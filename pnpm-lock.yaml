@@ -6,13 +6,13 @@ specifiers:
   '@ckeditor/ckeditor5-build-classic': ^29.2.0
   '@ckeditor/ckeditor5-build-decoupled-document': ^29.2.0
   '@ckeditor/ckeditor5-build-inline': ^29.2.0
-  '@fullcalendar/core': ^5.11.3
-  '@fullcalendar/daygrid': ^5.11.3
-  '@fullcalendar/interaction': ^5.11.3
-  '@fullcalendar/list': ^5.11.3
-  '@fullcalendar/timegrid': ^5.11.3
-  '@left4code/tw-starter': ^3.1.39
-  '@popperjs/core': ^2.11.6
+  '@fullcalendar/core': ^5.11.4
+  '@fullcalendar/daygrid': ^5.11.4
+  '@fullcalendar/interaction': ^5.11.4
+  '@fullcalendar/list': ^5.11.4
+  '@fullcalendar/timegrid': ^5.11.4
+  '@left4code/tw-starter': ^3.2.0
+  '@popperjs/core': ^2.11.7
   '@tailwindcss/forms': ^0.5.3
   autoprefixer: 10.4.6
   axios: ^0.25.0
@@ -21,7 +21,7 @@ specifiers:
   dropzone: ^5.9.3
   highlight.js: ^10.7.3
   imask: ^6.4.3
-  jquery: ^3.6.3
+  jquery: ^3.6.4
   jquery.easing: ^1.4.1
   js-beautify: ^1.14.7
   laravel-vite-plugin: ^0.2.4
@@ -35,7 +35,7 @@ specifiers:
   pristinejs: ^0.1.9
   simplebar: ^5.3.9
   tabulator-tables: ^4.9.3
-  tailwindcss: ^3.2.4
+  tailwindcss: ^3.2.7
   tiny-slider: ^2.9.4
   tippy.js: ^6.3.7
   toastify-js: ^1.12.0
@@ -51,19 +51,19 @@ dependencies:
   '@ckeditor/ckeditor5-build-classic': 29.2.0
   '@ckeditor/ckeditor5-build-decoupled-document': 29.2.0
   '@ckeditor/ckeditor5-build-inline': 29.2.0
-  '@fullcalendar/core': 5.11.3
-  '@fullcalendar/daygrid': 5.11.3
-  '@fullcalendar/interaction': 5.11.3
-  '@fullcalendar/list': 5.11.3
-  '@fullcalendar/timegrid': 5.11.3
-  '@left4code/tw-starter': 3.1.39
-  '@popperjs/core': 2.11.6
+  '@fullcalendar/core': 5.11.4
+  '@fullcalendar/daygrid': 5.11.4
+  '@fullcalendar/interaction': 5.11.4
+  '@fullcalendar/list': 5.11.4
+  '@fullcalendar/timegrid': 5.11.4
+  '@left4code/tw-starter': 3.2.0
+  '@popperjs/core': 2.11.7
   chart.js: 3.9.1
   dayjs: 1.11.7
   dropzone: 5.9.3
   highlight.js: 10.7.3
   imask: 6.4.3
-  jquery: 3.6.3
+  jquery: 3.6.4
   jquery.easing: 1.4.1
   js-beautify: 1.14.7
   litepicker: 2.0.12
@@ -79,7 +79,7 @@ dependencies:
   zoom-vanilla.js: 2.0.6
 
 devDependencies:
-  '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
+  '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.7
   autoprefixer: 10.4.6_postcss@8.4.21
   axios: 0.25.0
   laravel-vite-plugin: 0.2.4_vite@2.9.15
@@ -88,7 +88,7 @@ devDependencies:
   postcss-advanced-variables: 3.0.1
   postcss-cli: 9.1.0_postcss@8.4.21
   postcss-import: 14.1.0_postcss@8.4.21
-  tailwindcss: 3.2.4_postcss@8.4.21
+  tailwindcss: 3.2.7_postcss@8.4.21
   vite: 2.9.15
   vite-plugin-static-copy: 0.6.1_vite@2.9.15
 
@@ -513,55 +513,55 @@ packages:
     dev: true
     optional: true
 
-  /@fullcalendar/common/5.11.3:
-    resolution: {integrity: sha512-welVwyfQOXQQGfDwBMSfYEPbiO1cPfUD+C7jd3ZoweJR+dSO11ddFugxIQ7dGfABAGZ63oq/+LW9FsmAJezVNg==}
+  /@fullcalendar/common/5.11.4:
+    resolution: {integrity: sha512-wjy+EZgZIPWq1Z5qeB/pV2dmsXwzTJ2teNh5bjlVeHsvDYwERXSZEG2CdoF/NCTJaYeQY93xu1cj9Jw/0KXywA==}
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.5.0
     dev: false
 
-  /@fullcalendar/core/5.11.3:
-    resolution: {integrity: sha512-YUFxCvVJytUwFeXCx4J17kFMM7Ixwn9zBjVRw5NM2bMwgR6VAhSnlZc6yNQSOIy7Hj2TF0vDkO/4JNlTvxyAXw==}
+  /@fullcalendar/core/5.11.4:
+    resolution: {integrity: sha512-p1/GRIageomlyJpsMVi+Ig5TNo9t2sEYsLHe6zvtCLtpXK/l03veZukYyM/jou8VzT0VJp1f7yN8irc5VBgqxw==}
     dependencies:
-      '@fullcalendar/common': 5.11.3
-      preact: 10.11.3
-      tslib: 2.4.1
+      '@fullcalendar/common': 5.11.4
+      preact: 10.13.2
+      tslib: 2.5.0
     dev: false
 
-  /@fullcalendar/daygrid/5.11.3:
-    resolution: {integrity: sha512-PCK0y80DRNCzWuC5lGpIWqCgKDvql1ah7rXql5lu+Gn2EeFj15ZQ8diMFjtNIQucEmFaNOXnR05Pgcry1n6Shg==}
+  /@fullcalendar/daygrid/5.11.4:
+    resolution: {integrity: sha512-M/pSrxgrtG5vDkOxqTgv6WrptrsXjp5QgQLyXantSy+9EuZOagPKJDh+HEU94DKUAc0mlXS6iDdf0WzjkTHe6A==}
     dependencies:
-      '@fullcalendar/common': 5.11.3
-      tslib: 2.4.1
+      '@fullcalendar/common': 5.11.4
+      tslib: 2.5.0
     dev: false
 
-  /@fullcalendar/interaction/5.11.3:
-    resolution: {integrity: sha512-L955wkDjza62K96ndstvYs2Fd4V0kayTDpqW8W7huFG3Ox8MutpLqKAa2SCaTvcNIlWS4oexGQRiQAaJG7u47A==}
+  /@fullcalendar/interaction/5.11.4:
+    resolution: {integrity: sha512-AP04uFi3pRtPq83xvLCR1bjBKIf6r1PJDiT2Yz7yDK8Ax3fUUKbAi96V6QgMs8SPNTWkKmBIL8NL60QiI9oWQA==}
     dependencies:
-      '@fullcalendar/common': 5.11.3
-      tslib: 2.4.1
+      '@fullcalendar/common': 5.11.4
+      tslib: 2.5.0
     dev: false
 
-  /@fullcalendar/list/5.11.3:
-    resolution: {integrity: sha512-6m9rJPzB5XfJZg+MlgVpha1cI3NUDeyV3GOmojJWZuti05NfDP4f0lzFUul8W7m1DQcjGS2UPRNE8HouA3guEA==}
+  /@fullcalendar/list/5.11.4:
+    resolution: {integrity: sha512-GA1nUx9rvZcwwcQFBmTnxX0M7s7ywRCPsx/WWsBqxnkTYSufNMXp1hXyZo9o/K5MlqzcKalBOEz16HSlckZB9w==}
     dependencies:
-      '@fullcalendar/common': 5.11.3
-      tslib: 2.4.1
+      '@fullcalendar/common': 5.11.4
+      tslib: 2.5.0
     dev: false
 
-  /@fullcalendar/timegrid/5.11.3:
-    resolution: {integrity: sha512-SjIj2ZQ7nTyL1RxZkCPvNbuUQ0xHT+gfYJdUL3FT4bPjPJCxWtQ2CL8hxaeNmVozYYuy0yrGTW5Oup2+9IplbA==}
+  /@fullcalendar/timegrid/5.11.4:
+    resolution: {integrity: sha512-Ks9Kuiwf+JBqrN5qjC8Gy3ngLWIdbCQYISpYuREPvwMRnXxAmoYKvnkgkxoxde1X5w6X61CaT3sSYZQv9xJqVw==}
     dependencies:
-      '@fullcalendar/common': 5.11.3
-      '@fullcalendar/daygrid': 5.11.3
-      tslib: 2.4.1
+      '@fullcalendar/common': 5.11.4
+      '@fullcalendar/daygrid': 5.11.4
+      tslib: 2.5.0
     dev: false
 
   /@juggle/resize-observer/3.4.0:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: false
 
-  /@left4code/tw-starter/3.1.39:
-    resolution: {integrity: sha512-xjcN3Zig4oemlMH8pR+Qj/WPHpNFK5f3AbldHpJsnUgyAtZqhAwoTtZllWIT+fk2cA1CB7/Tft4AFnh1Fit9AA==}
+  /@left4code/tw-starter/3.2.0:
+    resolution: {integrity: sha512-3Wu5QRJBSb1IfsV/b7AqM1hSHndTVOCTTqiWwifqwzcP3Zw8uyXm/gwUV/Lp9EcfD8SbHzCUiCjtN8xtnTBr/w==}
     dev: false
 
   /@nodelib/fs.scandir/2.1.5:
@@ -589,17 +589,17 @@ packages:
     resolution: {integrity: sha512-aDemVMJL2cGo82EVHXMM2y6WoWlk00V2aibvNAl2djtZG1OquirMvnOTlb2L4tjcH5cT2q1/dyHepZcxnFW5zQ==}
     dev: false
 
-  /@popperjs/core/2.11.6:
-    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
+  /@popperjs/core/2.11.7:
+    resolution: {integrity: sha512-Cr4OjIkipTtcXKjAsm8agyleBuDHvxzeBoa1v543lbv1YaIwQjESsVcmjiWiPEbC1FIeHOG/Op9kdCmAmiS3Kw==}
     dev: false
 
-  /@tailwindcss/forms/0.5.3_tailwindcss@3.2.4:
+  /@tailwindcss/forms/0.5.3_tailwindcss@3.2.7:
     resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
     dependencies:
       mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.2.4_postcss@8.4.21
+      tailwindcss: 3.2.7_postcss@8.4.21
     dev: true
 
   /abbrev/1.1.1:
@@ -675,8 +675,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.21.4
-      caniuse-lite: 1.0.30001442
+      browserslist: 4.21.5
+      caniuse-lite: 1.0.30001470
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -714,15 +714,15 @@ packages:
       fill-range: 7.0.1
     dev: true
 
-  /browserslist/4.21.4:
-    resolution: {integrity: sha512-CBHJJdDmgjl3daYjN5Cp5kbTf1mUhZoS+beLklHIvkOWscs83YAhLlF3Wsh/lciQYAcbBJgTOD44VtG31ZM4Hw==}
+  /browserslist/4.21.5:
+    resolution: {integrity: sha512-tUkiguQGW7S3IhB7N+c2MV/HZPSCPAAiYBZXLsBhFB/PCy6ZKKsZrmBayHV9fdGV/ARIfJ14NkxKzRDjvp7L6w==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001442
-      electron-to-chromium: 1.4.284
-      node-releases: 2.0.8
-      update-browserslist-db: 1.0.10_browserslist@4.21.4
+      caniuse-lite: 1.0.30001470
+      electron-to-chromium: 1.4.340
+      node-releases: 2.0.10
+      update-browserslist-db: 1.0.10_browserslist@4.21.5
     dev: true
 
   /camelcase-css/2.0.1:
@@ -734,8 +734,8 @@ packages:
     resolution: {integrity: sha512-ceOhN1DL7Y4O6M0j9ICgmTYziV89WMd96SvSl0REd8PMgrY0B/WBOPoed5S1KUmJqXgUXh8gzSe6E3ae27upsQ==}
     dev: false
 
-  /caniuse-lite/1.0.30001442:
-    resolution: {integrity: sha512-239m03Pqy0hwxYPYR5JwOIxRJfLTWtle9FV8zosfV5pHg+/51uD4nxcUlM8+mWWGfwKtt8lJNHnD3cWw9VZ6ow==}
+  /caniuse-lite/1.0.30001470:
+    resolution: {integrity: sha512-065uNwY6QtHCBOExzbV6m236DDhYCCtPmQUCoQtwkVqzud8v5QPidoMr6CoMkC2nfp6nksjttqWQRRh75LqUmA==}
     dev: true
 
   /cfb/1.2.2:
@@ -831,8 +831,8 @@ packages:
       proto-list: 1.2.4
     dev: false
 
-  /core-js/3.27.1:
-    resolution: {integrity: sha512-GutwJLBChfGCpwwhbYoqfv03LAfmiz7e7D/BNxzeMxwQf10GRSzqiOjx7AmtEk+heiD/JWmBuyBPgFtx0Sg1ww==}
+  /core-js/3.29.1:
+    resolution: {integrity: sha512-+jwgnhg6cQxKYIIjGtAHq2nwUOolo9eoFZ4sHfUH09BLXBgxnH4gA0zEd+t+BO2cNB8idaBtZFcFTRjQJRJmAw==}
     requiresBuild: true
     dev: false
 
@@ -868,7 +868,7 @@ packages:
     dependencies:
       acorn-node: 1.8.2
       defined: 1.0.1
-      minimist: 1.2.7
+      minimist: 1.2.8
     dev: true
 
   /didyoumean/1.2.2:
@@ -900,8 +900,8 @@ packages:
       sigmund: 1.0.1
     dev: false
 
-  /electron-to-chromium/1.4.284:
-    resolution: {integrity: sha512-M8WEXFuKXMYMVr45fo8mq0wUrrJHheiKZf6BArTKk9ZBYCKJEOU5H8cdWgDT+qCVZf7Na4lVUaZsA+h6uA9+PA==}
+  /electron-to-chromium/1.4.340:
+    resolution: {integrity: sha512-zx8hqumOqltKsv/MF50yvdAlPF9S/4PXbyfzJS6ZGhbddGkRegdwImmfSVqCkEziYzrIGZ/TlrzBND4FysfkDg==}
     dev: true
 
   /emoji-regex/8.0.0:
@@ -1178,7 +1178,7 @@ packages:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
     dependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.0
     dev: true
@@ -1223,14 +1223,14 @@ packages:
       is-glob: 4.0.3
     dev: true
 
-  /glob/8.0.3:
-    resolution: {integrity: sha512-ull455NHSHI/Y1FqGaaYFaLGkNMMJbavMrEGFXG/PGrg6y7sutWHUHrz6gy6WEBH6akM1M414dWKCNs+IhKdiQ==}
+  /glob/8.1.0:
+    resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
     dependencies:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 5.1.2
+      minimatch: 5.1.6
       once: 1.4.0
     dev: false
 
@@ -1246,8 +1246,8 @@ packages:
       slash: 4.0.0
     dev: true
 
-  /graceful-fs/4.2.10:
-    resolution: {integrity: sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==}
+  /graceful-fs/4.2.11:
+    resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
     dev: true
 
   /has/1.0.3:
@@ -1325,8 +1325,8 @@ packages:
     resolution: {integrity: sha512-BVpRacWCbNfo/ALWxnLkIY/WRa4Ydg/LtwzIJZvDm7vrhV8Txv+ACi6EGnU11zT19sTc3KEPathWx6CtjWLD1w==}
     dev: false
 
-  /jquery/3.6.3:
-    resolution: {integrity: sha512-bZ5Sy3YzKo9Fyc8wH2iIQK4JImJ6R0GWI9kL1/k7Z91ZBNgkRXE6U0JfHIizZbort8ZunhSI3jw9I6253ahKfg==}
+  /jquery/3.6.4:
+    resolution: {integrity: sha512-v28EW9DWDFpzcD9O5iyJXg3R3+q+mET5JhnjJzQUZMHOv67bpSIHq81GEYpPNZHG+XXHsfSme3nxp/hndKEcsQ==}
     dev: false
 
   /js-beautify/1.14.7:
@@ -1336,7 +1336,7 @@ packages:
     dependencies:
       config-chain: 1.1.13
       editorconfig: 0.15.3
-      glob: 8.0.3
+      glob: 8.1.0
       nopt: 6.0.0
     dev: false
 
@@ -1345,7 +1345,7 @@ packages:
     dependencies:
       universalify: 2.0.0
     optionalDependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
     dev: true
 
   /laravel-vite-plugin/0.2.4_vite@2.9.15:
@@ -1357,8 +1357,8 @@ packages:
       vite: 2.9.15
     dev: true
 
-  /lilconfig/2.0.6:
-    resolution: {integrity: sha512-9JROoBW7pobfsx+Sq2JsASvCo6Pfo6WWoUW79HuB1BCoBXD4PLWJPqDF6fNj67pqBYTbAHkE57M1kS/+L1neOg==}
+  /lilconfig/2.1.0:
+    resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
     dev: true
 
@@ -1415,25 +1415,25 @@ packages:
     hasBin: true
     dev: true
 
-  /minimatch/5.1.2:
-    resolution: {integrity: sha512-bNH9mmM9qsJ2X4r2Nat1B//1dJVcn3+iBLa3IgqJ7EbGaDNepL9QSHOxN4ng33s52VMMhhIfgCYDk3C4ZmlDAg==}
+  /minimatch/5.1.6:
+    resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
     dev: false
 
-  /minimist/1.2.7:
-    resolution: {integrity: sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==}
+  /minimist/1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
     dev: true
 
-  /nanoid/3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
+  /nanoid/3.3.6:
+    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
 
-  /node-releases/2.0.8:
-    resolution: {integrity: sha512-dFSmB8fFHEH/s81Xi+Y/15DQY6VHW81nXRj86EMSL3lmuTmK1e+aT4wrFCkTbm+gSwkw4KpX+rT/pMM2c1mF+A==}
+  /node-releases/2.0.10:
+    resolution: {integrity: sha512-5GFldHPXVG/YZmFzJvKK2zDSzPKhEp0+ZR5SVaoSag9fsL5YgHbUHDfnG5494ISANDcK4KwPXAx2xqVEydmd7w==}
     dev: true
 
   /nopt/6.0.0:
@@ -1519,7 +1519,7 @@ packages:
       pretty-hrtime: 1.0.3
       read-cache: 1.0.0
       slash: 4.0.0
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -1536,11 +1536,11 @@ packages:
       resolve: 1.22.1
     dev: true
 
-  /postcss-js/4.0.0_postcss@8.4.21:
-    resolution: {integrity: sha512-77QESFBwgX4irogGVPgQ5s07vLvFqWr228qZY+w6lW599cRlK/HmnlivnnVUxkjHnCu4J16PDMHcH+e+2HbvTQ==}
+  /postcss-js/4.0.1_postcss@8.4.21:
+    resolution: {integrity: sha512-dDLF8pEO191hJMtlHFPRa8xsizHaM82MLfNkUHdUtVEV3tgTp5oj+8qbEqYM57SLfc74KSbw//4SeJma2LRVIw==}
     engines: {node: ^12 || ^14 || >= 16}
     peerDependencies:
-      postcss: ^8.3.3
+      postcss: ^8.4.21
     dependencies:
       camelcase-css: 2.0.1
       postcss: 8.4.21
@@ -1558,7 +1558,7 @@ packages:
       ts-node:
         optional: true
     dependencies:
-      lilconfig: 2.0.6
+      lilconfig: 2.1.0
       postcss: 8.4.21
       yaml: 1.10.2
     dev: true
@@ -1608,13 +1608,13 @@ packages:
     resolution: {integrity: sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
-      nanoid: 3.3.4
+      nanoid: 3.3.6
       picocolors: 1.0.0
       source-map-js: 1.0.2
     dev: true
 
-  /preact/10.11.3:
-    resolution: {integrity: sha512-eY93IVpod/zG3uMF22Unl8h9KkrcKIRs2EGar8hwLZZDU1lkjph303V9HZBwufh2s736U6VXuhD109LYqPoffg==}
+  /preact/10.13.2:
+    resolution: {integrity: sha512-q44QFLhOhty2Bd0Y46fnYW0gD/cbVM9dUVtNTDKPcdXSMA7jfY+Jpd6rk3GB0lcQss0z5s/6CmVP0Z/hV+g6pw==}
     dev: false
 
   /pretty-hrtime/1.0.3:
@@ -1709,7 +1709,7 @@ packages:
     dependencies:
       '@juggle/resize-observer': 3.4.0
       can-use-dom: 0.1.0
-      core-js: 3.27.1
+      core-js: 3.29.1
       lodash.debounce: 4.0.8
       lodash.memoize: 4.1.2
       lodash.throttle: 4.1.1
@@ -1762,8 +1762,8 @@ packages:
     resolution: {integrity: sha512-iwwQqAEGGxlgrBpcmJJvMJrfjGLcCXOB3AOb/DGkXqBy1YKoYA36hIl7qXGp6Jo8dSkzFAlDT6pKLZgyhs9OnQ==}
     dev: false
 
-  /tailwindcss/3.2.4_postcss@8.4.21:
-    resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
+  /tailwindcss/3.2.7_postcss@8.4.21:
+    resolution: {integrity: sha512-B6DLqJzc21x7wntlH/GsZwEXTBttVSl1FtCzC8WP4oBc/NKef7kaax5jeihkkCEWc831/5NDJ9gRNDK6NEioQQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
     peerDependencies:
@@ -1778,14 +1778,14 @@ packages:
       fast-glob: 3.2.12
       glob-parent: 6.0.2
       is-glob: 4.0.3
-      lilconfig: 2.0.6
+      lilconfig: 2.1.0
       micromatch: 4.0.5
       normalize-path: 3.0.0
       object-hash: 3.0.0
       picocolors: 1.0.0
       postcss: 8.4.21
       postcss-import: 14.1.0_postcss@8.4.21
-      postcss-js: 4.0.0_postcss@8.4.21
+      postcss-js: 4.0.1_postcss@8.4.21
       postcss-load-config: 3.1.4_postcss@8.4.21
       postcss-nested: 6.0.0_postcss@8.4.21
       postcss-selector-parser: 6.0.11
@@ -1807,7 +1807,7 @@ packages:
   /tippy.js/6.3.7:
     resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
     dependencies:
-      '@popperjs/core': 2.11.6
+      '@popperjs/core': 2.11.7
     dev: false
 
   /to-regex-range/5.0.1:
@@ -1827,8 +1827,8 @@ packages:
       '@orchidjs/sifter': 0.8.2
     dev: false
 
-  /tslib/2.4.1:
-    resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
+  /tslib/2.5.0:
+    resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
     dev: false
 
   /universalify/2.0.0:
@@ -1836,13 +1836,13 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /update-browserslist-db/1.0.10_browserslist@4.21.4:
+  /update-browserslist-db/1.0.10_browserslist@4.21.5:
     resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==}
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.21.5
       escalade: 3.1.1
       picocolors: 1.0.0
     dev: true
@@ -1952,8 +1952,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /yargs/17.6.2:
-    resolution: {integrity: sha512-1/9UrdHjDZc0eOU0HxOHoS78C69UD3JRMvzlJ7S79S2nTaWRA/whGCTV8o9e/N/1Va9YIV7Q4sOxD8VV4pCWOw==}
+  /yargs/17.7.1:
+    resolution: {integrity: sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==}
     engines: {node: '>=12'}
     dependencies:
       cliui: 8.0.1
