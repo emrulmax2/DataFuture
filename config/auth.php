@@ -72,7 +72,7 @@ return [
 
         'applicants' => [
             'driver' => 'eloquent',
-            'model' => App\ApplicantUser::class,
+            'model' => App\Models\ApplicantUser::class,
         ]
         // 'users' => [
         //     'driver' => 'database',

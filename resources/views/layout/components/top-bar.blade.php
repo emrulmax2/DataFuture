@@ -147,9 +147,15 @@
                     </li>
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
-                        <a href="{{ route('logout') }}" class="dropdown-item hover:bg-white/5">
-                            <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
-                        </a>
+                        @if(Auth::guard('applicant')->check())
+                            <a href="{{ route('applicant.logout') }}" class="dropdown-item hover:bg-white/5">
+                                <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
+                            </a>
+                        @else
+                            <a href="{{ route('logout') }}" class="dropdown-item hover:bg-white/5">
+                                <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
+                            </a>
+                        @endif
                     </li>
                 </ul>
             </div>

@@ -54,6 +54,8 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth.applicant' => \App\Http\Middleware\AuthApplicant::class,
+        'applicant.loggedin' => \App\Http\Middleware\ApplicantLoggedIn::class,
         'loggedin' => \App\Http\Middleware\LoggedIn::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,

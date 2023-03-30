@@ -11,9 +11,14 @@ class StoreApplicantUserRequest extends FormRequest
      *
      * @return bool
      */
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +29,8 @@ class StoreApplicantUserRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'email' => 'required|unique:applicant_users,email',
+            'password' => 'required|confirmed|min:8',
         ];
     }
 }

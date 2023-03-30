@@ -31,6 +31,16 @@ use App\Http\Controllers\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
 use App\Http\Controllers\TitleController;
 
+
+use App\Http\Controllers\Applicant\Auth\LoginController;
+use App\Http\Controllers\Applicant\Auth\RegisterController;
+
+use App\Http\Controllers\Auth\GoogleSocialiteController;
+
+use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
+use App\Http\Controllers\Applicant\Auth\VerificationController;
+
+use App\Models\ApplicantUser;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -46,9 +56,60 @@ Route::get('dark-mode-switcher', [DarkModeController::class, 'switch'])->name('d
 Route::get('color-scheme-switcher/{color_scheme}', [ColorSchemeController::class, 'switch'])->name('color-scheme-switcher');
 
 Route::controller(AuthController::class)->middleware('loggedin')->group(function() {
+
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
+// all applicant have a prefix route name applicant.* value
+Route::prefix('/applicant')->name('applicant.')->group(function() {
+
+    Route::controller(LoginController::class)->middleware('applicant.loggedin')->group(function() {
+
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+    });
+    
+    Route::controller(RegisterController::class)->middleware('applicant.loggedin')->group(function() {
+        Route::get('register', 'index')->name('register');
+        Route::post('register', 'store')->name('store.register');
+    });
+
+    Route::middleware('auth.applicant')->group(function() {
+
+        Route::get('logout', [LoginController::class, 'logout'])->name('logout');
+
+        Route::controller(ApplicantDashboard::class)->group(function() {
+            Route::get('/dashboard', 'index')->name('dashboard');
+        });
+
+    });
+    /**
+    * Verification Routes
+    */
+    Route::controller(VerificationController::class)->group(function() {
+        
+        Route::get('email/verify', 'show')->name('verification.notice');
+        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    });
+
+});
+    
+    Route::post('/applicant/email/verification-notification', function (Request $request) {
+        $id = \Auth::guard('applicant')->user()->id;
+        $user = ApplicantUser::find($id);
+        $user->sendEmailVerificationNotification();
+        return back()->with('verifymessage', 'Verification link sent!');
+
+    })->middleware(['auth.applicant', 'throttle:6,1'])->name('verification.send');
+
+
+    Route::controller(GoogleSocialiteController::class)->middleware('loggedin')->group(function() {
+
+        Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
+        Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
+
+    });
 
 Route::middleware('auth')->group(function() {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
