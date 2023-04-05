@@ -33,6 +33,7 @@ use App\Http\Controllers\TitleController;
 
 
 use App\Http\Controllers\Applicant\Auth\LoginController;
+use App\Http\Controllers\Applicant\Auth\ForgetPasswordController;
 use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
@@ -68,7 +69,17 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::get('login', 'loginView')->name('login');
         Route::post('login', 'login')->name('check');
     });
+
+    Route::controller(ForgetPasswordController::class)->middleware('applicant.loggedin')->group(function() {
+
+        Route::get('forget-password',  'showForgetPasswordForm')->name('forget.password.get');
+        Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
+        Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
+        Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
     
+    });
+
+
     Route::controller(RegisterController::class)->middleware('applicant.loggedin')->group(function() {
         Route::get('register', 'index')->name('register');
         Route::post('register', 'store')->name('store.register');

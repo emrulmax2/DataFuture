@@ -349,10 +349,10 @@ ul.social li{
             	<tr>
             		<td>
             			<div class="text" style="padding: 0 2.5em; text-align: center;">
-            				<h2>Please verify your email</h2>
-            				<h3>All applicant need to verify email in order to apply</h3>
-            				<p><a href="{{ $url }}" class="btn btn-primary">Click Here to Verify</a></p>
-							<p>This verification email will be valid for 1 hour</p>
+            				<h2>Please Reset your password</h2>
+            				<h3>You are receiving this email because we received a password request for your account</h3>
+            				<p><a href="{{ route('applicant.reset.password.get',$token) }}" class="btn btn-primary">RESET PASSWORD</a></p>
+							<p>This password email link will be expire in 60 mins. If you do not request a password reset no further action required.</p>
             			</div>
             		</td>
             	</tr>
