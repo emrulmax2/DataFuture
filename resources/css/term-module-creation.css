@@ -1,0 +1,23 @@
+/*
+                Created on : Jan 29, 2021, 10:20:08 PM
+                Author     : Sakib Bhuiyan
+*/
+.form-wizard-steps li.active button,
+.form-wizard-steps li.activated button{
+    background-color: #1C3FAA !important;
+    color: #FFF !important;
+}
+.form-wizard-steps li.active div,
+.form-wizard-steps li.activated div{
+    font-weight: 500 !important;
+    color: #2d3748 !important;
+}
+.form-wizard .wizard-fieldset {
+    display: none;
+}
+.form-wizard .wizard-fieldset.show {
+    display: block;
+}
+.wizard-form-error{
+    display: none;
+}
