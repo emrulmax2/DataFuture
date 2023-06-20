@@ -85,10 +85,28 @@
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>  
-                        <div>
-                            <label for="code" class="form-label">Code <span class="text-danger"></span></label>
-                            <input id="code" type="text" name="code" class="form-control w-full">
-                        </div>      
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label mr-3" for="is_hesa">Is Hesa Code?</label>
+                                <input id="is_hesa" class="form-check-input" name="is_hesa" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 hesa_code_area" style="display: none;">
+                            <label for="hesa_code" class="form-label">Hesa Code</label>
+                            <input id="hesa_code" type="text" name="hesa_code" class="form-control w-full">
+                            <div class="acc__input-error error-hesa_code text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label mr-3" for="is_df">Is DF Code?</label>
+                                <input id="is_df" class="form-check-input" name="is_df" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 df_code_area" style="display: none;">
+                            <label for="df_code" class="form-label">DF Code</label>
+                            <input id="df_code" type="text" name="df_code" class="form-control w-full">
+                            <div class="acc__input-error error-df_code text-danger mt-2"></div>
+                        </div>     
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -127,9 +145,27 @@
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>                               
                         </div>   
-                        <div>
-                            <label for="code" class="form-label">Code <span class="text-danger"></span></label>
-                            <input id="code" type="text" name="code" class="form-control w-full">
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label mr-3" for="is_hesa">Is Hesa Code?</label>
+                                <input id="is_hesa" class="form-check-input" name="is_hesa" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 hesa_code_area" style="display: none;">
+                            <label for="hesa_code" class="form-label">Hesa Code</label>
+                            <input id="hesa_code" type="text" name="hesa_code" class="form-control w-full">
+                            <div class="acc__input-error error-hesa_code text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label mr-3" for="is_df">Is DF Code?</label>
+                                <input id="is_df" class="form-check-input" name="is_df" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 df_code_area" style="display: none;">
+                            <label for="df_code" class="form-label">DF Code</label>
+                            <input id="df_code" type="text" name="df_code" class="form-control w-full">
+                            <div class="acc__input-error error-df_code text-danger mt-2"></div>
                         </div>                     
                     </div>
                     <div class="modal-footer">

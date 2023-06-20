@@ -8,9 +8,6 @@
     <div class="grid grid-cols-12 gap-6">
         <div class="col-span-12 2xl:col-span-9">
             <div class="grid grid-cols-12 gap-6">
-                <a  href="http://localhost:8001/login/token/?email={{ Auth::user()->email }}&token={{ session('accToken') }}" class="btn btn-primary w-32 mr-2 mb-2">
-                    <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Activity
-                </a>
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8">
                     <div class="intro-y flex items-center h-10">
@@ -35,8 +32,6 @@
                                     <div class="text-base text-slate-500 mt-1">Item Sales</div>
                                 </div>
                             </div>
-                            
-                            
                         </div>
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="report-box zoom-in">

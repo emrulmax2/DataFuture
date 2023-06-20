@@ -124,6 +124,58 @@
     </div>
 </div>
 <!-- END: Edit Modal -->
+<!-- BEGIN: Import Modal -->
+<div id="bankholidayImportModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Import Holiday</h2>
+                </div>
+                <div class="modal-body">
+                    <form method="post"  action="{{ route('bankholidays.import') }}" class="dropzone" id="bankholidayImportForm" enctype="multipart/form-data">
+                        @csrf
+                        <div class="fallback">
+                            <input name="import_holiday_file" type="file" />
+                        </div>
+                        <div class="dz-message" data-dz-message>
+                            <div class="text-lg font-medium">Drop files here or click to upload.</div>
+                            <div class="text-slate-500">
+                                {{-- This is just a demo dropzone. Selected files are <span class="font-medium">not</span> actually uploaded. --}}
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="academic_year_id" value="{{ $academicyear->id }}"/>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a style="float: left;" href="{{ route('bankholidays.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample Excel</a>
+                    <button type="button" data-tw-dismiss="modal"
+                        class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button id="saveImportholiday" class="btn btn-primary w-auto">Upload</button>
+                </div>
+            </div>
+        
+    </div>
+</div>
+<!-- END: Import Modal -->
+<!-- BEGIN: Success Modal Content -->
+<div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 successModalTitle">Congratulations!</div>
+                    <div class="text-slate-500 mt-2 successModalDesc">Holidays data successfully uploaded</div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Success Modal Content -->
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="bankholidayConfirmModal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -143,3 +195,6 @@
     </div>
 </div>
 <!-- END: Delete Confirm Modal Content -->
+@section('script')
+    @vite('resources/js/bankholiday.js')
+@endsection

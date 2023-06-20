@@ -1,8 +1,10 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import Dropzone from "dropzone";
 
 ("use strict");
+
 var bankholidayListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -117,6 +119,47 @@ var bankholidayListTable = (function () {
     };
 })();
 
+// Dropzone
+Dropzone.autoDiscover = false;
+$(".dropzone").each(function () {
+    Dropzone.options.bankholidayImportForm = {
+        autoProcessQueue: false
+    };
+
+    let options = {
+        accept: (file, done) => {
+            console.log("Uploaded");
+            done();
+        },
+    };
+
+    if ($(this).data("single")) {
+        options.maxFiles = 1;
+    }
+
+    if ($(this).data("file-types")) {
+        options.accept = (file, done) => {
+            if ($(this).data("file-types").split("|").indexOf(file.type) === -1) {
+                alert("Error! Files of this type are not accepted");
+                done("Error! Files of this type are not accepted");
+            } else {
+                console.log("Uploaded");
+                done();
+            }
+        };
+    }
+
+    var dz = new Dropzone(this, options);
+
+    dz.on("maxfilesexceeded", (file) => {
+        alert("No more files please!");
+    });
+    dz.on("complete", function(file) {
+        dz.removeFile(file);
+        bankholidayListTable.init();
+    });        
+});
+
 (function () {
     if ($("#bankholidayTableId").length) {
         // Init Table
@@ -155,6 +198,7 @@ var bankholidayListTable = (function () {
         const bankholidayEditModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#bankholidayEditModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#bankholidayConfirmModal"));
+        const bankholidayImportModal = tailwind.Modal.getOrCreateInstance("#bankholidayImportModal");
 
         let confModalDelTitle = 'Are you sure?';
         let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
@@ -378,6 +422,16 @@ var bankholidayListTable = (function () {
                     }
                 }
             });
+        });
+
+        $('#bankholidayImportModal').on('click','#saveImportholiday',function(e) {
+            e.preventDefault();
+            $('.dropzone').get(0).dropzone.processQueue();
+            bankholidayImportModal.hide();
+
+            succModal.show();   
+            //setTimeout(function() { succModal.hide(); }, 3000);
+            
         });
     }
 })()

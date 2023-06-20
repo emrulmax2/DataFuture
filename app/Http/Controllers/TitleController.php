@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Title;
+use App\Http\Requests\TitleRequest;
 
 class TitleController extends Controller
 {
@@ -56,6 +57,10 @@ class TitleController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'is_hesa' => $list->is_hesa,
+                    'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
+                    'is_df' => $list->is_df,
+                    'df_code' => ($list->is_df == 1 ? $list->df_code : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -64,32 +69,20 @@ class TitleController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function show($id)
-    {
-        return view('pages/academicyears/show', [
-            'title' => 'Academic Years - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Academic Years', 'href' => route('academicyears')],
-                ['label' => 'Academic Years Details', 'href' => 'javascript:void(0);']
-            ],
-            'academicyear' => AcademicYear::find($id),
-        ]);
-    }
-
-    public function store(AcademicYearRequest $request){
-        $data = AcademicYear::create([
+    public function store(TitleRequest $request){
+        $data = Title::create([
             'name'=> $request->name,
-            'code'=> $request->code,
-            'from_date'=> date('Y-m-d', strtotime($request->from_date)),
-            'to_date'=> date('Y-m-d', strtotime($request->to_date)),
-            'target_date_hesa_report'=> date('Y-m-d', strtotime($request->target_date_hesa_report)),
+            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
+            'df_code'=> (isset($request->df_code) && $request->df_code == 1 ? $request->df_code : null),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = AcademicYear::find($id);
+        $data = Title::find($id);
 
         if($data){
             return response()->json($data);
@@ -98,32 +91,31 @@ class TitleController extends Controller
         }
     }
 
-    public function update(AcademicYearUpdateRequest $request, AcademicYear $dataId){      
-        $data = AcademicYear::where('id', $request->id)->update([
+    public function update(TitleRequest $request){      
+        $data = Title::where('id', $request->id)->update([
             'name'=> $request->name,
-            'code'=> $request->code,
-            'from_date'=> date('Y-m-d', strtotime($request->from_date)),
-            'to_date'=> date('Y-m-d', strtotime($request->to_date)),
-            'target_date_hesa_report'=> date('Y-m-d', strtotime($request->target_date_hesa_report)),
+            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 ? $request->df_code : null),
             'updated_by' => auth()->user()->id
         ]);
-        return response()->json($data);
 
 
-        if($data->wasChanged()){
+        if($data){
             return response()->json(['message' => 'Data updated'], 200);
         }else{
-            return response()->json(['message' => 'No data Modified'], 304);
+            return response()->json(['message' => 'No data Modified'], 422);
         }
     }
 
     public function destroy($id){
-        $data = AcademicYear::find($id)->delete();
+        $data = Title::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = AcademicYear::where('id', $id)->withTrashed()->restore();
+        $data = Title::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }

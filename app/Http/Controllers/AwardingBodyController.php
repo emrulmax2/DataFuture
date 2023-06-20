@@ -54,7 +54,8 @@ class AwardingBodyController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
-                    'code' => $list->code,
+                    'hesa_code' => $list->hesa_code,
+                    'df_code' => $list->df_code,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -63,12 +64,27 @@ class AwardingBodyController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(AwardingBodyRequests $request){
-        $data = AwardingBody::create([
-            'name'=> $request->name,
-            'code'=> $request->code,
-            'created_by' => auth()->user()->id
+    public function show($id)
+    {
+        return view('pages/awardingbody/show', [
+            'title' => 'Awarding Body - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Awarding Body', 'href' => route('awardingbody')],
+                ['label' => 'Awarding Body Details', 'href' => 'javascript:void(0);']
+            ],
+            'awardingbody' => AwardingBody::find($id),
         ]);
+    }
+
+    public function store(AwardingBodyRequests $request){
+        // $data = AwardingBody::create([
+        //     'name'=> $request->name,
+        //     'code'=> $request->code,
+        //     'created_by' => auth()->user()->id
+        // ]);
+        $request->request->add(['created_by' => auth()->user()->id]);
+        $data = AwardingBody::create($request->all());
+
         return response()->json($data);
     }
 
@@ -85,7 +101,10 @@ class AwardingBodyController extends Controller
     public function update(AwardingBodyUpdateRequests $request, AwardingBody $dataId){
         $data = AwardingBody::where('id', $request->id)->update([
             'name'=> $request->name,
-            'code'=> $request->code,
+            'is_hesa' => (isset($request->is_hesa) ? $request->is_hesa : '0'),
+            'hesa_code'=> $request->hesa_code ? $request->hesa_code : null,
+            'is_df' => (isset($request->is_df) ? $request->is_df : '0'),
+            'df_code'=> $request->df_code ? $request->df_code : null,
             'updated_by' => auth()->user()->id
         ]);
 

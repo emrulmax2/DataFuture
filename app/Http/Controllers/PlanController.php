@@ -78,7 +78,6 @@ class PlanController extends Controller
                     $q->orWhere($day, 1);
                 endforeach;
             });
-            
         endif;
         if($status == 2): $query->onlyTrashed(); endif;
 

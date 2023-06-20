@@ -51,9 +51,13 @@
                 </div>
             </div>
             <button data-tw-toggle="modal" data-tw-target="#bankholidayAddModal" type="button" class="add_btn btn btn-primary shadow-md ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add Bank Holiday</button>
+            <button data-tw-toggle="modal" data-tw-target="#bankholidayImportModal" type="button" class="add_btn btn btn-pending shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import Holiday</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
         <div id="bankholidayTableId" data-academicyearid="{{ $academicyear->id }}" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
+@section('script')
+    @vite('resources/js/bankholiday.js')
+@endsection

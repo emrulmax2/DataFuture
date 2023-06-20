@@ -44,4 +44,8 @@ class CourseCreation extends Model
     public function availability(){
         return $this->hasMany(CourseCreationAvailability::class, 'course_creation_id', 'id');
     }
+
+    public function instance(){
+        return $this->hasMany(CourseCreationInstance::class, 'course_creation_id', 'id');
+    }
 }

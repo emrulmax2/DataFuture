@@ -11,6 +11,8 @@ use App\Http\Controllers\CourseQualificationController;
 use App\Http\Controllers\SourceTutionFeeController;
 use App\Http\Controllers\AwardingBodyController;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\CoursCreationController;
@@ -30,10 +32,24 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
 use App\Http\Controllers\TitleController;
+use App\Http\Controllers\EthnicityController;
+use App\Http\Controllers\KinsRelationController;
+use App\Http\Controllers\SexualOrientationController;
+use App\Http\Controllers\ReligionController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DisabilityController;
+use App\Http\Controllers\DocumentSettingsController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\PermissionCategoryController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionTemplateController;
+use App\Http\Controllers\ProcessListController;
+use App\Http\Controllers\TaskListController;
 
+use App\Http\Controllers\InterviewListController;
 
 use App\Http\Controllers\Applicant\Auth\LoginController;
-use App\Http\Controllers\Applicant\Auth\ForgetPasswordController;
 use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
@@ -42,6 +58,11 @@ use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
 use App\Http\Controllers\Applicant\Auth\VerificationController;
 
 use App\Models\ApplicantUser;
+use App\Http\Controllers\Applicant\ApplicationController;
+use App\Http\Controllers\Applicant\ApplicantQualificationCongroller;
+use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
+use App\Http\Controllers\UserController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -56,8 +77,11 @@ use App\Models\ApplicantUser;
 Route::get('dark-mode-switcher', [DarkModeController::class, 'switch'])->name('dark-mode-switcher');
 Route::get('color-scheme-switcher/{color_scheme}', [ColorSchemeController::class, 'switch'])->name('color-scheme-switcher');
 
-Route::controller(AuthController::class)->middleware('loggedin')->group(function() {
+Route::controller(ApplicantVarifyTempEmailController::class)->middleware('applicant.loggedin')->group(function() {
+    Route::get('varify-temporary-email/{token}',  'varifyTempEmail')->name('varify.temp.email');
+});
 
+Route::controller(AuthController::class)->middleware('loggedin')->group(function() {
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
@@ -69,17 +93,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::get('login', 'loginView')->name('login');
         Route::post('login', 'login')->name('check');
     });
-
-    Route::controller(ForgetPasswordController::class)->middleware('applicant.loggedin')->group(function() {
-
-        Route::get('forget-password',  'showForgetPasswordForm')->name('forget.password.get');
-        Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
-        Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
-        Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
     
-    });
-
-
     Route::controller(RegisterController::class)->middleware('applicant.loggedin')->group(function() {
         Route::get('register', 'index')->name('register');
         Route::post('register', 'store')->name('store.register');
@@ -91,6 +105,34 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 
         Route::controller(ApplicantDashboard::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
+            Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
+        });
+
+        Route::controller(ApplicationController::class)->group(function() {
+            Route::get('application', 'index')->name('application');
+            Route::post('application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
+            Route::post('application/store-course-details', 'storeCourseDetails')->name('application.store.course');
+            Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::post('application/review', 'review')->name('application.review');
+            Route::get('application/show/{id}', 'show')->name('application.show');
+        });
+
+        Route::controller(ApplicantQualificationCongroller::class)->group(function() {
+            Route::get('qualification/list', 'list')->name('qualification.list');
+            Route::post('qualification/store', 'store')->name('qualification.store');
+            Route::get('qualification/edit/{id}', 'edit')->name('qualification.edit');
+            Route::post('qualification/update', 'update')->name('qualification.update');
+            Route::delete('qualification/delete/{id}', 'destroy')->name('qualification.destory');
+            Route::post('qualification/restore/{id}', 'restore')->name('qualification.restore');
+        });
+
+        Route::controller(ApplicantEmploymentController::class)->group(function() {
+            Route::get('employment/list', 'list')->name('employment.list');
+            Route::post('employment/store', 'store')->name('employment.store');
+            Route::get('employment/edit/{id}', 'edit')->name('employment.edit');
+            Route::post('employment/update', 'update')->name('employment.update');
+            Route::delete('employment/delete/{id}', 'destroy')->name('employment.destory');
+            Route::post('employment/restore/{id}', 'restore')->name('employment.restore');
         });
 
     });
@@ -116,10 +158,8 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 
 
     Route::controller(GoogleSocialiteController::class)->middleware('loggedin')->group(function() {
-
         Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
         Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
-
     });
 
 Route::middleware('auth')->group(function() {
@@ -266,11 +306,150 @@ Route::middleware('auth')->group(function() {
     Route::controller(TitleController::class)->group(function() {
         Route::get('titles', 'index')->name('titles'); 
         Route::get('titles/list', 'list')->name('titles.list'); 
+        Route::post('titles/store', 'store')->name('titles.store'); 
+        Route::get('titles/edit/{id}', 'edit')->name('titles.edit');
+        Route::post('titles/update', 'update')->name('titles.update');
+        Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
+        Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
+    });
 
-        /*Route::post('plan-dates/generate', 'generate')->name('plan.dates.generate'); 
-        Route::post('plan-dates/store', 'store')->name('plan.dates.store'); 
-        Route::delete('plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
-        Route::post('plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');*/
+    Route::controller(EthnicityController::class)->group(function() {
+        Route::get('ethnic', 'index')->name('ethnic'); 
+        Route::get('ethnic/list', 'list')->name('ethnic.list'); 
+        Route::post('ethnic/store', 'store')->name('ethnic.store'); 
+        Route::get('ethnic/edit/{id}', 'edit')->name('ethnic.edit');
+        Route::post('ethnic/update', 'update')->name('ethnic.update');
+        Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
+        Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
+    });
+
+    Route::controller(KinsRelationController::class)->group(function() {
+        Route::get('kin-relations', 'index')->name('kin.relations'); 
+        Route::get('kin-relations/list', 'list')->name('kin.relations.list'); 
+        Route::post('kin-relations/store', 'store')->name('kin.relations.store'); 
+        Route::get('kin-relations/edit/{id}', 'edit')->name('kin.relations.edit');
+        Route::post('kin-relations/update', 'update')->name('kin.relations.update');
+        Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
+        Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
+    });
+
+    Route::controller(SexualOrientationController::class)->group(function() {
+        Route::get('sex-orientation', 'index')->name('sex.orientation'); 
+        Route::get('sex-orientation/list', 'list')->name('sex.orientation.list'); 
+        Route::post('sex-orientation/store', 'store')->name('sex.orientation.store'); 
+        Route::get('sex-orientation/edit/{id}', 'edit')->name('sex.orientation.edit');
+        Route::post('sex-orientation/update', 'update')->name('sex.orientation.update');
+        Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
+        Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
+    });
+
+    Route::controller(ReligionController::class)->group(function() {
+        Route::get('religion', 'index')->name('religion'); 
+        Route::get('religion/list', 'list')->name('religion.list'); 
+        Route::post('religion/store', 'store')->name('religion.store'); 
+        Route::get('religion/edit/{id}', 'edit')->name('religion.edit');
+        Route::post('religion/update', 'update')->name('religion.update');
+        Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
+        Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
+    });
+
+    Route::controller(StatusController::class)->group(function() {
+        Route::get('statuses', 'index')->name('statuses'); 
+        Route::get('statuses/list', 'list')->name('statuses.list'); 
+        Route::post('statuses/store', 'store')->name('statuses.store'); 
+        Route::get('statuses/edit/{id}', 'edit')->name('statuses.edit');
+        Route::post('statuses/update', 'update')->name('statuses.update');
+        Route::delete('statuses/delete/{id}', 'destroy')->name('statuses.destory');
+        Route::post('statuses/restore/{id}', 'restore')->name('statuses.restore');
+    });
+
+    Route::controller(CountryController::class)->group(function() {
+        Route::get('countries', 'index')->name('countries'); 
+        Route::get('countries/list', 'list')->name('countries.list'); 
+        Route::post('countries/store', 'store')->name('countries.store'); 
+        Route::get('countries/edit/{id}', 'edit')->name('countries.edit');
+        Route::post('countries/update', 'update')->name('countries.update');
+        Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
+        Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
+    });
+
+    Route::controller(DisabilityController::class)->group(function() {
+        Route::get('disabilities', 'index')->name('disabilities'); 
+        Route::get('disabilities/list', 'list')->name('disabilities.list'); 
+        Route::post('disabilities/store', 'store')->name('disabilities.store'); 
+        Route::get('disabilities/edit/{id}', 'edit')->name('disabilities.edit');
+        Route::post('disabilities/update', 'update')->name('disabilities.update');
+        Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
+        Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
+    });
+
+    Route::controller(AdmissionController::class)->group(function() {
+        Route::get('admission', 'index')->name('admission'); 
+        Route::get('admission/list', 'list')->name('admission.list'); 
+        Route::get('admission/show/{applicantId}', 'show')->name('admission.show');
+        //Route::get('admission/qualification-list', 'qualificationList')->name('admission.qualification.list');
+        //Route::get('admission/employment-list', 'employmentList')->name('admission.employment.list');
+        Route::post('admission/update-personal-details', 'updatePersonalDetails')->name('admission.update.personal.details');
+        Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
+        Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
+        Route::post('admission/update-course-details', 'updateCourseAndProgrammeDetails')->name('admission.update.course.details');
+        Route::post('admission/update-qualification-status', 'updateQualificationStatus')->name('admission.update.qualification.status');
+        Route::post('admission/update-employment-status', 'updateEmploymentStatus')->name('admission.update.employment.status');
+
+        Route::get('admission/process/{applicantId}', 'admissionProcess')->name('admission.process');
+        Route::post('admission/store-process-task', 'admissionStoreProcessTask')->name('admission.process.store.task.list');
+        Route::post('admission/upload-task-documents', 'admissionUploadTaskDocument')->name('admission.upload.task.documents');
+        Route::delete('admission/delete-task', 'admissionDeleteTask')->name('admission.destory.task');
+        Route::post('admission/completed-task', 'admissionCompletedTask')->name('admission.completed.task');
+        Route::post('admission/pending-task', 'admissionPendingTask')->name('admission.pending.task');
+        Route::get('admission/archived-process-list', 'admissionArchivedProcessList')->name('admission.archived.process.list');
+        Route::post('admission/restore-task', 'admissionResotreTask')->name('admission.resotore.task');
+        Route::post('admission/show-task-statuses', 'admissionShowTaskStatuses')->name('admission.show.task.outmoce.statuses');
+        Route::post('admission/task-result-update', 'admissionTaskResultUpdate')->name('admission.process.task.result.update');
+        Route::get('admission/task-log-list', 'admissionTaskLogList')->name('admission.process.log.list');
+
+        Route::get('admission/uploads/{applicantId}', 'admissionUploads')->name('admission.uploads');
+        Route::post('admission/uploads-documents', 'AdmissionUploadDocuments')->name('admission.upload.documents');
+        Route::get('admission/uploads-list', 'AdmissionUploadList')->name('admission.uploads.list');
+        Route::delete('admission/uploads-destroy', 'AdmissionUploadDestroy')->name('admission.destory.uploads');
+        Route::post('admission/uploads-restore', 'AdmissionUploadRestore')->name('admission.resotore.uploads');
+
+        Route::get('admission/notes/{applicantId}', 'admissionNotes')->name('admission.notes');
+        Route::post('admission/store-notes', 'admissionStoreNotes')->name('admission.store.note');
+        Route::get('admission/notes-list', 'admissionNotesList')->name('admission.note.list');
+        Route::post('admission/show-note', 'admissionShowNote')->name('admission.show.note');
+        Route::post('admission/get-note', 'admissionGetNote')->name('admission.get.note');
+        Route::post('admission/update-note', 'admissionUpdateNote')->name('admission.update.note');
+        Route::delete('admission/destory-note', 'admissionDestroyNote')->name('admission.destory.note');
+        Route::post('admission/restore-note', 'admissionRestoreNote')->name('admission.resotore.note');
+    });
+
+    Route::controller(ApplicantQualificationCongroller::class)->group(function() {
+        Route::get('qualification/list', 'list')->name('qualification.list');
+        Route::post('qualification/store', 'store')->name('qualification.store');
+        Route::get('qualification/edit/{id}', 'edit')->name('qualification.edit');
+        Route::post('qualification/update', 'update')->name('qualification.update');
+        Route::delete('qualification/delete/{id}', 'destroy')->name('qualification.destory');
+        Route::post('qualification/restore/{id}', 'restore')->name('qualification.restore');
+    });
+
+    Route::controller(ApplicantEmploymentController::class)->group(function() {
+        Route::get('employment/list', 'list')->name('employment.list');
+        Route::post('employment/store', 'store')->name('employment.store');
+        Route::get('employment/edit/{id}', 'edit')->name('employment.edit');
+        Route::post('employment/update', 'update')->name('employment.update');
+        Route::delete('employment/delete/{id}', 'destroy')->name('employment.destory');
+        Route::post('employment/restore/{id}', 'restore')->name('employment.restore');
+    });
+
+    Route::controller(UserController::class)->group(function() {
+        Route::get('users', 'index')->name('users'); 
+        Route::get('users/list', 'list')->name('users.list'); 
+        Route::post('users/store', 'store')->name('users.store'); 
+        Route::get('users/edit/{id}', 'edit')->name('users.edit');
+        Route::post('users/update/{id}', 'update')->name('users.update');
+        Route::delete('users/delete/{id}', 'destroy')->name('users.destory');
+        Route::post('users/restore/{id}', 'restore')->name('users.restore');
     });
 
 
@@ -478,6 +657,87 @@ Route::middleware('auth')->group(function() {
         Route::get('bankholidays/edit/{id}', 'edit')->name('bankholidays.edit');
         Route::post('bankholidays/update', 'update')->name('bankholidays.update');
         Route::delete('bankholidays/delete/{id}', 'destroy')->name('bankholidays.destory');
-        Route::post('bankholidays/restore/{id}', 'restore')->name('bankholidays.restore');        
+        Route::post('bankholidays/restore/{id}', 'restore')->name('bankholidays.restore');       
+        
+        Route::get('bankholidays/export/', 'export')->name('bankholidays.export');
+        Route::post('bankholidays/import', 'import')->name('bankholidays.import');
+    });
+
+    // Added on 26.04.23
+    Route::controller(DocumentSettingsController::class)->group(function() {
+        Route::get('documentsettings', 'index')->name('documentsettings'); 
+        Route::get('documentsettings/list', 'list')->name('documentsettings.list'); 
+        Route::post('documentsettings/store', 'store')->name('documentsettings.store'); 
+        Route::get('documentsettings/edit/{id}', 'edit')->name('documentsettings.edit');
+        Route::post('documentsettings/update', 'update')->name('documentsettings.update');
+        Route::delete('documentsettings/delete/{id}', 'destroy')->name('documentsettings.destory');
+        Route::post('documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
+    });
+
+    // Added on 04.05.23
+    Route::controller(DepartmentController::class)->group(function() {
+        Route::get('department', 'index')->name('department'); 
+        Route::get('department/list', 'list')->name('department.list'); 
+        Route::post('department/store', 'store')->name('department.store'); 
+        Route::get('department/edit/{id}', 'edit')->name('department.edit');
+        Route::post('department/update', 'update')->name('department.update');
+        Route::delete('department/delete/{id}', 'destroy')->name('department.destory');
+        Route::post('department/restore/{id}', 'restore')->name('department.restore');
+    });
+
+    Route::controller(PermissionCategoryController::class)->group(function() {
+        Route::get('permissioncategory', 'index')->name('permissioncategory'); 
+        Route::get('permissioncategory/list', 'list')->name('permissioncategory.list'); 
+        Route::post('permissioncategory/store', 'store')->name('permissioncategory.store'); 
+        Route::get('permissioncategory/edit/{id}', 'edit')->name('permissioncategory.edit');
+        Route::post('permissioncategory/update', 'update')->name('permissioncategory.update');
+        Route::delete('permissioncategory/delete/{id}', 'destroy')->name('permissioncategory.destory');
+        Route::post('permissioncategory/restore/{id}', 'restore')->name('permissioncategory.restore');
+    });
+
+    
+    Route::controller(RoleController::class)->group(function() {
+        Route::get('roles', 'index')->name('roles'); 
+        Route::get('roles/list', 'list')->name('roles.list'); 
+        Route::post('roles/store', 'store')->name('roles.store'); 
+        Route::get('roles/show/{id}', 'show')->name('roles.show');
+        Route::get('roles/edit/{id}', 'edit')->name('roles.edit');
+        Route::post('roles/update', 'update')->name('roles.update');
+        Route::delete('roles/delete/{id}', 'destroy')->name('roles.destory');
+        Route::post('roles/restore/{id}', 'restore')->name('roles.restore');
+    });
+
+    Route::controller(PermissionTemplateController::class)->group(function() {
+        Route::get('permissiontemplate/list', 'list')->name('permissiontemplate.list'); 
+        Route::post('permissiontemplate/store', 'store')->name('permissiontemplate.store'); 
+        Route::get('permissiontemplate/edit/{id}', 'edit')->name('permissiontemplate.edit');
+        Route::post('permissiontemplate/update', 'update')->name('permissiontemplate.update');
+        Route::delete('permissiontemplate/delete/{id}', 'destroy')->name('permissiontemplate.destory');
+        Route::post('permissiontemplate/restore/{id}', 'restore')->name('permissiontemplate.restore');
+    });
+
+    Route::controller(ProcessListController::class)->group(function() {
+        Route::get('processlist', 'index')->name('processlist'); 
+        Route::get('processlist/list', 'list')->name('processlist.list'); 
+        Route::post('processlist/store', 'store')->name('processlist.store'); 
+        Route::get('processlist/edit/{id}', 'edit')->name('processlist.edit');
+        Route::post('processlist/update', 'update')->name('processlist.update');
+        Route::delete('processlist/delete/{id}', 'destroy')->name('processlist.destory');
+        Route::post('processlist/restore/{id}', 'restore')->name('processlist.restore');
+    });
+
+    Route::controller(TaskListController::class)->group(function() {
+        Route::get('tasklist', 'index')->name('tasklist'); 
+        Route::get('tasklist/list', 'list')->name('tasklist.list'); 
+        Route::post('tasklist/store', 'store')->name('tasklist.store'); 
+        Route::get('tasklist/edit/{id}', 'edit')->name('tasklist.edit');
+        Route::post('tasklist/update', 'update')->name('tasklist.update');
+        Route::delete('tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
+        Route::post('tasklist/restore/{id}', 'restore')->name('tasklist.restore');
+    });
+
+    Route::controller(InterviewListController::class)->group(function() {
+        Route::get('interviewlist', 'index')->name('interviewlist');
+        Route::get('interviewlist/list', 'list')->name('interviewlist.list');
     });
 });

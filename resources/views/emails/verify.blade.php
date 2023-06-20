@@ -352,7 +352,6 @@ ul.social li{
             				<h2>Please verify your email</h2>
             				<h3>All applicant need to verify email in order to apply</h3>
             				<p><a href="{{ $url }}" class="btn btn-primary">Click Here to Verify</a></p>
-							<p>This verification email will be valid for 1 hour</p>
             			</div>
             		</td>
             	</tr>

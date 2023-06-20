@@ -9,6 +9,10 @@ use App\Http\Requests\BankHolidayUpdateRequests;
 use App\Models\AcademicYear;
 use App\Models\User;
 
+use App\Exports\HolidayExport;
+use App\Imports\HolidayImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class BankHolidayController extends Controller
 {
     public function list(Request $request){
@@ -152,5 +156,17 @@ class BankHolidayController extends Controller
         $data = BankHoliday::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new HolidayImport($request->input('academic_year_id')),$file);
+        return back()->with('success', 'Holiday Data Uploaded');
+    }
+
+    public function export(Request $request)
+    {
+
+        return Excel::download(new HolidayExport(), 'bankholidays.xlsx');        
     }
 }

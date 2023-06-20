@@ -34,8 +34,13 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Code",
-                    field: "code",
+                    title: "Hesa Code",
+                    field: "hesa_code",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "DF Code",
+                    field: "df_code",
                     headerHozAlign: "left",
                 },
                 {
@@ -203,6 +208,54 @@ var table = (function () {
             $('#confirmModal .agreeWith').attr('data-action', 'none');
         });
 
+        $('#addForm input[name="is_hesa"]').on('change', function(){
+            if($(this).prop('checked')){
+                $('#addForm .hesa_code_area').fadeIn('fast', function(){
+                    $('.hesa_code_area input').val('');
+                })
+            }else{
+                $('#addForm .hesa_code_area').fadeOut('fast', function(){
+                    $('.hesa_code_area input').val('');
+                })
+            }
+        })
+        
+        $('#addForm input[name="is_df"]').on('change', function(){
+            if($(this).prop('checked')){
+                $('#addForm .df_code_area').fadeIn('fast', function(){
+                    $('.df_code_area input').val('');
+                })
+            }else{
+                $('#addForm .df_code_area').fadeOut('fast', function(){
+                    $('.df_code_area input').val('');
+                })
+            }
+        })
+
+        $('#editForm input[name="is_hesa"]').on('change', function(){
+            if($(this).prop('checked')){
+                $('#editForm .hesa_code_area').fadeIn('fast', function(){
+                    $('.hesa_code_area input').val('');
+                })
+            }else{
+                $('#editForm .hesa_code_area').fadeOut('fast', function(){
+                    $('.hesa_code_area input').val('');
+                })
+            }
+        })
+        
+        $('#editForm input[name="is_df"]').on('change', function(){
+            if($(this).prop('checked')){
+                $('#editForm .df_code_area').fadeIn('fast', function(){
+                    $('.df_code_area input').val('');
+                })
+            }else{
+                $('#editForm .df_code_area').fadeOut('fast', function(){
+                    $('.df_code_area input').val('');
+                })
+            }
+        })
+
         $('#addForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('addForm');
@@ -263,7 +316,31 @@ var table = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                    $('#editModal input[name="code"]').val(dataset.code ? dataset.code : '');
+                    
+                    if(dataset.is_hesa == 1){
+                        document.querySelector('#editModal #is_hesa').checked = true;
+                        $('#editModal .hesa_code_area').fadeIn(500, function () {
+                            $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
+                        });
+                    }else{
+                        document.querySelector('#editModal #is_hesa').checked = false;
+                        $('#editModal .hesa_code_area').fadeOut(500, function () {
+                            $('#editModal input[name="hesa_code"]').val('');
+                        });
+                    }
+                    
+                    if(dataset.is_df == 1){
+                        document.querySelector('#editModal #is_df').checked = true;
+                        $('#editModal .df_code_area').fadeIn(500, function () {
+                            $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
+                        });
+                    }else{
+                        document.querySelector('#editModal #is_df').checked = false;
+                        $('#editModal .df_code_area').fadeOut(500, function () {
+                            $('#editModal input[name="df_code"]').val('');
+                        });
+                    }
+
                     $('#editModal input[name="from_date"]').val(dataset.from_date ? dataset.from_date : '');
                     $('#editModal input[name="to_date"]').val(dataset.to_date ? dataset.to_date : '');
                     $('#editModal input[name="target_date_hesa_report"]').val(dataset.target_date_hesa_report ? dataset.target_date_hesa_report : '');

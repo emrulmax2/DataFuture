@@ -13,7 +13,7 @@
         <nav aria-label="breadcrumb" class="-intro-x h-[45px] mr-auto">
             <ol class="breadcrumb breadcrumb-light">
                 <li class="breadcrumb-item"><a href="javascript:void(0);">Application</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ !is_null(\Auth::guard('applicant')->user()) ? route('applicant.dashboard') : route('dashboard') }}">Dashboard</a></li>
                 @if(isset($breadcrumbs) && !empty($breadcrumbs))
                     @php $i = 1; @endphp
                     @foreach($breadcrumbs as $crumbs)

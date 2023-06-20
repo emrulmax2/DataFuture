@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Tabulator - Midone - Tailwind HTML Admin Template</title>
+    <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
@@ -9,9 +9,24 @@
         <h2 class="text-lg font-medium mr-auto">Welcome! </h2>
         @if ($user->email_verified_at != NULL)
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button class="btn btn-primary shadow-md mr-2">Apply For College</button>
+            <a href="{{ route('applicant.application') }}" class="btn btn-primary shadow-md mr-2">Apply For Courses</a>
         </div>
         @endif
+    </div>
+    <div class="intro-y box p-5 mt-5">
+        @if (session('applicantSubmission'))
+            <div class="alert alert-success-soft alert-dismissible show flex items-center mb-2" role="alert">
+                <i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> {{ Session::get('applicantSubmission') }}
+                <button type="button" class="btn-close" data-tw-dismiss="alert" aria-label="Close">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            @php session()->forget('applicantSubmission'); @endphp
+        @endif
+
+        <div class="overflow-x-auto scrollbar-hidden">
+            <div id="applicantApplicantionList" class="mt-5 table-report table-report--tabulator"></div>
+        </div>
     </div>
     @if (session('verifymessage'))
         <!-- BEGIN: Notification Content -->
@@ -65,4 +80,5 @@
             }
         })()
     </script>
+    @vite('resources/js/applicant-dahsboard.js')
 @endsection

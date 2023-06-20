@@ -12,7 +12,10 @@ class AcademicYear extends Model
 
     protected $fillable = [
         'name',
-        'code',
+        'is_hesa',
+        'hesa_code',
+        'is_df',
+        'df_code',
         'from_date',
         'to_date',
         'target_date_hesa_report',

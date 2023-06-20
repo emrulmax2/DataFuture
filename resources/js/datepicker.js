@@ -7,7 +7,7 @@ import Litepicker from "litepicker";
     // Litepicker
     $(".datepicker").each(function () {
         let options = {
-            autoApply: false,
+            autoApply: true,
             singleMode: false,
             numberOfColumns: 2,
             numberOfMonths: 2,

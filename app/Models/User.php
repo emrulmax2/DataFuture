@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'gender',
+        'active',
     ];
 
     /**
@@ -47,7 +51,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends = ['photo'];
+    protected $appends = ['photo', 'photo_url'];
 
     /**
      * The getter that return accessible URL for user photo.
@@ -56,10 +60,18 @@ class User extends Authenticatable
      */
     public function getPhotoUrlAttribute()
     {
-        if ($this->foto !== null) {
-            return url('media/user/' . $this->id . '/' . $this->foto);
+        if ($this->photo !== null) {
+            return asset('storage/users/'.$this->id.'/'.$this->photo);
         } else {
-            return url('media-example/no-image.png');
+            return asset('build/assets/images/placeholders/200x200.jpg');
         }
+    }
+
+    public function getPhotoAttribute($value){
+        return $value;
+    }
+
+    public function userRole(){
+        return $this->hasMany(UserRole::class, 'user_id', 'id');
     }
 }

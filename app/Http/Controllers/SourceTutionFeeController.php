@@ -55,7 +55,8 @@ class SourceTutionFeeController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
-                    'code' => $list->code,
+                    'hesa_code' => $list->hesa_code,
+                    'df_code' => $list->df_code,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -65,11 +66,13 @@ class SourceTutionFeeController extends Controller
     }
 
     public function store(SourceTutionFeesRequests $request){
-        $data = SourceTuitionFee::create([
-            'name'=> $request->name,
-            'code'=> $request->code,
-            'created_by' => auth()->user()->id
-        ]);
+        // $data = SourceTuitionFee::create([
+        //     'name'=> $request->name,
+        //     'code'=> $request->code,
+        //     'created_by' => auth()->user()->id
+        // ]);
+        $request->request->add(['created_by' => auth()->user()->id]);
+        $data = SourceTuitionFee::create($request->all());
         return response()->json($data);
     }
 
@@ -86,7 +89,10 @@ class SourceTutionFeeController extends Controller
     public function update(SourceTutionFeesUpdateRequests $request, SourceTuitionFee $dataId){
         $data = SourceTuitionFee::where('id', $request->id)->update([
             'name'=> $request->name,
-            'code'=> $request->code,
+            'is_hesa' => (isset($request->is_hesa) ? $request->is_hesa : '0'),
+            'hesa_code'=> $request->hesa_code ? $request->hesa_code : null,
+            'is_df' => (isset($request->is_df) ? $request->is_df : '0'),
+            'df_code'=> $request->df_code ? $request->df_code : null,
             'updated_by' => auth()->user()->id
         ]);
 

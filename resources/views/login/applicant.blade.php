@@ -41,7 +41,7 @@
                             <input id="remember-me" type="checkbox" class="form-check-input border mr-2">
                             <label class="cursor-pointer select-none" for="remember-me">Remember me</label>
                         </div>
-                        <a href="{{ route('applicant.forget.password.get') }}">Forgot Password?</a>
+                        <a href="">Forgot Password?</a>
                     </div>
                     <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
                         <button id="btn-login" class="btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top">Login</button>
@@ -53,33 +53,29 @@
                 </div>
             </div>
             <!-- END: Login Form -->
-            @if(Session::has('message'))
-            <!-- BEGIN: Notification Content -->
-            <div id="success-notification-content" class="toastify-content hidden flex">
-                @if(Session::has('error'))
-                    <i class="text-danger" data-lucide="x-octagon"></i>
-                @else
-                    <i class="text-success" data-lucide="check-circle"></i>
-                @endif
-                <div class="ml-4 mr-4">
-                    <div class="font-medium">{{ Session::get('title') }}</div>
-                    <div class="text-slate-500 mt-1">{{ Session::get('message') }}</div>
-                </div>
-            </div>
-            <!-- END: Notification Content -->                                
-            <button id="success-notification-toggle" class="btn btn-primary hidden">Show Notification</button>
-            @endif
         </div>
-
     </div>
+
+    
+    @if (session('verifySuccessMessage'))
+        <!-- BEGIN: Notification Content -->
+        <div id="success-notification-content" class="toastify-content hidden flex">
+            <i class="text-success" data-lucide="check-circle"></i>
+            <div class="ml-4 mr-4">
+                <div class="font-medium">Error Found!</div>
+                <div class="text-slate-500 mt-1">{{ session('verifySuccessMessage') }}</div>
+            </div>
+        </div>
+        <!-- END: Notification Content -->
+        <!-- BEGIN: Notification Toggle -->
+        <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+        <!-- END: Notification Toggle -->
+    @endif
 @endsection
 
 @section('script')
     <script type="module">
         (function () {
-
-            if($("#success-notification-toggle").length>0)
-                    $("#success-notification-toggle").trigger('click')
             async function login() {
                 // Reset state
                 $('#login-form').find('.login__input').removeClass('border-danger')
@@ -122,6 +118,10 @@
             $('#btn-login').on('click', function() {
                 login()
             })
+            
+            if($('#success-notification-toggle').length>0) {
+                $("#success-notification-toggle").trigger('click');
+            }
         })()
     </script>
 @endsection

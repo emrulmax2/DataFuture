@@ -59,7 +59,8 @@ class AcademicYearController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
-                    'code' => $list->code,
+                    'hesa_code' => $list->hesa_code,
+                    'df_code' => $list->df_code,
                     'from_date' => $list->from_date,
                     'to_date' => $list->to_date,
                     'target_date_hesa_report' => $list->target_date_hesa_report,
@@ -86,7 +87,10 @@ class AcademicYearController extends Controller
     public function store(AcademicYearRequest $request){
         $data = AcademicYear::create([
             'name'=> $request->name,
-            'code'=> $request->code,
+            'is_hesa' => (isset($request->is_hesa) ? $request->is_hesa : '0'),
+            'hesa_code'=> $request->hesa_code ? $request->hesa_code : null,
+            'is_df' => (isset($request->is_df) ? $request->is_df : '0'),
+            'df_code'=> $request->df_code ? $request->df_code : null,
             'from_date'=> date('Y-m-d', strtotime($request->from_date)),
             'to_date'=> date('Y-m-d', strtotime($request->to_date)),
             'target_date_hesa_report'=> date('Y-m-d', strtotime($request->target_date_hesa_report)),
@@ -108,7 +112,10 @@ class AcademicYearController extends Controller
     public function update(AcademicYearUpdateRequest $request, AcademicYear $dataId){      
         $data = AcademicYear::where('id', $request->id)->update([
             'name'=> $request->name,
-            'code'=> $request->code,
+            'is_hesa' => (isset($request->is_hesa) ? $request->is_hesa : '0'),
+            'hesa_code'=> $request->hesa_code ? $request->hesa_code : null,
+            'is_df' => (isset($request->is_df) ? $request->is_df : '0'),
+            'df_code'=> $request->df_code ? $request->df_code : null,
             'from_date'=> date('Y-m-d', strtotime($request->from_date)),
             'to_date'=> date('Y-m-d', strtotime($request->to_date)),
             'target_date_hesa_report'=> date('Y-m-d', strtotime($request->target_date_hesa_report)),

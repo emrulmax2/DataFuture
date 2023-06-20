@@ -13,7 +13,10 @@ class AwardingBody extends Model
 
     protected $fillable = [
         'name',
-        'code',
+        'is_hesa',
+        'hesa_code',
+        'is_df',
+        'df_code',
         'created_by',
         'updated_by',
     ];
