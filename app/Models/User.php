@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
 class User extends Authenticatable
@@ -66,6 +68,7 @@ class User extends Authenticatable
             return asset('build/assets/images/placeholders/200x200.jpg');
         }
     }
+    
 
     public function getPhotoAttribute($value){
         return $value;
@@ -74,4 +77,16 @@ class User extends Authenticatable
     public function userRole(){
         return $this->hasMany(UserRole::class, 'user_id', 'id');
     }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
+    }
+
+    public function interviews(): HasMany
+    {
+        return $this->hasMany(ApplicantInterview::class);
+    }
+
+    
 }

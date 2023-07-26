@@ -51,32 +51,5 @@ class TaskList extends Model
     {
         return $this->hasManyThrough('App\Models\Applicant', 'App\Models\ApplicantTask','task_list_id','id','id','applicant_id');
     }
-    
-    //     projects
-    //     id - integer
-    //     name - string
-    
-    // environments
-    //     id - integer
-    //     project_id - integer
-    //     name - string
-    
-    // deployments
-    //     id - integer
-    //     environment_id - integer
-    //     commit_hash - string
-    // class Project extends Model
-    // {
-    //     public function deployments(): HasManyThrough
-    //     {
-    //         return $this->hasManyThrough(
-    //             Deployment::class,
-    //             Environment::class,
-    //             'project_id', // Foreign key on the environments table...
-    //             'environment_id', // Foreign key on the deployments table...
-    //             'id', // Local key on the projects table...
-    //             'id' // Local key on the environments table...
-    //         );
-    //     }
-    // }
+
 }

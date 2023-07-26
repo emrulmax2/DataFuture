@@ -14,7 +14,7 @@ import Litepicker from "litepicker";
             showWeekNumbers: true,
             format: "D MMM, YYYY",
             dropdowns: {
-                minYear: 1990,
+                minYear: 1900,
                 maxYear: null,
                 months: true,
                 years: true,

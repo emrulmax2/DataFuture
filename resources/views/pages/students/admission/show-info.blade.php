@@ -33,9 +33,38 @@
                     <div class="font-medium text-base">Work in Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    <button type="button" class="btn btn-primary w-auto mr-1 mb-0">
-                        {{ $applicant->status->name }}
-                    </button>
+                                         
+                    <div class="dropdown">
+                        <button class="dropdown-toggle btn btn-secondary active-bg-success active-text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="user" class="w-4 h-4 mr-2"></i> {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                        <div class="dropdown-menu w-40">
+                            <ul class="dropdown-content">
+                                <li>
+                                    <div class="dropdown-header">Change Status</div>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a href="" class="dropdown-item">
+                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Register
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="" class="dropdown-item">
+                                        <i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Enroll
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="" class="dropdown-item">
+                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Reject
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+      
+
                 </div>
             </div>
             <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>

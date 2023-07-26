@@ -97,6 +97,6 @@ class Applicant extends Model
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
     public function getFullNameAttribute() {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name . ' ' . $this->last_name.'';
     }
 }

@@ -49,6 +49,7 @@ export default defineConfig({
                 "resources/js/tasklist.js",
                 "resources/js/user.js",
                 "resources/js/interviewlist.js",
+                "resources/js/staff-interview-task.js",
 
                 "resources/js/admission.js",
                 "resources/js/admission-process.js",

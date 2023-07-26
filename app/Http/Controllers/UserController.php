@@ -6,6 +6,8 @@ use App\Http\Requests\UserCreateRequest;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRole;
+use App\Models\PermissionTemplate;
+use App\Models\PermissionCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserUpdateRequest;
@@ -23,8 +25,34 @@ class UserController extends Controller
             'roles' => Role::all()
         ]);
     }
+    public function useraccess($userId)
+    {
+        return view('pages/users/access/index', [
+            'title' => 'User Access Dashboard - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'User Access Dashboard', 'href' => 'javascript:void(0);']
+            ],
+            'user' => User::find($userId),
+        ]);
+    }
 
-    public function list(Request $request){
+    public function useraccessStaff($userId,$roleId) {
+
+        return view('pages/users/access/staff', [
+            'title' => 'Potential Interviewee List',
+            'breadcrumbs' => [
+                ['label' => 'User Dashboard', 'href' => route('useraccess',$userId)],
+                ['label' => 'Staff Dashboard', 'href' => 'javascript:void(0);'],
+            ],
+            'user' => User::find($userId),
+            'role' => Role::where('id', $roleId)->get(),       
+            
+        ]);
+
+    }
+
+    public function list(Request $request) {
+
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
@@ -80,9 +108,11 @@ class UserController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+
     }
 
-    public function store(UserCreateRequest $request){
+    public function store(UserCreateRequest $request) {
+
         $role_id = $request->role_id;
         $user = User::create([
             'name'=> $request->name,
@@ -114,26 +144,39 @@ class UserController extends Controller
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
         endif;
+
     }
 
-    public function edit($id){
+    public function edit($id) {
+
         $data = User::with('userRole')->find($id);
+
         $roles = [];
+
         if(isset($data->userRole) && !empty($data->userRole)):
+
             foreach($data->userRole as $ur):
                 $roles[] = $ur->role_id;
             endforeach;
+
         endif;
+
         $data['roleIds'] = $roles;
 
-        if($data){
+        if($data) {
+
             return response()->json($data);
+
         }else{
+
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+
         }
+
     }
 
-    public function update(UserUpdateRequest $request, User $dataId){    
+    public function update(UserUpdateRequest $request, User $dataId) {   
+
         $userID = $request->id;
         $userOldRow = User::find($userID);
         
@@ -145,12 +188,15 @@ class UserController extends Controller
             'gender'=> $request->gender,
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0)
         ];
+
         if(isset($request->password) && !empty($request->password)):
             $newData['password'] = Hash::make($request->password);
         endif;
         
         $newImageName = (isset($userOldRow->photo)) ? $userOldRow->photo : '';
+
         if($request->hasFile('photo')):
+
             $imageName = 'Avatar_'.$userID.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
             $path = $request->file('photo')->storeAs('public/users/'.$userID.'/', $imageName);
             if(isset($userOldRow->photo) && !empty($userOldRow->photo)):
@@ -159,6 +205,7 @@ class UserController extends Controller
                 endif;
             endif;
             $newImageName = $imageName;
+
         endif;
 
         $user->fill($newData);
@@ -178,11 +225,16 @@ class UserController extends Controller
             endforeach;
         endif;
 
-        if($user->wasChanged() || $isChanged){
+        if($user->wasChanged() || $isChanged) {
+
             return response()->json(['message' => 'Data updated'], 200);
-        }else{
+
+        } else {
+
             return response()->json(['message' => 'No data Modified'], 304);
+
         }
+
     }
 
     public function destroy($id){
