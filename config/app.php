@@ -214,6 +214,8 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+        'Arr' => Illuminate\Support\Arr::class,
+        'Str' => Illuminate\Support\Str::class,
     ])->toArray(),
 
 ];
