@@ -4,10 +4,10 @@
             <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
                 <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
                     <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
-                        <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
-                        <div class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
+                        <img alt="{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}" class="rounded-full" src="{{ (isset($applicant->photo) && !empty($applicant->photo) ? asset('storage/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                        <button data-tw-toggle="modal" data-tw-target="#addApplicantPhotoModal" type="button" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
                             <i class="w-4 h-4 text-white" data-lucide="camera"></i>
-                        </div>
+                        </button>
                     </div>
                     <div class="ml-10">
                         <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</div>
@@ -33,38 +33,9 @@
                     <div class="font-medium text-base">Work in Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
-                                         
-                    <div class="dropdown">
-                        <button class="dropdown-toggle btn btn-secondary active-bg-success active-text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="user" class="w-4 h-4 mr-2"></i> {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <div class="dropdown-header">Change Status</div>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Register
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Enroll
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Reject
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-      
-
+                    <button type="button" class="btn btn-primary w-auto mr-1 mb-0">
+                        {{ $applicant->status->name }}
+                    </button>
                 </div>
             </div>
             <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
@@ -91,3 +62,48 @@
         </div>
     </div>
 </div>
+
+<!-- BEGIN: Import Modal -->
+<div id="addApplicantPhotoModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="font-medium text-base mr-auto">Upload Profile Photo</h2>
+            </div>
+            <div class="modal-body">
+                <form method="post"  action="{{ route('admission.upload.photo') }}" class="dropzone" id="addApplicantPhotoForm" style="padding: 5px;" enctype="multipart/form-data">
+                    @csrf    
+                    <div class="fallback">
+                        <input name="documents" type="file" />
+                    </div>
+                    <div class="dz-message" data-dz-message>
+                        <div class="text-lg font-medium">Drop file here or click to upload.</div>
+                        <div class="text-slate-500">
+                            Select .jpg, .png, or .gif formate image. Max file size should be 5MB.
+                        </div>
+                    </div>
+                    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                <button type="button" id="uploadPhotoBtn" class="btn btn-primary w-auto">     
+                    Upload                      
+                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        stroke="white" class="w-4 h-4 ml-2">
+                        <g fill="none" fill-rule="evenodd">
+                            <g transform="translate(1 1)" stroke-width="4">
+                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- END: Import Modal -->
