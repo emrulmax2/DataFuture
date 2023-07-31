@@ -64,6 +64,9 @@ use App\Models\ApplicantUser;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\ApplicantQualificationCongroller;
 use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
+use App\Http\Controllers\CommonSmtpController;
+use App\Http\Controllers\LetterSetController;
+use App\Http\Controllers\SignatoryController;
 use App\Http\Controllers\UserController;
 
 use App\Http\Middleware\EnsureExpiredDateIsValid;
