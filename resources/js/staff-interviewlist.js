@@ -14,8 +14,7 @@ minusIcon.setAttribute('stroke-width', '1.5')
 
 const plusIcon = createElement(Plus)
 plusIcon.setAttribute('stroke-width', '1.5')
-// our object array
-var dataStudents = [];
+
 
 var interviewListTable = (function () {
     var _tableGen = function () {
@@ -25,15 +24,11 @@ var interviewListTable = (function () {
 
         let tableContent = new Tabulator("#interviewList", {
             dataTree:true,
-            //dataTreeCollapseElement:minusIcon,
-            //dataTreeExpandElement:plusIcon,
             ajaxURL: route("applicant.interview.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
-            //ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
-            //columnDefs: [ { orderable: false, targets: [0,2], }],
             pagination: "remote",
             paginationSize: 10,
             paginationSizeSelector: [5, 10, 20, 30, 40],
@@ -45,7 +40,6 @@ var interviewListTable = (function () {
                     title: "Serial",
                     field: "sl",
                     width: "180",
-                    //sortable:false,
                 },
                 {
                     title: "Applicant No.",
@@ -98,52 +92,45 @@ var interviewListTable = (function () {
                     headerHozAlign: "center",
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
-                        
-                        btns += '<button aria-expanded="false" data-tw-toggle="modal" data-id="' + 
-                                        cell.getData().id 
-                                        + '" data-tw-target="#callLockModal"  class="profile-lock__button transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1"><i data-lucide="lock" class="stroke-1.5 h-5 w-5"></i></button>';
-
-                            //     btns += '<div class="dropdown">\
-                            //     <button aria-expanded="false" data-tw-toggle="dropdown" data-tw-merge class="dropdown-toggle transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1"><i data-lucide="more-vertical" width="24" height="24" class="stroke-1.5 h-5 w-5"></i></button>\
-                            //     <div class="dropdown-menu w-40">\
-                            //         <ul class="dropdown-content">\
-                            //             <li>\
-                            //                 <div class="dropdown-header">Options</div>\
-                            //             </li>\
-                            //             <li>\
-                            //                 <hr class="dropdown-divider">\
-                            //             </li>\
-                            //             <li>\
-                            //                 <a href="javascript:void(0)" data-id="' + 
-                            //                 cell.getData().id 
-                            //                 + '"class="dropdown-item interview-start hover-bg-success hover-text-white">\
-                            //                     <i data-lucide="alarm-clock" class="w-4 h-4 mr-2"></i> Start Interview\
-                            //                 </a>\
-                            //             </li>\
-                            //             <li>\
-                            //                 <a href="javascript:void(0)" data-id="' + 
-                            //                 cell.getData().id 
-                            //                 + '"class="dropdown-item interview-end hover-bg-success hover-text-white">\
-                            //                     <i data-lucide="alarm-clock-off" class="w-4 h-4 mr-2"></i> End interview\
-                            //                 </a>\
-                            //             </li>\
-                            //             <li>\
-                            //                 <a href="javascript:void(0)" data-id="' + 
-                            //                 cell.getData().id 
-                            //                 + '" data-tw-toggle="modal" data-tw-target="#editModal" class="dropdown-item interview-result hover-bg-success hover-text-white">\
-                            //                     <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Update Result\
-                            //                 </a>\
-                            //             </li>\
-                            //             <li>\
-                            //                 <a href="javascript:void(0)" data-id="' + 
-                            //                 cell.getData().id 
-                            //                 + '" class="dropdown-item interview-taskend hover-bg-success hover-text-white">\
-                            //                     <i data-lucide="archive" class="w-4 h-4 mr-2"></i> Finish Task\
-                            //                 </a>\
-                            //             </li>\
-                            //         </ul>\
-                            //     </div>\
-                            // </div>'
+                        btns += '<button class="profile-lock__button btn btn-secondary w-48 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
+                                    <i data-lucide="eye" class="w-4 h-4 mr-2"></i> View Profile\
+                                    <svg width="25" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="rgb(100,116,139)" class="loading invisible w-4 h-4 ml-2">\
+                                    <g fill="none" fill-rule="evenodd" stroke-width="4">\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                    </g>\
+                                </svg>\
+                                </button>';
                         return btns;
                     },
                 }
@@ -202,47 +189,33 @@ const lockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#ca
 
 $(document).on("click", ".profile-lock__button", function (e) { 
     e.preventDefault();
-    //interviewId = $(this).attr("data-id");
-    document.getElementById('interviewId').value = $(this).attr("data-id");
-
-});
-$('#callLockModalForm').on('submit', function(e){
-    e.preventDefault();
-    const form = document.getElementById('callLockModalForm');
-
-    document.querySelector('#unlock').setAttribute('disabled', 'disabled');
-    document.querySelector("#unlock svg.loading").style.cssText ="display: inline-block;";
-
-    let form_data = new FormData(form);
-    //form_data.append('file', $('#addUserForm input[name="photo"]')[0].files[0]); 
+    document.querySelector(".profile-lock__button svg.loading").classList.remove('invisible')
+    const data = {
+        interviewId : $(this).attr("data-id")
+    }
     axios({
         method: "post",
         url: route('applicant.interview.unlock'),
-        data: form_data,
+        data: data,
         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
     }).then(response => {
-        document.querySelector('#unlock').removeAttribute('disabled');
-        document.querySelector("#unlock svg.loading").style.cssText = "display: none;";
-        //console.log(response.data.data);
-        //return false;
+        document.querySelector(".profile-lock__button svg.loading").classList.add('invisible')
+
 
         if (response.status == 200) {
             lockModal.hide();
 
             succModal.show();
             let Data = response.data.ref;
-            //alert(Data);
             document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                $("#successModal .successModalTitle").html( "Congratulations!" );
-                $("#successModal .successModalDesc").html('Profile Unlocked.');
+                $("#successModal .successModalTitle").html( "Success!" );
+                $("#successModal .successModalDesc").html('Profile Matched.');
             });   
             
             location.href= Data;  
         }
-        //userListTable.init();
     }).catch(error => {
-        document.querySelector('#unlock').removeAttribute('disabled');
-        document.querySelector("#unlock svg.loading").style.cssText = "display: none;";
+        document.querySelector(".profile-lock__button svg.loading").classList.add('invisible')
         if (error.response) {
             if (error.response.status == 422) {
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -255,8 +228,8 @@ $('#callLockModalForm').on('submit', function(e){
                 errorModal.show();
                 document.getElementById("errorModal")
                         .addEventListener("shown.tw.modal", function (event) {
-                            $("#errorModal .errorModalTitle").html('Invalid Date!');
-                            $("#errorModal .errorModalDesc").html('Invalid Date');
+                            $("#errorModal .errorModalTitle").html('Invalid Profile!');
+                            $("#errorModal .errorModalDesc").html('Interviewer didn\'t match');
                         }); 
                 
                         
@@ -265,13 +238,13 @@ $('#callLockModalForm').on('submit', function(e){
             }
         }
     });
+
 });
-//
+
 
 
 $(document).on("click", ".interview-result", function (e) { 
         e.preventDefault();
-        //interviewId = $(this).attr("data-id");
         document.getElementById('id').value = $(this).attr("data-id");;
     
 });
@@ -429,7 +402,6 @@ $(document).on("click", ".interview-end", function (e) {
 
             const form = document.getElementById('editForm')
             let form_data = new FormData(form);
-            //const user = document.getElementById('interview_status').value;
             
             axios({
                 method: "post",

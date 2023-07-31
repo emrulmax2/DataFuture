@@ -27,7 +27,7 @@ class InterviewerUnlockRequest extends FormRequest
         return [
             
             'interviewId' => 'required',
-            'dob' => 'required'
+            //'dob' => 'required'
         ];
         
     }

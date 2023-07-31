@@ -175,11 +175,12 @@ class InterviewListController extends Controller
 
     public function interviewAssignedList($userId) {
 
-        return view('pages/users/access/staff', [
-            'title' => 'Potential Interviewee List',
+        return view('pages.interview.assigned.staff', [
+            'title' => 'Applicant List For Interview Session',
             'breadcrumbs' => [
                 ['label' => 'Dashboard', 'href' => route('staff.dashboard')],
-                ['label' => 'Staff Dashboard', 'href' => 'javascript:void(0);'],
+                ['label' => 'Interview List', 'href' => route('interviewlist')],
+                ['label' => 'Interview Session List', 'href' => 'javascript:void(0);'],
             ],
             'user' => User::find($userId),
             'role' => '',
@@ -242,19 +243,18 @@ class InterviewListController extends Controller
     public function unlockInterView(InterviewerUnlockRequest $request)
     {
         $data = ApplicantInterview::find($request->interviewId);
-        DB::enableQueryLog();
-        $ApplicantData = Applicant::where(["date_of_birth"=>date("Y-m-d",strtotime($request->dob)),"id"=>$data->applicant_id])->get()->first();
-        $query = DB::getQueryLog();
-        //dd($query);
         $unlockedData = NULL;
-        if($ApplicantData)
-        $unlockedData = ApplicantViewUnlock::create([
-                'user_id' =>$data->user_id,
-                'applicant_id' =>$data->applicant_id,
-                'token' => Str::random(16),
-                'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
-                'created_by' => \Auth::id()
-            ]);
+        
+        if($data->user_id == \Auth::id()) {
+            ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
+            $unlockedData = ApplicantViewUnlock::create([
+                    'user_id' =>$data->user_id,
+                    'applicant_id' =>$data->applicant_id,
+                    'token' => Str::random(16),
+                    'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
+                    'created_by' => \Auth::id()
+                ]);
+        }
         if($unlockedData) {
             $resultData = [
                 "applicantId" => $data->applicant_id,
@@ -265,18 +265,19 @@ class InterviewListController extends Controller
                 "data"=>$resultData,
                 "ref"=>route('applicant.interview.profile.view',["id" => $data->applicant_id,"interview" => ($request->interviewId *1),"token" =>  $unlockedData->token] )],200);
         } else {
-            return response()->json(["msg"=>"Invalid Birth Date"],404);
+            return response()->json(["msg"=>"Invalid Access"],404);
         }
     }
+
     public function unlockInterViewDirect(InterviewerUnlockDirectRequest $request)
     {
         $ApplicantData = Applicant::where(["date_of_birth"=>date("Y-m-d",strtotime($request->dob)),"id"=>$request->applicantId])->get()->first();
         $unlockedData = NULL;
 
         if($ApplicantData) {
-
             $applicantTaskData = ApplicantTask::where(['task_list_id'=>$request->taskListId,'applicant_id'=>$request->applicantId])->get()->first();
             $authId = \Auth::id();
+
             $interview = ApplicantInterview::create([
                                     'user_id' =>$authId,
                                     'applicant_id' =>$request->applicantId,
@@ -288,8 +289,9 @@ class InterviewListController extends Controller
                                     'interview_status' =>'N/A',
                                     'created_by' => $authId
             ]);
-            $data = ApplicantInterview::find($interview->id);
 
+            $data = ApplicantInterview::find($interview->id);
+            ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
             $unlockedData = ApplicantViewUnlock::create([
                     'user_id' =>$data->user_id,
                     'applicant_id' =>$data->applicant_id,
@@ -307,7 +309,7 @@ class InterviewListController extends Controller
             ];
             return response()->json(["msg"=>"Profile Unlocked",
                 "data"=>$resultData,
-                "ref"=>route('applicant.interview.profile.view',["id" => $data->applicant_id,"interview" => ($interview->id *1),"token" =>  $unlockedData->token] )],200);
+                "ref"=>route('applicant.interview.profile.view',["id" => $data->applicant_id,"interview" => ($interview->id *1),"token" =>$unlockedData->token] )],200);
         
         } else {
 
@@ -317,7 +319,7 @@ class InterviewListController extends Controller
     // route applicant.interview.profile.view
     public function profileView($id,$interview,$token) {
         
-        return view('pages.interviewlist.profiles.showduplicate', [
+        return view('pages.interviewlist.profiles.show', [
 
             'title' => 'Admission Management - LCC Data Future Managment',
             'breadcrumbs' => [
