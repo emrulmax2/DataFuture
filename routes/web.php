@@ -144,9 +144,11 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     /**
     * Verification Routes
     */
-    Route::controller(VerificationController::class)->group(function() {       
+    Route::controller(VerificationController::class)->group(function() {
+        
         Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
     });
 
 });
@@ -386,6 +388,38 @@ Route::middleware('auth')->group(function() {
         Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
     });
 
+    Route::controller(CommonSmtpController::class)->group(function() {
+        Route::get('common-smtp', 'index')->name('common.smtp'); 
+        Route::get('common-smtp/list', 'list')->name('common.smtp.list'); 
+        Route::post('common-smtp/store', 'store')->name('common.smtp.store');
+        Route::get('common-smtp/edit/{id}', 'edit')->name('common.smtp.edit');
+        Route::post('common-smtp/update/{id}', 'update')->name('common.smtp.update');
+
+        Route::delete('common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
+        Route::post('common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
+    });
+
+    Route::controller(LetterSetController::class)->group(function() {
+        Route::get('letter-sets', 'index')->name('letter.set'); 
+        Route::get('letter-sets/list', 'list')->name('letter.set.list'); 
+        Route::post('letter-sets/store', 'store')->name('letter.set.store');
+        Route::get('letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::post('letter-sets/update', 'update')->name('letter.set.update');
+
+        Route::delete('letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
+        Route::post('letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
+    });
+
+    Route::controller(SignatoryController::class)->group(function() {
+        Route::get('signatory', 'index')->name('signatory'); 
+        Route::get('signatory/list', 'list')->name('signatory.list'); 
+        Route::post('signatory/store', 'store')->name('signatory.store');
+        Route::post('signatory/edit', 'edit')->name('signatory.edit');
+        Route::post('signatory/update', 'update')->name('signatory.update');
+        Route::delete('signatory/delete/{id}', 'destroy')->name('signatory.destory');
+        Route::post('signatory/restore/{id}', 'restore')->name('signatory.restore');
+    });
+
     Route::controller(AdmissionController::class)->group(function() {
         Route::get('admission', 'index')->name('admission'); 
         Route::get('admission/list', 'list')->name('admission.list'); 
@@ -398,6 +432,8 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/update-course-details', 'updateCourseAndProgrammeDetails')->name('admission.update.course.details');
         Route::post('admission/update-qualification-status', 'updateQualificationStatus')->name('admission.update.qualification.status');
         Route::post('admission/update-employment-status', 'updateEmploymentStatus')->name('admission.update.employment.status');
+
+        Route::post('admission/upload-applicant-photo', 'admissionUploadApplicantPhoto')->name('admission.upload.photo');
 
         Route::get('admission/process/{applicantId}', 'admissionProcess')->name('admission.process');
         Route::post('admission/store-process-task', 'admissionStoreProcessTask')->name('admission.process.store.task.list');
@@ -425,6 +461,22 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/update-note', 'admissionUpdateNote')->name('admission.update.note');
         Route::delete('admission/destory-note', 'admissionDestroyNote')->name('admission.destory.note');
         Route::post('admission/restore-note', 'admissionRestoreNote')->name('admission.resotore.note');
+
+        Route::get('admission/communications/{applicantId}', 'admissionCommunication')->name('admission.communication');
+        Route::post('admission/send-mail', 'admissionCommunicationSendMail')->name('admission.communication.send.mail');
+        Route::get('admission/mail-list', 'admissionCommunicationMailList')->name('admission.communication.mail.list');
+        Route::post('admission/mail-show', 'admissionCommunicationMailShow')->name('admission.communication.mail.show');
+        Route::delete('admission/destory-mail', 'admissionDestroyMail')->name('admission.communication.mail.destroy');
+        Route::post('admission/restore-mail', 'admissionRestoreMail')->name('admission.communication.mail.restore');
+        Route::post('admission/send-sms', 'admissionCommunicationSendSms')->name('admission.communication.send.sms');
+        Route::get('admission/sms-list', 'admissionCommunicationSmsList')->name('admission.communication.sms.list');
+        Route::post('admission/sms-show', 'admissionCommunicationSmsShow')->name('admission.communication.sms.show');
+        Route::delete('admission/destory-sms', 'admissionDestroySms')->name('admission.communication.sms.destroy');
+        Route::post('admission/restore-sms', 'admissionRestoreSms')->name('admission.communication.sms.restore');
+
+        Route::post('admission/get-letter-set', 'admissionGetLetterSet')->name('admission.communication.get.letter.set');
+        Route::post('admission/send-letter', 'admissionSendLetter')->name('admission.communication.send.letter');
+        
     });
 
     Route::controller(ApplicantQualificationCongroller::class)->group(function() {
