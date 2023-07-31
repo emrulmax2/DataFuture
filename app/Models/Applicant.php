@@ -18,6 +18,7 @@ class Applicant extends Model
         'title_id',
         'first_name',
         'last_name',
+        'photo',
         'date_of_birth',
         'gender',
         'submission_date',
