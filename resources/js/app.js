@@ -82,4 +82,6 @@ import "./assessment";
 import "./rooms";
 import "./plan";
 import "./plans-date-list";
-import "./documentsettings"; 
+import "./documentsettings";
+
+import "./admission-global";
