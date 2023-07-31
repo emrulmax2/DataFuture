@@ -140,26 +140,42 @@ class TopMenu
                     'icon' => 'settings',
                     'title' => 'Settings',
                     'sub_menu' => [
-                        'awardingbody' => [
-                            'route_name' => 'awardingbody',
-                            'params' => [],
-                            'title' =>'Awarding Body'
+                        'comonsettings' => [
+                            'icon' => '',
+                            'title' => 'Applicants',
+                            'sub_menu' => [
+                                'awardingbody' => [
+                                    'icon' => '',
+                                    'route_name' => 'awardingbody',
+                                    'params' => [],
+                                    'title' =>'Awarding Body'
+                                ],
+                                'academicyears' => [
+                                    'icon' => '',
+                                    'route_name' => 'academicyears',
+                                    'params' => [],
+                                    'title' =>'Academic Years'
+                                ],                  
+                                'sourcetutionfees' => [
+                                    'icon' => '',
+                                    'route_name' => 'sourcetutionfees',
+                                    'params' => [],
+                                    'title' =>'Source of Tuition Fees'
+                                ],
+                                'coursequalification' => [
+                                    'icon' => '',
+                                    'route_name' => 'coursequalification',
+                                    'params' => [],
+                                    'title' => 'Course Qualifications'
+                                ], 
+                                'countries' => [
+                                    'icon' => '',
+                                    'route_name' => 'countries',
+                                    'params' => [],
+                                    'title' => 'Countries'
+                                ], 
+                            ]
                         ],
-                        'academicyears' => [
-                            'route_name' => 'academicyears',
-                            'params' => [],
-                            'title' =>'Academic Years'
-                        ],                  
-                        'sourcetutionfees' => [
-                            'route_name' => 'sourcetutionfees',
-                            'params' => [],
-                            'title' =>'Source of Tuition Fees'
-                        ],
-                        'coursequalification' => [
-                            'route_name' => 'coursequalification',
-                            'params' => [],
-                            'title' => 'Course Qualifications'
-                        ], 
                         'applicants' => [
                             'icon' => '',
                             'title' => 'Applicants',
@@ -205,7 +221,22 @@ class TopMenu
                                     'route_name' => 'disabilities',
                                     'params' => [],
                                     'title' => 'Disabilities'
-                                ]
+                                ],
+                                'documentsettings' => [
+                                    'route_name' => 'documentsettings',
+                                    'params' => [],
+                                    'title' => 'Document Settings'
+                                ],
+                                'processlist' => [
+                                    'route_name' => 'processlist',
+                                    'params' => [],
+                                    'title' => 'Process List'
+                                ],
+                                'tasklist' => [
+                                    'route_name' => 'tasklist',
+                                    'params' => [],
+                                    'title' => 'Task List'
+                                ],
                             ]
                         ],
                         'usersettings' => [
@@ -238,29 +269,33 @@ class TopMenu
                                 ],
                             ]
                         ],
-                        'countries' => [
-                            'route_name' => 'countries',
-                            'params' => [],
-                            'title' => 'Countries'
-                        ], 
-                        'documentsettings' => [
-                            'route_name' => 'documentsettings',
-                            'params' => [],
-                            'title' => 'Document Settings'
-                        ],
-                        'processlist' => [
-                            'route_name' => 'processlist',
-                            'params' => [],
-                            'title' => 'Process List'
-                        ],
-                        'tasklist' => [
-                            'route_name' => 'tasklist',
-                            'params' => [],
-                            'title' => 'Task List'
+                        'communicationsettings' => [
+                            'icon' => '',
+                            'title' => 'Communications',
+                            'sub_menu' => [
+                                'common.smtp' => [
+                                    'icon' => '',
+                                    'route_name' => 'common.smtp',
+                                    'params' => [],
+                                    'title' => 'Common SMTP'
+                                ],
+                                'letter.set' => [
+                                    'icon' => '',
+                                    'route_name' => 'letter.set',
+                                    'params' => [],
+                                    'title' => 'Letter Sets'
+                                ],
+                                'signatory' => [
+                                    'icon' => '',
+                                    'route_name' => 'signatory',
+                                    'params' => [],
+                                    'title' => 'Signatory Sets'
+                                ]
+                            ]
                         ],
                     ]
                 ],
-                /*'apps' => [
+                /*'apps' => [ 
                     'icon' => 'activity',
                     'title' => 'Apps',
                     'sub_menu' => [

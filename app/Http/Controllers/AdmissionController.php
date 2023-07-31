@@ -7,6 +7,9 @@ use App\Http\Requests\AdmissionCourseDetailsRequest;
 use App\Http\Requests\AdmissionKinDetailsRequest;
 use App\Http\Requests\AdmissionPersonalDetailsRequest;
 use App\Http\Requests\ApplicantNoteRequest;
+use App\Http\Requests\SendEmailRequest;
+use App\Http\Requests\SendLetterRequest;
+use App\Http\Requests\SendSmsRequest;
 use App\Models\Applicant;
 use App\Models\ApplicantArchive;
 use App\Models\ApplicantContact;
@@ -37,18 +40,29 @@ use Illuminate\Support\Facades\Auth;
 use Mail; 
 use Hash;
 use App\Mail\ApplicantTempEmailVerification;
+use App\Mail\CommunicationSendMail;
+
 use App\Models\ApplicantDocument;
 use App\Models\ApplicantDocumentList;
+use App\Models\ApplicantEmail;
+use App\Models\ApplicantEmailsAttachment;
 use App\Models\ApplicantNote;
+use App\Models\ApplicantSms;
 use App\Models\ApplicantTask;
 use App\Models\ApplicantTaskDocument;
 use App\Models\ApplicantTaskLog;
+use App\Models\ComonSmtp;
 use App\Models\DocumentSettings;
+use App\Models\Option;
 use App\Models\ProcessList;
 use App\Models\TaskStatus;
 use Illuminate\Support\Facades\Mail as FacadesMail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use App\Jobs\UserMailerJob;
+use App\Models\LetterSet;
+use App\Models\Signatory;
 
 class AdmissionController extends Controller
 {
@@ -1109,4 +1123,412 @@ class AdmissionController extends Controller
         endif;
         return response()->json(['message' => 'Successfully restored'], 200);
     }
+
+
+    public function admissionUploadApplicantPhoto(Request $request){
+        $applicant_id = $request->applicant_id;
+        $applicantOldRow = Applicant::where('id', $applicant_id)->first();
+        $oldPhoto = (isset($applicantOldRow->photo) && !empty($applicantOldRow->photo) ? $applicantOldRow->photo : '');
+
+        $document = $request->file('file');
+        $imageName = time().'_'.$document->getClientOriginalName();
+        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        if(!empty($oldPhoto)):
+            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
+                Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
+            endif;
+        endif;
+
+        $applicant = Applicant::find($applicant_id);
+        $applicant->fill([
+            'photo' => $imageName
+        ]);
+        $changes = $applicant->getDirty();
+        $applicant->save();
+
+        if($applicant->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['applicant_id'] = $applicant_id;
+                $data['table'] = 'applicants';
+                $data['field_name'] = $field;
+                $data['field_value'] = $applicantOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                ApplicantArchive::create($data);
+            endforeach;
+        endif;
+
+        return response()->json(['message' => 'Photo successfully change & updated'], 200);
+    }
+
+    
+    public function admissionCommunication($applicantId){
+        return view('pages.students.admission.communication', [
+            'title' => 'Admission Management - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
+                ['label' => 'Communication', 'href' => 'javascript:void(0);'],
+            ],
+            'applicant' => Applicant::find($applicantId),
+            'smtps' => ComonSmtp::all(),
+            'letterSet' => LetterSet::all(),
+            'signatory' => Signatory::all()
+        ]);
+    }
+
+    public function admissionGetLetterSet(Request $request){
+        $letterSetId = $request->letterSetId;
+        $letterSet = LetterSet::find($letterSetId);
+
+        return response()->json(['res' => $letterSet], 200);
+    }
+
+    public function admissionSendLetter(SendLetterRequest $request){
+        $applicant_id = $request->applicant_id;
+        $issued_date = (!empty($request->issued_date) ? date('Y-m-d', strtotime($request->issued_date)) : '');
+        $letter_set_id = $request->letter_set_id;
+        $letter_body = $request->letter_body;
+        $is_email_or_attachment = (isset($request->is_email_or_attachment) && $request->is_email_or_attachment > 0 ? $request->is_email_or_attachment : 1);
+
+        $signatory_id = $request->signatory_id;
+        $signatory = Signatory::find($signatory_id);
+
+        
+
+    }
+
+    public function admissionCommunicationSendMail(SendEmailRequest $request){
+
+        $applicantID = $request->applicant_id;
+        $Applicant = Applicant::find($applicantID);
+
+        $applicantEmail = ApplicantEmail::create([
+            'applicant_id' => $applicantID,
+            'comon_smtp_id' => $request->comon_smtp_id,
+            'subject' => $request->subject,
+            'body' => $request->body,
+            'created_by' => auth()->user()->id,
+        ]);
+
+        $commonSmtp = ComonSmtp::find($request->comon_smtp_id);
+
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
+        ];
+
+
+        // $configuration = [
+        //     'smtp_host'    => 'sandbox.smtp.mailtrap.io',
+        //     'smtp_port'    => 2525,
+        //     'smtp_username'  => '89141c3a34ccb1',
+        //     'smtp_password'  => 'c3a83169586b87',
+        //     'smtp_encryption'  => 'tls',
+        //     'from_email'    => $commonSmtp->smtp_user,
+        //     'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
+        // ];
+
+        UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject,$request->body));
+
+        if($applicantEmail):
+            if($request->hasFile('documents')):
+                $documents = $request->file('documents');
+                foreach($documents as $document):
+                    $documentName = time().'_'.$document->getClientOriginalName();
+                    $path = $document->storeAs('public/applicants/'.$applicantID.'/', $documentName);
+
+                    $data = [];
+                    $data['applicant_id'] = $applicantID;
+                    $data['hard_copy_check'] = 0;
+                    $data['doc_type'] = $document->getClientOriginalExtension();
+                    $data['path'] = asset('storage/applicants/'.$applicantID.'/'.$documentName);
+                    $data['display_file_name'] = $documentName;
+                    $data['current_file_name'] = $documentName;
+                    $data['created_by'] = auth()->user()->id;
+                    $applicantDocument = ApplicantDocument::create($data);
+
+                    if($applicantDocument):
+                        $noteUpdate = ApplicantEmailsAttachment::create([
+                            'applicant_email_id' => $applicantEmail->id,
+                            'applicant_document_id' => $applicantDocument->id,
+                            'created_by' => auth()->user()->id
+                        ]);
+                    endif;
+                endforeach;
+            endif;
+            return response()->json(['message' => 'Email successfully sent to Applicant'], 200);
+        else:
+            return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+        endif;
+    }
+
+    public function admissionCommunicationMailList(Request $request){
+        $applicantId = (isset($request->applicantId) && !empty($request->applicantId) ? $request->applicantId : 0);
+        $queryStr = (isset($request->queryStrCME) && $request->queryStrCME != '' ? $request->queryStrCME : '');
+        $status = (isset($request->statusCME) && $request->statusCME > 0 ? $request->statusCME : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+
+        $query = ApplicantEmail::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        if(!empty($queryStr)):
+            $query->where('subject','LIKE','%'.$queryStr.'%');
+            $query->orWhere('body','LIKE','%'.$queryStr.'%');
+        endif;
+        if($status == 2):
+            $query->onlyTrashed();
+        endif;
+
+        $total_rows = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'subject' => $list->subject,
+                    'smtp' => (isset($list->smtp->smtp_user) && !empty($list->smtp->smtp_user) ? $list->smtp->smtp_user : ''),
+                    'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function admissionCommunicationSendSms(SendSmsRequest $request){
+        $applicantID = $request->applicant_id;
+        $applicantSms = ApplicantSms::create([
+            'applicant_id' => $applicantID,
+            'subject' => $request->subject,
+            'sms' => $request->sms,
+            'created_by' => auth()->user()->id,
+        ]);
+
+        if($applicantSms):
+            $applicantContact = ApplicantContact::where('applicant_id', $applicantID)->get()->first();
+            if(isset($applicantContact->mobile) && !empty($applicantContact->mobile)):
+                $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
+                $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
+                $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => $request->sms, 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $applicantContact->mobile
+                    ]);
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::timeout(-1)->withHeaders([
+                        'access-token' => $smseagle_api,
+                        'Content-Type' => 'application/json',
+                    ])->post('http://79.171.153.104/api/v2/messages/sms', [
+                        'to' => [$applicantContact->mobile],
+                        'text' => $request->sms
+                    ]);
+                endif;
+                $message = 'SMS successfully stored and sent to the student.';
+            else:
+                $message = 'SMS stored into database but not sent due to missing mobile number.';
+            endif;
+            return response()->json(['message' => $message], 200);
+        else:
+            return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+        endif;
+    }
+
+    public function admissionCommunicationSmsList(Request $request){
+        $applicantId = (isset($request->applicantId) && !empty($request->applicantId) ? $request->applicantId : 0);
+        $queryStr = (isset($request->queryStrCMS) && $request->queryStrCMS != '' ? $request->queryStrCMS : '');
+        $status = (isset($request->statusCMS) && $request->statusCMS > 0 ? $request->statusCMS : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+
+        $query = ApplicantSms::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
+        if(!empty($queryStr)):
+            $query->where('subject','LIKE','%'.$queryStr.'%');
+            $query->orWhere('sms','LIKE','%'.$queryStr.'%');
+        endif;
+        if($status == 2):
+            $query->onlyTrashed();
+        endif;
+
+        $total_rows = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'subject' => $list->subject,
+                    'sms' => (strlen(strip_tags($list->sms)) > 40 ? substr(strip_tags($list->sms), 0, 40).'...' : strip_tags($list->sms)),
+                    'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function admissionDestroyMail(Request $request){
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+
+        $applicantMailAttachments = ApplicantEmailsAttachment::where('applicant_email_id', $recordid)->get();
+        if(!empty($applicantMailAttachments)):
+            foreach($applicantMailAttachments as $attachment):
+                $applicantDoc = ApplicantDocument::find($attachment->applicant_document_id)->delete();
+            endforeach;
+        endif;
+        ApplicantEmail::find($recordid)->delete();
+
+        return response()->json(['message' => 'Successfully deleted'], 200);
+    }
+
+    public function admissionRestoreMail(Request $request) {
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+
+        ApplicantEmail::where('id', $recordid)->withTrashed()->restore();
+        $applicantMailAttachments = ApplicantEmailsAttachment::where('applicant_email_id', $recordid)->get();
+        if(!empty($applicantMailAttachments)):
+            foreach($applicantMailAttachments as $attachment):
+                $applicantDoc = ApplicantDocument::where('id', $attachment->applicant_document_id)->withTrashed()->restore();
+            endforeach;
+        endif;
+        return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function admissionCommunicationMailShow(Request $request){
+        $mailId = $request->recordId;
+        $mail = ApplicantEmail::find($mailId);
+        $heading = 'Mail Subject: <u>'.$mail->subject.'</u>';
+        $html = '';
+        $html .= '<div class="grid grid-cols-12 gap-4">';
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">Issued Date</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div>'.(isset($mail->created_at) && !empty($mail->created_at) ? date('jS F, Y', strtotime($mail->created_at)) : '').'</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">Issued By</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div>'.(isset($mail->user->name) ? $mail->user->name : 'Unknown').'</div>';
+            $html .= '</div>';
+            if(isset($mail->documents) && !empty($mail->documents)):
+                $html .= '<div class="col-span-3">';
+                    $html .= '<div class="text-slate-500 font-medium">Attachments</div>';
+                $html .= '</div>';
+                $html .= '<div class="col-span-9">';
+                    foreach($mail->documents as $doc):
+                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.asset('storage/applicants/'.$doc->applicant_id.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                    endforeach;
+                $html .= '</div>';
+            endif;
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">Mail Description</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div class="mailContent">'.$mail->body.'</div>';
+            $html .= '</div>';
+        $html .= '</div>';
+
+        return response()->json(['heading' => $heading, 'html' => $html], 200);
+    }
+
+    public function admissionDestroySms(Request $request){
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+        ApplicantSms::find($recordid)->delete();
+
+        return response()->json(['message' => 'Successfully deleted'], 200);
+    }
+
+    public function admissionRestoreSms(Request $request) {
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+
+        ApplicantSms::where('id', $recordid)->withTrashed()->restore();
+        return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function admissionCommunicationSmsShow(Request $request){
+        $mailId = $request->recordId;
+        $sms = ApplicantSms::find($mailId);
+        $heading = 'Mail Subject: <u>'.$sms->subject.'</u>';
+        $html = '';
+        $html .= '<div class="grid grid-cols-12 gap-4">';
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">Issued Date</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div>'.(isset($sms->created_at) && !empty($sms->created_at) ? date('jS F, Y', strtotime($sms->created_at)) : '').'</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">Issued By</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div>'.(isset($sms->user->name) ? $sms->user->name : 'Unknown').'</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-3">';
+                $html .= '<div class="text-slate-500 font-medium">SMS Text</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-9">';
+                $html .= '<div class="mailContent">'.$sms->sms.'</div>';
+            $html .= '</div>';
+        $html .= '</div>';
+
+        return response()->json(['heading' => $heading, 'html' => $html], 200);
+    }
+
 }
