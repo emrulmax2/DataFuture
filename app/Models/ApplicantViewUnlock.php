@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ApplicantViewUnlock extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory;
 
     //protected $guard = ['id'];
     protected $fillable = ['user_id', 'applicant_id','token','expired_at','created_by'];
@@ -17,7 +16,7 @@ class ApplicantViewUnlock extends Model
      *
      * @var array
      */
-    protected $dates = ['deleted_at','expired_at'];
+    protected $dates = ['expired_at'];
 
     public function setExpiredAtAttribute($value) {  
         $this->attributes['expired_at'] =  (!empty($value) ? date('Y-m-d H:i:s', strtotime($value)) : '');
