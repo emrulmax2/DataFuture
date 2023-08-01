@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
+            $table->index('venue_id');
             $table->unsignedBigInteger('venue_id');
             $table->string('name',191);
             $table->unsignedBigInteger('room_capacity');
