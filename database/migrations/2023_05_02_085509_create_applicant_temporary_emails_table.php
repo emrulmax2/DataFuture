@@ -36,6 +36,11 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('applicant_temporary_emails', function (Blueprint $table) {
+
+            $table->dropForeign(['applicant_id']);
+
+        });
         Schema::dropIfExists('applicant_temporary_emails');
     }
 };

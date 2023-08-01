@@ -49,6 +49,17 @@ return new class extends Migration
      */
     public function down()
     {
+
+        Schema::table('applicants', function (Blueprint $table) {
+
+            $table->dropForeign(['applicant_user_id']);
+            $table->dropForeign(['title_id']);
+            $table->dropForeign(['status_id']);
+            $table->dropForeign(['nationality_id']);
+            $table->dropForeign(['country_id']);
+            
+        });
+
         Schema::dropIfExists('applicants');
     }
 };

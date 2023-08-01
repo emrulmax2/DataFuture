@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('course_creation_instance_id');
             $table->string('name', 191);
-            $table->tinyInteger('session_term', 4);
+            $table->unsignedTinyInteger('session_term');
             $table->enum('term', ['Autumn Term', 'Spring Term', 'Summer Term', 'Winter Term']);
             $table->date('start_date');
             $table->date('end_date');
@@ -26,7 +26,6 @@ return new class extends Migration
             $table->date('teaching_end_date');
             $table->date('revision_start_date');
             $table->date('revision_end_date');
-
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->softDeletes();
@@ -43,6 +42,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('instance_terms', function (Blueprint $table) {
+            $table->dropForeign(['course_creation_instance_id']);
+        });
         Schema::dropIfExists('instance_terms');
     }
 };

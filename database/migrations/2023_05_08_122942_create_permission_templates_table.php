@@ -42,15 +42,12 @@ return new class extends Migration
      */
     public function down()
     {
-        $table->dropForeign(['permission_category_id']);
-        $table->dropIndex('lists_permission_category_id_index');
-        $table->dropColumn('permission_category_id');
-        $table->dropForeign(['role_id']);
-        $table->dropIndex('lists_role_id_index');
-        $table->dropColumn('role_id');
-        $table->dropForeign(['department_id']);
-        $table->dropIndex('lists_department_id_index');
-        $table->dropColumn('department_id');
+
+        Schema::table('permission_templates', function (Blueprint $table) {
+            $table->dropForeign(['permission_category_id']);
+            $table->dropForeign(['role_id']);
+            $table->dropForeign(['department_id']);
+        });
         Schema::dropIfExists('permission_templates');
     }
 };

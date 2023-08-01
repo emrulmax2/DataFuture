@@ -40,6 +40,11 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('task_lists', function (Blueprint $table) {
+
+            $table->dropForeign(['process_list_id']);
+            
+        });
         Schema::dropIfExists('task_lists');
     }
 };

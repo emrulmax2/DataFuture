@@ -26,8 +26,14 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('semester_id')->references('id')->on('semesters');
-            $table->foreign('course_id')->references('id')->on('courses');
+            $table->foreign('semester_id')->references('id')
+            ->on('semesters')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
+            $table->foreign('course_id')->references('id')
+            ->on('courses')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

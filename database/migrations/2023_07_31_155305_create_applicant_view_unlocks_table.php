@@ -37,10 +37,10 @@ return new class extends Migration
      */
     public function down()
     {
-        $table->dropForeign(['user_id']);
-        $table->dropIndex('lists_user_id_index');
-        $table->dropForeign(['applicant_id']);
-        $table->dropIndex('lists_applicant_id_index');
+        Schema::table('applicant_interviews', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['applicant_id']);
+        });
         Schema::dropIfExists('applicant_view_unlocks');
     }
 };
