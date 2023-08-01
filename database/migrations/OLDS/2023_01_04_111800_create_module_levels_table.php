@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('module_levels', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->string('name',45);
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();

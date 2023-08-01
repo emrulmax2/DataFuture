@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('major_source_of_tuition_fees', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->string('name',100);
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
