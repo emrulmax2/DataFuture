@@ -21,6 +21,8 @@ return new class extends Migration
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
+            $table->foreign('user_id')->nullable()->references('id')->on('users')->onUpdate('cascade')->onDelete('set null');
+            $table->foreign('task_list_id')->references('id')->on('task_lists')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -31,6 +33,10 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('task_list_users', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['task_list_id']);
+        });
         Schema::dropIfExists('task_list_users');
     }
 };

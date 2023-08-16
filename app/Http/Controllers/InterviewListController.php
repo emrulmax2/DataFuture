@@ -175,7 +175,7 @@ class InterviewListController extends Controller
 
     public function interviewAssignedList($userId) {
 
-        return view('pages.interview.assigned.staff', [
+        return view('pages.interview.assigned.access.staff', [
             'title' => 'Applicant List For Interview Session',
             'breadcrumbs' => [
                 ['label' => 'Dashboard', 'href' => route('staff.dashboard')],
