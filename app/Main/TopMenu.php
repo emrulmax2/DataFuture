@@ -142,7 +142,7 @@ class TopMenu
                     'sub_menu' => [
                         'comonsettings' => [
                             'icon' => '',
-                            'title' => 'Applicants',
+                            'title' => 'Common Settings',
                             'sub_menu' => [
                                 'awardingbody' => [
                                     'icon' => '',

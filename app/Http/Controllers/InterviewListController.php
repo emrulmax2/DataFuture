@@ -15,6 +15,14 @@ use App\Models\Title;
 use App\Models\ApplicantViewUnlock;
 use App\Models\ApplicantInterview;
 use App\Models\TaskListUser;
+use App\Models\UserRole;
+use App\Models\Semester;
+use App\Models\Course;
+use App\Models\Status;
+use App\Models\AcademicYear;
+use App\Models\CourseCreation;
+use App\Models\CourseCreationInstance;
+use App\Models\ApplicantProposedCourse;
 use App\Http\Requests\InterviewerUpdateRequest;
 use App\Http\Requests\InterviewerUnlockRequest;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
@@ -44,6 +52,10 @@ class InterviewListController extends Controller
             'applicanttasks' => ApplicantTask::all(),
             'applicants' => Applicant::all(),
             'users' => User::all(),
+            'semesters' => Semester::all(),
+            'courses' => Course::all(),
+            'academic' => AcademicYear::all(),
+            'statuses' => Status::where('type', 'Applicant')->get(),
             'unfinishedInterviewCount' =>$unfinishedInterviewCount
         ]);
     }
@@ -91,18 +103,29 @@ class InterviewListController extends Controller
                             $ApplicantTaskInfo = ApplicantTask::where(["applicant_id"=>$applicantData->id,"task_list_id"=>$list->id])->get()->first();
                             
                             $tasklistUserId = TaskListUser::where(["task_list_id"=>$ApplicantTaskInfo->task_list_id])->pluck('user_id')->all();
-                            
+                            $isAdmin = 0;
                             $logId = $request->user()->id;
-
-                            if(in_array($logId, $tasklistUserId)) {
+                            $roles = \Auth::user()->roles;
+                            foreach ($roles as $role):
+                                
+                                if($role->type == "Admin") {
+                                    $isAdmin =1 ;
+                                    break;
+                                }
+                            endforeach;
                             
-                                $ApplicantInterviewData = ApplicantInterview::where(["applicant_id"=>$applicantData->id,"applicant_task_id"=>$ApplicantTaskInfo->id])->get()->first();
+                            if(in_array($logId, $tasklistUserId) || $isAdmin) {
+                            
+                                $ApplicantInterviewData = ApplicantInterview::where(["applicant_id"=>$applicantData->id,"applicant_task_id"=>$ApplicantTaskInfo->id,"interview_status"=>'Completed'])
+                                                            ->whereIn('interview_result', ['Pass','N/A','NULL'])->get()->first();
+                                //dd($ApplicantInterviewData);      
+
                                 $isFilterd = 0;
                                 if(isset($request->status) && $status=="applicantNumber") {
                                 $isFilterd = ($applicantData->application_no==$queryStr) ? 'Filtered' : 0;
 
                                 if($isFilterd) {
-                                    if(!$ApplicantInterviewData)
+                                    if(!$ApplicantInterviewData )
                                         $nestedDataContainer[$k++] = ["data"=> [ 
                                                                                 "name" => $applicantData->title->name." ".$applicantData->full_name,
                                                                                 "id"=>$applicantData->id,
@@ -156,21 +179,76 @@ class InterviewListController extends Controller
                                 $nestedDataContainer = "No Interview access available for current logged in user";
                             }
                         }
-                    // this code is for + layer adding to table
-                    // if($nestedDataContainer) {
-                    //     $data[] = [
-                    //         'id' => $list->id,
-                    //         'sl' => $i,
-                    //         'taskname' => $list->name,
-                    //         '_children' => $nestedDataContainer,
-                            
-                    //     ];
-                    //     $i++;
-                    // }
                 endforeach;
             endif;
             return response()->json(['last_page' => $last_page, 'data' => $nestedDataContainer]);
         //}
+    }
+
+    public function completedList(Request $request){
+        $instances = (isset($request->instances) && !empty($request->instances) ? $request->instances : []);
+        $courseCreationId = (isset($request->courseCreationId) && !empty($request->courseCreationId) ? $request->courseCreationId : []);
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $applicants = ApplicantProposedCourse::select(DB::raw('group_concat(applicant_id) as applicant_ids'))
+                                                    ->where(["course_creation_id" => $courseCreationId])
+                                                    ->get()
+                                                    ->first();
+        
+        $query = ApplicantInterview::with('applicant')
+                                    ->orderByRaw(implode(',', $sorts))
+                                    ->whereIn('applicant_id',[$applicants->applicant_ids])
+                                    ->where('interview_status','Completed');
+
+        $total_rows = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'applicant_number' => $list->applicant->application_no,
+                    'name' => $list->applicant->title->name." ".$list->applicant->full_name,
+                    'date' => $list->interview_date,
+                    'gender' => $list->applicant->gender,
+                    'status' => $list->interview_status,
+                    'time'=> ($list->start_time ? $list->start_time : "00:00") ." - ". ($list->end_time ? $list->end_time : "00:00"), 
+                    'result' => $list->interview_result,
+                    'interviewer' => $list->user->name
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    
+    }
+
+    public function showInstances(Request $request){
+        $semester = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
+        $course   = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
+        $academic  = (isset($request->academic) && !empty($request->academic) ? $request->academic : []);
+        $courseCreationId = CourseCreation::where(["semester_id"=>$semester,"course_id"=>$course])->get()->first();
+        $instances = CourseCreationInstance::where(['academic_year_id'=>$academic,"course_creation_id"=>$courseCreationId->id])->get();
+
+        return response()->json(['instances' => $instances,'courseCreationId' => $courseCreationId->id]);
     }
 
     public function interviewAssignedList($userId) {
@@ -208,7 +286,7 @@ class InterviewListController extends Controller
                 'interview_date' => date("Y-m-d"),
                 'start_time' => NULL,
                 'end_time' => NULL,
-                'interview_status' =>'N/A',
+                'interview_result' =>'N/A',
                 'created_by' => \Auth::id()
             ]);
         }
@@ -244,6 +322,9 @@ class InterviewListController extends Controller
     {
         $data = ApplicantInterview::find($request->interviewId);
         $unlockedData = NULL;
+        $userRole = UserRole::where(["user_id"=>$data->user_id])->get()->first();
+        $role = Role::where(['id'=>$userRole->role_id])->get()->first();
+        $roleType = $role->type;
         
         if($data->user_id == \Auth::id()) {
             ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
@@ -254,6 +335,15 @@ class InterviewListController extends Controller
                     'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
                     'created_by' => \Auth::id()
                 ]);
+        } elseif($roleType == "Admin") {
+            ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
+            $unlockedData = ApplicantViewUnlock::create([
+                    'user_id' =>$data->user_id,
+                    'applicant_id' =>$data->applicant_id,
+                    'token' => Str::random(16),
+                    'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
+                    'created_by' => \Auth::id()
+                ]);    
         }
         if($unlockedData) {
             $resultData = [
@@ -286,7 +376,7 @@ class InterviewListController extends Controller
                                     'interview_date' => date("Y-m-d"),
                                     'start_time' => NULL,
                                     'end_time' => NULL,
-                                    'interview_status' =>'N/A',
+                                    'interview_result' =>'N/A',
                                     'created_by' => $authId
             ]);
 

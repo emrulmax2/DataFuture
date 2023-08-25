@@ -29,10 +29,7 @@
             </div>
         </form>
         <div class="flex mt-5 sm:mt-0">
-            <a href="{{ route('interviewlist') }}" id="interviewRemainingList" class="btn btn-primary text-white w-1/2 sm:w-auto mr-2">
-                <i data-lucide="eye" class="w-4 h-4 mr-2"></i> View remain interviews
-            </a>
-            <a id="assignedPageLoad" href="{{ route('staff.dashboard') }}" type="button" class="btn btn-secondary w-auto  mt-2 sm:mt-0 sm:ml-1  mr-2" ><i data-lucide="arrow-left"  class="w-4 h-4 mr-2"></i> Back</a>
+            <a id="assignedPageLoad" href="{{ route('interviewlist') }}" type="button" class="btn btn-secondary w-auto  mt-2 sm:mt-0 sm:ml-1  mr-2" ><i data-lucide="arrow-left"  class="w-4 h-4 mr-2"></i> Back</a>
             {{-- <div class="dropdown w-1/2 sm:w-auto">
                 <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
@@ -81,9 +78,9 @@
                 </div>
                 <div class="modal-body">
                     <div>       
-                        <label for="interview_status" class="form-label">Result <span class="text-danger">*</span></label>
+                        <label for="interview_result" class="form-label">Result <span class="text-danger">*</span></label>
                             <input type="hidden" id="id" value="" name="id" />
-                            <select id="interview_status" name="interview_status" class="form-control w-full interview_status__input">
+                            <select id="interview_result" name="interview_result" class="form-control w-full interview_result__input">
                                 <option value="">Please Select</option>
                                 
                                     <option value="Pass">Pass</option>
@@ -91,7 +88,7 @@
                                     <option value="Unattainded">Unattainded</option>
                                   
                             </select>
-                            <div id="error-interview_status" class="interview_status__input-error error-user text-danger mt-2"></div>
+                            <div id="error-interview_result" class="interview_result__input-error error-user text-danger mt-2"></div>
                     </div>
                 </div>
                 <div class="modal-footer">

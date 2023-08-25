@@ -1,5 +1,5 @@
 <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-5">
-    <div class="col-span-8">
+    <div class="col-span-12 intro-y md:col-span-8">
         <div class="intro-y box px-5 pt-5 h-60">
             <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
                 <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 mt-2 md:mt-0 intro-y md:col-span-4">
         <div class="intro-y box p-5 pt-3 h-60">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6 flex">
@@ -87,14 +87,30 @@
                 <div class="singleProgressBar">
                     <div class="flex justify-between mb-2">
                         <div class="font-medium">Result :</div>
-                        <div id="progressInterviewStatus" class="font-medium">{{ ($interview->interview_status ? $interview->interview_status : 'N/A') }}</div>
+                        <div id="progressInterviewStatus" class="font-medium">{{ ($interview->interview_result ? $interview->interview_result : 'N/A') }}</div>
                     </div>
                 </div>
                 
                 <div class="singleProgressBar">
-                    <div class="flex justify-between mb-2">
-                        <div class="font-medium">Document :</div>
-                        <div class="font-medium"><a href="#"><i data-lucide="file" class="w-5 h-5"></i></a></div>
+                    <div class="flex flex-wrap items-center justify-center font-medium lg:flex-nowrap">
+                        <div class="w-full mb-4 mr-auto lg:mb-0 lg:w-1/2">Document :</div>
+                        @if(isset($interview->document->current_file_name))
+                        <div id="fileLoadedView" class="inline-flex items-center justify-center cursor-pointer">
+                            {{-- <table class="table ">
+                                <tr>
+                                    <td> --}}
+                                        <a class="inline-flex items-center justify-center cursor-pointer" target="_blank" href="{{   asset('storage/interviewresult/'.$interview->document->current_file_name)   }}"><i data-lucide="paperclip" class="w-4 h-4 mr-2"></i>{{ $interview->document->current_file_name }}</a>
+                                    {{-- </td>
+                                    <td> --}}
+                                        <a class="inline-flex items-center justify-center cursor-pointer" data-tw-toggle="modal" data-tw-target="#confirmModal"><i data-lucide="delete" class="w-5 h-5 ml-2 text-danger "></i></a>
+                                    {{-- </td>
+                                </tr>
+                            </table> --}}
+                            
+                        </div>
+                        @else
+                            <div class="inline-flex items-center justify-center cursor-pointer font-medium"><i data-lucide="slash" class="w-5 h-5"></i></div>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ use App\Models\TaskList;
 use App\Models\ApplicantTask;
 use App\Models\Applicant;
 use App\Models\ApplicantInterview;
+use App\Models\ApplicantDocument;
 use App\Models\Role;
 use App\Models\UserRole;
 use App\Models\User;
@@ -23,6 +24,7 @@ class ApplicantInterviewListController extends Controller
             'tasklists' => TaskList::all(),
             'applicanttasks' => ApplicantTask::all(),
             'applicants' => Applicant::all(),
+            'applicantdocuments' => ApplicantDocument::all(),
             'users' => User::all(),
         ]);
     }
@@ -46,8 +48,10 @@ class ApplicantInterviewListController extends Controller
             if(!empty($queryStr)):
                 $query->where('name','LIKE','%'.$queryStr.'%');
             endif;
-            $query->whereHas('task', function($query){
+            $query->whereHas('task', function($query) {
+
                 $query->where('status',"<>",'Completed');  
+
             });
             
             $total_rows = $query->count();
@@ -65,17 +69,20 @@ class ApplicantInterviewListController extends Controller
             if(!empty($Query)):
                 $i = 1;
                 foreach($Query as $list):
+                    $k =0;
+                    $nestedDataContainer = [];
+                    
                         $data[] = [
                             'id' => $list->id,
                             'sl' => $i,
                             "name" => $list->applicant->title->name." ".$list->applicant->full_name,
                             'applicant_number'=> $list->applicant->application_no,
                             'gender' =>$list->applicant->gender,
-                            'status' =>$list->task->status,
+                            'status' =>$list->interview_status,
                             'time' => ($list->start_time ? $list->start_time : "00:00") ." - ". ($list->end_time ? $list->end_time : "00:00") ,
                             'date' => $list->interview_date,
-                            'result' => $list->interview_status,
-                            
+                            'result' => $list->interview_result,
+                            'interviewer' => $list->user->name
                         ];
                         $i++;
                     
@@ -84,20 +91,33 @@ class ApplicantInterviewListController extends Controller
             return response()->json(['last_page' => $last_page, 'data' => $data]);      
     }
 
-    public function interviewResultUpdate(Request $request) {
+    public function interviewResultUpdate(Request $request){
+        
+        $applicantInterviewData = ApplicantInterview::find($request->id);
+        
+        if(!$applicantInterviewData->applicant_document_id) {
 
-
-        $ApplicantInterview = ApplicantInterview::find($request->id);
- 
-        $ApplicantInterview->interview_status = $request->interview_status;
-            
-        $ApplicantInterview->save();
-                    
-        if($ApplicantInterview->wasChanged())      
-            return response()->json(["msg"=>"Result Updated","result"=>$request->interview_status],200);
-        else
-            return response()->json(["msg"=>"Nothing Changed"],422);
-
+            $document = $request->file('file');
+            $imageName = time().'_'.$document->getClientOriginalName();
+            $path = $document->storeAs('public/interviewresult/',$imageName);
+            $data = [];
+            $data['applicant_id'] = $applicantInterviewData->applicant_id;
+            $data['doc_type'] = $document->getClientOriginalExtension();
+            $data['path'] = asset('storage/interviewresult/'.$imageName);
+            $data['display_file_name'] = $imageName;
+            $data['current_file_name'] = $imageName;
+            $data['created_by'] = auth()->user()->id;
+            $applicantDoc = ApplicantDocument::create($data);
+            if($applicantDoc):
+                $applicantInterviewUpdate = $applicantInterviewData->update([
+                    'applicant_document_id' => $applicantDoc->id,
+                    'interview_result' => $request->resultValue
+                ]);
+            endif;
+            return response()->json(['message' => 'Upload Successful.'], 200);
+        } else
+           return response()->json(['message' => 'Document already exist. Please remove file before new upload'], 422);
+        
     }
 
     
@@ -105,13 +125,20 @@ class ApplicantInterviewListController extends Controller
         
         $ApplicantInterview = ApplicantInterview::find($request->id);
 
-        $task = ApplicantTask::find($ApplicantInterview->task->id);
-
-        $task->status = "Completed";
+        $ApplicantInterview->interview_status = 'Completed';
         
-        $task->save();
+        if($ApplicantInterview->interview_result == "Pass")  {
+
+            $task = ApplicantTask::find($ApplicantInterview->task->id);
+            $task->status = "Completed";
+            $task->updated_by = \Auth::user()->id;
+            $task->save();
+
+        }
+        $ApplicantInterview->updated_by = \Auth::user()->id;
+        $ApplicantInterview->save();
                 
-        if($task->wasChanged())      
+        if($ApplicantInterview->wasChanged())      
             return response()->json(["msg"=>"Task Finished","status"=>"Completed"],200);
         else
             return response()->json(["msg"=>"Nothing Changed"],422);
@@ -151,6 +178,25 @@ class ApplicantInterviewListController extends Controller
         if($ApplicantInterview->wasChanged())     
 
             return response()->json(["msg"=>"Time End","data"=>["end"=> date("h:i a", strtotime($endTime))]],200);
+        else
+            return response()->json(["msg"=>"Nothing Changed"],422);
+    }
+
+    public function interviewFileRemove($id) {
+
+        $ApplicantInterview = ApplicantInterview::find($id);
+
+        $ApplicantDocument = ApplicantDocument::find($ApplicantInterview->applicant_document_id);
+        $ApplicantDocument->forceDelete();
+        //ApplicantDocument::destroy($ApplicantInterview->applicant_document_id);
+
+        $ApplicantInterview->applicant_document_id = null;
+        
+        $ApplicantInterview->save();
+
+        if($ApplicantInterview->wasChanged())     
+
+            return response()->json(["msg"=>"Removed"],200);
         else
             return response()->json(["msg"=>"Nothing Changed"],422);
     }

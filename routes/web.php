@@ -811,11 +811,15 @@ Route::middleware('auth')->group(function() {
         Route::post('interviewlist/direct/unlock', 'unlockInterViewDirect')->name('applicant.interview.unlock.direct');
         Route::get('interviewlist/profile/{id}/{interview}/{token}', 'profileView')->name('applicant.interview.profile.view')->middleware(EnsureExpiredDateIsValid::class);
         Route::get('interviewlist/staff/{userId}', 'interviewAssignedList')->name('applicant.interview.session.list');
+        
+        Route::get('interviewlist/showinstances', 'showInstances')->name('interviewlist.showinstances');
+        Route::get('interviewlist/completedlist', 'completedList')->name('interviewlist.completedlist');
+        Route::post('interviewlist/completedlistunlock', 'unlockInterView')->name('applicant.completedinterview.unlock');
     });
 
     Route::controller(InterviewAssignedController::class)->group(function() {
 
-        Route::get('interview/assaigned', 'index')->name('interview.assigned');
+        Route::get('interview/assigned', 'index')->name('interview.assigned');
         Route::get('interview/list', 'list')->name('interview.assigned.list');    
           
     });
@@ -823,12 +827,19 @@ Route::middleware('auth')->group(function() {
     Route::controller(ApplicantInterviewListController::class)->group(function() {
 
         Route::get('applicant_interviewlist', 'index')->name('applicant.interview');
+
         Route::get('applicant_interviewlist/list', 'list')->name('applicant.interview.list');
+
         Route::post('applicant_interviewlist/update', 'interviewResultUpdate')->name('applicant.interview.result.update');
+
         Route::post('applicant_interviewlist/task', 'interviewTaskUpdate')->name('applicant.interview.task.update');
+
         Route::post('applicant_interviewlist/start', 'interviewStartTimeUpdate')->name('applicant.interview.start');
+
         Route::post('applicant_interviewlist/end', 'interviewEndTimeUpdate')->name('applicant.interview.end');
 
+        Route::delete('applicant_interviewlist/file/remove/{id}', 'interviewFileRemove')->name('applicant.interview.file.remove');
+        
     });
     
 });

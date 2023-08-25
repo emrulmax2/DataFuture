@@ -43,7 +43,7 @@
         "axios": "^0.25.0",
         "laravel-vite-plugin": "^0.2.4",
         "lodash": "^4.17.21",
-        "postcss": "^8.4.27",
+        "postcss": "^8.4.28",
         "postcss-advanced-variables": "^3.0.1",
         "postcss-cli": "^9.1.0",
         "postcss-import": "^14.1.0",

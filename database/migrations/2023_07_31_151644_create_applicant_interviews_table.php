@@ -26,7 +26,7 @@ return new class extends Migration
             $table->date('interview_date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->enum('interview_status',['Pass', 'Fail', 'Unattainded', 'N/A'])->nullable();
+            $table->enum('interview_result',['Pass', 'Fail', 'Unattainded', 'N/A'])->nullable();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();

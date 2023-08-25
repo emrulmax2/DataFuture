@@ -393,8 +393,8 @@ $(document).on("click", ".interview-end", function (e) {
         
         $('#editForm').on("submit", function (e) {
 
-            $('#editForm').find('.interview_status__input').removeClass('border-danger')
-            $('#editForm').find('.interview_status__input-error').html('')
+            $('#editForm').find('.interview_result__input').removeClass('border-danger')
+            $('#editForm').find('.interview_result__input-error').html('')
 
             e.preventDefault()
             document.querySelector('#update').setAttribute('disabled', 'disabled')

@@ -11,7 +11,7 @@ class ApplicantInterview extends Model
     use HasFactory,SoftDeletes;
 
     //protected $guard = ['id'];
-    protected $fillable = ['user_id', 'applicant_id','applicant_task_id','applicant_document_id','interview_date','start_time','end_time','interview_status','created_by'];
+    protected $fillable = ['user_id', 'applicant_id','applicant_task_id','applicant_document_id','interview_date','start_time','end_time','interview_result','created_by'];
     /**
      * The attributes that should be mutated to dates.
      *

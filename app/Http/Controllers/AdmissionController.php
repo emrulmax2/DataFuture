@@ -67,6 +67,7 @@ use App\Models\Signatory;
 class AdmissionController extends Controller
 {
     public function index(){
+
         return view('pages.students.admission.index', [
             'title' => 'Admission Management - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -154,6 +155,7 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    
     }
 
     public function show($applicantId){

@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createElement, createIcons, icons,Minus,Plus } from "lucide";
 import Tabulator from "tabulator-tables";
 import { constant } from "lodash";
+import TomSelect from "tom-select";
 
 ("use strict");
 
@@ -232,13 +233,329 @@ var interviewListTable = (function () {
         },
     };
 })();
+// For In Progress Table
+var applicantInterviewListTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let querystr = $("#query-applicant").val() != "" ? $("#query-applicant").val() : "";
+        let status = $("#status-applicant").val() != "" ? $("#status-applicant").val() : "";
+
+        let tableContent = new Tabulator("#applicantInterviewList", {
+            dataTree:true,
+            ajaxURL: route("applicant.interview.list"),
+            ajaxParams: { querystr: querystr, status: status },
+            ajaxFiltering: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Serial",
+                    field: "sl",
+                    width: "180",
+                },
+                {
+                    title: "Applicant No.",
+                    field: "applicant_number",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Interview Date",
+                    field: "date",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Name",
+                    field: "name",
+                    headerSort:false,
+                },
+                {
+                    title: "Gender",
+                    field: "gender",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Sart Time - End Time",
+                    field: "time",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Result",
+                    field: "result",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Interviewer",
+                    field: "interviewer",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Actions",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    formatter(cell, formatterParams) {                        
+                        var btns = ""; 
+                        btns += '<button class="applicantprofile-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
+                                    <i data-lucide="eye" class="w-4 h-4 mr-2"></i> View Profile\
+                                    <svg width="25" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="rgb(100,116,139)" class="loading invisible w-4 h-4 ml-2">\
+                                    <g fill="none" fill-rule="evenodd" stroke-width="4">\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                    </g>\
+                                </svg>\
+                                </button>';
+                        return btns;
+                    },
+                }
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });               
+
+            },
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
+var interviewCompletedListTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let instances = $("#instancesCom").val() != "" ? $("#instancesCom").val() : "";
+        let courseCreationId = $("#courseCreationId").val() != "" ? $("#courseCreationId").val() : "";
+        let tableContent = new Tabulator("#completedInterviewTable", {
+            ajaxURL: route("interviewlist.completedlist"),
+            ajaxParams: { instances: instances, courseCreationId: courseCreationId },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Serial",
+                    field: "sl",
+                    width: "180",
+                },
+                {
+                    title: "Applicant No.",
+                    field: "applicant_number",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Interview Date",
+                    field: "date",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Name",
+                    field: "name",
+                    headerSort:false,
+                },
+                {
+                    title: "Gender",
+                    field: "gender",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Sart Time - End Time",
+                    field: "time",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Result",
+                    field: "result",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Interviewer",
+                    field: "interviewer",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Actions",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    formatter(cell, formatterParams) {                        
+                        var btns = ""; 
+                        btns += '<button class="completed-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
+                                    <i data-lucide="eye" class="w-4 h-4 mr-2"></i> View Profile\
+                                    <svg width="25" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="rgb(100,116,139)" class="loading invisible w-4 h-4 ml-2">\
+                                    <g fill="none" fill-rule="evenodd" stroke-width="4">\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="0s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                        <circle cx="22" cy="22" r="1">\
+                                            <animate attributeName="r"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 20"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.165, 0.84, 0.44, 1"\
+                                                repeatCount="indefinite" />\
+                                            <animate attributeName="stroke-opacity"\
+                                                begin="-0.9s" dur="1.8s"\
+                                                values="1; 0"\
+                                                calcMode="spline"\
+                                                keyTimes="0; 1"\
+                                                keySplines="0.3, 0.61, 0.355, 1"\
+                                                repeatCount="indefinite" />\
+                                        </circle>\
+                                    </g>\
+                                </svg>\
+                                </button>';
+                        return btns;
+                    },
+                }
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+        // Export
+        $("#tabulator-export-csv-COM").on("click", function (event) {
+            tableContent.download("csv", "data.csv");
+        });
+
+        $("#tabulator-export-json-COM").on("click", function (event) {
+            tableContent.download("json", "data.json");
+        });
+
+        $("#tabulator-export-xlsx-COM").on("click", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "data.xlsx", {
+                sheetName: "Completed Interview Details",
+            });
+        });
+
+        $("#tabulator-export-html-COM").on("click", function (event) {
+            tableContent.download("html", "data.html", {
+                style: true,
+            });
+        });
+
+        // Print
+        $("#tabulator-print-COM").on("click", function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
 
 const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
 const lockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
 
-//
-
+// For View Profile Button in In Progress Tab
 $(document).on("click", ".profile-lock__button", function (e) { 
     e.preventDefault();
     //interviewId = $(this).attr("data-id");
@@ -246,6 +563,115 @@ $(document).on("click", ".profile-lock__button", function (e) {
     document.getElementById('taskListId').value = $(this).attr("data-task");
 
 });
+// For View Profile Button in In Progress Tab
+$(document).on("click", ".applicantprofile-lock__button", function (e) { 
+    e.preventDefault();
+    document.querySelector(".applicantprofile-lock__button svg.loading").classList.remove('invisible')
+    const data = {
+        interviewId : $(this).attr("data-id")
+    }
+    axios({
+        method: "post",
+        url: route('applicant.interview.unlock'),
+        data: data,
+        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    }).then(response => {
+        document.querySelector(".applicantprofile-lock__button svg.loading").classList.add('invisible')
+
+
+        if (response.status == 200) {
+            lockModal.hide();
+
+            succModal.show();
+            let Data = response.data.ref;
+            document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                $("#successModal .successModalTitle").html( "Success!" );
+                $("#successModal .successModalDesc").html('Profile Matched.');
+            });   
+            
+            location.href= Data;  
+        }
+    }).catch(error => {
+        document.querySelector(".applicantprofile-lock__button svg.loading").classList.add('invisible')
+        if (error.response) {
+            if (error.response.status == 422) {
+                for (const [key, val] of Object.entries(error.response.data.errors)) {
+                    $(`#callLockModalForm .${key}`).addClass('border-danger');
+                    $(`#callLockModalForm  .error-${key}`).html(val);
+                }
+            } else if (error.response.status == 404) {
+                succModal.hide();
+                lockModal.hide();
+                errorModal.show();
+                document.getElementById("errorModal")
+                        .addEventListener("shown.tw.modal", function (event) {
+                            $("#errorModal .errorModalTitle").html('Invalid Profile!');
+                            $("#errorModal .errorModalDesc").html('Interviewer didn\'t match');
+                        }); 
+                
+                        
+            } else {
+                console.log('error')
+            }
+        }
+    });
+
+});
+
+//For View Profile Button in Completed Tab      
+$(document).on("click", ".completed-lock__button", function (e) { 
+    e.preventDefault();
+    document.querySelector(".completed-lock__button svg.loading").classList.remove('invisible')
+    const data = {
+        interviewId : $(this).attr("data-id")
+    }
+    axios({
+        method: "post",
+        url: route('applicant.completedinterview.unlock'),
+        data: data,
+        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    }).then(response => {
+        document.querySelector(".completed-lock__button svg.loading").classList.add('invisible')
+
+        if (response.status == 200) {
+            lockModal.hide();
+
+            succModal.show();
+            let Data = response.data.ref;
+            document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                $("#successModal .successModalTitle").html( "Success!" );
+                $("#successModal .successModalDesc").html('Profile Matched.');
+            });   
+            
+            location.href= Data;  
+        }
+    }).catch(error => {
+        document.querySelector(".completed-lock__button svg.loading").classList.add('invisible')
+        if (error.response) {
+            if (error.response.status == 422) {
+                for (const [key, val] of Object.entries(error.response.data.errors)) {
+                    $(`#callLockModalForm .${key}`).addClass('border-danger');
+                    $(`#callLockModalForm  .error-${key}`).html(val);
+                }
+            } else if (error.response.status == 404) {
+                succModal.hide();
+                lockModal.hide();
+                errorModal.show();
+                document.getElementById("errorModal")
+                        .addEventListener("shown.tw.modal", function (event) {
+                            $("#errorModal .errorModalTitle").html('Invalid Profile!');
+                            $("#errorModal .errorModalDesc").html('Interviewer didn\'t match');
+                        }); 
+                
+                        
+            } else {
+                console.log('error')
+            }
+        }
+    });
+
+});
+
 $('#callLockModalForm').on('submit', function(e){
     e.preventDefault();
     const form = document.getElementById('callLockModalForm');
@@ -307,6 +733,18 @@ $('#callLockModalForm').on('submit', function(e){
 });
 //
 (function () {
+    var semestersCOM = new TomSelect('#semestersCom',{
+        plugins: ['remove_button'],
+    });
+    var coursesCOM = new TomSelect('#coursesCom',{
+        plugins: ['remove_button'],
+    });
+    var academicCOM = new TomSelect('#academicCom',{
+        plugins: ['remove_button'],
+    });
+    semestersCOM.clear(true);
+    coursesCOM.clear(true);
+    academicCOM.clear(true);
 
     $('#interviewerSelectForm').find('.assign__input').removeClass('border-danger')
     $('#interviewerSelectForm').find('.assign__input-error').html('')
@@ -470,4 +908,111 @@ $('#callLockModalForm').on('submit', function(e){
         // });
         
     }
+
+    // For In Progress Tab Table Search
+    if ($("#applicantInterviewList").length) {
+        // Init Table
+        applicantInterviewListTable.init();
+        
+        // Filter function
+        function filterHTMLForm() {
+            applicantInterviewListTable.init();
+        }
+
+        // On submit filter form
+        $("#tabulatorApplicantFilterForm")[0].addEventListener(
+            "keypress",
+            function (event) {
+                let keycode = event.keyCode ? event.keyCode : event.which;
+                if (keycode == "13") {
+                    event.preventDefault();
+                    filterHTMLForm();
+                }
+            }
+        );
+
+        // On click go button
+        $("#tabulator-html-filter-applicantgo").on("click", function (event) {
+            filterHTMLForm();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-applicantreset").on("click", function (event) {
+            $("#query-applicant").val("");
+            $("#status-applicant").val("");
+            filterHTMLForm();
+        });
+    }
+
+    // For Completed Tab Course Creation Instances Data
+    document.getElementById("academicCom").onchange = function(){      
+        var academic  = document.getElementById("academicCom").value;
+        var courses   = document.getElementById("coursesCom").value;
+        var semesters = document.getElementById("semestersCom").value;
+        if(academic!="" && courses!="" && semesters!="") {
+            $.ajax({
+                type: "GET",
+                url: route('interviewlist.showinstances'),
+                data : {
+                    "_token": "{{ csrf_token() }}",
+                    "academic": academic,
+                    "courses": courses,
+                    "semesters": semesters,
+                },
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                success: function (data) {
+                    let tthisInstanceOptions = document.getElementById("instancesCom");
+                    
+                    for(let i =0; i<data.instances.length; i++) {
+                    
+                        let opt = document.createElement('option');
+                        opt.value = data.instances[i].id;
+                        opt.innerHTML = " from "+data.instances[i].start_date +" to "+ data.instances[i].end_date;
+                        tthisInstanceOptions.appendChild(opt);
+                    }
+                    let instancesCom = new TomSelect('#instancesCom',{
+                        plugins: ['remove_button'],
+                    });
+                    document.getElementById('courseCreationId').value = data.courseCreationId;
+                    document.getElementById("instancediv").style.visibility = "visible";
+                },
+                error: function (data) {
+                    console.log('error');
+                }
+            });
+        }
+    };
+
+    //var instancesCom = new TomSelect('#instancesCom');
+    
+    // Filter function
+    function filterHTMLFormCOM() {
+        interviewCompletedListTable.init();
+    }
+
+    // On submit filter form
+    $("#tabulatorFilterForm-COM")[0].addEventListener(
+        "keypress",
+        function (event) {
+            let keycode = event.keyCode ? event.keyCode : event.which;
+            if (keycode == "13") {
+                event.preventDefault();
+                filterHTMLFormCOM();
+            }
+        }
+    );
+
+    // On click go button
+    $("#tabulator-html-filter-go-COM").on("click", function (event) {
+        filterHTMLFormCOM();
+    });
+
+    // On reset filter form
+    $("#tabulator-html-filter-reset-COM").on("click", function (event) {
+        semestersCOM.clear(true);
+        coursesCOM.clear(true);
+        academicCOM.clear(true);
+        //instancesCom.clear(true);
+        filterHTMLFormCOM();
+    });
 })()
