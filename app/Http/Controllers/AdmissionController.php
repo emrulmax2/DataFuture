@@ -1410,7 +1410,7 @@ class AdmissionController extends Controller
                 'smtp_host'    => 'smtp.gmail.com',
                 'smtp_port'    => '587',
                 'smtp_username'  => 'no-reply@lcc.ac.uk',
-                'smtp_password'  => '',
+                'smtp_password'  => 'churchill1',
                 'smtp_encryption'  => 'tls',
                 
                 'from_email'    => 'no-reply@lcc.ac.uk',
