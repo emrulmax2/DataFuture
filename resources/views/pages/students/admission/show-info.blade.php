@@ -39,23 +39,31 @@
                 </div>
             </div>
             <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            @php 
+                $pending = $applicant->pendingTasks->count();
+                $completed = $applicant->completedTasks->count();
+
+                $totalTask = $pending + $completed;
+                $pendingProgress = ( $totalTask > 0 ? round($pending / $totalTask, 2) * 100 : '0');
+                $completedProgress = ( $totalTask > 0 ? round($completed / $totalTask, 2) * 100 : '0');
+            @endphp
             <div class="progressBarWrap">
                 <div class="singleProgressBar mb-3">
                     <div class="flex justify-between mb-1">
                         <div class="font-medium">Pending Task</div>
-                        <div class="font-medium">20%</div>
+                        <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $applicant->pendingTasks->count() + $applicant->completedTasks->count() }}</div>
                     </div>
                     <div class="progress h-1">
-                        <div class="progress-bar w-1/2 bg-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-warning"  style="width: {{ $pendingProgress }}%;"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
                 <div class="singleProgressBar">
                     <div class="flex justify-between mb-1">
                         <div class="font-medium">Completed Task</div>
-                        <div class="font-medium">2/20</div>
+                        <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $applicant->pendingTasks->count() + $applicant->completedTasks->count() }}</div>
                     </div>
                     <div class="progress h-1">
-                        <div class="progress-bar w-2/5" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" style="width: {{ $completedProgress }}%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
             </div>

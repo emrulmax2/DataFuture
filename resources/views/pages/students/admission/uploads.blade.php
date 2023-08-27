@@ -141,7 +141,7 @@
                             <label class="form-check-label" for="hard_copy_check-1">Yes</label>
                         </div>
                         <div class="form-check mt-2">
-                            <input checked id="hard_copy_check-2" class="form-check-input" type="radio" value="1" name="hard_copy_check_status" value="vertical-radio-liam-neeson">
+                            <input checked id="hard_copy_check-2" class="form-check-input" type="radio" value="0" name="hard_copy_check_status" value="vertical-radio-liam-neeson">
                             <label class="form-check-label" for="hard_copy_check-2">No</label>
                         </div>
                     </div>

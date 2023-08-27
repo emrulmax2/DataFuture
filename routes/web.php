@@ -68,7 +68,10 @@ use App\Http\Controllers\CommonSmtpController;
 use App\Http\Controllers\LetterSetController;
 use App\Http\Controllers\SignatoryController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\SmsTemplateController;
+use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
 /*
@@ -471,14 +474,20 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/mail-show', 'admissionCommunicationMailShow')->name('admission.communication.mail.show');
         Route::delete('admission/destory-mail', 'admissionDestroyMail')->name('admission.communication.mail.destroy');
         Route::post('admission/restore-mail', 'admissionRestoreMail')->name('admission.communication.mail.restore');
+        Route::post('admission/get-mail-template', 'admissionGetMailTemplate')->name('admission.communication.get.mail.template');
+
         Route::post('admission/send-sms', 'admissionCommunicationSendSms')->name('admission.communication.send.sms');
         Route::get('admission/sms-list', 'admissionCommunicationSmsList')->name('admission.communication.sms.list');
         Route::post('admission/sms-show', 'admissionCommunicationSmsShow')->name('admission.communication.sms.show');
         Route::delete('admission/destory-sms', 'admissionDestroySms')->name('admission.communication.sms.destroy');
         Route::post('admission/restore-sms', 'admissionRestoreSms')->name('admission.communication.sms.restore');
+        Route::post('admission/get-sms-template', 'admissionGetSmsTemplate')->name('admission.communication.get.sms.template');
 
         Route::post('admission/get-letter-set', 'admissionGetLetterSet')->name('admission.communication.get.letter.set');
         Route::post('admission/send-letter', 'admissionSendLetter')->name('admission.communication.send.letter');
+        Route::get('admission/letter-list', 'admissionCommunicationLetterList')->name('admission.communication.letter.list');
+        Route::delete('admission/destroy-letter', 'admissionDestroyLetter')->name('admission.communication.letter.destroy');
+        Route::post('admission/restore-letter', 'admissionRestoreLetter')->name('admission.communication.letter.restore');
         
     });
 
@@ -606,7 +615,6 @@ Route::middleware('auth')->group(function() {
         Route::get('image-zoom-page', 'imageZoom')->name('image-zoom');
     });
 
-    // Added on 12.12.22
     Route::controller(CourseController::class)->group(function() {
         Route::get('courses', 'index')->name('courses'); 
         Route::get('courses/list', 'list')->name('courses.list');        
@@ -619,7 +627,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('courses/delete/{id}', 'destroy')->name('courses.destory');
         Route::post('courses/restore/{id}', 'restore')->name('courses.restore');
     });
-    // Added on 13.12.22
+   
     Route::controller(SemesterController::class)->group(function() {
         Route::get('semester', 'index')->name('semester');
         Route::get('semester/list', 'list')->name('semester.list');     
@@ -629,7 +637,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('semester/delete/{id}', 'destroy')->name('semester.destory');
         Route::post('semester/restore/{id}', 'restore')->name('semester.restore');
     });
-    // Added on 20.12.22
+   
     Route::controller(CourseQualificationController::class)->group(function() {
         Route::get('coursequalification', 'index')->name('coursequalification'); 
         Route::get('coursequalification/list', 'list')->name('coursequalification.list');        
@@ -639,7 +647,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('coursequalification/delete/{id}', 'destroy')->name('coursequalification.destory');
         Route::post('coursequalification/restore/{id}', 'restore')->name('coursequalification.restore');
     });
-    // Added on 20.12.22
+ 
     Route::controller(SourceTutionFeeController::class)->group(function() {
         Route::get('sourcetutionfees', 'index')->name('sourcetutionfees'); 
         Route::get('sourcetutionfees/list', 'list')->name('sourcetutionfees.list');        
@@ -651,7 +659,6 @@ Route::middleware('auth')->group(function() {
         Route::post('sourcetutionfees/restore/{id}', 'restore')->name('sourcetutionfees.restore');
     });
 
-    // Added on 22.12.22
     Route::controller(AwardingBodyController::class)->group(function() {
         Route::get('awardingbody', 'index')->name('awardingbody'); 
         Route::get('awardingbody/list', 'list')->name('awardingbody.list');        
@@ -662,7 +669,6 @@ Route::middleware('auth')->group(function() {
         Route::post('awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
     });
 
-    // Added on 22.12.22
     Route::controller(AcademicYearController::class)->group(function() {
         Route::get('academicyears', 'index')->name('academicyears'); 
         Route::get('academicyears/list', 'list')->name('academicyears.list');    
@@ -674,7 +680,6 @@ Route::middleware('auth')->group(function() {
         Route::post('academicyears/restore/{id}', 'restore')->name('academicyears.restore');
     });
 
-    // Added on 28.12.22
     Route::controller(GroupController::class)->group(function() {
         Route::get('groups', 'index')->name('groups'); 
         Route::get('groups/list', 'list')->name('groups.list');        
@@ -716,7 +721,6 @@ Route::middleware('auth')->group(function() {
         Route::post('room/restore/{id}', 'restore')->name('room.restore');        
     });
 
-    // Added on 08.03.23
     Route::controller(BankHolidayController::class)->group(function() {      
         Route::get('bankholidays/list', 'list')->name('bankholidays.list');
         Route::post('bankholidays/store', 'store')->name('bankholidays.store'); 
@@ -729,7 +733,6 @@ Route::middleware('auth')->group(function() {
         Route::post('bankholidays/import', 'import')->name('bankholidays.import');
     });
 
-    // Added on 26.04.23
     Route::controller(DocumentSettingsController::class)->group(function() {
         Route::get('documentsettings', 'index')->name('documentsettings'); 
         Route::get('documentsettings/list', 'list')->name('documentsettings.list'); 
@@ -740,7 +743,6 @@ Route::middleware('auth')->group(function() {
         Route::post('documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
     });
 
-    // Added on 04.05.23
     Route::controller(DepartmentController::class)->group(function() {
         Route::get('department', 'index')->name('department'); 
         Route::get('department/list', 'list')->name('department.list'); 
@@ -819,27 +821,57 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(InterviewAssignedController::class)->group(function() {
 
-        Route::get('interview/assigned', 'index')->name('interview.assigned');
+        Route::get('interview/assaigned', 'index')->name('interview.assigned');
         Route::get('interview/list', 'list')->name('interview.assigned.list');    
           
     });
     
     Route::controller(ApplicantInterviewListController::class)->group(function() {
-
         Route::get('applicant_interviewlist', 'index')->name('applicant.interview');
-
         Route::get('applicant_interviewlist/list', 'list')->name('applicant.interview.list');
-
         Route::post('applicant_interviewlist/update', 'interviewResultUpdate')->name('applicant.interview.result.update');
-
         Route::post('applicant_interviewlist/task', 'interviewTaskUpdate')->name('applicant.interview.task.update');
-
         Route::post('applicant_interviewlist/start', 'interviewStartTimeUpdate')->name('applicant.interview.start');
-
         Route::post('applicant_interviewlist/end', 'interviewEndTimeUpdate')->name('applicant.interview.end');
 
         Route::delete('applicant_interviewlist/file/remove/{id}', 'interviewFileRemove')->name('applicant.interview.file.remove');
         
     });
     
+    Route::controller(ApplicantProfilePrintController::class)->group(function() {
+        Route::get('applicantprofilepdf/{applicantId}', 'generatePDF')->name('applicantprofile.print');
+    });
+    // a pdf will be saved
+
+    Route::controller(SmsTemplateController::class)->group(function() {
+        Route::get('sms-template', 'index')->name('sms.template'); 
+        Route::get('sms-template/list', 'list')->name('sms.template.list'); 
+        Route::post('sms-template/store', 'store')->name('sms.template.store');
+        Route::get('sms-template/edit/{id}', 'edit')->name('sms.template.edit');
+        Route::post('sms-template/update', 'update')->name('sms.template.update');
+
+        Route::delete('sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
+        Route::post('sms-template/restore/{id}', 'restore')->name('sms.template.restore');
+    });
+
+    Route::controller(EmailTemplateController::class)->group(function() {
+        Route::get('email-template', 'index')->name('email.template'); 
+        Route::get('email-template/list', 'list')->name('email.template.list'); 
+        Route::post('email-template/store', 'store')->name('email.template.store');
+        Route::get('email-template/edit/{id}', 'edit')->name('email.template.edit');
+        Route::post('email-template/update', 'update')->name('email.template.update');
+
+        Route::delete('email-template/delete/{id}', 'destroy')->name('email.template.destory');
+        Route::post('email-template/restore/{id}', 'restore')->name('email.template.restore');
+    });
+
+    Route::controller(LetterHeaderFooterController::class)->group(function() {
+        Route::get('letterheaderfooter', 'index')->name('letterheaderfooter'); 
+        Route::get('letterheaderfooter/headerlist', 'letterheaderlist')->name('letterheader.list');
+        Route::get('letterheaderfooter/footerlist', 'letterfooterlist')->name('letterfooter.list');
+        Route::post('letterheaderfooter/upload-letterheader', 'uploadLetterHeader')->name('letterheaderfooter.upload.letterhead'); 
+        Route::post('letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
+        Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
+        Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
 });

@@ -1,17 +1,16 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
-import { each } from "jquery";
 import Dropzone from "dropzone";
 
 
 ("use strict");
 var processTaskArchiveListTable = (function () {
-    var _tableGen = function () {
+    var _tableGen = function (tableId, applicantId, processId ) {
         // Setup Tabulator
-        let tableContent = new Tabulator("#processTaskArchiveListTable", {
+        let tableContent = new Tabulator(tableId, {
             ajaxURL: route("admission.archived.process.list"),
+            ajaxParams: { applicantId: applicantId, processId: processId },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -52,7 +51,9 @@ var processTaskArchiveListTable = (function () {
                     width: "180",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        btns += '<button data-id="' +cell.getData().id +'" style="top: -7px;"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9">\
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" icon-name="rotate-cw" data-lucide="rotate-cw" class="lucide lucide-rotate-cw block mx-auto"><path d="M21 2v6h-6"></path><path d="M21 13a9 9 0 11-3-7.7L21 8"></path></svg>\
+                        </button>';
                         
                         return btns;
                     },
@@ -78,8 +79,8 @@ var processTaskArchiveListTable = (function () {
         });
     };
     return {
-        init: function () {
-            _tableGen();
+        init: function ( tableId, applicantId, processId ) {
+            _tableGen( tableId, applicantId, processId  );
         },
     };
 })();
@@ -178,12 +179,44 @@ var processTaskLogTable = (function () {
 
 
 (function(){
+    if ($(".processTaskArchiveListTable").length) {
+        // Init Table
+        $(".processTaskArchiveListTable").each(function(){
+            var $table = $(this);
+            var processId = $table.attr('data-process');
+            var applicantId = $table.attr('data-applicant');
+            var tableId = '#'+$table.attr('id');
+            
+            processTaskArchiveListTable.init(tableId, applicantId, processId);
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        })
+
+        $('.processTaskArchiveListTable').on('click', '.restore_btn', function(e){
+            e.preventDefault();
+            var $btn = $(this);
+            var rowid = $btn.attr('data-id');
+
+            confirmModal.show();
+            document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                $("#confirmModal .confModTitle").html("Are you sure?");
+                $("#confirmModal .confModDesc").html('Do you want to restore this process task? Please click on agree to continue.');
+                $("#confirmModal .agreeWith").attr('data-recordid', rowid);
+                $("#confirmModal .agreeWith").attr('data-status', 'RESTORETASK');
+            });
+        })
+    }
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const processDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#processDropdown"));
     const uploadTaskDocumentModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
     const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
+    const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
 
     const updateTaskOutcomeModalEl = document.getElementById('updateTaskOutcomeModal')
     updateTaskOutcomeModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -279,6 +312,7 @@ var processTaskLogTable = (function () {
     $('#closeProcessDropdown').on('click', function(e){
         e.preventDefault();
         processDropdown.hide();
+        processListAccordion.hide();
     })
 
     $('#successModal .successCloser').on('click', function(e){
@@ -567,25 +601,6 @@ var processTaskLogTable = (function () {
             confirmModal.hide();
         }
     });
-
-    if ($("#processTaskArchiveListTable").length) {
-        // Init Table
-        processTaskArchiveListTable.init();
-
-        $('#processTaskArchiveListTable').on('click', '.restore_btn', function(e){
-            e.preventDefault();
-            var $btn = $(this);
-            var rowid = $btn.attr('data-id');
-
-            confirmModal.show();
-            document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-                $("#confirmModal .confModTitle").html("Are you sure?");
-                $("#confirmModal .confModDesc").html('Do you want to restore this process task? Please click on agree to continue.');
-                $("#confirmModal .agreeWith").attr('data-recordid', rowid);
-                $("#confirmModal .agreeWith").attr('data-status', 'RESTORETASK');
-            });
-        })
-    }
 
     $('.updateTaskOutcome').on('click', function(e){
         e.preventDefault();

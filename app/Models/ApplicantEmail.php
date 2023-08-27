@@ -13,6 +13,7 @@ class ApplicantEmail extends Model
     protected $fillable = [
         'applicant_id',
         'comon_smtp_id',
+        'email_template_id',
         'subject',
         'body',
         'created_by',
@@ -40,5 +41,9 @@ class ApplicantEmail extends Model
 
     public function documents(){
         return $this->belongsToMany(ApplicantDocument::class, 'applicant_emails_attachments');
+    }
+    
+    public function template(){
+        return $this->belongsTo(EmailTemplate::class, 'email_template_id');
     }
 }

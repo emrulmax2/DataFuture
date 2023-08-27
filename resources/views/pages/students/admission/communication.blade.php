@@ -239,7 +239,7 @@
                     <div class="modal-body">
                         <div>
                             <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
-                            <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full"  data-single-mode="true">
+                            <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
                             <div class="acc__input-error error-issued_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
@@ -255,7 +255,7 @@
                             <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-5 letterEditorArea" style="display: none;">
-                            <textarea name="letter_body" id="letterEditor"></textarea>
+                            <textarea rows="15" name="letter_body" id="letterEditor"></textarea>
                             <div class="acc__input-error error-letter_body text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
@@ -337,6 +337,17 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="sms_template_id" class="form-label">Template</label>
+                            <select id="sms_template_id" name="sms_template_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($smsTemplates))
+                                    @foreach($smsTemplates as $st)
+                                        <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
                             <label for="sms_subject" class="form-label">Subject <span class="text-danger">*</span></label>
                             <input id="sms_subject" type="text" name="subject" class="form-control w-full">
                             <div class="acc__input-error error-subject text-danger mt-2"></div>
@@ -396,10 +407,21 @@
                             </select>
                             <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3 mb-3">
+                        <div class="mt-3">
                             <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
                             <input id="subject" type="text" name="subject" class="form-control w-full">
                             <div class="acc__input-error error-subject text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 mb-4">
+                            <label for="email_template_id" class="form-label">Template</label>
+                            <select id="email_template_id" name="email_template_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($emailTemplates))
+                                    @foreach($emailTemplates as $et)
+                                        <option value="{{ $et->id }}">{{ $et->email_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
                         <div>
                             <textarea name="body" id="mailEditor"></textarea>

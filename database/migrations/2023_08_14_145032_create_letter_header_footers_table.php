@@ -13,13 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('applicant_sms', function (Blueprint $table) {
+        Schema::create('letter_header_footers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('applicant_id');
-            $table->unsignedBigInteger('sms_template_id')->nullable();
-            $table->string('subject', 191);
-            $table->text('sms');
-
+            $table->string('name');
+            $table->string('path', 191);
+            $table->string('current_file_name', 191);
+            $table->enum('type', ['Header', 'Footer']);
+            $table->enum('for_letter', ['Yes', 'No']);
+            $table->enum('for_email', ['Yes', 'No']);
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
@@ -34,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('applicant_sms');
+        Schema::dropIfExists('letter_header_footers');
     }
 };

@@ -8,7 +8,8 @@
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
         <div class="ml-auto flex justify-end">
-           
+            <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto">Download Pdf</a>
+            <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
         </div>
     </div>
     <!-- BEGIN: Profile Info -->

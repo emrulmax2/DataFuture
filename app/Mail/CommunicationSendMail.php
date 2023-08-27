@@ -7,21 +7,23 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
 class CommunicationSendMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $subject,$content;
+    public $subject,$content,$attachmentList;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($subject,$content)
+    public function __construct($subject,$content,$attachmentList)
     {
         $this->subject = $subject;
         $this->content = $content;
+        $this->attachmentList = $attachmentList;
     }
 
     /**
@@ -56,8 +58,17 @@ class CommunicationSendMail extends Mailable
      *
      * @return array
      */
-    public function attachments()
+    public function attachments(): array
     {
-        return [];
+        $attachmentArray = [];
+        $i =0 ;
+        
+        foreach ($this->attachmentList as $attachment) {           
+            $attachmentArray[$i++] = Attachment::fromStorageDisk('local',$attachment["pathinfo"])
+            ->as($attachment["nameinfo"])
+            ->withMime($attachment["mimeinfo"]);
+        }
+        
+        return $attachmentArray;
     }
 }

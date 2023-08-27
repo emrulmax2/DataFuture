@@ -6,22 +6,21 @@ import { each } from "jquery";
 import Dropzone from "dropzone";
 
 ("use strict");
-var applicantUploadListTable = (function () {
+var letterHeaderListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let applicantId = $("#applicantUploadListTable").attr('data-applicant') != "" ? $("#applicantUploadListTable").attr('data-applicant') : "0";
-        let queryStr = $("#query-UP").val() != "" ? $("#query-UP").val() : "";
-        let status = $("#status-UP").val() != "" ? $("#status-UP").val() : "1";
+        let queryStr = $("#query-HEADER").val() != "" ? $("#query-HEADER").val() : "";
+        let status = $("#status-HEADER").val() != "" ? $("#status-HEADER").val() : "1";
 
-        let tableContent = new Tabulator("#applicantUploadListTable", {
-            ajaxURL: route("admission.uploads.list"),
-            ajaxParams: { applicantId: applicantId, queryStr : queryStr, status : status},
+        let tableContent = new Tabulator("#letterHeaderListTable", {
+            ajaxURL: route("letterheader.list"),
+            ajaxParams: {queryStr : queryStr, status : status},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
+            paginationSize: 5,
             paginationSizeSelector: [5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
@@ -35,33 +34,28 @@ var applicantUploadListTable = (function () {
                 },
                 {
                     title: "Name",
-                    field: "display_file_name",
+                    field: "name",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Checked",
-                    field: "hard_copy_check",
+                    title: "Letter",
+                    field: "for_letter",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
-                        if(cell.getData().hard_copy_check == 1){
-                            return '<span class="btn btn-success-soft px-1 py-0 rounded-0">Yes</span>';
-                        }else{
-                            return '<span class="btn btn-pending-soft px-1 py-0 rounded-0">No</span>';
-                        }
-                    }
                 },
                 {
-                    title: "Uploaded By",
-                    field: "created_by",
+                    title: "Email",
+                    field: "for_email",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "File",
+                    field: "url",
+                    headerHozAlign: "left",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                       if(cell.getData().url != ''){
+                            return '<img style="max-with: 100%; height: 30px;" src="'+cell.getData().url+'" alt="'+cell.getData().name+'"/>';
+                       } 
                     }
                 },
                 {
@@ -104,29 +98,29 @@ var applicantUploadListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-UP").on("click", function (event) {
+        $("#tabulator-export-csv-HEADER").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-UP").on("click", function (event) {
+        $("#tabulator-export-json-HEADER").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-UP").on("click", function (event) {
+        $("#tabulator-export-xlsx-HEADER").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Letter Header Templates",
             });
         });
 
-        $("#tabulator-export-html-UP").on("click", function (event) {
+        $("#tabulator-export-html-HEADER").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-UP").on("click", function (event) {
+        $("#tabulator-print-HEADER").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -138,57 +132,47 @@ var applicantUploadListTable = (function () {
 })();
 
 (function(){
-    if ($("#applicantUploadListTable").length) {
+    if ($("#letterHeaderListTable").length) {
         // Init Table
-        applicantUploadListTable.init();
+        letterHeaderListTable.init();
 
         // Filter function
         function filterHTMLFormUP() {
-            applicantUploadListTable.init();
+            letterHeaderListTable.init();
         }
 
 
         // On click go button
-        $("#tabulator-html-filter-go-UP").on("click", function (event) {
+        $("#tabulator-html-filter-go-HEADER").on("click", function (event) {
             filterHTMLFormUP();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-UP").on("click", function (event) {
-            $("#query-UP").val("");
-            $("#status-UP").val("1");
+        $("#tabulator-html-filter-reset-HEADER").on("click", function (event) {
+            $("#query-HEADER").val("");
+            $("#status-HEADER").val("1");
             filterHTMLFormUP();
         });
 
     }
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#letterheadConfirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const uploadsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadsDropdown"));
-    const uploadDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadDocumentModal"));
+    const uploadLetterHeaderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadLetterHeaderModal"));
 
-    const uploadDocumentModalEl = document.getElementById('uploadDocumentModal')
-    uploadDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#uploadDocumentModal input[name="document_setting_id"]').val('0');
-        $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
-        $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
-        document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
-        document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-    });
-    const confirmModalEl = document.getElementById('confirmModal')
+    
+    // To get value of name field
+    
+    const confirmModalEl = document.getElementById('letterheadConfirmModal')
     confirmModalEl.addEventListener('hide.tw.modal', function(event) {
-        $("#confirmModal .confModDesc").html('');
-        $("#confirmModal .agreeWith").attr('data-recordid', '0');
-        $("#confirmModal .agreeWith").attr('data-status', 'none');
-        $('#confirmModal button').removeAttr('disabled');
+        $("#letterheadConfirmModal .confModDesc").html('');
+        $("#letterheadConfirmModal .agreeWith").attr('data-recordid', '0');
+        $("#letterheadConfirmModal .agreeWith").attr('data-status', 'none');
+        $('#letterheadConfirmModal button').removeAttr('disabled');
     });
 
-    $('#closeUploadsDropdown').on('click', function(e){
-        e.preventDefault();
-        uploadsDropdown.hide();
-    });
-
-    $('#confirmModal .disAgreeWith').on('click', function(e){
+    $('#letterheadConfirmModal .disAgreeWith').on('click', function(e){
         e.preventDefault();
 
         confirmModal.hide();
@@ -215,36 +199,35 @@ var applicantUploadListTable = (function () {
     });
 
     /* Start Dropzone */
-    if($("#uploadDocumentForm").length > 0){
+    if($("#uploadLetterHeadForm").length > 0){
         let dzError = false;
         Dropzone.autoDiscover = false;
-        Dropzone.options.uploadDocumentForm = {
+        Dropzone.options.uploadLetterHeadForm = {
             autoProcessQueue: false,
-            maxFiles: 10,
+            maxFiles: 1,
             maxFilesize: 20,
             parallelUploads: 10,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
+            acceptedFiles: ".jpeg,.jpg,.png,.gif",
             addRemoveLinks: true,
             thumbnailWidth: 100,
             thumbnailHeight: 100,
         };
-
+        
         let options = {
             accept: (file, done) => {
-                console.log("Uploaded");
+                console.log("Uploaded");             
                 done();
             },
         };
 
-
-        var drzn1 = new Dropzone('#uploadDocumentForm', options);
+        var drzn1 = new Dropzone('#uploadLetterHeadForm', options);
 
         drzn1.on("maxfilesexceeded", (file) => {
-            $('#uploadDocumentModal .modal-content .uploadError').remove();
-            $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
+            $('#uploadLetterHeadForm .modal-content .uploadError').remove();
+            $('#uploadLetterHeadForm .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 1 file at a time.</div>');
             drzn1.removeFile(file);
             setTimeout(function(){
-                $('#uploadDocumentModal .modal-content .uploadError').remove();
+                $('#uploadLetterHeadForm .modal-content .uploadError').remove();
             }, 4000)
         });
 
@@ -257,20 +240,16 @@ var applicantUploadListTable = (function () {
             return file.previewElement.classList.add("dz-success");
         });
 
-        drzn1.on("complete", function(file) {
-            //drzn1.removeFile(file);
-        }); 
-
         drzn1.on('queuecomplete', function(){
-            $('#uploadDocBtn').removeAttr('disabled');
-            document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
+            $('#uploadHeaderBtn').removeAttr('disabled');
+            document.querySelector("#uploadHeaderBtn svg").style.cssText ="display: none;";
 
-            uploadDocumentModal.hide();
+            uploadLetterHeaderModal.hide();
             if(!dzError){
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Applicant document successfully uploaded.');
+                    $("#successModal .successModalDesc").html('Successfully uploaded.');
                     $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });      
                 
@@ -287,23 +266,56 @@ var applicantUploadListTable = (function () {
                 });
                 setTimeout(function(){
                     warningModal.hide();
-                    //window.location.reload();
+                    window.location.reload();
                 }, 5000);
             }
+        });
+
+        const uploadLetterHeaderModalEl = document.getElementById('uploadLetterHeaderModal')
+        uploadLetterHeaderModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#uploadLetterHeaderModal .acc__input-error').html('');
+            $('#uploadLetterHeaderModal input[name="display_name"]').val('');
+            $('#uploadLetterHeaderModal input[name="name"]').val('');
+            $('#uploadLetterHeaderModal input[name="for_letter"]').val('No');
+            $('#uploadLetterHeaderModal input[name="for_email"]').val('No');
+            $('#uploadLetterHeaderModal input.letter_for_options').prop('checked', false);
+            drzn1.removeAllFiles();
+        });
+
+        $('#uploadLetterHeaderModal [name="display_name"]').on('keyup paste change', function(e){
+            $('#uploadLetterHeaderModal [name="name"]').val($('#uploadLetterHeaderModal [name="display_name"]').val());
         })
 
-        $('#uploadDocBtn').on('click', function(e){
+        /*$('#uploadLetterHeaderModal [name="dispaly_for"]').on('change', function(e){
+            $('#uploadLetterHeaderModal [name="for"]').val($('#uploadLetterHeaderModal [name="dispaly_for"]').val());
+        })*/
+
+        $('#uploadLetterHeaderModal .letter_for_options').on('change', function(e){
+            $('#uploadLetterHeaderModal .letter_for_options').each(function(){
+                var inputVal = $(this).val();
+                if($(this).prop('checked')){
+                    $('#uploadLetterHeaderModal input[name="'+inputVal+'"]').val('Yes');
+                }else{
+                    $('#uploadLetterHeaderModal input[name="'+inputVal+'"]').val('No');
+                }
+            });
+        })
+
+        $('#uploadHeaderBtn').on('click', function(e){
             e.preventDefault();
-            document.querySelector('#uploadDocBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadDocBtn svg").style.cssText ="display: inline-block;";
-            
-            if($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
-                var hardCopyChecked = $('#uploadDocumentModal [name="hard_copy_check_status"]:checked').val();
-                $('#uploadDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
+            document.querySelector('#uploadHeaderBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#uploadHeaderBtn svg").style.cssText ="display: inline-block;";
+
+            var header_for = $('#uploadLetterHeaderModal .letter_for_options:checked').length;
+            alert(header_for);
+            return false;
+       
+            if($('#uploadLetterHeaderModal [name="name"]').val() != "" && header_for > 0){
+                $('#uploadLetterHeaderModal .modal-content .uploadError').remove();
                 drzn1.processQueue();
             }else{
-                $('#uploadDocumentModal .modal-content .uploadError').remove();
-                $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                $('#uploadLetterHeaderModal .modal-content .uploadError').remove();
+                $('#uploadLetterHeaderModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please fill out all required fields.</div>');
                 
                 createIcons({
                     icons,
@@ -312,90 +324,69 @@ var applicantUploadListTable = (function () {
                 });
 
                 setTimeout(function(){
-                    $('#uploadDocumentModal .modal-content .uploadError').remove();
-                    document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
-                    document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-                }, 5000)
+                    $('#uploadLetterHeaderModal .modal-content .uploadError').remove();
+                }, 5000);
+
+                document.querySelector('#uploadHeaderBtn').removeAttribute('disabled', 'disabled');
+                document.querySelector("#uploadHeaderBtn svg").style.cssText ="display: none;";
             }
             
         });
     }
     /* End Dropzone */
 
-    $('#applicantDocumentUploaders').on('click', function(e){
-        e.preventDefault();
-        
-        if($('.applicant_doc_ids:checked').length > 0){
-            uploadDocumentModal.show();
-            var documentSettingId = $('.applicant_doc_ids:checked').val();
-            $('#uploadDocumentModal input[name="document_setting_id"]').val(documentSettingId);
-            uploadsDropdown.hide();
-            $('.applicant_doc_ids').prop('checked', false);
-        }else{
-            warningModal.show();
-            $('#warningModal .warningModalTitle').html('Oops!');
-            $('#warningModal .warningModalDesc').html('Please a document type from the list firs.');
-            $('#warningModal .warningCloser').attr('data-action', 'DISMISS');
-
-            setTimeout(function(){
-                warningModal.hide();
-            }, 5000);
-        }
-    });
-
-    $('#applicantUploadListTable').on('click', '.delete_btn', function(e){
+    $('#letterHeaderListTable').on('click', '.delete_btn', function(e){
         e.preventDefault();
         var $btn = $(this);
         var uploadId = $btn.attr('data-id');
 
         confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to delete this document from applicant list? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', uploadId);
-            $("#confirmModal .agreeWith").attr('data-status', 'DELETEDOC');
+        document.getElementById("letterheadConfirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#letterheadConfirmModal .confModTitle").html("Are you sure?" );
+            $("#letterheadConfirmModal .confModDesc").html('Want to delete this file? Please click on agree to continue.');
+            $("#letterheadConfirmModal .agreeWith").attr('data-recordid', uploadId);
+            $("#letterheadConfirmModal .agreeWith").attr('data-status', 'DELETEDOC');
         });
     });
 
-    $('#applicantUploadListTable').on('click', '.restore_btn', function(e){
+    $('#letterHeaderListTable').on('click', '.restore_btn', function(e){
         e.preventDefault();
         var $btn = $(this);
         var uploadId = $btn.attr('data-id');
 
         confirmModal.show();
-        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to restore this document from the trash? Please click on agree to continue.');
-            $("#confirmModal .agreeWith").attr('data-recordid', uploadId);
-            $("#confirmModal .agreeWith").attr('data-status', 'RESTOREDOC');
+        document.getElementById("letterheadConfirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#letterheadConfirmModal .confModTitle").html("Are you sure?" );
+            $("#letterheadConfirmModal .confModDesc").html('Want to restore this file from the trash? Please click on agree to continue.');
+            $("#letterheadConfirmModal .agreeWith").attr('data-recordid', uploadId);
+            $("#letterheadConfirmModal .agreeWith").attr('data-status', 'RESTOREDOC');
         });
     });
 
-    $('#confirmModal .agreeWith').on('click', function(e){
+    $('#letterheadConfirmModal .agreeWith').on('click', function(e){
         e.preventDefault();
         let $agreeBTN = $(this);
         let recordid = $agreeBTN.attr('data-recordid');
         let action = $agreeBTN.attr('data-status');
-        let applicant = $agreeBTN.attr('data-applicant');
 
-        $('#confirmModal button').attr('disabled', 'disabled');
+        $('#letterheadConfirmModal button').attr('disabled', 'disabled');
 
         if(action == 'DELETEDOC'){
             axios({
                 method: 'delete',
-                url: route('admission.destory.uploads'),
-                data: {applicant : applicant, recordid : recordid},
+                url: route('letterheaderfooter.destory.uploads'),
+                data: {recordid : recordid},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
+                    $('#letterheadConfirmModal button').removeAttr('disabled');
                     confirmModal.hide();
-                    applicantUploadListTable.init();
+                    letterHeaderListTable.init();
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant uploaded document successfully deleted.');
+                        $('#successModal .successModalDesc').html('Uploaded file successfully deleted.');
                         $('#successModal .successCloser').attr('data-action', 'NONE');
                     });
 
@@ -409,19 +400,19 @@ var applicantUploadListTable = (function () {
         }else if(action == 'RESTOREDOC'){
             axios({
                 method: 'post',
-                url: route('admission.resotore.uploads'),
-                data: {applicant : applicant, recordid : recordid},
+                url: route('letterheaderfooter.resotore.uploads'),
+                data: {recordid : recordid},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
+                    $('#letterheadConfirmModal button').removeAttr('disabled');
                     confirmModal.hide();
-                    applicantUploadListTable.init();
+                    letterHeaderListTable.init();
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Applicant document successfully resotred.');
+                        $('#successModal .successModalDesc').html('File successfully resotred.');
                         $('#successModal .successCloser').attr('data-action', 'NONE');
                     });
 
@@ -436,5 +427,4 @@ var applicantUploadListTable = (function () {
             confirmModal.hide();
         }
     });
-
-})()
+})();

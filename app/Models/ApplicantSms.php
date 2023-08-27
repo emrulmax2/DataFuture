@@ -12,6 +12,7 @@ class ApplicantSms extends Model
 
     protected $fillable = [
         'applicant_id',
+        'sms_template_id',
         'subject',
         'sms',
         'created_by',
@@ -31,5 +32,9 @@ class ApplicantSms extends Model
     
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
+    }
+    
+    public function template(){
+        return $this->belongsTo(SmsTemplate::class, 'sms_template_id');
     }
 }

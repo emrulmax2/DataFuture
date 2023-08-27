@@ -222,6 +222,17 @@ var smtpSettingsListTable = (function () {
         });
     });
 
+
+    $('#editSmtpForm select[name="smtp_encryption"]').on('change', function(){
+        var $this = $(this);
+        var enc = $this.val();
+
+        if(enc == 'ssl'){
+            $('#editSmtpForm input[name="smtp_port"]').val(465);
+        }else{
+            $('#editSmtpForm input[name="smtp_port"]').val(587);
+        }
+    });
     
     $('#editSmtpForm').on('submit', function(e){
         e.preventDefault();
@@ -269,6 +280,17 @@ var smtpSettingsListTable = (function () {
                 }
             }
         });
+    });
+
+    $('#addSmtpForm select[name="smtp_encryption"]').on('change', function(){
+        var $this = $(this);
+        var enc = $this.val();
+
+        if(enc == 'ssl'){
+            $('#addSmtpForm input[name="smtp_port"]').val(465);
+        }else{
+            $('#addSmtpForm input[name="smtp_port"]').val(587);
+        }
     });
     
     $('#addSmtpForm').on('submit', function(e){

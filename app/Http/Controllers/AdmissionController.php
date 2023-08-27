@@ -61,13 +61,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\UserMailerJob;
+use App\Models\ApplicantLetter;
+use App\Models\EmailTemplate;
+use App\Models\LetterHeaderFooter;
 use App\Models\LetterSet;
 use App\Models\Signatory;
+use App\Models\SmsTemplate;
+
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdmissionController extends Controller
 {
     public function index(){
-
         return view('pages.students.admission.index', [
             'title' => 'Admission Management - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -155,7 +160,6 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
-    
     }
 
     public function show($applicantId){
@@ -484,6 +488,29 @@ class AdmissionController extends Controller
     }
 
     public function admissionProcess($applicantId){
+        $processGroup = [];
+        $processList = ProcessList::where('phase', 'Applicant')->orderBy('id', 'ASC')->get();
+        if(!empty($processList)):
+            $i = 1;
+            foreach($processList as $prl):
+                $taskIds = [];
+                foreach($prl->tasks as $tsk):
+                    $taskIds[] = $tsk->id;
+                endforeach;
+                if(!empty($taskIds)):
+                    $pendingTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->get();
+                    $completedTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->get();
+
+
+                    $processGroup[$i]['name'] = $prl->name;
+                    $processGroup[$i]['id'] = $prl->id;
+                    $processGroup[$i]['pendingTask'] = $pendingTask;
+                    $processGroup[$i]['completedTask'] = $completedTask;
+                endif;
+                $i++;
+            endforeach;
+        endif;
+
         return view('pages.students.admission.process', [
             'title' => 'Admission Management - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -492,11 +519,13 @@ class AdmissionController extends Controller
                 ['label' => 'Process', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
-            'process' => ProcessList::where('phase', 'Applicant')->first(),
+            'process' => ProcessList::where('phase', 'Applicant')->orderBy('id', 'ASC')->get(),
             'existingTask' => ApplicantTask::where('applicant_id', $applicantId)->pluck('task_list_id')->toArray(),
             'applicantPendingTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get(),
             'applicantCompletedTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+
+            'processGroup' => $processGroup
         ]);
     }
 
@@ -635,13 +664,33 @@ class AdmissionController extends Controller
     }
 
     public function admissionArchivedProcessList(Request $request){
+        $applicantId = (isset($request->applicantId) && $request->applicantId > 0 ? $request->applicantId : 0);
+        $processId = (isset($request->processId) && $request->processId > 0 ? $request->processId : 0);
+
+        $processList = ProcessList::where('id', $processId)->where('phase', 'Applicant')->orderBy('id', 'ASC')->get();
+        $taskIds = [];
+        if(!empty($processList)):
+            foreach($processList as $prl):
+                foreach($prl->tasks as $tsk):
+                    $taskIds[] = $tsk->id;
+                endforeach;
+            endforeach;
+        endif;
+
+
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = ApplicantTask::orderByRaw(implode(',', $sorts))->onlyTrashed();
+        $query = ApplicantTask::where('applicant_id', $applicantId);
+        if(!empty($taskIds)):
+            $query->whereIn('task_list_id', $taskIds);
+        else:
+            $query->where('task_list_id', '0');
+        endif;
+        $query->orderByRaw(implode(',', $sorts))->onlyTrashed();
 
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
@@ -1177,7 +1226,9 @@ class AdmissionController extends Controller
             'applicant' => Applicant::find($applicantId),
             'smtps' => ComonSmtp::all(),
             'letterSet' => LetterSet::all(),
-            'signatory' => Signatory::all()
+            'signatory' => Signatory::all(),
+            'smsTemplates' => SmsTemplate::all(),
+            'emailTemplates' => EmailTemplate::all()
         ]);
     }
 
@@ -1190,16 +1241,268 @@ class AdmissionController extends Controller
 
     public function admissionSendLetter(SendLetterRequest $request){
         $applicant_id = $request->applicant_id;
-        $issued_date = (!empty($request->issued_date) ? date('Y-m-d', strtotime($request->issued_date)) : '');
+        $applicant = Applicant::find($applicant_id);
+        $pin = time();
+
+        $issued_date = (!empty($request->issued_date) ? date('Y-m-d', strtotime($request->issued_date)) : date('Y-m-d'));
         $letter_set_id = $request->letter_set_id;
+        $letterSet = LetterSet::find($letter_set_id);
+        $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
+
         $letter_body = $request->letter_body;
         $is_email_or_attachment = (isset($request->is_email_or_attachment) && $request->is_email_or_attachment > 0 ? $request->is_email_or_attachment : 1);
 
         $signatory_id = $request->signatory_id;
-        $signatory = Signatory::find($signatory_id);
 
+        $data = [];
+        $data['applicant_id'] = $applicant_id;
+        $data['letter_set_id'] = $letter_set_id;
+        $data['pin'] = $pin;
+        $data['signatory_id'] = $signatory_id;
+        $data['is_email_or_attachment'] = $is_email_or_attachment;
+        $data['issued_by'] = auth()->user()->id;
+        $data['issued_date'] = $issued_date;
+        $data['created_by'] = auth()->user()->id;
+
+        $letter = ApplicantLetter::create($data);
+        $attachmentFiles = [];
+        if($letter):
+            $signatoryHTML = '';
+            if($signatory_id > 0):
+                $signatory = Signatory::find($signatory_id);
+                $signatoryHTML .= '<p>';
+                    $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
+                    if(isset($signatory->signature) && !empty($signatory->signature)):
+                        $signatureImage = asset('storage/signatories/'.$signatory->signature);
+                        $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
+                    endif;
+                    $signatoryHTML .= $signatory->signatory_name.'<br/>';
+                    $signatoryHTML .= $signatory->signatory_post.'<br/>';
+                    $signatoryHTML .= 'London Churchill College';
+                $signatoryHTML .= '</p>';
+            else:
+                $signatoryHTML .= '<p>';
+                    $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
+                    $signatoryHTML .= 'The Academic Admin Dept.<br/>';
+                    $signatoryHTML .= 'London Churchill College';
+                $signatoryHTML .= '</p>';
+            endif;
+
+            $emailHTML = '';
+            $emailHTML .= 'Dear '.$applicant->first_name.' '.$applicant->last_name.', <br/>';
+            if($is_email_or_attachment == 2):
+                $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
+
+                $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
+                $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+                $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+                $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+                $PDFHTML = '';
+                $PDFHTML .= '<html>';
+                    $PDFHTML .= '<head>';
+                        $PDFHTML .= '<title>'.$letter_title.'</title>';
+                        $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                        $PDFHTML .= '<style>
+                                        table{margin-left: 0px;}
+                                        figure{margin: 0;}
+                                        @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
+                                        header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
+                                        footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                        .pageCounter{position: relative;}
+                                        .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                        .pinRow td{border-bottom: 1px solid gray;}
+                                        .text-center{text-align: center;}
+                                        .text-left{text-align: left;}
+                                        .text-right{text-align: right;}
+                                    </style>';
+                    $PDFHTML .= '</head>';
+                    $PDFHTML .= '<body>';
+                        if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
+                            $PDFHTML .= '<header>';
+                                $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                            $PDFHTML .= '</header>';
+                        endif;
+
+                        $PDFHTML .= '<footer>';
+                            $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
+                                        font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
+                                if($LetterFooters->count() > 0):
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
+                                            $numberOfPartners = $LetterFooters->count();
+                                            $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
+
+                                            foreach($LetterFooters as $lf):
+                                                $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                            endforeach;
+                                        $PDFHTML .= '</td>';
+                                    $PDFHTML .= '</tr>';
+                                endif;
+                                $PDFHTML .= '<tr class="pinRow">';
+                                    $PDFHTML .= '<td style="padding-bottom: 3px;">';
+                                        $PDFHTML .= '<span class="pageCounter text-left"></span>';
+                                    $PDFHTML .= '</td>';
+                                    $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
+                                        $PDFHTML .= 'pin - '.$pin;
+                                    $PDFHTML .= '</td>';
+                                $PDFHTML .= '</tr>';
+
+                                if(!empty($regNo) || !empty($regAt)):
+                                $PDFHTML .= '<tr class="regInfoRow">';
+                                    $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
+                                        $PDFHTML .= (!empty($regNo) ? 'Company Reg. No. '.$regNo->value : '');
+                                        $PDFHTML .= (!empty($regAt) ? (!empty($regNo) ? ', ' : '').$regAt->value : '');
+                                    $PDFHTML .= '</td>';
+                                $PDFHTML .= '</tr>';
+                                endif;
+                            $PDFHTML .= '</table>';
+                        $PDFHTML .= '</footer>';
+
+                        $PDFHTML .= $letter_body;
+                        if($signatory_id > 0):
+                            $signatory = Signatory::find($signatory_id);
+                            $PDFHTML .= '<p>';
+                                $PDFHTML .= '<strong>Best Regards,</strong><br/>';
+                                if(isset($signatory->signature) && !empty($signatory->signature)):
+                                    $signatureImage = asset('storage/signatories/'.$signatory->signature); 
+                                    $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
+                                endif;
+                                $PDFHTML .= $signatory->signatory_name.'<br/>';
+                                $PDFHTML .= $signatory->signatory_post.'<br/>';
+                                $PDFHTML .= 'London Churchill College';
+                            $PDFHTML .= '</p>';
+                        endif;
+                    $PDFHTML .= '</body>';
+                $PDFHTML .= '</html>';
+
+                $fileName = time().'_'.$applicant_id.'_Letter.pdf';
+                $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
+                    ->setPaper('a4', 'portrait')
+                    ->setWarnings(false)
+                    ->save(storage_path('app/public/applicants/'.$applicant_id.'/').$fileName);
+                $attachmentFiles[] = [
+                    "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$fileName,
+                    "nameinfo" => $fileName,
+                    "mimeinfo" => 'application/pdf'
+                ];
+                
+                $data = [];
+                $data['applicant_id'] = $applicant_id;
+                $data['hard_copy_check'] = 0;
+                $data['doc_type'] = 'pdf';
+                $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$fileName);
+                $data['display_file_name'] = $letter_title;
+                $data['current_file_name'] = $fileName;
+                $data['created_by'] = auth()->user()->id;
+                $applicantDocument = ApplicantDocument::create($data);
+
+                if($applicantDocument):
+                    $noteUpdate = ApplicantLetter::where('id', $letter->id)->update([
+                        'applicant_document_id' => $applicantDocument->id
+                    ]);
+                endif;
+            else:
+                $emailHTML .= $letter_body;
+            endif;
+            $emailHTML .= $signatoryHTML;
+
+            $configuration = [
+                'smtp_host'    => 'smtp.gmail.com',
+                'smtp_port'    => '587',
+                'smtp_username'  => 'no-reply@lcc.ac.uk',
+                'smtp_password'  => 'churchill1',
+                'smtp_encryption'  => 'tls',
+                
+                'from_email'    => 'no-reply@lcc.ac.uk',
+                'from_name'    =>  'London Churchill College',
+            ];
+            UserMailerJob::dispatch($configuration, $applicant->users->email, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+
+            return response()->json(['message' => 'Letter successfully generated and distributed.'], 200);
+        else:
+            return response()->json(['message' => 'Something went wrong. Please try latter.'], 422);
+        endif;
+    }
+
+    public function admissionCommunicationLetterList(Request $request){
+        $applicantId = (isset($request->applicantId) && !empty($request->applicantId) ? $request->applicantId : 0);
+        $queryStr = (isset($request->queryStrCML) && $request->queryStrCML != '' ? $request->queryStrCML : '');
+        $status = (isset($request->statusCML) && $request->statusCML > 0 ? $request->statusCML : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+
+        $query = DB::table('applicant_letters as al')
+                        ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys')
+                        ->leftJoin('letter_sets as ls', 'al.letter_set_id', '=', 'ls.id')
+                        ->leftJoin('signatories as sg', 'al.signatory_id', '=', 'sg.id')
+                        ->leftJoin('users as ur', 'al.issued_by', '=', 'ur.id')
+                        ->where('al.applicant_id', '=', $applicantId);
+        if(!empty($queryStr)):
+            $query->where('ls.letter_type','LIKE','%'.$queryStr.'%');
+            $query->orWhere('ls.letter_title','LIKE','%'.$queryStr.'%');
+            $query->orWhere('sg.signatory_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('sg.signatory_post','LIKE','%'.$queryStr.'%');
+        endif;
+        if($status == 2):
+            $query->whereNotNull('al.deleted_at');
+        else:
+            $query->whereNull('al.deleted_at');
+        endif;
+        $query->orderByRaw(implode(',', $sorts));
+
+        $total_rows = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
+        $Query = $query->offset($offset)
+               ->limit($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'letter_type' => $list->letter_type,
+                    'letter_title' => $list->letter_title,
+                    'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
+                    'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
+                    'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function admissionDestroyLetter(Request $request){
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+
+        ApplicantLetter::find($recordid)->delete();
+
+        return response()->json(['message' => 'Successfully deleted'], 200);
+    }
+
+    public function admissionRestoreLetter(Request $request) {
+        $applicant = $request->applicant;
+        $recordid = $request->recordid;
+
+        ApplicantLetter::where('id', $recordid)->withTrashed()->restore();
+        return response()->json(['message' => 'Successfully restored'], 200);
     }
 
     public function admissionCommunicationSendMail(SendEmailRequest $request){
@@ -1210,6 +1513,7 @@ class AdmissionController extends Controller
         $applicantEmail = ApplicantEmail::create([
             'applicant_id' => $applicantID,
             'comon_smtp_id' => $request->comon_smtp_id,
+            'email_template_id' => (isset($request->email_template_id) && $request->email_template_id > 0 ? $request->email_template_id : NULL),
             'subject' => $request->subject,
             'body' => $request->body,
             'created_by' => auth()->user()->id,
@@ -1228,22 +1532,32 @@ class AdmissionController extends Controller
             'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
         ];
 
-
-        // $configuration = [
-        //     'smtp_host'    => 'sandbox.smtp.mailtrap.io',
-        //     'smtp_port'    => 2525,
-        //     'smtp_username'  => '89141c3a34ccb1',
-        //     'smtp_password'  => 'c3a83169586b87',
-        //     'smtp_encryption'  => 'tls',
-        //     'from_email'    => $commonSmtp->smtp_user,
-        //     'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
-        // ];
-
-        UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject,$request->body));
-
         if($applicantEmail):
+            $emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+
+            $MAILHTML = '';
+            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name)):
+                $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
+                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
+                $MAILHTML .= '</div>';
+            endif;
+            $MAILHTML .= $request->body;
+            if($emailFooters->count() > 0):
+                $MAILHTML .= '<div style="text-align: center; vertical-align: middle; margin: 20px 0 0 0;">';
+                    $numberOfPartners = $emailFooters->count();
+                    $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
+
+                    foreach($emailFooters as $lf):
+                        $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                    endforeach;
+                $MAILHTML .= '</div>';
+            endif;
+
             if($request->hasFile('documents')):
                 $documents = $request->file('documents');
+                $docCounter = 1;
+                $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
                     $path = $document->storeAs('public/applicants/'.$applicantID.'/', $documentName);
@@ -1264,8 +1578,18 @@ class AdmissionController extends Controller
                             'applicant_document_id' => $applicantDocument->id,
                             'created_by' => auth()->user()->id
                         ]);
+
+                        $attachmentInfo[$docCounter++] = [
+                            "pathinfo" => 'public/applicants/'.$applicantID.'/'.$documentName,
+                            "nameinfo" => $document->getClientOriginalName(),
+                            "mimeinfo" => $document->getMimeType()
+                        ];
+                        $docCounter++;
                     endif;
                 endforeach;
+                UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+            else:
+                UserMailerJob::dispatch($configuration, $Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, []));
             endif;
             return response()->json(['message' => 'Email successfully sent to Applicant'], 200);
         else:
@@ -1328,13 +1652,15 @@ class AdmissionController extends Controller
 
     public function admissionCommunicationSendSms(SendSmsRequest $request){
         $applicantID = $request->applicant_id;
+        $smsTemplateID = (isset($request->sms_template_id) && $request->sms_template_id > 0 ? $request->sms_template_id : NULL);
         $applicantSms = ApplicantSms::create([
             'applicant_id' => $applicantID,
+            'sms_template_id' => $smsTemplateID,
             'subject' => $request->subject,
             'sms' => $request->sms,
             'created_by' => auth()->user()->id,
         ]);
-
+        
         if($applicantSms):
             $applicantContact = ApplicantContact::where('applicant_id', $applicantID)->get()->first();
             if(isset($applicantContact->mobile) && !empty($applicantContact->mobile)):
@@ -1408,6 +1734,7 @@ class AdmissionController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'template' => isset($list->template->sms_title) && !empty($list->template->sms_title) ? $list->template->sms_title : '',
                     'subject' => $list->subject,
                     'sms' => (strlen(strip_tags($list->sms)) > 40 ? substr(strip_tags($list->sms), 0, 40).'...' : strip_tags($list->sms)),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
@@ -1447,6 +1774,13 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function admissionGetMailTemplate(Request $request){
+        $emailTemplateID = $request->emailTemplateID;
+        $emailTemplate = EmailTemplate::find($emailTemplateID);
+
+        return response()->json(['row' => $emailTemplate], 200);
     }
 
     public function admissionCommunicationMailShow(Request $request){
@@ -1504,12 +1838,27 @@ class AdmissionController extends Controller
         return response()->json(['message' => 'Successfully restored'], 200);
     }
 
+    public function admissionGetSmsTemplate(Request $request){
+        $smsTemplateId = $request->smsTemplateId;
+        $smsTemplate = SmsTemplate::find($smsTemplateId);
+
+        return response()->json(['row' => $smsTemplate], 200);
+    }
+
     public function admissionCommunicationSmsShow(Request $request){
         $mailId = $request->recordId;
         $sms = ApplicantSms::find($mailId);
         $heading = 'Mail Subject: <u>'.$sms->subject.'</u>';
         $html = '';
         $html .= '<div class="grid grid-cols-12 gap-4">';
+            if(isset($sms->template->sms_title) && !empty($sms->template->sms_title)):
+                $html .= '<div class="col-span-3">';
+                    $html .= '<div class="text-slate-500 font-medium">Template</div>';
+                $html .= '</div>';
+                $html .= '<div class="col-span-9">';
+                    $html .= '<div>'.(isset($sms->template->sms_title) ? $sms->template->sms_title : 'Unknown').'</div>';
+                $html .= '</div>';
+            endif;
             $html .= '<div class="col-span-3">';
                 $html .= '<div class="text-slate-500 font-medium">Issued Date</div>';
             $html .= '</div>';

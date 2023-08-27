@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('applicant_id');
             $table->unsignedBigInteger('comon_smtp_id');
+            $table->unsignedBigInteger('email_template_id')->nullable();
             $table->string('subject', 191);
             $table->longText('body');
 

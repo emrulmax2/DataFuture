@@ -4,14 +4,14 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
-var letterSettingsListTable = (function () {
+var emailTemplateListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-LS").val() != "" ? $("#query-LS").val() : "";
-        let status = $("#status-LS").val() != "" ? $("#status-LS").val() : "";
+        let querystr = $("#query-EMAIL").val() != "" ? $("#query-EMAIL").val() : "";
+        let status = $("#status-EMAIL").val() != "" ? $("#status-EMAIL").val() : "";
         
-        let tableContent = new Tabulator("#letterSettingsListTable", {
-            ajaxURL: route("letter.set.list"),
+        let tableContent = new Tabulator("#emailTemplateListTable", {
+            ajaxURL: route("email.template.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -30,13 +30,13 @@ var letterSettingsListTable = (function () {
                     width: "120",
                 },
                 {
-                    title: "Letter Type",
-                    field: "letter_type",
+                    title: "Template Title",
+                    field: "email_title",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Letter Title",
-                    field: "letter_title",
+                    title: "Description",
+                    field: "description",
                     headerHozAlign: "left",
                 },
                 {
@@ -49,7 +49,7 @@ var letterSettingsListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editLetterModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmailModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -79,29 +79,29 @@ var letterSettingsListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-LS").on("click", function (event) {
+        $("#tabulator-export-csv-EMAIL").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-LS").on("click", function (event) {
+        $("#tabulator-export-json-EMAIL").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-LS").on("click", function (event) {
+        $("#tabulator-export-xlsx-EMAIL").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Document Settings Details",
+                sheetName: "Email Template Details",
             });
         });
 
-        $("#tabulator-export-html-LS").on("click", function (event) {
+        $("#tabulator-export-html-EMAIL").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-LS").on("click", function (event) {
+        $("#tabulator-print-EMAIL").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -114,32 +114,32 @@ var letterSettingsListTable = (function () {
 
 
 (function(){
-    if ($("#letterSettingsListTable").length) {
+    if ($("#emailTemplateListTable").length) {
         // Init Table
-        letterSettingsListTable.init();
+        emailTemplateListTable.init();
 
         // Filter function
         function filterHTMLForm() {
-            letterSettingsListTable.init();
+            emailTemplateListTable.init();
         }
 
         // On click go button
-        $("#tabulator-html-filter-go-LS").on("click", function (event) {
+        $("#tabulator-html-filter-go-EMAIL").on("click", function (event) {
             filterHTMLForm();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-LS").on("click", function (event) {
-            $("#query-LS").val("");
-            $("#status-LS").val("1");
+        $("#tabulator-html-filter-reset-EMAIL").on("click", function (event) {
+            $("#query-EMAIL").val("");
+            $("#status-EMAIL").val("1");
             filterHTMLForm();
         });
     }
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const addLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addLetterModal"));
-    const editLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editLetterModal"));
+    const addEmailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmailModal"));
+    const editEmailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmailModal"));
 
     let addEditor;
     if($("#addEditor").length > 0){
@@ -154,36 +154,24 @@ var letterSettingsListTable = (function () {
     let editEditor;
     if($("#editEditor").length > 0){
         const el = document.getElementById('editEditor');
-        ClassicEditor.create(el, {
-            toolbar: {
-                items: [
-                    'undo', 'redo',
-                    '|', 'heading',
-                    '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
-                    '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
-                    '|', 'link', 'uploadImage', 'blockQuote', 'codeBlock',
-                    '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
-                ],
-                shouldNotGroupWhenFull: false
-            }
-        }).then(newEditor => {
+        ClassicEditor.create(el).then(newEditor => {
             editEditor = newEditor;
         }).catch((error) => {
             console.error(error);
         });
     }
 
-    const addLetterModalEl = document.getElementById('addLetterModal')
-    addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal input').val('');
+    const addEmailModalEl = document.getElementById('addEmailModal')
+    addEmailModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addEmailModal .acc__input-error').html('');
+        $('#addEmailModal input').val('');
         addEditor.setData('');
     });
 
-    const editLetterModalEl = document.getElementById('editLetterModal')
-    editLetterModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editLetterModal .acc__input-error').html('');
-        $('#editLetterModal .modal-body input').val('');
+    const editEmailModalEl = document.getElementById('editEmailModal')
+    editEmailModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editEmailModal .acc__input-error').html('');
+        $('#editEmailModal .modal-body input').val('');
         editEditor.setData('');
     });
 
@@ -192,45 +180,45 @@ var letterSettingsListTable = (function () {
         $('#confirmModal .agreeWith').attr('data-action', 'none');
     });
 
-    $('#addLetterForm').on('submit', function(e){
+    $('#addEmailForm').on('submit', function(e){
         e.preventDefault();
-        const form = document.getElementById('addLetterForm');
+        const form = document.getElementById('addEmailForm');
     
-        document.querySelector('#saveLetterSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveLetterSet svg").style.cssText ="display: inline-block;";
+        document.querySelector('#saveEmailSet').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveEmailSet svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('letter.set.store'),
+            url: route('email.template.store'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#saveLetterSet').removeAttribute('disabled');
-            document.querySelector("#saveLetterSet svg").style.cssText = "display: none;";
+            document.querySelector('#saveEmailSet').removeAttribute('disabled');
+            document.querySelector("#saveEmailSet svg").style.cssText = "display: none;";
             
             if (response.status == 200) {
-                addLetterModal.hide();
+                addEmailModal.hide();
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Letter set successfully inserted.');
+                    $("#successModal .successModalDesc").html('Email Template successfully inserted.');
                 });                
                 
                 setTimeout(function(){
                     successModal.hide();
                 }, 3000);
             }
-            letterSettingsListTable.init();
+            emailTemplateListTable.init();
         }).catch(error => {
-            document.querySelector('#saveLetterSet').removeAttribute('disabled');
-            document.querySelector("#saveLetterSet svg").style.cssText = "display: none;";
+            document.querySelector('#saveEmailSet').removeAttribute('disabled');
+            document.querySelector("#saveEmailSet svg").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addLetterForm .${key}`).addClass('border-danger')
-                        $(`#addLetterForm  .error-${key}`).html(val)
+                        $(`#addEmailForm .${key}`).addClass('border-danger')
+                        $(`#addEmailForm  .error-${key}`).html(val)
                     }
                 } else {
                     console.log('error');
@@ -239,13 +227,13 @@ var letterSettingsListTable = (function () {
         });
     });
 
-    $('#letterSettingsListTable').on('click', '.edit_btn', function(){
+    $('#emailTemplateListTable').on('click', '.edit_btn', function(){
         var $btn = $(this);
         var recordId = $btn.attr('data-id');
 
         axios({
             method: "get",
-            url: route("letter.set.edit", recordId),
+            url: route("email.template.edit", recordId),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -253,10 +241,9 @@ var letterSettingsListTable = (function () {
             if (response.status == 200) {
                 let dataset = response.data;
                 
-                $('#editLetterModal input[name="letter_type"]').val(dataset.letter_type ? dataset.letter_type : '');
-                $('#editLetterModal input[name="letter_title"]').val(dataset.letter_title ? dataset.letter_title : '');
+                $('#editEmailModal input[name="email_title"]').val(dataset.email_title ? dataset.email_title : '');
                 editEditor.setData(dataset.description ? dataset.description : '');
-                $('#editLetterModal input[name="id"]').val(recordId);
+                $('#editEmailModal input[name="id"]').val(recordId);
             }
         }).catch((error) => {
             console.log(error);
@@ -264,45 +251,45 @@ var letterSettingsListTable = (function () {
     });
 
 
-    $('#editLetterForm').on('submit', function(e){
+    $('#editEmailForm').on('submit', function(e){
         e.preventDefault();
-        const form = document.getElementById('editLetterForm');
+        const form = document.getElementById('editEmailForm');
     
-        document.querySelector('#editLetterSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#editLetterSet svg").style.cssText ="display: inline-block;";
+        document.querySelector('#editEmailSet').setAttribute('disabled', 'disabled');
+        document.querySelector("#editEmailSet svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('letter.set.update'),
+            url: route('email.template.update'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#editLetterSet').removeAttribute('disabled');
-            document.querySelector("#editLetterSet svg").style.cssText = "display: none;";
+            document.querySelector('#editEmailSet').removeAttribute('disabled');
+            document.querySelector("#editEmailSet svg").style.cssText = "display: none;";
             
             if (response.status == 200) {
-                editLetterModal.hide();
+                editEmailModal.hide();
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Letter set successfully updated.');
+                    $("#successModal .successModalDesc").html('Email Template successfully updated.');
                 });                
                 
                 setTimeout(function(){
                     successModal.hide();
                 }, 3000);
             }
-            letterSettingsListTable.init();
+            emailTemplateListTable.init();
         }).catch(error => {
-            document.querySelector('#editLetterSet').removeAttribute('disabled');
-            document.querySelector("#editLetterSet svg").style.cssText = "display: none;";
+            document.querySelector('#editEmailSet').removeAttribute('disabled');
+            document.querySelector("#editEmailSet svg").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editLetterForm .${key}`).addClass('border-danger')
-                        $(`#editLetterForm  .error-${key}`).html(val)
+                        $(`#editEmailForm .${key}`).addClass('border-danger')
+                        $(`#editEmailForm  .error-${key}`).html(val)
                     }
                 } else {
                     console.log('error');
@@ -312,7 +299,7 @@ var letterSettingsListTable = (function () {
     });
 
     // Delete Course
-    $('#letterSettingsListTable').on('click', '.delete_btn', function(){
+    $('#emailTemplateListTable').on('click', '.delete_btn', function(){
         let $statusBTN = $(this);
         let rowID = $statusBTN.attr('data-id');
 
@@ -326,7 +313,7 @@ var letterSettingsListTable = (function () {
     });
 
     // Restore Course
-    $('#letterSettingsListTable').on('click', '.restore_btn', function(){
+    $('#emailTemplateListTable').on('click', '.restore_btn', function(){
         let $statusBTN = $(this);
         let dataID = $statusBTN.attr('data-id');
 
@@ -350,7 +337,7 @@ var letterSettingsListTable = (function () {
         if(action == 'DELETE'){
             axios({
                 method: 'delete',
-                url: route('letter.set.destory', recordID),
+                url: route('email.template.destory', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -360,17 +347,17 @@ var letterSettingsListTable = (function () {
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set item successfully deleted!');
+                        $('#successModal .successModalDesc').html('Email Template successfully deleted!');
                     });
                 }
-                letterSettingsListTable.init();
+                emailTemplateListTable.init();
             }).catch(error =>{
                 console.log(error)
             });
         } else if(action == 'RESTORE'){
             axios({
                 method: 'post',
-                url: route('letter.set.restore', recordID),
+                url: route('email.template.restore', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -380,10 +367,10 @@ var letterSettingsListTable = (function () {
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set item successfully restored!');
+                        $('#successModal .successModalDesc').html('Email Template successfully restored!');
                     });
                 }
-                letterSettingsListTable.init();
+                emailTemplateListTable.init();
             }).catch(error =>{
                 console.log(error)
             });

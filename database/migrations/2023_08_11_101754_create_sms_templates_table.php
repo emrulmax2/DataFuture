@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('applicant_sms', function (Blueprint $table) {
+        Schema::create('sms_templates', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('applicant_id');
-            $table->unsignedBigInteger('sms_template_id')->nullable();
-            $table->string('subject', 191);
-            $table->text('sms');
+            $table->string('sms_title', 191);
+            $table->text('description');
 
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('applicant_sms');
+        Schema::dropIfExists('sms_templates');
     }
 };

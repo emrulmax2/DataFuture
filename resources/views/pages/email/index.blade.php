@@ -6,29 +6,29 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Common SMTP</h2>
+        <h2 class="text-lg font-medium mr-auto">Email Template</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addSmtpModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New SMTP</button>
+            <button data-tw-toggle="modal" data-tw-target="#addEmailModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Email</button>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
+            <form id="tabulatorFilterForm-LS" class="xl:flex sm:mr-auto" >
                 <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                     <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                    <input id="query-EMAIL" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
                 </div>
                 <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                     <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                    <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                    <select id="status-EMAIL" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                         <option value="1">Active</option>
                         <option value="2">Archived</option>
                     </select>
                 </div>
                 <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                    <button id="tabulator-html-filter-go-EMAIL" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                    <button id="tabulator-html-filter-reset-EMAIL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                 </div>
             </form>
             <div class="flex mt-5 sm:mt-0">
@@ -42,22 +42,22 @@
                     <div class="dropdown-menu w-40">
                         <ul class="dropdown-content">
                             <li>
-                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                <a id="tabulator-export-csv-EMAIL" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                 </a>
                             </li>
                             <li>
-                                <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
+                                <a id="tabulator-export-json-EMAIL" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                 </a>
                             </li>
                             <li>
-                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                <a id="tabulator-export-xlsx-EMAIL" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                 </a>
                             </li>
                             <li>
-                                <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
+                                <a id="tabulator-export-html-EMAIL" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                 </a>
                             </li>
@@ -67,63 +67,35 @@
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
-            <div id="smtpSettingsListTable" class="mt-5 table-report table-report--tabulator"></div>
+            <div id="emailTemplateListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: HTML Table Data -->
 
     <!-- BEGIN: Edit Modal -->
-    <div id="editSmtpModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="editSmtpForm" enctype="multipart/form-data">
+    <div id="editEmailModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editEmailForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit SMTP</h2>
+                        <h2 class="font-medium text-base mr-auto">Edit Email</h2>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="edit_smtp_user" class="form-label">SMTP Email <span class="text-danger">*</span></label>
-                            <input id="edit_smtp_user" type="text" name="smtp_user" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_user text-danger mt-2"></div>
+                        <div class="mt-3">
+                            <label for="edit_email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
+                            <input id="edit_email_title" type="text" name="email_title" class="form-control w-full">
+                            <div class="acc__input-error error-email_title text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_smtp_pass" class="form-label">SMTP Password <span class="text-danger">*</span></label>
-                            <input id="edit_smtp_pass" type="password" name="smtp_pass" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_pass text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_smtp_host" class="form-label">SMTP Host <span class="text-danger">*</span></label>
-                            <input id="edit_smtp_host" type="text" name="smtp_host" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_host text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_smtp_port" class="form-label">SMTP Port <span class="text-danger">*</span></label>
-                            <input id="edit_smtp_port" type="text" name="smtp_port" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_port text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_smtp_encryption" class="form-label">SMTP Encryption <span class="text-danger">*</span></label>
-                            <select id="edit_smtp_encryption" name="smtp_encryption" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="tls">TLS</option>
-                                <option value="ssl">SSL</option>
-                            </select>
-                            <div class="acc__input-error error-smtp_encryption text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_smtp_authentication" class="form-label">SMTP Authentication <span class="text-danger">*</span></label>
-                            <select id="edit_smtp_authentication" name="smtp_authentication" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="true">True</option>
-                                <option value="false">False</option>
-                            </select>
-                            <div class="acc__input-error error-smtp_authentication text-danger mt-2"></div>
+                            <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" id="editEditor"></textarea>
+                            <div class="acc__input-error error-description text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateSMTP" class="btn btn-primary w-auto">     
-                            Update                      
+                        <button type="submit" id="editEmailSet" class="btn btn-primary w-auto">     
+                            Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
@@ -146,54 +118,28 @@
     <!-- END: Edit Modal -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="addSmtpModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="addSmtpForm" enctype="multipart/form-data">
+    <div id="addEmailModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="addEmailForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add SMTP</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Email</h2>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="smtp_user" class="form-label">SMTP Email <span class="text-danger">*</span></label>
-                            <input id="smtp_user" type="text" name="smtp_user" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_user text-danger mt-2"></div>
+                        <div class="mt-3">
+                            <label for="email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
+                            <input id="email_title" type="text" name="email_title" class="form-control w-full">
+                            <div class="acc__input-error error-email_title text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="smtp_pass" class="form-label">SMTP Password <span class="text-danger">*</span></label>
-                            <input id="smtp_pass" type="password" name="smtp_pass" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_pass text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="smtp_host" class="form-label">SMTP Host <span class="text-danger">*</span></label>
-                            <input id="smtp_host"  value="smtp.gmail.com" type="text" name="smtp_host" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_host text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="smtp_port" class="form-label">SMTP Port <span class="text-danger">*</span></label>
-                            <input id="smtp_port" value="587" type="text" name="smtp_port" class="form-control w-full">
-                            <div class="acc__input-error error-smtp_port text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="smtp_encryption" class="form-label">SMTP Encryption <span class="text-danger">*</span></label>
-                            <select id="smtp_encryption" name="smtp_encryption" class="form-control w-full">
-                                <option selected value="tls">TLS</option>
-                                <option value="ssl">SSL</option>
-                            </select>
-                            <div class="acc__input-error error-smtp_encryption text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="smtp_authentication" class="form-label">SMTP Authentication <span class="text-danger">*</span></label>
-                            <select id="smtp_authentication" name="smtp_authentication" class="form-control w-full">
-                                <option selected value="true">True</option>
-                                <option value="false">False</option>
-                            </select>
-                            <div class="acc__input-error error-smtp_authentication text-danger mt-2"></div>
+                            <label for="addEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" id="addEditor"></textarea>
+                            <div class="acc__input-error error-description text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveSMTP" class="btn btn-primary w-auto">     
+                        <button type="submit" id="saveEmailSet" class="btn btn-primary w-auto">     
                             Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
@@ -226,7 +172,7 @@
                         <div class="text-slate-500 mt-2 successModalDesc"></div>
                     </div>
                     <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="successDismissBtn btn btn-primary w-24">Ok</button>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
                     </div>
                 </div>
             </div>
@@ -256,5 +202,5 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/common-smtp.js')
+    @vite('resources/js/email-template.js')
 @endsection

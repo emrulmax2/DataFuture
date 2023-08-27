@@ -13,13 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('applicant_sms', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('applicant_id');
-            $table->unsignedBigInteger('sms_template_id')->nullable();
-            $table->string('subject', 191);
-            $table->text('sms');
-
+        Schema::create('course_creation_qualifications', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name',45);
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
@@ -34,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('applicant_sms');
+        Schema::dropIfExists('course_creation_qualifications');
     }
 };
