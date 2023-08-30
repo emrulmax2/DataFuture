@@ -30,7 +30,7 @@
     </div>
     @if (session('verifymessage'))
         <!-- BEGIN: Notification Content -->
-        <div id="success-notification-content" class="toastify-content hidden flex">
+        <div id="success-notification-content" class="toastify-content hidden">
             <i class="text-success" data-lucide="check-circle"></i>
             <div class="ml-4 mr-4">
                 <div class="font-medium">Email Sent!</div>
