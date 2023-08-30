@@ -100,4 +100,40 @@ class Applicant extends Model
     public function getFullNameAttribute() {
         return $this->first_name . ' ' . $this->last_name.'';
     }
+
+    public function emails(){
+        return $this->hasMany(ApplicantEmail::class, 'applicant_id', 'id');
+    }
+
+    public function letters(){
+        return $this->hasMany(ApplicantLetter::class, 'applicant_id', 'id');
+    }
+
+    public function sms(){
+        return $this->hasMany(ApplicantSms::class, 'applicant_id', 'id');
+    }
+
+    public function docses(){
+        return $this->hasMany(ApplicantDocument::class, 'applicant_id', 'id');
+    }
+
+    public function notes(){
+        return $this->hasMany(ApplicantNote::class, 'applicant_id', 'id');
+    }
+
+    public function pendingTasks(){
+        $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
+        $tasks->getQuery()->where('status', '=', 'Pending');
+        return $tasks;
+    }
+
+    public function completedTasks(){
+        $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
+        $tasks->getQuery()->where('status', '=', 'Completed');
+        return $tasks;
+    }
+
+    public function allTasks(){
+       return $this->hasMany(ApplicantTask::class, 'applicant_id');
+    }
 }
