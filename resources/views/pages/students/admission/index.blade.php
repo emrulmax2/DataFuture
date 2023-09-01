@@ -67,8 +67,8 @@
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Status</div>
                         <select id="statuses-ADM" name="statuses[]" class="w-full tom-selects" multiple>
-                            @if(!empty($statuses))
-                                @foreach($statuses as $sts)
+                            @if(!empty($allStatuses))
+                                @foreach($allStatuses as $sts)
                                     <option value="{{ $sts->id }}">{{ $sts->name }}</option>
                                 @endforeach
                             @endif

@@ -70,17 +70,31 @@ use App\Models\SmsTemplate;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
+use Illuminate\Support\Facades\Cache;
+
 class AdmissionController extends Controller
 {
     public function index(){
+        
+        $semesters = Cache::get('semesters', function () {
+            return Semester::all()->sortByDesc("name");
+        });
+        $courses = Cache::get('courses', function () {
+            return Course::all();
+        });
+        $statuses = Cache::get('statuses', function () {
+            return Status::where('type', 'Applicant')->get();
+        });
+        
+        
         return view('pages.students.admission.index', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Admission Management - X LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
             ],
-            'semesters' => Semester::all(),
-            'courses' => Course::all(),
-            'statuses' => Status::where('type', 'Applicant')->get(),
+            'semesters' => $semesters,
+            'courses' => $courses,
+            'allStatuses' => $statuses,
         ]);
     }
 
@@ -119,7 +133,7 @@ class AdmissionController extends Controller
         if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
         if(!empty($lastname)): $query->where('last_name', 'LIKE', '%'.$lastname.'%'); endif;
         if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
-        if(!empty($statuses)): $query->whereIn('status_id', $statuses); endif;
+        if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
         if(!empty($semesters) || !empty($courseCreationId)):
             $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId){
                 if(!empty($semesters)): $qs->whereIn('semester_id', $semesters); endif;
@@ -170,6 +184,7 @@ class AdmissionController extends Controller
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'titles' => Title::all(),
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
@@ -499,12 +514,14 @@ class AdmissionController extends Controller
                 endforeach;
                 if(!empty($taskIds)):
                     $pendingTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->get();
+                    $inProgressTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'In Progress')->get();
                     $completedTask = ApplicantTask::where('applicant_id', $applicantId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->get();
 
 
                     $processGroup[$i]['name'] = $prl->name;
                     $processGroup[$i]['id'] = $prl->id;
                     $processGroup[$i]['pendingTask'] = $pendingTask;
+                    $processGroup[$i]['inProgressTask'] = $inProgressTask;
                     $processGroup[$i]['completedTask'] = $completedTask;
                 endif;
                 $i++;
@@ -519,6 +536,7 @@ class AdmissionController extends Controller
                 ['label' => 'Process', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'process' => ProcessList::where('phase', 'Applicant')->orderBy('id', 'ASC')->get(),
             'existingTask' => ApplicantTask::where('applicant_id', $applicantId)->pluck('task_list_id')->toArray(),
             'applicantPendingTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get(),
@@ -532,6 +550,8 @@ class AdmissionController extends Controller
     public function admissionStoreProcessTask(Request $request){
         $task_list_ids = (isset($request->task_list_ids) && !empty($request->task_list_ids) ? $request->task_list_ids : []);
         $applicant_id = (isset($request->applicant_id) && $request->applicant_id ? $request->applicant_id : 0);
+        $applicantRow = Applicant::find($applicant_id);
+
         if(!empty($task_list_ids) && $applicant_id > 0):
             $existingTaskIds = ApplicantTask::where('applicant_id', $applicant_id)->pluck('task_list_id')->toArray();
             $existingDiff = array_diff($existingTaskIds, $task_list_ids);
@@ -560,6 +580,22 @@ class AdmissionController extends Controller
                     $deleteTask = ApplicantTask::where('applicant_id', $applicant_id)->where('task_list_id', $task)->delete();
                     $numDelete += 1;
                 endforeach;
+            endif;
+
+            $applicantTasks = ApplicantTask::withTrashed()->where('applicant_id', $applicant_id)->get();
+            if($applicantTasks->count() > 0 && $applicantRow->status_id < 3):
+                $applicantData['status_id'] = 3;
+                Applicant::where('id', $applicant_id)->update($applicantData);
+
+                $data = [];
+                $data['applicant_id'] = $applicant_id;
+                $data['table'] = 'applicants';
+                $data['field_name'] = 'status_id';
+                $data['field_value'] = $applicantRow->status_id;
+                $data['field_new_value'] = '3';
+                $data['created_by'] = auth()->user()->id;
+
+                ApplicantArchive::create($data);
             endif;
             if($numInsert > 0):
                 $message = 'Task list '.$numInsert.' item success fully inserted.';
@@ -632,7 +668,7 @@ class AdmissionController extends Controller
     public function admissionCompletedTask(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
-
+        $applicantRow = Applicant::find($applicant);
 
         $applicantTask = ApplicantTask::where('id', $recordid)->where('applicant_id', $applicant)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
         $applicantTaskLog = ApplicantTaskLog::create([
@@ -643,12 +679,28 @@ class AdmissionController extends Controller
             'current_field_value' => 'Completed',
             'created_by' => auth()->user()->id
         ]);
+        $pendingTask = ApplicantTask::whereIn('status', ['Pending', 'In Progress'])->get();
+        if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
+            $applicantData['status_id'] = 4;
+            Applicant::where('id', $applicant)->update($applicantData);
+
+            $data = [];
+            $data['applicant_id'] = $applicant;
+            $data['table'] = 'applicants';
+            $data['field_name'] = 'status_id';
+            $data['field_value'] = $applicantRow->status_id;
+            $data['field_new_value'] = '4';
+            $data['created_by'] = auth()->user()->id;
+
+            ApplicantArchive::create($data);
+        endif;
         return response()->json(['message' => 'Data deleted'], 200);
     }
 
     public function admissionPendingTask(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
+        $applicantRow = Applicant::find($applicant);
 
 
         $applicantTask = ApplicantTask::where('id', $recordid)->where('applicant_id', $applicant)->update(['status' => 'Pending', 'updated_by' => auth()->user()->id]);
@@ -660,6 +712,21 @@ class AdmissionController extends Controller
             'current_field_value' => 'Pending',
             'created_by' => auth()->user()->id
         ]);
+
+        if($applicantRow->status_id > 3):
+            $applicantData['status_id'] = 3;
+            Applicant::where('id', $applicant)->update($applicantData);
+
+            $data = [];
+            $data['applicant_id'] = $applicant;
+            $data['table'] = 'applicants';
+            $data['field_name'] = 'status_id';
+            $data['field_value'] = $applicantRow->status_id;
+            $data['field_new_value'] = '3';
+            $data['created_by'] = auth()->user()->id;
+
+            ApplicantArchive::create($data);
+        endif;
         return response()->json(['message' => 'Data updated'], 200);
     }
 
@@ -866,6 +933,7 @@ class AdmissionController extends Controller
                 ['label' => 'Uploads', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('admission', '1')->get()
         ]);
@@ -973,6 +1041,7 @@ class AdmissionController extends Controller
                 ['label' => 'Notes', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
@@ -1224,6 +1293,7 @@ class AdmissionController extends Controller
                 ['label' => 'Communication', 'href' => 'javascript:void(0);'],
             ],
             'applicant' => Applicant::find($applicantId),
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'smtps' => ComonSmtp::all(),
             'letterSet' => LetterSet::all(),
             'signatory' => Signatory::all(),
@@ -1254,11 +1324,15 @@ class AdmissionController extends Controller
 
         $signatory_id = $request->signatory_id;
 
+        $comon_smtp_id = $request->comon_smtp_id;
+        $commonSmtp = ComonSmtp::find($comon_smtp_id);
+
         $data = [];
         $data['applicant_id'] = $applicant_id;
         $data['letter_set_id'] = $letter_set_id;
         $data['pin'] = $pin;
         $data['signatory_id'] = $signatory_id;
+        $data['comon_smtp_id'] = $comon_smtp_id;
         $data['is_email_or_attachment'] = $is_email_or_attachment;
         $data['issued_by'] = auth()->user()->id;
         $data['issued_date'] = $issued_date;
@@ -1267,6 +1341,113 @@ class AdmissionController extends Controller
         $letter = ApplicantLetter::create($data);
         $attachmentFiles = [];
         if($letter):
+            /* Generate PDF Start */
+            $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
+            $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+            $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+            $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+            $PDFHTML = '';
+            $PDFHTML .= '<html>';
+                $PDFHTML .= '<head>';
+                    $PDFHTML .= '<title>'.$letter_title.'</title>';
+                    $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                    $PDFHTML .= '<style>
+                                    table{margin-left: 0px;}
+                                    figure{margin: 0;}
+                                    @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
+                                    header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
+                                    footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                    .pageCounter{position: relative;}
+                                    .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                    .pinRow td{border-bottom: 1px solid gray;}
+                                    .text-center{text-align: center;}
+                                    .text-left{text-align: left;}
+                                    .text-right{text-align: right;}
+                                </style>';
+                $PDFHTML .= '</head>';
+                $PDFHTML .= '<body>';
+                    if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
+                        $PDFHTML .= '<header>';
+                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                        $PDFHTML .= '</header>';
+                    endif;
+
+                    $PDFHTML .= '<footer>';
+                        $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
+                                    font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
+                            if($LetterFooters->count() > 0):
+                                $PDFHTML .= '<tr>';
+                                    $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
+                                        $numberOfPartners = $LetterFooters->count();
+                                        $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
+
+                                        foreach($LetterFooters as $lf):
+                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                        endforeach;
+                                    $PDFHTML .= '</td>';
+                                $PDFHTML .= '</tr>';
+                            endif;
+                            $PDFHTML .= '<tr class="pinRow">';
+                                $PDFHTML .= '<td style="padding-bottom: 3px;">';
+                                    $PDFHTML .= '<span class="pageCounter text-left"></span>';
+                                $PDFHTML .= '</td>';
+                                $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
+                                    $PDFHTML .= 'pin - '.$pin;
+                                $PDFHTML .= '</td>';
+                            $PDFHTML .= '</tr>';
+
+                            if(!empty($regNo) || !empty($regAt)):
+                            $PDFHTML .= '<tr class="regInfoRow">';
+                                $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
+                                    $PDFHTML .= (!empty($regNo) ? 'Company Reg. No. '.$regNo->value : '');
+                                    $PDFHTML .= (!empty($regAt) ? (!empty($regNo) ? ', ' : '').$regAt->value : '');
+                                $PDFHTML .= '</td>';
+                            $PDFHTML .= '</tr>';
+                            endif;
+                        $PDFHTML .= '</table>';
+                    $PDFHTML .= '</footer>';
+
+                    $PDFHTML .= $letter_body;
+                    if($signatory_id > 0):
+                        $signatory = Signatory::find($signatory_id);
+                        $PDFHTML .= '<p>';
+                            $PDFHTML .= '<strong>Best Regards,</strong><br/>';
+                            if(isset($signatory->signature) && !empty($signatory->signature)):
+                                $signatureImage = asset('storage/signatories/'.$signatory->signature); 
+                                $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
+                            endif;
+                            $PDFHTML .= $signatory->signatory_name.'<br/>';
+                            $PDFHTML .= $signatory->signatory_post.'<br/>';
+                            $PDFHTML .= 'London Churchill College';
+                        $PDFHTML .= '</p>';
+                    endif;
+                $PDFHTML .= '</body>';
+            $PDFHTML .= '</html>';
+
+            $fileName = time().'_'.$applicant_id.'_Letter.pdf';
+            $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
+                ->setPaper('a4', 'portrait')
+                ->setWarnings(false)
+                ->save(storage_path('app/public/applicants/'.$applicant_id.'/').$fileName);
+
+            $data = [];
+            $data['applicant_id'] = $applicant_id;
+            $data['hard_copy_check'] = 0;
+            $data['doc_type'] = 'pdf';
+            $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$fileName);
+            $data['display_file_name'] = $letter_title;
+            $data['current_file_name'] = $fileName;
+            $data['created_by'] = auth()->user()->id;
+            $applicantDocument = ApplicantDocument::create($data);
+
+            if($applicantDocument):
+                $noteUpdate = ApplicantLetter::where('id', $letter->id)->update([
+                    'applicant_document_id' => $applicantDocument->id
+                ]);
+            endif;
+            /* Generate PDF End */
+
+
             $signatoryHTML = '';
             if($signatory_id > 0):
                 $signatory = Signatory::find($signatory_id);
@@ -1293,125 +1474,22 @@ class AdmissionController extends Controller
             if($is_email_or_attachment == 2):
                 $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
 
-                $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
-                $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
-                $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-                $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
-                $PDFHTML = '';
-                $PDFHTML .= '<html>';
-                    $PDFHTML .= '<head>';
-                        $PDFHTML .= '<title>'.$letter_title.'</title>';
-                        $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                        $PDFHTML .= '<style>
-                                        table{margin-left: 0px;}
-                                        figure{margin: 0;}
-                                        @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
-                                        header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
-                                        footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
-                                        .pageCounter{position: relative;}
-                                        .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
-                                        .pinRow td{border-bottom: 1px solid gray;}
-                                        .text-center{text-align: center;}
-                                        .text-left{text-align: left;}
-                                        .text-right{text-align: right;}
-                                    </style>';
-                    $PDFHTML .= '</head>';
-                    $PDFHTML .= '<body>';
-                        if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
-                            $PDFHTML .= '<header>';
-                                $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
-                            $PDFHTML .= '</header>';
-                        endif;
-
-                        $PDFHTML .= '<footer>';
-                            $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
-                                        font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
-                                if($LetterFooters->count() > 0):
-                                    $PDFHTML .= '<tr>';
-                                        $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
-                                            $numberOfPartners = $LetterFooters->count();
-                                            $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
-
-                                            foreach($LetterFooters as $lf):
-                                                $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
-                                            endforeach;
-                                        $PDFHTML .= '</td>';
-                                    $PDFHTML .= '</tr>';
-                                endif;
-                                $PDFHTML .= '<tr class="pinRow">';
-                                    $PDFHTML .= '<td style="padding-bottom: 3px;">';
-                                        $PDFHTML .= '<span class="pageCounter text-left"></span>';
-                                    $PDFHTML .= '</td>';
-                                    $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
-                                        $PDFHTML .= 'pin - '.$pin;
-                                    $PDFHTML .= '</td>';
-                                $PDFHTML .= '</tr>';
-
-                                if(!empty($regNo) || !empty($regAt)):
-                                $PDFHTML .= '<tr class="regInfoRow">';
-                                    $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
-                                        $PDFHTML .= (!empty($regNo) ? 'Company Reg. No. '.$regNo->value : '');
-                                        $PDFHTML .= (!empty($regAt) ? (!empty($regNo) ? ', ' : '').$regAt->value : '');
-                                    $PDFHTML .= '</td>';
-                                $PDFHTML .= '</tr>';
-                                endif;
-                            $PDFHTML .= '</table>';
-                        $PDFHTML .= '</footer>';
-
-                        $PDFHTML .= $letter_body;
-                        if($signatory_id > 0):
-                            $signatory = Signatory::find($signatory_id);
-                            $PDFHTML .= '<p>';
-                                $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                                if(isset($signatory->signature) && !empty($signatory->signature)):
-                                    $signatureImage = asset('storage/signatories/'.$signatory->signature); 
-                                    $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
-                                endif;
-                                $PDFHTML .= $signatory->signatory_name.'<br/>';
-                                $PDFHTML .= $signatory->signatory_post.'<br/>';
-                                $PDFHTML .= 'London Churchill College';
-                            $PDFHTML .= '</p>';
-                        endif;
-                    $PDFHTML .= '</body>';
-                $PDFHTML .= '</html>';
-
-                $fileName = time().'_'.$applicant_id.'_Letter.pdf';
-                $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
-                    ->setPaper('a4', 'portrait')
-                    ->setWarnings(false)
-                    ->save(storage_path('app/public/applicants/'.$applicant_id.'/').$fileName);
                 $attachmentFiles[] = [
                     "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$fileName,
                     "nameinfo" => $fileName,
                     "mimeinfo" => 'application/pdf'
                 ];
-                
-                $data = [];
-                $data['applicant_id'] = $applicant_id;
-                $data['hard_copy_check'] = 0;
-                $data['doc_type'] = 'pdf';
-                $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$fileName);
-                $data['display_file_name'] = $letter_title;
-                $data['current_file_name'] = $fileName;
-                $data['created_by'] = auth()->user()->id;
-                $applicantDocument = ApplicantDocument::create($data);
-
-                if($applicantDocument):
-                    $noteUpdate = ApplicantLetter::where('id', $letter->id)->update([
-                        'applicant_document_id' => $applicantDocument->id
-                    ]);
-                endif;
             else:
                 $emailHTML .= $letter_body;
             endif;
             $emailHTML .= $signatoryHTML;
 
             $configuration = [
-                'smtp_host'    => 'smtp.gmail.com',
-                'smtp_port'    => '587',
-                'smtp_username'  => 'no-reply@lcc.ac.uk',
-                'smtp_password'  => 'churchill1',
-                'smtp_encryption'  => 'tls',
+                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
                 
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
@@ -1439,10 +1517,11 @@ class AdmissionController extends Controller
         $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
 
         $query = DB::table('applicant_letters as al')
-                        ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys')
+                        ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'adc.current_file_name')
                         ->leftJoin('letter_sets as ls', 'al.letter_set_id', '=', 'ls.id')
                         ->leftJoin('signatories as sg', 'al.signatory_id', '=', 'sg.id')
                         ->leftJoin('users as ur', 'al.issued_by', '=', 'ur.id')
+                        ->leftJoin('applicant_documents as adc', 'al.applicant_document_id', '=', 'adc.id')
                         ->where('al.applicant_id', '=', $applicantId);
         if(!empty($queryStr)):
             $query->where('ls.letter_type','LIKE','%'.$queryStr.'%');
@@ -1472,12 +1551,17 @@ class AdmissionController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $docURL = '';
+                if(isset($list->applicant_document_id) && $list->applicant_document_id > 0 && isset($list->current_file_name)):
+                    $docURL = (!empty($list->current_file_name) ? asset('storage/applicants/'.$list->applicant_id.'/'.$list->current_file_name) : '');
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'letter_type' => $list->letter_type,
                     'letter_title' => $list->letter_title,
                     'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
+                    'docurl' => $docURL,
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -1880,6 +1964,40 @@ class AdmissionController extends Controller
         $html .= '</div>';
 
         return response()->json(['heading' => $heading, 'html' => $html], 200);
+    }
+
+    public function admissionStudentUpdateStatus(Request $request){
+        $applicant_id = $request->applicantID;
+        $statusidID = $request->statusidID;
+        $rejectedReason = (isset($request->rejectedReason) && !empty($request->rejectedReason) ? $request->rejectedReason : Null);
+
+        $applicantOldRow = Applicant::find($applicant_id);
+
+        $applicant = Applicant::find($applicant_id);
+        $applicant->fill([
+            'status_id' => $statusidID,
+            'rejected_reason' => $rejectedReason,
+        ]);
+        $changes = $applicant->getDirty();
+        $applicant->save();
+
+        if($applicant->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['applicant_id'] = $applicant_id;
+                $data['table'] = 'applicants';
+                $data['field_name'] = $field;
+                $data['field_value'] = $applicantOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                ApplicantArchive::create($data);
+            endforeach;
+
+            return response()->json(['message' => 'Student status successfully updated'], 200);
+        else:
+            return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
+        endif;
     }
 
 }
