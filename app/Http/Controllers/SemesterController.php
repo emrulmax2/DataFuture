@@ -7,6 +7,7 @@ use App\Http\Requests\SemesterRequests;
 use App\Http\Requests\SemesterUpdateRequests;
 use App\Models\Semester;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class SemesterController extends Controller
 {
@@ -70,6 +71,10 @@ class SemesterController extends Controller
             'name'=> $request->name,
             'created_by' => auth()->user()->id
         ]);
+
+        $semesters = Semester::all()->sortByDesc("name");
+        Cache::forever('semesters', $semesters);
+
         return response()->json($data);
     }
 
@@ -89,6 +94,9 @@ class SemesterController extends Controller
             'updated_by' => auth()->user()->id
         ]);
 
+        $semesters = Semester::all()->sortByDesc("name");
+        Cache::forever('semesters', $semesters);
+
         return response()->json($data);
 
 
@@ -101,12 +109,21 @@ class SemesterController extends Controller
 
     public function destroy($id){
         $data = Semester::find($id)->delete();
+
+        $semesters = Semester::all()->sortByDesc("name");
+        Cache::forever('semesters', $semesters);
+
         return response()->json($data);
+        
+
     }
 
     public function restore($id) {
         $data = Semester::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        $semesters = Semester::all()->sortByDesc("name");
+        Cache::forever('semesters', $semesters);
+
+        return response()->json($data);
     }
 }

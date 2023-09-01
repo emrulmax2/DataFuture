@@ -77,13 +77,13 @@ class AdmissionController extends Controller
 {
     public function index(){
         
-        $semesters = Cache::rememberForever('semesters', function () {
-            return Semester::all();
+        $semesters = Cache::get('semesters', function () {
+            return Semester::all()->sortByDesc("name");
         });
-        $courses = Cache::rememberForever('courses', function () {
+        $courses = Cache::get('courses', function () {
             return Course::all();
         });
-        $statuses = Cache::rememberForever('statuses', function () {
+        $statuses = Cache::get('statuses', function () {
             return Status::where('type', 'Applicant')->get();
         });
         
