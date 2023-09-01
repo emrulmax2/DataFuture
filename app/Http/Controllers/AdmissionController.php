@@ -70,17 +70,31 @@ use App\Models\SmsTemplate;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
+use Illuminate\Support\Facades\Cache;
+
 class AdmissionController extends Controller
 {
     public function index(){
+        
+        $semesters = Cache::rememberForever('semesters', function () {
+            return Semester::all();
+        });
+        $courses = Cache::rememberForever('courses', function () {
+            return Course::all();
+        });
+        $statuses = Cache::rememberForever('statuses', function () {
+            return Status::where('type', 'Applicant')->get();
+        });
+        
+        
         return view('pages.students.admission.index', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Admission Management - X LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
             ],
-            'semesters' => Semester::all(),
-            'courses' => Course::all(),
-            'statuses' => Status::where('type', 'Applicant')->get(),
+            'semesters' => $semesters,
+            'courses' => $courses,
+            'statuses' => $statuses,
         ]);
     }
 
