@@ -14,6 +14,7 @@ class ApplicantLetter extends Model
         'applicant_id',
         'letter_set_id',
         'signatory_id',
+        'comon_smtp_id',
         'is_email_or_attachment',
         'applicant_document_id',
         'issued_by',
@@ -31,5 +32,9 @@ class ApplicantLetter extends Model
 
     public function applicant(){
         return $this->belongsTo(Applicant::class, 'applicant_id');
+    }
+
+    public function document(){
+        return $this->belongsTo(ApplicantDocument::class, 'applicant_document_id');
     }
 }

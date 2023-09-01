@@ -238,7 +238,7 @@ var processTaskLogTable = (function () {
         const form = document.getElementById('studentProcessListForm');
     
         document.querySelector('#addProcessItemsAdd').setAttribute('disabled', 'disabled');
-        document.querySelector("#addProcessItemsAdd svg").style.cssText ="display: inline-block;";
+        document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText ="display: inline-block;";
 
         var task_list_ids = [];
         var applicant_id = $('input[name="applicant_id"]', $form).val();
@@ -257,7 +257,7 @@ var processTaskLogTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-                    document.querySelector("#addProcessItemsAdd svg").style.cssText = "display: none;";
+                    document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
 
                     successModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -273,7 +273,7 @@ var processTaskLogTable = (function () {
                 }
             }).catch(error => {
                 document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-                document.querySelector("#addProcessItemsAdd svg").style.cssText = "display: none;";
+                document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         warningModal.show();
@@ -293,7 +293,7 @@ var processTaskLogTable = (function () {
             });
         }else{
             document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-            document.querySelector("#addProcessItemsAdd svg").style.cssText = "display: none;";
+            document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
 
             warningModal.show();
             document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {

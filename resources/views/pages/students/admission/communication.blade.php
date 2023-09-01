@@ -243,6 +243,18 @@
                             <div class="acc__input-error error-issued_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
+                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
+                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($smtps))
+                                    @foreach($smtps as $sm)
+                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
                             <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
                             <select id="letter_set_id" name="letter_set_id" class="form-control w-full">
                                 <option value="">Please Select</option>

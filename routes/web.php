@@ -488,6 +488,9 @@ Route::middleware('auth')->group(function() {
         Route::get('admission/letter-list', 'admissionCommunicationLetterList')->name('admission.communication.letter.list');
         Route::delete('admission/destroy-letter', 'admissionDestroyLetter')->name('admission.communication.letter.destroy');
         Route::post('admission/restore-letter', 'admissionRestoreLetter')->name('admission.communication.letter.restore');
+
+
+        Route::post('admission/update-status', 'admissionStudentUpdateStatus')->name('admission.student.update.status');
         
     });
 

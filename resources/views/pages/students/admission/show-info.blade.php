@@ -33,25 +33,73 @@
                     <div class="font-medium text-base">Work in Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    <button type="button" class="btn btn-primary w-auto mr-1 mb-0">
-                        {{ $applicant->status->name }}
-                    </button>
+                    @if($applicant->status_id == 4 || $applicant->status_id == 5)
+                        <div class="dropdown inline-block" data-tw-placement="bottom-start">
+                            <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
+                                {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                            </button>
+                            <div class="dropdown-menu w-72">
+                                <ul class="dropdown-content">
+                                    <li><h6 class="dropdown-header">Status List</h6></li>
+                                    <li><hr class="dropdown-divider mt-0"></li>
+
+                                    @if(!empty($allStatuses))
+                                        @foreach($allStatuses as $sts)
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6, 7])))
+                                            <li>
+                                                <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
+                                                    <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
+                                                </a>
+                                            </li>
+                                            @endif
+                                        @endforeach
+                                    @endif
+
+                                    <!--<li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <div class="flex p-1">
+                                            <button type="submit" id="updateStudentStatus" class="btn btn-primary py-1 px-2 w-auto">     
+                                                <i data-lucide="rotate-cw" class="w-3 h-3 mr-2"></i> Change Status                     
+                                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                    stroke="white" class="w-4 h-4 ml-2 theLoaderTwo">
+                                                    <g fill="none" fill-rule="evenodd">
+                                                        <g transform="translate(1 1)" stroke-width="4">
+                                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                            </path>
+                                                        </g>
+                                                    </g>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </li>-->
+                                </ul>
+                            </div>
+                        </div>
+                    @else
+                        <button type="button" class="btn btn-primary w-auto mr-1 mb-0">
+                            {{ $applicant->status->name }}
+                        </button>
+                    @endif
                 </div>
             </div>
             <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             @php 
                 $pending = $applicant->pendingTasks->count();
+                $inprogress = $applicant->inProgressTasks->count();
                 $completed = $applicant->completedTasks->count();
 
-                $totalTask = $pending + $completed;
-                $pendingProgress = ( $totalTask > 0 ? round($pending / $totalTask, 2) * 100 : '0');
+                $totalTask = $pending + $inprogress + $completed;
+                $pendingProgress = ( $totalTask > 0 ? round(($pending + $inprogress) / $totalTask, 2) * 100 : '0');
                 $completedProgress = ( $totalTask > 0 ? round($completed / $totalTask, 2) * 100 : '0');
             @endphp
             <div class="progressBarWrap">
                 <div class="singleProgressBar mb-3">
                     <div class="flex justify-between mb-1">
                         <div class="font-medium">Pending Task</div>
-                        <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $applicant->pendingTasks->count() + $applicant->completedTasks->count() }}</div>
+                        <div class="font-medium">{{ $pending + $inprogress }}/{{ $totalTask }}</div>
                     </div>
                     <div class="progress h-1">
                         <div class="progress-bar bg-warning"  style="width: {{ $pendingProgress }}%;"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -60,7 +108,7 @@
                 <div class="singleProgressBar">
                     <div class="flex justify-between mb-1">
                         <div class="font-medium">Completed Task</div>
-                        <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $applicant->pendingTasks->count() + $applicant->completedTasks->count() }}</div>
+                        <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $totalTask }}</div>
                     </div>
                     <div class="progress h-1">
                         <div class="progress-bar" style="width: {{ $completedProgress }}%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -114,4 +162,38 @@
         </div>
     </div>
 </div>
-    <!-- END: Import Modal -->
+<!-- END: Import Modal -->
+
+<!-- BEGIN: Status Confirm Modal -->
+<div id="statusConfirmModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                    <div class="text-slate-500 mt-2 confModDesc"></div>
+
+                    <div class="mt-3 rejectedReasonArea border-t border-slate-200/60 border-b pt-4 pb-6" style="display: none;">
+                        <label for="rejected_reason" class="form-label">Rejected Reason <span class="text-danger">*</span></label>
+                        <select id="rejected_reason" name="rejected_reason" class="form-control w-3/4">
+                            <option value="">Please select a reason</option>
+                            <option value="Failed Interview">Failed Interview</option>
+                            <option value="Shortage of Document">Shortage of Document</option>
+                            <option value="Wrong Information">Wrong Information</option>
+                            <option value="Lack of Qualification">Lack of Qualification</option>
+                            <option value="Unavailable for Communication">Unavailable for Communication</option>
+                            <option value="Failure in English Test">Failure in English Test</option>
+                            <option value="Previous Bad Records">Previous Bad Records</option> 
+                        </select>
+                    </div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                    <button type="button" data-statusid="0" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Status Confirm Modal -->

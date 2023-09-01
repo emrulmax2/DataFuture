@@ -54,23 +54,30 @@ class ApplicationController extends Controller
     }
 
     public function storePersonalDetails(ApplicationPersonalDetailsRequest $request){
+        $lastApplicantRow = Applicant::orderBy('id', 'DESC')->get()->first();
+        $lastApplicantId = (isset($lastApplicantRow->id) && !empty($lastApplicantRow->id));
         $applicantUserId = $request->applicant_user_id;
         $applicant_id = $request->applicant_id;
         $applicant = Applicant::updateOrCreate([ 'applicant_user_id' => $applicantUserId, 'id' => $applicant_id ], [
             '$applicant_id' => $applicantUserId,
-            'application_no' => '',
+            //'application_no' => '',
             'title_id' => $request->title_id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
-            'status_id' => 2,
+            'status_id' => 1,
             'nationality_id' => $request->nationality_id,
             'country_id' => $request->country_id,
             'created_by' => \Auth::guard('applicant')->user()->id,
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
         if($applicant){
+            if(isset($applicant->application_no) && empty($applicant->application_no)):
+                $theApplicantId = $applicant->id;
+                $appNo = '100'.sprintf('%05d', $theApplicantId);
+                Applicant::where('id', $theApplicantId)->update(['application_no' => $appNo]);
+            endif;
             $disabilityStatus = (isset($request->disability_status) && $request->disability_status > 0 ? $request->disability_status : 0);
             $otherDetails = ApplicantOtherDetail::updateOrCreate(['applicant_id' => $applicant->id], [
                     'ethnicity_id' => $request->ethnicity_id,
@@ -184,6 +191,7 @@ class ApplicationController extends Controller
     public function storeApplicantSubmission(Request $request){
         $applicant_id = $request->applicant_id;
         $applicant = Applicant::where('id', $applicant_id)->update([
+            'status_id' => 2,
             'submission_date' => date('Y-m-d'),
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
