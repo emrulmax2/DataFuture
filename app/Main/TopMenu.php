@@ -290,6 +290,24 @@ class TopMenu
                                     'route_name' => 'signatory',
                                     'params' => [],
                                     'title' => 'Signatory Sets'
+                                ],
+                                'sms.template' => [
+                                    'icon' => '',
+                                    'route_name' => 'sms.template',
+                                    'params' => [],
+                                    'title' => 'SMS Templates'
+                                ],
+                                'email.template' => [
+                                    'icon' => '',
+                                    'route_name' => 'email.template',
+                                    'params' => [],
+                                    'title' => 'Email Templates'
+                                ],
+                                'letterheaderfooter' => [
+                                    'icon' => '',
+                                    'route_name' => 'letterheaderfooter',
+                                    'params' => [],
+                                    'title' => 'Header & Footers'
                                 ]
                             ]
                         ],

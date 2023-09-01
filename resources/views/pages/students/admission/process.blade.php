@@ -21,7 +21,7 @@
             </div>
             <div class="col-span-6 text-right relative">
                 <div class="dropdown" id="processDropdown">
-                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Task</button>
+                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Task <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
                         <form method="post" action="#" id="studentProcessListForm">
                             <ul class="dropdown-content">
@@ -71,9 +71,9 @@
                                 <li>
                                     <div class="flex p-1">
                                         <button type="submit" id="addProcessItemsAdd" class="btn btn-primary py-1 px-2 w-auto">     
-                                            Add Items                      
+                                            <i data-lucide="plus-circle" class="w-3 h-3 mr-2"></i> Add Items                      
                                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                                stroke="white" class="w-4 h-4 ml-2">
+                                                stroke="white" class="w-4 h-4 ml-2 theLoader">
                                                 <g fill="none" fill-rule="evenodd">
                                                     <g transform="translate(1 1)" stroke-width="4">
                                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -118,6 +118,13 @@
                                             data-tw-target="#process-tab-{{ $loop->index }}-1" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-1" 
                                             aria-selected="true">
                                             Pending
+                                        </button>
+                                    </li>
+                                    <li id="process-{{ $loop->index }}-4-tab" class="nav-item  mr-10 flex" role="presentation">
+                                        <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
+                                            data-tw-target="#process-tab-{{ $loop->index }}-4" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-4" 
+                                            aria-selected="false">
+                                            In Progress
                                         </button>
                                     </li>
                                     <li id="process-{{ $loop->index }}-2-tab" class="nav-item flex" role="presentation">
@@ -177,17 +184,6 @@
                                                                                 @endforeach
                                                                             </div>
                                                                         @endif
-                                                                        <!--<div class="flex mt-2">
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-12.jpg">
-                                                                            </div>
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-3.jpg">
-                                                                            </div>
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-12.jpg">
-                                                                            </div>
-                                                                        </div>-->
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -262,7 +258,7 @@
                                                     <div class="col-span-3 sm:col-span-4 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
-                                                                <button class="dropdown-toggle btn btn-warning text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Update</button>
+                                                                <button class="dropdown-toggle btn btn-warning text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Update  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
@@ -309,16 +305,16 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div id="process-tab-{{ $loop->index }}-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-2-tab">
-                                        @if($proGroup['completedTask']->count() > 0)
-                                            @foreach($proGroup['completedTask'] as $task)
-                                            <div class="grid grid-cols-12 gap-4">
+                                    <div id="process-tab-{{ $loop->index }}-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-4-tab">
+                                        @if($proGroup['inProgressTask']->count() > 0)
+                                            @foreach($proGroup['inProgressTask'] as $task)
+                                                <div class="grid grid-cols-12 gap-4">
                                                     <div class="col-span-6 sm:col-span-4">
                                                         <div class="relative ">
                                                             <div class="intro-x relative flex items-center mb-3">
                                                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                                                     <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden bg-white">
-                                                                        <i data-lucide="check-circle" class="text-success absolute w-full h-full"></i>
+                                                                        <i data-lucide="minus-circle" class="text-danger absolute w-full h-full"></i>
                                                                     </div>
                                                                 </div>
                                                                 <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
@@ -350,17 +346,6 @@
                                                                                 @endforeach
                                                                             </div>
                                                                         @endif
-                                                                        <!--<div class="flex mt-2">
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-12.jpg">
-                                                                            </div>
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-3.jpg">
-                                                                            </div>
-                                                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in">
-                                                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="http://127.0.0.1:8000/build/assets/images/preview-12.jpg">
-                                                                            </div>
-                                                                        </div>-->
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -435,7 +420,169 @@
                                                     <div class="col-span-3 sm:col-span-4 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
-                                                                <button class="dropdown-toggle btn btn-success text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Actions</button>
+                                                                <button class="dropdown-toggle btn btn-warning text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Update  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                                                                <div class="dropdown-menu w-64">
+                                                                    <ul class="dropdown-content">
+                                                                        <li>
+                                                                            <a href="javascript:void(0);" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
+                                                                            </a>
+                                                                        </li>
+                                                                        @if(isset($task->task->status) && $task->task->status == 'Yes')
+                                                                        <li>
+                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">
+                                                                                <i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
+                                                                        @if(isset($task->task->upload) && $task->task->upload == 'Yes')
+                                                                        <li>
+                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">
+                                                                                <i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
+                                                                        @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
+                                                                        <li>
+                                                                            <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsCompleted dropdown-item">
+                                                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id == '')) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() == 0)))
+                                                            <button type="button" data-taskid="{{ $task->id }}" class="deleteApplicantTask btn btn-danger ml-2">
+                                                                <i data-lucide="trash" class="w-5 h-5"></i>
+                                                            </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @else 
+                                            <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
+                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no "In Progress" task found for this applicant.
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div id="process-tab-{{ $loop->index }}-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-2-tab">
+                                        @if($proGroup['completedTask']->count() > 0)
+                                            @foreach($proGroup['completedTask'] as $task)
+                                            <div class="grid grid-cols-12 gap-4">
+                                                    <div class="col-span-6 sm:col-span-4">
+                                                        <div class="relative ">
+                                                            <div class="intro-x relative flex items-center mb-3">
+                                                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
+                                                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden bg-white">
+                                                                        <i data-lucide="check-circle" class="text-success absolute w-full h-full"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
+                                                                    <div class="flex items-center">
+                                                                        <div class="font-medium">
+                                                                            {{ $task->task->name }}
+                                                                            @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
+                                                                                (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>
+                                                                    </div>
+                                                                    <div class="text-slate-500">
+                                                                        @if(isset($task->task->short_description) && !empty($task->task->short_description))
+                                                                        <div class="mt-1">{{ $task->task->short_description }}</div>
+                                                                        @endif
+                                                                        @if(isset($task->documents) && !empty($task->documents))
+                                                                            <div class="flex mt-2">
+                                                                                @foreach($task->documents as $tdoc)
+                                                                                    @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
+                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                        </a>
+                                                                                    @else 
+                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                            <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+                                                                                        </a>
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-span-3 sm:col-span-4">
+                                                        <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
+                                                            <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
+                                                            @if(isset($task->task->users) && !empty($task->task->users))
+                                                                @foreach($task->task->users as $userser)
+                                                                    @if($loop->first)
+                                                                        <div class="flex items-center justify-start">
+                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                            </div>
+                                                                            <div class="ml-4">
+                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
+                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
+                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
+                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
+                                                                                    @else 
+                                                                                        {{ 'Unknown' }}
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </div> 
+                                                                    @endif
+                                                                @endforeach
+                                                            @else 
+                                                                <div class="ml-0">
+                                                                    <div class="font-medium assignedUserName">Not Found</div>
+                                                                </div>
+                                                            @endif
+                                                            <div class="ml-5">
+                                                                <div class="dropdown" id="assignedUserDropdown_{{ $task->id }}">
+                                                                    <button class="dropdown-toggle p-1 text-slate-500 rounded-full border border-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                                                                    <div class="dropdown-menu w-64">
+                                                                        <ul class="dropdown-content overflow-y-auto m-h-56">
+                                                                            @if(isset($task->task->users) && !empty($task->task->users))
+                                                                                @foreach($task->task->users as $userser)
+                                                                                    <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
+                                                                                        <div class="flex items-center justify-start">
+                                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
+                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                            </div>
+                                                                                            <div class="ml-4">
+                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
+                                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
+                                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
+                                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
+                                                                                                    @else 
+                                                                                                        {{ 'Unknown' }}
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div> 
+                                                                                    </li>
+                                                                                @endforeach
+                                                                            @else 
+                                                                                <li>
+                                                                                    <div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
+                                                                                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> No assigned user found!
+                                                                                    </div>
+                                                                                </li> 
+                                                                            @endif
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-span-3 sm:col-span-4 text-right">
+                                                        <div class="flex justify-end">
+                                                            <div class="dropdown">
+                                                                <button class="dropdown-toggle btn btn-success text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Actions  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>

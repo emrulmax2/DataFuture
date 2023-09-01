@@ -23,6 +23,7 @@ class Applicant extends Model
         'gender',
         'submission_date',
         'status_id',
+        'rejected_reason',
         'nationality_id',
         'country_id',
         'created_by',
@@ -124,6 +125,12 @@ class Applicant extends Model
     public function pendingTasks(){
         $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
         $tasks->getQuery()->where('status', '=', 'Pending');
+        return $tasks;
+    }
+
+    public function inProgressTasks(){
+        $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
+        $tasks->getQuery()->where('status', '=', 'In Progress');
         return $tasks;
     }
 
