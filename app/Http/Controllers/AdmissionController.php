@@ -94,7 +94,7 @@ class AdmissionController extends Controller
             ],
             'semesters' => $semesters,
             'courses' => $courses,
-            'allStatusess' => $statuses,
+            'allStatuses' => $statuses,
         ]);
     }
 
