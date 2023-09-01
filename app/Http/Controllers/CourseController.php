@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\AwardingBody;
 use App\Models\ModuleLevel;
 use App\Models\SourceTuitionFee;
+use Illuminate\Support\Facades\Cache;
 
 class CourseController extends Controller
 {
@@ -77,7 +78,10 @@ class CourseController extends Controller
     public function store(CourseRequests $request){
         $request->request->add(['created_by' => auth()->user()->id]);
         $course = Course::create($request->all());
-        
+
+        $courseAll = Course::all()->sortByAsc("name");
+        Cache::forever('courses', $courseAll);
+
         return response()->json($course);
     }
 
@@ -101,6 +105,9 @@ class CourseController extends Controller
             'source_tuition_fee_id'=> $request->source_tuition_fee_id,
             'updated_by' => auth()->user()->id
         ]);
+
+        $courseAll = Course::all()->sortByAsc("name");
+        Cache::forever('courses', $courseAll);
 
         return response()->json($data);
 
@@ -127,11 +134,18 @@ class CourseController extends Controller
 
     public function destroy($id){
         $data = Course::find($id)->delete();
+
+        $courseAll = Course::all()->sortByAsc("name");
+        Cache::forever('courses', $courseAll);
+
         return response()->json($data);
     }
 
     public function restore($id) {
         $data = Course::where('id', $id)->withTrashed()->restore();
+
+        $courseAll = Course::all()->sortByAsc("name");
+        Cache::forever('courses', $courseAll);
 
         response()->json($data);
     }
