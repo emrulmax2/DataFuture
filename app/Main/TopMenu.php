@@ -26,40 +26,8 @@ class TopMenu
                 'dashboard' => [
                     'icon' => 'home',
                     'title' => 'Dashboard',
-                    'sub_menu' => [
-                        'dashboard' => [
-                            'icon' => '',
-                            'route_name' => 'dashboard',
-                            'params' => [
-                                'layout' => 'top-menu',
-                            ],
-                            'title' => 'Overview 1'
-                        ],
-                        'dashboard-overview-2' => [
-                            'icon' => '',
-                            'route_name' => 'dashboard-overview-2',
-                            'params' => [
-                                'layout' => 'top-menu',
-                            ],
-                            'title' => 'Overview 2'
-                        ],
-                        'dashboard-overview-3' => [
-                            'icon' => '',
-                            'route_name' => 'dashboard-overview-3',
-                            'params' => [
-                                'layout' => 'top-menu',
-                            ],
-                            'title' => 'Overview 3'
-                        ],
-                        'dashboard-overview-4' => [
-                            'icon' => '',
-                            'route_name' => 'dashboard-overview-4',
-                            'params' => [
-                                'layout' => 'top-menu',
-                            ],
-                            'title' => 'Overview 4'
-                        ]
-                    ]
+                    'route_name' => 'dashboard',
+                    'params' => []
                 ],
                 'courses' => [
                     'icon' => 'book-open',

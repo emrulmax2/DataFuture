@@ -452,6 +452,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/show-task-statuses', 'admissionShowTaskStatuses')->name('admission.show.task.outmoce.statuses');
         Route::post('admission/task-result-update', 'admissionTaskResultUpdate')->name('admission.process.task.result.update');
         Route::get('admission/task-log-list', 'admissionTaskLogList')->name('admission.process.log.list');
+        Route::get('admission/interview-log-list', 'admissionInterviewLogList')->name('admission.applicant.interview.log');
 
         Route::get('admission/uploads/{applicantId}', 'admissionUploads')->name('admission.uploads');
         Route::post('admission/uploads-documents', 'AdmissionUploadDocuments')->name('admission.upload.documents');
@@ -526,13 +527,14 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(StaffDashboard::class)->group(function() {
+        Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');
         Route::get('/dashboard/list', 'list')->name('dashboard.staff.list');
     });
 
 
     Route::controller(PageController::class)->group(function() {
-        Route::get('/', 'dashboardOverview1')->name('dashboard');
+        //Route::get('/', 'dashboardOverview1')->name('dashboard');
      
         Route::get('crud-data-list-page', 'crudDataList')->name('crud-data-list');
         Route::get('crud-form-page', 'crudForm')->name('crud-form');

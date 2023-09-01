@@ -30,7 +30,7 @@
         <div class="intro-y box p-5 pt-3">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Work in Progress</div>
+                    <div class="font-medium text-base">Work Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
                     @if($applicant->status_id == 4 || $applicant->status_id == 5)
@@ -45,7 +45,7 @@
 
                                     @if(!empty($allStatuses))
                                         @foreach($allStatuses as $sts)
-                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6, 7])))
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6, 7, 9])))
                                             <li>
                                                 <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
                                                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}

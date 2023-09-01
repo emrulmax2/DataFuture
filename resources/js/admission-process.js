@@ -177,6 +177,81 @@ var processTaskLogTable = (function () {
     };
 })();
 
+var applicantInterviewLogTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+
+        var applicantTaskId = ($('#processTaskLogTable').attr('data-applicanttaskid') > 0 ? $('#processTaskLogTable').attr('data-applicanttaskid') : 0);
+        var applicantId = ($('#processTaskLogTable').attr('data-applicantid') > 0 ? $('#processTaskLogTable').attr('data-applicantid') : 0);
+
+        let tableContent = new Tabulator("#processTaskLogTable", {
+            ajaxURL: route("admission.applicant.interview.log"),
+            ajaxParams: { applicantTaskId: applicantTaskId, applicantId: applicantId },
+            ajaxFiltering: false,
+            ajaxSorting: false,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Serial",
+                    field: "sl",
+                    width: "180",
+                },
+                {
+                    title: "Interview Date",
+                    field: "date",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Sart Time - End Time",
+                    field: "time",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Result",
+                    field: "result",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    headerHozAlign: "left",
+                    
+                    headerSort:false,
+                },
+                {
+                    title: "Interviewer",
+                    field: "interviewer",
+                    headerHozAlign: "left",
+                }
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });               
+
+            },
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
 
 (function(){
     if ($(".processTaskArchiveListTable").length) {
@@ -709,9 +784,17 @@ var processTaskLogTable = (function () {
         e.preventDefault();
         var $btn = $(this);
         var applicantTaskId = $btn.attr('data-applicanttaskid');
+        var applicantid = $btn.attr('data-applicantid');
+        var interview = $btn.attr('data-interview');
 
         $('#processTaskLogTable').attr('data-applicanttaskid', applicantTaskId);
-        processTaskLogTable.init();
+        $('#processTaskLogTable').attr('data-interview', interview);
+        if(interview == 1){
+            applicantInterviewLogTable.init();
+        }else{
+            processTaskLogTable.init();
+        }
+        
     })
 
 })()
