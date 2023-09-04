@@ -7,9 +7,9 @@
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Term Modules</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="#" class="add_btn btn btn-primary shadow-md mr-2">Add Module Creation</a>
-        </div>
+        <!--<div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <a href="" class="add_btn btn btn-primary shadow-md mr-2">Add Module Creation</a>
+        </div>-->
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">

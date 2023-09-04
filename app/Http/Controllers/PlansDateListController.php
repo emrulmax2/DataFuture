@@ -120,7 +120,8 @@ class PlansDateListController extends Controller
                         $end = $teaching_end_date;
                         while(strtotime($start) <= strtotime($end)):
                             $dayName = strtolower(date('D', strtotime($start)));
-                            if(isset($plan->$dayName) && $plan->$dayName == 1):
+                            $bankHolidays = BankHoliday::where('academic_year_id', $academic_year_id)->where('start_date', '>=', $start)->where('end_date', '<=', $start)->get();
+                            if(isset($plan->$dayName) && $plan->$dayName == 1 && $bankHolidays->count() == 0):
                                 $name = '';
                                 if($start == $submission_date):
                                     $name = 'Submission';
