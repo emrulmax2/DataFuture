@@ -8,6 +8,7 @@ use App\Models\Semester;
 use App\Models\CourseCreation;
 use App\Http\Requests\CourseCreationsRequest;
 use App\Models\AcademicYear;
+use App\Models\CourseQualification;
 
 class CoursCreationController extends Controller
 {
@@ -17,6 +18,7 @@ class CoursCreationController extends Controller
             'breadcrumbs' => [['label' => 'Course Creations', 'href' => 'javascript:void(0);']],
             'courses' => Course::all(),
             'semesters' => Semester::all(),
+            'qualifications' => CourseQualification::all(),
         ]);
     }
 
