@@ -400,6 +400,9 @@ var employmentHistoryTable = (function () {
     let tomOptions = {
         plugins: {
             dropdown_input: {},
+            remove_button: {
+                title: "Remove this item",
+            }
         },
         placeholder: 'Search Here...',
         persist: false,

@@ -84,7 +84,7 @@ class AdmissionController extends Controller
             return Course::all();
         });
         $statuses = Cache::get('statuses', function () {
-            return Status::where('type', 'Applicant')->get();
+            return Status::where('type', 'Applicant')->where('id', '>', 1)->get();
         });
         
         
