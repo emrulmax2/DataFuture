@@ -45,7 +45,7 @@ class CoursCreationController extends Controller
         $total_rows = $query->count();
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -82,6 +82,7 @@ class CoursCreationController extends Controller
                     'sl' => $i,
                     'course' => $list->course->name,
                     'semester' => $list->semester->name,
+                    'qualification' => isset($list->qualification->name) ? $list->qualification->name : '',
                     'duration' => $list->duration,
                     'unit_length' => $list->unit_length,
                     'slc_code'=> $list->slc_code,
