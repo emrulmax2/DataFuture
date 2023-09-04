@@ -61,6 +61,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\UserMailerJob;
+use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\EmailTemplate;
 use App\Models\LetterHeaderFooter;
@@ -83,7 +84,7 @@ class AdmissionController extends Controller
             return Course::all();
         });
         $statuses = Cache::get('statuses', function () {
-            return Status::where('type', 'Applicant')->get();
+            return Status::where('type', 'Applicant')->where('id', '>', 1)->get();
         });
         
         
@@ -1998,6 +1999,50 @@ class AdmissionController extends Controller
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
         endif;
+    }
+
+    public function admissionInterviewLogList(Request $request){
+        $applicantTaskId = (isset($request->applicantTaskId) && $request->applicantTaskId > 0 ? $request->applicantTaskId : 0);
+        $applicantId = (isset($request->applicantId) && $request->applicantId > 0 ? $request->applicantId : 0);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = ApplicantInterview::where('applicant_id', $applicantId)->where('applicant_task_id', $applicantTaskId)->orderByRaw(implode(',', $sorts));
+
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+        $total_rows = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'date' => $list->interview_date,
+                    'time' => $list->start_time.' - '.$list->end_time,
+                    'result' => $list->interview_result,
+                    'status' => $list->interview_status,
+                    'interviewer' => (isset($list->user->name) ? $list->user->name : '')
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
 }

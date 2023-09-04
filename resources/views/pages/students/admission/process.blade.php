@@ -262,7 +262,7 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                            <a href="javascript:void(0);" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                            <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
@@ -424,7 +424,7 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                            <a href="javascript:void(0);" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
@@ -586,7 +586,7 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                            <a href="javascript:void(0);" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
@@ -636,7 +636,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="processTaskLogTable" data-applicanttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
+                        <div id="processTaskLogTable" data-interview="0" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
