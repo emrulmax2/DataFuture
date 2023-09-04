@@ -42,7 +42,7 @@ class PlanController extends Controller
         $instance_term = (isset($request->instance_term) && !empty($request->instance_term) ? $request->instance_term : []);
         $moduleCreationIds = [];
         if(!empty($instance_term)):
-            $moduleCreations = ModuleCreation::whereIn('', $instance_term)->get();
+            $moduleCreations = ModuleCreation::whereIn('instance_term_id', $instance_term)->get();
             if(!empty($moduleCreations)):
                 foreach($moduleCreations as $mc):
                     $moduleCreationIds[] = $mc->id;
@@ -56,7 +56,7 @@ class PlanController extends Controller
         $days = (isset($request->days) && !empty($request->days) ? $request->days : []);
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -244,8 +244,8 @@ class PlanController extends Controller
                                                     $html .= '<div class="rdbItem tutor dropdownMenus" data-id="'.$cp->tutor_id.'" data-label="Tutor">';
                                                         $html .= '<button type="button" class=" btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>'.$cp->tutor->name.'</span></button>';
                                                     $html .= '</div>';
-                                                    $html .= '<div class="rdbItem personalTutor dropdownMenus" data-id="'.$cp->personal_tutor_id.'" data-label="Personal Tutor">';
-                                                        $html .= '<button type="button" class=" btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>'.$cp->personalTutor->name.'</span></button>';
+                                                    $html .= '<div class="rdbItem personalTutor dropdownMenus" data-id="'.(isset($cp->personal_tutor_id) ? $cp->personal_tutor_id : '').'" data-label="Personal Tutor">';
+                                                        $html .= '<button type="button" class=" btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->personalTutor->name) ? $cp->personalTutor->name : '').'</span></button>';
                                                     $html .= '</div>';
                                                     $html .= '<div class="rdbItem rdItemHalf odds classType dropdownMenus" data-id="'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 0).'" data-label="Class Type">';
                                                         $html .= '<button type="button" class="btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 'Class Type').'</span></button>';
@@ -445,10 +445,10 @@ class PlanController extends Controller
                                     $html .= '<button type="button" class="btn btn-course inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="book" class="w-4 h-4 mr-1"></i> '.$cp->course->name.'</button>';
                                 $html .= '</div>';
                                 $html .= '<div class="rdbItem module" data-id="'.$cp->module_creation_id.'" data-label="Module">';
-                                    $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.$cp->creations->module_name.'</button>';
+                                    $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.(isset($cp->creations->module_name) ? $cp->creations->module_name : '').'</button>';
                                 $html .= '</div>';
                                 $html .= '<div class="rdbItem group dropdownMenus" data-id="'.$cp->group_id.'" data-label="Group">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>'.$cp->group->name.'</span></button>';
+                                    $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->group->name) ? $cp->group->name : '').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="dropdownMenuBox">';
                                         $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
@@ -462,7 +462,7 @@ class PlanController extends Controller
                                     $html .= '</div>';
                                 $html .= '</div>';
                                 $html .= '<div class="rdbItem tutor dropdownMenus" data-id="'.$cp->tutor_id.'" data-label="Tutor">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>'.$cp->tutor->name.'</span></button>';
+                                    $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->tutor->name) ? $cp->tutor->name : '').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="dropdownMenuBox">';
                                         $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
@@ -476,7 +476,7 @@ class PlanController extends Controller
                                     $html .= '</div>';
                                 $html .= '</div>';
                                 $html .= '<div class="rdbItem personalTutor dropdownMenus" data-id="'.$cp->personal_tutor_id.'" data-label="Personal Tutor">';
-                                    $html .= '<button type="button" class="DMToggle btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>'.$cp->personalTutor->name.'</span></button>';
+                                    $html .= '<button type="button" class="DMToggle btn btn-ptutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user-check" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->personalTutor->name) ? $cp->personalTutor->name : '').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="dropdownMenuBox">';
                                         $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
