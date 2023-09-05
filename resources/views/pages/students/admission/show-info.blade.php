@@ -120,11 +120,14 @@
 </div>
 
 <!-- BEGIN: Import Modal -->
-<div id="addApplicantPhotoModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="addApplicantPhotoModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="font-medium text-base mr-auto">Upload Profile Photo</h2>
+                <a data-tw-dismiss="modal" href="javascript:;">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                </a>
             </div>
             <div class="modal-body">
                 <form method="post"  action="{{ route('admission.upload.photo') }}" class="dropzone" id="addApplicantPhotoForm" style="padding: 5px;" enctype="multipart/form-data">

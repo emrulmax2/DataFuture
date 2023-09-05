@@ -1,10 +1,13 @@
 <!-- BEGIN: Add Base Data Future Modal -->
-<div id="courseDataFutureAddModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="courseDataFutureAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="courseDataFutureAddForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Base Datafuture</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -58,12 +61,15 @@
     <!-- END: Add  Base Data Future Modal -->
 
 <!-- BEGIN: Add Base Data Future Modal -->
-<div id="courseDataFutureEditModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="courseDataFutureEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="courseDataFutureEditForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Base Datafuture</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>

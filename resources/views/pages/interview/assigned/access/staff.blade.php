@@ -69,12 +69,15 @@
 <!-- END: HTML Table Data -->
 
 <!-- BEGIN: Edit Modal -->
-<div id="editModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="editForm">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Update Result</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>       
@@ -148,7 +151,7 @@
 <!-- END: Success Modal Content -->
 
 <!-- BEGIN: Student Profile Lock Modal -->
-<div id="callLockModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="callLockModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="callLockModalForm" enctype="multipart/form-data">
             <div class="modal-content">

@@ -151,11 +151,14 @@
     </div>
     <!-- END: Letter Footer Table Data -->
     <!-- BEGIN: Letter Header Modal -->
-    <div id="uploadLetterHeaderModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="uploadLetterHeaderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Upload Header</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">      
                     <div>
@@ -220,11 +223,14 @@
     </div>
     <!-- END: Letter Header Modal -->
     <!-- BEGIN: Letter Footer Modal -->
-    <div id="uploadLetterFooterModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="uploadLetterFooterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Upload Footer</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">   
                     <div>

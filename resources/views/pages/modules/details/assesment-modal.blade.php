@@ -1,10 +1,13 @@
 <!-- BEGIN: Add Module Modal -->
-<div id="moduleAssesmentAddModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="moduleAssesmentAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="moduleAssesmentAddForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Assesment</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -44,12 +47,15 @@
     <!-- END: Add Module Modal -->
 
     <!-- BEGIN: Edit Module Modal -->
-    <div id="moduleAssesmentEditModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="moduleAssesmentEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="moduleAssesmentEditForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Update Assesment</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>

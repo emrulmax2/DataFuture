@@ -679,12 +679,15 @@
 
 
     <!-- BEGIN: Add Qualification Modal -->
-    <div id="addQualificationModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="addQualificationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Education Qualification</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -740,12 +743,15 @@
     
 
     <!-- BEGIN: Edit Qualification Modal -->
-    <div id="editQualificationModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="editQualificationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Education Qualification</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -801,12 +807,15 @@
     <!-- END: Edit Qualification Modal -->
 
     <!-- BEGIN: Add Employement History Modal -->
-    <div id="addEmployementHistoryModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="addEmployementHistoryForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Employment History</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4">
@@ -904,12 +913,15 @@
     <!-- END: Add Employement History Modal -->
 
     <!-- BEGIN: Add Employement History Modal -->
-    <div id="editEmployementHistoryModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="editEmployementHistoryForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Employment History</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4">
@@ -1010,12 +1022,15 @@
 
 
     <!-- BEGIN: Add Employement History Modal -->
-    <div id="addressModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Address</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4">

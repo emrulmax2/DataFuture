@@ -1,10 +1,13 @@
 <!-- BEGIN: Edit Personal Details Modal -->
-<div id="editAdmissionPersonalDetailsModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editAdmissionPersonalDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editAdmissionPersonalDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Personal Details</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
@@ -141,12 +144,15 @@
 <!-- END: Edit Personal Details Modal -->
 
 <!-- BEGIN: Edit Contact Details Modal -->
-<div id="editAdmissionContactDetailsModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editAdmissionContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="editAdmissionContactDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Contact Details</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
@@ -241,12 +247,15 @@
 <!-- END: Edit Contact Details Modal -->
 
 <!-- BEGIN: Edit Kin Details Modal -->
-<div id="editAdmissionKinDetailsModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editAdmissionKinDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="editAdmissionKinDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Next of Kin</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
@@ -353,12 +362,15 @@
 <!-- END: Edit Kin Details Modal -->
 
 <!-- BEGIN: Edit Kin Details Modal -->
-<div id="editAdmissionCourseDetailsModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editAdmissionCourseDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editAdmissionCourseDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Proposed Course & Programme</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
@@ -480,12 +492,15 @@
 <!-- END: Edit Kin Details Modal -->
 
 <!-- BEGIN: Address Modal -->
-<div id="addressModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Address</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
@@ -551,12 +566,15 @@
 
 
 <!-- BEGIN: Add Qualification Modal -->
-<div id="addQualificationModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="addQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="addQualificationForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Education Qualification</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>
@@ -612,12 +630,15 @@
 
 
 <!-- BEGIN: Edit Qualification Modal -->
-<div id="editQualificationModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="editQualificationForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Education Qualification</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>
@@ -673,12 +694,15 @@
 <!-- END: Edit Qualification Modal -->
 
 <!-- BEGIN: Add Employement History Modal -->
-<div id="addEmployementHistoryModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="addEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="addEmployementHistoryForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Employment History</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
@@ -776,12 +800,15 @@
 <!-- END: Add Employement History Modal -->
 
 <!-- BEGIN: Add Employement History Modal -->
-<div id="editEmployementHistoryModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="editEmployementHistoryForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Employment History</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">

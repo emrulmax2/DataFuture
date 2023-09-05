@@ -628,12 +628,18 @@
 
     
     <!-- BEGIN: View Log Modal -->
-    <div id="viewTaskLogModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="viewTaskLogModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Task Change Log</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 <div class="modal-body">
                     <div class="overflow-x-auto scrollbar-hidden">
                         <div id="processTaskLogTable" data-interview="0" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
@@ -648,12 +654,15 @@
     <!-- END: View Log Modal -->
     
     <!-- BEGIN: Update Outcome Modal -->
-    <div id="updateTaskOutcomeModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="updateTaskOutcomeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="updateTaskOutcomeForm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Update Outcome</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                          
@@ -685,11 +694,14 @@
     <!-- END: Update Outcome Modal -->
 
     <!-- BEGIN: Import Modal -->
-    <div id="uploadTaskDocumentModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="uploadTaskDocumentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Upload Documents</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <form method="post"  action="{{ route('admission.upload.task.documents') }}" class="dropzone" id="uploadTaskDocumentForm" style="padding: 5px;" enctype="multipart/form-data">

@@ -83,12 +83,15 @@
     </div>
     <!-- END: HTML Table Data -->
     <!-- BEGIN: Add Modal -->
-    <div id="addTaskModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addTaskModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="addTaskForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Task</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -227,12 +230,15 @@
     </div>
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
-    <div id="editTaskModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editTaskModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="editTaskForm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Task</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
