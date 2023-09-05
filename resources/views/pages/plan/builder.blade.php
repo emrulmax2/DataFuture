@@ -168,7 +168,7 @@
                             <th class="whitespace-nowrap">Day</th>
                             @if(!empty($rooms))
                                 @foreach($rooms as $rm)
-                                    <th class="whitespace-nowrap">{{ $rm->name }} - {{ $rm->venue->name }}</th>
+                                    <th class="whitespace-nowrap">{{ $rm->name }} - {{ isset($rm->venue->name) ? $rm->venue->name : '' }}</th>
                                 @endforeach
                             @endif
                         </tr>

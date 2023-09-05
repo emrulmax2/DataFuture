@@ -448,6 +448,7 @@ var applicantInterviewLogTable = (function () {
 
         drzn.on("error", function(file, response){
             dzError = true;
+            alert('hier')
         });
 
         drzn.on("success", function(file, response){
@@ -477,6 +478,9 @@ var applicantInterviewLogTable = (function () {
                     window.location.reload();
                 }, 5000);
             }else{
+                $('#uploadProcessDoc').removeAttr('disabled');
+                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
                     $("#warningModal .warningModalTitle").html("Error Found!" );
@@ -492,10 +496,23 @@ var applicantInterviewLogTable = (function () {
 
         $('#uploadProcessDoc').on('click', function(e){
             e.preventDefault();
-            document.querySelector('#uploadProcessDoc').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadProcessDoc svg").style.cssText ="display: inline-block;";
-            drzn.processQueue();
-            
+            var acceptedFiles = drzn.getAcceptedFiles().length;
+            if(acceptedFiles > 0){
+                document.querySelector('#uploadProcessDoc').setAttribute('disabled', 'disabled');
+                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: inline-block;";
+                drzn.processQueue();
+            }else{
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!" );
+                    $("#warningModal .warningModalDesc").html('Empty submission are not accepted. Please upload some valid files.');
+                    $("#warningModal .warningCloser").attr('data-action', 'NONE');
+                });
+                
+                setTimeout(function(){
+                    warningModal.hide();
+                }, 5000);
+            }
         })
     }
 
