@@ -229,12 +229,15 @@
     <!-- END: SMS -->
 
     <!-- BEGIN: Send Letter Modal -->
-    <div id="addLetterModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addLetterForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Send Letter</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -321,11 +324,14 @@
     <!-- END: Send Letter Modal -->
 
     <!-- BEGIN: View Modal -->
-    <div id="viewCommunicationModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="viewCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Vew Communication</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     
@@ -340,12 +346,15 @@
     <!-- END: View Modal -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="smsSMSModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="smsSMSModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="smsSMSForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Send SMS</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -399,12 +408,15 @@
     <!-- END: Add Modal -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="sendEmailModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="sendEmailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="sendEmailForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Send Email</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>

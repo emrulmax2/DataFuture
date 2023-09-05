@@ -84,11 +84,14 @@
     </div>
 
     <!-- BEGIN: View Modal -->
-    <div id="viewNoteModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="viewNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Note</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     
@@ -103,12 +106,15 @@
     <!-- END: View Modal -->
 
     <!-- BEGIN: Edit Modal -->
-    <div id="editNoteModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editNoteForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Note</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -155,12 +161,15 @@
     <!-- END: Edit Modal -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="addNoteModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addNoteForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Note</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>

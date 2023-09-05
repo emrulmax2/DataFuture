@@ -1,10 +1,13 @@
 <!-- BEGIN: Add Modal -->
-<div id="roomAddModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="roomAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="roomAddForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Room</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>
@@ -44,12 +47,15 @@
 </div>
 <!-- END: Add Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="roomEditModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="roomEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="roomEditForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Venue</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>

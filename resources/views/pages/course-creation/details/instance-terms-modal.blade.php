@@ -1,10 +1,13 @@
 <!-- BEGIN: Add Modal -->
-<div id="instancetermAddModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="instancetermAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog  modal-lg">
         <form method="POST" action="#" id="instancetermAddForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Instance Term</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
@@ -97,12 +100,15 @@
 </div>
 <!-- END: Add Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="instancetermEditModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="instancetermEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="instancetermEditForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Instance Term</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">

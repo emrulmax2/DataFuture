@@ -1,10 +1,13 @@
 <!-- BEGIN: Add Modal -->
-<div id="bankholidayAddModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="bankholidayAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="bankholidayAddForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Add Bank Holiday</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>
@@ -62,12 +65,15 @@
 </div>
 <!-- END: Add Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="bankholidayEditModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="bankholidayEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="bankholidayEditForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Bank Holiday</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>
@@ -125,11 +131,14 @@
 </div>
 <!-- END: Edit Modal -->
 <!-- BEGIN: Import Modal -->
-<div id="bankholidayImportModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="bankholidayImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Import Holiday</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <form method="post"  action="{{ route('bankholidays.import') }}" class="dropzone" id="bankholidayImportForm" enctype="multipart/form-data">

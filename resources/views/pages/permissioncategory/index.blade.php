@@ -72,12 +72,15 @@
     </div>
     <!-- END: HTML Table Data -->
     <!-- BEGIN: Add Modal -->
-    <div id="addPermissionModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="addPermissionForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Permission Category</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -113,12 +116,15 @@
     </div>
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
-    <div id="editPermissionModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="editPermissionForm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Permission Category</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>

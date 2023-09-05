@@ -73,12 +73,15 @@
     <!-- END: HTML Table Data -->
 
     <!-- BEGIN: Edit Modal -->
-    <div id="editSmsModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editSmsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editSmsForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Template</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div class="mt-3">
@@ -124,12 +127,15 @@
     <!-- END: Edit Modal -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="addSmsModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addSmsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addSmsForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Template</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div class="mt-3">

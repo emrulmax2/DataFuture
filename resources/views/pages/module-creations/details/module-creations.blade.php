@@ -58,12 +58,15 @@
 </div>
 
 <!-- BEGIN: Edit or View Assessment Modal -->
-<div id="viewModuleAssessmentModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="viewModuleAssessmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="viewModuleAssessmentForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Assessments list of <u class="moduleName">Module Name</u></h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="theLoader flex flex-col justify-end items-center py-10">
@@ -97,12 +100,15 @@
 <!-- END: Edit or View Assessment Modal -->
 
 <!-- BEGIN: Add Assessment Modal -->
-<div id="addModuleAssessmentModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="addModuleAssessmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form method="POST" action="#" id="addModuleAssessmentForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Assessments list of <u class="moduleName">Module Name</u></h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div class="theLoader flex flex-col justify-end items-center py-10">
@@ -136,12 +142,15 @@
 <!-- END: Add Assessment Modal -->
 
 <!-- BEGIN: Edit Modal -->
-<div id="editModuleCreationModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="editModuleCreationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="#" id="editModuleCreationForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Module Creation</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
                 </div>
                 <div class="modal-body">
                     <div>

@@ -72,12 +72,15 @@
     </div>
     <!-- END: HTML Table Data -->
     <!-- BEGIN: Add Modal -->
-    <div id="addRoleModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="addRoleModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="addRoleForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Role</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
@@ -126,12 +129,15 @@
     </div>
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
-    <div id="editRoleModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="editRoleModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="editRoleForm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Role</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
                         <div>
