@@ -83,9 +83,27 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
+                            <select id="course_id" name="course_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($courses))
+                                    @foreach($courses as $cr)
+                                        <option value="{{ $cr->id }}">{{ $cr->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-course_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
                             <label for="name" class="form-label">Group Name <span class="text-danger">*</span></label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 flex items-center">
+                            <label for="evening_and_weekend" class="form-label pt-1 mr-5 mb-0">Evening & Weekend</label>
+                            <div class="form-check form-switch">
+                                <input id="evening_and_weekend" name="evening_and_weekend" class="form-check-input" type="checkbox" value="1">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -125,9 +143,27 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="edit_course_id" class="form-label">Course <span class="text-danger">*</span></label>
+                            <select id="edit_course_id" name="course_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($courses))
+                                    @foreach($courses as $cr)
+                                        <option value="{{ $cr->id }}">{{ $cr->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-course_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
                             <label for="name" class="form-label">Group Name <span class="text-danger">*</span></label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 flex items-center">
+                            <label for="edit_evening_and_weekend" class="form-label pt-1 mr-5 mb-0">Evening & Weekend</label>
+                            <div class="form-check form-switch">
+                                <input id="edit_evening_and_weekend" name="evening_and_weekend" class="form-check-input" type="checkbox" value="1">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -29,8 +29,18 @@ var table = (function () {
                     width: "180",
                 },
                 {
+                    title: "Course",
+                    field: "course",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Group Name",
                     field: "name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Evening & Weekend",
+                    field: "evening_and_weekend",
                     headerHozAlign: "left",
                 },
                 {
@@ -153,13 +163,17 @@ var table = (function () {
         const addModalEl = document.getElementById('addModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addModal .acc__input-error').html('');
-            $('#addModal input').val('');
+            $('#addModal input[name="name"]').val('');
+            $('#addModal select').val('');
+            $('#addModal input[name="evening_and_weekend"]').prop('checked', false);
         });
         
         const editModalEl = document.getElementById('editModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editModal .acc__input-error').html('');
-            $('#editModal input').val('');
+            $('#editModal input[name="name"]').val('');
+            $('#editModal select').val('');
+            $('#editModal input[name="evening_and_weekend"]').prop('checked', false);
             $('#editModal input[name="id"]').val('0');
         });
 
@@ -226,7 +240,14 @@ var table = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
+                    $('#editModal select[name="course_id"]').val(dataset.course_id ? dataset.course_id : '');
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
+
+                    if(dataset.evening_and_weekend == 1){
+                        $('#editModal input[name="evening_and_weekend"]').prop('checked', true);
+                    }else{
+                        $('#editModal input[name="evening_and_weekend"]').prop('checked', false);
+                    }
 
                     $('#editModal input[name="id"]').val(editId);
                 }

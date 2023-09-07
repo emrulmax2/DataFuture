@@ -746,7 +746,7 @@ class AdmissionController extends Controller
         endif;
 
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -2005,7 +2005,7 @@ class AdmissionController extends Controller
         $applicantTaskId = (isset($request->applicantTaskId) && $request->applicantTaskId > 0 ? $request->applicantTaskId : 0);
         $applicantId = (isset($request->applicantId) && $request->applicantId > 0 ? $request->applicantId : 0);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];

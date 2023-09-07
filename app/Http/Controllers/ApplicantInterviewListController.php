@@ -36,7 +36,7 @@ class ApplicantInterviewListController extends Controller
             $applicanttask = (isset($request->applicanttask) && $request->applicanttask > 0 ? $request->applicanttask : '');
             $applicant = (isset($request->applicant) && $request->applicant > 0 ? $request->applicant : '');
 
-            $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+            $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
             $sorts = [];
             foreach($sorters as $sort):
                 $sorts[] = $sort['field'].' '.$sort['dir'];

@@ -11,7 +11,9 @@ class Group extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'course_id',
         'name',
+        'evening_and_weekend',
         'created_by',
         'updated_by',
     ];
@@ -22,4 +24,8 @@ class Group extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function course(){
+        return $this->belongsTo(Course::class, 'course_id');
+    }
 }

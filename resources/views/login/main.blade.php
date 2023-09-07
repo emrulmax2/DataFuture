@@ -42,8 +42,8 @@
                         <a href="">Forgot Password?</a>
                     </div>
                     <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
-                        <button id="btn-login" class="btn btn-primary py-3 px-4 w-full xl:w-64 xl:mr-3 align-top">Staff Login</button>
-                        <a href="{{ route('applicant.register') }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-secondary text-slate-500 dark:border-darkmode-100/40 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-secondary/20 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-100/10 mt-3 w-full px-4 py-3 align-top xl:mt-0 xl:w-64">Register as applicant</a>
+                        <button id="btn-login" class="btn btn-primary py-3 px-4 w-full md:w-64 xl:mr-3 align-top">Staff Login</button>
+                        <a href="{{ route('applicant.register') }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-secondary text-slate-500 dark:border-darkmode-100/40 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-secondary/20 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-100/10 mt-3 w-full px-4 py-3 align-top xl:mt-0 md:w-64">Register as applicant</a>
                     </div>
 
                     <div class="intro-x mt-4 text-center font-bold text-1xl">
@@ -64,7 +64,7 @@
     </div>
     @if (session('google'))
     <!-- BEGIN: Notification Content -->
-    <div id="success-notification-content" class="toastify-content hidden flex">
+    <div id="success-notification-content" class="toastify-content hidden ">
         <i class="text-danger" data-lucide="x-octagon"></i>
         <div class="ml-4 mr-4">
             <div class="font-medium">No Linked Account Found!</div>

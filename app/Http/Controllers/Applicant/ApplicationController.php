@@ -24,6 +24,7 @@ use App\Models\ApplicantKin;
 use App\Models\ApplicantOtherDetail;
 use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantQualification;
+use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
 use Illuminate\Support\Carbon;
@@ -45,8 +46,8 @@ class ApplicationController extends Controller
             'users' => User::all(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => Applicant::where('applicant_user_id', \Auth::guard('applicant')->user()->id)->whereNull('submission_date')->orderBy('id', 'DESC')->first(),
-            'instance' => CourseCreationInstance::all()->filter(function($item) {
-                if (Carbon::now()->between($item->start_date, $item->end_date)) {
+            'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
+                if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
                   return $item;
                 }
             })

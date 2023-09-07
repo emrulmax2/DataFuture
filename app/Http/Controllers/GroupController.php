@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\GroupsRequests;
 use App\Http\Requests\GroupsUpdateRequests;
+use App\Models\Course;
 use App\Models\Group;
 use App\Models\User;
 
@@ -17,6 +18,7 @@ class GroupController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Groups', 'href' => 'javascript:void(0);']
             ],
+            'courses' => Course::all()
         ]);
     }
 
@@ -26,10 +28,8 @@ class GroupController extends Controller
 
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-        $total_rows = $count = Group::count();
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -46,6 +46,9 @@ class GroupController extends Controller
             $query->onlyTrashed();
         endif;
 
+        $total_rows = $count = $query->count();
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -58,7 +61,9 @@ class GroupController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'course' => (isset($list->course->name) && !empty($list->course->name) ? $list->course->name : ''),
                     'name' => $list->name,
+                    'evening_and_weekend' => (isset($list->evening_and_weekend) && $list->evening_and_weekend == '1' ? 'Yes' : 'No'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -69,7 +74,9 @@ class GroupController extends Controller
 
     public function store(GroupsRequests $request){
         $data = Group::create([
+            'course_id'=> $request->course_id,
             'name'=> $request->name,
+            'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -85,9 +92,11 @@ class GroupController extends Controller
         }
     }
 
-    public function update(GroupsUpdateRequests $request, Group $dataId){
+    public function update(GroupsUpdateRequests $request, Group $group){
         $data = Group::where('id', $request->id)->update([
+            'course_id'=> $request->course_id,
             'name'=> $request->name,
+            'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
             'updated_by' => auth()->user()->id
         ]);
 

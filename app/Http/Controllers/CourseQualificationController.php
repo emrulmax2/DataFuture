@@ -24,7 +24,7 @@ class CourseQualificationController extends Controller
         $total_rows = $count = CourseQualification::count();
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];

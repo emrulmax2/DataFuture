@@ -65,7 +65,7 @@ class InterviewListController extends Controller
             $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
             $status = (isset($request->status) && $request->status !="" ? $request->status : '');
 
-            $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'asc']));
+            $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
             $sorts = [];
             
             foreach($sorters as $sort):
