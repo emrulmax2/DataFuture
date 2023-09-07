@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GroupsUpdateRequests extends FormRequest
 {
@@ -24,7 +25,13 @@ class GroupsUpdateRequests extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|unique:groups,name,'. $this->id,
+            'course_id' => 'required',
+            'name' => [ 'required', 
+                Rule::unique('groups')
+                       ->ignore($this->id)
+                       ->where('course_id', $this->course_id)
+            ]
+
         ];
     }
 }

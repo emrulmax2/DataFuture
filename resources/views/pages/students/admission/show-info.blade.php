@@ -45,7 +45,7 @@
 
                                     @if(!empty($allStatuses))
                                         @foreach($allStatuses as $sts)
-                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6, 7, 9])))
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])))
                                             <li>
                                                 <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
                                                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
