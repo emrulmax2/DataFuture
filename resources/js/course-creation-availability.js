@@ -29,7 +29,7 @@ var courseCreationAvailabilityTable = (function () {
                     width: "180",
                 },
                 {
-                    title: "Admission Date",
+                    title: "Admission Start Date",
                     field: "admission_date",
                     headerHozAlign: "left",
                 },

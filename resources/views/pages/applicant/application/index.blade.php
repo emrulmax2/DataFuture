@@ -314,8 +314,8 @@
                                 <div class="col-span-12 sm:col-span-6">
                                     <select id="course_creation_id" class="lcc-tom-select w-full" name="course_creation_id">
                                         <option value="" selected>Please Select</option>
-                                        @if(!empty($instance))
-                                            @foreach($instance as $ci)
+                                        @if(!empty($courseCreationAvailibility))
+                                            @foreach($courseCreationAvailibility as $ci)
                                                 <option {{ isset($apply->course->course_creation_id) && $apply->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
                                             @endforeach 
                                         @endif 
