@@ -426,7 +426,7 @@ class PlanController extends Controller
     public function getExistClassPlanBox($course, $instanceterm, $modulecreation){
         $plans = [];
 
-        $groups = Group::all();
+        $groups = Group::where('course_id', $course)->get();
         $users = User::all();
 
         $days = [ 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
@@ -453,7 +453,7 @@ class PlanController extends Controller
                                     $html .= '<div class="dropdownMenuBox">';
                                         $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
                                         $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                                            if(!empty($groups)):
+                                            if(!empty($groups) && $groups->count() > 0):
                                                 foreach($groups as $gr):
                                                     $html .= '<li data-value="'.$gr->id.'">'.$gr->name.'</li>';
                                                 endforeach;
@@ -566,7 +566,7 @@ class PlanController extends Controller
         $module_creation_id = $request->module_creation_id;
         $moduleCreation = ModuleCreation::find($module_creation_id);
 
-        $groups = Group::all();
+        $groups = Group::where('course_id', $course_id)->get();
         $users = User::all();
 
         $day = $request->day;
@@ -587,7 +587,7 @@ class PlanController extends Controller
                 $html .= '<div class="dropdownMenuBox">';
                     $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
                     $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
-                        if(!empty($groups)):
+                        if(!empty($groups) && $groups->count() > 0):
                             foreach($groups as $gr):
                                 $html .= '<li data-value="'.$gr->id.'">'.$gr->name.'</li>';
                             endforeach;
