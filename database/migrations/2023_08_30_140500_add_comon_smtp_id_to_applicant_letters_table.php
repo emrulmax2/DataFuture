@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('applicant_letters', function (Blueprint $table) {
-            $table->dropColumn('pin');
+            $table->dropColumn('comon_smtp_id');
         });
     }
 };
