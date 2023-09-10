@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('groups', function (Blueprint $table) {
-            $table->unsignedBigInteger('course_id')->nullable()->default(null)->after('id');;
+            $table->unsignedBigInteger('course_id')->nullable()->after('id');;
             $table->tinyInteger('evening_and_weekend')->nullable()->default(0)->after(('name'));
 
-            $table->foreign('course_id')->references('id')->on('courses');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -29,6 +29,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('groups', function (Blueprint $table) {
+            $table->dropForeign(['course_id']);
             $table->dropColumn('course_id');
             $table->dropColumn('evening_and_weekend');
         });
