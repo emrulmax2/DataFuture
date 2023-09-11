@@ -33,7 +33,7 @@
                     <div class="font-medium text-base">Work Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    @if($applicant->status_id == 4 || $applicant->status_id == 5)
+                    @if($applicant->status_id == 4 || $applicant->status_id == 5 || $applicant->status_id == 6)
                         <div class="dropdown inline-block" data-tw-placement="bottom-start">
                             <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
                                 {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
@@ -45,7 +45,7 @@
 
                                     @if(!empty($allStatuses))
                                         @foreach($allStatuses as $sts)
-                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])))
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])) || ($applicant->status_id == 6 && in_array($sts->id, [7, 9])))
                                             <li>
                                                 <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
                                                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
