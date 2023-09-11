@@ -35,17 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('student_task_documents', function (Blueprint $table) {
-
-            $table->dropForeign(['student_id']);
-            $table->dropForeign(['student_task_id']);
-            $table->dropForeign(['student_document_id']);
-
-            $table->dropColumn('student_id');
-            $table->dropColumn('student_task_id');
-            $table->dropColumn('student_document_id');
-        });
-
         Schema::dropIfExists('student_task_documents');
     }
 };
