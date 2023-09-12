@@ -1967,6 +1967,22 @@ class AdmissionController extends Controller
         return response()->json(['heading' => $heading, 'html' => $html], 200);
     }
 
+    public function admissionStudentStatusValidation(Request $request){
+        $applicantID = $request->applicantID;
+        $applicant = Applicant::find($applicantID);
+        $res = [];
+        if($applicant->proof_type == '' || $applicant->proof_id == '' || $applicant->proof_expiredate){
+            $res['proof_type'] = !isset($applicant->proof_type) || $applicant->proof_type == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_type];
+            $res['proof_id'] = !isset($applicant->proof_id) || $applicant->proof_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_id];
+            $res['proof_expiredate'] = !isset($applicant->proof_expiredate) || $applicant->proof_expiredate == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_expiredate];
+
+            $res['suc'] = 2;
+        }else{
+            $res['suc'] = 1;
+        }
+        return response(['msg' => $res], 200);
+    }
+
     public function admissionStudentUpdateStatus(Request $request){
         $applicant_id = $request->applicantID;
         $statusidID = $request->statusidID;
@@ -1974,11 +1990,21 @@ class AdmissionController extends Controller
 
         $applicantOldRow = Applicant::find($applicant_id);
 
+        $statusData = [];
+        $statusData['status_id'] = $statusidID;
+        $statusData['rejected_reason'] = $rejectedReason;
+        if(empty($applicantOldRow->proof_type) && (isset($request->proof_type) && !empty($request->proof_type)) && $statusidID == 7){
+            $statusData['proof_type'] = $request->proof_type;
+        }
+        if(empty($applicantOldRow->proof_id) && (isset($request->proof_id) && !empty($request->proof_id)) && $statusidID == 7){
+            $statusData['proof_id'] = $request->proof_id;
+        }
+        if(empty($applicantOldRow->proof_expiredate) && (isset($request->proof_expiredate) && !empty($request->proof_expiredate)) && $statusidID == 7){
+            $statusData['proof_expiredate'] = date('Y-m-d', strtotime($request->proof_expiredate));
+        }
+
         $applicant = Applicant::find($applicant_id);
-        $applicant->fill([
-            'status_id' => $statusidID,
-            'rejected_reason' => $rejectedReason,
-        ]);
+        $applicant->fill($statusData);
         $changes = $applicant->getDirty();
         $applicant->save();
 
