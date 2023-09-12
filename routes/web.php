@@ -492,6 +492,7 @@ Route::middleware('auth')->group(function() {
 
 
         Route::post('admission/update-status', 'admissionStudentUpdateStatus')->name('admission.student.update.status');
+        Route::post('admission/status-validation', 'admissionStudentStatusValidation')->name('admission.student.status.validation');
         
     });
 

@@ -399,10 +399,7 @@ var employmentHistoryTable = (function () {
 (function(){
     let tomOptions = {
         plugins: {
-            dropdown_input: {},
-            remove_button: {
-                title: "Remove this item",
-            },
+            dropdown_input: {}
         },
         placeholder: 'Search Here...',
         persist: false,
@@ -417,6 +414,17 @@ var employmentHistoryTable = (function () {
     //var employment_status = new TomSelect('#employment_status', tomOptions);
 
     $('.lccTom').each(function(){
+        if ($(this).attr("multiple") !== undefined) {
+            tomOptions = {
+                ...tomOptions,
+                plugins: {
+                    ...tomOptions.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                }
+            };
+        }
         new TomSelect(this, tomOptions);
     })
 

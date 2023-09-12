@@ -116,6 +116,25 @@
                                 <label class="form-check-label" for="disabilty_allowance">&nbsp;</label>
                             </div>
                         </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="proof_type" class="form-label">Proof of Id Type</label>
+                            <select id="proof_type" class="lccTom lcc-tom-select w-full" name="proof_type">
+                                <option value="">Please Select</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
+                            </select>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="proof_id" class="form-label">ID No</label>
+                            <input type="text" value="{{ isset($applicant->proof_id) ? $applicant->proof_id : '' }}" placeholder="ID No" id="proof_id" class="form-control" name="proof_id">
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="proof_expiredate" class="form-label">Expiry Date</label>
+                            <input type="text" value="{{ isset($applicant->proof_expiredate) ? $applicant->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="proof_expiredate" class="form-control datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

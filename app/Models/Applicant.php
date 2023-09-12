@@ -26,6 +26,9 @@ class Applicant extends Model
         'rejected_reason',
         'nationality_id',
         'country_id',
+        'proof_type',
+        'proof_id',
+        'proof_expiredate',
         'created_by',
         'updated_by',
     ];
@@ -142,5 +145,12 @@ class Applicant extends Model
 
     public function allTasks(){
        return $this->hasMany(ApplicantTask::class, 'applicant_id');
+    }
+
+    public function setProofExpiredateAttribute($value) {  
+        $this->attributes['proof_expiredate'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+    public function getProofExpiredateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }

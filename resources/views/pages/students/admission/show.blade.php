@@ -102,6 +102,25 @@
                         </div>
                     </div>
                 @endif
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Proof of Id Type</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_type) && !empty($applicant->proof_type) ? ucfirst($applicant->proof_type) : '---' }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">ID No</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_id) && !empty($applicant->proof_id) ? $applicant->proof_id : '---' }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Expiry date</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_expiredate) && !empty($applicant->proof_expiredate) ? $applicant->proof_expiredate : '---' }}</div>
+                    </div>
+                </div>
+
             </div>
         </div>
         
@@ -519,6 +538,12 @@
                         <div class="col-span-8 font-medium">{!! ($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
                     </div>
                 </div>
+
+                @if($applicant->status_id >= 6)
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div> 
+
+                @endif
+
             </div>
         </div>
     </div>

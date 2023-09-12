@@ -33,7 +33,7 @@
                     <div class="font-medium text-base">Work Progress</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    @if($applicant->status_id == 4 || $applicant->status_id == 5)
+                    @if($applicant->status_id == 4 || $applicant->status_id == 5 || $applicant->status_id == 6)
                         <div class="dropdown inline-block" data-tw-placement="bottom-start">
                             <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
                                 {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
@@ -45,7 +45,7 @@
 
                                     @if(!empty($allStatuses))
                                         @foreach($allStatuses as $sts)
-                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])))
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])) || ($applicant->status_id == 6 && in_array($sts->id, [7, 9])))
                                             <li>
                                                 <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
                                                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
@@ -168,7 +168,7 @@
 <!-- END: Import Modal -->
 
 <!-- BEGIN: Status Confirm Modal -->
-<div id="statusConfirmModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="statusConfirmModal" class="modal"  data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body p-0">
@@ -189,6 +189,28 @@
                             <option value="Failure in English Test">Failure in English Test</option>
                             <option value="Previous Bad Records">Previous Bad Records</option> 
                         </select>
+                    </div>
+
+                    <div class="mt-3 offerAcceptedErrorArea border-t border-slate-200/60 border-b pt-4 pb-6" style="display: none;">
+                        <div class="pb-2 proof_type" style="display: none;">
+                            <label for="sts_proof_type" class="form-label block mb-1">Proof of Id Type <span class="text-danger">*</span></label>
+                            <select id="sts_proof_type" class="form-control  w-3/4" name="proof_type">
+                                <option value="">Please Select</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
+                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
+                            </select>
+                        </div>
+                        <div class="pb-2 proof_id" style="display: none;">
+                            <label for="sts_proof_id" class="form-label block mb-1">ID No <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ isset($applicant->proof_id) ? $applicant->proof_id : '' }}" placeholder="ID No" id="sts_proof_id" class="form-control  w-3/4" name="proof_id">
+                        </div>
+                        <div class="proof_expiredate" style="display: none;">
+                            <label for="sts_proof_expiredate" class="form-label block mb-1">Expiry Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ isset($applicant->proof_expiredate) ? $applicant->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="sts_proof_expiredate" class="form-control  w-3/4 datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
+                        </div>
                     </div>
                 </div>
                 <div class="px-5 pb-8 text-center">
