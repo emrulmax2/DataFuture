@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
 use App\Http\Requests\AdmissionContactDetailsRequest;
 use App\Http\Requests\AdmissionCourseDetailsRequest;
 use App\Http\Requests\AdmissionKinDetailsRequest;
@@ -60,7 +62,11 @@ use Illuminate\Support\Facades\Mail as FacadesMail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+
 use App\Jobs\UserMailerJob;
+use App\Jobs\ProcessStudents;
+use App\Jobs\ProcessNewStudentToUser;
+use App\Jobs\ProcessStudentNoteDetails;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\EmailTemplate;
@@ -72,6 +78,8 @@ use App\Models\SmsTemplate;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
+
+
 
 class AdmissionController extends Controller
 {
@@ -1981,7 +1989,15 @@ class AdmissionController extends Controller
         ]);
         $changes = $applicant->getDirty();
         $applicant->save();
+        if($statusidID == 7) {
 
+            $bus = Bus::batch([
+                new ProcessNewStudentToUser($applicant),
+                new ProcessStudents($applicant),
+                new ProcessStudentNoteDetails($applicant),
+            ])->dispatch();
+
+        }
         if($applicant->wasChanged() && !empty($changes)):
             foreach($changes as $field => $value):
                 $data = [];
