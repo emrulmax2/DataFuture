@@ -147,10 +147,19 @@ class Applicant extends Model
        return $this->hasMany(ApplicantTask::class, 'applicant_id');
     }
 
-    public function setProofExpiredateAttribute($value) {  
-        $this->attributes['proof_expiredate'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    public function proofs(){
+        return $this->hasMany(ApplicantProofOfId::class, 'applicant_id', 'id');
     }
-    public function getProofExpiredateAttribute($value) {
-        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+
+    public function proof(){
+        return $this->hasOne(ApplicantProofOfId::class, 'applicant_id', 'id')->latestOfMany();
+    }
+
+    public function feeeligibilities(){
+        return $this->hasMany(ApplicantFeeEligibility::class, 'applicant_id', 'id');
+    }
+
+    public function feeeligibility(){
+        return $this->hasOne(ApplicantFeeEligibility::class, 'applicant_id', 'id')->latestOfMany();
     }
 }

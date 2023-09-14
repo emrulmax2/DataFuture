@@ -60,7 +60,7 @@ class ApplicationController extends Controller
         $applicantUserId = $request->applicant_user_id;
         $applicant_id = $request->applicant_id;
         $applicant = Applicant::updateOrCreate([ 'applicant_user_id' => $applicantUserId, 'id' => $applicant_id ], [
-            '$applicant_id' => $applicantUserId,
+            'applicant_id' => $applicantUserId,
             //'application_no' => '',
             'title_id' => $request->title_id,
             'first_name' => $request->first_name,

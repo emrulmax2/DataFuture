@@ -57,7 +57,9 @@ export default defineConfig({
                 "resources/js/admission.js",
                 "resources/js/admission-process.js",
                 "resources/js/admission-uploads.js",
-                "resources/js/admission-notes.js"
+                "resources/js/admission-notes.js",
+                "resources/js/hesagender.js",
+                "resources/js/feeeligibilities.js"
             ],
             refresh: true,
         }),

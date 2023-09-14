@@ -186,6 +186,15 @@ import Dropzone from "dropzone";
                                 $('#statusConfirmModal .offerAcceptedErrorArea input[name="proof_expiredate"]').val(theValidation.proof_expiredate.vals)
                             });
                         }
+                        if(theValidation.fee_eligibility_id.suc == 2){
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeIn('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val('')
+                            });
+                        }else{
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeOut('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val(theValidation.fee_eligibility_id.vals)
+                            });
+                        }
                     });
                 }else{
                     $("#statusConfirmModal .rejectedReasonArea").fadeOut(function(){
@@ -209,6 +218,7 @@ import Dropzone from "dropzone";
             var proof_type = $('#statusConfirmModal [name="proof_type"]').val();
             var proof_id = $('#statusConfirmModal [name="proof_id"]').val();
             var proof_expiredate = $('#statusConfirmModal [name="proof_expiredate"]').val();
+            var fee_eligibility_id = $('#statusConfirmModal [name="fee_eligibility_id"]').val();
             var $theBtn = $(this);
 
 
@@ -227,7 +237,7 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#statusConfirmModal .modal-content .validationErrors').remove();
                 }, 5000);
-            }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '')){
+            }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '' || fee_eligibility_id == '')){
                 $('#statusConfirmModal button').removeAttr('disabled');
                 $('#statusConfirmModal .modal-content .validationErrors').remove();
                 $('#statusConfirmModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please fill out all required fields.</div>');
@@ -245,7 +255,7 @@ import Dropzone from "dropzone";
                 axios({
                     method: "post",
                     url: route('admission.student.update.status'),
-                    data: {applicantID : applicantID, statusidID : statusidID, rejectedReason : rejectedReason, proof_type: proof_type, proof_id : proof_id, proof_expiredate : proof_expiredate},
+                    data: {applicantID : applicantID, statusidID : statusidID, rejectedReason : rejectedReason, proof_type: proof_type, proof_id : proof_id, proof_expiredate : proof_expiredate, fee_eligibility_id : fee_eligibility_id},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {

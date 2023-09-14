@@ -196,20 +196,31 @@
                             <label for="sts_proof_type" class="form-label block mb-1">Proof of Id Type <span class="text-danger">*</span></label>
                             <select id="sts_proof_type" class="form-control  w-3/4" name="proof_type">
                                 <option value="">Please Select</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
                             </select>
                         </div>
                         <div class="pb-2 proof_id" style="display: none;">
                             <label for="sts_proof_id" class="form-label block mb-1">ID No <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($applicant->proof_id) ? $applicant->proof_id : '' }}" placeholder="ID No" id="sts_proof_id" class="form-control  w-3/4" name="proof_id">
+                            <input type="text" value="{{ isset($applicant->proof->proof_id) ? $applicant->proof->proof_id : '' }}" placeholder="ID No" id="sts_proof_id" class="form-control  w-3/4" name="proof_id">
                         </div>
-                        <div class="proof_expiredate" style="display: none;">
+                        <div class="pb-2 proof_expiredate" style="display: none;">
                             <label for="sts_proof_expiredate" class="form-label block mb-1">Expiry Date <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($applicant->proof_expiredate) ? $applicant->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="sts_proof_expiredate" class="form-control  w-3/4 datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
+                            <input type="text" value="{{ isset($applicant->proof->proof_expiredate) ? $applicant->proof->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="sts_proof_expiredate" class="form-control  w-3/4 datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
+                        </div>
+                        <div class="pb-2 fee_eligibility_id" style="display: none;">
+                            <label for="sts_fee_eligibility_id" class="form-label block mb-1">Fee Eligibility <span class="text-danger">*</span></label>
+                            <select id="sts_fee_eligibility_id" class="form-control  w-3/4" name="fee_eligibility_id">
+                                <option value="">Please Select</option>
+                                @if($feeelegibility->count() > 0)
+                                    @foreach($feeelegibility as $fl)
+                                        <option {{ isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id == $fl->id ? 'Selected' : '' }} value="{{ $fl->id }}">{{ $fl->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
                     </div>
                 </div>
