@@ -42,11 +42,13 @@ class ApplicantDocument extends Model
     /*public function taskDocument(){
         return $this->hasOne(ApplicantTaskDocument::class, 'applicant_document_id', 'id');
     }*/
-    
-    public function tasks(){
-        return $this->belongsToMany(Task::class, 'applicant_task_documents');
-    }
-    
+
+    // I am not sure about this line of code.... I don't think its working anywhere
+        public function tasks(){
+            return $this->belongsToMany(Task::class, 'applicant_task_documents');
+        }
+    // Please check :comment form Emrul
+
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }
