@@ -2,7 +2,6 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
-import { each } from "jquery";
 import Dropzone from "dropzone";
 
 (function(){
@@ -109,30 +108,102 @@ import Dropzone from "dropzone";
             $("#statusConfirmModal .rejectedReasonArea").fadeOut(function(){
                 $("#statusConfirmModal .rejectedReasonArea select").val('');
             });
+
+            $("#statusConfirmModal .offerAcceptedErrorArea").fadeOut(function(){
+                $("#statusConfirmModal .offerAcceptedErrorArea > div").fadeOut();
+                $("#statusConfirmModal .offerAcceptedErrorArea select").val('');
+                $("#statusConfirmModal .offerAcceptedErrorArea input").val('');
+            });
+
             $('#statusConfirmModal .modal-content .validationErrors').remove();
+            $('#statusConfirmModal button').removeAttr('disabled');
         });
 
         $('.changeApplicantStatus').on('click', function(e){
             e.preventDefault();
             var statusID = $(this).attr('data-statusid');
             var applicantID = $(this).attr('data-applicantid');
-
+            var theValidation;
+            
             statusConfirmModal.show();
+            var title = 'Are you sure?';
+            var message = 'Do you want to change the applicant status? Please click on agree to continue.';
             if(statusID == 8){
-                var message = 'Do you want to change the applicant status? Please Select a Reason and click on agree to continue.';
-            }else{
-                var message = 'Do you want to change the applicant status? Please click on agree to continue.';
+                message = 'Do you want to change the applicant status? Please Select a Reason and click on agree to continue.';
+            }else if(statusID == 7){
+                $.ajax({
+                    method: 'POST',
+                    url: route('admission.student.status.validation'),
+                    data: { applicantID : applicantID },
+                    async: false,
+                    cache: false,
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    success: function(res, textStatus, xhr){
+                        theValidation = res.msg;
+                        if(res.msg.suc == 2){
+                            title = 'Validation Error Found!'
+                            message = 'There are some validation error found. Please fill out all fields and click on agree to continue.';
+                        }else{
+                            message = 'Do you want to change the applicant status? Please click on agree to continue.';
+                        }
+                    }
+                });
             }
+
             document.getElementById("statusConfirmModal").addEventListener("shown.tw.modal", function (event) {
-                $("#statusConfirmModal .confModTitle").html("Are you sure?");
+                $("#statusConfirmModal .confModTitle").html(title);
                 $("#statusConfirmModal .confModDesc").html(message);
                 if(statusID == 8){
                     $("#statusConfirmModal .rejectedReasonArea").fadeIn(function(){
                         $("#statusConfirmModal .rejectedReasonArea select").val('');
                     });
+                }else if(statusID == 7 && theValidation.suc == 2){
+                    $("#statusConfirmModal .offerAcceptedErrorArea").fadeIn('fast', function(){
+                        if(theValidation.proof_type.suc == 2){
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_type').fadeIn('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea select[name="proof_type"]').val('')
+                            });
+                        }else{
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_type').fadeOut('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea select[name="proof_type"]').val(theValidation.proof_type.vals)
+                            });
+                        }
+                        if(theValidation.proof_id.suc == 2){
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_id').fadeIn('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="proof_id"]').val('')
+                            });
+                        }else{
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_id').fadeOut('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="proof_id"]').val(theValidation.proof_id.vals)
+                            });
+                        }
+                        if(theValidation.proof_expiredate.suc == 2){
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_expiredate').fadeIn('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="proof_expiredate"]').val('')
+                            });
+                        }else{
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.proof_expiredate').fadeOut('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="proof_expiredate"]').val(theValidation.proof_expiredate.vals)
+                            });
+                        }
+                        if(theValidation.fee_eligibility_id.suc == 2){
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeIn('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val('')
+                            });
+                        }else{
+                            $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeOut('fast', function(){
+                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val(theValidation.fee_eligibility_id.vals)
+                            });
+                        }
+                    });
                 }else{
                     $("#statusConfirmModal .rejectedReasonArea").fadeOut(function(){
                         $("#statusConfirmModal .rejectedReasonArea select").val('');
+                    });
+                    $("#statusConfirmModal .offerAcceptedErrorArea").fadeOut('fast', function(){
+                        $('#statusConfirmModal .offerAcceptedErrorArea > div').fadeOut();
+                        $('#statusConfirmModal .offerAcceptedErrorArea input').val('');
+                        $('#statusConfirmModal .offerAcceptedErrorArea select').val('');
                     });
                 }
                 $("#statusConfirmModal .agreeWith").attr('data-statusid', statusID);
@@ -144,6 +215,12 @@ import Dropzone from "dropzone";
             var applicantID = $(this).attr('data-applicant');
             var statusidID = $(this).attr('data-statusid');
             var rejectedReason = $('#statusConfirmModal [name="rejected_reason"]').val();
+            var proof_type = $('#statusConfirmModal [name="proof_type"]').val();
+            var proof_id = $('#statusConfirmModal [name="proof_id"]').val();
+            var proof_expiredate = $('#statusConfirmModal [name="proof_expiredate"]').val();
+            var fee_eligibility_id = $('#statusConfirmModal [name="fee_eligibility_id"]').val();
+            var $theBtn = $(this);
+
 
             $('#statusConfirmModal button').attr('disabled', 'disabled');
             if(statusidID == 8 && rejectedReason == ''){
@@ -160,11 +237,25 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#statusConfirmModal .modal-content .validationErrors').remove();
                 }, 5000);
+            }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '' || fee_eligibility_id == '')){
+                $('#statusConfirmModal button').removeAttr('disabled');
+                $('#statusConfirmModal .modal-content .validationErrors').remove();
+                $('#statusConfirmModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please fill out all required fields.</div>');
+                
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                setTimeout(function(){
+                    $('#statusConfirmModal .modal-content .validationErrors').remove();
+                }, 5000);
             }else{
                 axios({
                     method: "post",
                     url: route('admission.student.update.status'),
-                    data: {applicantID : applicantID, statusidID : statusidID, rejectedReason : rejectedReason},
+                    data: {applicantID : applicantID, statusidID : statusidID, rejectedReason : rejectedReason, proof_type: proof_type, proof_id : proof_id, proof_expiredate : proof_expiredate, fee_eligibility_id : fee_eligibility_id},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {

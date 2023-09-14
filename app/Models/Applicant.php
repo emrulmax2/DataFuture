@@ -26,6 +26,9 @@ class Applicant extends Model
         'rejected_reason',
         'nationality_id',
         'country_id',
+        'proof_type',
+        'proof_id',
+        'proof_expiredate',
         'created_by',
         'updated_by',
     ];
@@ -142,5 +145,21 @@ class Applicant extends Model
 
     public function allTasks(){
        return $this->hasMany(ApplicantTask::class, 'applicant_id');
+    }
+
+    public function proofs(){
+        return $this->hasMany(ApplicantProofOfId::class, 'applicant_id', 'id');
+    }
+
+    public function proof(){
+        return $this->hasOne(ApplicantProofOfId::class, 'applicant_id', 'id')->latestOfMany();
+    }
+
+    public function feeeligibilities(){
+        return $this->hasMany(ApplicantFeeEligibility::class, 'applicant_id', 'id');
+    }
+
+    public function feeeligibility(){
+        return $this->hasOne(ApplicantFeeEligibility::class, 'applicant_id', 'id')->latestOfMany();
     }
 }

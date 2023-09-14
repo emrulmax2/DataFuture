@@ -178,6 +178,18 @@ class TopMenu
                                     'params' => [],
                                     'title' => 'Religions'
                                 ],
+                                'gender' => [
+                                    'icon' => '',
+                                    'route_name' => 'gender',
+                                    'params' => [],
+                                    'title' => 'Hesa Gender'
+                                ],
+                                'feeeligibilities' => [
+                                    'icon' => '',
+                                    'route_name' => 'feeeligibilities',
+                                    'params' => [],
+                                    'title' => 'Fee Eligibility'
+                                ],
                                 'statuses' => [
                                     'icon' => '',
                                     'route_name' => 'statuses',

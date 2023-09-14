@@ -102,6 +102,25 @@
                         </div>
                     </div>
                 @endif
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Proof of Id Type</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_type) && !empty($applicant->proof->proof_type) ? ucfirst($applicant->proof->proof_type) : '---' }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">ID No</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_id) && !empty($applicant->proof->proof_id) ? $applicant->proof->proof_id : '---' }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Expiry date</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_expiredate) && !empty($applicant->proof->proof_expiredate) ? $applicant->proof->proof_expiredate : '---' }}</div>
+                    </div>
+                </div>
+
             </div>
         </div>
         
@@ -306,6 +325,12 @@
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>
                         <div class="col-span-8 font-medium">{!! (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Fee Eligibility</div>
+                        <div class="col-span-8 font-medium">{!! (isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---') !!}</div>
                     </div>
                 </div>
             </div>
@@ -519,6 +544,12 @@
                         <div class="col-span-8 font-medium">{!! ($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
                     </div>
                 </div>
+
+                @if($applicant->status_id >= 6)
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div> 
+
+                @endif
+
             </div>
         </div>
     </div>

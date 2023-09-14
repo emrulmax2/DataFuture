@@ -74,6 +74,9 @@ use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
+use App\Http\Controllers\HesaGenderController;
+use App\Http\Controllers\FeeEligibilityController;
+
 
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
@@ -519,6 +522,7 @@ Route::middleware('auth')->group(function() {
 
 
         Route::post('admission/update-status', 'admissionStudentUpdateStatus')->name('admission.student.update.status');
+        Route::post('admission/status-validation', 'admissionStudentStatusValidation')->name('admission.student.status.validation');
         
     });
 
@@ -905,5 +909,25 @@ Route::middleware('auth')->group(function() {
         Route::post('letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
         Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
         Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
+    
+    Route::controller(HesaGenderController::class)->group(function() {
+        Route::get('gender', 'index')->name('gender'); 
+        Route::get('gender/list', 'list')->name('gender.list'); 
+        Route::post('gender/store', 'store')->name('gender.store'); 
+        Route::get('gender/edit/{id}', 'edit')->name('gender.edit');
+        Route::post('gender/update', 'update')->name('gender.update');
+        Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
+        Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
+    });
+
+    Route::controller(FeeEligibilityController::class)->group(function() {
+        Route::get('feeeligibilities', 'index')->name('feeeligibilities'); 
+        Route::get('feeeligibilities/list', 'list')->name('feeeligibilities.list'); 
+        Route::post('feeeligibilities/store', 'store')->name('feeeligibilities.store'); 
+        Route::get('feeeligibilities/edit/{id}', 'edit')->name('feeeligibilities.edit');
+        Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
+        Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
+        Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
     });
 });
