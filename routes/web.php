@@ -74,6 +74,12 @@ use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
+
+use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\Student\PersonalDetailController;
+use App\Http\Controllers\Student\KinDetailController;
+use App\Http\Controllers\Student\ContactDetailController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -174,9 +180,9 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     });
 
 Route::middleware('auth')->group(function() {
+    
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
-    
     Route::controller(CoursCreationController::class)->group(function() {
         Route::get('course-creation', 'index')->name('course.creation'); 
         Route::get('course-creation/list', 'list')->name('course.creation.list'); 
@@ -411,7 +417,6 @@ Route::middleware('auth')->group(function() {
         Route::post('letter-sets/store', 'store')->name('letter.set.store');
         Route::get('letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
         Route::post('letter-sets/update', 'update')->name('letter.set.update');
-
         Route::delete('letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
     });
@@ -426,12 +431,34 @@ Route::middleware('auth')->group(function() {
         Route::post('signatory/restore/{id}', 'restore')->name('signatory.restore');
     });
 
+    Route::controller(StudentController::class)->group(function() {
+
+        Route::get('student', 'index')->name('student'); 
+        Route::get('student/list', 'list')->name('student.list'); 
+        Route::get('student/show/{id}', 'show')->name('student.show');
+
+    });
+    
+    Route::controller(PersonalDetailController::class)->group(function() {
+        Route::get('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+    });
+
+    Route::controller(ContactDetailController::class)->group(function() {
+        Route::get('student/update-contact-details', 'update')->name('student.update.contact.details'); 
+    });
+    Route::controller(KinDetailController::class)->group(function() {
+        Route::post('student/update-kin-details', 'update')->name('student.update.kin.details');
+    });
+
     Route::controller(AdmissionController::class)->group(function() {
+
         Route::get('admission', 'index')->name('admission'); 
         Route::get('admission/list', 'list')->name('admission.list'); 
         Route::get('admission/show/{applicantId}', 'show')->name('admission.show');
+        
         //Route::get('admission/qualification-list', 'qualificationList')->name('admission.qualification.list');
         //Route::get('admission/employment-list', 'employmentList')->name('admission.employment.list');
+
         Route::post('admission/update-personal-details', 'updatePersonalDetails')->name('admission.update.personal.details');
         Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
         Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
