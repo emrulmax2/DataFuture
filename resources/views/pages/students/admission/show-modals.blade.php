@@ -188,7 +188,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
+                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
                         @php 
