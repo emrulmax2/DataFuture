@@ -18,6 +18,8 @@ use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\ApplicantNote;
 use App\Models\ApplicantDocument;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessStudentNoteDetails implements ShouldQueue
 {
@@ -46,10 +48,14 @@ class ProcessStudentNoteDetails implements ShouldQueue
         $student = Student::where(["user_id"=> $user->id])->get()->first();
 
         foreach ($this->applicant->notes as $note):
+            
             $note = ApplicantNote::find($note->id);
+
             $studentDocument = new StudentDocument();
+            //DB::enableQueryLog();
+
             $applicantArray = [
-                'document_setting_id' => $note->document->id,	
+                'student_id' => $student->id,
                 'hard_copy_check' => $note->document->hard_copy_check,
                 'doc_type' => $note->document->doc_type,
                 'disk_type' => $note->document->disk_type,
@@ -58,9 +64,16 @@ class ProcessStudentNoteDetails implements ShouldQueue
                 'current_file_name' => $note->document->current_file_name,
                 'created_by'=> ($note->document->updated_by) ? $note->document->updated_by : $note->document->created_by,
             ];
+            if($note->document->document_setting_id) {
+                array_merge($applicantArray,['document_setting_id' => $note->document->document_setting_id]);
+            }
             $studentDocument->fill($applicantArray);
 
             $studentDocument->save();
+            //$queries = DB::getQueryLog();
+
+            // Log::debug($queries);
+
             unset ($applicantArray);
             $studentNote = new StudentNote();
             $applicantArray = [

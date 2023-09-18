@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\DarkModeController;
@@ -169,7 +171,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 });
     
     Route::post('/applicant/email/verification-notification', function (Request $request) {
-        $id = \Auth::guard('applicant')->user()->id;
+        $id = Auth::guard('applicant')->user()->id;
         $user = ApplicantUser::find($id);
         $user->sendEmailVerificationNotification();
         return back()->with('verifymessage', 'Verification link sent!');
@@ -523,6 +525,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('admission/update-status', 'admissionStudentUpdateStatus')->name('admission.student.update.status');
         Route::post('admission/status-validation', 'admissionStudentStatusValidation')->name('admission.student.status.validation');
+
+        Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
+
+        Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
         
     });
 

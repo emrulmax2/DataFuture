@@ -12,9 +12,7 @@ class StudentDisability extends Model
 
     protected $fillable = [
         'student_id',
-        'disabilitiy_id',
-        'created_by',
-        'updated_by',
+        'disability_id'
     ];
 
     /**
@@ -29,6 +27,6 @@ class StudentDisability extends Model
     }
 
     public function disabilities(){
-        return $this->belongsTo(Disability::class, 'disabilitiy_id');
+        return $this->belongsTo(Disability::class, 'disability_id');
     }
 }

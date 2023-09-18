@@ -44,9 +44,9 @@ class ProcessStudents implements ShouldQueue
         $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
         $student = new Student();
         $applicantArray = [
+            'applicant_id' => $this->applicant->id,
             'applicant_user_id' => $this->applicant->applicant_user_id,
             'user_id' => $user->id,
-            'applicant_id' => $this->applicant->id,
             'application_no'=> $this->applicant->application_no,
             'title_id'=> $this->applicant->title_id,
             'first_name'=> $this->applicant->first_name,

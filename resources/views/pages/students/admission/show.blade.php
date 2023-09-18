@@ -1,22 +1,24 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>{{ $title }}</title>
+    <title>{{ $title }}- </title>
 @endsection
 
 @section('subcontent')
+
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        
         <div class="ml-auto flex justify-end">
+            <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2">Progress Bar</button>
             <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto">Download Pdf</a>
             <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
         </div>
+        
     </div>
     <!-- BEGIN: Profile Info -->
-
     @include('pages.students.admission.show-info')
     @include('pages.students.admission.show-menu')
-    
     
     <!-- END: Profile Info -->
     <div class="intro-y mt-5">
@@ -25,6 +27,7 @@
                 <div class="col-span-6">
                     <div class="font-medium text-base">Personal Details</div>
                 </div>
+
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $applicant->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Personal Details
@@ -555,8 +558,10 @@
     </div>
 
     @include('pages.students.admission.show-modals')
+
 @endsection
 
 @section('script')
     @vite('resources/js/admission.js')
+    @vite('resources/js/admission-vue.js')
 @endsection

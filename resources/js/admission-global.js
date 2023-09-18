@@ -100,6 +100,7 @@ import Dropzone from "dropzone";
     /* Update Status */
     if($('.changeApplicantStatus').length > 0){
         const statusConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#statusConfirmModal"));
+        const statusStudentProgressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#progressBarModal"));
         const statusConfirmModalEl = document.getElementById('statusConfirmModal')
         statusConfirmModalEl.addEventListener('hide.tw.modal', function(event) {
             $("#statusConfirmModal .confModTitle").html("Are you sure?");
@@ -260,9 +261,13 @@ import Dropzone from "dropzone";
                 }).then(response => {
                     if (response.status == 200) {
                         $('#statusConfirmModal button').removeAttr('disabled');
-
+                        if(statusidID==7) {
+                            statusConfirmModal.hide();
+                            statusStudentProgressModal.show();
+                        } else {   
                         statusConfirmModal.hide();
                         window.location.reload();
+                        }
                     }
                 }).catch(error => {
                     $('#statusConfirmModal button').removeAttr('disabled');

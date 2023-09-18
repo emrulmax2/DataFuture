@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import {createApp} from 'vue'
 
 ("use strict");
 var admissionListTable = (function () {
@@ -1617,3 +1618,4 @@ var employmentHistoryTable = (function () {
 
     
 })();
+

@@ -11,6 +11,7 @@ class StudentTaskDocument extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'student_id',
         'student_task_id',
         'student_document_id',
         'created_by',
