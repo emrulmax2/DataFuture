@@ -5,6 +5,14 @@ import TomSelect from "tom-select";
 import Dropzone from "dropzone";
 
 (function(){
+    /* Site Preloader */
+    if($('.sitePreLoader').length > 0){
+        $(window).on('load', function(){
+            $('.sitePreLoader').fadeOut();
+        })
+    }
+    /* Site Preloader */
+
     /* Start Dropzone */
     if($("#addApplicantPhotoModal").length > 0){
         let dzErrors = false;
@@ -223,6 +231,7 @@ import Dropzone from "dropzone";
             var $theBtn = $(this);
 
 
+
             $('#statusConfirmModal button').attr('disabled', 'disabled');
             if(statusidID == 8 && rejectedReason == ''){
                 $('#statusConfirmModal button').removeAttr('disabled');
@@ -238,7 +247,7 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#statusConfirmModal .modal-content .validationErrors').remove();
                 }, 5000);
-            }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '' || fee_eligibility_id == '')){
+            }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '' || fee_eligibility_id == '') && $('#statusConfirmModal .offerAcceptedErrorArea').is(':visible')){
                 $('#statusConfirmModal button').removeAttr('disabled');
                 $('#statusConfirmModal .modal-content .validationErrors').remove();
                 $('#statusConfirmModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please fill out all required fields.</div>');

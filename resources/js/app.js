@@ -57,7 +57,7 @@ import "./mobile-menu";
 import "./side-menu-tooltip";
 import "./dark-mode-switcher";
 
-//all Form Data                             // Added on 05.12.22
+//all Form Data                                // Added on 05.12.22
 import "./form";                              // Added on 05.12.22
 import "./courses";                           // Added on 12.12.22
 import "./semester";                          // Added on 13.12.22

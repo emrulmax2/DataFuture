@@ -2037,7 +2037,7 @@ class AdmissionController extends Controller
             $res['proof_type'] = !isset($Proof->proof_type) || $Proof->proof_type == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_type];
             $res['proof_id'] = !isset($Proof->proof_id) || $Proof->proof_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_id];
             $res['proof_expiredate'] = !isset($Proof->proof_expiredate) || $Proof->proof_expiredate == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_expiredate];
-            $res['fee_eligibility_id'] = !isset($Proof->fee_eligibility_id) || $Proof->fee_eligibility_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->fee_eligibility_id];
+            $res['fee_eligibility_id'] = !isset($eligible->fee_eligibility_id) || $eligible->fee_eligibility_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $eligible->fee_eligibility_id];
 
             $res['suc'] = 2;
         }else{
