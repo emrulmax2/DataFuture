@@ -107,6 +107,6 @@ class ProcessStudentTaskDocument implements ShouldQueue
         endforeach;
         unset($applicantArray);
         //--END: Student Task Document Sync
-        
+
     }
 }
