@@ -2068,6 +2068,8 @@ class AdmissionController extends Controller
                 new ProcessNewStudentToUser($applicant),
                 new ProcessStudents($applicant),
                 new ProcessStudentNoteDetails($applicant),
+                new ProcessStudentTask($applicant),
+                new ProcessStudentTaskDocument($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
@@ -2178,69 +2180,104 @@ class AdmissionController extends Controller
     public $applicant;
     public function convertStudentDemo() {
         $this->applicant  = Applicant::find(1);
-        $studentId = Student::find(13);
+        //$studentId = Student::find(19);
 
-        $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::find(13);       
+        //$ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
+        //$user = User::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::find(20);      
+        
         //ApplicantTask
-        $applicantTaskList = ApplicantTask::where('applicant_id',$this->applicant->id)->get();
-        foreach($applicantTaskList as $applicantTaskData):
-            $applicantTaskArray = [
-                'student_id' => $student->id,
-                'task_list_id' => $applicantTaskData->task_list_id,
-                'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : 'NULL',
-                'status'=> isset($applicantTaskData->status) ? ($applicantTaskData->status) : NULL,
-                'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
-            ];
-            if($applicantTaskData->task_status_id) {
-                array_merge($applicantTaskArray,['task_status_id' => $applicantTaskData->task_status_id]);
-            }
-            $dataTask = new StudentTask();
-            $dataTask->fill($applicantTaskArray);
-            $dataTask->save();
-            //Applicant Task wise Document capture
-            $applicantTaskDocumentData = ApplicantTaskDocument::where(['applicant_task_id'=>$applicantTaskData->id])->get();
-            foreach($applicantTaskDocumentData as $applicantTaskDocument):
-                $applicantDocument = ApplicantDocument::find($applicantTaskDocument->applicant_document_id);
-                //find the document and put it in student document
-                // then insert it into studentDocument and applicantTaskDocument
-                $studentDocument = new StudentDocument();
-                //DB::enableQueryLog();
+        // $applicantTaskList = ApplicantTask::where('applicant_id',$this->applicant->id)->get();
+        // foreach($applicantTaskList as $applicantTaskData):
+        //     $applicantTaskArray = [
+        //         'student_id' => $student->id,
+        //         'applicant_task_id' =>$applicantTaskData->id,
+        //         'task_list_id' => $applicantTaskData->task_list_id,
+        //         'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : 'NULL',
+        //         'status'=> isset($applicantTaskData->status) ? ($applicantTaskData->status) : NULL,
+        //         'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+        //     ];
+        //     if($applicantTaskData->task_status_id) {
+        //         array_merge($applicantTaskArray,['task_status_id' => $applicantTaskData->task_status_id]);
+        //     }
+        //     $dataTask = new StudentTask();
+        //     $dataTask->fill($applicantTaskArray);
+        //     $dataTask->save();
+        // endforeach;  
+        
+        // $applicantTaskidList = [];
+        // $studentDocumentList = [];
+        // foreach($this->applicant->allTasks as $applicantTaskData):
+        //     //Applicant Task wise Document capture
+        //     $applicantTaskDocumentData = ApplicantTaskDocument::where(['applicant_task_id'=>$applicantTaskData->id])->get();
+            
+        //     if(!in_array($applicantTaskData->id, $applicantTaskidList)) {
+        //         array_push($applicantTaskidList,$applicantTaskData->id);
+        //         foreach($applicantTaskDocumentData as $applicantTaskDocument):
+        //             $applicantDocument = ApplicantDocument::find($applicantTaskDocument->applicant_document_id);
+        //             //find the document and put it in student document
+        //             // then insert it into studentDocument and applicantTaskDocument
+        //             $studentDocument = new StudentDocument();
+        //             //DB::enableQueryLog();
 
-                $applicantArray = [
-                    'student_id' => $student->id,
-                    'hard_copy_check' => $applicantDocument->hard_copy_check,
-                    'doc_type' => $applicantDocument->doc_type,
-                    'disk_type' => $applicantDocument->disk_type,
-                    'path' => $applicantDocument->path,
-                    'display_file_name' =>	 $applicantDocument->display_file_name,
-                    'current_file_name' => $applicantDocument->current_file_name,
-                    'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
-                ];
-                if($applicantDocument->document_setting_id) {
-                    array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
-                }
-                $studentDocument->fill($applicantArray);
+        //             $applicantArray = [
+        //                 'student_id' => $student->id,
+        //                 'hard_copy_check' => $applicantDocument->hard_copy_check,
+        //                 'doc_type' => $applicantDocument->doc_type,
+        //                 'disk_type' => $applicantDocument->disk_type,
+        //                 'path' => $applicantDocument->path,
+        //                 'display_file_name' =>	 $applicantDocument->display_file_name,
+        //                 'current_file_name' => $applicantDocument->current_file_name,
+        //                 'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+        //             ];
+        //             if($applicantDocument->document_setting_id) {
+        //                 array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+        //             }
+        //             $studentDocument->fill($applicantArray);
 
-                $studentDocument->save();
-                //endDocuemnt saved
-                $applicantTaskDocArray = [
-                    'student_id' => $student->id,
-                    'student_task_id' => $dataTask->id,
-                    'student_document_id' => $studentDocument->id,
-                    'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
-                ];
+        //             $studentDocument->save();
+        //             //endDocuemnt saved
+        //             $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
+                    
+        //         endforeach;
+                
+        //     }
+        // endforeach;
+        //dd($studentDocumentList);
+            //     $studentTaskList = StudentTask::where("student_id", $student->id)->get();
+            //     foreach($studentTaskList as $task):
+            //         foreach ($studentDocumentList as $applicantTaskId => $studentDocuementArray):
+            //             if($applicantTaskId==$task->applicant_task_id) {
+            //                 foreach ($studentDocuementArray as $studentDocId):
+            //                 $applicantArray = [
+            //                     'student_id' => $student->id,
+            //                     'student_task_id' => $task->id,
+            //                     'student_document_id' => $studentDocId,
+            //                     'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+            //                 ];
+            //                 $data = new StudentTaskDocument();
+            //                 $data->fill($applicantArray);
+            //                 $data->save();
+            //                 endforeach;
+            //             }
+            //         endforeach;
+            //     endforeach;
+            // dd("END") ;  
+                
 
-                $data = new StudentTaskDocument();
+        // $applicantTaskDocArray = [
+        //     'student_id' => $student->id,
+        //     'student_task_id' => $dataTask->id,
+        //     'student_document_id' => $studentDocument->id,
+        //     'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+        // ];
 
-                $data->fill($applicantTaskDocArray);
-                $dataTask->save();
-                unset ($applicantTaskArray);
-            endforeach;
-        endforeach;
+        // $data = new StudentTaskDocument();
 
-        unset ($applicantTaskArray);
+        // $data->fill($applicantTaskDocArray);
+        // $dataTask->save();
+        // unset ($applicantTaskArray);
+        // unset ($applicantTaskArray);
 
         //dd($applicantTaskData->task_list_id);
         //$tasklistId = ApplicantTask::where('applicant_id', $applicant)->get()->first()->pluck('task_list_id');
@@ -2361,29 +2398,29 @@ class AdmissionController extends Controller
         // $student->fill($applicantDisabilityArray);
 
         //StudentEmployments
-        $applicantEmployments= ApplicantEmployment::where('applicant_id',$applicant->id)->get()->first();
-        $applicantEmploymentArray = [
-            'student_id' => $studentId->id,
-            'company_name' => $applicantEmployments->company_name,
-            'company_phone' => $applicantEmployments->company_phone,
-            'position'=> $applicantEmployments->position,
-            'start_date' => $applicantEmployments->start_date,
-            'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : 'NULL',
-            'continuing' => isset($applicantEmployments->continuing) ? ($applicantEmployments->continuing) : '0',
-            'address_line_1' => $applicantEmployments->address_line_1,
-            'address_line_2' => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
-            'state' => isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
-            'post_code' => $applicantEmployments->post_code,
-            'city' => $applicantEmployments->city,
-            'country' => $applicantEmployments->country,
-            'created_by'=> ($applicant->updated_by) ? $applicant->updated_by : $applicant->created_by,
-        ];
+        // $applicantEmployments= ApplicantEmployment::where('applicant_id',$applicant->id)->get()->first();
+        // $applicantEmploymentArray = [
+        //     'student_id' => $studentId->id,
+        //     'company_name' => $applicantEmployments->company_name,
+        //     'company_phone' => $applicantEmployments->company_phone,
+        //     'position'=> $applicantEmployments->position,
+        //     'start_date' => $applicantEmployments->start_date,
+        //     'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : 'NULL',
+        //     'continuing' => isset($applicantEmployments->continuing) ? ($applicantEmployments->continuing) : '0',
+        //     'address_line_1' => $applicantEmployments->address_line_1,
+        //     'address_line_2' => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
+        //     'state' => isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
+        //     'post_code' => $applicantEmployments->post_code,
+        //     'city' => $applicantEmployments->city,
+        //     'country' => $applicantEmployments->country,
+        //     'created_by'=> ($applicant->updated_by) ? $applicant->updated_by : $applicant->created_by,
+        // ];
 
-        $student = new StudentEmployment();
+        // $student = new StudentEmployment();
 
-        $student->fill($applicantEmploymentArray);
+        // $student->fill($applicantEmploymentArray);
 
-        $student->save();
+        // $student->save();
     }
 
 }

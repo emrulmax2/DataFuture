@@ -13,6 +13,7 @@ class StudentTask extends Model
 
     protected $fillable = [
         'student_id',
+        'applicant_task_id',
         'task_list_id',
         'assign_user',
         'external_link_ref',
