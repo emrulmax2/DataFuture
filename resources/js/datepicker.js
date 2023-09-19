@@ -15,7 +15,7 @@ import Litepicker from "litepicker";
             format: "DD-MM-YYYY",
             dropdowns: {
                 minYear: 1900,
-                maxYear: null,
+                maxYear: 2050,
                 months: true,
                 years: true,
             },

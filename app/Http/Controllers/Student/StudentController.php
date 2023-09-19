@@ -35,7 +35,7 @@ class StudentController extends Controller
             return Course::all();
         });
         $statuses = Cache::get('statuses', function () {
-            return Status::where('type', 'Applicant')->where('id', '>', 1)->get();
+            return Status::where('type', 'Applicant')->where('id', '>', 6)->get();
         });
         
         
