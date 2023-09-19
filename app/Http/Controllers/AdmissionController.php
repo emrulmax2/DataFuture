@@ -75,6 +75,7 @@ use App\Jobs\ProcessStudentQualification;
 use App\Jobs\ProcessStudentContact;
 use App\Jobs\ProcessStudentDisability;
 use App\Jobs\ProcessStudentEmployement;
+use App\Jobs\ProcessStudentProposedCourse;
 
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
@@ -89,6 +90,8 @@ use App\Models\JobBatch;
 
 // For Student Data Insert
 use App\Models\Student;
+use App\Models\ApplicantUser;
+use App\Models\StudentProposedCourse;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -2071,6 +2074,7 @@ class AdmissionController extends Controller
                 new ProcessStudentContact($applicant),
                 new ProcessStudentDisability($applicant),
                 new ProcessStudentEmployement($applicant),
+                new ProcessStudentProposedCourse($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
@@ -2178,11 +2182,38 @@ class AdmissionController extends Controller
             //dd($e);
         }
     }
-    //public $applicant;
-    //public function convertStudentDemo() {
-        //$this->applicant  = Applicant::find(1);
+    public $applicant;
+    public function convertStudentDemo() {
+        $this->applicant  = Applicant::find(1);
         //$student = Student::find(20);      
-         
-    //}
+        $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
+        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["user_id"=> $user->id])->get()->first(); 
+        
+        //StudentDisabilities
+        $applicantProposedCourseData= ApplicantProposedCourse::where('applicant_id',$this->applicant->id)->get();
+        foreach($applicantProposedCourseData as $applicantProposedCourse):
+            
+            $dataArray = [
+                'student_id' => $student->id,
+                'course_creation_id'=>$applicantProposedCourse->course_creation_id,
+                'semester_id'=>$applicantProposedCourse->semester_id,
+                'academic_year_id'=>$applicantProposedCourse->academic_year_id,
+                'student_loan'=>$applicantProposedCourse->student_loan,
+                'student_finance_england'=>$applicantProposedCourse->student_finance_england,
+                'fund_receipt'=>$applicantProposedCourse->fund_receipt,
+                'applied_received_fund'=>$applicantProposedCourse->applied_received_fund,
+                'full_time'=>$applicantProposedCourse->full_time,
+                'other_funding'=>$applicantProposedCourse->other_funding,
+                'created_by'=>($applicantProposedCourse->updated_by) ? $applicantProposedCourse->updated_by : $applicantProposedCourse->created_by,
+            ];
+            
+            $data = new StudentProposedCourse();
+            $data->fill($dataArray);
+            $data->save();
+            unset ($dataArray);
+        endforeach;
+
+    }
 
 }
