@@ -42,8 +42,7 @@ class ProcessStudentProposedCourse implements ShouldQueue
         $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
         $student = Student::where(["user_id"=> $user->id])->get()->first(); 
         
-        //StudentDisabilities
-        $applicantProposedCourseData= ApplicantProposedCourse::where('applicant_id',$student->id)->get();
+        $applicantProposedCourseData= ApplicantProposedCourse::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantProposedCourseData as $applicantProposedCourse):
             
             $dataArray = [
@@ -59,7 +58,7 @@ class ProcessStudentProposedCourse implements ShouldQueue
                 'other_funding'=>$applicantProposedCourse->other_funding,
                 'created_by'=>($applicantProposedCourse->updated_by) ? $applicantProposedCourse->updated_by : $applicantProposedCourse->created_by,
             ];
-
+            
             $data = new StudentProposedCourse();
             $data->fill($dataArray);
             $data->save();
