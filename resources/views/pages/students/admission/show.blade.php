@@ -1,22 +1,24 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>{{ $title }}</title>
+    <title>{{ $title }}- </title>
 @endsection
 
 @section('subcontent')
+
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        
         <div class="ml-auto flex justify-end">
+            <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2">Progress Bar</button>
             <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto">Download Pdf</a>
             <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
         </div>
+        
     </div>
     <!-- BEGIN: Profile Info -->
-
     @include('pages.students.admission.show-info')
     @include('pages.students.admission.show-menu')
-    
     
     <!-- END: Profile Info -->
     <div class="intro-y mt-5">
@@ -25,6 +27,7 @@
                 <div class="col-span-6">
                     <div class="font-medium text-base">Personal Details</div>
                 </div>
+
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $applicant->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Personal Details
@@ -105,19 +108,19 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Proof of Id Type</div>
-                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_type) && !empty($applicant->proof_type) ? ucfirst($applicant->proof_type) : '---' }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_type) && !empty($applicant->proof->proof_type) ? ucfirst($applicant->proof->proof_type) : '---' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">ID No</div>
-                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_id) && !empty($applicant->proof_id) ? $applicant->proof_id : '---' }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_id) && !empty($applicant->proof->proof_id) ? $applicant->proof->proof_id : '---' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Expiry date</div>
-                        <div class="col-span-8 font-medium">{{ isset($applicant->proof_expiredate) && !empty($applicant->proof_expiredate) ? $applicant->proof_expiredate : '---' }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($applicant->proof->proof_expiredate) && !empty($applicant->proof->proof_expiredate) ? $applicant->proof->proof_expiredate : '---' }}</div>
                     </div>
                 </div>
 
@@ -325,6 +328,12 @@
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>
                         <div class="col-span-8 font-medium">{!! (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Fee Eligibility</div>
+                        <div class="col-span-8 font-medium">{!! (isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---') !!}</div>
                     </div>
                 </div>
             </div>
@@ -549,8 +558,10 @@
     </div>
 
     @include('pages.students.admission.show-modals')
+
 @endsection
 
 @section('script')
     @vite('resources/js/admission.js')
+    @vite('resources/js/admission-vue.js')
 @endsection

@@ -34,6 +34,7 @@ return new class extends Migration
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
+
             $table->foreign('applicant_id')->references('id')->on('applicants')->onDelete('set null')->onUpdate('set null');
             $table->foreign('applicant_user_id')->references('id')->on('applicant_users')->onDelete('set null')->onUpdate('set null');
             $table->foreign('title_id')->references('id')->on('titles')->onDelete('set null')->onUpdate('set null');

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\DarkModeController;
@@ -73,6 +75,15 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
+
+use App\Http\Controllers\HesaGenderController;
+use App\Http\Controllers\FeeEligibilityController;
+
+
+use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\Student\PersonalDetailController;
+use App\Http\Controllers\Student\KinDetailController;
+use App\Http\Controllers\Student\ContactDetailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -160,7 +171,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
 });
     
     Route::post('/applicant/email/verification-notification', function (Request $request) {
-        $id = \Auth::guard('applicant')->user()->id;
+        $id = Auth::guard('applicant')->user()->id;
         $user = ApplicantUser::find($id);
         $user->sendEmailVerificationNotification();
         return back()->with('verifymessage', 'Verification link sent!');
@@ -174,9 +185,9 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     });
 
 Route::middleware('auth')->group(function() {
+    
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
-    
     Route::controller(CoursCreationController::class)->group(function() {
         Route::get('course-creation', 'index')->name('course.creation'); 
         Route::get('course-creation/list', 'list')->name('course.creation.list'); 
@@ -411,7 +422,6 @@ Route::middleware('auth')->group(function() {
         Route::post('letter-sets/store', 'store')->name('letter.set.store');
         Route::get('letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
         Route::post('letter-sets/update', 'update')->name('letter.set.update');
-
         Route::delete('letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
     });
@@ -426,12 +436,34 @@ Route::middleware('auth')->group(function() {
         Route::post('signatory/restore/{id}', 'restore')->name('signatory.restore');
     });
 
+    Route::controller(StudentController::class)->group(function() {
+
+        Route::get('student', 'index')->name('student'); 
+        Route::get('student/list', 'list')->name('student.list'); 
+        Route::get('student/show/{id}', 'show')->name('student.show');
+
+    });
+    
+    Route::controller(PersonalDetailController::class)->group(function() {
+        Route::get('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+    });
+
+    Route::controller(ContactDetailController::class)->group(function() {
+        Route::get('student/update-contact-details', 'update')->name('student.update.contact.details'); 
+    });
+    Route::controller(KinDetailController::class)->group(function() {
+        Route::post('student/update-kin-details', 'update')->name('student.update.kin.details');
+    });
+
     Route::controller(AdmissionController::class)->group(function() {
+
         Route::get('admission', 'index')->name('admission'); 
         Route::get('admission/list', 'list')->name('admission.list'); 
         Route::get('admission/show/{applicantId}', 'show')->name('admission.show');
+        
         //Route::get('admission/qualification-list', 'qualificationList')->name('admission.qualification.list');
         //Route::get('admission/employment-list', 'employmentList')->name('admission.employment.list');
+
         Route::post('admission/update-personal-details', 'updatePersonalDetails')->name('admission.update.personal.details');
         Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
         Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
@@ -493,6 +525,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('admission/update-status', 'admissionStudentUpdateStatus')->name('admission.student.update.status');
         Route::post('admission/status-validation', 'admissionStudentStatusValidation')->name('admission.student.status.validation');
+
+        Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
+
+        Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
         
     });
 
@@ -879,5 +915,25 @@ Route::middleware('auth')->group(function() {
         Route::post('letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
         Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
         Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
+    
+    Route::controller(HesaGenderController::class)->group(function() {
+        Route::get('gender', 'index')->name('gender'); 
+        Route::get('gender/list', 'list')->name('gender.list'); 
+        Route::post('gender/store', 'store')->name('gender.store'); 
+        Route::get('gender/edit/{id}', 'edit')->name('gender.edit');
+        Route::post('gender/update', 'update')->name('gender.update');
+        Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
+        Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
+    });
+
+    Route::controller(FeeEligibilityController::class)->group(function() {
+        Route::get('feeeligibilities', 'index')->name('feeeligibilities'); 
+        Route::get('feeeligibilities/list', 'list')->name('feeeligibilities.list'); 
+        Route::post('feeeligibilities/store', 'store')->name('feeeligibilities.store'); 
+        Route::get('feeeligibilities/edit/{id}', 'edit')->name('feeeligibilities.edit');
+        Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
+        Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
+        Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
     });
 });

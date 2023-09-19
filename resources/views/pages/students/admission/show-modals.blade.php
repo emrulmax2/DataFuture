@@ -120,20 +120,20 @@
                             <label for="proof_type" class="form-label">Proof of Id Type</label>
                             <select id="proof_type" class="lccTom lcc-tom-select w-full" name="proof_type">
                                 <option value="">Please Select</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
-                                <option {{ isset($applicant->proof_type) && $applicant->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'driving' ? 'Selected' : '' }} value="driving">Driving Licence</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'nid' ? 'Selected' : '' }} value="nid">National ID Card</option>
+                                <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'respermit' ? 'Selected' : '' }} value="respermit">Residence Permit No</option>
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="proof_id" class="form-label">ID No</label>
-                            <input type="text" value="{{ isset($applicant->proof_id) ? $applicant->proof_id : '' }}" placeholder="ID No" id="proof_id" class="form-control" name="proof_id">
+                            <input type="text" value="{{ isset($applicant->proof->proof_id) ? $applicant->proof->proof_id : '' }}" placeholder="ID No" id="proof_id" class="form-control" name="proof_id">
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="proof_expiredate" class="form-label">Expiry Date</label>
-                            <input type="text" value="{{ isset($applicant->proof_expiredate) ? $applicant->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="proof_expiredate" class="form-control datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
+                            <input type="text" value="{{ isset($applicant->proof->proof_expiredate) ? $applicant->proof->proof_expiredate : '' }}" placeholder="DD-MM-YYYY" id="proof_expiredate" class="form-control datepicker" data-format="DD-MM-YYYY" data-single-mode="true" name="proof_expiredate">
                         </div>
                     </div>
                 </div>
@@ -155,6 +155,7 @@
                         </svg>
                     </button>
                     <input type="hidden" value="{{ $applicant->id }}" name="id"/>
+                    <input type="hidden" value="{{ isset($applicant->proof->id) && $applicant->proof->id > 0 ? $applicant->proof->id : 0 }}" name="applicant_proof_of_id"/>
                 </div>
             </div>
         </form>
@@ -187,7 +188,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
+                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
                         @php 
@@ -482,6 +483,21 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-x-4">
+                                <label for="fee_eligibility_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Fee Eligibility</label>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <select id="fee_eligibility_id" class="lcc-tom-select w-full" name="fee_eligibility_id">
+                                        <option value="">Please Select</option>
+                                        @if($feeelegibility->count() > 0)
+                                            @foreach($feeelegibility as $fl)
+                                                <option {{ isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id == $fl->id ? 'Selected' : '' }} value="{{ $fl->id }}">{{ $fl->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -503,6 +519,7 @@
                     </button>
                     <input type="hidden" value="{{ $applicant->id }}" name="applicant_id"/>
                     <input type="hidden" value="{{ (isset($applicant->course->id) ? $applicant->course->id : 0) }}" name="id"/>
+                    <input type="hidden" value="{{ (isset($applicant->feeeligibility->id) && $applicant->feeeligibility->id > 0 ? $applicant->feeeligibility->id : 0) }}" name="applicant_proof_of_id"/>
                 </div>
             </div>
         </form>

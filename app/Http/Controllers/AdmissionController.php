@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
 use App\Http\Requests\AdmissionContactDetailsRequest;
 use App\Http\Requests\AdmissionCourseDetailsRequest;
 use App\Http\Requests\AdmissionKinDetailsRequest;
@@ -36,7 +38,8 @@ use App\Models\Title;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Mail; 
 use Hash;
 use App\Mail\ApplicantTempEmailVerification;
@@ -60,14 +63,32 @@ use Illuminate\Support\Facades\Mail as FacadesMail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+
 use App\Jobs\UserMailerJob;
+use App\Models\ApplicantFeeEligibility;
+use App\Jobs\ProcessStudents;
+use App\Jobs\ProcessNewStudentToUser;
+use App\Jobs\ProcessStudentNoteDetails;
+use App\Jobs\ProcessStudentTask;
+use App\Jobs\ProcessStudentTaskDocument;
+use App\Jobs\ProcessStudentQualification;
+use App\Jobs\ProcessStudentContact;
+use App\Jobs\ProcessStudentDisability;
+use App\Jobs\ProcessStudentEmployement;
+
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
+use App\Models\ApplicantProofOfId;
 use App\Models\EmailTemplate;
+use App\Models\FeeEligibility;
 use App\Models\LetterHeaderFooter;
 use App\Models\LetterSet;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
+use App\Models\JobBatch;
+
+// For Student Data Insert
+use App\Models\Student;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -95,7 +116,7 @@ class AdmissionController extends Controller
             ],
             'semesters' => $semesters,
             'courses' => $courses,
-            'allStatuses' => $statuses,
+            'allStatuses' => $statuses
         ]);
     }
 
@@ -195,7 +216,8 @@ class AdmissionController extends Controller
             'users' => User::all(),
             'instance' => CourseCreationInstance::all(),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
-            'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get()
+            'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all()
         ]);
     }
 
@@ -210,10 +232,20 @@ class AdmissionController extends Controller
         $disability_id = ($disability_status == 1 && isset($request->disability_id) && !empty($request->disability_id) ? $request->disability_id : []);
         $disabilty_allowance = ($disability_status == 1 && !empty($disability_id) && (isset($request->disabilty_allowance) && $request->disabilty_allowance > 0) ? $request->disabilty_allowance : 0);
 
+        $proof_type = (isset($request->proof_type) && !empty($request->proof_type) ? $request->proof_type : '');
+        $proof_id = (isset($request->proof_id) && !empty($request->proof_id) ? $request->proof_id : '');
+        $proof_expiredate = (isset($request->proof_expiredate) && !empty($request->proof_expiredate) ? $request->proof_expiredate : '');
+        $applicant_proof_of_id = (isset($request->applicant_proof_of_id) && $request->applicant_proof_of_id > 0 ? $request->applicant_proof_of_id : 0);
+
         $request->request->remove('ethnicity_id');
         $request->request->remove('disability_status');
         $request->request->remove('disability_id');
         $request->request->remove('disabilty_allowance');
+
+        $request->request->remove('proof_type');
+        $request->request->remove('proof_id');
+        $request->request->remove('proof_expiredate');
+        $request->request->remove('applicant_proof_of_id');
 
         $applicant = Applicant::find($applicant_id);
         $applicant->fill($request->input());
@@ -234,6 +266,17 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         $request->request->remove('id');
+
+        if(!empty($proof_type) || !empty($proof_id) || !empty($proof_expiredate) || $applicant_proof_of_id > 0):
+            $applicantProof = ApplicantProofOfId::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $applicant_proof_of_id ], [
+                'applicant_id' => $applicant_id,
+                'proof_type' => $proof_type,
+                'proof_id' => $proof_id,
+                'proof_expiredate' => $proof_expiredate,
+                'created_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->id,
+            ]);
+        endif;
 
         $otherDetails = ApplicantOtherDetail::where('applicant_id', $applicant_id)->first();
         $otherDetails->fill([
@@ -421,6 +464,17 @@ class AdmissionController extends Controller
         $changes = $proposedCourse->getDirty();
         $proposedCourse->save();
 
+        $applicant_proof_of_id = (isset($request->applicant_proof_of_id) && $request->applicant_proof_of_id > 0 ? $request->applicant_proof_of_id : 0);
+        $fee_eligibility_id = (isset($request->fee_eligibility_id) && $request->fee_eligibility_id > 0 ? $request->fee_eligibility_id : 0);
+        if($fee_eligibility_id > 0):
+            $applicantEligibility = ApplicantFeeEligibility::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $applicant_proof_of_id ], [
+                'applicant_id' => $applicant_id,
+                'fee_eligibility_id' => $fee_eligibility_id,
+                'created_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->id,
+            ]);
+        endif;
+
         if($proposedCourse->wasChanged() && !empty($changes)):
             foreach($changes as $field => $value):
                 $data = [];
@@ -543,6 +597,7 @@ class AdmissionController extends Controller
             'applicantPendingTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get(),
             'applicantCompletedTask' => ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all(),
 
             'processGroup' => $processGroup
         ]);
@@ -731,7 +786,7 @@ class AdmissionController extends Controller
         return response()->json(['message' => 'Data updated'], 200);
     }
 
-    public function admissionArchivedProcessList(Request $request){
+    public function admissionArchivedProcessList(Request $request) {
         $applicantId = (isset($request->applicantId) && $request->applicantId > 0 ? $request->applicantId : 0);
         $processId = (isset($request->processId) && $request->processId > 0 ? $request->processId : 0);
 
@@ -936,7 +991,8 @@ class AdmissionController extends Controller
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'docSettings' => DocumentSettings::where('admission', '1')->get()
+            'docSettings' => DocumentSettings::where('admission', '1')->get(),
+            'feeelegibility' => FeeEligibility::all()
         ]);
     }
 
@@ -1043,7 +1099,8 @@ class AdmissionController extends Controller
             ],
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all()
         ]);
     }
 
@@ -1299,7 +1356,8 @@ class AdmissionController extends Controller
             'letterSet' => LetterSet::all(),
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::all(),
-            'emailTemplates' => EmailTemplate::all()
+            'emailTemplates' => EmailTemplate::all(),
+            'feeelegibility' => FeeEligibility::all()
         ]);
     }
 
@@ -1672,9 +1730,9 @@ class AdmissionController extends Controller
                         $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+                UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo))->now();
             else:
-                UserMailerJob::dispatch($configuration, $Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, []));
+                UserMailerJob::dispatch($configuration, $Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, []))->now();
             endif;
             return response()->json(['message' => 'Email successfully sent to Applicant'], 200);
         else:
@@ -1969,12 +2027,14 @@ class AdmissionController extends Controller
 
     public function admissionStudentStatusValidation(Request $request){
         $applicantID = $request->applicantID;
-        $applicant = Applicant::find($applicantID);
+        $Proof = ApplicantProofOfId::where('applicant_id', $applicantID)->latest()->first();
+        $eligible = ApplicantFeeEligibility::where('applicant_id', $applicantID)->latest()->first();
         $res = [];
-        if($applicant->proof_type == '' || $applicant->proof_id == '' || $applicant->proof_expiredate){
-            $res['proof_type'] = !isset($applicant->proof_type) || $applicant->proof_type == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_type];
-            $res['proof_id'] = !isset($applicant->proof_id) || $applicant->proof_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_id];
-            $res['proof_expiredate'] = !isset($applicant->proof_expiredate) || $applicant->proof_expiredate == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $applicant->proof_expiredate];
+        if((!isset($Proof->proof_type) || $Proof->proof_type == '') || (!isset($Proof->proof_id) || $Proof->proof_id == '') || (!isset($Proof->proof_expiredate) || $Proof->proof_expiredate == '') || (!isset($eligible->fee_eligibility_id) || $eligible->fee_eligibility_id == '')){
+            $res['proof_type'] = !isset($Proof->proof_type) || $Proof->proof_type == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_type];
+            $res['proof_id'] = !isset($Proof->proof_id) || $Proof->proof_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_id];
+            $res['proof_expiredate'] = !isset($Proof->proof_expiredate) || $Proof->proof_expiredate == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $Proof->proof_expiredate];
+            $res['fee_eligibility_id'] = !isset($eligible->fee_eligibility_id) || $eligible->fee_eligibility_id == '' ? ['suc' => 2, 'vals' => ''] : ['suc' => 1, 'vals' => $eligible->fee_eligibility_id];
 
             $res['suc'] = 2;
         }else{
@@ -1993,22 +2053,48 @@ class AdmissionController extends Controller
         $statusData = [];
         $statusData['status_id'] = $statusidID;
         $statusData['rejected_reason'] = $rejectedReason;
-        if(empty($applicantOldRow->proof_type) && (isset($request->proof_type) && !empty($request->proof_type)) && $statusidID == 7){
-            $statusData['proof_type'] = $request->proof_type;
-        }
-        if(empty($applicantOldRow->proof_id) && (isset($request->proof_id) && !empty($request->proof_id)) && $statusidID == 7){
-            $statusData['proof_id'] = $request->proof_id;
-        }
-        if(empty($applicantOldRow->proof_expiredate) && (isset($request->proof_expiredate) && !empty($request->proof_expiredate)) && $statusidID == 7){
-            $statusData['proof_expiredate'] = date('Y-m-d', strtotime($request->proof_expiredate));
-        }
+        
 
         $applicant = Applicant::find($applicant_id);
         $applicant->fill($statusData);
         $changes = $applicant->getDirty();
         $applicant->save();
+        if($statusidID == 7) {
 
+            $bus = Bus::batch([
+                new ProcessNewStudentToUser($applicant),
+                new ProcessStudents($applicant),
+                new ProcessStudentNoteDetails($applicant),
+                new ProcessStudentTask($applicant),
+                new ProcessStudentTaskDocument($applicant),
+                new ProcessStudentQualification($applicant),
+                new ProcessStudentContact($applicant),
+                new ProcessStudentDisability($applicant),
+                new ProcessStudentEmployement($applicant),
+            ])->dispatch();
+            
+            session()->put("lastBatchId",$bus->id);
+        }
         if($applicant->wasChanged() && !empty($changes)):
+            if($statusidID == 7):
+                $existingProofId = (isset($applicantOldRow->proof->id) && $applicantOldRow->proof->id > 0 ? $applicantOldRow->proof->id : 0);
+                $existingElegbId = (isset($applicantOldRow->feeeligibility->id) && $applicantOldRow->feeeligibility->id > 0 ? $applicantOldRow->feeeligibility->id : 0);
+
+                $applicantProof = ApplicantProofOfId::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $existingProofId ], [
+                    'applicant_id' => $applicant_id,
+                    'proof_type' => $request->proof_type,
+                    'proof_id' => $request->proof_id,
+                    'proof_expiredate' => $request->proof_expiredate,
+                    'created_by' => auth()->user()->id,
+                    'updated_by' => auth()->user()->id,
+                ]);
+                $applicantEligibility = ApplicantFeeEligibility::updateOrCreate([ 'applicant_id' => $applicant_id, 'id' => $existingElegbId ], [
+                    'applicant_id' => $applicant_id,
+                    'fee_eligibility_id' => $request->fee_eligibility_id,
+                    'created_by' => auth()->user()->id,
+                    'updated_by' => auth()->user()->id,
+                ]);
+            endif;
             foreach($changes as $field => $value):
                 $data = [];
                 $data['applicant_id'] = $applicant_id;
@@ -2070,5 +2156,33 @@ class AdmissionController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
+
+    // Job Batch Function
+    public function progressForStudentStoreProcess(Request $request) {
+        try
+        {
+            $batchId = $request->id ?? session()->get('lastBatchId');
+
+            if(JobBatch::where('id', $batchId)->count())
+            {
+                $response = JobBatch::where('id', $batchId)->first();
+                 
+                return response()->json($response);
+            // } else {
+            //     return response()->json(["total_jobs" => 0,"pending_jobs"=>0]);
+            }
+        }
+        catch(Exception $e)
+        {
+            Log::error($e);
+            //dd($e);
+        }
+    }
+    //public $applicant;
+    //public function convertStudentDemo() {
+        //$this->applicant  = Applicant::find(1);
+        //$student = Student::find(20);      
+         
+    //}
 
 }
