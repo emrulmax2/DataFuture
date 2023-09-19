@@ -197,11 +197,11 @@ import Dropzone from "dropzone";
                         }
                         if(theValidation.fee_eligibility_id.suc == 2){
                             $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeIn('fast', function(){
-                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val('')
+                                $('#statusConfirmModal .offerAcceptedErrorArea select[name="fee_eligibility_id"]').val('')
                             });
                         }else{
                             $('#statusConfirmModal .offerAcceptedErrorArea > div.fee_eligibility_id').fadeOut('fast', function(){
-                                $('#statusConfirmModal .offerAcceptedErrorArea input[name="fee_eligibility_id"]').val(theValidation.fee_eligibility_id.vals)
+                                $('#statusConfirmModal .offerAcceptedErrorArea select[name="fee_eligibility_id"]').val(theValidation.fee_eligibility_id.vals)
                             });
                         }
                     });
@@ -211,8 +211,6 @@ import Dropzone from "dropzone";
                     });
                     $("#statusConfirmModal .offerAcceptedErrorArea").fadeOut('fast', function(){
                         $('#statusConfirmModal .offerAcceptedErrorArea > div').fadeOut();
-                        $('#statusConfirmModal .offerAcceptedErrorArea input').val('');
-                        $('#statusConfirmModal .offerAcceptedErrorArea select').val('');
                     });
                 }
                 $("#statusConfirmModal .agreeWith").attr('data-statusid', statusID);
@@ -223,14 +221,12 @@ import Dropzone from "dropzone";
             e.preventDefault();
             var applicantID = $(this).attr('data-applicant');
             var statusidID = $(this).attr('data-statusid');
-            var rejectedReason = $('#statusConfirmModal [name="rejected_reason"]').val();
-            var proof_type = $('#statusConfirmModal [name="proof_type"]').val();
-            var proof_id = $('#statusConfirmModal [name="proof_id"]').val();
-            var proof_expiredate = $('#statusConfirmModal [name="proof_expiredate"]').val();
-            var fee_eligibility_id = $('#statusConfirmModal [name="fee_eligibility_id"]').val();
+            var rejectedReason = document.getElementById("rejected_reason").value;
+            var proof_type = document.getElementById("sts_proof_type").value;
+            var proof_id = document.getElementById("sts_proof_id").value;
+            var proof_expiredate = document.getElementById("sts_proof_expiredate").value;
+            var fee_eligibility_id = document.getElementById("fee_eligibility_id").value;
             var $theBtn = $(this);
-
-
 
             $('#statusConfirmModal button').attr('disabled', 'disabled');
             if(statusidID == 8 && rejectedReason == ''){

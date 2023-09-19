@@ -75,6 +75,7 @@ use App\Jobs\ProcessStudentQualification;
 use App\Jobs\ProcessStudentContact;
 use App\Jobs\ProcessStudentDisability;
 use App\Jobs\ProcessStudentEmployement;
+use App\Models\AcademicYear;
 use App\Jobs\ProcessStudentProposedCourse;
 
 use App\Models\ApplicantInterview;
@@ -2098,6 +2099,14 @@ class AdmissionController extends Controller
                     'created_by' => auth()->user()->id,
                     'updated_by' => auth()->user()->id,
                 ]);
+
+                $academicYear = AcademicYear::orderBy('id', 'desc')->where('from_date', '<=', Carbon::now())->where('to_date', '>=', Carbon::now())->first();
+                if(isset($academicYear->id) && $academicYear->id > 0):
+                    $applicantPropCourse = ApplicantProposedCourse::where('applicant_id', $applicant_id)->update([
+                        'academic_year_id' => $academicYear->id,
+                        'updated_by' => auth()->user()->id,
+                    ]);
+                endif;
             endif;
             foreach($changes as $field => $value):
                 $data = [];
