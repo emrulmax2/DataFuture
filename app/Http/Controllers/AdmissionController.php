@@ -80,6 +80,7 @@ use App\Jobs\ProcessStudentProposedCourse;
 use App\Jobs\ProcessStudentOtherDetails;
 use App\Jobs\ProcessStudentProofOfId;
 use App\Jobs\ProcessStudentFeeEligibility;
+use App\Jobs\ProcessStudentSms;
 
 use App\Models\AcademicYear;
 use App\Models\ApplicantInterview;
@@ -2086,6 +2087,7 @@ class AdmissionController extends Controller
                 new ProcessStudentOtherDetails($applicant),
                 new ProcessStudentProofOfId($applicant),
                 new ProcessStudentFeeEligibility($applicant),
+                new ProcessStudentSms($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
