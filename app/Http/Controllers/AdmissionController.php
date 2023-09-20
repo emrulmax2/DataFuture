@@ -81,6 +81,7 @@ use App\Jobs\ProcessStudentOtherDetails;
 use App\Jobs\ProcessStudentProofOfId;
 use App\Jobs\ProcessStudentFeeEligibility;
 use App\Jobs\ProcessStudentSms;
+use App\Jobs\ProcessStudentLetter;
 
 use App\Models\AcademicYear;
 use App\Models\ApplicantInterview;
@@ -100,6 +101,8 @@ use App\Models\ApplicantUser;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentKin;
 use App\Models\StudentOtherDetail;
+use App\Models\StudentDocument;
+use App\Models\StudentLetter;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -2088,6 +2091,7 @@ class AdmissionController extends Controller
                 new ProcessStudentProofOfId($applicant),
                 new ProcessStudentFeeEligibility($applicant),
                 new ProcessStudentSms($applicant),
+                new ProcessStudentLetter($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
@@ -2209,7 +2213,8 @@ class AdmissionController extends Controller
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
         $student = Student::where(["user_id"=> $user->id])->get()->first();
-        
+
+  
 
     }
 

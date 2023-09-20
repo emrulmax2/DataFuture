@@ -54,7 +54,7 @@ class ProcessStudentSms implements ShouldQueue
             ];
 
             if($applicantSet->sms_template_id) {
-                array_merge($dataArray,['sms_template_id' => $applicantSet->sms_template_id]);
+                $dataArray = array_merge($dataArray,['sms_template_id' => $applicantSet->sms_template_id]);
             }
 
             $data = new StudentSms();

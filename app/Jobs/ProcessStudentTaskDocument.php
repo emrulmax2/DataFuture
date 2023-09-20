@@ -72,7 +72,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
                         'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
                     ];
                     if($applicantDocument->document_setting_id) {
-                        array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                        $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
                     }
                     $studentDocument->fill($applicantArray);
 

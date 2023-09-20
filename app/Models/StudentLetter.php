@@ -12,6 +12,7 @@ class StudentLetter extends Model
 
     protected $fillable = [
         'student_id',
+        'applicant_letter_id',
         'letter_set_id',
         'signatory_id',
         'comon_smtp_id',

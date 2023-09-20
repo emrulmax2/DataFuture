@@ -57,7 +57,7 @@ class ProcessStudentTask implements ShouldQueue
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
             if($applicantTaskData->task_status_id) {
-                array_merge($applicantTaskArray,['task_status_id' => $applicantTaskData->task_status_id]);
+                $applicantTaskArray = array_merge($applicantTaskArray,['task_status_id' => $applicantTaskData->task_status_id]);
             }
             $dataTask = new StudentTask();
             $dataTask->fill($applicantTaskArray);

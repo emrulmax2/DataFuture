@@ -65,7 +65,7 @@ class ProcessStudentNoteDetails implements ShouldQueue
                 'created_by'=> ($note->document->updated_by) ? $note->document->updated_by : $note->document->created_by,
             ];
             if($note->document->document_setting_id) {
-                array_merge($applicantArray,['document_setting_id' => $note->document->document_setting_id]);
+                $applicantArray = array_merge($applicantArray,['document_setting_id' => $note->document->document_setting_id]);
             }
             $studentDocument->fill($applicantArray);
 

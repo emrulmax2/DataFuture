@@ -60,10 +60,10 @@ class ProcessStudentOtherDetails implements ShouldQueue
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
             if($applicantSet->sexual_orientation_id) {
-                array_merge($dataArray,['sexual_orientation_id' => $applicantSet->sexual_orientation_id]);
+                $dataArray = array_merge($dataArray,['sexual_orientation_id' => $applicantSet->sexual_orientation_id]);
             }
             if($applicantSet->religion_id) {
-                array_merge($dataArray,['religion_id' => $applicantSet->religion_id]);
+                $dataArray = array_merge($dataArray,['religion_id' => $applicantSet->religion_id]);
             }
 
             $data = new StudentOtherDetail();

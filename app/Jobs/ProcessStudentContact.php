@@ -62,11 +62,11 @@ class ProcessStudentContact implements ShouldQueue
             ];
 
             if($applicantContact->country_id) {
-                array_merge($dataArray,['country_id' => $applicantContact->country_id]);
+                $dataArray = array_merge($dataArray,['country_id' => $applicantContact->country_id]);
             }
 
             if($applicantContact->permanent_country_id) {
-                array_merge($dataArray,['permanent_country_id' => $applicantContact->permanent_country_id]);
+                $dataArray = array_merge($dataArray,['permanent_country_id' => $applicantContact->permanent_country_id]);
             }
 
             $data = new StudentContact();
