@@ -529,7 +529,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
 
-        Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
+        //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
         
     });
 

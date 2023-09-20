@@ -82,6 +82,9 @@ use App\Jobs\ProcessStudentProofOfId;
 use App\Jobs\ProcessStudentFeeEligibility;
 use App\Jobs\ProcessStudentSms;
 use App\Jobs\ProcessStudentLetter;
+use App\Jobs\ProcessStudentInterview;
+use App\Jobs\ProcessStudentEmail;
+
 
 use App\Models\AcademicYear;
 use App\Models\ApplicantInterview;
@@ -96,13 +99,17 @@ use App\Models\SmsTemplate;
 use App\Models\JobBatch;
 
 // For Student Data Insert
-use App\Models\Student;
-use App\Models\ApplicantUser;
-use App\Models\StudentProposedCourse;
-use App\Models\StudentKin;
-use App\Models\StudentOtherDetail;
-use App\Models\StudentDocument;
-use App\Models\StudentLetter;
+// use App\Models\Student;
+// use App\Models\ApplicantUser;
+// use App\Models\StudentProposedCourse;
+// use App\Models\StudentKin;
+// use App\Models\StudentOtherDetail;
+// use App\Models\StudentDocument;
+// use App\Models\StudentLetter;
+// use App\Models\StudentTask;
+// use App\Models\StudentInterview;
+// use App\Models\StudentEmail;
+// use App\Models\StudentEmailsAttachment;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -2092,6 +2099,8 @@ class AdmissionController extends Controller
                 new ProcessStudentFeeEligibility($applicant),
                 new ProcessStudentSms($applicant),
                 new ProcessStudentLetter($applicant),
+                new ProcessStudentInterview($applicant),
+                new ProcessStudentEmail($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
@@ -2207,15 +2216,13 @@ class AdmissionController extends Controller
             //dd($e);
         }
     }
-    public $applicant;
-    public function convertStudentDemo() {
-        $this->applicant  = Applicant::find(1);  
-        $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
-
-  
-
-    }
+    // public $applicant;
+    // public function convertStudentDemo() {
+    //     $this->applicant  = Applicant::find(1);  
+    //     $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
+    //     $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
+    //     $student = Student::where(["user_id"=> $user->id])->get()->first();
+        
+    // }
 
 }
