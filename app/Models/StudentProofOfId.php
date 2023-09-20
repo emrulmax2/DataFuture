@@ -6,23 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentOtherDetail extends Model
+class StudentProofOfId extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'student_id',
-        'ethnicity_id',
-        'disability_status',
-        'disabilty_allowance',
-        'is_education_qualification',
-        'employment_status',
-        'college_introduction',
-        'gender_identity',
-        'sexual_orientation_id',
-        'religion_id',
+        'proof_type',
+        'proof_id',
+        'proof_expiredate',
         'created_by',
-        'updated_by',
+        'updated_by'
     ];
 
     /**
@@ -32,11 +26,15 @@ class StudentOtherDetail extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function setProofExpiredateAttribute($value) {  
+        $this->attributes['proof_expiredate'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+    
+    public function getProofExpiredateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+    
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
-    }
-
-    public function ethnicity(){
-        return $this->belongsTo(Ethnicity::class, 'ethnicity_id');
     }
 }

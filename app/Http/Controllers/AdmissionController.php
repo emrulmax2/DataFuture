@@ -75,9 +75,11 @@ use App\Jobs\ProcessStudentQualification;
 use App\Jobs\ProcessStudentContact;
 use App\Jobs\ProcessStudentDisability;
 use App\Jobs\ProcessStudentEmployement;
-use App\Models\AcademicYear;
+use App\Jobs\ProcessStudentKinDetail;
 use App\Jobs\ProcessStudentProposedCourse;
+use App\Jobs\ProcessStudentOtherDetails;
 
+use App\Models\AcademicYear;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
@@ -93,6 +95,8 @@ use App\Models\JobBatch;
 use App\Models\Student;
 use App\Models\ApplicantUser;
 use App\Models\StudentProposedCourse;
+use App\Models\StudentKin;
+use App\Models\StudentOtherDetail;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -2076,6 +2080,8 @@ class AdmissionController extends Controller
                 new ProcessStudentDisability($applicant),
                 new ProcessStudentEmployement($applicant),
                 new ProcessStudentProposedCourse($applicant),
+                new ProcessStudentKinDetail($applicant),
+                new ProcessStudentOtherDetails($applicant),
             ])->dispatch();
             
             session()->put("lastBatchId",$bus->id);
@@ -2193,11 +2199,10 @@ class AdmissionController extends Controller
     }
     public $applicant;
     public function convertStudentDemo() {
-        $this->applicant  = Applicant::find(1);
-        //$student = Student::find(20);      
+        $this->applicant  = Applicant::find(1);  
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first(); 
+        $student = Student::where(["user_id"=> $user->id])->get()->first();
         
 
     }
