@@ -437,10 +437,11 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(StudentController::class)->group(function() {
-
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
         Route::get('student/show/{id}', 'show')->name('student.show');
+
+        Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
     });
     

@@ -477,3 +477,16 @@
 .la-ball-scale-multiple.la-2x>div{width:64px;height:64px}
 .la-ball-scale-multiple.la-3x{width:96px;height:96px}
 .la-ball-scale-multiple.la-3x>div{width:96px;height:96px}@-webkit-keyframes ball-scale-multiple{0%{opacity:0;-webkit-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-webkit-transform:scale(1);transform:scale(1)}}@-moz-keyframes ball-scale-multiple{0%{opacity:0;-moz-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-moz-transform:scale(1);transform:scale(1)}}@-o-keyframes ball-scale-multiple{0%{opacity:0;-o-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-o-transform:scale(1);transform:scale(1)}}@keyframes ball-scale-multiple{0%{opacity:0;-webkit-transform:scale(0);-moz-transform:scale(0);-o-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-webkit-transform:scale(1);-moz-transform:scale(1);-o-transform:scale(1);transform:scale(1)}}
+
+.liveStudentMainMenu{
+    position: relative;
+}
+.liveStudentSubMenu{
+    position: absolute;
+    left: 0;
+    top: calc(100% - 55px);
+    display: none;
+}
+.liveStudentSubMenu.show{
+    display: flex;
+}

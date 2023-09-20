@@ -13,14 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('student_disabilities', function (Blueprint $table) {
+        Schema::create('student_archives', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('student_id')->unsigned();
-            $table->bigInteger('disability_id')->unsigned();
-            $table->softDeletes();
+            $table->unsignedBigInteger('student_id');
+            $table->string('table', 145)->nullable();
+            $table->string('field_name', 145)->nullable();
+            $table->text('field_value')->nullable();
+            $table->text('field_new_value')->nullable();
+
+            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('disability_id')->references('id')->on('disabilities')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -31,7 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-
-        Schema::dropIfExists('student_disabilities');
+        Schema::dropIfExists('student_archives');
     }
 };

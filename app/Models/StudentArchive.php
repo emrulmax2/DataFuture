@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentSms extends Model
+class StudentArchive extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'student_id',
-        'sms_template_id',
-        'subject',
-        'sms',
+        'table',
+        'field_name',
+        'field_value',
+        'field_new_value',
         'created_by',
         'updated_by',
     ];
@@ -25,16 +26,4 @@ class StudentSms extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
-    public function student(){
-        return $this->belongsTo(Student::class, 'student_id');
-    }
-    
-    public function user(){
-        return $this->belongsTo(User::class, 'created_by');
-    }
-    
-    public function template(){
-        return $this->belongsTo(SmsTemplate::class, 'sms_template_id');
-    }
 }

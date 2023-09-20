@@ -17,17 +17,21 @@ use App\Models\CourseCreationInstance;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\Ethnicity;
+use App\Models\FeeEligibility;
 use App\Models\KinsRelation;
 use App\Models\Semester;
 use App\Models\Status;
+use App\Models\Student;
+use App\Models\StudentArchive;
 use App\Models\Title;
 use App\Models\User;
+use App\Models\StudentSms;
+use Illuminate\Support\Facades\Storage;
 
 
 class StudentController extends Controller
 {
     public function index(){
-        
         $semesters = Cache::get('semesters', function () {
             return Semester::all()->sortByDesc("name");
         });
@@ -35,14 +39,14 @@ class StudentController extends Controller
             return Course::all();
         });
         $statuses = Cache::get('statuses', function () {
-            return Status::where('type', 'Applicant')->where('id', '>', 6)->get();
+            return Status::where('type', 'Student')->get();
         });
         
         
-        return view('pages.students.admission.index', [
-            'title' => 'Admission Management - X LCC Data Future Managment',
+        return view('pages.students.live.index', [
+            'title' => 'Live Students - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
+                ['label' => 'Students Live', 'href' => 'javascript:void(0);']
             ],
             'semesters' => $semesters,
             'courses' => $courses,
@@ -80,7 +84,7 @@ class StudentController extends Controller
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
 
-        $query = Applicant::orderByRaw(implode(',', $sorts))->whereNotNull('submission_date');
+        $query = Student::orderByRaw(implode(',', $sorts));
         if(!empty($refno)): $query->where('application_no', $refno); endif;
         if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
         if(!empty($lastname)): $query->where('last_name', 'LIKE', '%'.$lastname.'%'); endif;
@@ -119,7 +123,7 @@ class StudentController extends Controller
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
                     'gender'=> $list->gender,
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
-                    'url' => route('admission.show', $list->id),
+                    'url' => route('student.show', $list->id),
                     'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId)
                 ];
                 $i++;
@@ -128,15 +132,15 @@ class StudentController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function show($applicantId){
-        return view('pages.students.admission.show', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+    public function show($studentId){
+        return view('pages.students.live.show', [
+            'title' => 'Live Students - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
             ],
-            'applicant' => Applicant::find($applicantId),
-            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
             'titles' => Title::all(),
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
@@ -145,8 +149,47 @@ class StudentController extends Controller
             'bodies' => AwardingBody::all(),
             'users' => User::all(),
             'instance' => CourseCreationInstance::all(),
-            'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
-            'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get()
+            'documents' => DocumentSettings::where('live', '1')->orderBy('id', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all()
         ]);
+    }
+
+    public function UploadStudentPhoto(Request $request){
+        $applicant_id = $request->applicant_id;
+        $student_id = $request->student_id;
+        $applicantOldRow = Student::where('id', $student_id)->first();
+        $oldPhoto = (isset($applicantOldRow->photo) && !empty($applicantOldRow->photo) ? $applicantOldRow->photo : '');
+
+        $document = $request->file('file');
+        $imageName = time().'_'.$document->getClientOriginalName();
+        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        if(!empty($oldPhoto)):
+            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
+                Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
+            endif;
+        endif;
+
+        $student = Student::find($student_id);
+        $student->fill([
+            'photo' => $imageName
+        ]);
+        $changes = $student->getDirty();
+        $student->save();
+
+        if($student->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'students';
+                $data['field_name'] = $field;
+                $data['field_value'] = $applicantOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+        endif;
+
+        return response()->json(['message' => 'Photo successfully change & updated'], 200);
     }
 }

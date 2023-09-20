@@ -101,6 +101,11 @@ class TopMenu
                             'route_name' => 'admission',
                             'params' => [],
                             'title' => 'Admission'
+                        ],
+                        'student' => [
+                            'route_name' => 'student',
+                            'params' => [],
+                            'title' => 'Live'
                         ]
                     ]
                 ],

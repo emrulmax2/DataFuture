@@ -35,6 +35,54 @@ class Student extends Model
 
     protected $dates = ['deleted_at'];
 
+    public function other(){
+        return $this->hasOne(StudentOtherDetail::class, 'student_id', 'id');
+    }
+
+    public function contact(){
+        return $this->hasOne(StudentContact::class, 'student_id', 'id');
+    }
+
+    public function course(){
+        return $this->hasOne(StudentProposedCourse::class, 'student_id', 'id');
+    }
+
+    public function kin(){
+        return $this->hasOne(StudentKin::class, 'student_id', 'id');
+    }
+
+    public function disability(){
+        return $this->hasMany(StudentDisability::class, 'student_id', 'id');
+    }
+
+    public function quals(){
+        return $this->hasMany(StudentQualification::class, 'student_id', 'id');
+    }
+
+    public function employment(){
+        return $this->hasMany(StudentEmployment::class, 'student_id', 'id');
+    }
+
+    public function title(){
+        return $this->belongsTo(Title::class, 'title_id');
+    }
+
+    public function nation(){
+        return $this->belongsTo(Country::class, 'nationality_id');
+    }
+
+    public function country(){
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    public function status(){
+        return $this->belongsTo(Status::class, 'status_id');
+    }
+
+    public function users(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function setDateOfBirthAttribute($value) {  
         $this->attributes['date_of_birth'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
     }
