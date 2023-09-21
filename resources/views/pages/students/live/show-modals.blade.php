@@ -212,6 +212,7 @@
                         </svg>
                     </button>
                     <input type="hidden" value="{{ $student->id }}" name="student_id"/>
+                    <input type="hidden" value="{{ isset($student->otherPerInfo->id) && $student->otherPerInfo->id > 0 ? $student->otherPerInfo->id : 0 }}" name="student_other_personal_information_id"/>
                 </div>
             </div>
         </form>

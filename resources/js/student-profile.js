@@ -36,6 +36,8 @@ import TomSelect from "tom-select";
     
 
     const editAdmissionPersonalDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));
+    const editOtherPersonalInfoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editOtherPersonalInfoModal"));
+    const editAdmissionKinDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionKinDetailsModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
     $('#successModal .successCloser').on('click', function(e){
@@ -219,27 +221,28 @@ import TomSelect from "tom-select";
         var $form = $(this);
         const form = document.getElementById('editOtherPersonalInfoForm');
     
-        document.querySelector('#savePD').setAttribute('disabled', 'disabled');
-        document.querySelector("#savePD svg").style.cssText ="display: inline-block;";
+        document.querySelector('#saveSOI').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveSOI svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
         let applicantId = $('[name="applicant_id"]', $form).val();
         axios({
             method: "post",
-            url: route('student.update.personal.details'),
+            url: route('student.update.other.personal.details'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                document.querySelector('#savePD').removeAttribute('disabled');
-                document.querySelector("#savePD svg").style.cssText = "display: none;";
+                
+                document.querySelector('#saveSOI').removeAttribute('disabled');
+                document.querySelector("#saveSOI svg").style.cssText = "display: none;";
 
-                editAdmissionPersonalDetailsModal.hide();
+                editOtherPersonalInfoModal.hide();
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Personal Data successfully updated.');
+                    $("#successModal .successModalDesc").html('Other Personal Information successfully updated.');
                     $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });      
                 
@@ -249,13 +252,13 @@ import TomSelect from "tom-select";
                 }, 5000);
             }
         }).catch(error => {
-            document.querySelector('#savePD').removeAttribute('disabled');
-            document.querySelector("#savePD svg").style.cssText = "display: none;";
+            document.querySelector('#saveSOI').removeAttribute('disabled');
+            document.querySelector("#saveSOI svg").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editAdmissionPersonalDetailsForm .${key}`).addClass('border-danger');
-                        $(`#editAdmissionPersonalDetailsForm  .error-${key}`).html(val);
+                        $(`#editOtherPersonalInfoForm .${key}`).addClass('border-danger');
+                        $(`#editOtherPersonalInfoForm  .error-${key}`).html(val);
                     }
                 } else {
                     console.log('error');
@@ -268,8 +271,6 @@ import TomSelect from "tom-select";
 
     /* Edit Kin Details */
     if($('#editAdmissionKinDetailsForm').length > 0){
-        const editAdmissionKinDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionKinDetailsModal"));
-        //const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         $('#editAdmissionKinDetailsForm').on('submit', function(e){
             e.preventDefault();
             var $form = $(this);
