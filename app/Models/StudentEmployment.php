@@ -40,6 +40,6 @@ class StudentEmployment extends Model
     }
     
     public function reference(){
-        return $this->hasMany(EmploymentReference::class, 'student_employment_id', 'id');
+        return $this->hasMany(StudentEmploymentReference::class, 'student_employment_id', 'id');
     }
 }

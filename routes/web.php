@@ -84,6 +84,8 @@ use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
 use App\Http\Controllers\Student\KinDetailController;
 use App\Http\Controllers\Student\ContactDetailController;
+use App\Http\Controllers\Student\EducationQualificationController;
+use App\Http\Controllers\Student\EmploymentHistoryController;
 use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProofIdCheckController;
 
@@ -469,8 +471,31 @@ Route::middleware('auth')->group(function() {
     Route::controller(ContactDetailController::class)->group(function() {
         Route::get('student/update-contact-details', 'update')->name('student.update.contact.details'); 
     });
+    
     Route::controller(KinDetailController::class)->group(function() {
         Route::post('student/update-kin-details', 'update')->name('student.update.kin.details');
+    });
+
+    Route::controller(EducationQualificationController::class)->group(function() {
+        Route::post('student/update-qualification-status', 'updateStudentQualificationStatus')->name('student.qualification.status.update');
+
+        Route::get('student/qualification-list', 'list')->name('student.qualification.list');
+        Route::post('student/qualification-store', 'store')->name('student.qualification.store');
+        Route::get('student/qualification-edit/{id}', 'edit')->name('student.qualification.edit');
+        Route::post('student/qualification-update', 'update')->name('student.qualification.update');
+        Route::delete('student/qualification-delete/{id}', 'destroy')->name('student.qualification.destory');
+        Route::post('student/qualification-restore/{id}', 'restore')->name('student.qualification.restore');
+    });
+
+    Route::controller(EmploymentHistoryController::class)->group(function() {
+        Route::post('student/update-employment-status', 'updateStudentEmploymentStatus')->name('student.employment.status.update');
+
+        Route::get('student/employment-list', 'list')->name('student.employment.list');
+        Route::post('student/employment-store', 'store')->name('student.employment.store');
+        Route::get('student/employment-edit/{id}', 'edit')->name('student.employment.edit');
+        Route::post('student/employment-update', 'update')->name('student.employment.update');
+        Route::delete('student/employment-delete/{id}', 'destroy')->name('student.employment.destory');
+        Route::post('student/employment-restore/{id}', 'restore')->name('student.employment.restore');
     });
 
     Route::controller(AdmissionController::class)->group(function() {

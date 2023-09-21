@@ -586,14 +586,14 @@
                     <div>
                         <div class="form-check form-switch justify-start">
                             <label class="form-check-label m-0 mr-2" for="is_education_qualification">Student have any formal academic qualification?</label>
-                            <input {{ (isset($applicant->other->is_education_qualification) && $applicant->other->is_education_qualification == 1 ? 'checked' : '') }} id="is_education_qualification" value="1" name="is_education_qualification" class="form-check-input" type="checkbox">
+                            <input {{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? 'checked' : '') }} id="is_education_qualification" value="1" name="is_education_qualification" class="form-check-input" type="checkbox">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="updateSQS" class="btn btn-primary w-auto">     
-                        Save                      
+                        Update                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
@@ -671,7 +671,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                 </div>
             </div>
         </form>
@@ -735,7 +735,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     <input type="hidden" name="id" value="0"/>
                 </div>
             </div>
@@ -743,6 +743,64 @@
     </div>
 </div>
 <!-- END: Edit Qualification Modal -->
+
+
+<!-- BEGIN: Update Employement Status Modal -->
+<div id="editStudentEmpStatusModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editStudentEmpStatusForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Employement Status</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="student_employment_status" class="form-label">Employment Status <span class="text-danger"></span></label>
+                        <select id="student_employment_status" class="lcc-tom-select w-full" name="employment_status">
+                            <option value="">Please Select</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Part Time' ? 'Selected' : '' }} value="Part Time">Part Time</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Fixed Term' ? 'Selected' : '' }} value="Fixed Term">Fixed Term</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Contractor' ? 'Selected' : '' }} value="Contractor">Contractor</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Zero Hour' ? 'Selected' : '' }} value="Zero Hour">Zero Hour</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Seasonal' ? 'Selected' : '' }} value="Seasonal">Seasonal</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Agency or Temp' ? 'Selected' : '' }} value="Agency or Temp">Agency or Temp</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Consultant' ? 'Selected' : '' }} value="Consultant">Consultant</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Office Holder' ? 'Selected' : '' }} value="Office Holder">Office Holder</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Volunteer' ? 'Selected' : '' }} value="Volunteer">Volunteer</option>
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Unemployed' ? 'Selected' : '' }} value="Unemployed">Unemployed</option> 
+                            <option {{ isset($student->other->employment_status) && $student->other->employment_status == 'Full Time' ? 'Selected' : '' }} value="Full Time">Full Time</option> 
+                        </select>
+                        <div class="acc__input-error error-employment_status text-danger mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="updateSES" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_other_detail_id" value="{{ (isset($student->other->id) && $student->other->id > 0 ? $student->other->id : 0) }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Update Employement Status Modal -->
 
 <!-- BEGIN: Add Employement History Modal -->
 <div id="addEmployementHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -842,7 +900,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                 </div>
             </div>
         </form>
@@ -948,7 +1006,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     <input type="hidden" name="id" value="0"/>
                     <input type="hidden" name="ref_id" value="0"/>
                 </div>
