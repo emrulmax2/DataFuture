@@ -18,8 +18,11 @@ use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
+use App\Models\HesaGender;
 use App\Models\KinsRelation;
+use App\Models\Religion;
 use App\Models\Semester;
+use App\Models\SexualOrientation;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
@@ -150,7 +153,10 @@ class StudentController extends Controller
             'users' => User::all(),
             'instance' => CourseCreationInstance::all(),
             'documents' => DocumentSettings::where('live', '1')->orderBy('id', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'sexualOrientation' => SexualOrientation::all(),
+            'hesaGender' => HesaGender::all(),
+            'religion' => Religion::all(),
         ]);
     }
 

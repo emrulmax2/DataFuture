@@ -75,6 +75,41 @@
                         <div class="col-span-8 font-medium">{{ isset($student->other->ethnicity->name) ? $student->other->ethnicity->name : '' }}</div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="intro-y box p-5  mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Student Other Personal Information</div>
+                </div>
+                
+                <div class="col-span-6 text-right">
+                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherPersonalInfoModal" type="button" class="editOtherInfo btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Other Info
+                    </button>
+                </div>
+            </div>
+            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Sexual Orientation</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->sexori->name) && !empty($student->otherPerInfo->sexori->name) ? $student->otherPerInfo->sexori->name : '---') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Gender Identity</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->gender->name) && !empty($student->otherPerInfo->gender->name) ? $student->otherPerInfo->gender->name : '---') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Religion or Belief</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->religion->name) && !empty($student->otherPerInfo->religion->name) ? $student->otherPerInfo->religion->name : '---') }}</div>
+                    </div>
+                </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Disability Status</div>
@@ -107,25 +142,113 @@
                         </div>
                     </div>
                 @endif
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Proof of Id Type</div>
-                        <div class="col-span-8 font-medium">{{ isset($student->proof->proof_type) && !empty($student->proof->proof_type) ? ucfirst($student->proof->proof_type) : '---' }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">ID No</div>
-                        <div class="col-span-8 font-medium">{{ isset($student->proof->proof_id) && !empty($student->proof->proof_id) ? $student->proof->proof_id : '---' }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Expiry date</div>
-                        <div class="col-span-8 font-medium">{{ isset($student->proof->proof_expiredate) && !empty($student->proof->proof_expiredate) ? $student->proof->proof_expiredate : '---' }}</div>
-                    </div>
+            </div>
+        </div>
+
+        <div class="intro-y box p-5  mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Student Other Identifications</div>
                 </div>
 
+                <div class="col-span-6 text-right">
+                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherItentificationModal" type="button" class="editOtherIdentification btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Identification
+                    </button>
+                </div>
+            </div>
+            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Application Ref. No</div>
+                        <div class="col-span-8 font-medium">{{ $student->application_no }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">SSN</div>
+                        <div class="col-span-8 font-medium"></div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">UHN Number</div>
+                        <div class="col-span-8 font-medium"></div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">DF SID Number</div>
+                        <div class="col-span-8 font-medium"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="font-medium text-base mt-5 pt-5">Proof Of ID Checks</div>
+            <div class="mt-2 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12">
+                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                        <div id="tabulatorFilterForm-PIC" class="xl:flex sm:mr-auto" >
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
+                                <input id="query-PIC" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
+                                <select id="status-PIC" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="1">Active</option>
+                                    <option value="2">Archived</option>
+                                </select>
+                            </div>
+                            <div class="mt-2 xl:mt-0">
+                                <button id="tabulator-html-filter-go-PIC" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                                <button id="tabulator-html-filter-reset-PIC" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                            </div>
+                        </div>
+                        <div class="flex mt-5 sm:mt-0">
+                            <button id="tabulator-print-PIC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                            </button>
+                            <div class="dropdown w-1/2 sm:w-auto mr-2">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                </button>
+                                <div class="dropdown-menu w-40">
+                                    <ul class="dropdown-content">
+                                        <li>
+                                            <a id="tabulator-export-csv-PIC" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="tabulator-export-json-PIC" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="tabulator-export-xlsx-PIC" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="tabulator-export-html-PIC" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button data-tw-toggle="modal" data-tw-target="#addProoOfIdCheckModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Proof Of ID
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto scrollbar-hidden">
+                        <div id="studentProofOfIdCheckTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -143,9 +266,9 @@
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium">Address</div>
-                        <div class="col-span-12 font-medium">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-12 text-slate-500 font-medium mb-1">Term Time / Correspondence Address</div>
+                        <div class="col-span-12 font-medium pl-5">
                             @if(isset($student->contact->address_line_1) && !empty($student->contact->address_line_1))
                                 <span class="font-medium">{{ $student->contact->address_line_1 }}</span><br/>
                             @endif
@@ -166,18 +289,30 @@
                             @endif
                         </div>
                     </div>
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-4 text-slate-500 font-medium">Term Time Accomodation Type</div>
+                        <div class="col-span-8 font-medium">---</div>
+                    </div>
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Term Time Address Postcode</div>
+                        <div class="col-span-8 font-medium">---</div>
+                    </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-12 text-slate-500 font-medium">Permanent Address</div>
-                        <div class="col-span-12 font-medium">
-
+                        <div class="col-span-12 font-medium pl-5">
+                            <span class="font-medium text-danger">Not set yet!</span>
                         </div>
+                    </div>
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Permanent Country codee</div>
+                        <div class="col-span-8 font-medium">---</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0 mb-4">
-                        <div class="col-span-4 text-slate-500 font-medium">Email</div>
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-4 text-slate-500 font-medium">Personal Email</div>
                         <div class="col-span-8 font-medium">
                             {{ $student->users->email }}
                             @if ($student->users->email_verified_at == NULL)
@@ -192,7 +327,11 @@
                             @endif
                         </div>
                     </div>
-                    <div class="grid grid-cols-12 gap-0 mb-4">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-4 text-slate-500 font-medium">Institutional Email</div>
+                        <div class="col-span-8 font-medium">---</div>
+                    </div>
+                    <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
                         <div class="col-span-8 font-medium">{{ $student->contact->home }}</div>
                     </div>
@@ -208,68 +347,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Email</div>
-                        <div class="col-span-8 font-medium">
-                            {{ $student->users->email }}
-                            @if ($student->users->email_verified_at == NULL)
-                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
-                            @else
-                                @if(isset($tempEmail->applicant_id) && $tempEmail->applicant_id > 0 && (isset($tempEmail->status) && $tempEmail->status == 'Pending'))
-                                    <span class="btn inline-flex btn-warning px-2 ml-2 py-0 text-white rounded-0">Awaiting Verification</span><br/>
-                                    <span>({{ $tempEmail->email }})</span>
-                                @else
-                                    <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
-                        <div class="col-span-8 font-medium">{{ $student->contact->home }}</div>
-                    </div>
-                </div> 
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">
-                            {{ $student->contact->mobile }}
-                            @if($student->contact->mobile_verification == 1)
-                                <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                            @else
-                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-6">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium">Address</div>
-                        <div class="col-span-12 font-medium">
-                            @if(isset($student->contact->address_line_1) && !empty($student->contact->address_line_1))
-                                <span class="font-medium">{{ $student->contact->address_line_1 }}</span><br/>
-                            @endif
-                            @if(isset($student->contact->address_line_2) && !empty($student->contact->address_line_2))
-                                <span class="font-medium">{{ $student->contact->address_line_2 }}</span><br/>
-                            @endif
-                            @if(isset($student->contact->city) && !empty($student->contact->city))
-                                <span class="font-medium">{{ $student->contact->city }}</span>,
-                            @endif
-                            @if(isset($student->contact->state) && !empty($student->contact->state))
-                                <span class="font-medium">{{ $student->contact->state }}</span>, <br/>
-                            @endif
-                            @if(isset($student->contact->post_code) && !empty($student->contact->post_code))
-                                <span class="font-medium">{{ $student->contact->post_code }}</span>,
-                            @endif
-                            @if(isset($student->contact->country) && !empty($student->contact->country))
-                                <span class="font-medium">{{ $student->contact->country }}</span><br/>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
 
@@ -338,14 +416,14 @@
             </div>
         </div>
 
-        <div class="intro-y box p-5 mt-5">
+        <div class="intro-y box p-5 mt-5" id="applicantQualification">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Proposed Course & Programme</div>
+                    <div class="font-medium text-base">Education Qualification</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    <button data-tw-toggle="modal" data-tw-target="#editAdmissionCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Course & Programme
+                    <button data-tw-toggle="modal" data-tw-target="#editStudentQualStatusModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Status
                     </button>
                 </div>
             </div>
@@ -353,81 +431,11 @@
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>
-                        <div class="col-span-8 font-medium">{{ isset($student->course->creation->course->name) ? $student->course->creation->course->name : '' }} - {{ isset($student->course->semester->name) ? $student->course->semester->name : '' }}</div>
+                        <div class="col-span-3 text-slate-500 font-medium">Student have any formal academic qualification?</div>
+                        <div class="col-span-8 font-medium">{!! (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">How are you funding your education at London Churchill College?</div>
-                        <div class="col-span-8 font-medium">{{ isset($student->course->student_loan) ? $student->course->student_loan : '' }}</div>
-                    </div>
-                </div>
-                @if(isset($student->course->student_loan) && $student->course->student_loan == 'Student Loan')
-                    <div class="col-span-12 sm:col-span-12">
-                        <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</div>
-                            <div class="col-span-8 font-medium">{!! (isset($student->course->student_finance_england) && $student->course->student_finance_england == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn rounded-0 btn-danger px-2 py-0 text-white">No</span>') !!}</div>
-                        </div>
-                    </div>
-                    @if(isset($student->course->student_finance_england) && $student->course->student_finance_england == 1)
-                        <div class="col-span-12 sm:col-span-12">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Are you already in receipt of funds?</div>
-                                <div class="col-span-8 font-medium">{!! (isset($student->course->fund_receipt) && $student->course->fund_receipt == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
-                            </div>
-                        </div>
-                    @endif
-                    <div class="col-span-12 sm:col-span-12">
-                        <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</div>
-                            <div class="col-span-8 font-medium">{!! (isset($student->course->applied_received_fund) && $student->course->applied_received_fund == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn rounded-0 btn-danger px-2 py-0 text-white">No</span>') !!}</div>
-                        </div>
-                    </div>
-                @elseif(isset($student->course->student_loan) && $student->course->student_loan == 'Others')
-                    <div class="col-span-12 sm:col-span-12">
-                        <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Other Funding</div>
-                            <div class="col-span-8 font-medium">{{ (isset($student->course->other_funding) && $student->course->other_funding != '' ? $student->course->other_funding : '') }}</div>
-                        </div>
-                    </div>
-                @endif
-                <div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>
-                        <div class="col-span-8 font-medium">{!! (isset($student->course->full_time) && $student->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Fee Eligibility</div>
-                        <div class="col-span-8 font-medium">{!! (isset($student->feeeligibility->elegibility->name) && isset($student->feeeligibility->fee_eligibility_id) && $student->feeeligibility->fee_eligibility_id > 0 ? $student->feeeligibility->elegibility->name : '---') !!}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="intro-y box p-5 mt-5" id="applicantQualification">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Education Qualification</div>
-                </div>
-                <div class="col-span-6 text-right">
-                    <div class="form-check form-switch justify-end">
-                        <label class="form-check-label m-0 mr-2" for="is_edication_qualification">Do you have any formal academic qualification?</label>
-                        <input data-applicant="{{ $student->id }}" {{ (isset($student->other->is_edication_qualification) && $student->other->is_edication_qualification == 1 ? 'checked' : '') }} id="is_edication_qualification" value="1" name="is_edication_qualification" class="form-check-input" type="checkbox">
-                    </div>
-                </div>
-            </div>
-            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-            <div class="grid grid-cols-12 gap-4"> 
-                {{--<div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Do you have any formal academic qualification? </div>
-                        <div class="col-span-8 font-medium">{!! (isset($student->other->is_edication_qualification) && $student->other->is_edication_qualification == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>--}}
-                <div class="col-span-12 educationQualificationTableWrap" style="display: {{ isset($student->other->is_edication_qualification) && $student->other->is_edication_qualification == 1 ? 'block' : 'none' }};">
+                <div class="col-span-12 educationQualificationTableWrap" style="display: {{ isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? 'block' : 'none' }};">
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                         <div id="tabulatorFilterForm-EQ" class="xl:flex sm:mr-auto" >
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
@@ -485,12 +493,7 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="educationQualTable" data-applicant="{{ $student->id }}" class="mt-5 table-report table-report--tabulator {{ isset($student->other->is_edication_qualification) && $student->other->is_edication_qualification == 1 ? 'activeTable' : '' }}"></div>
-                    </div>
-                </div>
-                <div class="col-span-12 educationQualificationTableNoWrap" style="display: {{ !isset($student->other->is_edication_qualification) || $student->other->is_edication_qualification != 1 ? 'block' : 'none' }};">
-                    <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                        <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Education Qualification status are disabled.
+                        <div id="educationQualTable" data-applicant="{{ $student->id }}" class="mt-5 table-report table-report--tabulator {{ isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? 'activeTable' : '' }}"></div>
                     </div>
                 </div>
             </div>
@@ -624,6 +627,7 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/student-profile.js')
     @vite('resources/js/student-global.js')
+    @vite('resources/js/student-profile.js')
+    @vite('resources/js/student-proof-id-check.js')
 @endsection

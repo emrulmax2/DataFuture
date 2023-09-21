@@ -7,10 +7,10 @@ import Dropzone from "dropzone";
 (function(){
 
     /* Start Dropzone */
-    if($("#addApplicantPhotoModal").length > 0){
+    if($("#addStudentPhotoModal").length > 0){
         let dzErrors = false;
         Dropzone.autoDiscover = false;
-        Dropzone.options.addApplicantPhotoForm = {
+        Dropzone.options.addStudentPhotoForm = {
             autoProcessQueue: false,
             maxFiles: 1,
             maxFilesize: 5,
@@ -29,14 +29,14 @@ import Dropzone from "dropzone";
         };
 
 
-        var drzn1 = new Dropzone('#addApplicantPhotoForm', options);
+        var drzn1 = new Dropzone('#addStudentPhotoForm', options);
 
         drzn1.on("maxfilesexceeded", (file) => {
-            $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-            $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
+            $('#addStudentPhotoModal .modal-content .uploadError').remove();
+            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
             drzn1.removeFile(file);
             setTimeout(function(){
-                $('#addApplicantPhotoModal .modal-content .uploadError').remove();
+                $('#addStudentPhotoModal .modal-content .uploadError').remove();
             }, 4000)
         });
 
@@ -54,14 +54,14 @@ import Dropzone from "dropzone";
         }); 
 
         drzn1.on('queuecomplete', function(){
-            $('#uploadPhotoBtn').removeAttr('disabled');
-            document.querySelector("#uploadPhotoBtn svg").style.cssText ="display: none;";
+            $('#uploadStudentPhotoBtn').removeAttr('disabled');
+            document.querySelector("#uploadStudentPhotoBtn svg").style.cssText ="display: none;";
 
             if(!dzErrors){
                 drzn1.removeAllFiles();
 
-                $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-                $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+                $('#addStudentPhotoModal .modal-content .uploadError').remove();
+                $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -69,12 +69,12 @@ import Dropzone from "dropzone";
                 });
 
                 setTimeout(function(){
-                    $('#addApplicantPhotoModal .modal-content .uploadError').remove();
+                    $('#addStudentPhotoModal .modal-content .uploadError').remove();
                     window.location.reload();
                 }, 3000);
             }else{
-                $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-                $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
+                $('#addStudentPhotoModal .modal-content .uploadError').remove();
+                $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -82,15 +82,15 @@ import Dropzone from "dropzone";
                 });
                 
                 setTimeout(function(){
-                    $('#addApplicantPhotoModal .modal-content .uploadError').remove();
+                    $('#addStudentPhotoModal .modal-content .uploadError').remove();
                 }, 5000);
             }
         })
 
-        $('#uploadPhotoBtn').on('click', function(e){
+        $('#uploadStudentPhotoBtn').on('click', function(e){
             e.preventDefault();
-            document.querySelector('#uploadPhotoBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadPhotoBtn svg").style.cssText ="display: inline-block;";
+            document.querySelector('#uploadStudentPhotoBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#uploadStudentPhotoBtn svg").style.cssText ="display: inline-block;";
             
             drzn1.processQueue();
             

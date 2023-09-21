@@ -51,6 +51,10 @@ class Student extends Model
         return $this->hasOne(StudentKin::class, 'student_id', 'id');
     }
 
+    public function otherPerInfo(){
+        return $this->hasOne(StudentOtherPersonalInformation::class, 'student_id', 'id');
+    }
+
     public function disability(){
         return $this->hasMany(StudentDisability::class, 'student_id', 'id');
     }

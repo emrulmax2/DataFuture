@@ -84,6 +84,82 @@
                             </select>
                             <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
                         </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" value="{{ $student->id }}" name="id"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Personal Details Modal -->
+
+<!-- BEGIN: Edit Other Personal Information Modal -->
+<div id="editOtherPersonalInfoModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" action="#" id="editOtherPersonalInfoForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Other Personal Information</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4 gap-y-5">
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="sexual_orientation_id" class="form-label">Sexual Orientation <span class="text-danger">*</span></label>
+                            <select id="sexual_orientation_id" class="lccTom lcc-tom-select w-full" name="sexual_orientation_id">
+                                <option value="" selected>Please Select</option>
+                                @if(!empty($sexualOrientation))
+                                    @foreach($sexualOrientation as $so)
+                                        <option {{ isset($student->otherPerInfo->sexual_orientation_id) && $so->id == $student->otherPerInfo->sexual_orientation_id ? 'Selected' : '' }} value="{{ $so->id }}">{{ $so->name }}</option>
+                                    @endforeach 
+                                @endif 
+                            </select>
+                            <div class="acc__input-error error-sexual_orientation_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="hesa_gender_id" class="form-label">Gender Identity <span class="text-danger">*</span></label>
+                            <select id="hesa_gender_id" class="lccTom lcc-tom-select w-full" name="hesa_gender_id">
+                                <option value="" selected>Please Select</option>
+                                @if(!empty($hesaGender))
+                                    @foreach($hesaGender as $hg)
+                                        <option {{ isset($student->otherPerInfo->hesa_gender_id) && $hg->id == $student->otherPerInfo->hesa_gender_id ? 'Selected' : '' }} value="{{ $hg->id }}">{{ $hg->name }}</option>
+                                    @endforeach 
+                                @endif 
+                            </select>
+                            <div class="acc__input-error error-hesa_gender_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="religion_id" class="form-label">Religion or Belief <span class="text-danger">*</span></label>
+                            <select id="religion_id" class="lccTom lcc-tom-select w-full" name="religion_id">
+                                <option value="" selected>Please Select</option>
+                                @if(!empty($religion))
+                                    @foreach($religion as $reg)
+                                        <option {{ isset($student->otherPerInfo->religion_id) && $reg->id == $student->otherPerInfo->religion_id ? 'Selected' : '' }} value="{{ $reg->id }}">{{ $reg->name }}</option>
+                                    @endforeach 
+                                @endif 
+                            </select>
+                            <div class="acc__input-error error-religion_id text-danger mt-2"></div>
+                        </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="disability_status" class="form-label">Do you have any disabilities?</label>
                             <div class="form-check form-switch">
@@ -96,7 +172,7 @@
                             @php 
                                 $ids = [];
                                 if(!empty($student->disability)):
-                                    foreach($student->disability as $dis): $ids[] = $dis->disabilitiy_id; endforeach;
+                                    foreach($student->disability as $dis): $ids[] = $dis->disability_id; endforeach;
                                 endif;
                             @endphp
                             @if(!empty($disability))
@@ -120,7 +196,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePD" class="btn btn-primary w-auto">     
+                    <button type="submit" id="saveSOI" class="btn btn-primary w-auto">     
                         Update                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -135,7 +211,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $student->id }}" name="id"/>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
                 </div>
             </div>
         </form>
@@ -352,7 +428,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $student->id }}" name="applicant_id"/>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
                     <input type="hidden" value="{{ (isset($student->kin->id) ? $student->kin->id : 0) }}" name="id"/>
                 </div>
             </div>
@@ -361,151 +437,6 @@
 </div>
 <!-- END: Edit Kin Details Modal -->
 
-<!-- BEGIN: Edit Kin Details Modal -->
-<div id="editAdmissionCourseDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <form method="POST" action="#" id="editAdmissionCourseDetailsForm" enctype="multipart/form-data">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Proposed Course & Programme</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="course_creation_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course & Semester <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <select id="course_creation_id" class="lcc-tom-select w-full" name="course_creation_id">
-                                        <option value="" selected>Please Select</option>
-                                        @if(!empty($instance))
-                                            @foreach($instance as $ci)
-                                                <option {{ isset($student->course->course_creation_id) && $student->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
-                                            @endforeach 
-                                        @endif 
-                                    </select>
-                                    <div class="acc__input-error error-course_creation_id text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="student_loan" class="form-label sm:pt-2 col-span-12 sm:col-span-6">How are you funding your education at London Churchill College? <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <select id="student_loan" class="lcc-tom-select w-full" name="student_loan">
-                                        <option value="">Please Select</option>
-                                        <option {{ isset($student->course->student_loan) && $student->course->student_loan == 'Private' ? 'selected' : ''}} value="Private">Independently/Private</option>
-                                        <option {{ isset($student->course->student_loan) && $student->course->student_loan == 'Funding Body' ? 'selected' : ''}} value="Funding Body">Funding Body</option>
-                                        <option {{ isset($student->course->student_loan) && $student->course->student_loan == 'Sponsor' ? 'selected' : ''}} value="Sponsor">Sponsor</option>
-                                        <option {{ isset($student->course->student_loan) && $student->course->student_loan == 'Student Loan' ? 'selected' : ''}} value="Student Loan">Student Loan</option>
-                                        <option {{ isset($student->course->student_loan) && $student->course->student_loan == 'Others' ? 'selected' : ''}} value="Others">Other</option>  
-                                    </select>
-                                    <div class="acc__input-error error-student_loan text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 studentLoanEnglandFunding" style="display: {{ isset($student->course->student_loan) && $student->course->student_loan == 'Student Loan' ? 'block' : 'none'}};">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="student_finance_england" class="form-label col-span-12 sm:col-span-6">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course? <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="form-check form-switch">
-                                        <input {{ isset($student->course->student_finance_england) && $student->course->student_finance_england == 1 ? 'checked' : '' }} id="student_finance_england" class="form-check-input" name="student_finance_england" value="1" type="checkbox">
-                                        <label class="form-check-label" for="student_finance_england">&nbsp;</label>
-                                    </div>
-                                    <div class="acc__input-error error-student_finance_england text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 studentLoanFundReceipt" style="display: {{ isset($student->course->student_loan) && $student->course->student_loan == 'Student Loan' && isset($student->course->student_finance_england) && $student->course->student_finance_england == 1 ? 'block' : 'none' }};">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="fund_receipt" class="form-label col-span-12 sm:col-span-6">Are you already in receipt of funds? <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="form-check form-switch">
-                                        <input {{ isset($student->course->fund_receipt) && $student->course->fund_receipt == 1 ? 'checked' : '' }} id="fund_receipt" class="form-check-input" name="fund_receipt" value="1" type="checkbox">
-                                        <label class="form-check-label" for="fund_receipt">&nbsp;</label>
-                                    </div>
-                                    <div class="acc__input-error error-fund_receipt text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 studentLoanApplied" style="display: {{ isset($student->course->student_loan) && $student->course->student_loan == 'Student Loan' ? 'block' : 'none'}};">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="applied_received_fund" class="form-label col-span-12 sm:col-span-6">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution? <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="form-check form-switch">
-                                        <input {{ isset($student->course->applied_received_fund) && $student->course->applied_received_fund == 1 ? 'checked' : '' }} id="applied_received_fund" class="form-check-input" name="applied_received_fund" value="1" type="checkbox">
-                                        <label class="form-check-label" for="applied_received_fund">&nbsp;</label>
-                                    </div>
-                                    <div class="acc__input-error error-applied_received_fund text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 otherFundings" style="display: {{ isset($student->course->student_loan) && $student->course->student_loan == 'Others' ? 'block' : 'none'}};">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="other_funding" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Please type other fundings <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <input type="text" placeholder="Other Funding" value="{{ isset($student->course->other_funding) && !empty($student->course->other_funding) ? $student->course->other_funding : '' }}" id="other_funding" class="form-control" name="other_funding">
-                                    <div class="acc__input-error error-other_funding text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="form-check form-switch">
-                                        <input {{ isset($student->course->full_time) && $student->course->full_time == 1 ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
-                                        <label class="form-check-label" for="full_time">&nbsp;</label>
-                                    </div>
-                                    <div class="acc__input-error error-full_time text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="fee_eligibility_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Fee Eligibility</label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <select id="fee_eligibility_id" class="lcc-tom-select w-full" name="fee_eligibility_id">
-                                        <option value="">Please Select</option>
-                                        @if($feeelegibility->count() > 0)
-                                            @foreach($feeelegibility as $fl)
-                                                <option {{ isset($student->feeeligibility->fee_eligibility_id) && $student->feeeligibility->fee_eligibility_id == $fl->id ? 'Selected' : '' }} value="{{ $fl->id }}">{{ $fl->name }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePCP" class="btn btn-primary w-auto">     
-                        Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <input type="hidden" value="{{ $student->id }}" name="applicant_id"/>
-                    <input type="hidden" value="{{ (isset($student->course->id) ? $student->course->id : 0) }}" name="id"/>
-                    <input type="hidden" value="{{ (isset($student->feeeligibility->id) && $student->feeeligibility->id > 0 ? $student->feeeligibility->id : 0) }}" name="applicant_proof_of_id"/>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-<!-- END: Edit Kin Details Modal -->
 
 <!-- BEGIN: Address Modal -->
 <div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -579,7 +510,50 @@
 </div>
 <!-- END: Address Modal -->
 
-
+<!-- BEGIN: Update Qualification Status Modal -->
+<div id="editStudentQualStatusModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editStudentQualStatusForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Education Qualification Status</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="form-check form-switch justify-start">
+                            <label class="form-check-label m-0 mr-2" for="is_education_qualification">Student have any formal academic qualification?</label>
+                            <input {{ (isset($applicant->other->is_education_qualification) && $applicant->other->is_education_qualification == 1 ? 'checked' : '') }} id="is_education_qualification" value="1" name="is_education_qualification" class="form-check-input" type="checkbox">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="updateSQS" class="btn btn-primary w-auto">     
+                        Save                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="student_other_detail_id" value="{{ (isset($student->other->id) && $student->other->id > 0 ? $student->other->id : 0) }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Update Qualification Status Modal -->
 
 <!-- BEGIN: Add Qualification Modal -->
 <div id="addQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -923,6 +897,130 @@
 </div>
 <!-- END: Add Employement History Modal -->
 
+<!-- BEGIN: Add Proof ID Check Modal -->
+<div id="addProoOfIdCheckModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="addProoOfIdCheckForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Add Proof ID Check</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12">
+                            <label for="proof_type" class="form-label">Proof Type <span class="text-danger">*</span></label>
+                            <select id="proof_type" class="form-control w-full" name="proof_type">
+                                <option value="">Please Select</option>
+                                <option value="passport">Passport</option>
+                                <option value="birth">Birth</option>
+                                <option value="driving">Driving</option>
+                                <option value="nid">NID</option>
+                                <option value="respermit">Respermit</option>
+                            </select>
+                            <div class="acc__input-error error-proof_type text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="proof_id" class="form-label">Proof ID <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Proof ID" id="proof_id" class="form-control w-full" name="proof_id">
+                            <div class="acc__input-error error-proof_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="proof_expiredate" class="form-label">Expire Date <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="MM-YYYY" id="proof_expiredate" class="form-control w-full datepicker" name="proof_expiredate" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-proof_expiredate text-danger mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="addPIC" class="btn btn-primary w-auto">     
+                        Save                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Proof ID Check Modal -->
+<!-- BEGIN: Add Proof ID Check Modal -->
+<div id="editProoOfIdCheckModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editProoOfIdCheckForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Proof ID Check</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12">
+                            <label for="edit_proof_type" class="form-label">Proof Type <span class="text-danger">*</span></label>
+                            <select id="edit_proof_type" class="form-control w-full" name="proof_type">
+                                <option value="">Please Select</option>
+                                <option value="passport">Passport</option>
+                                <option value="birth">Birth</option>
+                                <option value="driving">Driving</option>
+                                <option value="nid">NID</option>
+                                <option value="respermit">Respermit</option>
+                            </select>
+                            <div class="acc__input-error error-proof_type text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="edit_proof_id" class="form-label">Proof ID <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Proof ID" id="edit_proof_id" class="form-control w-full" name="proof_id">
+                            <div class="acc__input-error error-proof_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="edit_proof_expiredate" class="form-label">Expire Date <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="MM-YYYY" id="edit_proof_expiredate" class="form-control w-full datepicker" name="proof_expiredate" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-proof_expiredate text-danger mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="editPIC" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Proof ID Check Modal -->
+
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -982,22 +1080,3 @@
 </div>
 <!-- END: Delete Confirm Modal Content -->
 
-<!-- BEGIN: Delete Confirm Modal Content -->
-<div id="confirmEducationModal" class="modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body p-0">
-                <div class="p-5 text-center">
-                    <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                    <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                    <div class="text-slate-500 mt-2 confModDesc"></div>
-                </div>
-                <div class="px-5 pb-8 text-center">
-                    <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                    <button type="button" data-applicant="{{ $student->id }}" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- END: Delete Confirm Modal Content -->

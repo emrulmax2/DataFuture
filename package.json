@@ -19,7 +19,7 @@
         "@popperjs/core": "^2.11.8",
         "@vitejs/plugin-vue": "^4.3.4",
         "chart.js": "^3.9.1",
-        "dayjs": "^1.11.9",
+        "dayjs": "^1.11.10",
         "dropzone": "^5.9.3",
         "highlight.js": "^10.7.3",
         "imask": "^6.6.3",

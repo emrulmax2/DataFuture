@@ -65,7 +65,8 @@ export default defineConfig({
 
                 "resources/js/students.js",
                 "resources/js/student-global.js",
-                "resources/js/student-profile.js"
+                "resources/js/student-profile.js",
+                "resources/js/student-proof-id-check.js"
             ],
             refresh: true,
         }),

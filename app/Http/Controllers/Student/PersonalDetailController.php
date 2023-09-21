@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\AdmissionPersonalDetailsRequest;
-
+use App\Http\Requests\StudentPersonalDetailsRequest;
 use App\Models\Applicant;
 use App\Models\ApplicantArchive;
 use App\Models\ApplicantOtherDetail;
@@ -17,7 +17,7 @@ use App\Models\StudentOtherDetail;
 
 class PersonalDetailController extends Controller
 {
-    public function update(AdmissionPersonalDetailsRequest $request){
+    public function update(StudentPersonalDetailsRequest $request){
         $student_id = $request->id;
         $studentOldRow = Student::find($student_id);
         $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();

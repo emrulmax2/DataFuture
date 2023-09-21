@@ -84,6 +84,7 @@ use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
 use App\Http\Controllers\Student\KinDetailController;
 use App\Http\Controllers\Student\ContactDetailController;
+use App\Http\Controllers\Student\ProofIdCheckController;
 
 /*
 |--------------------------------------------------------------------------
@@ -447,6 +448,16 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(PersonalDetailController::class)->group(function() {
         Route::get('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+    });
+    
+    Route::controller(ProofIdCheckController::class)->group(function() {
+        Route::get('student/proof-list', 'list')->name('student.proof.id.check.list'); 
+        Route::post('student/proof-store', 'store')->name('student.proof.id.check.store'); 
+        Route::get('student/proof-edit/{id}', 'edit')->name('student.proof.id.check.edit');
+        Route::post('student/proof-update', 'update')->name('student.proof.id.check.update');
+
+        Route::delete('student/delete-proof/{id}', 'destroy')->name('student.proof.id.check.destory');
+        Route::post('student/restore-proof/{id}', 'restore')->name('student.proof.id.check.restore');
     });
 
     Route::controller(ContactDetailController::class)->group(function() {
