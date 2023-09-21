@@ -220,6 +220,66 @@
 </div>
 <!-- END: Edit Personal Details Modal -->
 
+<!-- BEGIN: Edit Other Personal Information Modal -->
+<div id="editOtherItentificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editOtherItentificationForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Student Other Identification</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4 gap-y-5">
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="application_no" class="form-label">Application Ref. No <span class="text-danger">*</span></label>
+                            <input type="text" id="application_no" class="form-control w-full" name="application_no" value="{{ $student->application_no }}" placeholder="Application Ref No.">
+                            <div class="acc__input-error error-application_no text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="ssn_no" class="form-label">SSN <span class="text-danger">*</span></label>
+                            <input type="text" id="ssn_no" class="form-control w-full" name="ssn_no" value="{{ $student->ssn_no }}" placeholder="SSN">
+                            <div class="acc__input-error error-ssn_no text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="uhn_no" class="form-label">UHN Number <span class="text-danger">*</span></label>
+                            <input type="text" id="uhn_no" class="form-control w-full" name="uhn_no" value="{{ $student->uhn_no }}" placeholder="UHN Number">
+                            <div class="acc__input-error error-uhn_no text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="registration_no" class="form-label">DF SID Number <span class="text-danger">*</span></label>
+                            <input type="text" id="registration_no" class="form-control w-full" name="registration_no" value="{{ $student->registration_no }}" placeholder="DF SID Number">
+                            <div class="acc__input-error error-registration_no text-danger mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="updateSOID" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Personal Details Modal -->
+
 <!-- BEGIN: Edit Contact Details Modal -->
 <div id="editAdmissionContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">

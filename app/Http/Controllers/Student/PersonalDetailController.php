@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\AdmissionPersonalDetailsRequest;
+use App\Http\Requests\StudentOtherIdentificationUpdateRequest;
 use App\Http\Requests\StudentPersonalDetailsRequest;
 use App\Models\Applicant;
 use App\Models\ApplicantArchive;
@@ -35,7 +36,7 @@ class PersonalDetailController extends Controller
             foreach($changes as $field => $value):
                 $data = [];
                 $data['student_id'] = $student_id;
-                $data['table'] = 'applicants';
+                $data['table'] = 'students';
                 $data['field_name'] = $field;
                 $data['field_value'] = $studentOldRow->$field;
                 $data['field_new_value'] = $value;
@@ -68,5 +69,31 @@ class PersonalDetailController extends Controller
         endif;
 
         return response()->json(['msg' => 'Personal Data Successfully Updated.'], 200);
+    }
+
+    public function updateOtherIdentificationDetails(StudentOtherIdentificationUpdateRequest $request){
+        $student_id = $request->student_id;
+        $studentOldRow = Student::find($student_id);
+
+        $student = Student::find($student_id);
+        $student->fill($request->input());
+        $changes = $student->getDirty();
+        $student->save();
+
+        if($student->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'students';
+                $data['field_name'] = $field;
+                $data['field_value'] = $studentOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+        endif;
+
+        return response()->json(['msg' => 'Student Other Identification Data Successfully Updated.'], 200);
     }
 }

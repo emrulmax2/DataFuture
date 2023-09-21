@@ -449,6 +449,7 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(PersonalDetailController::class)->group(function() {
         Route::post('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+        Route::post('student/update-personal-identification-details', 'updateOtherIdentificationDetails')->name('student.update.other.identification'); 
     });
     
     Route::controller(OtherPersonalInformationController::class)->group(function() {

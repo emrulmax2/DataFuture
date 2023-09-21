@@ -168,19 +168,19 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">SSN</div>
-                        <div class="col-span-8 font-medium"></div>
+                        <div class="col-span-8 font-medium">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">UHN Number</div>
-                        <div class="col-span-8 font-medium"></div>
+                        <div class="col-span-8 font-medium">{{ isset($student->uhn_no) && !empty($student->uhn_no) ? $student->uhn_no : '---' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">DF SID Number</div>
-                        <div class="col-span-8 font-medium"></div>
+                        <div class="col-span-8 font-medium">{{ isset($student->registration_no) && !empty($student->registration_no) ? $student->registration_no : '---' }}</div>
                     </div>
                 </div>
             </div>

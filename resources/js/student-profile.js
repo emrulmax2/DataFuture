@@ -38,6 +38,7 @@ import TomSelect from "tom-select";
     const editAdmissionPersonalDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));
     const editOtherPersonalInfoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editOtherPersonalInfoModal"));
     const editAdmissionKinDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionKinDetailsModal"));
+    const editOtherItentificationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editOtherItentificationModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
     $('#successModal .successCloser').on('click', function(e){
@@ -300,7 +301,7 @@ import TomSelect from "tom-select";
                     });      
                     
                     setTimeout(function(){
-                        successModal.show();
+                        successModal.hide();
                         window.location.reload();
                     }, 5000);
                 }
@@ -319,16 +320,57 @@ import TomSelect from "tom-select";
                 }
             });
         });
-
-        // $('#successModal .successCloser').on('click', function(e){
-        //     e.preventDefault();
-        //     if($(this).attr('data-action') == 'RELOAD'){
-        //         successModal.hide();
-        //         window.location.reload();
-        //     }else{
-        //         successModal.hide();
-        //     }
-        // })
     }
     /* Edit Kin Details*/
+
+    /* Edit Personal Identification Details */
+    $('#editOtherItentificationForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('editOtherItentificationForm');
+    
+        document.querySelector('#updateSOID').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateSOID svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.update.other.identification'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                document.querySelector('#updateSOID').removeAttribute('disabled');
+                document.querySelector("#updateSOID svg").style.cssText = "display: none;";
+                
+                editOtherItentificationModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student Other Identification successfully updated.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });      
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 5000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateSOID').removeAttribute('disabled');
+            document.querySelector("#updateSOID svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editOtherItentificationForm .${key}`).addClass('border-danger');
+                        $(`#editOtherItentificationForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* Edit Personal Identification Details*/
 })();
