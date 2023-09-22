@@ -141,6 +141,8 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
+
+            Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
         });
 
         Route::controller(ApplicantQualificationCongroller::class)->group(function() {
