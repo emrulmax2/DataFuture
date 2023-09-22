@@ -15,7 +15,9 @@ use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\ApplicantEmployment;
+use App\Models\EmploymentReference;
 use App\Models\StudentEmployment;
+use App\Models\StudentEmploymentReference;
 
 class ProcessStudentEmployement implements ShouldQueue
 {
@@ -67,6 +69,25 @@ class ProcessStudentEmployement implements ShouldQueue
             $data->fill($applicantEmploymentArray);
             $data->save();
             unset ($dataArray);
+
+            $dataSet = EmploymentReference::where('applicant_employment_id',$applicantEmployments->id)->get();
+            foreach($dataSet as $employmentData):
+                $applicantEmploymentArray = [
+
+                    'student_employment_id' => $data->id, 
+                    'name' => $employmentData->name,
+                    'position' => $employmentData->position,
+                    'phone' => $employmentData->phone,
+                    'email' => $employmentData->email,
+                    'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+                ];
+    
+                $data = new StudentEmploymentReference();
+                $data->fill($applicantEmploymentArray);
+                $data->save();
+                unset ($applicantEmploymentArray);
+            endforeach;
+
         endforeach;
   
 

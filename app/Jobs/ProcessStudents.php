@@ -59,6 +59,8 @@ class ProcessStudents implements ShouldQueue
             'status_id'=> $this->applicant->status_id,
             'nationality_id'=> $this->applicant->nationality_id,
             'country_id'=> $this->applicant->country_id,
+            'referral_code' => $this->applicant->referral_code,
+            'is_referral_varified' => $this->applicant->is_referral_varified,
             'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
         ];
         $student->fill($applicantArray);
