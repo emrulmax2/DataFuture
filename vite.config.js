@@ -39,6 +39,7 @@ export default defineConfig({
                 "resources/js/country.js",
                 "resources/js/application.js",
                 "resources/js/disabilities.js",
+                "resources/js/consent-policy.js",
 
                 "resources/js/applicant-dahsboard.js",
                 "resources/js/bankholiday.js",
@@ -68,7 +69,8 @@ export default defineConfig({
                 "resources/js/student-profile.js",
                 "resources/js/student-proof-id-check.js",
                 "resources/js/student-edication-qualification.js",
-                "resources/js/student-employment-history.js"
+                "resources/js/student-employment-history.js",
+                "resources/js/student-consent.js"
             ],
             refresh: true,
         }),

@@ -590,21 +590,48 @@
         </div>
 
         <div class="intro-y box p-5 mt-5">
-            <div class="font-medium text-base">Others</div>
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Others</div>
+                </div>
+                <div class="col-span-6 text-right">
+                    <button data-tw-toggle="modal" data-tw-target="#editStudentConsentModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Consent
+                    </button>
+                </div>
+            </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Student Consent</div>
+                        <div class="col-span-8"> 
+                            @if(!empty($stdConsentIds) && $consent->count() > 0)
+                                <ul class="m-0 p-0 mb-2">
+                                    @foreach($consent as $con)
+                                        @if(in_array($con->id, $stdConsentIds))
+                                        <li class="text-left font-normal mb-3 pl-6 relative">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-success absolute" style="left: 0; top: 4px;"></i>
+                                            <div class="font-medium text-base">{{ $con->name }}</div>
+                                            <div class="pt-1">{{ $con->description }}</div>
+                                        </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            @else 
+                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Student consent not set yet.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>
                         <div class="col-span-8 font-medium">{!! ($student->referral_code != '' ? $student->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
                     </div>
                 </div>
-
-                @if($student->status_id >= 6)
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div> 
-
-                @endif
-
             </div>
         </div>
     </div>
@@ -619,4 +646,5 @@
     @vite('resources/js/student-proof-id-check.js')
     @vite('resources/js/student-edication-qualification.js')
     @vite('resources/js/student-employment-history.js')
+    @vite('resources/js/student-consent.js')
 @endsection

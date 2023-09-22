@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Applicant;
 use App\Models\ApplicantTemporaryEmail;
 use App\Models\AwardingBody;
+use App\Models\ConsentPolicy;
 use App\Models\Country;
 use App\Models\Course;
 use App\Models\CourseCreation;
@@ -26,6 +27,7 @@ use App\Models\SexualOrientation;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
+use App\Models\StudentConsent;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
@@ -157,6 +159,8 @@ class StudentController extends Controller
             'sexualOrientation' => SexualOrientation::all(),
             'hesaGender' => HesaGender::all(),
             'religion' => Religion::all(),
+            'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
+            'consent' => ConsentPolicy::all()
         ]);
     }
 

@@ -490,3 +490,7 @@
 .liveStudentSubMenu.show{
     display: flex;
 }
+
+#editStudentConsentModal .readOnlyConsent{
+    cursor: not-allowed;
+}

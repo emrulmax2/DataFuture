@@ -73,13 +73,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SmsTemplateController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\ConsentPolicyController;
 use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
 use App\Http\Controllers\HesaGenderController;
 use App\Http\Controllers\FeeEligibilityController;
-
-
+use App\Http\Controllers\Student\ConsentController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
 use App\Http\Controllers\Student\KinDetailController;
@@ -339,6 +339,16 @@ Route::middleware('auth')->group(function() {
         Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
     });
 
+    Route::controller(ConsentPolicyController::class)->group(function() {
+        Route::get('consent', 'index')->name('consent'); 
+        Route::get('consent/list', 'list')->name('consent.list'); 
+        Route::post('consent/store', 'store')->name('consent.store'); 
+        Route::get('consent/edit/{id}', 'edit')->name('consent.edit');
+        Route::post('consent/update', 'update')->name('consent.update');
+        Route::delete('consent/delete/{id}', 'destroy')->name('consent.destory');
+        Route::post('consent/restore/{id}', 'restore')->name('consent.restore');
+    });
+
     Route::controller(EthnicityController::class)->group(function() {
         Route::get('ethnic', 'index')->name('ethnic'); 
         Route::get('ethnic/list', 'list')->name('ethnic.list'); 
@@ -474,6 +484,10 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(KinDetailController::class)->group(function() {
         Route::post('student/update-kin-details', 'update')->name('student.update.kin.details');
+    });
+    
+    Route::controller(ConsentController::class)->group(function() {
+        Route::post('student/update-consent', 'update')->name('student.update.consent');
     });
 
     Route::controller(EducationQualificationController::class)->group(function() {
