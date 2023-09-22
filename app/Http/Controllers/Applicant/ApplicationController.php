@@ -27,6 +27,7 @@ use App\Models\ApplicantQualification;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
+use App\Models\ReferralCode;
 use Illuminate\Support\Carbon;
 
 class ApplicationController extends Controller
@@ -656,5 +657,30 @@ class ApplicationController extends Controller
             ],
             'applicant' => Applicant::where('id', $id)->first(),
         ]);
+    }
+
+    public function verifyReferralCode(Request $request){
+        $applicantId = $request->applicantId;
+        $code = $request->code;
+        $applicant = Applicant::find($applicantId);
+
+        $res = [];
+        $referralCodes = ReferralCode::where('code', $code)->first();
+        if(isset($referralCodes->code) && !empty($referralCodes->code) && $referralCodes->code == $code){
+            $applicantUpdate = Applicant::where('id', $applicantId)->update([
+                'referral_code' => $code,
+                'is_referral_varified' => 1
+            ]);
+
+            $res['suc'] = 1;
+            $res['code'] = $code;
+            $res['is_referral_varified'] = 1;
+        }else{
+            $res['suc'] = 1;
+            $res['code'] = $applicant->referral_code;
+            $res['is_referral_varified'] = $applicant->is_referral_varified;
+        }
+
+        return response()->json(['msg' => $res], 200);
     }
 }

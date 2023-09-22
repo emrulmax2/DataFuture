@@ -146,6 +146,12 @@ class TopMenu
                                     'route_name' => 'countries',
                                     'params' => [],
                                     'title' => 'Countries'
+                                ],
+                                'consent' => [
+                                    'icon' => '',
+                                    'route_name' => 'consent',
+                                    'params' => [],
+                                    'title' => 'Consent Policy'
                                 ], 
                             ]
                         ],

@@ -1168,13 +1168,75 @@ var employmentHistoryTable = (function () {
     })
     
 
-    $('#referral_code').on('keyup', function(){
-        if($(this).val() != ''){
-            $('.varifiedReferralWrap').fadeIn();
+    $('#referral_code').on('keyup paste', function(){
+        var $input = $(this);
+        var $btn = $(this).siblings('#varifiedReferral');
+        var $orgStatusInput = $(this).siblings('.is_referral_varified');
+
+        var orgCode = $input.attr('data-org');
+        var code = $input.val();
+        var orgStatus = $orgStatusInput.attr('data-org');
+        var status = $orgStatusInput.val();
+        if(code != orgCode){
+            $btn.css({'display': 'inline-flex'});
+            $input.css({'border-color': 'red'});
+            $input.closest('form').find('.form-wizard-next-btn').attr('disabled', 'disabled');
+            $orgStatusInput.val('0');
+            status = 0;
+        }else if(code == orgCode){
+            $btn.fadeOut();
+            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
+            $orgStatusInput.val(orgStatus);
+            status = orgStatus;
         }else{
-            $('.varifiedReferralWrap').fadeOut();
+            $input.val(orgCode)
+            $btn.fadeOut();
+            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
+            $orgStatusInput.val(orgStatus);
+            status = orgStatus;
         }
     });
+
+    $('#varifiedReferral').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var $input = $btn.siblings('#referral_code');
+        var $orgStatusInput = $btn.siblings('.is_referral_varified');
+
+        if(!$btn.hasClass('verified')){
+            var applicantId = $btn.attr('data-applicant-id');
+            var code = $btn.siblings('#referral_code').val();
+            $btn.attr('disabled', 'disabled');
+
+            axios({
+                method: 'POST',
+                url: route('application.verify.referral.code'),
+                data: {applicantId : applicantId, code : code},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    if(response.data.msg.suc == 1){
+                        
+                    }else{
+
+                    }
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('WOW!');
+                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                    });
+                }
+                employmentHistoryTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    })
 
     $('#student_loan').on('change', function(){
         var $this = $(this);

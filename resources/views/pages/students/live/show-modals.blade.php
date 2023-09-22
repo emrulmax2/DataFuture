@@ -1077,6 +1077,7 @@
     </div>
 </div>
 <!-- END: Edit Proof ID Check Modal -->
+
 <!-- BEGIN: Add Proof ID Check Modal -->
 <div id="editProoOfIdCheckModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -1139,6 +1140,62 @@
     </div>
 </div>
 <!-- END: Edit Proof ID Check Modal -->
+
+<!-- BEGIN: Student Consent Modal -->
+<div id="editStudentConsentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="#" id="editStudentConsentForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Update Consent</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        @if($consent->count() > 0)
+                            @foreach($consent as $con)
+                                <div class="col-span-12 sm:col-span-2">
+                                    <div class="form-check form-switch m-0 mt-1 justify-end">
+                                        <input {{ in_array($con->id, $stdConsentIds) ? 'Checked' : '' }} id="student_consent_{{ $con->id }}" name="student_consent[{{ $con->id }}]" value="1" class="form-check-input {{ in_array($con->id, $stdConsentIds) && $con->is_required == 'Yes' ? 'readOnlyConsent' : '' }}" type="checkbox">
+                                        <label class="form-check-label" for="student_consent_{{ $con->id }}">&nbsp;</label>
+                                    </div>
+                                </div>
+                                <div class="col-span-12 sm:col-span-10 text-left">
+                                    <div class="font-medium text-base">{{ $con->name }}</div>
+                                    <div class="pt-1">{{ $con->description }}</div>
+                                </div>
+                            @endforeach
+                            <div class="col-span-12 sm:col-span-2"></div>
+                            <div class="col-span-12 sm:col-span-10"><div class="acc__input-error error-student_consent text-danger mt-2"></div></div>
+                        @endif
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="editSCP" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Student Consent Modal -->
 
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">

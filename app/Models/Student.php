@@ -149,5 +149,9 @@ class Student extends Model
     public function allTasks(){
        return $this->hasMany(StudentTask::class, 'student_id');
     }
+
+    public function consents(){
+        return $this->hasMany(StudentConsent::class, 'student_id', 'id');
+    }
     
 }

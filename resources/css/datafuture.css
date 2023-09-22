@@ -490,3 +490,16 @@
 .liveStudentSubMenu.show{
     display: flex;
 }
+
+#editStudentConsentModal .readOnlyConsent{
+    cursor: not-allowed;
+}
+
+
+.validationGroup{
+    position: relative;
+}
+.validationGroup button{
+    right: 0;
+    top: 0;
+}
