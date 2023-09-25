@@ -153,5 +153,9 @@ class Student extends Model
     public function consents(){
         return $this->hasMany(StudentConsent::class, 'student_id', 'id');
     }
+
+    public function referral(){
+        return $this->belongsTo(ReferralCode::class, 'status_id');
+    }
     
 }

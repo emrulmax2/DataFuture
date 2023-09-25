@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Applicant;
 use App\Models\ApplicantTemporaryEmail;
 use App\Models\AwardingBody;
+use App\Models\ComonSmtp;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
 use App\Models\Course;
@@ -17,13 +18,18 @@ use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
+use App\Models\EmailTemplate;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
 use App\Models\HesaGender;
 use App\Models\KinsRelation;
+use App\Models\LetterSet;
+use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Semester;
 use App\Models\SexualOrientation;
+use App\Models\Signatory;
+use App\Models\SmsTemplate;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
@@ -138,13 +144,19 @@ class StudentController extends Controller
     }
 
     public function show($studentId){
+        $student = Student::find($studentId);
+        $referral = [];
+        if(isset($student->referral_code) && !empty($student->referral_code) && isset($student->is_referral_varified) && $student->is_referral_varified == 1):
+            $referralCode = $student->referral_code;
+            $referral = ReferralCode::where('code', $referralCode)->first();
+        endif;
         return view('pages.students.live.show', [
             'title' => 'Live Students - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
             ],
-            'student' => Student::find($studentId),
+            'student' => $student,
             'allStatuses' => Status::where('type', 'Student')->get(),
             'titles' => Title::all(),
             'country' => Country::all(),
@@ -160,7 +172,52 @@ class StudentController extends Controller
             'hesaGender' => HesaGender::all(),
             'religion' => Religion::all(),
             'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
-            'consent' => ConsentPolicy::all()
+            'consent' => ConsentPolicy::all(),
+            'referral' => $referral
+        ]);
+    }
+
+    public function communications($studentId){
+        return view('pages.students.live.communication', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Communications', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
+            'smtps' => ComonSmtp::all(),
+            'letterSet' => LetterSet::all(),
+            'signatory' => Signatory::all(),
+            'smsTemplates' => SmsTemplate::all(),
+            'emailTemplates' => EmailTemplate::all(),
+        ]);
+    }
+
+    public function uploads($studentId){
+        return view('pages.students.live.uploads', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Documents', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'docSettings' => DocumentSettings::where('live', '1')->get()
+        ]);
+    }
+
+    public function notes($studentId){
+        return view('pages.students.live.notes', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Notes', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
 

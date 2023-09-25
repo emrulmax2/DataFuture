@@ -57,17 +57,17 @@
         </ul>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="#" class="nav-link py-4">
+        <a href="{{ route('student.communication', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.communication' ? 'active' : '' }}">
             Communications
         </a>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="#" class="nav-link py-4">
+        <a href="{{ route('student.uploads', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.uploads' ? 'active' : '' }}">
             Documents
         </a>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="#" class="nav-link py-4">
+        <a href="{{ route('student.notes', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.notes' ? 'active' : '' }}">
             Notes
         </a>
     </li>

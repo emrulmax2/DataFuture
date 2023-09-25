@@ -6,13 +6,11 @@
 
 @section('subcontent')
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
     </div>
-    <!-- BEGIN: Profile Info -->
-
-    @include('pages.students.admission.show-info')
-    @include('pages.students.admission.show-menu')
     
+    <!-- BEGIN: Profile Info -->
+    @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
     <!-- BEGIN: Letters -->
@@ -80,7 +78,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommLetterListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <div id="studentCommLetterListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
@@ -151,7 +149,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommEmailListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <div id="studentCommEmailListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
@@ -222,7 +220,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommSMSListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <div id="studentCommSMSListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
@@ -315,7 +313,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     </div>
                 </div>
             </form>
@@ -399,7 +397,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     </div>
                 </div>
             </form>
@@ -476,7 +474,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     </div>
                 </div>
             </form>
@@ -534,7 +532,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                        <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>
@@ -544,5 +542,8 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/admission-communication.js')
+    @vite('resources/js/student-global.js')
+    @vite('resources/js/student-letter.js')
+    @vite('resources/js/student-email.js')
+    @vite('resources/js/student-sms.js')
 @endsection

@@ -626,12 +626,36 @@
                         </div>
                     </div>
                 </div>
+                @if(isset($student->referral_code) && !empty($student->referral_code) && isset($student->is_referral_varified) && $student->is_referral_varified == 1)
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>
-                        <div class="col-span-8 font-medium">{!! ($student->referral_code != '' ? $student->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Referred By</div>
+                        <div class="col-span-8 font-medium">
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Code</div>
+                                <div class="font-medium">{{ $referral->code }}</div>
+                            </div>
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Type</div>
+                                <div class="font-medium">{{ $referral->type }}</div>
+                            </div>
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Referrer</div>
+                                <div class="font-medium">
+                                    @if($referral->type == 'Student')
+                                        <span>{{ $referral->student->frist_name }} {{ $referral->student->last_naem }}</span><br/>
+                                        <span>{{ $referral->student->users->email }}</span><br/>
+                                        <span>{{ $referral->student->contact->mobile }}</span>
+                                    @else 
+                                        <span>{{ $referral->user->name }}</span><br/>
+                                        <span>{{ $referral->user->email }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>

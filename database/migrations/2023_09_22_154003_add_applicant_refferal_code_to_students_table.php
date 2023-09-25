@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->string("referral_code",20)->nullable();
-            $table->tinyInteger("is_referral_varified")->nullable();
+            $table->string("referral_code",20)->after('submission_date')->nullable();
+            $table->tinyInteger("is_referral_varified")->after('referral_code')->nullable();
         });
     }
 

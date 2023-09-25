@@ -85,9 +85,14 @@ use App\Http\Controllers\Student\PersonalDetailController;
 use App\Http\Controllers\Student\KinDetailController;
 use App\Http\Controllers\Student\ContactDetailController;
 use App\Http\Controllers\Student\EducationQualificationController;
+use App\Http\Controllers\Student\EmailController;
 use App\Http\Controllers\Student\EmploymentHistoryController;
+use App\Http\Controllers\Student\LetterController;
+use App\Http\Controllers\Student\NoteController;
 use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProofIdCheckController;
+use App\Http\Controllers\Student\SmsController;
+use App\Http\Controllers\Student\UploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -456,6 +461,9 @@ Route::middleware('auth')->group(function() {
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
         Route::get('student/show/{id}', 'show')->name('student.show');
+        Route::get('student/communication/{id}', 'communications')->name('student.communication');
+        Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
+        Route::get('student/notes/{applicantId}', 'notes')->name('student.notes');
 
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
@@ -512,6 +520,49 @@ Route::middleware('auth')->group(function() {
         Route::post('student/employment-update', 'update')->name('student.employment.update');
         Route::delete('student/employment-delete/{id}', 'destroy')->name('student.employment.destory');
         Route::post('student/employment-restore/{id}', 'restore')->name('student.employment.restore');
+    });
+
+    Route::controller(LetterController::class)->group(function() {
+        Route::post('student/get-letter-set', 'getLetterSet')->name('student.get.letter.set');
+        Route::post('student/letter-store', 'store')->name('student.send.letter');
+        Route::get('student/letter-list', 'list')->name('student.letter.list');
+        Route::delete('student/letter-delete', 'destroy')->name('student.letter.destroy');
+        Route::post('student/restore-letter', 'restore')->name('student.letter.restore');
+    });
+
+    Route::controller(EmailController::class)->group(function() {
+        Route::post('student/send-mail', 'store')->name('student.send.mail');
+        Route::get('student/mail-list', 'list')->name('student.mail.list');
+        Route::post('student/mail-show', 'show')->name('student.mail.show');
+        Route::delete('student/destory-mail', 'destroy')->name('student.mail.destroy');
+        Route::post('student/restore-mail', 'restore')->name('student.mail.restore');
+        Route::post('student/get-mail-template', 'getEmailTemplate')->name('student.get.mail.template');
+    });
+
+    Route::controller(SmsController::class)->group(function() {
+        Route::post('student/send-sms', 'store')->name('student.send.sms');
+        Route::get('student/sms-list', 'list')->name('student.sms.list');
+        Route::post('student/sms-show', 'show')->name('student.sms.show');
+        Route::delete('student/destory-sms', 'destroy')->name('student.sms.destroy');
+        Route::post('student/restore-sms', 'restore')->name('student.sms.restore');
+        Route::post('student/get-sms-template', 'getSmsTemplate')->name('student.get.sms.template');
+    });
+
+    Route::controller(NoteController::class)->group(function() {
+        Route::post('student/store-notes', 'store')->name('student.store.note');
+        Route::get('student/notes-list', 'list')->name('student.note.list');
+        Route::post('student/show-note', 'show')->name('student.show.note');
+        Route::post('student/get-note', 'edit')->name('student.get.note');
+        Route::post('student/update-note', 'update')->name('student.update.note');
+        Route::delete('student/destory-note', 'destroy')->name('student.destory.note');
+        Route::post('student/restore-note', 'restore')->name('student.resotore.note');
+    });
+
+    Route::controller(UploadController::class)->group(function() {
+        Route::post('student/uploads-documents', 'store')->name('student.upload.documents');
+        Route::get('student/uploads-list', 'list')->name('student.uploads.list');
+        Route::delete('student/uploads-destroy', 'destroy')->name('student.destory.uploads');
+        Route::post('student/uploads-restore', 'restore')->name('student.resotore.uploads');
     });
 
     Route::controller(AdmissionController::class)->group(function() {

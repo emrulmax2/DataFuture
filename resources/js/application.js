@@ -1212,28 +1212,38 @@ var employmentHistoryTable = (function () {
 
             axios({
                 method: 'POST',
-                url: route('application.verify.referral.code'),
+                url: route('applicant.application.verify.referral.code'),
                 data: {applicantId : applicantId, code : code},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
+                    $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
                     if(response.data.msg.suc == 1){
-                        
+                        $btn.removeAttr('disabled').html('<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified').removeClass('btn-danger').addClass('btn-primary verified');
+                        $input.css({'border-color': 'rgba(226, 232, 240, 1)'}).attr('data-org', response.data.msg.code).attr('readonly', 'readonly');
+                        $orgStatusInput.val(response.data.msg.is_referral_varified).attr('data-org', response.data.msg.is_referral_varified);
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
+
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
                     }else{
-
+                        $btn.fadeOut().removeAttr('disabled');
+                        $input.val('').css({'border-color': 'rgba(226, 232, 240, 1)'});
+                        $orgStatusInput.val('0');
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('Referral code does not match. Please insert a valid one.')
                     }
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
 
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
-                    });
+                    setTimeout(function(){
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
+                    }, 5000)
                 }
-                employmentHistoryTable.init();
             }).catch(error =>{
-                console.log(error)
+                if (error.response){
+                    console.log(error)
+                }
             });
         }
     })

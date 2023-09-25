@@ -6,14 +6,13 @@
 
 @section('subcontent')
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
     </div>
-    <!-- BEGIN: Profile Info -->
 
-    @include('pages.students.admission.show-info')
-    @include('pages.students.admission.show-menu')
-    
+    <!-- BEGIN: Profile Info -->
+    @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
+
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
@@ -21,25 +20,31 @@
             </div>
             <div class="col-span-6 text-right relative">
                 <div class="dropdown" id="uploadsDropdown">
-                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List</button>
+                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
                         <ul class="dropdown-content">
                             <li><h6 class="dropdown-header">Document List</h6></li>
                             <li><hr class="dropdown-divider mt-0"></li>
-                            @if(isset($docSettings) && !empty($docSettings))
+                            @if(isset($docSettings) && !empty($docSettings) && $docSettings->count() > 0)
                                 @foreach($docSettings as $ds)
                                     <li>
                                         <div class="form-check dropdown-item">
-                                            <label class="inline-flex items-center cursor-pointer" for="applicant_doc_{{ $ds->id }}"><i data-lucide="activity" class="w-4 h-4 mr-2"></i> {{ $ds->name }}</label>
-                                            <input id="applicant_doc_{{ $ds->id }}" name="applicant_doc_ids[]" class="form-check-input applicant_doc_ids ml-auto" type="radio" value="{{ $ds->id }}">
+                                            <label class="inline-flex items-center cursor-pointer" for="student_doc_{{ $ds->id }}"><i data-lucide="activity" class="w-4 h-4 mr-2"></i> {{ $ds->name }}</label>
+                                            <input id="student_doc_{{ $ds->id }}" name="student_doc_ids[]" class="form-check-input student_doc_ids ml-auto" type="radio" value="{{ $ds->id }}">
                                         </div>
                                     </li>
                                 @endforeach
+                            @else 
+                                <li>
+                                    <div class="alert alert-pending-soft show flex items-top mb-1 mt-1" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not setting found!
+                                    </div>
+                                </li>
                             @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <div class="flex p-1">
-                                    <button type="button" id="applicantDocumentUploaders" class="btn btn-primary py-1 px-2 w-auto">     
+                                    <button type="button" id="studentDocumentUploaders" class="btn btn-primary py-1 px-2 w-auto">     
                                         Upload Documents
                                     </button>
                                     <button type="button" id="closeUploadsDropdown" class="btn btn-secondary py-1 px-2 ml-auto">Close</button>
@@ -105,7 +110,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantUploadListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <div id="studentUploadListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
@@ -122,7 +127,7 @@
                     </a>
                 </div>
                 <div class="modal-body">
-                    <form method="post"  action="{{ route('admission.upload.documents') }}" class="dropzone" id="uploadDocumentForm" style="padding: 5px;" enctype="multipart/form-data">
+                    <form method="post"  action="{{ route('student.upload.documents') }}" class="dropzone" id="uploadDocumentForm" style="padding: 5px;" enctype="multipart/form-data">
                         @csrf    
                         <div class="fallback">
                             <input name="documents[]" multiple type="file" />
@@ -133,7 +138,7 @@
                                 Max file size 5MB & max file limit 10.
                             </div>
                         </div>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                         <input type="hidden" name="document_setting_id" value="0"/>
                         <input type="hidden" name="hard_copy_check" value="0"/>
                     </form>
@@ -223,7 +228,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                        <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>
@@ -233,5 +238,6 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/admission-uploads.js')
+    @vite('resources/js/student-global.js')
+    @vite('resources/js/student-upload.js')
 @endsection
