@@ -25,12 +25,12 @@ return new class extends Migration
             $table->string('mobile',145);
             $table->text('external_link_ref')->nullable();
             $table->tinyInteger('mobile_verification')->default('0');
-            $table->string('address_line_1',191);
-            $table->string('address_line_2',191)->nullable();
-            $table->string('state',145)->nullable();
-            $table->string('post_code',145);
+            $table->string('address_line_1',191);//
+            $table->string('address_line_2',191)->nullable();//
+            $table->string('state',145)->nullable();//
+            $table->string('post_code',145);//
             $table->string('permanent_post_code',191)->nullable();
-            $table->string('city',145);
+            $table->string('city',145);//
             $table->string('country',191);
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();

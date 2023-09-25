@@ -20,12 +20,12 @@ return new class extends Migration
             $table->string('name',145)->nullable();
             $table->string('mobile',191);
             $table->string('email',145)->nullable();
-            $table->string('address_line_1',191);
-            $table->string('address_line_2',191)->nullable();
-            $table->string('state',191)->nullable();
-            $table->string('post_code',145);
-            $table->string('city',191)->nullable();
-            $table->string('country',191);
+            $table->string('address_line_1',191);//
+            $table->string('address_line_2',191)->nullable();//
+            $table->string('state',191)->nullable();//
+            $table->string('post_code',145);//
+            $table->string('city',191)->nullable();//
+            $table->string('country',191);//
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
