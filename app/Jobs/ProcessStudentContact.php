@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Address;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -51,13 +52,8 @@ class ProcessStudentContact implements ShouldQueue
                 'mobile' => $applicantContact->mobile,
                 'external_link_ref'=> isset($applicantContact->external_link_ref) ? ($applicantContact->external_link_ref) : 'NULL',
                 'mobile_verification' => isset($applicantContact->mobile_verification) ? ($applicantContact->mobile_verification) : '0',
-                'address_line_1' => $applicantContact->address_line_1,
-                'address_line_2' => isset($applicantContact->address_line_2) ? ($applicantContact->address_line_2) : 'NULL',
-                'state' => isset($applicantContact->state) ? ($applicantContact->state) : 'NULL',
-                'post_code' => $applicantContact->post_code,
                 'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : 'NULL',
-                'city' => $applicantContact->city,
-                'country' => $applicantContact->country,
+                
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
 
@@ -69,6 +65,21 @@ class ProcessStudentContact implements ShouldQueue
                 $dataArray = array_merge($dataArray,['permanent_country_id' => $applicantContact->permanent_country_id]);
             }
 
+            $Address = new Address();
+            $dataAddress = [
+                "address_line_1" => $applicantContact->address_line_1,
+                "address_line_2" => isset($applicantContact->address_line_2) ? ($applicantContact->address_line_2) : 'NULL',
+                "state"	=> isset($applicantContact->state) ? ($applicantContact->state) : 'NULL',
+                "post_code"	=> $applicantContact->post_code,
+                "city" =>$applicantContact->city,
+                "country" =>$applicantContact->country,
+            ];
+       
+            $Address->fill($dataAddress);
+            $Address->save();
+            if($Address->id) {
+                $dataArray = array_merge($dataArray,["term_time_address_id"=>$Address->id]);
+            }
             $data = new StudentContact();
 
             $data->fill($dataArray);

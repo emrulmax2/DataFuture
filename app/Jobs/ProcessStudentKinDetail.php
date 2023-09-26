@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Address;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -52,15 +53,24 @@ class ProcessStudentKinDetail implements ShouldQueue
                 'kins_relation_id' => $applicantKin->kins_relation_id,
                 'mobile' =>	$applicantKin->mobile,
                 'email' =>	$applicantKin ->email,
-                'address_line_1' =>	$applicantKin->address_line_1,
-                'address_line_2' =>	$applicantKin->address_line_2,
-                'state' =>	$applicantKin->state,
-                'post_code' =>	$applicantKin->post_code,
-                'city' => $applicantKin->city,
-                'country' =>	$applicantKin->country,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
                 
             ];
+            $Address = new Address();
+            $dataAddress = [
+                "address_line_1" => $applicantKin->address_line_1,
+                "address_line_2" => isset($applicantKin->address_line_2) ? ($applicantKin->address_line_2) : 'NULL',
+                "state"	=> isset($applicantKin->state) ? ($applicantKin->state) : 'NULL',
+                "post_code"	=> $applicantKin->post_code,
+                "city" =>$applicantKin->city,
+                "country" =>$applicantKin->country,
+            ];
+       
+            $Address->fill($dataAddress);
+            $Address->save();
+            if($Address->id) {
+                $dataArray = array_merge($dataArray,["address_id"=>$Address->id]);
+            }
 
             $data = new StudentKin();
 

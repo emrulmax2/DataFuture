@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Address;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -56,15 +57,24 @@ class ProcessStudentEmployement implements ShouldQueue
                 'start_date' => $applicantEmployments->start_date,
                 'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : 'NULL',
                 'continuing' => isset($applicantEmployments->continuing) ? ($applicantEmployments->continuing) : '0',
-                'address_line_1' => $applicantEmployments->address_line_1,
-                'address_line_2' => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
-                'state' => isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
-                'post_code' => $applicantEmployments->post_code,
-                'city' => $applicantEmployments->city,
-                'country' => $applicantEmployments->country,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
 
+            $Address = new Address();
+            $dataAddress = [
+                "address_line_1" => $applicantEmployments->address_line_1,
+                "address_line_2" => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
+                "state"	=> isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
+                "post_code"	=> $applicantEmployments->post_code,
+                "city" =>$applicantEmployments->city,
+                "country" =>$applicantEmployments->country,
+            ];
+       
+            $Address->fill($dataAddress);
+            $Address->save();
+            if($Address->id) {
+                $applicantEmploymentArray = array_merge($applicantEmploymentArray,["address_id"=>$Address->id]);
+            }
             $data = new StudentEmployment();
             $data->fill($applicantEmploymentArray);
             $data->save();
