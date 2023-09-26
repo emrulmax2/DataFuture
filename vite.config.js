@@ -70,7 +70,14 @@ export default defineConfig({
                 "resources/js/student-proof-id-check.js",
                 "resources/js/student-edication-qualification.js",
                 "resources/js/student-employment-history.js",
-                "resources/js/student-consent.js"
+                "resources/js/student-consent.js",
+                "resources/js/student-letter.js",
+                "resources/js/student-email.js",
+                "resources/js/student-sms.js",
+                "resources/js/student-note.js",
+                "resources/js/student-upload.js",
+                "resources/js/student-process.js",
+                "resources/js/student-course.js"
             ],
             refresh: true,
         }),

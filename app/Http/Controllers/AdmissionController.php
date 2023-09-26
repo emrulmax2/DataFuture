@@ -98,19 +98,6 @@ use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\JobBatch;
 
-// For Student Data Insert
-// use App\Models\Student;
-// use App\Models\ApplicantUser;
-// use App\Models\StudentProposedCourse;
-// use App\Models\StudentKin;
-// use App\Models\StudentOtherDetail;
-// use App\Models\StudentDocument;
-// use App\Models\StudentLetter;
-// use App\Models\StudentTask;
-// use App\Models\StudentInterview;
-// use App\Models\StudentEmail;
-// use App\Models\StudentEmailsAttachment;
-
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;

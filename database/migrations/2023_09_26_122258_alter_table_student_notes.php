@@ -13,9 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->string("referral_code",20)->after('submission_date')->nullable();
-            $table->tinyInteger("is_referral_varified")->after('referral_code')->nullable();
+        Schema::table('student_notes', function (Blueprint $table) {
+            $table->date('opening_date')->nullable()->after('student_document_id');
         });
     }
 
@@ -26,9 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->dropColumn("referral_code");
-            $table->dropColumn("is_referral_varified");
+        Schema::table('student_notes', function (Blueprint $table) {
+            $table->dropColumn(['opening_date']);
         });
     }
 };

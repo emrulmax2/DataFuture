@@ -33,7 +33,7 @@ class Student extends Model
         'nationality_id',
         'country_id',
         'created_by',
-        'updated_by',
+        'updated_by', 
     ];
 
     protected $dates = ['deleted_at'];
@@ -152,6 +152,18 @@ class Student extends Model
 
     public function consents(){
         return $this->hasMany(StudentConsent::class, 'student_id', 'id');
+    }
+
+    public function referral(){
+        return $this->belongsTo(ReferralCode::class, 'status_id');
+    }
+
+    public function feeeligibilities(){
+        return $this->hasMany(StudentFeeEligibility::class, 'student_id', 'id');
+    }
+
+    public function feeeligibility(){
+        return $this->hasOne(StudentFeeEligibility::class, 'student_id', 'id')->latestOfMany();
     }
     
 }

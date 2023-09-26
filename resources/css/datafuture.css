@@ -503,3 +503,6 @@
     right: 0;
     top: 0;
 }
+.mw-120{
+    min-width: 120px;
+}

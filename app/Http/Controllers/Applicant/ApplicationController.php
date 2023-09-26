@@ -176,13 +176,14 @@ class ApplicationController extends Controller
                 $applicantEmployments = ApplicantEmployment::where('applicant_id', $applicant_id)->forceDelete();
             endif;
 
-            if(isset($request->referral_code) && !empty($request->referral_code)):
+            /*if(isset($request->referral_code) && !empty($request->referral_code)):
                 $ref = Applicant::where('id', $applicant_id)->update([
                     'referral_code' => $request->referral_code,
                     'is_referral_varified' => 0,
                     'updated_by' => \Auth::guard('applicant')->user()->id,
                 ]);
-            endif;
+            endif;*/
+            
             return response()->json(['message' => 'Course details successfully inserted or updated', 'applicant_id' => $applicant_id], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
@@ -676,7 +677,7 @@ class ApplicationController extends Controller
             $res['code'] = $code;
             $res['is_referral_varified'] = 1;
         }else{
-            $res['suc'] = 1;
+            $res['suc'] = 2;
             $res['code'] = $applicant->referral_code;
             $res['is_referral_varified'] = $applicant->is_referral_varified;
         }

@@ -6,14 +6,13 @@
 
 @section('subcontent')
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
     </div>
-    <!-- BEGIN: Profile Info -->
 
-    @include('pages.students.admission.show-info')
-    @include('pages.students.admission.show-menu')
-    
+    <!-- BEGIN: Profile Info -->
+    @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
+
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
@@ -78,7 +77,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantNotesListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <div id="studentNotesListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
@@ -118,6 +117,12 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="edit_opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="edit_opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="editEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
@@ -151,7 +156,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                         <input type="hidden" name="id" value="0"/>
                     </div>
                 </div>
@@ -173,6 +178,12 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="addEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
@@ -201,7 +212,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                     </div>
                 </div>
             </form>
@@ -259,7 +270,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                        <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>
@@ -269,5 +280,6 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/admission-notes.js')
+    @vite('resources/js/student-global.js')
+    @vite('resources/js/student-note.js')
 @endsection

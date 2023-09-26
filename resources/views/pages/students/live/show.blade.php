@@ -57,6 +57,7 @@
                         <div class="col-span-8 font-medium">{{ $student->gender }}</div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3"></div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
@@ -110,6 +111,7 @@
                         <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->religion->name) && !empty($student->otherPerInfo->religion->name) ? $student->otherPerInfo->religion->name : '---') }}</div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3"></div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Disability Status</div>
@@ -121,14 +123,6 @@
                 @if(isset($student->other->disability_status) && $student->other->disability_status == 1)
                     <div class="col-span-12 sm:col-span-3">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Allowance Claimed?</div>
-                            <div class="col-span-8 font-medium">
-                                {!! (isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-span-12 sm:col-span-3">
-                        <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-12 text-slate-500 font-medium">Disabilities</div>
                             <div class="col-span-12 font-medium">
                                 @if(isset($student->disability) && !empty($student->disability))
@@ -138,6 +132,14 @@
                                         @endforeach
                                     </ul>
                                 @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Allowance Claimed?</div>
+                            <div class="col-span-8 font-medium">
+                                {!! (isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
                             </div>
                         </div>
                     </div>
@@ -626,12 +628,36 @@
                         </div>
                     </div>
                 </div>
+                @if(isset($student->referral_code) && !empty($student->referral_code) && isset($student->is_referral_varified) && $student->is_referral_varified == 1)
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>
-                        <div class="col-span-8 font-medium">{!! ($student->referral_code != '' ? $student->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Referred By</div>
+                        <div class="col-span-8 font-medium">
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Code</div>
+                                <div class="font-medium">{{ $referral->code }}</div>
+                            </div>
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Type</div>
+                                <div class="font-medium">{{ $referral->type }}</div>
+                            </div>
+                            <div class="flex justify-start items-start mb-2">
+                                <div class="text-slate-500 font-medium mr-3 mw-120">Referrer</div>
+                                <div class="font-medium">
+                                    @if($referral->type == 'Student')
+                                        <span>{{ $referral->student->frist_name }} {{ $referral->student->last_naem }}</span><br/>
+                                        <span>{{ $referral->student->users->email }}</span><br/>
+                                        <span>{{ $referral->student->contact->mobile }}</span>
+                                    @else 
+                                        <span>{{ $referral->user->name }}</span><br/>
+                                        <span>{{ $referral->user->email }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>

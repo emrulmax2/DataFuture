@@ -8,7 +8,8 @@
                     </button>
                 </div>
                 <div class="ml-5">
-                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</div>
+                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">LCC000001</div>
+                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} <span class="font-black">{{ $student->last_name }}</span></div>
                     <div class="text-slate-500">{{ isset($student->course->creation->course->name) ? $student->course->creation->course->name : '' }} - {{ isset($student->course->semester->name) ? $student->course->semester->name : '' }}</div>
                     <div class="text-slate-500">{{ isset($student->course->creation->available->type) ? $student->course->creation->available->type : '' }}</div>
                 </div>

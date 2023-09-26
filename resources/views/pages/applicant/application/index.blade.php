@@ -593,8 +593,9 @@
                                         <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
                                         <button id="varifiedReferral" 
                                             data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" 
-                                            class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
-                                            style="display: {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'inline-flex' : 'none' }};"
+                                            class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
+                                            style="display: {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'inline-flex' : 'none' }};" 
+                                            {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'readonly' : '' }}
                                             >
                                             @if(isset($apply->is_referral_varified) && $apply->is_referral_varified == 1)
                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified
@@ -604,6 +605,7 @@
                                         </button>
                                         <input type="hidden" class="is_referral_varified" name="is_referral_varified" value="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" data-org="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" />
                                     </div>
+                                    <div class="acc__input-error error-verificationError text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>
