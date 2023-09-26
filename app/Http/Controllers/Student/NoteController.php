@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicantNoteRequest;
+use App\Http\Requests\StudentNoteRequest;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentNote;
@@ -12,12 +13,13 @@ use Illuminate\Support\Facades\Storage;
 
 class NoteController extends Controller
 {
-    public function store(ApplicantNoteRequest $request){
+    public function store(StudentNoteRequest $request){
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
         $note = StudentNote::create([
             'student_id'=> $student_id,
+            'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Live',
             'created_by' => auth()->user()->id
@@ -96,6 +98,7 @@ class NoteController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
                     'url' => $docURL,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
@@ -158,6 +161,7 @@ class NoteController extends Controller
 
         $note = StudentNote::where('id', $noteId)->where('student_id', $student_id)->Update([
             'student_id'=> $student_id,
+            'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Admission',
             'updated_by' => auth()->user()->id

@@ -1,16 +1,19 @@
-<ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu">
+<ul 
+    class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu" 
+    style="padding-bottom: {{ Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
+    >
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.show', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.show' ? 'active' : '' }}">
             Profile
         </a>
     </li>
     <li class="nav-item hasChildren" role="presentation">
-        <a href="javascript:void(0);" class="nav-link py-4">
+        <a href="javascript:void(0);" class="nav-link py-4 {{ Route::currentRouteName() == 'student.course' ? 'active' : '' }}">
             Course <i data-lucide="chevron-down" class="inline-flex ml-1 w-4 h-4"></i>
         </a>
-        <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentSubMenu">
+        <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentSubMenu {{ Route::currentRouteName() == 'student.course' ? 'show' : '' }}">
             <li class="nav-item" role="presentation">
-                <a href="javascript:void(0);" class="nav-link py-4">
+                <a href="{{ route('student.course', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.course' ? 'active' : '' }}">
                     Course Details
                 </a>
             </li>
@@ -72,7 +75,7 @@
         </a>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="javascript:void(0);" class="nav-link py-4">
+        <a href="{{ route('student.process', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.process' ? 'active' : '' }}">
             Task & Process
         </a>
     </li>

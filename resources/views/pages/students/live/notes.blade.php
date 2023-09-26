@@ -117,6 +117,12 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="edit_opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="edit_opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="editEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
@@ -172,6 +178,12 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="addEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>

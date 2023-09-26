@@ -75,7 +75,9 @@ export default defineConfig({
                 "resources/js/student-email.js",
                 "resources/js/student-sms.js",
                 "resources/js/student-note.js",
-                "resources/js/student-upload.js"
+                "resources/js/student-upload.js",
+                "resources/js/student-process.js",
+                "resources/js/student-course.js"
             ],
             refresh: true,
         }),

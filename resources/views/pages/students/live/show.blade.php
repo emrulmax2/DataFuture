@@ -57,6 +57,7 @@
                         <div class="col-span-8 font-medium">{{ $student->gender }}</div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3"></div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
@@ -110,6 +111,7 @@
                         <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->religion->name) && !empty($student->otherPerInfo->religion->name) ? $student->otherPerInfo->religion->name : '---') }}</div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3"></div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Disability Status</div>
@@ -121,14 +123,6 @@
                 @if(isset($student->other->disability_status) && $student->other->disability_status == 1)
                     <div class="col-span-12 sm:col-span-3">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Allowance Claimed?</div>
-                            <div class="col-span-8 font-medium">
-                                {!! (isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-span-12 sm:col-span-3">
-                        <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-12 text-slate-500 font-medium">Disabilities</div>
                             <div class="col-span-12 font-medium">
                                 @if(isset($student->disability) && !empty($student->disability))
@@ -138,6 +132,14 @@
                                         @endforeach
                                     </ul>
                                 @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Allowance Claimed?</div>
+                            <div class="col-span-8 font-medium">
+                                {!! (isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
                             </div>
                         </div>
                     </div>

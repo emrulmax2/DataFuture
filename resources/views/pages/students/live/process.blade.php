@@ -6,14 +6,13 @@
 
 @section('subcontent')
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
     </div>
-    <!-- BEGIN: Profile Info -->
 
-    @include('pages.students.admission.show-info')
-    @include('pages.students.admission.show-menu')
-    
+    <!-- BEGIN: Profile Info -->
+    @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
+
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
@@ -86,7 +85,7 @@
                                             </svg>
                                         </button>
                                         <button type="button" id="closeProcessDropdown" class="btn btn-secondary py-1 px-2 ml-auto">Close</button>
-                                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                                     </div>
                                 </li>
                             </ul>
@@ -173,11 +172,11 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}">
                                                                                         </a>
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
                                                                                             <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
                                                                                         </a>
                                                                                     @endif
@@ -197,7 +196,7 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
                                                                                 <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
@@ -262,20 +261,20 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                            <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                            <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
                                                                         @if(isset($task->task->status) && $task->task->status == 'Yes')
                                                                         <li>
-                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">
+                                                                            <a data-studenttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">
                                                                                 <i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome
                                                                             </a>
                                                                         </li>
                                                                         @endif
                                                                         @if(isset($task->task->upload) && $task->task->upload == 'Yes')
                                                                         <li>
-                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">
+                                                                            <a data-studenttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">
                                                                                 <i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents
                                                                             </a>
                                                                         </li>
@@ -291,7 +290,7 @@
                                                                 </div>
                                                             </div>
                                                             @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id == '')) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() == 0)))
-                                                            <button type="button" data-taskid="{{ $task->id }}" class="deleteApplicantTask btn btn-danger ml-2">
+                                                            <button type="button" data-taskid="{{ $task->id }}" class="deletestudentTask btn btn-danger ml-2">
                                                                 <i data-lucide="trash" class="w-5 h-5"></i>
                                                             </button>
                                                             @endif
@@ -301,7 +300,7 @@
                                             @endforeach
                                         @else 
                                             <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no pending process found for this applicant.
+                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no pending process found for this student.
                                             </div>
                                         @endif
                                     </div>
@@ -335,11 +334,11 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}">
                                                                                         </a>
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
                                                                                             <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
                                                                                         </a>
                                                                                     @endif
@@ -359,7 +358,7 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
                                                                                 <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
@@ -424,20 +423,20 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
                                                                         @if(isset($task->task->status) && $task->task->status == 'Yes')
                                                                         <li>
-                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">
+                                                                            <a data-studenttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">
                                                                                 <i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome
                                                                             </a>
                                                                         </li>
                                                                         @endif
                                                                         @if(isset($task->task->upload) && $task->task->upload == 'Yes')
                                                                         <li>
-                                                                            <a data-applicanttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">
+                                                                            <a data-studenttaskid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">
                                                                                 <i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents
                                                                             </a>
                                                                         </li>
@@ -453,7 +452,7 @@
                                                                 </div>
                                                             </div>
                                                             @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id == '')) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() == 0)))
-                                                            <button type="button" data-taskid="{{ $task->id }}" class="deleteApplicantTask btn btn-danger ml-2">
+                                                            <button type="button" data-taskid="{{ $task->id }}" class="deletestudentTask btn btn-danger ml-2">
                                                                 <i data-lucide="trash" class="w-5 h-5"></i>
                                                             </button>
                                                             @endif
@@ -463,7 +462,7 @@
                                             @endforeach
                                         @else 
                                             <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no "In Progress" task found for this applicant.
+                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no "In Progress" task found for this student.
                                             </div>
                                         @endif
                                     </div>
@@ -497,11 +496,11 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}">
                                                                                         </a>
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$student->applicant_id.'/'.$tdoc->current_file_name) }}" download>
                                                                                             <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
                                                                                         </a>
                                                                                     @endif
@@ -521,7 +520,7 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
                                                                                 <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
@@ -586,7 +585,7 @@
                                                                 <div class="dropdown-menu w-64">
                                                                     <ul class="dropdown-content">
                                                                         <li>
-                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
+                                                                        <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-studentid="{{ $student->id }}" data-studenttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
@@ -604,13 +603,13 @@
                                             @endforeach
                                         @else 
                                             <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no completed process found for this applicant.
+                                                <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Oops! There are no completed process found for this student.
                                             </div>
                                         @endif
                                     </div>
                                     <div id="process-tab-{{ $loop->index }}-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-3-tab">
                                         <div class="overflow-x-auto scrollbar-hidden">
-                                            <div id="processTaskArchiveListTable_{{ $proGroup['id'] }}" data-process="{{ $proGroup['id'] }}" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator processTaskArchiveListTable"></div>
+                                            <div id="processTaskArchiveListTable_{{ $proGroup['id'] }}" data-process="{{ $proGroup['id'] }}" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator processTaskArchiveListTable"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -642,7 +641,7 @@
                     </a>
                 <div class="modal-body">
                     <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="processTaskLogTable" data-interview="0" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
+                        <div id="processTaskLogTable" data-interview="0" data-studentid="{{ $student->id }}" data-studenttaskid="0" class="mt-0 table-report table-report--tabulator"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -684,8 +683,8 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                        <input type="hidden" name="applicant_task_id" value="0"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="student_task_id" value="0"/>
                     </div>
                 </div>
             </form>
@@ -704,7 +703,7 @@
                     </a>
                 </div>
                 <div class="modal-body">
-                    <form method="post"  action="{{ route('admission.upload.task.documents') }}" class="dropzone" id="uploadTaskDocumentForm" style="padding: 5px;" enctype="multipart/form-data">
+                    <form method="post"  action="{{ route('student.upload.task.documents') }}" class="dropzone" id="uploadTaskDocumentForm" style="padding: 5px;" enctype="multipart/form-data">
                         <div class="fallback">
                             <input name="documents[]" multiple type="file" />
                         </div>
@@ -714,8 +713,8 @@
                                 Max file size 5MB & max file limit 10.
                             </div>
                         </div>
-                        <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
-                        <input type="hidden" name="applicant_task_id" value="0"/>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="student_task_id" value="0"/>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -791,7 +790,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                        <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>
@@ -801,5 +800,6 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/admission-process.js')
+    @vite('resources/js/student-global.js')
+    @vite('resources/js/student-process.js')
 @endsection

@@ -32,6 +32,12 @@ var studentNotesListTable = (function () {
                     width: "120",
                 },
                 {
+                    title: "Opening Date",
+                    field: "opening_date",
+                    headerHozAlign: "left",
+                    width: "150",
+                },
+                {
                     title: "Note",
                     field: "note",
                     headerHozAlign: "left",
@@ -198,6 +204,7 @@ var studentNotesListTable = (function () {
     const editNoteModalEl = document.getElementById('editNoteModal')
     editNoteModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editNoteModal .acc__input-error').html('');
+        $('#editNoteModal input[name="opening_date"]').val('');
         $('#editNoteModal input[name="document"]').val('');
         $('#editNoteModal #editNoteDocumentName').html('');
         $('#editNoteModal input[name="id"]').val('0');
@@ -340,6 +347,7 @@ var studentNotesListTable = (function () {
         }).then(response => {
             let dataset = response.data.res;
             editEditor.setData(dataset.note ? dataset.note : '');
+            $('#editNoteModal [name="opening_date"]').val(dataset.opening_date ? dataset.opening_date : '');
             $('#editNoteModal input[name="id"]').val(noteId);
             if(dataset.docURL != ''){
                 $('#editNoteModal .downloadExistAttachment').attr('href', dataset.docURL).fadeIn();

@@ -24,6 +24,7 @@ use App\Models\FeeEligibility;
 use App\Models\HesaGender;
 use App\Models\KinsRelation;
 use App\Models\LetterSet;
+use App\Models\ProcessList;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Semester;
@@ -37,6 +38,7 @@ use App\Models\StudentConsent;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
+use App\Models\StudentTask;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -177,6 +179,20 @@ class StudentController extends Controller
         ]);
     }
 
+    public function courseDetails($studentId){
+        return view('pages.students.live.course', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Course', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
+            'instance' => CourseCreationInstance::all(),
+            'feeelegibility' => FeeEligibility::all()
+        ]);
+    }
+
     public function communications($studentId){
         return view('pages.students.live.communication', [
             'title' => 'Live Students - LCC Data Future Managment',
@@ -218,6 +234,50 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+        ]);
+    }
+
+    public function process($studentId){
+        $processGroup = [];
+        $processList = ProcessList::where('phase', 'Live')->orderBy('id', 'ASC')->get();
+        if(!empty($processList)):
+            $i = 1;
+            foreach($processList as $prl):
+                $taskIds = [];
+                foreach($prl->tasks as $tsk):
+                    $taskIds[] = $tsk->id;
+                endforeach;
+                if(!empty($taskIds)):
+                    $pendingTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Pending')->get();
+                    $inProgressTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'In Progress')->get();
+                    $completedTask = StudentTask::where('student_id', $studentId)->whereIn('task_list_id', $taskIds)->where('status', 'Completed')->get();
+
+
+                    $processGroup[$i]['name'] = $prl->name;
+                    $processGroup[$i]['id'] = $prl->id;
+                    $processGroup[$i]['pendingTask'] = $pendingTask;
+                    $processGroup[$i]['inProgressTask'] = $inProgressTask;
+                    $processGroup[$i]['completedTask'] = $completedTask;
+                endif;
+                $i++;
+            endforeach;
+        endif;
+
+        return view('pages.students.live.process', [
+            'title' => 'Live Student - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Process & Tasks', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'allStatuses' => Status::where('type', 'Student')->get(),
+            'process' => ProcessList::where('phase', 'Live')->orderBy('id', 'ASC')->get(),
+            'existingTask' => StudentTask::where('student_id', $studentId)->pluck('task_list_id')->toArray(),
+            'applicantPendingTask' => StudentTask::where('student_id', $studentId)->where('status', 'Pending')->get(),
+            'applicantCompletedTask' => StudentTask::where('student_id', $studentId)->where('status', 'Completed')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+
+            'processGroup' => $processGroup
         ]);
     }
 
