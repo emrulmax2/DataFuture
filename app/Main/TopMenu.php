@@ -155,6 +155,11 @@ class TopMenu
                                 ], 
                             ]
                         ],
+                        'student.options' => [
+                            'route_name' => 'student.options',
+                            'params' => [],
+                            'title' => 'Student Option Value'
+                        ],
                         'applicants' => [
                             'icon' => '',
                             'title' => 'Applicants',

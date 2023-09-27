@@ -30,13 +30,7 @@ export default defineConfig({
                 "resources/js/ckeditor-balloon-block.js",
                 "resources/js/ckeditor-document.js",
 
-                "resources/js/title.js",
-                "resources/js/ethnicity.js",
-                "resources/js/kins-relation.js",
-                "resources/js/sexual-rientation.js",
-                "resources/js/religion.js",
                 "resources/js/status.js",
-                "resources/js/country.js",
                 "resources/js/application.js",
                 "resources/js/disabilities.js",
                 "resources/js/consent-policy.js",
@@ -61,7 +55,6 @@ export default defineConfig({
                 "resources/js/admission-process.js",
                 "resources/js/admission-uploads.js",
                 "resources/js/admission-notes.js",
-                "resources/js/hesagender.js",
                 "resources/js/feeeligibilities.js",
 
                 "resources/js/students.js",
@@ -77,7 +70,17 @@ export default defineConfig({
                 "resources/js/student-note.js",
                 "resources/js/student-upload.js",
                 "resources/js/student-process.js",
-                "resources/js/student-course.js"
+                "resources/js/student-course.js",
+
+                "resources/js/student-option.js",
+                "resources/js/title.js",
+                "resources/js/ethnicity.js",
+                "resources/js/kins-relation.js",
+                "resources/js/sexual-rientation.js",
+                "resources/js/religion.js",
+                "resources/js/hesagender.js",
+                "resources/js/country.js",
+                
             ],
             refresh: true,
         }),

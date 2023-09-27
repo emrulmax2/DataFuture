@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Applicant;
 use App\Models\TaskList;
 use App\Models\ApplicantTask;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -34,6 +35,8 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
+            'applicant' => Applicant::all()->count(),
+            'student' => Student::all()->count(),
         ]);
     }
     

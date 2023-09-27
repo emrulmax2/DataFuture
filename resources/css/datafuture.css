@@ -506,3 +506,26 @@
 .mw-120{
     min-width: 120px;
 }
+.cursor-pointer{
+    cursor: pointer;
+}
+.optionBox .optionBoxBody{
+    position: relative;
+    display: none;
+}
+.optionBox.active .optionBoxBody{
+    position: relative;
+    display: block;
+}
+.optionBox .optionBoxTitle{
+    padding: 7px 0;
+}
+.optionBox.active .optionBoxTitle{
+    color: rgb(var(--color-primary) / var(--tw-text-opacity));
+}
+.optionBox .optionBoxHeader button{
+    display: none;
+}
+.optionBox.active .optionBoxHeader button{
+    display: inline-flex;
+}

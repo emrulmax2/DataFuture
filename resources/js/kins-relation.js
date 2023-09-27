@@ -3,12 +3,12 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
  
 ("use strict");
-var settingsListTable = (function () {
+var kinsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
-        let tableContent = new Tabulator("#settingsListTable", {
+        let querystr = $("#query-KINS").val() != "" ? $("#query-KINS").val() : "";
+        let status = $("#status-KINS").val() != "" ? $("#status-KINS").val() : "";
+        let tableContent = new Tabulator("#kinsListTable", {
             ajaxURL: route("kin.relations.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
@@ -25,7 +25,6 @@ var settingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
                 },
                 {
                     title: "Name",
@@ -43,16 +42,24 @@ var settingsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "120",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSettingsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editKinsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -82,29 +89,29 @@ var settingsListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv").on("click", function (event) {
+        $("#tabulator-export-csv-KINS").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
+        $("#tabulator-export-json-KINS").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx-KINS").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Course Details",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
+        $("#tabulator-export-html-KINS").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print-KINS").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -117,130 +124,143 @@ var settingsListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#settingsListTable").length) {
+    if ($("#kinsListTable").length) {
         // Init Table
-        settingsListTable.init();
+        $('.optionBoxTitle').on('click', function(e){
+            e.preventDefault();
+            var $title = $(this);
+            var $box = $title.parents('.optionBox');
+            var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
+            var table = $boxBody.attr('data-tableid');
+    
+            if($box.hasClass('active') && table == 'kinsListTable'){
+                kinsListTable.init();
+            }
+        });
+
 
         // Filter function
-        function filterHTMLForm() {
-            settingsListTable.init();
+        function filterHTMLFormKINS() {
+            kinsListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
+        $("#tabulatorFilterForm-KINS")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLForm();
+                    filterHTMLFormKINS();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
+        $("#tabulator-html-filter-go-KINS").on("click", function (event) {
+            filterHTMLFormKINS();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLForm();
+        $("#tabulator-html-filter-reset-KINS").on("click", function (event) {
+            $("#query-KINS").val("");
+            $("#status-KINS").val("1");
+            filterHTMLFormKINS();
         });
 
-        const addSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSettingsModal"));
-        const editSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSettingsModal"));
+        const addKinsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addKinsModal"));
+        const editKinsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editKinsModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addSettingsModalEl = document.getElementById('addSettingsModal')
-        addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addSettingsModal .acc__input-error').html('');
-            $('#addSettingsModal .modal-body input:not([type="checkbox"])').val('');
+        const addKinsModalEl = document.getElementById('addKinsModal')
+        addKinsModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addKinsModal .acc__input-error').html('');
+            $('#addKinsModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addSettingsModal input[name="is_hesa"]').prop('checked', false);
-            $('#addSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addSettingsModal .hesa_code_area input').val('');
+            $('#addKinsModal input[name="is_hesa"]').prop('checked', false);
+            $('#addKinsModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addKinsModal .hesa_code_area input').val('');
             });
-            $('#addSettingsModal input[name="is_df"]').prop('checked', false);
-            $('#addSettingsModal .df_code_area').fadeOut('fast', function(){
-                $('#addSettingsModal .df_code_area input').val('');
+            $('#addKinsModal input[name="is_df"]').prop('checked', false);
+            $('#addKinsModal .df_code_area').fadeOut('fast', function(){
+                $('#addKinsModal .df_code_area input').val('');
             })
+            $('#addKinsModal input[name="active"]').prop('checked', true);
         });
         
-        const editSettingsModalEl = document.getElementById('editSettingsModal')
-        editSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editSettingsModal .acc__input-error').html('');
-            $('#editSettingsModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editSettingsModal input[name="id"]').val('0');
+        const editKinsModalEl = document.getElementById('editKinsModal')
+        editKinsModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editKinsModal .acc__input-error').html('');
+            $('#editKinsModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editKinsModal input[name="id"]').val('0');
 
-            $('#editSettingsModal input[name="is_hesa"]').prop('checked', false);
-            $('#editSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editSettingsModal .hesa_code_area input').val('');
+            $('#editKinsModal input[name="is_hesa"]').prop('checked', false);
+            $('#editKinsModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editKinsModal .hesa_code_area input').val('');
             });
-            $('#editSettingsModal input[name="is_df"]').prop('checked', false);
-            $('#editSettingsModal .df_code_area').fadeOut('fast', function(){
-                $('#editSettingsModal .df_code_area input').val('');
+            $('#editKinsModal input[name="is_df"]').prop('checked', false);
+            $('#editKinsModal .df_code_area').fadeOut('fast', function(){
+                $('#editKinsModal .df_code_area input').val('');
             })
+            $('#addKinsModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addSettingsForm input[name="is_hesa"]').on('change', function(){
+        $('#addKinsForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSettingsForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addSettingsForm .hesa_code_area input').val('');
+                $('#addKinsForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addKinsForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addSettingsForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addSettingsForm .hesa_code_area input').val('');
+                $('#addKinsForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addKinsForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addSettingsForm input[name="is_df"]').on('change', function(){
+        $('#addKinsForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSettingsForm .df_code_area').fadeIn('fast', function(){
-                    $('#addSettingsForm .df_code_area input').val('');
+                $('#addKinsForm .df_code_area').fadeIn('fast', function(){
+                    $('#addKinsForm .df_code_area input').val('');
                 })
             }else{
-                $('#addSettingsForm .df_code_area').fadeOut('fast', function(){
-                    $('#addSettingsForm .df_code_area input').val('');
+                $('#addKinsForm .df_code_area').fadeOut('fast', function(){
+                    $('#addKinsForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editSettingsForm input[name="is_hesa"]').on('change', function(){
+        $('#editKinsForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSettingsForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editSettingsForm .hesa_code_area input').val('');
+                $('#editKinsForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editKinsForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editSettingsForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editSettingsForm .hesa_code_area input').val('');
+                $('#editKinsForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editKinsForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editSettingsForm input[name="is_df"]').on('change', function(){
+        $('#editKinsForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSettingsForm .df_code_area').fadeIn('fast', function(){
-                    $('#editSettingsForm .df_code_area input').val('');
+                $('#editKinsForm .df_code_area').fadeIn('fast', function(){
+                    $('#editKinsForm .df_code_area input').val('');
                 })
             }else{
-                $('#editSettingsForm .df_code_area').fadeOut('fast', function(){
-                    $('#editSettingsForm .df_code_area input').val('');
+                $('#editKinsForm .df_code_area').fadeOut('fast', function(){
+                    $('#editKinsForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addSettingsForm').on('submit', function(e){
+        $('#addKinsForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addSettingsForm');
+            const form = document.getElementById('addKinsForm');
         
-            document.querySelector('#saveSettings').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveSettings svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveKins').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveKins svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
@@ -249,11 +269,11 @@ var settingsListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                document.querySelector('#saveKins').removeAttribute('disabled');
+                document.querySelector("#saveKins svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addSettingsModal.hide();
+                    addKinsModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -261,15 +281,15 @@ var settingsListTable = (function () {
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                settingsListTable.init();
+                kinsListTable.init();
             }).catch(error => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                document.querySelector('#saveKins').removeAttribute('disabled');
+                document.querySelector("#saveKins svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addSettingsForm .${key}`).addClass('border-danger');
-                            $(`#addSettingsForm  .error-${key}`).html(val);
+                            $(`#addKinsForm .${key}`).addClass('border-danger');
+                            $(`#addKinsForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -278,7 +298,7 @@ var settingsListTable = (function () {
             });
         });
 
-        $("#settingsListTable").on("click", ".edit_btn", function () {      
+        $("#kinsListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
@@ -292,31 +312,36 @@ var settingsListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editSettingsModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                        $('#editKinsModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editSettingsModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editSettingsModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editSettingsModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editKinsModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editKinsModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editKinsModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editSettingsModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editSettingsModal input[name="hesa_code"]').val('');
+                            $('#editKinsModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editKinsModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editKinsModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editSettingsModal input[name="is_df"]').prop('checked', true);
-                            $('#editSettingsModal .df_code_area').fadeIn('fast', function(){
-                                $('#editSettingsModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editKinsModal input[name="is_df"]').prop('checked', true);
+                            $('#editKinsModal .df_code_area').fadeIn('fast', function(){
+                                $('#editKinsModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editSettingsModal input[name="is_df"]').prop('checked', false);
-                            $('#editSettingsModal .df_code_area').fadeOut('fast', function(){
-                                $('#editSettingsModal input[name="df_code"]').val('');
+                            $('#editKinsModal input[name="is_df"]').prop('checked', false);
+                            $('#editKinsModal .df_code_area').fadeOut('fast', function(){
+                                $('#editKinsModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editSettingsModal input[name="id"]').val(editId);
+                        $('#editKinsModal input[name="id"]').val(editId);
+                        if(dataset.active == 1){
+                            $('#editKinsModal input[name="active"]').prop('checked', true);
+                        }else{
+                            $('#editKinsModal input[name="active"]').prop('checked', false);
+                        }
                     }
                 })
                 .catch((error) => {
@@ -325,13 +350,13 @@ var settingsListTable = (function () {
         });
 
         // Update Course Data
-        $("#editSettingsForm").on("submit", function (e) {
+        $("#editKinsForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editSettingsForm input[name="id"]').val();
-            const form = document.getElementById("editSettingsForm");
+            let editId = $('#editKinsForm input[name="id"]').val();
+            const form = document.getElementById("editKinsForm");
 
-            document.querySelector('#updateSettings').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateSettings svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateKins').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateKins svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
@@ -344,9 +369,9 @@ var settingsListTable = (function () {
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateSettings").removeAttribute("disabled");
-                    document.querySelector("#updateSettings svg").style.cssText = "display: none;";
-                    editSettingsModal.hide();
+                    document.querySelector("#updateKins").removeAttribute("disabled");
+                    document.querySelector("#updateKins svg").style.cssText = "display: none;";
+                    editKinsModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -354,18 +379,18 @@ var settingsListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                settingsListTable.init();
+                kinsListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateSettings").removeAttribute("disabled");
-                document.querySelector("#updateSettings svg").style.cssText = "display: none;";
+                document.querySelector("#updateKins").removeAttribute("disabled");
+                document.querySelector("#updateKins svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editSettingsForm .${key}`).addClass('border-danger')
-                            $(`#editSettingsForm  .error-${key}`).html(val)
+                            $(`#editKinsForm .${key}`).addClass('border-danger')
+                            $(`#editKinsForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editSettingsModal.hide();
+                        editKinsModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -387,7 +412,7 @@ var settingsListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            if(action == 'DELETEKINS'){
                 axios({
                     method: 'delete',
                     url: route('kin.relations.destory', recordID),
@@ -403,11 +428,11 @@ var settingsListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    settingsListTable.init();
+                    kinsListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORE'){
+            } else if(action == 'RESTOREKINS'){
                 axios({
                     method: 'post',
                     url: route('kin.relations.restore', recordID),
@@ -423,15 +448,48 @@ var settingsListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    settingsListTable.init();
+                    kinsListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            }else if(action == 'CHANGESTATKINS'){
+                axios({
+                    method: 'post',
+                    url: route('kin.relations.update.status', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('WOW!');
+                            $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        });
+                    }
+                    kinsListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
+        $('#kinsListTable').on('click', '.status_updater', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confirmModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATKINS');
+            });
+        });
+
         // Delete Course
-        $('#settingsListTable').on('click', '.delete_btn', function(){
+        $('#kinsListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -440,12 +498,12 @@ var settingsListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEKINS');
             });
         });
 
         // Restore Course
-        $('#settingsListTable').on('click', '.restore_btn', function(){
+        $('#kinsListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -454,7 +512,7 @@ var settingsListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREKINS');
             });
         });
     }
