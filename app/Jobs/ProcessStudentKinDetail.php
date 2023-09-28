@@ -64,6 +64,7 @@ class ProcessStudentKinDetail implements ShouldQueue
                 "post_code"	=> $applicantKin->post_code,
                 "city" =>$applicantKin->city,
                 "country" =>$applicantKin->country,
+                'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
        
             $Address->fill($dataAddress);

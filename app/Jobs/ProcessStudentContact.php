@@ -73,6 +73,7 @@ class ProcessStudentContact implements ShouldQueue
                 "post_code"	=> $applicantContact->post_code,
                 "city" =>$applicantContact->city,
                 "country" =>$applicantContact->country,
+                'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
        
             $Address->fill($dataAddress);

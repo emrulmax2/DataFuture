@@ -68,6 +68,7 @@ class ProcessStudentEmployement implements ShouldQueue
                 "post_code"	=> $applicantEmployments->post_code,
                 "city" =>$applicantEmployments->city,
                 "country" =>$applicantEmployments->country,
+                'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
        
             $Address->fill($dataAddress);
