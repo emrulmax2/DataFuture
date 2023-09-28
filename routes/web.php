@@ -95,6 +95,7 @@ use App\Http\Controllers\Student\ProcessController;
 use App\Http\Controllers\Student\ProofIdCheckController;
 use App\Http\Controllers\Student\SmsController;
 use App\Http\Controllers\Student\UploadController;
+use App\Http\Controllers\StudentOptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -338,16 +339,6 @@ Route::middleware('auth')->group(function() {
         Route::post('plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
     });
 
-    Route::controller(TitleController::class)->group(function() {
-        Route::get('titles', 'index')->name('titles'); 
-        Route::get('titles/list', 'list')->name('titles.list'); 
-        Route::post('titles/store', 'store')->name('titles.store'); 
-        Route::get('titles/edit/{id}', 'edit')->name('titles.edit');
-        Route::post('titles/update', 'update')->name('titles.update');
-        Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
-        Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
-    });
-
     Route::controller(ConsentPolicyController::class)->group(function() {
         Route::get('consent', 'index')->name('consent'); 
         Route::get('consent/list', 'list')->name('consent.list'); 
@@ -356,46 +347,6 @@ Route::middleware('auth')->group(function() {
         Route::post('consent/update', 'update')->name('consent.update');
         Route::delete('consent/delete/{id}', 'destroy')->name('consent.destory');
         Route::post('consent/restore/{id}', 'restore')->name('consent.restore');
-    });
-
-    Route::controller(EthnicityController::class)->group(function() {
-        Route::get('ethnic', 'index')->name('ethnic'); 
-        Route::get('ethnic/list', 'list')->name('ethnic.list'); 
-        Route::post('ethnic/store', 'store')->name('ethnic.store'); 
-        Route::get('ethnic/edit/{id}', 'edit')->name('ethnic.edit');
-        Route::post('ethnic/update', 'update')->name('ethnic.update');
-        Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
-        Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
-    });
-
-    Route::controller(KinsRelationController::class)->group(function() {
-        Route::get('kin-relations', 'index')->name('kin.relations'); 
-        Route::get('kin-relations/list', 'list')->name('kin.relations.list'); 
-        Route::post('kin-relations/store', 'store')->name('kin.relations.store'); 
-        Route::get('kin-relations/edit/{id}', 'edit')->name('kin.relations.edit');
-        Route::post('kin-relations/update', 'update')->name('kin.relations.update');
-        Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
-        Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
-    });
-
-    Route::controller(SexualOrientationController::class)->group(function() {
-        Route::get('sex-orientation', 'index')->name('sex.orientation'); 
-        Route::get('sex-orientation/list', 'list')->name('sex.orientation.list'); 
-        Route::post('sex-orientation/store', 'store')->name('sex.orientation.store'); 
-        Route::get('sex-orientation/edit/{id}', 'edit')->name('sex.orientation.edit');
-        Route::post('sex-orientation/update', 'update')->name('sex.orientation.update');
-        Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
-        Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
-    });
-
-    Route::controller(ReligionController::class)->group(function() {
-        Route::get('religion', 'index')->name('religion'); 
-        Route::get('religion/list', 'list')->name('religion.list'); 
-        Route::post('religion/store', 'store')->name('religion.store'); 
-        Route::get('religion/edit/{id}', 'edit')->name('religion.edit');
-        Route::post('religion/update', 'update')->name('religion.update');
-        Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
-        Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
     });
 
     Route::controller(StatusController::class)->group(function() {
@@ -1047,16 +998,6 @@ Route::middleware('auth')->group(function() {
         Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
         Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
     });
-    
-    Route::controller(HesaGenderController::class)->group(function() {
-        Route::get('gender', 'index')->name('gender'); 
-        Route::get('gender/list', 'list')->name('gender.list'); 
-        Route::post('gender/store', 'store')->name('gender.store'); 
-        Route::get('gender/edit/{id}', 'edit')->name('gender.edit');
-        Route::post('gender/update', 'update')->name('gender.update');
-        Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
-        Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
-    });
 
     Route::controller(FeeEligibilityController::class)->group(function() {
         Route::get('feeeligibilities', 'index')->name('feeeligibilities'); 
@@ -1066,5 +1007,75 @@ Route::middleware('auth')->group(function() {
         Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
         Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
         Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
+    });
+
+    Route::controller(StudentOptionController::class)->group(function(){
+        Route::get('student-options', 'index')->name('student.options');
+    });
+
+    Route::controller(TitleController::class)->group(function() {
+        Route::get('titles', 'index')->name('titles'); 
+        Route::get('titles/list', 'list')->name('titles.list'); 
+        Route::post('titles/store', 'store')->name('titles.store'); 
+        Route::get('titles/edit/{id}', 'edit')->name('titles.edit');
+        Route::post('titles/update', 'update')->name('titles.update');
+        Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
+        Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
+        Route::post('titles/update-status/{id}', 'updateStatus')->name('titles.update.status');
+    });
+
+    Route::controller(EthnicityController::class)->group(function() {
+        Route::get('ethnic', 'index')->name('ethnic'); 
+        Route::get('ethnic/list', 'list')->name('ethnic.list'); 
+        Route::post('ethnic/store', 'store')->name('ethnic.store'); 
+        Route::get('ethnic/edit/{id}', 'edit')->name('ethnic.edit');
+        Route::post('ethnic/update', 'update')->name('ethnic.update');
+        Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
+        Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
+        Route::post('ethnic/update-status/{id}', 'updateStatus')->name('ethnic.update.status');
+    });
+
+    Route::controller(KinsRelationController::class)->group(function() {
+        Route::get('kin-relations', 'index')->name('kin.relations'); 
+        Route::get('kin-relations/list', 'list')->name('kin.relations.list'); 
+        Route::post('kin-relations/store', 'store')->name('kin.relations.store'); 
+        Route::get('kin-relations/edit/{id}', 'edit')->name('kin.relations.edit');
+        Route::post('kin-relations/update', 'update')->name('kin.relations.update');
+        Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
+        Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
+        Route::post('kin-relations/update-status/{id}', 'updateStatus')->name('kin.relations.update.status');
+    });
+
+    Route::controller(SexualOrientationController::class)->group(function() {
+        Route::get('sex-orientation', 'index')->name('sex.orientation'); 
+        Route::get('sex-orientation/list', 'list')->name('sex.orientation.list'); 
+        Route::post('sex-orientation/store', 'store')->name('sex.orientation.store'); 
+        Route::get('sex-orientation/edit/{id}', 'edit')->name('sex.orientation.edit');
+        Route::post('sex-orientation/update', 'update')->name('sex.orientation.update');
+        Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
+        Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
+        Route::post('sex-orientation/update-status/{id}', 'updateStatus')->name('sex.orientation.update.status');
+    });
+
+    Route::controller(ReligionController::class)->group(function() {
+        Route::get('religion', 'index')->name('religion'); 
+        Route::get('religion/list', 'list')->name('religion.list'); 
+        Route::post('religion/store', 'store')->name('religion.store'); 
+        Route::get('religion/edit/{id}', 'edit')->name('religion.edit');
+        Route::post('religion/update', 'update')->name('religion.update');
+        Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
+        Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
+        Route::post('religion/update-status/{id}', 'updateStatus')->name('religion.update.status');
+    });
+    
+    Route::controller(HesaGenderController::class)->group(function() {
+        Route::get('gender', 'index')->name('gender'); 
+        Route::get('gender/list', 'list')->name('gender.list'); 
+        Route::post('gender/store', 'store')->name('gender.store'); 
+        Route::get('gender/edit/{id}', 'edit')->name('gender.edit');
+        Route::post('gender/update', 'update')->name('gender.update');
+        Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
+        Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
+        Route::post('gender/update-status/{id}', 'updateStatus')->name('gender.update.status');
     });
 });
