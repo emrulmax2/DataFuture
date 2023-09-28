@@ -16,6 +16,7 @@ class Disability extends Model
         'hesa_code',
         'is_df',
         'df_code',
+        'active',
         'created_by',
         'updated_by',
     ];

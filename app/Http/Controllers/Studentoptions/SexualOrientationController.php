@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\KinsRelation;
-use App\Http\Requests\KinsRelationRequest;
+use App\Models\SexualOrientation;
+use App\Http\Requests\SexualOrientationRequest;
 
-class KinsRelationController extends Controller
+class SexualOrientationController extends Controller
 {
     public function index()
     {
-        return view('pages/kins-relation/index', [
-            'title' => 'Kins Relation - LCC Data Future Managment',
+        return view('pages/sexual-orientation/index', [
+            'title' => 'Sexual Orientation - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Kins Relations', 'href' => 'javascript:void(0);']
+                ['label' => 'Sexual Orientation', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -28,7 +29,7 @@ class KinsRelationController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = KinsRelation::orderByRaw(implode(',', $sorts));
+        $query = SexualOrientation::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -72,8 +73,8 @@ class KinsRelationController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(KinsRelationRequest $request){
-        $data = KinsRelation::create([
+    public function store(SexualOrientationRequest $request){
+        $data = SexualOrientation::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
@@ -86,7 +87,7 @@ class KinsRelationController extends Controller
     }
 
     public function edit($id){
-        $data = KinsRelation::find($id);
+        $data = SexualOrientation::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,8 +96,8 @@ class KinsRelationController extends Controller
         }
     }
 
-    public function update(KinsRelationRequest $request){      
-        $data = KinsRelation::where('id', $request->id)->update([
+    public function update(SexualOrientationRequest $request){      
+        $data = SexualOrientation::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
@@ -115,21 +116,21 @@ class KinsRelationController extends Controller
     }
 
     public function destroy($id){
-        $data = KinsRelation::find($id)->delete();
+        $data = SexualOrientation::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = KinsRelation::where('id', $id)->withTrashed()->restore();
+        $data = SexualOrientation::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = KinsRelation::find($id);
+        $title = SexualOrientation::find($id);
         $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
 
-        KinsRelation::where('id', $id)->update([
+        SexualOrientation::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

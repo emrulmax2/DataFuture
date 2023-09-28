@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Disability;
 use App\Http\Requests\DisabilityRequest;
@@ -20,7 +21,7 @@ class DisabilityController extends Controller
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -32,8 +33,10 @@ class DisabilityController extends Controller
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
-        if($status == 2):
+        if($status == 3):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
 
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -61,6 +64,7 @@ class DisabilityController extends Controller
                     'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
                     'is_df' => $list->is_df,
                     'df_code' => ($list->is_df == 1 ? $list->df_code : ''),
+                    'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -73,9 +77,10 @@ class DisabilityController extends Controller
         $data = Disability::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->df_code) && $request->df_code == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -95,9 +100,10 @@ class DisabilityController extends Controller
         $data = Disability::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->is_df) && $request->is_df == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -118,5 +124,17 @@ class DisabilityController extends Controller
         $data = Disability::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function updateStatus($id){
+        $title = Disability::find($id);
+        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+
+        Disability::where('id', $id)->update([
+            'active'=> $active,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

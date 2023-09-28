@@ -1,26 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\OptionValueRequest;
+use App\Models\QualificationTypeIdentifier;
 use Illuminate\Http\Request;
-use App\Models\Country;
-use App\Http\Requests\CountryRequest;
 
-class CountryController extends Controller
+class QualificationTypeIdentifierController extends Controller
 {
-    public function index()
-    {
-        return view('pages/country/index', [
-            'title' => 'Countries - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Countries', 'href' => 'javascript:void(0);']
-            ],
-        ]);
-    }
-
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -28,12 +19,14 @@ class CountryController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Country::orderByRaw(implode(',', $sorts));
+        $query = QualificationTypeIdentifier::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
 
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -57,11 +50,11 @@ class CountryController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
-                    'iso_code' => $list->iso_code,
                     'is_hesa' => $list->is_hesa,
                     'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
                     'is_df' => $list->is_df,
                     'df_code' => ($list->is_df == 1 ? $list->df_code : ''),
+                    'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -70,21 +63,21 @@ class CountryController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(CountryRequest $request){
-        $data = Country::create([
+    public function store(OptionValueRequest $request){
+        $data = QualificationTypeIdentifier::create([
             'name'=> $request->name,
-            'iso_code'=> $request->iso_code,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->df_code) && $request->df_code == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = Country::find($id);
+        $data = QualificationTypeIdentifier::find($id);
 
         if($data){
             return response()->json($data);
@@ -93,14 +86,14 @@ class CountryController extends Controller
         }
     }
 
-    public function update(CountryRequest $request){      
-        $data = Country::where('id', $request->id)->update([
+    public function update(OptionValueRequest $request){      
+        $data = QualificationTypeIdentifier::where('id', $request->id)->update([
             'name'=> $request->name,
-            'iso_code'=> $request->iso_code,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->is_df) && $request->is_df == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -113,13 +106,25 @@ class CountryController extends Controller
     }
 
     public function destroy($id){
-        $data = Country::find($id)->delete();
+        $data = QualificationTypeIdentifier::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Country::where('id', $id)->withTrashed()->restore();
+        $data = QualificationTypeIdentifier::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function updateStatus($id){
+        $title = QualificationTypeIdentifier::find($id);
+        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+
+        QualificationTypeIdentifier::where('id', $id)->update([
+            'active'=> $active,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

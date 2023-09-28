@@ -1,16 +1,15 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import { data } from "jquery";
  
 ("use strict");
-var countryListTable = (function () {
+var PreviousproviderListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
-        let status = $("#status-CNTR").val() != "" ? $("#status-CNTR").val() : "";
-        let tableContent = new Tabulator("#countryListTable", {
-            ajaxURL: route("countries.list"),
+        let querystr = $("#query-PREVIOUSPROVIDER").val() != "" ? $("#query-PREVIOUSPROVIDER").val() : "";
+        let status = $("#status-PREVIOUSPROVIDER").val() != "" ? $("#status-PREVIOUSPROVIDER").val() : "";
+        let tableContent = new Tabulator("#PreviousproviderListTable", {
+            ajaxURL: route("previousprovider.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -30,11 +29,6 @@ var countryListTable = (function () {
                 {
                     title: "Name",
                     field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "ISO Code",
-                    field: "iso_code",
                     headerHozAlign: "left",
                 },
                 {
@@ -65,7 +59,7 @@ var countryListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCountryModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPreviousproviderModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -95,29 +89,29 @@ var countryListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-CNTR").on("click", function (event) {
+        $("#tabulator-export-csv-PREVIOUSPROVIDER").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-CNTR").on("click", function (event) {
+        $("#tabulator-export-json-PREVIOUSPROVIDER").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-CNTR").on("click", function (event) {
+        $("#tabulator-export-xlsx-PREVIOUSPROVIDER").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Course Details",
             });
         });
 
-        $("#tabulator-export-html-CNTR").on("click", function (event) {
+        $("#tabulator-export-html-PREVIOUSPROVIDER").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-CNTR").on("click", function (event) {
+        $("#tabulator-print-PREVIOUSPROVIDER").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -130,7 +124,7 @@ var countryListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#countryListTable").length) {
+    if ($("#PreviousproviderListTable").length) {
         $('.optionBoxTitle').on('click', function(e){
             e.preventDefault();
             var $title = $(this);
@@ -138,146 +132,146 @@ var countryListTable = (function () {
             var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
             var table = $boxBody.attr('data-tableid');
     
-            if($box.hasClass('active') && table == 'countryListTable'){
-                countryListTable.init();
+            if($box.hasClass('active') && table == 'PreviousproviderListTable'){
+                PreviousproviderListTable.init();
             }
         });
 
         // Filter function
-        function filterHTMLFormCNTR() {
-            countryListTable.init();
+        function filterHTMLFormPREVIOUSPROVIDER() {
+            PreviousproviderListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm-CNTR")[0].addEventListener(
+        $("#tabulatorFilterForm-PREVIOUSPROVIDER")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLFormCNTR();
+                    filterHTMLFormPREVIOUSPROVIDER();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go-CNTR").on("click", function (event) {
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-go-PREVIOUSPROVIDER").on("click", function (event) {
+            filterHTMLFormPREVIOUSPROVIDER();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-CNTR").on("click", function (event) {
-            $("#query-CNTR").val("");
-            $("#status-CNTR").val("1");
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-reset-PREVIOUSPROVIDER").on("click", function (event) {
+            $("#query-PREVIOUSPROVIDER").val("");
+            $("#status-PREVIOUSPROVIDER").val("1");
+            filterHTMLFormPREVIOUSPROVIDER();
         });
 
-        const addCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCountryModal"));
-        const editCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCountryModal"));
+        const addPreviousproviderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPreviousproviderModal"));
+        const editPreviousproviderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPreviousproviderModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addCountryModalEl = document.getElementById('addCountryModal')
-        addCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addCountryModal .acc__input-error').html('');
-            $('#addCountryModal .modal-body input:not([type="checkbox"])').val('');
+        const addPreviousproviderModalEl = document.getElementById('addPreviousproviderModal')
+        addPreviousproviderModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addPreviousproviderModal .acc__input-error').html('');
+            $('#addPreviousproviderModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#addCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .hesa_code_area input').val('');
+            $('#addPreviousproviderModal input[name="is_hesa"]').prop('checked', false);
+            $('#addPreviousproviderModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addPreviousproviderModal .hesa_code_area input').val('');
             });
-            $('#addCountryModal input[name="is_df"]').prop('checked', false);
-            $('#addCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .df_code_area input').val('');
+            $('#addPreviousproviderModal input[name="is_df"]').prop('checked', false);
+            $('#addPreviousproviderModal .df_code_area').fadeOut('fast', function(){
+                $('#addPreviousproviderModal .df_code_area input').val('');
             })
-            $('#addCountryModal input[name="active"]').prop('checked', true);
+            $('#addPreviousproviderModal input[name="active"]').prop('checked', true);
         });
         
-        const editCountryModalEl = document.getElementById('editCountryModal')
-        editCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editCountryModal .acc__input-error').html('');
-            $('#editCountryModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editCountryModal input[name="id"]').val('0');
+        const editPreviousproviderModalEl = document.getElementById('editPreviousproviderModal')
+        editPreviousproviderModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editPreviousproviderModal .acc__input-error').html('');
+            $('#editPreviousproviderModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editPreviousproviderModal input[name="id"]').val('0');
 
-            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .hesa_code_area input').val('');
+            $('#editPreviousproviderModal input[name="is_hesa"]').prop('checked', false);
+            $('#editPreviousproviderModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editPreviousproviderModal .hesa_code_area input').val('');
             });
-            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .df_code_area input').val('');
+            $('#editPreviousproviderModal input[name="is_df"]').prop('checked', false);
+            $('#editPreviousproviderModal .df_code_area').fadeOut('fast', function(){
+                $('#editPreviousproviderModal .df_code_area input').val('');
             })
-            $('#editCountryModal input[name="active"]').prop('checked', false);
+            $('#editPreviousproviderModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#addPreviousproviderForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addPreviousproviderForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addPreviousproviderForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addPreviousproviderForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addPreviousproviderForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addCountryForm input[name="is_df"]').on('change', function(){
+        $('#addPreviousproviderForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addPreviousproviderForm .df_code_area').fadeIn('fast', function(){
+                    $('#addPreviousproviderForm .df_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addPreviousproviderForm .df_code_area').fadeOut('fast', function(){
+                    $('#addPreviousproviderForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#editPreviousproviderForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editPreviousproviderForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editPreviousproviderForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editPreviousproviderForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editPreviousproviderForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_df"]').on('change', function(){
+        $('#editPreviousproviderForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editPreviousproviderForm .df_code_area').fadeIn('fast', function(){
+                    $('#editPreviousproviderForm .df_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editPreviousproviderForm .df_code_area').fadeOut('fast', function(){
+                    $('#editPreviousproviderForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addCountryForm').on('submit', function(e){
+        $('#addPreviousproviderForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addCountryForm');
+            const form = document.getElementById('addPreviousproviderForm');
         
-            document.querySelector('#saveCountry').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveCountry svg").style.cssText ="display: inline-block;";
+            document.querySelector('#savePreviousprovider').setAttribute('disabled', 'disabled');
+            document.querySelector("#savePreviousprovider svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('countries.store'),
+                url: route('previousprovider.store'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#savePreviousprovider').removeAttribute('disabled');
+                document.querySelector("#savePreviousprovider svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addCountryModal.hide();
+                    addPreviousproviderModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -285,15 +279,15 @@ var countryListTable = (function () {
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                countryListTable.init();
+                PreviousproviderListTable.init();
             }).catch(error => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#savePreviousprovider').removeAttribute('disabled');
+                document.querySelector("#savePreviousprovider svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addCountryForm .${key}`).addClass('border-danger');
-                            $(`#addCountryForm  .error-${key}`).html(val);
+                            $(`#addPreviousproviderForm .${key}`).addClass('border-danger');
+                            $(`#addPreviousproviderForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -302,13 +296,13 @@ var countryListTable = (function () {
             });
         });
 
-        $("#countryListTable").on("click", ".edit_btn", function () {      
+        $("#PreviousproviderListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
             axios({
                 method: "get",
-                url: route("countries.edit", editId),
+                url: route("previousprovider.edit", editId),
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
@@ -316,36 +310,35 @@ var countryListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editCountryModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editCountryModal input[name="iso_code"]').val(dataset.iso_code ? dataset.iso_code : '');
+                        $('#editPreviousproviderModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editCountryModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editPreviousproviderModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editPreviousproviderModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editPreviousproviderModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val('');
+                            $('#editPreviousproviderModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editPreviousproviderModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editPreviousproviderModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editCountryModal input[name="is_df"]').prop('checked', true);
-                            $('#editCountryModal .df_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editPreviousproviderModal input[name="is_df"]').prop('checked', true);
+                            $('#editPreviousproviderModal .df_code_area').fadeIn('fast', function(){
+                                $('#editPreviousproviderModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-                            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val('');
+                            $('#editPreviousproviderModal input[name="is_df"]').prop('checked', false);
+                            $('#editPreviousproviderModal .df_code_area').fadeOut('fast', function(){
+                                $('#editPreviousproviderModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editCountryModal input[name="id"]').val(editId);
+                        $('#editPreviousproviderModal input[name="id"]').val(editId);
                         if(dataset.active == 1){
-                            $('#editCountryModal input[name="active"]').prop('checked', true);
+                            $('#editPreviousproviderModal input[name="active"]').prop('checked', true);
                         }else{
-                            $('#editCountryModal input[name="active"]').prop('checked', false);
+                            $('#editPreviousproviderModal input[name="active"]').prop('checked', false);
                         }
                     }
                 })
@@ -355,28 +348,28 @@ var countryListTable = (function () {
         });
 
         // Update Course Data
-        $("#editCountryForm").on("submit", function (e) {
+        $("#editPreviousproviderForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editCountryForm input[name="id"]').val();
-            const form = document.getElementById("editCountryForm");
+            let editId = $('#editPreviousproviderForm input[name="id"]').val();
+            const form = document.getElementById("editPreviousproviderForm");
 
-            document.querySelector('#updateCountry').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateCountry svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updatePreviousprovider').setAttribute('disabled', 'disabled');
+            document.querySelector('#updatePreviousprovider svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
             axios({
                 method: "post",
-                url: route("countries.update"),
+                url: route("previousprovider.update"),
                 data: form_data,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateCountry").removeAttribute("disabled");
-                    document.querySelector("#updateCountry svg").style.cssText = "display: none;";
-                    editCountryModal.hide();
+                    document.querySelector("#updatePreviousprovider").removeAttribute("disabled");
+                    document.querySelector("#updatePreviousprovider svg").style.cssText = "display: none;";
+                    editPreviousproviderModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -384,18 +377,18 @@ var countryListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                countryListTable.init();
+                PreviousproviderListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateCountry").removeAttribute("disabled");
-                document.querySelector("#updateCountry svg").style.cssText = "display: none;";
+                document.querySelector("#updatePreviousprovider").removeAttribute("disabled");
+                document.querySelector("#updatePreviousprovider svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editCountryForm .${key}`).addClass('border-danger')
-                            $(`#editCountryForm  .error-${key}`).html(val)
+                            $(`#editPreviousproviderForm .${key}`).addClass('border-danger')
+                            $(`#editPreviousproviderForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editCountryModal.hide();
+                        editPreviousproviderModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -417,10 +410,10 @@ var countryListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETECNTR'){
+            if(action == 'DELETEPREVIOUSPROVIDER'){
                 axios({
                     method: 'delete',
-                    url: route('countries.destory', recordID),
+                    url: route('previousprovider.destory', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -433,14 +426,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    countryListTable.init();
+                    PreviousproviderListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORECNTR'){
+            } else if(action == 'RESTOREPREVIOUSPROVIDER'){
                 axios({
                     method: 'post',
-                    url: route('countries.restore', recordID),
+                    url: route('previousprovider.restore', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -453,14 +446,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    countryListTable.init();
+                    PreviousproviderListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            }else if(action == 'CHANGESTATCNTR'){
+            }else if(action == 'CHANGESTATPREVIOUSPROVIDER'){
                 axios({
                     method: 'post',
-                    url: route('countries.update.status', recordID),
+                    url: route('previousprovider.update.status', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -473,14 +466,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record status successfully updated!');
                         });
                     }
-                    countryListTable.init();
+                    PreviousproviderListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
-        $('#countryListTable').on('click', '.status_updater', function(){
+        $('#PreviousproviderListTable').on('click', '.status_updater', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -489,12 +482,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATCNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATPREVIOUSPROVIDER');
             });
         });
 
         // Delete Course
-        $('#countryListTable').on('click', '.delete_btn', function(){
+        $('#PreviousproviderListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -503,12 +496,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEPREVIOUSPROVIDER');
             });
         });
 
         // Restore Course
-        $('#countryListTable').on('click', '.restore_btn', function(){
+        $('#PreviousproviderListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -517,7 +510,7 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREPREVIOUSPROVIDER');
             });
         });
     }

@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
-use App\Models\FeeEligibility;
+use App\Http\Controllers\Controller;
+use App\Models\HesaGender;
 use Illuminate\Http\Request;
-use App\Http\Requests\FeeEligibilityRequest;
+use App\Http\Requests\HesaGenderRequest;
 
-class FeeEligibilityController extends Controller
+class HesaGenderController extends Controller
 {
     public function index()
     {
-        return view('pages/feeeligibility/index', [
-            'title' => 'Fee Eligibilities - LCC Data Future Managment',
+        return view('pages/hesagender/index', [
+            'title' => 'Hesa Genders - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Fee Eligibilities', 'href' => 'javascript:void(0);']
+                ['label' => 'Hesa Genders', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -28,12 +29,14 @@ class FeeEligibilityController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = FeeEligibility::orderByRaw(implode(',', $sorts));
+        $query = HesaGender::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
 
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -61,6 +64,7 @@ class FeeEligibilityController extends Controller
                     'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
                     'is_df' => $list->is_df,
                     'df_code' => ($list->is_df == 1 ? $list->df_code : ''),
+                    'active' => ($list->active == 1 ? $list->active : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -69,21 +73,21 @@ class FeeEligibilityController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(FeeEligibilityRequest $request){
-
-        $data = FeeEligibility::create([
+    public function store(HesaGenderRequest $request){
+        $data = HesaGender::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->df_code) && $request->df_code == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = FeeEligibility::find($id);
+        $data = HesaGender::find($id);
 
         if($data){
             return response()->json($data);
@@ -92,13 +96,14 @@ class FeeEligibilityController extends Controller
         }
     }
 
-    public function update(FeeEligibilityRequest $request){      
-        $data = FeeEligibility::where('id', $request->id)->update([
+    public function update(HesaGenderRequest $request){      
+        $data = HesaGender::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
-            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 ? $request->hesa_code : null),
+            'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
-            'df_code'=> (isset($request->is_df) && $request->is_df == 1 ? $request->df_code : null),
+            'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -111,13 +116,25 @@ class FeeEligibilityController extends Controller
     }
 
     public function destroy($id){
-        $data = FeeEligibility::find($id)->delete();
+        $data = HesaGender::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = FeeEligibility::where('id', $id)->withTrashed()->restore();
+        $data = HesaGender::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function updateStatus($id){
+        $title = HesaGender::find($id);
+        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+
+        HesaGender::where('id', $id)->update([
+            'active'=> $active,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Ethnicity;
-use App\Http\Requests\EthnicityRequest;
+use App\Models\Country;
+use App\Http\Requests\CountryRequest;
 
-class EthnicityController extends Controller
+class CountryController extends Controller
 {
     public function index()
     {
-        return view('pages/ethnicity/index', [
-            'title' => 'Ethnicity - LCC Data Future Managment',
+        return view('pages/country/index', [
+            'title' => 'Countries - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Ethnicities', 'href' => 'javascript:void(0);']
+                ['label' => 'Countries', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -28,11 +29,11 @@ class EthnicityController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Ethnicity::orderByRaw(implode(',', $sorts));
+        $query = Country::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
-        if($status == 3):
+        if($status == 2):
             $query->onlyTrashed();
         else:
             $query->where('active', $status);
@@ -59,6 +60,7 @@ class EthnicityController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'iso_code' => $list->iso_code,
                     'is_hesa' => $list->is_hesa,
                     'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
                     'is_df' => $list->is_df,
@@ -72,9 +74,10 @@ class EthnicityController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(EthnicityRequest $request){
-        $data = Ethnicity::create([
+    public function store(CountryRequest $request){
+        $data = Country::create([
             'name'=> $request->name,
+            'iso_code'=> $request->iso_code,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
@@ -86,7 +89,7 @@ class EthnicityController extends Controller
     }
 
     public function edit($id){
-        $data = Ethnicity::find($id);
+        $data = Country::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,14 +98,15 @@ class EthnicityController extends Controller
         }
     }
 
-    public function update(EthnicityRequest $request){      
-        $data = Ethnicity::where('id', $request->id)->update([
+    public function update(CountryRequest $request){      
+        $data = Country::where('id', $request->id)->update([
             'name'=> $request->name,
+            'iso_code'=> $request->iso_code,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -115,21 +119,21 @@ class EthnicityController extends Controller
     }
 
     public function destroy($id){
-        $data = Ethnicity::find($id)->delete();
+        $data = Country::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Ethnicity::where('id', $id)->withTrashed()->restore();
+        $data = Country::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = Ethnicity::find($id);
+        $title = Country::find($id);
         $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
 
-        Ethnicity::where('id', $id)->update([
+        Country::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

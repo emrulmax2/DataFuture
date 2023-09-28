@@ -1,16 +1,15 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import { data } from "jquery";
  
 ("use strict");
-var countryListTable = (function () {
+var HighestqoeListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
-        let status = $("#status-CNTR").val() != "" ? $("#status-CNTR").val() : "";
-        let tableContent = new Tabulator("#countryListTable", {
-            ajaxURL: route("countries.list"),
+        let querystr = $("#query-HIGHESTQOE").val() != "" ? $("#query-HIGHESTQOE").val() : "";
+        let status = $("#status-HIGHESTQOE").val() != "" ? $("#status-HIGHESTQOE").val() : "";
+        let tableContent = new Tabulator("#HighestqoeListTable", {
+            ajaxURL: route("highestqoe.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -30,11 +29,6 @@ var countryListTable = (function () {
                 {
                     title: "Name",
                     field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "ISO Code",
-                    field: "iso_code",
                     headerHozAlign: "left",
                 },
                 {
@@ -65,7 +59,7 @@ var countryListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCountryModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editHighestqoeModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -95,29 +89,29 @@ var countryListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-CNTR").on("click", function (event) {
+        $("#tabulator-export-csv-HIGHESTQOE").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-CNTR").on("click", function (event) {
+        $("#tabulator-export-json-HIGHESTQOE").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-CNTR").on("click", function (event) {
+        $("#tabulator-export-xlsx-HIGHESTQOE").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Course Details",
             });
         });
 
-        $("#tabulator-export-html-CNTR").on("click", function (event) {
+        $("#tabulator-export-html-HIGHESTQOE").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-CNTR").on("click", function (event) {
+        $("#tabulator-print-HIGHESTQOE").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -130,7 +124,7 @@ var countryListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#countryListTable").length) {
+    if ($("#HighestqoeListTable").length) {
         $('.optionBoxTitle').on('click', function(e){
             e.preventDefault();
             var $title = $(this);
@@ -138,146 +132,146 @@ var countryListTable = (function () {
             var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
             var table = $boxBody.attr('data-tableid');
     
-            if($box.hasClass('active') && table == 'countryListTable'){
-                countryListTable.init();
+            if($box.hasClass('active') && table == 'HighestqoeListTable'){
+                HighestqoeListTable.init();
             }
         });
 
         // Filter function
-        function filterHTMLFormCNTR() {
-            countryListTable.init();
+        function filterHTMLFormHIGHESTQOE() {
+            HighestqoeListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm-CNTR")[0].addEventListener(
+        $("#tabulatorFilterForm-HIGHESTQOE")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLFormCNTR();
+                    filterHTMLFormHIGHESTQOE();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go-CNTR").on("click", function (event) {
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-go-HIGHESTQOE").on("click", function (event) {
+            filterHTMLFormHIGHESTQOE();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-CNTR").on("click", function (event) {
-            $("#query-CNTR").val("");
-            $("#status-CNTR").val("1");
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-reset-HIGHESTQOE").on("click", function (event) {
+            $("#query-HIGHESTQOE").val("");
+            $("#status-HIGHESTQOE").val("1");
+            filterHTMLFormHIGHESTQOE();
         });
 
-        const addCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCountryModal"));
-        const editCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCountryModal"));
+        const addHighestqoeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHighestqoeModal"));
+        const editHighestqoeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editHighestqoeModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addCountryModalEl = document.getElementById('addCountryModal')
-        addCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addCountryModal .acc__input-error').html('');
-            $('#addCountryModal .modal-body input:not([type="checkbox"])').val('');
+        const addHighestqoeModalEl = document.getElementById('addHighestqoeModal')
+        addHighestqoeModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addHighestqoeModal .acc__input-error').html('');
+            $('#addHighestqoeModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#addCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .hesa_code_area input').val('');
+            $('#addHighestqoeModal input[name="is_hesa"]').prop('checked', false);
+            $('#addHighestqoeModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addHighestqoeModal .hesa_code_area input').val('');
             });
-            $('#addCountryModal input[name="is_df"]').prop('checked', false);
-            $('#addCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .df_code_area input').val('');
+            $('#addHighestqoeModal input[name="is_df"]').prop('checked', false);
+            $('#addHighestqoeModal .df_code_area').fadeOut('fast', function(){
+                $('#addHighestqoeModal .df_code_area input').val('');
             })
-            $('#addCountryModal input[name="active"]').prop('checked', true);
+            $('#addHighestqoeModal input[name="active"]').prop('checked', true);
         });
         
-        const editCountryModalEl = document.getElementById('editCountryModal')
-        editCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editCountryModal .acc__input-error').html('');
-            $('#editCountryModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editCountryModal input[name="id"]').val('0');
+        const editHighestqoeModalEl = document.getElementById('editHighestqoeModal')
+        editHighestqoeModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editHighestqoeModal .acc__input-error').html('');
+            $('#editHighestqoeModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editHighestqoeModal input[name="id"]').val('0');
 
-            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .hesa_code_area input').val('');
+            $('#editHighestqoeModal input[name="is_hesa"]').prop('checked', false);
+            $('#editHighestqoeModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editHighestqoeModal .hesa_code_area input').val('');
             });
-            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .df_code_area input').val('');
+            $('#editHighestqoeModal input[name="is_df"]').prop('checked', false);
+            $('#editHighestqoeModal .df_code_area').fadeOut('fast', function(){
+                $('#editHighestqoeModal .df_code_area input').val('');
             })
-            $('#editCountryModal input[name="active"]').prop('checked', false);
+            $('#editHighestqoeModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#addHighestqoeForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addHighestqoeForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addHighestqoeForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addHighestqoeForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addHighestqoeForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addCountryForm input[name="is_df"]').on('change', function(){
+        $('#addHighestqoeForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addHighestqoeForm .df_code_area').fadeIn('fast', function(){
+                    $('#addHighestqoeForm .df_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addHighestqoeForm .df_code_area').fadeOut('fast', function(){
+                    $('#addHighestqoeForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#editHighestqoeForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editHighestqoeForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editHighestqoeForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editHighestqoeForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editHighestqoeForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_df"]').on('change', function(){
+        $('#editHighestqoeForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editHighestqoeForm .df_code_area').fadeIn('fast', function(){
+                    $('#editHighestqoeForm .df_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editHighestqoeForm .df_code_area').fadeOut('fast', function(){
+                    $('#editHighestqoeForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addCountryForm').on('submit', function(e){
+        $('#addHighestqoeForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addCountryForm');
+            const form = document.getElementById('addHighestqoeForm');
         
-            document.querySelector('#saveCountry').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveCountry svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveHighestqoe').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveHighestqoe svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('countries.store'),
+                url: route('highestqoe.store'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#saveHighestqoe').removeAttribute('disabled');
+                document.querySelector("#saveHighestqoe svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addCountryModal.hide();
+                    addHighestqoeModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -285,15 +279,15 @@ var countryListTable = (function () {
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                countryListTable.init();
+                HighestqoeListTable.init();
             }).catch(error => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#saveHighestqoe').removeAttribute('disabled');
+                document.querySelector("#saveHighestqoe svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addCountryForm .${key}`).addClass('border-danger');
-                            $(`#addCountryForm  .error-${key}`).html(val);
+                            $(`#addHighestqoeForm .${key}`).addClass('border-danger');
+                            $(`#addHighestqoeForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -302,13 +296,13 @@ var countryListTable = (function () {
             });
         });
 
-        $("#countryListTable").on("click", ".edit_btn", function () {      
+        $("#HighestqoeListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
             axios({
                 method: "get",
-                url: route("countries.edit", editId),
+                url: route("highestqoe.edit", editId),
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
@@ -316,36 +310,35 @@ var countryListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editCountryModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editCountryModal input[name="iso_code"]').val(dataset.iso_code ? dataset.iso_code : '');
+                        $('#editHighestqoeModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editCountryModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editHighestqoeModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editHighestqoeModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editHighestqoeModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val('');
+                            $('#editHighestqoeModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editHighestqoeModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editHighestqoeModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editCountryModal input[name="is_df"]').prop('checked', true);
-                            $('#editCountryModal .df_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editHighestqoeModal input[name="is_df"]').prop('checked', true);
+                            $('#editHighestqoeModal .df_code_area').fadeIn('fast', function(){
+                                $('#editHighestqoeModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-                            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val('');
+                            $('#editHighestqoeModal input[name="is_df"]').prop('checked', false);
+                            $('#editHighestqoeModal .df_code_area').fadeOut('fast', function(){
+                                $('#editHighestqoeModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editCountryModal input[name="id"]').val(editId);
+                        $('#editHighestqoeModal input[name="id"]').val(editId);
                         if(dataset.active == 1){
-                            $('#editCountryModal input[name="active"]').prop('checked', true);
+                            $('#editHighestqoeModal input[name="active"]').prop('checked', true);
                         }else{
-                            $('#editCountryModal input[name="active"]').prop('checked', false);
+                            $('#editHighestqoeModal input[name="active"]').prop('checked', false);
                         }
                     }
                 })
@@ -355,28 +348,28 @@ var countryListTable = (function () {
         });
 
         // Update Course Data
-        $("#editCountryForm").on("submit", function (e) {
+        $("#editHighestqoeForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editCountryForm input[name="id"]').val();
-            const form = document.getElementById("editCountryForm");
+            let editId = $('#editHighestqoeForm input[name="id"]').val();
+            const form = document.getElementById("editHighestqoeForm");
 
-            document.querySelector('#updateCountry').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateCountry svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateHighestqoe').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateHighestqoe svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
             axios({
                 method: "post",
-                url: route("countries.update"),
+                url: route("highestqoe.update"),
                 data: form_data,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateCountry").removeAttribute("disabled");
-                    document.querySelector("#updateCountry svg").style.cssText = "display: none;";
-                    editCountryModal.hide();
+                    document.querySelector("#updateHighestqoe").removeAttribute("disabled");
+                    document.querySelector("#updateHighestqoe svg").style.cssText = "display: none;";
+                    editHighestqoeModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -384,18 +377,18 @@ var countryListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                countryListTable.init();
+                HighestqoeListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateCountry").removeAttribute("disabled");
-                document.querySelector("#updateCountry svg").style.cssText = "display: none;";
+                document.querySelector("#updateHighestqoe").removeAttribute("disabled");
+                document.querySelector("#updateHighestqoe svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editCountryForm .${key}`).addClass('border-danger')
-                            $(`#editCountryForm  .error-${key}`).html(val)
+                            $(`#editHighestqoeForm .${key}`).addClass('border-danger')
+                            $(`#editHighestqoeForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editCountryModal.hide();
+                        editHighestqoeModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -417,10 +410,10 @@ var countryListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETECNTR'){
+            if(action == 'DELETEHIGHESTQOE'){
                 axios({
                     method: 'delete',
-                    url: route('countries.destory', recordID),
+                    url: route('highestqoe.destory', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -433,14 +426,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    countryListTable.init();
+                    HighestqoeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORECNTR'){
+            } else if(action == 'RESTOREHIGHESTQOE'){
                 axios({
                     method: 'post',
-                    url: route('countries.restore', recordID),
+                    url: route('highestqoe.restore', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -453,14 +446,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    countryListTable.init();
+                    HighestqoeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            }else if(action == 'CHANGESTATCNTR'){
+            }else if(action == 'CHANGESTATHIGHESTQOE'){
                 axios({
                     method: 'post',
-                    url: route('countries.update.status', recordID),
+                    url: route('highestqoe.update.status', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -473,14 +466,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record status successfully updated!');
                         });
                     }
-                    countryListTable.init();
+                    HighestqoeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
-        $('#countryListTable').on('click', '.status_updater', function(){
+        $('#HighestqoeListTable').on('click', '.status_updater', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -489,12 +482,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATCNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATHIGHESTQOE');
             });
         });
 
         // Delete Course
-        $('#countryListTable').on('click', '.delete_btn', function(){
+        $('#HighestqoeListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -503,12 +496,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEHIGHESTQOE');
             });
         });
 
         // Restore Course
-        $('#countryListTable').on('click', '.restore_btn', function(){
+        $('#HighestqoeListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -517,7 +510,7 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREHIGHESTQOE');
             });
         });
     }

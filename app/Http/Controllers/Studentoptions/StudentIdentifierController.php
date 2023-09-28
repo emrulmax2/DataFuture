@@ -1,22 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
-use Illuminate\Http\Request;
-use App\Models\SexualOrientation;
-use App\Http\Requests\SexualOrientationRequest;
+use App\Http\Controllers\Controller;
+use App\Models\StudentIdentifier;
+use Illuminate\Http\Request;        
+use App\Http\Requests\StudentIdentifierRequest;
 
-class SexualOrientationController extends Controller
+class StudentIdentifierController extends Controller
 {
-    public function index()
-    {
-        return view('pages/sexual-orientation/index', [
-            'title' => 'Sexual Orientation - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Sexual Orientation', 'href' => 'javascript:void(0);']
-            ],
-        ]);
-    }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
@@ -28,11 +20,11 @@ class SexualOrientationController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = SexualOrientation::orderByRaw(implode(',', $sorts));
+        $query = StudentIdentifier::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
-        if($status == 2):
+        if($status == 3):
             $query->onlyTrashed();
         else:
             $query->where('active', $status);
@@ -72,21 +64,28 @@ class SexualOrientationController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(SexualOrientationRequest $request){
-        $data = SexualOrientation::create([
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StudentIdentifierRequest $request)
+    {
+        $data = StudentIdentifier::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = SexualOrientation::find($id);
+        $data = StudentIdentifier::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,14 +94,14 @@ class SexualOrientationController extends Controller
         }
     }
 
-    public function update(SexualOrientationRequest $request){      
-        $data = SexualOrientation::where('id', $request->id)->update([
+    public function update(StudentIdentifierRequest $request){      
+        $data = StudentIdentifier::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -115,21 +114,21 @@ class SexualOrientationController extends Controller
     }
 
     public function destroy($id){
-        $data = SexualOrientation::find($id)->delete();
+        $data = StudentIdentifier::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = SexualOrientation::where('id', $id)->withTrashed()->restore();
+        $data = StudentIdentifier::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = SexualOrientation::find($id);
-        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+        $SID= StudentIdentifier::find($id);
+        $active = (isset($SID->active) && $SID->active == 1 ? 0 : 1);
 
-        SexualOrientation::where('id', $id)->update([
+        StudentIdentifier::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

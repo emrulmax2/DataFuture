@@ -32,7 +32,6 @@ export default defineConfig({
 
                 "resources/js/status.js",
                 "resources/js/application.js",
-                "resources/js/disabilities.js",
                 "resources/js/consent-policy.js",
 
                 "resources/js/applicant-dahsboard.js",
@@ -55,7 +54,6 @@ export default defineConfig({
                 "resources/js/admission-process.js",
                 "resources/js/admission-uploads.js",
                 "resources/js/admission-notes.js",
-                "resources/js/feeeligibilities.js",
 
                 "resources/js/students.js",
                 "resources/js/student-global.js",
@@ -80,6 +78,15 @@ export default defineConfig({
                 "resources/js/religion.js",
                 "resources/js/hesagender.js",
                 "resources/js/country.js",
+                "resources/js/disabilities.js",
+                "resources/js/feeeligibilities.js",
+                "resources/js/apelcredit.js",
+                "resources/js/highest-qualification-on-entry.js",
+                "resources/js/country-fo-permanent-address.js",
+                "resources/js/previous-provider.js",
+                "resources/js/reason-for-engagement-ending.js",  
+                "resources/js/termtimeaccommodationtype.js",
+                "resources/js/studentidentifier.js",
                 
             ],
             refresh: true,

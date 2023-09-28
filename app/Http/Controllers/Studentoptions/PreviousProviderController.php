@@ -1,23 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\OptionValueRequest;
+use App\Models\PreviousProvider;
 use Illuminate\Http\Request;
-use App\Models\Religion;
-use App\Http\Requests\ReligionRequest;
 
-class ReligionController extends Controller
+class PreviousProviderController extends Controller
 {
-    public function index()
-    {
-        return view('pages/religion/index', [
-            'title' => 'Religions - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Religions', 'href' => 'javascript:void(0);']
-            ],
-        ]);
-    }
-
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
@@ -28,7 +19,7 @@ class ReligionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Religion::orderByRaw(implode(',', $sorts));
+        $query = PreviousProvider::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -72,21 +63,21 @@ class ReligionController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(ReligionRequest $request){
-        $data = Religion::create([
+    public function store(OptionValueRequest $request){
+        $data = PreviousProvider::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) ? $request->active : 0),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = Religion::find($id);
+        $data = PreviousProvider::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,14 +86,14 @@ class ReligionController extends Controller
         }
     }
 
-    public function update(ReligionRequest $request){      
-        $data = Religion::where('id', $request->id)->update([
+    public function update(OptionValueRequest $request){      
+        $data = PreviousProvider::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) ? $request->active : 0),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -115,21 +106,21 @@ class ReligionController extends Controller
     }
 
     public function destroy($id){
-        $data = Religion::find($id)->delete();
+        $data = PreviousProvider::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Religion::where('id', $id)->withTrashed()->restore();
+        $data = PreviousProvider::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = Religion::find($id);
+        $title = PreviousProvider::find($id);
         $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
 
-        Religion::where('id', $id)->update([
+        PreviousProvider::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

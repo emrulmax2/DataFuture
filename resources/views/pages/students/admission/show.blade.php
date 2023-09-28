@@ -227,7 +227,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Relation</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->relation->name }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($applicant->kin->relation->name) ? $applicant->kin->relation->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">

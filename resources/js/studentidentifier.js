@@ -4,13 +4,13 @@ import Tabulator from "tabulator-tables";
 import { data } from "jquery";
  
 ("use strict");
-var countryListTable = (function () {
+var studentidentifierListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
-        let status = $("#status-CNTR").val() != "" ? $("#status-CNTR").val() : "";
-        let tableContent = new Tabulator("#countryListTable", {
-            ajaxURL: route("countries.list"),
+        let querystr = $("#query-SID").val() != "" ? $("#query-SID").val() : "";
+        let status = $("#status-SID").val() != "" ? $("#status-SID").val() : "";
+        let tableContent = new Tabulator("#studentidentifierListTable", {
+            ajaxURL: route("studentidentifier.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -30,11 +30,6 @@ var countryListTable = (function () {
                 {
                     title: "Name",
                     field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "ISO Code",
-                    field: "iso_code",
                     headerHozAlign: "left",
                 },
                 {
@@ -65,7 +60,7 @@ var countryListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCountryModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editStudentidentifierModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -95,29 +90,29 @@ var countryListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-CNTR").on("click", function (event) {
+        $("#tabulator-export-csv-SID").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-CNTR").on("click", function (event) {
+        $("#tabulator-export-json-SID").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-CNTR").on("click", function (event) {
+        $("#tabulator-export-xlsx-SID").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Course Details",
+                sheetName: "SID Details",
             });
         });
 
-        $("#tabulator-export-html-CNTR").on("click", function (event) {
+        $("#tabulator-export-html-SID").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-CNTR").on("click", function (event) {
+        $("#tabulator-print-SID").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -130,7 +125,8 @@ var countryListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#countryListTable").length) {
+    if ($("#studentidentifierListTable").length) {
+        // Init Table
         $('.optionBoxTitle').on('click', function(e){
             e.preventDefault();
             var $title = $(this);
@@ -138,162 +134,164 @@ var countryListTable = (function () {
             var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
             var table = $boxBody.attr('data-tableid');
     
-            if($box.hasClass('active') && table == 'countryListTable'){
-                countryListTable.init();
+            if($box.hasClass('active') && table == 'studentidentifierListTable'){
+                studentidentifierListTable.init();
             }
         });
 
         // Filter function
-        function filterHTMLFormCNTR() {
-            countryListTable.init();
+        function filterHTMLFormSID() {
+            studentidentifierListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm-CNTR")[0].addEventListener(
+        $("#tabulatorFilterForm-SID")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLFormCNTR();
+                    filterHTMLFormSID();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go-CNTR").on("click", function (event) {
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-go-SID").on("click", function (event) {
+            filterHTMLFormSID();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-CNTR").on("click", function (event) {
-            $("#query-CNTR").val("");
-            $("#status-CNTR").val("1");
-            filterHTMLFormCNTR();
+        $("#tabulator-html-filter-reset-SID").on("click", function (event) {
+            $("#query-SID").val("");
+            $("#status-SID").val("1");
+            filterHTMLFormSID();
         });
 
-        const addCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCountryModal"));
-        const editCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCountryModal"));
+        const addStudentidentifierModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addStudentidentifierModal"));
+        const editStudentidentifierModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editStudentidentifierModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addCountryModalEl = document.getElementById('addCountryModal')
-        addCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addCountryModal .acc__input-error').html('');
-            $('#addCountryModal .modal-body input:not([type="checkbox"])').val('');
+        const addStudentidentifierModalEl = document.getElementById('addStudentidentifierModal')
+        addStudentidentifierModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addStudentidentifierModal .acc__input-error').html('');
+            $('#addStudentidentifierModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#addCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .hesa_code_area input').val('');
+            $('#addStudentidentifierModal input[name="is_hesa"]').prop('checked', false);
+            $('#addStudentidentifierModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addStudentidentifierModal .hesa_code_area input').val('');
             });
-            $('#addCountryModal input[name="is_df"]').prop('checked', false);
-            $('#addCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#addCountryModal .df_code_area input').val('');
-            })
-            $('#addCountryModal input[name="active"]').prop('checked', true);
+            $('#addStudentidentifierModal input[name="is_df"]').prop('checked', false);
+            $('#addStudentidentifierModal .df_code_area').fadeOut('fast', function(){
+                $('#addStudentidentifierModal .df_code_area input').val('');
+            });
+            
+            $('#addStudentidentifierModal input[name="active"]').prop('checked', true);
         });
         
-        const editCountryModalEl = document.getElementById('editCountryModal')
-        editCountryModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editCountryModal .acc__input-error').html('');
-            $('#editCountryModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editCountryModal input[name="id"]').val('0');
+        const editStudentidentifierModalEl = document.getElementById('editStudentidentifierModal')
+        editStudentidentifierModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editStudentidentifierModal .acc__input-error').html('');
+            $('#editStudentidentifierModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editStudentidentifierModal input[name="id"]').val('0');
 
-            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .hesa_code_area input').val('');
+            $('#editStudentidentifierModal input[name="is_hesa"]').prop('checked', false);
+            $('#editStudentidentifierModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editStudentidentifierModal .hesa_code_area input').val('');
             });
-            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                $('#editCountryModal .df_code_area input').val('');
+            $('#editStudentidentifierModal input[name="is_df"]').prop('checked', false);
+            $('#editStudentidentifierModal .df_code_area').fadeOut('fast', function(){
+                $('#editStudentidentifierModal .df_code_area input').val('');
             })
-            $('#editCountryModal input[name="active"]').prop('checked', false);
+            
+            $('#editStudentidentifierModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#addStudentidentifierForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addStudentidentifierForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addStudentidentifierForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .hesa_code_area input').val('');
+                $('#addStudentidentifierForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addStudentidentifierForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addCountryForm input[name="is_df"]').on('change', function(){
+        $('#addStudentidentifierForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addStudentidentifierForm .df_code_area').fadeIn('fast', function(){
+                    $('#addStudentidentifierForm .df_code_area input').val('');
                 })
             }else{
-                $('#addCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#addCountryForm .df_code_area input').val('');
+                $('#addStudentidentifierForm .df_code_area').fadeOut('fast', function(){
+                    $('#addStudentidentifierForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_hesa"]').on('change', function(){
+        $('#editStudentidentifierForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editStudentidentifierForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editStudentidentifierForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .hesa_code_area input').val('');
+                $('#editStudentidentifierForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editStudentidentifierForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editCountryForm input[name="is_df"]').on('change', function(){
+        $('#editStudentidentifierForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editCountryForm .df_code_area').fadeIn('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editStudentidentifierForm .df_code_area').fadeIn('fast', function(){
+                    $('#editStudentidentifierForm .df_code_area input').val('');
                 })
             }else{
-                $('#editCountryForm .df_code_area').fadeOut('fast', function(){
-                    $('#editCountryForm .df_code_area input').val('');
+                $('#editStudentidentifierForm .df_code_area').fadeOut('fast', function(){
+                    $('#editStudentidentifierForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addCountryForm').on('submit', function(e){
+        $('#addStudentidentifierForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addCountryForm');
+            const form = document.getElementById('addStudentidentifierForm');
         
-            document.querySelector('#saveCountry').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveCountry svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveStudentidentifier').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveStudentidentifier svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('countries.store'),
+                url: route('studentidentifier.store'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#saveStudentidentifier').removeAttribute('disabled');
+                document.querySelector("#saveStudentidentifier svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addCountryModal.hide();
+                    addStudentidentifierModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                             $("#successModal .successModalTitle").html( "Congratulations!" );
-                            $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
+                            $("#successModal .successModalDesc").html('Item Successfully inserted.');
                     });     
                 }
-                countryListTable.init();
+                studentidentifierListTable.init();
             }).catch(error => {
-                document.querySelector('#saveCountry').removeAttribute('disabled');
-                document.querySelector("#saveCountry svg").style.cssText = "display: none;";
+                document.querySelector('#saveStudentidentifier').removeAttribute('disabled');
+                document.querySelector("#saveStudentidentifier svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addCountryForm .${key}`).addClass('border-danger');
-                            $(`#addCountryForm  .error-${key}`).html(val);
+                            $(`#addStudentidentifierForm .${key}`).addClass('border-danger');
+                            $(`#addStudentidentifierForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -302,13 +300,13 @@ var countryListTable = (function () {
             });
         });
 
-        $("#countryListTable").on("click", ".edit_btn", function () {      
+        $("#studentidentifierListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
             axios({
                 method: "get",
-                url: route("countries.edit", editId),
+                url: route("studentidentifier.edit", editId),
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
@@ -316,36 +314,36 @@ var countryListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editCountryModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editCountryModal input[name="iso_code"]').val(dataset.iso_code ? dataset.iso_code : '');
+                        $('#editStudentidentifierModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editCountryModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editStudentidentifierModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editStudentidentifierModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editStudentidentifierModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editCountryModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="hesa_code"]').val('');
+                            $('#editStudentidentifierModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editStudentidentifierModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editStudentidentifierModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editCountryModal input[name="is_df"]').prop('checked', true);
-                            $('#editCountryModal .df_code_area').fadeIn('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editStudentidentifierModal input[name="is_df"]').prop('checked', true);
+                            $('#editStudentidentifierModal .df_code_area').fadeIn('fast', function(){
+                                $('#editStudentidentifierModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editCountryModal input[name="is_df"]').prop('checked', false);
-                            $('#editCountryModal .df_code_area').fadeOut('fast', function(){
-                                $('#editCountryModal input[name="df_code"]').val('');
+                            $('#editStudentidentifierModal input[name="is_df"]').prop('checked', false);
+                            $('#editStudentidentifierModal .df_code_area').fadeOut('fast', function(){
+                                $('#editStudentidentifierModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editCountryModal input[name="id"]').val(editId);
+                        $('#editStudentidentifierModal input[name="id"]').val(editId);
+
                         if(dataset.active == 1){
-                            $('#editCountryModal input[name="active"]').prop('checked', true);
+                            $('#editStudentidentifierModal input[name="active"]').prop('checked', true);
                         }else{
-                            $('#editCountryModal input[name="active"]').prop('checked', false);
+                            $('#editStudentidentifierModal input[name="active"]').prop('checked', false);
                         }
                     }
                 })
@@ -355,47 +353,47 @@ var countryListTable = (function () {
         });
 
         // Update Course Data
-        $("#editCountryForm").on("submit", function (e) {
+        $("#editStudentidentifierForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editCountryForm input[name="id"]').val();
-            const form = document.getElementById("editCountryForm");
+            let editId = $('#editStudentidentifierForm input[name="id"]').val();
+            const form = document.getElementById("editStudentidentifierForm");
 
-            document.querySelector('#updateCountry').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateCountry svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateStudentidentifier').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateStudentidentifier svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
             axios({
                 method: "post",
-                url: route("countries.update"),
+                url: route("studentidentifier.update"),
                 data: form_data,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateCountry").removeAttribute("disabled");
-                    document.querySelector("#updateCountry svg").style.cssText = "display: none;";
-                    editCountryModal.hide();
+                    document.querySelector("#updateStudentidentifier").removeAttribute("disabled");
+                    document.querySelector("#updateStudentidentifier svg").style.cssText = "display: none;";
+                    editStudentidentifierModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                         $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Titles data successfully updated.');
+                        $("#successModal .successModalDesc").html('Data successfully updated.');
                     });
                 }
-                countryListTable.init();
+                studentidentifierListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateCountry").removeAttribute("disabled");
-                document.querySelector("#updateCountry svg").style.cssText = "display: none;";
+                document.querySelector("#updateStudentidentifier").removeAttribute("disabled");
+                document.querySelector("#updateStudentidentifier svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editCountryForm .${key}`).addClass('border-danger')
-                            $(`#editCountryForm  .error-${key}`).html(val)
+                            $(`#editStudentidentifierForm .${key}`).addClass('border-danger')
+                            $(`#editStudentidentifierForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editCountryModal.hide();
+                        editStudentidentifierModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -417,10 +415,10 @@ var countryListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETECNTR'){
+            if(action == 'DELETEStudentidentifier'){
                 axios({
                     method: 'delete',
-                    url: route('countries.destory', recordID),
+                    url: route('studentidentifier.destory', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -433,14 +431,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    countryListTable.init();
+                    studentidentifierListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORECNTR'){
+            } else if(action == 'RESTOREStudentidentifier'){
                 axios({
                     method: 'post',
-                    url: route('countries.restore', recordID),
+                    url: route('studentidentifier.restore', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -453,14 +451,14 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    countryListTable.init();
+                    studentidentifierListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            }else if(action == 'CHANGESTATCNTR'){
+            }else if(action == 'CHANGESTATStudentidentifier'){
                 axios({
                     method: 'post',
-                    url: route('countries.update.status', recordID),
+                    url: route('studentidentifier.update.status', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -473,14 +471,15 @@ var countryListTable = (function () {
                             $('#successModal .successModalDesc').html('Record status successfully updated!');
                         });
                     }
-                    countryListTable.init();
+                    studentidentifierListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
-        $('#countryListTable').on('click', '.status_updater', function(){
+        // Delete Course
+        $('#studentidentifierListTable').on('click', '.status_updater', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -489,12 +488,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATCNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATStudentidentifier');
             });
         });
 
         // Delete Course
-        $('#countryListTable').on('click', '.delete_btn', function(){
+        $('#studentidentifierListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -503,12 +502,12 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEStudentidentifier');
             });
         });
 
         // Restore Course
-        $('#countryListTable').on('click', '.restore_btn', function(){
+        $('#studentidentifierListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -517,7 +516,7 @@ var countryListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORECNTR');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREStudentidentifier');
             });
         });
     }

@@ -1,23 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\OptionValueRequest;
+use App\Models\ReasonForEngagementEnding;
 use Illuminate\Http\Request;
-use App\Models\Title;
-use App\Http\Requests\TitleRequest;
 
-class TitleController extends Controller
+class ReasonForEngagementEndingController extends Controller
 {
-    public function index()
-    {
-        return view('pages/title/index', [
-            'title' => 'Titles - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Titles', 'href' => 'javascript:void(0);']
-            ],
-        ]);
-    }
-
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
@@ -28,11 +19,11 @@ class TitleController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Title::orderByRaw(implode(',', $sorts));
+        $query = ReasonForEngagementEnding::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
-        if($status == 3):
+        if($status == 2):
             $query->onlyTrashed();
         else:
             $query->where('active', $status);
@@ -72,21 +63,21 @@ class TitleController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(TitleRequest $request){
-        $data = Title::create([
+    public function store(OptionValueRequest $request){
+        $data = ReasonForEngagementEnding::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = Title::find($id);
+        $data = ReasonForEngagementEnding::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,14 +86,14 @@ class TitleController extends Controller
         }
     }
 
-    public function update(TitleRequest $request){      
-        $data = Title::where('id', $request->id)->update([
+    public function update(OptionValueRequest $request){      
+        $data = ReasonForEngagementEnding::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -115,21 +106,21 @@ class TitleController extends Controller
     }
 
     public function destroy($id){
-        $data = Title::find($id)->delete();
+        $data = ReasonForEngagementEnding::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Title::where('id', $id)->withTrashed()->restore();
+        $data = ReasonForEngagementEnding::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = Title::find($id);
+        $title = ReasonForEngagementEnding::find($id);
         $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
 
-        Title::where('id', $id)->update([
+        ReasonForEngagementEnding::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

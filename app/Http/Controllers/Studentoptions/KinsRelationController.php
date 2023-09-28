@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Studentoptions;
 
-use App\Models\HesaGender;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\HesaGenderRequest;
+use App\Models\KinsRelation;
+use App\Http\Requests\KinsRelationRequest;
 
-class HesaGenderController extends Controller
+class KinsRelationController extends Controller
 {
     public function index()
     {
-        return view('pages/hesagender/index', [
-            'title' => 'Hesa Genders - LCC Data Future Managment',
+        return view('pages/kins-relation/index', [
+            'title' => 'Kins Relation - LCC Data Future Managment',
             'breadcrumbs' => [
-                ['label' => 'Hesa Genders', 'href' => 'javascript:void(0);']
+                ['label' => 'Kins Relations', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -28,7 +29,7 @@ class HesaGenderController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = HesaGender::orderByRaw(implode(',', $sorts));
+        $query = KinsRelation::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -63,7 +64,7 @@ class HesaGenderController extends Controller
                     'hesa_code' => ($list->is_hesa == 1 ? $list->hesa_code : ''),
                     'is_df' => $list->is_df,
                     'df_code' => ($list->is_df == 1 ? $list->df_code : ''),
-                    'active' => ($list->active == 1 ? $list->active : ''),
+                    'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -72,21 +73,21 @@ class HesaGenderController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(HesaGenderRequest $request){
-        $data = HesaGender::create([
+    public function store(KinsRelationRequest $request){
+        $data = KinsRelation::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = HesaGender::find($id);
+        $data = KinsRelation::find($id);
 
         if($data){
             return response()->json($data);
@@ -95,14 +96,14 @@ class HesaGenderController extends Controller
         }
     }
 
-    public function update(HesaGenderRequest $request){      
-        $data = HesaGender::where('id', $request->id)->update([
+    public function update(KinsRelationRequest $request){      
+        $data = KinsRelation::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
             'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
-            'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -115,21 +116,21 @@ class HesaGenderController extends Controller
     }
 
     public function destroy($id){
-        $data = HesaGender::find($id)->delete();
+        $data = KinsRelation::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = HesaGender::where('id', $id)->withTrashed()->restore();
+        $data = KinsRelation::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $title = HesaGender::find($id);
+        $title = KinsRelation::find($id);
         $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
 
-        HesaGender::where('id', $id)->update([
+        KinsRelation::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

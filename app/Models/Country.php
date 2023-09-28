@@ -17,6 +17,7 @@ class Country extends Model
         'is_df',
         'df_code',
         'iso_code',
+        'active',
         'created_by',
         'updated_by',
     ];

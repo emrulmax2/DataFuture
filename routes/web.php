@@ -33,14 +33,14 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
-use App\Http\Controllers\TitleController;
-use App\Http\Controllers\EthnicityController;
-use App\Http\Controllers\KinsRelationController;
-use App\Http\Controllers\SexualOrientationController;
-use App\Http\Controllers\ReligionController;
+use App\Http\Controllers\Studentoptions\TitleController;
+use App\Http\Controllers\Studentoptions\EthnicityController;
+use App\Http\Controllers\Studentoptions\KinsRelationController;
+use App\Http\Controllers\Studentoptions\SexualOrientationController;
+use App\Http\Controllers\Studentoptions\ReligionController;
 use App\Http\Controllers\StatusController;
-use App\Http\Controllers\CountryController;
-use App\Http\Controllers\DisabilityController;
+use App\Http\Controllers\Studentoptions\CountryController;
+use App\Http\Controllers\Studentoptions\DisabilityController;
 use App\Http\Controllers\DocumentSettingsController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PermissionCategoryController;
@@ -77,8 +77,8 @@ use App\Http\Controllers\ConsentPolicyController;
 use App\Http\Controllers\LetterHeaderFooterController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
-use App\Http\Controllers\HesaGenderController;
-use App\Http\Controllers\FeeEligibilityController;
+use App\Http\Controllers\Studentoptions\HesaGenderController;
+use App\Http\Controllers\Studentoptions\FeeEligibilityController;
 use App\Http\Controllers\Student\ConsentController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
@@ -94,8 +94,16 @@ use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProcessController;
 use App\Http\Controllers\Student\ProofIdCheckController;
 use App\Http\Controllers\Student\SmsController;
+use App\Http\Controllers\Studentoptions\StudentIdentifierController;
+use App\Http\Controllers\Studentoptions\TermTimeAccommodationTypeController;
 use App\Http\Controllers\Student\UploadController;
 use App\Http\Controllers\StudentOptionController;
+use App\Http\Controllers\Studentoptions\ApelCreditController;
+use App\Http\Controllers\Studentoptions\CountryOfPermanentAddressController;
+use App\Http\Controllers\Studentoptions\HighestQualificationOnEntryController;
+use App\Http\Controllers\Studentoptions\PreviousProviderController;
+use App\Http\Controllers\Studentoptions\QualificationTypeIdentifierController;
+use App\Http\Controllers\Studentoptions\ReasonForEngagementEndingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -357,26 +365,6 @@ Route::middleware('auth')->group(function() {
         Route::post('statuses/update', 'update')->name('statuses.update');
         Route::delete('statuses/delete/{id}', 'destroy')->name('statuses.destory');
         Route::post('statuses/restore/{id}', 'restore')->name('statuses.restore');
-    });
-
-    Route::controller(CountryController::class)->group(function() {
-        Route::get('countries', 'index')->name('countries'); 
-        Route::get('countries/list', 'list')->name('countries.list'); 
-        Route::post('countries/store', 'store')->name('countries.store'); 
-        Route::get('countries/edit/{id}', 'edit')->name('countries.edit');
-        Route::post('countries/update', 'update')->name('countries.update');
-        Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
-        Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
-    });
-
-    Route::controller(DisabilityController::class)->group(function() {
-        Route::get('disabilities', 'index')->name('disabilities'); 
-        Route::get('disabilities/list', 'list')->name('disabilities.list'); 
-        Route::post('disabilities/store', 'store')->name('disabilities.store'); 
-        Route::get('disabilities/edit/{id}', 'edit')->name('disabilities.edit');
-        Route::post('disabilities/update', 'update')->name('disabilities.update');
-        Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
-        Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
     });
 
     Route::controller(CommonSmtpController::class)->group(function() {
@@ -999,16 +987,6 @@ Route::middleware('auth')->group(function() {
         Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
     });
 
-    Route::controller(FeeEligibilityController::class)->group(function() {
-        Route::get('feeeligibilities', 'index')->name('feeeligibilities'); 
-        Route::get('feeeligibilities/list', 'list')->name('feeeligibilities.list'); 
-        Route::post('feeeligibilities/store', 'store')->name('feeeligibilities.store'); 
-        Route::get('feeeligibilities/edit/{id}', 'edit')->name('feeeligibilities.edit');
-        Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
-        Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
-        Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
-    });
-
     Route::controller(StudentOptionController::class)->group(function(){
         Route::get('student-options', 'index')->name('student.options');
     });
@@ -1077,5 +1055,126 @@ Route::middleware('auth')->group(function() {
         Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
         Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
         Route::post('gender/update-status/{id}', 'updateStatus')->name('gender.update.status');
+    });
+
+    Route::controller(CountryController::class)->group(function() {
+        Route::get('countries', 'index')->name('countries'); 
+        Route::get('countries/list', 'list')->name('countries.list'); 
+        Route::post('countries/store', 'store')->name('countries.store'); 
+        Route::get('countries/edit/{id}', 'edit')->name('countries.edit');
+        Route::post('countries/update', 'update')->name('countries.update');
+        Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
+        Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
+        Route::post('countries/update-status/{id}', 'updateStatus')->name('countries.update.status');
+    });
+
+    Route::controller(DisabilityController::class)->group(function() {
+        Route::get('disabilities', 'index')->name('disabilities'); 
+        Route::get('disabilities/list', 'list')->name('disabilities.list'); 
+        Route::post('disabilities/store', 'store')->name('disabilities.store'); 
+        Route::get('disabilities/edit/{id}', 'edit')->name('disabilities.edit');
+        Route::post('disabilities/update', 'update')->name('disabilities.update');
+        Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
+        Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
+        Route::post('disabilities/update-status/{id}', 'updateStatus')->name('disabilities.update.status');
+    });
+
+    Route::controller(FeeEligibilityController::class)->group(function() {
+        Route::get('feeeligibilities', 'index')->name('feeeligibilities'); 
+        Route::get('feeeligibilities/list', 'list')->name('feeeligibilities.list'); 
+        Route::post('feeeligibilities/store', 'store')->name('feeeligibilities.store'); 
+        Route::get('feeeligibilities/edit/{id}', 'edit')->name('feeeligibilities.edit');
+        Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
+        Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
+        Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
+        Route::post('feeeligibilities/update-status/{id}', 'updateStatus')->name('feeeligibilities.update.status');
+    });
+
+    Route::controller(ApelCreditController::class)->group(function() {
+        Route::get('apelcred', 'index')->name('apelcred'); 
+        Route::get('apelcred/list', 'list')->name('apelcred.list'); 
+        Route::post('apelcred/store', 'store')->name('apelcred.store'); 
+        Route::get('apelcred/edit/{id}', 'edit')->name('apelcred.edit');
+        Route::post('apelcred/update', 'update')->name('apelcred.update');
+        Route::delete('apelcred/delete/{id}', 'destroy')->name('apelcred.destory');
+        Route::post('apelcred/restore/{id}', 'restore')->name('apelcred.restore');
+        Route::post('apelcred/update-status/{id}', 'updateStatus')->name('apelcred.update.status');
+    });
+
+    Route::controller(HighestQualificationOnEntryController::class)->group(function() {
+        Route::get('highest-qualification-on-entry', 'index')->name('highestqoe'); 
+        Route::get('highest-qualification-on-entry/list', 'list')->name('highestqoe.list'); 
+        Route::post('highest-qualification-on-entry/store', 'store')->name('highestqoe.store'); 
+        Route::get('highest-qualification-on-entry/edit/{id}', 'edit')->name('highestqoe.edit');
+        Route::post('highest-qualification-on-entry/update', 'update')->name('highestqoe.update');
+        Route::delete('highest-qualification-on-entry/delete/{id}', 'destroy')->name('highestqoe.destory');
+        Route::post('highest-qualification-on-entry/restore/{id}', 'restore')->name('highestqoe.restore');
+        Route::post('highest-qualification-on-entry/update-status/{id}', 'updateStatus')->name('highestqoe.update.status');
+    });
+
+    Route::controller(CountryOfPermanentAddressController::class)->group(function() {
+        Route::get('country-of-permanent-address', 'index')->name('permaddcountry'); 
+        Route::get('country-of-permanent-address/list', 'list')->name('permaddcountry.list'); 
+        Route::post('country-of-permanent-address/store', 'store')->name('permaddcountry.store'); 
+        Route::get('country-of-permanent-address/edit/{id}', 'edit')->name('permaddcountry.edit');
+        Route::post('country-of-permanent-address/update', 'update')->name('permaddcountry.update');
+        Route::delete('country-of-permanent-address/delete/{id}', 'destroy')->name('permaddcountry.destory');
+        Route::post('country-of-permanent-address/restore/{id}', 'restore')->name('permaddcountry.restore');
+        Route::post('country-of-permanent-address/update-status/{id}', 'updateStatus')->name('permaddcountry.update.status');
+    });
+
+    Route::controller(PreviousProviderController::class)->group(function() {
+        Route::get('previous-provider', 'index')->name('previousprovider'); 
+        Route::get('previous-provider/list', 'list')->name('previousprovider.list'); 
+        Route::post('previous-provider/store', 'store')->name('previousprovider.store'); 
+        Route::get('previous-provider/edit/{id}', 'edit')->name('previousprovider.edit');
+        Route::post('previous-provider/update', 'update')->name('previousprovider.update');
+        Route::delete('previous-provider/delete/{id}', 'destroy')->name('previousprovider.destory');
+        Route::post('previous-provider/restore/{id}', 'restore')->name('previousprovider.restore');
+        Route::post('previous-provider/update-status/{id}', 'updateStatus')->name('previousprovider.update.status');
+    });
+
+    Route::controller(QualificationTypeIdentifierController::class)->group(function() {
+        Route::get('qualification-identifier', 'index')->name('qaualtypeid'); 
+        Route::get('qualification-identifier/list', 'list')->name('qaualtypeid.list'); 
+        Route::post('qualification-identifier/store', 'store')->name('qaualtypeid.store'); 
+        Route::get('qualification-identifier/edit/{id}', 'edit')->name('qaualtypeid.edit');
+        Route::post('qualification-identifier/update', 'update')->name('qaualtypeid.update');
+        Route::delete('qualification-identifier/delete/{id}', 'destroy')->name('qaualtypeid.destory');
+        Route::post('qualification-identifier/restore/{id}', 'restore')->name('qaualtypeid.restore');
+        Route::post('qualification-identifier/update-status/{id}', 'updateStatus')->name('qaualtypeid.update.status');
+    });
+
+    Route::controller(ReasonForEngagementEndingController::class)->group(function() {
+        Route::get('reason-end', 'index')->name('rsnengend'); 
+        Route::get('reason-end/list', 'list')->name('rsnengend.list'); 
+        Route::post('reason-end/store', 'store')->name('rsnengend.store'); 
+        Route::get('reason-end/edit/{id}', 'edit')->name('rsnengend.edit');
+        Route::post('reason-end/update', 'update')->name('rsnengend.update');
+        Route::delete('reason-end/delete/{id}', 'destroy')->name('rsnengend.destory');
+        Route::post('reason-end/restore/{id}', 'restore')->name('rsnengend.restore');
+        Route::post('reason-end/update-status/{id}', 'updateStatus')->name('rsnengend.update.status');
+    });    
+    
+    Route::controller(TermTimeAccommodationTypeController::class)->group(function() {
+        Route::get('termtimeaccommodationtype', 'index')->name('termtimeaccommodationtype'); 
+        Route::get('termtimeaccommodationtype/list', 'list')->name('termtimeaccommodationtype.list'); 
+        Route::post('termtimeaccommodationtype/store', 'store')->name('termtimeaccommodationtype.store'); 
+        Route::get('termtimeaccommodationtype/edit/{id}', 'edit')->name('termtimeaccommodationtype.edit');
+        Route::post('termtimeaccommodationtype/update', 'update')->name('termtimeaccommodationtype.update');
+        Route::delete('termtimeaccommodationtype/delete/{id}', 'destroy')->name('termtimeaccommodationtype.destory');
+        Route::post('termtimeaccommodationtype/restore/{id}', 'restore')->name('termtimeaccommodationtype.restore');
+        Route::post('termtimeaccommodationtype/update-status/{id}', 'updateStatus')->name('termtimeaccommodationtype.update.status');
+    });
+
+    Route::controller(StudentIdentifierController::class)->group(function() {
+        Route::get('studentidentifier', 'index')->name('studentidentifier'); 
+        Route::get('studentidentifier/list', 'list')->name('studentidentifier.list'); 
+        Route::post('studentidentifier/store', 'store')->name('studentidentifier.store'); 
+        Route::get('studentidentifier/edit/{id}', 'edit')->name('studentidentifier.edit');
+        Route::post('studentidentifier/update', 'update')->name('studentidentifier.update');
+        Route::delete('studentidentifier/delete/{id}', 'destroy')->name('studentidentifier.destory');
+        Route::post('studentidentifier/restore/{id}', 'restore')->name('studentidentifier.restore');
+        Route::post('studentidentifier/update-status/{id}', 'updateStatus')->name('studentidentifier.update.status');
     });
 });

@@ -6,8 +6,8 @@ import Tabulator from "tabulator-tables";
 var feeEligibilitiesListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
+        let querystr = $("#query-FEEELIGIBILITY").val() != "" ? $("#query-FEEELIGIBILITY").val() : "";
+        let status = $("#status-FEEELIGIBILITY").val() != "" ? $("#status-FEEELIGIBILITY").val() : "";
         let tableContent = new Tabulator("#feeEligibilitiesListTable", {
             ajaxURL: route("feeeligibilities.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -25,7 +25,6 @@ var feeEligibilitiesListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
                 },
                 {
                     title: "Title",
@@ -43,12 +42,20 @@ var feeEligibilitiesListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "120",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -82,29 +89,29 @@ var feeEligibilitiesListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv").on("click", function (event) {
+        $("#tabulator-export-csv-FEEELIGIBILITY").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
+        $("#tabulator-export-json-FEEELIGIBILITY").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx-FEEELIGIBILITY").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Fee Eligibilities Details",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
+        $("#tabulator-export-html-FEEELIGIBILITY").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print-FEEELIGIBILITY").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -119,15 +126,25 @@ var feeEligibilitiesListTable = (function () {
     // Tabulator
     if ($("#feeEligibilitiesListTable").length) {
         // Init Table
-        feeEligibilitiesListTable.init();
+        $('.optionBoxTitle').on('click', function(e){
+            e.preventDefault();
+            var $title = $(this);
+            var $box = $title.parents('.optionBox');
+            var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
+            var table = $boxBody.attr('data-tableid');
+    
+            if($box.hasClass('active') && table == 'feeEligibilitiesListTable'){
+                feeEligibilitiesListTable.init();
+            }
+        });
 
         // Filter function
-        function filterHTMLForm() {
+        function filterHTMLFormFEEELIGIBILITY() {
             feeEligibilitiesListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
+        $("#tabulatorFilterForm-FEEELIGIBILITY")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
@@ -139,15 +156,15 @@ var feeEligibilitiesListTable = (function () {
         );
 
         // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
+        $("#tabulator-html-filter-go-FEEELIGIBILITY").on("click", function (event) {
+            filterHTMLFormFEEELIGIBILITY();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLForm();
+        $("#tabulator-html-filter-reset-FEEELIGIBILITY").on("click", function (event) {
+            $("#query-FEEELIGIBILITY").val("");
+            $("#status-FEEELIGIBILITY").val("1");
+            filterHTMLFormFEEELIGIBILITY();
         });
 
         const addFeeEligibilityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFeeEligibilityModal"));
@@ -169,6 +186,7 @@ var feeEligibilitiesListTable = (function () {
             $('#addFeeEligibilityModal .df_code_area').fadeOut('fast', function(){
                 $('#addFeeEligibilityModal .df_code_area input').val('');
             })
+            $('#addFeeEligibilityModal input[name="active"]').prop('checked', true);
         });
         
         const editFeeEligibilityModalEl = document.getElementById('editFeeEligibilityModal')
@@ -185,6 +203,7 @@ var feeEligibilitiesListTable = (function () {
             $('#editFeeEligibilityModal .df_code_area').fadeOut('fast', function(){
                 $('#editFeeEligibilityModal .df_code_area input').val('');
             })
+            $('#editFeeEligibilityModal input[name="active"]').prop('checked', false);
         });
         
         $('#addFeeEligibilityForm input[name="is_hesa"]').on('change', function(){
@@ -318,6 +337,12 @@ var feeEligibilitiesListTable = (function () {
                             })
                         }
                         $('#editFeeEligibilityModal input[name="id"]').val(editId);
+
+                        if(dataset.active == 1){
+                            $('#editFeeEligibilityModal input[name="active"]').prop('checked', true);
+                        }else{
+                            $('#editFeeEligibilityModal input[name="active"]').prop('checked', false);
+                        }
                     }
                 })
                 .catch((error) => {
@@ -388,7 +413,7 @@ var feeEligibilitiesListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            if(action == 'DELETEFEEELIGIBILITY'){
                 axios({
                     method: 'delete',
                     url: route('feeeligibilities.destory', recordID),
@@ -408,7 +433,7 @@ var feeEligibilitiesListTable = (function () {
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORE'){
+            } else if(action == 'RESTOREFEEELIGIBILITY'){
                 axios({
                     method: 'post',
                     url: route('feeeligibilities.restore', recordID),
@@ -428,8 +453,42 @@ var feeEligibilitiesListTable = (function () {
                 }).catch(error =>{
                     console.log(error)
                 });
+            }else if(action == 'CHANGESTATFEEELIGIBILITY'){
+                axios({
+                    method: 'post',
+                    url: route('feeeligibilities.update.status', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('WOW!');
+                            $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        });
+                    }
+                    feeEligibilitiesListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
             }
         })
+
+        // Status Updater
+        $('#feeEligibilitiesListTable').on('click', '.status_updater', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confirmModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATFEEELIGIBILITY');
+            });
+        });
 
         // Delete Course
         $('#feeEligibilitiesListTable').on('click', '.delete_btn', function(){
@@ -441,7 +500,7 @@ var feeEligibilitiesListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEFEEELIGIBILITY');
             });
         });
 
@@ -455,7 +514,7 @@ var feeEligibilitiesListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREFEEELIGIBILITY');
             });
         });
     }

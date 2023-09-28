@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class HesaGender extends Model
+class PreviousProvider extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -16,6 +16,7 @@ class HesaGender extends Model
         'hesa_code',
         'is_df',
         'df_code',
+        'iso_code',
         'active',
         'created_by',
         'updated_by',
