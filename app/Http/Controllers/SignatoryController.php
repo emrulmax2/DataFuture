@@ -64,7 +64,12 @@ class SignatoryController extends Controller
             foreach($Query as $list):
                 $signature = '';
                 if(isset($list->signature) && !empty($list->signature)):
-                    $signature = asset('storage/signatories/'.$list->signature);
+                    if(Storage::disk('google')->exists('public/signatories/'.$list->signature)) {
+                        $disk = Storage::disk('google');
+                        $signature = $disk ->url('public/signatories/'.$list->signature);
+                    
+                    } else
+                        $signature = asset('storage/signatories/'.$list->signature);
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -90,8 +95,8 @@ class SignatoryController extends Controller
         if($request->hasFile('signatory')):
             $document = $request->file('signatory');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/signatories/', $documentName);
-
+            $path = $document->storeAs('public/signatories/', $documentName,'google');
+            //Storage::disk('google')->put($path, file_get_contents($document));
             $data = [];
             $data['signatory_name'] = $request->signatory_name;
             $data['signatory_post'] = $request->signatory_post;

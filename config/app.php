@@ -198,6 +198,7 @@ return [
         App\Providers\ViewServiceProvider::class,
 
         Laravel\Socialite\SocialiteServiceProvider::class,
+        App\Providers\GoogleDriveServiceProvider::class,
 
     ],
 
