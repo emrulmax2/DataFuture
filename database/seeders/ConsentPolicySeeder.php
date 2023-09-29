@@ -36,6 +36,7 @@ class ConsentPolicySeeder extends Seeder
                 'name' => 'Employment', 
                 'description' => 'Career advice, Career Events, Drop in Session, Seminar', 
                 'is_required' => 'No', 
+                'department_id' => NULL, 
                 'created_by' => 1, 
                 'created_at' => date("Y-m-d", time())
             ],
