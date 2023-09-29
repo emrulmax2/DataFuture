@@ -99,7 +99,7 @@
                             {{-- <table class="table ">
                                 <tr>
                                     <td> --}}
-                                        <a class="inline-flex items-center justify-center cursor-pointer" target="_blank" href="{{   asset('storage/interviewresult/'.$interview->document->current_file_name)   }}"><i data-lucide="paperclip" class="w-4 h-4 mr-2"></i>{{ $interview->document->current_file_name }}</a>
+                                        <a class="inline-flex items-center justify-center cursor-pointer" target="_blank" href="{{   asset('storage/interviewresult/'.$applicant->id."/".$interview->document->current_file_name)   }}"><i data-lucide="paperclip" class="w-4 h-4 mr-2"></i>{{ $interview->document->current_file_name }}</a>
                                     {{-- </td>
                                     <td> --}}
                                         <a class="inline-flex items-center justify-center cursor-pointer" data-tw-toggle="modal" data-tw-target="#confirmModal"><i data-lucide="delete" class="w-5 h-5 ml-2 text-danger "></i></a>

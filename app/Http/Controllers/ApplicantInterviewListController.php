@@ -99,11 +99,11 @@ class ApplicantInterviewListController extends Controller
 
             $document = $request->file('file');
             $imageName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/interviewresult/',$imageName);
+            $path = $document->storeAs('public/interviewresult/'.$applicantInterviewData->applicant_id.'/',$imageName);
             $data = [];
             $data['applicant_id'] = $applicantInterviewData->applicant_id;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = asset('storage/interviewresult/'.$imageName);
+            $data['path'] = asset('storage/interviewresult/'.$applicantInterviewData->applicant_id.'/'.$imageName);
             $data['display_file_name'] = $imageName;
             $data['current_file_name'] = $imageName;
             $data['created_by'] = auth()->user()->id;
