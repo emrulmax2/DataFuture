@@ -29,67 +29,69 @@ class TopMenu
                     'route_name' => 'dashboard',
                     'params' => []
                 ],
-                'courses' => [
+                'coursemanagement' => [
                     'icon' => 'book-open',
-                    'title' => 'Courses & Semesters',
+                    'title' => 'Courses Management',
                     'sub_menu' => [
-                        'semester' => [
-                            'route_name' => 'semester',
-                            'params' => [],
-                            'title' => 'Semesters'
-                        ],
                         'courses' => [
-                            'route_name' => 'courses',
-                            'params' => [],
-                            'title' => 'Courses'
+                            'icon' => '',
+                            'title' => 'Courses & Semesters',
+                            'sub_menu' => [
+                                'semester' => [
+                                    'icon' => '',
+                                    'route_name' => 'semester',
+                                    'params' => [],
+                                    'title' => 'Semesters'
+                                ],
+                                'courses' => [
+                                    'icon' => '',
+                                    'route_name' => 'courses',
+                                    'params' => [],
+                                    'title' => 'Courses'
+                                ],
+                                'course.creation' => [
+                                    'icon' => '',
+                                    'route_name' => 'course.creation',
+                                    'params' => [],
+                                    'title' => 'Course Creations'
+                                ],
+                            ]
                         ],
-                        'course.creation' => [
-                            'route_name' => 'course.creation',
-                            'params' => [],
-                            'title' => 'Course Creations'
+                        'terms' => [
+                            'icon' => '',
+                            'title' => 'Terms & Modules',
+                            'sub_menu' => [
+                                'term.module.creation' => [
+                                    'icon' => '',
+                                    'route_name' => 'term.module.creation',
+                                    'params' => [],
+                                    'title' =>'Term Module Creations'
+                                ],
+                                'modulelevels' => [
+                                    'icon' => '',
+                                    'route_name' => 'modulelevels',
+                                    'params' => [],
+                                    'title' =>'Module Levels'
+                                ],
+                                'groups' => [
+                                    'icon' => '',
+                                    'route_name' => 'groups',
+                                    'params' => [],
+                                    'title' =>'Groups'
+                                ],
+                            ]
                         ],
-                    ]
-                ],
-                'terms' => [
-                    'icon' => 'calendar',
-                    'title' => 'Terms & Modules',
-                    'sub_menu' => [
-                        'term.module.creation' => [
-                            'route_name' => 'term.module.creation',
-                            'params' => [],
-                            'title' =>'Term Module Creations'
-                        ],
-                        'modulelevels' => [
-                            'route_name' => 'modulelevels',
-                            'params' => [],
-                            'title' =>'Module Levels'
-                        ],
-                        'groups' => [
-                            'route_name' => 'groups',
-                            'params' => [],
-                            'title' =>'Groups'
-                        ],
-                    ]
-                ],
-                'plans' => [
-                    'icon' => 'calendar',
-                    'title' => 'Plans',
-                    'sub_menu' => [
-                        'venues' => [
-                            'route_name' => 'class.plan',
-                            'params' => [],
-                            'title' =>'Class Plans'
-                        ],
-                    ]
-                ],
-                'campuses' => [
-                    'icon' => 'map-pin',
-                    'title' => 'Locations',
-                    'sub_menu' => [
-                        'venues' => [
-                            'route_name' => 'venues',
-                            'params' => [],
-                            'title' =>'Venues'
+                        'plans' => [
+                            'icon' => '',
+                            'title' => 'Plans',
+                            'sub_menu' => [
+                                'venues' => [
+                                    'icon' => '',
+                                    'route_name' => 'class.plan',
+                                    'params' => [],
+                                    'title' =>'Class Plans'
+                                ],
+                            ]
                         ],
                     ]
                 ],
@@ -141,12 +143,6 @@ class TopMenu
                                     'params' => [],
                                     'title' => 'Course Qualifications'
                                 ], 
-                                'countries' => [
-                                    'icon' => '',
-                                    'route_name' => 'countries',
-                                    'params' => [],
-                                    'title' => 'Countries'
-                                ],
                                 'consent' => [
                                     'icon' => '',
                                     'route_name' => 'consent',
@@ -155,68 +151,27 @@ class TopMenu
                                 ], 
                             ]
                         ],
-                        'student.options' => [
-                            'route_name' => 'student.options',
-                            'params' => [],
-                            'title' => 'Student Option Value'
+                        'locations' => [
+                            'icon' => '',
+                            'title' => 'Locations',
+                            'sub_menu' => [
+                                'venues' => [
+                                    'icon' => '',
+                                    'route_name' => 'venues',
+                                    'params' => [],
+                                    'title' =>'Venues'
+                                ],
+                            ]
                         ],
                         'applicants' => [
                             'icon' => '',
                             'title' => 'Applicants',
                             'sub_menu' => [
-                                'titles' => [
-                                    'icon' => '',
-                                    'route_name' => 'titles',
-                                    'params' => [],
-                                    'title' => 'Title'
-                                ],
-                                'ethnicities' => [
-                                    'icon' => '',
-                                    'route_name' => 'ethnic',
-                                    'params' => [],
-                                    'title' => 'Ethnicities'
-                                ],
-                                'kin.relations' => [
-                                    'icon' => '',
-                                    'route_name' => 'kin.relations',
-                                    'params' => [],
-                                    'title' => 'Kins Relations'
-                                ],
-                                'sex.orientation' => [
-                                    'icon' => '',
-                                    'route_name' => 'sex.orientation',
-                                    'params' => [],
-                                    'title' => 'Sexual Orientation'
-                                ],
-                                'religion' => [
-                                    'icon' => '',
-                                    'route_name' => 'religion',
-                                    'params' => [],
-                                    'title' => 'Religions'
-                                ],
-                                'gender' => [
-                                    'icon' => '',
-                                    'route_name' => 'gender',
-                                    'params' => [],
-                                    'title' => 'Hesa Gender'
-                                ],
-                                'feeeligibilities' => [
-                                    'icon' => '',
-                                    'route_name' => 'feeeligibilities',
-                                    'params' => [],
-                                    'title' => 'Fee Eligibility'
-                                ],
                                 'statuses' => [
                                     'icon' => '',
                                     'route_name' => 'statuses',
                                     'params' => [],
                                     'title' => 'Statuses'
-                                ],
-                                'disabilities' => [
-                                    'icon' => '',
-                                    'route_name' => 'disabilities',
-                                    'params' => [],
-                                    'title' => 'Disabilities'
                                 ],
                                 'documentsettings' => [
                                     'route_name' => 'documentsettings',
@@ -234,6 +189,11 @@ class TopMenu
                                     'title' => 'Task List'
                                 ],
                             ]
+                        ],
+                        'student.options' => [
+                            'route_name' => 'student.options',
+                            'params' => [],
+                            'title' => 'Student Option Value'
                         ],
                         'usersettings' => [
                             'icon' => '',

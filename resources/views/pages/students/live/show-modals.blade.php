@@ -294,9 +294,22 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                            <input value="{{ isset($student->users->email) ? $student->users->email : '' }}" type="text" placeholder="Email" id="email" class="form-control" name="email">
-                            <div class="acc__input-error error-email text-danger mt-2"></div>
+                            <label for="personal_email" class="form-label">Personal Email <span class="text-danger">*</span></label>
+                            <input value="{{ isset($student->users->email) ? $student->users->email : '' }}" type="text" placeholder="Email" id="email" class="form-control" name="personal_email">
+                            <div class="acc__input-error error-personal_email text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="institutional_email" class="form-label">Institutional Email <span class="text-danger">*</span></label>
+                            <div class="input-group emailGroup">
+                                <input type="text" class="form-control" name="institutional_email_name">
+                                <div class="input-group-text">
+                                    <select class="form-control" name="institutional_email_domain">
+                                        <option value="lcc.ac.uk">lcc.ac.uk</option>
+                                        <option value="lcc.co.uk">lcc.co.uk</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-institutional_email_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="phone" class="form-label">Home Phone <span class="text-danger">*</span></label>
@@ -308,52 +321,125 @@
                             <input value="{{ isset($student->contact->mobile) ? $student->contact->mobile : '' }}" data-original="{{ isset($student->contact->mobile) ? $student->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
-                        @php 
-                            $address = $address_line_1 = $address_line_2 = $city = $state = $post_code = $country = '';
-                            if(isset($student->contact->address_line_1) && !empty($student->contact->address_line_1)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->address_line_1.'</span><br/>';
-                                $address_line_1 = $student->contact->address_line_1;
+                        <div class="col-span-12">
+                            <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                        </div>
+                        @php
+                            $term_time_address_id = (isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0 ? $student->contact->term_time_address_id : 0);
+                            $address = '';
+                            if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->address_line_1.'</span><br/>';
                             endif;
-                            if(isset($student->contact->address_line_2) && !empty($student->contact->address_line_2)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->address_line_2.'</span><br/>';
-                                $address_line_2 = $student->contact->address_line_2;
+                            if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->address_line_2.'</span><br/>';
                             endif;
-                            if(isset($student->contact->city) && !empty($student->contact->city)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->city.'</span>, ';
-                                $city = $student->contact->city;
+                            if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->city.'</span>, ';
                             endif;
-                            if(isset($student->contact->state) && !empty($student->contact->state)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->state.'</span>, <br/>';
-                                $state = $student->contact->state;
+                            if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->state.'</span>, <br/>';
                             endif;
-                            if(isset($student->contact->post_code) && !empty($student->contact->post_code)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->post_code.'</span>,<br/>';
-                                $post_code = $student->contact->post_code;
+                            if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->post_code.'</span>,<br/>';
                             endif;
-                            if(isset($student->contact->country) && !empty($student->contact->country)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->country.'</span><br/>';
-                                $country = $student->contact->country;
-                            endif;
-
-                            if($address != ''):
-                                $address .= '<input type="hidden" name="applicant_address" value="'.$address_line_1.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_line_1" value="'.$address_line_1.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_line_2" value="'.$address_line_2.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_city" value="'.$city.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_state" value="'.$state.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_postal_zip_code" value="'.$post_code.'"/>';
-                                $address .= '<input type="hidden" name="applicant_address_country" value="'.$country.'"/>';
+                            if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                                $address .= '<span class="text-slate-600 font-medium">'.$student->contact->termaddress->country.'</span><br/>';
                             endif;
                         @endphp
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="address_line_1" class="form-label">Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2 {{ !empty($address) ? 'active' : '' }}" id="applicanAddress" style="display: {{ !empty($address) ? 'block' : 'none' }};">{!! $address !!}</div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="applicant" data-address-wrap="#applicanAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ !empty($address) ? 'Update Address' : 'Add Address' }}</span>
-                                </button>
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="termTimeAddressWrap">
+                            <label for="address_line_1" class="form-label">Term Time Address <span class="text-danger">*</span></label>
+                            <div class="addresses mb-2">
+                                @if($term_time_address_id > 0)
+                                    {!! $address !!}
+                                @else 
+                                    <span class="text-warning font-medium">Not set yet!</span>
+                                @endif
                             </div>
-                            <div class="acc__input-error error-applicant_address text-danger mt-2"></div>
+                            <div>
+                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ $term_time_address_id > 0 ? 'Update Address' : 'Add Address' }}</span>
+                                </button>
+                                <input type="hidden" name="term_time_address_id" class="address_id_field" value="{{ $term_time_address_id }}"/>
+                            </div>
+                            <div class="acc__input-error error-term_time_address_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <div>
+                                <label for="mobile" class="form-label">Term Time Accomodation Type</label>
+                                <select class="lcc-tom-select lccTom w-full" name="term_time_accommodation_type_id">
+                                    <option value="">Please Select</option>
+                                    @if($ttacom->count() > 0)
+                                        @foreach($ttacom as $ttc)
+                                            <option {{ (isset($student->contact->term_time_accommodation_type) && $ttc->id == $student->contact->term_time_accommodation_type ? 'Selected' : '') }} value="{{ $ttc->id }}">{{ $ttc->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="mt-3">
+                                <label for="mobile" class="form-label">Term Time Address Postcode <span class="text-danger">*</span></label>
+                                <input value="{{ isset($student->contact->term_time_post_code) ? $student->contact->term_time_post_code : '' }}" type="text" placeholder="Post Code" class="form-control" name="term_time_post_code">
+                                <div class="acc__input-error error-term_time_post_code text-danger mt-2"></div>
+                            </div>
+                        </div>
+                        <div class="col-span-12">
+                            <div class="mt-3 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                        </div>
+                        @php
+                            $permanent_address_id = (isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0 ? $student->contact->term_time_address_id : 0);
+                            $address2 = '';
+                            if(isset($student->contact->permaddress->address_line_1) && !empty($student->contact->permaddress->address_line_1)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->address_line_1.'</span><br/>';
+                            endif;
+                            if(isset($student->contact->permaddress->address_line_2) && !empty($student->contact->permaddress->address_line_2)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->address_line_2.'</span><br/>';
+                            endif;
+                            if(isset($student->contact->permaddress->city) && !empty($student->contact->permaddress->city)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->city.'</span>, ';
+                            endif;
+                            if(isset($student->contact->permaddress->state) && !empty($student->contact->permaddress->state)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->state.'</span>, <br/>';
+                            endif;
+                            if(isset($student->contact->permaddress->post_code) && !empty($student->contact->permaddress->post_code)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->post_code.'</span>,<br/>';
+                            endif;
+                            if(isset($student->contact->permaddress->country) && !empty($student->contact->permaddress->country)):
+                                $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->country.'</span><br/>';
+                            endif;
+                        @endphp
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="permanentAddressWrap">
+                            <label for="address_line_1" class="form-label">Permanent Address <span class="text-danger">*</span></label>
+                            <div class="addresses mb-2">
+                                @if($permanent_address_id > 0)
+                                    {!! $address2 !!}
+                                @else 
+                                    <span class="text-warning font-medium">Not set yet!</span>
+                                @endif
+                            </div>
+                            <div>
+                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ $permanent_address_id > 0 ? 'Update Address' : 'Add Address' }}</span>
+                                </button>
+                                <input type="hidden" name="permanent_address_id" class="address_id_field" value="{{ $permanent_address_id }}"/>
+                            </div>
+                            <div class="acc__input-error error-permanent_address_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <div>
+                                <label for="permanent_country_id" class="form-label">Permanent Country</label>
+                                <select class="lcc-tom-select lccTom w-full" name="permanent_country_id">
+                                    <option value="">Please Select</option>
+                                    @if($country->count() > 0)
+                                        @foreach($country as $con)
+                                            <option {{ isset($student->contact->permanent_country_id) && $con->id == $student->contact->permanent_country_id ? 'Selected' : '' }} value="{{ $con->id }}">{{ $con->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="mt-3">
+                                <label for="permanent_post_code" class="form-label">Permanent Postcode <span class="text-danger">*</span></label>
+                                <input value="{{ isset($student->contact->permanent_post_code) ? $student->contact->permanent_post_code : '' }}" type="text" placeholder="Post Code" class="form-control" name="permanent_post_code">
+                                <div class="acc__input-error error-permanent_post_code text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -374,7 +460,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $student->id }}" name="applicant_id"/>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
                     <input type="hidden" value="{{ (isset($student->contact->id) ? $student->contact->id : 0) }}" name="id"/>
                 </div>
             </div>
@@ -423,52 +509,45 @@
                             <input value="{{ isset($student->kin->email) ? $student->kin->email : '' }}" type="email" placeholder="Email" id="kins_email" class="form-control" name="kins_email">
                             <div class="acc__input-error error-kins_email text-danger mt-2"></div>
                         </div>
-                        @php 
-                            $address = $address_line_1 = $address_line_2 = $city = $state = $post_code = $country = '';
-                            if(isset($student->kin->address_line_1) && !empty($student->kin->address_line_1)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->address_line_1.'</span><br/>';
-                                $address_line_1 = $student->kin->address_line_1;
+                        
+                        @php
+                            $kin_address_id = (isset($student->kin->address_id) && $student->kin->address_id > 0 ? $student->kin->address_id : 0);
+                            $address3 = '';
+                            if(isset($student->kin->address->address_line_1) && !empty($student->kin->address->address_line_1)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->address_line_1.'</span><br/>';
                             endif;
-                            if(isset($student->kin->address_line_2) && !empty($student->kin->address_line_2)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->address_line_2.'</span><br/>';
-                                $address_line_2 = $student->kin->address_line_2;
+                            if(isset($student->kin->address->address_line_2) && !empty($student->kin->address->address_line_2)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->address_line_2.'</span><br/>';
                             endif;
-                            if(isset($student->kin->city) && !empty($student->kin->city)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->city.'</span>, ';
-                                $city = $student->kin->city;
+                            if(isset($student->kin->address->city) && !empty($student->kin->address->city)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->city.'</span>, ';
                             endif;
-                            if(isset($student->kin->state) && !empty($student->kin->state)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->state.'</span>, <br/>';
-                                $state = $student->kin->state;
+                            if(isset($student->kin->address->state) && !empty($student->kin->address->state)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->state.'</span>, <br/>';
                             endif;
-                            if(isset($student->kin->post_code) && !empty($student->kin->post_code)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->post_code.'</span>,<br/>';
-                                $post_code = $student->kin->post_code;
+                            if(isset($student->kin->address->post_code) && !empty($student->kin->address->post_code)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->post_code.'</span>,<br/>';
                             endif;
-                            if(isset($student->kin->country) && !empty($student->kin->country)):
-                                $address .= '<span class="text-slate-600 font-medium">'.$student->kin->country.'</span><br/>';
-                                $country = $student->kin->country;
-                            endif;
-
-                            if($address != ''):
-                                $address .= '<input type="hidden" name="kin_address" value="'.$address_line_1.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_line_1" value="'.$address_line_1.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_line_2" value="'.$address_line_2.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_city" value="'.$city.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_state" value="'.$state.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_postal_zip_code" value="'.$post_code.'"/>';
-                                $address .= '<input type="hidden" name="kin_address_country" value="'.$country.'"/>';
+                            if(isset($student->kin->address->country) && !empty($student->kin->address->country)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$student->kin->address->country.'</span><br/>';
                             endif;
                         @endphp
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2 {{ !empty($address) ? 'active' : '' }}" id="kinAddress" style="display: {{ !empty($address) ? 'block' : 'none' }};">{!! $address !!}</div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="kin" data-address-wrap="#kinAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ !empty($address) ? 'Update Address' : 'Add Address' }}</span>
-                                </button>
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="kinAddressWrap">
+                            <label for="address_line_1" class="form-label">Kin Address <span class="text-danger">*</span></label>
+                            <div class="addresses mb-2">
+                                @if($kin_address_id > 0)
+                                    {!! $address3 !!}
+                                @else 
+                                    <span class="text-warning font-medium">Not set yet!</span>
+                                @endif
                             </div>
-                            <div class="acc__input-error error-kin_address text-danger mt-2"></div>
+                            <div>
+                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ $kin_address_id > 0 ? 'Update Address' : 'Add Address' }}</span>
+                                </button>
+                                <input type="hidden" name="address_id" class="address_id_field" value="{{ $kin_address_id }}"/>
+                            </div>
+                            <div class="acc__input-error error-address_id text-danger mt-2"></div>
                         </div>
                     </div>
                 </div>
@@ -514,8 +593,8 @@
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12">
                             <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full required" name="student_address_address_line_1">
-                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
+                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="student_address_address_line_1">
+                            <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12">
                             <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
@@ -523,22 +602,21 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full required" name="student_address_city">
+                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full" name="student_address_city">
                             <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_state_province_region" class="form-label">State</label>
                             <input type="text" placeholder="State" id="student_address_state_province_region" class="form-control w-full" name="student_address_state_province_region">
-                            <div class="acc__input-error error-student_address_state_province_region text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full required" name="student_address_postal_zip_code">
+                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full" name="student_address_postal_zip_code">
                             <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full required" name="student_address_country">
+                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="student_address_country">
                             <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
                         </div>
                         <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
@@ -563,7 +641,7 @@
                         </svg>
                     </button>
                     <input type="hidden" name="place" value=""/>
-                    <input type="hidden" name="prefix" value=""/>
+                    <input type="hidden" name="address_id" value="0"/>
                 </div>
             </div>
         </form>
@@ -847,15 +925,20 @@
                             <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Company Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2" id="empHistoryAddress" style="display: none;"></div>
+
+                        
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="addEmpHistoryAddress">
+                            <label for="address_line_1" class="form-label">Company Address <span class="text-danger">*</span></label>
+                            <div class="addresses mb-2">
+                                <span class="text-warning font-medium">Not set yet!</span>
+                            </div>
                             <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#empHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
                                     <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
                                 </button>
+                                <input type="hidden" name="address_id" class="address_id_field" value="0"/>
                             </div>
-                            <div class="acc__input-error error-employment_address text-danger mt-2"></div>
+                            <div class="acc__input-error error-address_id text-danger mt-2"></div>
                         </div>
 
                         <div class="col-span-12">
@@ -953,15 +1036,18 @@
                             <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Company Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2" id="editEmpHistoryAddress" style="display: none;"></div>
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="editEmpHistoryAddress">
+                            <label for="address_line_1" class="form-label">Company Address <span class="text-danger">*</span></label>
+                            <div class="addresses mb-2">
+                                <span class="text-warning font-medium">Not set yet!</span>
+                            </div>
                             <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#editEmpHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
                                     <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
                                 </button>
+                                <input type="hidden" name="address_id" class="address_id_field" value="0"/>
                             </div>
-                            <div class="acc__input-error error-employment_address text-danger mt-2"></div>
+                            <div class="acc__input-error error-address_id text-danger mt-2"></div>
                         </div>
 
                         <div class="col-span-12">

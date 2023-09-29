@@ -269,47 +269,76 @@
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0 mb-3">
-                        <div class="col-span-12 text-slate-500 font-medium mb-1">Term Time / Correspondence Address</div>
-                        <div class="col-span-12 font-medium pl-5">
-                            @if(isset($student->contact->address_line_1) && !empty($student->contact->address_line_1))
-                                <span class="font-medium">{{ $student->contact->address_line_1 }}</span><br/>
-                            @endif
-                            @if(isset($student->contact->address_line_2) && !empty($student->contact->address_line_2))
-                                <span class="font-medium">{{ $student->contact->address_line_2 }}</span><br/>
-                            @endif
-                            @if(isset($student->contact->city) && !empty($student->contact->city))
-                                <span class="font-medium">{{ $student->contact->city }}</span>,
-                            @endif
-                            @if(isset($student->contact->state) && !empty($student->contact->state))
-                                <span class="font-medium">{{ $student->contact->state }}</span>, <br/>
-                            @endif
-                            @if(isset($student->contact->post_code) && !empty($student->contact->post_code))
-                                <span class="font-medium">{{ $student->contact->post_code }}</span>,
-                            @endif
-                            @if(isset($student->contact->country) && !empty($student->contact->country))
-                                <span class="font-medium">{{ $student->contact->country }}</span><br/>
+                        <div class="col-span-12 text-slate-500 font-medium mb-2">Term Time / Correspondence Address</div>
+                        <div class="col-span-12 font-medium">
+                            @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
+                                @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span><br/>
+                                @endif
+                                @if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2))
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_2 }}</span><br/>
+                                @endif
+                                @if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city))
+                                    <span class="font-medium">{{ $student->contact->termaddress->city }}</span>,
+                                @endif
+                                @if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state))
+                                    <span class="font-medium">{{ $student->contact->termaddress->state }}</span>, <br/>
+                                @endif
+                                @if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code))
+                                    <span class="font-medium">{{ $student->contact->termaddress->post_code }}</span>,
+                                @endif
+                                @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
+                                    <span class="font-medium">{{ $student->contact->termaddress->country }}</span><br/>
+                                @endif
+                            @else 
+                                <span class="font-medium text-warning">Not Set Yet!</span><br/>
                             @endif
                         </div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
-                        <div class="col-span-4 text-slate-500 font-medium">Term Time Accomodation Type</div>
-                        <div class="col-span-8 font-medium">---</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->contact->ttacom->name) && !empty($student->contact->ttacom->name) ? $student->contact->ttacom->name : '---') }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Term Time Address Postcode</div>
-                        <div class="col-span-8 font-medium">---</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->contact->term_time_post_code) && !empty($student->contact->term_time_post_code) ? $student->contact->term_time_post_code : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0 mb-3">
-                        <div class="col-span-12 text-slate-500 font-medium">Permanent Address</div>
-                        <div class="col-span-12 font-medium pl-5">
-                            <span class="font-medium text-danger">Not set yet!</span>
+                        <div class="col-span-12 text-slate-500 font-medium mb-2">Permanent Address</div>
+                        <div class="col-span-12 font-medium">
+                            @if(isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0)
+                                @if(isset($student->contact->permaddress->address_line_1) && !empty($student->contact->permaddress->address_line_1))
+                                    <span class="font-medium">{{ $student->contact->permaddress->address_line_1 }}</span><br/>
+                                @endif
+                                @if(isset($student->contact->permaddress->address_line_2) && !empty($student->contact->permaddress->address_line_2))
+                                    <span class="font-medium">{{ $student->contact->permaddress->address_line_2 }}</span><br/>
+                                @endif
+                                @if(isset($student->contact->permaddress->city) && !empty($student->contact->permaddress->city))
+                                    <span class="font-medium">{{ $student->contact->permaddress->city }}</span>,
+                                @endif
+                                @if(isset($student->contact->permaddress->state) && !empty($student->contact->permaddress->state))
+                                    <span class="font-medium">{{ $student->contact->permaddress->state }}</span>, <br/>
+                                @endif
+                                @if(isset($student->contact->permaddress->post_code) && !empty($student->contact->permaddress->post_code))
+                                    <span class="font-medium">{{ $student->contact->permaddress->post_code }}</span>,
+                                @endif
+                                @if(isset($student->contact->permaddress->country) && !empty($student->contact->permaddress->country))
+                                    <span class="font-medium">{{ $student->contact->permaddress->country }}</span><br/>
+                                @endif
+                            @else 
+                                <span class="font-medium text-warning">Not Set Yet!</span><br/>
+                            @endif
                         </div>
                     </div>
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-4 text-slate-500 font-medium">Permanent Country code</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->contact->pcountry->name) && !empty($student->contact->pcountry->name) ? $student->contact->pcountry->name : '---') }}</div>
+                    </div>
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Permanent Country codee</div>
-                        <div class="col-span-8 font-medium">---</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Permanent Post code</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->contact->permanent_post_code) && !empty($student->contact->permanent_post_code) ? $student->contact->permanent_post_code : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">
@@ -392,25 +421,29 @@
                 </div>
                 <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium">Address</div>
+                        <div class="col-span-12 text-slate-500 font-medium mb-2">Address</div>
                         <div class="col-span-12 font-medium">
-                            @if(isset($student->kin->address_line_1) && !empty($student->kin->address_line_1))
-                                <span class="font-medium">{{ $student->kin->address_line_1 }}</span><br/>
-                            @endif
-                            @if(isset($student->kin->address_line_2) && !empty($student->kin->address_line_2))
-                                <span class="font-medium">{{ $student->kin->address_line_2 }}</span><br/>
-                            @endif
-                            @if(isset($student->kin->city) && !empty($student->kin->city))
-                                <span class="font-medium">{{ $student->kin->city }}</span>,
-                            @endif
-                            @if(isset($student->kin->state) && !empty($student->kin->state))
-                                <span class="font-medium">{{ $student->kin->state }}</span>, <br/>
-                            @endif
-                            @if(isset($student->kin->post_code) && !empty($student->kin->post_code))
-                                <span class="font-medium">{{ $student->kin->post_code }}</span>,
-                            @endif
-                            @if(isset($student->kin->country) && !empty($student->kin->country))
-                                <span class="font-medium">{{ $student->kin->country }}</span><br/>
+                            @if(isset($student->kin->address_id) && $student->kin->address_id > 0)
+                                @if(isset($student->kin->address->address_line_1) && !empty($student->kin->address->address_line_1))
+                                    <span class="font-medium">{{ $student->kin->address->address_line_1 }}</span><br/>
+                                @endif
+                                @if(isset($student->kin->address->address_line_2) && !empty($student->kin->address->address_line_2))
+                                    <span class="font-medium">{{ $student->kin->address->address_line_2 }}</span><br/>
+                                @endif
+                                @if(isset($student->kin->address->city) && !empty($student->kin->address->city))
+                                    <span class="font-medium">{{ $student->kin->address->city }}</span>,
+                                @endif
+                                @if(isset($student->kin->address->state) && !empty($student->kin->address->state))
+                                    <span class="font-medium">{{ $student->kin->address->state }}</span>, <br/>
+                                @endif
+                                @if(isset($student->kin->address->post_code) && !empty($student->kin->address->post_code))
+                                    <span class="font-medium">{{ $student->kin->address->post_code }}</span>,
+                                @endif
+                                @if(isset($student->kin->address->country) && !empty($student->kin->address->country))
+                                    <span class="font-medium">{{ $student->kin->address->country }}</span><br/>
+                                @endif
+                            @else 
+                                <span class="font-medium text-warning">Not Set Yet!</span><br/>
                             @endif
                         </div>
                     </div>

@@ -14,15 +14,17 @@ class StudentContact extends Model
         'student_id',
         'country_id',
         'permanent_country_id',
+        'permanent_address_id',
+        'term_time_address_id',
         'home',
+        'term_time_accommodation_type_id',
         'mobile',
-        'address_line_1',
-        'address_line_2',
-        'state',
-        'post_code',
+        'external_link_ref',
+        'mobile_verification',
+        'personal_email_verification',
+        'personal_email',
         'permanent_post_code',
-        'city',
-        'country',
+        'term_time_post_code',
         'created_by',
         'updated_by',
     ];
@@ -33,4 +35,20 @@ class StudentContact extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function termaddress(){
+        return $this->belongsTo(Address::class, 'term_time_address_id');
+    }
+
+    public function permaddress(){
+        return $this->belongsTo(Address::class, 'permanent_address_id');
+    }
+
+    public function ttacom(){
+        return $this->belongsTo(TermTimeAccommodationType::class, 'term_time_accommodation_type_id');
+    }
+
+    public function pcountry(){
+        return $this->belongsTo(Country::class, 'permanent_country_id');
+    }
 }

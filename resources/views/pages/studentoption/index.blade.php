@@ -17,8 +17,9 @@
             <div class="intro-y box optionBox">
                 <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Titles</h2>
-                    <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                    <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0 flex justify-end items-center">
                         <button data-tw-toggle="modal" data-tw-target="#addTitleModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Title</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="titleListTable">
@@ -32,6 +33,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Ethnicities</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addEthnicityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Ethnicity</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="ethnicityListTable">
@@ -45,6 +47,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Kins Relation</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addKinsModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Relation</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="kinsListTable">
@@ -58,6 +61,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Sexual Orientation</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addSexoModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Orientation</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="sexoListTable">
@@ -71,6 +75,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Religions</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addRelgnModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Religion</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="relgnListTable">
@@ -84,6 +89,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Genders</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addHgenModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Gender</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="hgenListTable">
@@ -97,6 +103,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Countries</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addCountryModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Gender</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="countryListTable">
@@ -110,6 +117,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Disabilities</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addDisabilityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Disability</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="disabilityListTable">
@@ -123,6 +131,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Fee Eligibilities</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addFeeEligibilityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Disability</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="feeEligibilitiesListTable">
@@ -136,6 +145,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Highest qualification on entry</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addHighestqoeModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="HighestqoeListTable">
@@ -149,6 +159,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Country of permanent address</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addPermaddcountryModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="PermaddcountryListTable">
@@ -162,6 +173,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Previous provider</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addPreviousproviderModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="PreviousproviderListTable">
@@ -175,6 +187,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Qualification type identifier</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addQaualtypeidModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="QaualtypeidListTable">
@@ -188,6 +201,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Reason for Engagement ending</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addRsnengendModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="RsnengendListTable">
@@ -202,6 +216,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Term Time Accommodation Type</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addTTACCOMModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Term Time Accommodation Type</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="termtimeaccommodationtypeListTable">
@@ -216,6 +231,7 @@
                     <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Student Identifier</h2>
                     <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                         <button data-tw-toggle="modal" data-tw-target="#addStudentidentifierModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Student Identifier</button>
+                        <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                     </div>
                 </div>
                 <div class="optionBoxBody p-5" data-tableid="studentidentifierListTable">

@@ -13,6 +13,7 @@ use App\Http\Controllers\CourseQualificationController;
 use App\Http\Controllers\SourceTutionFeeController;
 use App\Http\Controllers\AwardingBodyController;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\GroupController;
@@ -432,7 +433,7 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(ContactDetailController::class)->group(function() {
-        Route::get('student/update-contact-details', 'update')->name('student.update.contact.details'); 
+        Route::post('student/update-contact-details', 'update')->name('student.update.contact.details'); 
     });
     
     Route::controller(KinDetailController::class)->group(function() {
@@ -1176,5 +1177,10 @@ Route::middleware('auth')->group(function() {
         Route::delete('studentidentifier/delete/{id}', 'destroy')->name('studentidentifier.destory');
         Route::post('studentidentifier/restore/{id}', 'restore')->name('studentidentifier.restore');
         Route::post('studentidentifier/update-status/{id}', 'updateStatus')->name('studentidentifier.update.status');
+    });
+
+    Route::controller(AddressController::class)->group(function() {
+        Route::post('address/get-address', 'getAddress')->name('address.get');
+        Route::post('address/store', 'store')->name('address.store');
     });
 });

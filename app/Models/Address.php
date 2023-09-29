@@ -17,6 +17,7 @@ class Address extends Model
         'post_code',
         'city',
         'country',
+        'active',
         'created_by',
         'updated_by',
     ];

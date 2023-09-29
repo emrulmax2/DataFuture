@@ -529,3 +529,15 @@
 .optionBox.active .optionBoxHeader button{
     display: inline-flex;
 }
+.optionBox.active .optionBoxHeader svg.arrowNavigation{
+    display: none;
+}
+
+.emailGroup .input-group-text{
+    width: 120px;
+    padding: 0;
+    border: none;
+}
+.emailGroup input.form-control{
+    width: calc(100% - 120px);
+}
