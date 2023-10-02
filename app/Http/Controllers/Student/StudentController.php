@@ -39,6 +39,7 @@ use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
+use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -160,22 +161,23 @@ class StudentController extends Controller
             ],
             'student' => $student,
             'allStatuses' => Status::where('type', 'Student')->get(),
-            'titles' => Title::all(),
-            'country' => Country::all(),
-            'ethnicity' => Ethnicity::all(),
-            'disability' => Disability::all(),
-            'relations' => KinsRelation::all(),
+            'titles' => Title::where('active', 1)->get(),
+            'country' => Country::where('active', 1)->get(),
+            'ethnicity' => Ethnicity::where('active', 1)->get(),
+            'disability' => Disability::where('active', 1)->get(),
+            'relations' => KinsRelation::where('active', 1)->get(),
             'bodies' => AwardingBody::all(),
             'users' => User::all(),
             'instance' => CourseCreationInstance::all(),
             'documents' => DocumentSettings::where('live', '1')->orderBy('id', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all(),
-            'sexualOrientation' => SexualOrientation::all(),
-            'hesaGender' => HesaGender::all(),
-            'religion' => Religion::all(),
+            'feeelegibility' => FeeEligibility::where('active', 1)->get(),
+            'sexualOrientation' => SexualOrientation::where('active', 1)->get(),
+            'hesaGender' => HesaGender::where('active', 1)->get(),
+            'religion' => Religion::where('active', 1)->get(),
             'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
             'consent' => ConsentPolicy::all(),
-            'referral' => $referral
+            'referral' => $referral,
+            'ttacom' => TermTimeAccommodationType::where('active', 1)->get()
         ]);
     }
 

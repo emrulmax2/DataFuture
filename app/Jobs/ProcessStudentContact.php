@@ -52,7 +52,7 @@ class ProcessStudentContact implements ShouldQueue
                 'mobile' => $applicantContact->mobile,
                 'external_link_ref'=> isset($applicantContact->external_link_ref) ? ($applicantContact->external_link_ref) : 'NULL',
                 'mobile_verification' => isset($applicantContact->mobile_verification) ? ($applicantContact->mobile_verification) : '0',
-                'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : 'NULL',
+                //'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : 'NULL',
                 
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
@@ -63,6 +63,10 @@ class ProcessStudentContact implements ShouldQueue
 
             if($applicantContact->permanent_country_id) {
                 $dataArray = array_merge($dataArray,['permanent_country_id' => $applicantContact->permanent_country_id]);
+            }
+
+            if($applicantContact->post_code) {
+                $dataArray = array_merge($dataArray,['term_time_post_code' => $applicantContact->post_code]);
             }
 
             $Address = new Address();

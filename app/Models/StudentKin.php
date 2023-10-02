@@ -14,16 +14,11 @@ class StudentKin extends Model
 
     protected $fillable = [
         'student_id',
-        'name',
         'kins_relation_id',
+        'address_id',
+        'name',
         'mobile',
         'email',
-        'address_line_1',
-        'address_line_2',
-        'state',
-        'post_code',
-        'city',
-        'country',
         'created_by',
         'updated_by',
     ];
@@ -40,5 +35,8 @@ class StudentKin extends Model
     }
     public function relation(){
         return $this->belongsTo(KinsRelation::class, 'kins_relation_id');
+    }
+    public function address(){
+        return $this->belongsTo(Address::class, 'address_id');
     }
 }

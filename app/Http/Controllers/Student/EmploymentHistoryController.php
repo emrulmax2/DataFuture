@@ -84,12 +84,12 @@ class EmploymentHistoryController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $address = '';
-                $address .= $list->address_line_1.'<br/>';
-                $address .= ($list->address_line_2 != '' ? $list->address_line_2.'<br/>' : '');
-                $address .= ($list->city != '' ? $list->city.', ' : '');
-                $address .= ($list->state != '' ? $list->state.', ' : '');
-                $address .= ($list->post_code != '' ? $list->post_code.', ' : '');
-                $address .= ($list->country != '' ? '<br/>'.$list->country : '');
+                $address .= (isset($list->address->address_line_1) ? $list->address->address_line_1.'<br/>' : '');
+                $address .= (isset($list->address->address_line_2) && $list->address->address_line_2 != '' ? $list->address->address_line_2.'<br/>' : '');
+                $address .= (isset($list->address->city) && $list->address->city != '' ? $list->address->city.', ' : '');
+                $address .= (isset($list->address->state) && $list->address->state != '' ? $list->address->state.', ' : '');
+                $address .= (isset($list->address->post_code) && $list->address->post_code != '' ? $list->address->post_code.', ' : '');
+                $address .= (isset($list->address->country) && $list->address->country != '' ? '<br/>'.$list->address->country : '');
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -122,12 +122,7 @@ class EmploymentHistoryController extends Controller
             'start_date'=> $request->start_date,
             'continuing'=> $continuing,
             'end_date'=> ($continuing != 1 && isset($request->end_date) && !empty($request->end_date) ? $request->end_date : ''),
-            'address_line_1' => (isset($request->employment_address_line_1) ? $request->employment_address_line_1 : ''),
-            'address_line_2' => (isset($request->employment_address_line_2) ? $request->employment_address_line_2 : ''),
-            'state' => (isset($request->employment_address_state) ? $request->employment_address_state : ''),
-            'post_code' => (isset($request->employment_address_postal_zip_code) ? $request->employment_address_postal_zip_code : ''),
-            'city' => (isset($request->employment_address_city) ? $request->employment_address_city : ''),
-            'country' => (isset($request->employment_address_country) ? $request->employment_address_country : ''),
+            'address_id' => (isset($request->address_id) ? $request->address_id : null),
             'created_by' => auth()->user()->id
         ]);
         if($employment):
@@ -145,7 +140,7 @@ class EmploymentHistoryController extends Controller
     }
 
     public function edit($id){
-        $data = StudentEmployment::with(['reference'])->where('id', $id)->first();
+        $data = StudentEmployment::with(['reference', 'address'])->where('id', $id)->first();
 
         if($data){
             return response()->json($data);
@@ -167,12 +162,7 @@ class EmploymentHistoryController extends Controller
             'start_date'=> $request->start_date,
             'continuing'=> $continuing,
             'end_date'=> ($continuing != 1 && isset($request->end_date) && !empty($request->end_date) ? $request->end_date : ''),
-            'address_line_1' => (isset($request->employment_address_line_1) ? $request->employment_address_line_1 : ''),
-            'address_line_2' => (isset($request->employment_address_line_2) ? $request->employment_address_line_2 : ''),
-            'state' => (isset($request->employment_address_state) ? $request->employment_address_state : ''),
-            'post_code' => (isset($request->employment_address_postal_zip_code) ? $request->employment_address_postal_zip_code : ''),
-            'city' => (isset($request->employment_address_city) ? $request->employment_address_city : ''),
-            'country' => (isset($request->employment_address_country) ? $request->employment_address_country : ''),
+            'address_id' => (isset($request->address_id) ? $request->address_id : null),
             'updated_by' => auth()->user()->id
         ]);
         $reference = StudentEmploymentReference::where('id', $referenceID)->update([

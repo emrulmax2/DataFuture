@@ -348,35 +348,26 @@ var studentEmploymentHistoryTable = (function () {
                     $('#editEmployementHistoryModal input[name="continuing"]').prop('checked', false);
                     $('#editEmployementHistoryModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '').removeAttr('disabled');
                 }
-
-                if(dataset.address_line_1 != '' || dataset.city != '' || dataset.post_code != '' || dataset.country != ''){
+                
+                var address_id = (typeof dataset.address_id !== 'undefined' && dataset.address_id > 0 ? dataset.address_id : 0);
+                if(address_id > 0){
+                    var address = (typeof dataset.address !== 'undefined' && dataset.address ? dataset.address : []);
                     var htmls = '';
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_1+'</span><br/>';
-                    if(dataset.address_line_2 != ''){
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.address_line_2+'</span><br/>';
-                    }
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.city+'</span>, ';
-                    if(dataset.state != ''){
-                        htmls += '<span class="text-slate-600 font-medium">'+dataset.state+'</span>, <br/>';
-                    }else{
-                        htmls += '<br/>';
-                    }
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.post_code+'</span>,<br/>';
-                    htmls += '<span class="text-slate-600 font-medium">'+dataset.country+'</span><br/>';
+                    htmls += (typeof address.address_line_1 !== 'undefined' && address.address_line_1 ? '<span class="text-slate-600 font-medium">'+address.address_line_1+'</span><br/>' : '');
+                    htmls += (typeof address.address_line_2 !== 'undefined' && address.address_line_2 != '' ? '<span class="text-slate-600 font-medium">'+address.address_line_2+'</span><br/>' : '');
+                    htmls += (typeof address.city !== 'undefined' && address.city ? '<span class="text-slate-600 font-medium">'+address.city+'</span>, ' : '');
+                    htmls += (typeof address.state !== 'undefined' && address.state != '' ? '<span class="text-slate-600 font-medium">'+address.state+'</span>, <br/>' : '<br/>');
+                    htmls += (typeof address.post_code !== 'undefined' && dataset.post_code ? '<span class="text-slate-600 font-medium">'+dataset.post_code+'</span>,<br/>' : '');
+                    htmls += (typeof address.country !== 'undefined' && dataset.country ? '<span class="text-slate-600 font-medium">'+dataset.country+'</span><br/>' : '');
 
-                    htmls += '<input type="hidden" name="employment_address" value="'+dataset.address_line_1+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_line_1" value="'+(dataset.address_line_1 != '' ? dataset.address_line_1 : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_line_2" value="'+(dataset.address_line_2 != '' ? dataset.address_line_2 : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_city" value="'+(dataset.city != '' ? dataset.city : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_state" value="'+(dataset.state != '' ? dataset.state : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_postal_zip_code" value="'+(dataset.post_code != '' ? dataset.post_code : '')+'"/>';
-                    htmls += '<input type="hidden" name="employment_address_country" value="'+(dataset.country != '' ? dataset.country : '')+'"/>';
-
-                    $('#editEmpHistoryAddress').fadeIn().html(htmls).addClass('active');
-                    $('#editEmployementHistoryModal .addressPopupToggler span').html('Update Address');
+                    
+                    $('#editEmpHistoryAddress .addresses').html(htmls);
+                    $('#editEmpHistoryAddress .addressPopupToggler span').html('Update Address');
+                    $('#editEmpHistoryAddress .address_id_field').val(address_id);
                 }else{
-                    $('#editEmpHistoryAddress').fadeOut().html('').removeClass('active');
-                    $('#editEmployementHistoryModal .addressPopupToggler span').html('Add Address');
+                    $('#editEmpHistoryAddress .addresses').html('<span class="text-warning font-medium">Not set yet!</span>');
+                    $('#editEmpHistoryAddress .addressPopupToggler span').html('Add Address');
+                    $('#editEmpHistoryAddress .address_id_field').val(address_id);
                 }
 
                 $('#editEmployementHistoryModal input[name="contact_name"]').val(dataset.reference[0].name ? dataset.reference[0].name : '');
