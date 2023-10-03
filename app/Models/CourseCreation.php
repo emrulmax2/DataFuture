@@ -52,4 +52,8 @@ class CourseCreation extends Model
     public function instance(){
         return $this->hasMany(CourseCreationInstance::class, 'course_creation_id', 'id');
     }
+
+    public function screl(){
+        return $this->hasMany(StudentCourseRelation::class, 'course_creation_id', 'id');
+    }
 }

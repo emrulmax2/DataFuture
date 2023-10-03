@@ -10,8 +10,8 @@
                 <div class="ml-5">
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">LCC000001</div>
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} <span class="font-black">{{ $student->last_name }}</span></div>
-                    <div class="text-slate-500">{{ isset($student->course->creation->course->name) ? $student->course->creation->course->name : '' }} - {{ isset($student->course->semester->name) ? $student->course->semester->name : '' }}</div>
-                    <div class="text-slate-500">{{ isset($student->course->creation->available->type) ? $student->course->creation->available->type : '' }}</div>
+                    <div class="text-slate-500">{{ isset($student->crel->creation->course->name) ? $student->crel->creation->course->name : '' }} - {{ isset($student->crel->propose->semester->name) ? $student->crel->propose->semester->name : '' }}</div>
+                    <div class="text-slate-500">{{ isset($student->crel->creation->available->type) ? $student->crel->creation->available->type : '' }}</div>
                 </div>
             </div>
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">

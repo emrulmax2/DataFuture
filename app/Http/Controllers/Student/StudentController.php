@@ -35,6 +35,7 @@ use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentConsent;
+use App\Models\StudentProposedCourse;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
@@ -191,7 +192,8 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'instance' => CourseCreationInstance::all(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'proposedCourse' => StudentProposedCourse::where('student_id', $studentId)->first()
         ]);
     }
 

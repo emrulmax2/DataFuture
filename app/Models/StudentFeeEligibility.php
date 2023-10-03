@@ -12,6 +12,7 @@ class StudentFeeEligibility extends Model
 
     protected $fillable = [
         'student_id',
+        'student_course_relation_id',
         'fee_eligibility_id',
         'created_by',
         'updated_by'

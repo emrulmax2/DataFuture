@@ -37,6 +37,10 @@ class Course extends Model
         return $this->belongsTo(AwardingBody::class, 'awarding_body_id');
     }
 
+    public function cr_creation(){
+        return $this->hasMany(CourseCreation::class, 'course_id', 'id');
+    }
+
     public function modules(){
         return $this->hasMany(CourseModule::class);
     }

@@ -76,6 +76,7 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\ConsentPolicyController;
 use App\Http\Controllers\LetterHeaderFooterController;
+use App\Http\Controllers\Student\AwardingBodyDetailController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
 use App\Http\Controllers\Studentoptions\HesaGenderController;
@@ -524,6 +525,11 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(CourseDetailController::class)->group(function() {
         Route::post('student/update-course-details', 'update')->name('student.update.course.details');
+    });
+
+    Route::controller(AwardingBodyDetailController::class)->group(function() {
+        Route::post('student/update-awarding-body-details', 'update')->name('student.update.awarding.body.details');
+        Route::post('student/update-awarding-body-status', 'updateStatus')->name('student.update.awarding.body.status');
     });
 
     Route::controller(AdmissionController::class)->group(function() {

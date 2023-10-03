@@ -87,6 +87,7 @@ export default defineConfig({
                 "resources/js/reason-for-engagement-ending.js",  
                 "resources/js/termtimeaccommodationtype.js",
                 "resources/js/studentidentifier.js",
+                "resources/js/student-awarding-body.js",
                 
             ],
             refresh: true,

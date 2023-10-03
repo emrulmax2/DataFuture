@@ -158,12 +158,8 @@ class Student extends Model
         return $this->belongsTo(ReferralCode::class, 'status_id');
     }
 
-    public function feeeligibilities(){
-        return $this->hasMany(StudentFeeEligibility::class, 'student_id', 'id');
-    }
-
-    public function feeeligibility(){
-        return $this->hasOne(StudentFeeEligibility::class, 'student_id', 'id')->latestOfMany();
+    public function crel(){
+        return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
     }
     
 }

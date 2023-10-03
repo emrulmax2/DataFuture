@@ -19,11 +19,6 @@
             </li>
             <li class="nav-item" role="presentation">
                 <a href="javascript:void(0);" class="nav-link py-4">
-                    Awarding Body
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a href="javascript:void(0);" class="nav-link py-4">
                     Attendance
                 </a>
             </li>

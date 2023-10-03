@@ -6,22 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentProposedCourse extends Model
+class StudentCourseRelation extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'student_id',
-        'student_course_relation_id',
         'course_creation_id',
-        'semester_id',
-        'academic_year_id',
-        'student_loan',
-        'student_finance_england',
-        'fund_receipt',
-        'applied_received_fund',
-        'full_time',
-        'other_funding',
+        'student_id',
+        'active',
         'created_by',
         'updated_by',
     ];
@@ -36,16 +28,20 @@ class StudentProposedCourse extends Model
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
     }
-    
+
     public function creation(){
         return $this->belongsTo(CourseCreation::class, 'course_creation_id');
     }
 
-    public function semester(){
-        return $this->belongsTo(Semester::class, 'semester_id');
+    public function propose(){
+        return $this->hasOne(StudentProposedCourse::class, 'student_course_relation_id', 'id')->latestOfMany();
     }
-    
-    public function academicYear(){
-        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+
+    public function abody(){
+        return $this->hasOne(StudentAwardingBodyDetails::class, 'student_course_relation_id', 'id')->latestOfMany();
+    }
+
+    public function feeeligibility(){
+        return $this->hasOne(StudentFeeEligibility::class, 'student_course_relation_id', 'id')->latestOfMany();
     }
 }

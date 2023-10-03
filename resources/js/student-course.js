@@ -46,62 +46,6 @@ import TomSelect from "tom-select";
         }
     })
 
-    $('#student_loan').on('change', function(){
-        var $this = $(this);
-        if($this.val() == 'Others'){
-            $('.studentLoanEnglandFunding').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.otherFundings').fadeIn('fast', function(){
-                $('input', this).val('');
-            })
-        }else if($this.val() == 'Student Loan'){
-            $('.studentLoanEnglandFunding').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.otherFundings').fadeOut('fast', function(){
-                $('input', this).val('');
-            })
-        }else{
-            $('.studentLoanEnglandFunding').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.studentLoanApplied').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-            $('.otherFundings').fadeOut('fast', function(){
-                $('input', this).val('');
-            })
-        }
-    })
-
-    $('#student_finance_england').on('change', function(){
-        if($(this).prop('checked')){
-            $('.studentLoanFundReceipt').fadeIn('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-        }else{
-            $('.studentLoanFundReceipt').fadeOut('fast', function(){
-                $('input[type="checkbox"]', this).prop('checked', false);
-            })
-        }
-    });
-
     $('#editStudentCourseDetailsForm').on('submit', function(e){
         e.preventDefault();
         var $form = $(this);
