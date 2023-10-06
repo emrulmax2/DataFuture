@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Settings\Studentoptions;
 
 use App\Http\Controllers\Controller;
-use App\Models\StudentIdentifier;
+use App\Models\SexIdentifier;
 use Illuminate\Http\Request;        
-use App\Http\Requests\StudentIdentifierRequest;
+use App\Http\Requests\SexIdentifierRequest;
 
-class StudentIdentifierController extends Controller
+class SexIdentifierController extends Controller
 {
 
     public function list(Request $request){
@@ -20,7 +20,7 @@ class StudentIdentifierController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = StudentIdentifier::orderByRaw(implode(',', $sorts));
+        $query = SexIdentifier::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -70,9 +70,9 @@ class StudentIdentifierController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StudentIdentifierRequest $request)
+    public function store(SexIdentifierRequest $request)
     {
-        $data = StudentIdentifier::create([
+        $data = SexIdentifier::create([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
@@ -85,7 +85,7 @@ class StudentIdentifierController extends Controller
     }
 
     public function edit($id){
-        $data = StudentIdentifier::find($id);
+        $data = SexIdentifier::find($id);
 
         if($data){
             return response()->json($data);
@@ -94,8 +94,8 @@ class StudentIdentifierController extends Controller
         }
     }
 
-    public function update(StudentIdentifierRequest $request){      
-        $data = StudentIdentifier::where('id', $request->id)->update([
+    public function update(SexIdentifierRequest $request){      
+        $data = SexIdentifier::where('id', $request->id)->update([
             'name'=> $request->name,
             'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
@@ -114,21 +114,21 @@ class StudentIdentifierController extends Controller
     }
 
     public function destroy($id){
-        $data = StudentIdentifier::find($id)->delete();
+        $data = SexIdentifier::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = StudentIdentifier::where('id', $id)->withTrashed()->restore();
+        $data = SexIdentifier::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
 
     public function updateStatus($id){
-        $SID= StudentIdentifier::find($id);
+        $SID= SexIdentifier::find($id);
         $active = (isset($SID->active) && $SID->active == 1 ? 0 : 1);
 
-        StudentIdentifier::where('id', $id)->update([
+        SexIdentifier::where('id', $id)->update([
             'active'=> $active,
             'updated_by' => auth()->user()->id
         ]);

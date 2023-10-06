@@ -10,7 +10,7 @@ var studentidentifierListTable = (function () {
         let querystr = $("#query-SID").val() != "" ? $("#query-SID").val() : "";
         let status = $("#status-SID").val() != "" ? $("#status-SID").val() : "";
         let tableContent = new Tabulator("#studentidentifierListTable", {
-            ajaxURL: route("studentidentifier.list"),
+            ajaxURL: route("sexidentifier.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -267,7 +267,7 @@ var studentidentifierListTable = (function () {
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('studentidentifier.store'),
+                url: route('sexidentifier.store'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -306,7 +306,7 @@ var studentidentifierListTable = (function () {
 
             axios({
                 method: "get",
-                url: route("studentidentifier.edit", editId),
+                url: route("sexidentifier.edit", editId),
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
@@ -365,7 +365,7 @@ var studentidentifierListTable = (function () {
 
             axios({
                 method: "post",
-                url: route("studentidentifier.update"),
+                url: route("sexidentifier.update"),
                 data: form_data,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -418,7 +418,7 @@ var studentidentifierListTable = (function () {
             if(action == 'DELETEStudentidentifier'){
                 axios({
                     method: 'delete',
-                    url: route('studentidentifier.destory', recordID),
+                    url: route('sexidentifier.destory', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -438,7 +438,7 @@ var studentidentifierListTable = (function () {
             } else if(action == 'RESTOREStudentidentifier'){
                 axios({
                     method: 'post',
-                    url: route('studentidentifier.restore', recordID),
+                    url: route('sexidentifier.restore', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -458,7 +458,7 @@ var studentidentifierListTable = (function () {
             }else if(action == 'CHANGESTATStudentidentifier'){
                 axios({
                     method: 'post',
-                    url: route('studentidentifier.update.status', recordID),
+                    url: route('sexidentifier.update.status', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {

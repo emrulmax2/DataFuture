@@ -73,6 +73,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\AttendanceAndResultController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
 use App\Http\Controllers\Settings\SettingController;
@@ -97,7 +98,7 @@ use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProcessController;
 use App\Http\Controllers\Student\ProofIdCheckController;
 use App\Http\Controllers\Student\SmsController;
-use App\Http\Controllers\Settings\Studentoptions\StudentIdentifierController;
+use App\Http\Controllers\Settings\Studentoptions\SexIdentifierController;
 use App\Http\Controllers\Settings\Studentoptions\TermTimeAccommodationTypeController;
 use App\Http\Controllers\Student\UploadController;
 use App\Http\Controllers\Settings\StudentOptionController;
@@ -1182,19 +1183,23 @@ Route::middleware('auth')->group(function() {
         Route::post('termtimeaccommodationtype/update-status/{id}', 'updateStatus')->name('termtimeaccommodationtype.update.status');
     });
 
-    Route::controller(StudentIdentifierController::class)->group(function() {
-        Route::get('studentidentifier', 'index')->name('studentidentifier'); 
-        Route::get('studentidentifier/list', 'list')->name('studentidentifier.list'); 
-        Route::post('studentidentifier/store', 'store')->name('studentidentifier.store'); 
-        Route::get('studentidentifier/edit/{id}', 'edit')->name('studentidentifier.edit');
-        Route::post('studentidentifier/update', 'update')->name('studentidentifier.update');
-        Route::delete('studentidentifier/delete/{id}', 'destroy')->name('studentidentifier.destory');
-        Route::post('studentidentifier/restore/{id}', 'restore')->name('studentidentifier.restore');
-        Route::post('studentidentifier/update-status/{id}', 'updateStatus')->name('studentidentifier.update.status');
+    Route::controller(SexIdentifierController::class)->group(function() {
+        Route::get('sexidentifier', 'index')->name('sexidentifier'); 
+        Route::get('sexidentifier/list', 'list')->name('sexidentifier.list'); 
+        Route::post('sexidentifier/store', 'store')->name('sexidentifier.store'); 
+        Route::get('sexidentifier/edit/{id}', 'edit')->name('sexidentifier.edit');
+        Route::post('sexidentifier/update', 'update')->name('sexidentifier.update');
+        Route::delete('sexidentifier/delete/{id}', 'destroy')->name('sexidentifier.destory');
+        Route::post('sexidentifier/restore/{id}', 'restore')->name('sexidentifier.restore');
+        Route::post('sexidentifier/update-status/{id}', 'updateStatus')->name('sexidentifier.update.status');
     });
 
     Route::controller(AddressController::class)->group(function() {
         Route::post('address/get-address', 'getAddress')->name('address.get');
         Route::post('address/store', 'store')->name('address.store');
+    });
+
+    Route::controller(AttendanceAndResultController::class)->group(function() {
+        Route::get('attendance-and-result', 'index')->name('attend.result');
     });
 });

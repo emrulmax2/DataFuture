@@ -558,3 +558,22 @@
     width: auto;
     max-width: 100%;
 }
+
+
+
+#attendanceAndResultAccr.accordion .accordion-item:first-child{
+    margin-top: -.5rem;
+}
+#attendanceAndResultAccr.accordion .accordion-item:last-child{
+    margin-bottom: -.5rem;
+}
+#attendanceAndResultAccr.accordion .accordion-item .accordion-header .accordion-button{
+    padding-left: .5rem;
+}
+#attendanceAndResultAccr .accordion-button .accordionCollaps{
+    right: 0;
+}
+#attendanceAndResultAccr.accordion .accordion-item:not(:last-child) {
+    border-bottom-width: 1px;
+    border-color: rgb(var(--color-slate-300) / 0.6);
+}

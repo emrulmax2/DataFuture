@@ -97,6 +97,8 @@ export default defineConfig({
                 "resources/js/termtimeaccommodationtype.js",
                 "resources/js/studentidentifier.js",
                 "resources/js/student-awarding-body.js",
+
+                "resources/js/attedance-and-management.js",
                 
             ],
             refresh: true,
