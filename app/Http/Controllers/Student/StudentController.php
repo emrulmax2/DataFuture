@@ -293,9 +293,9 @@ class StudentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'google');
         if(!empty($oldPhoto)):
-            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
+            if (Storage::disk('google')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
                 Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
             endif;
         endif;

@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 
 use Mail; 
 use Hash;
+use Illuminate\Support\Facades\Storage;
 
 class EmailController extends Controller
 {
@@ -54,9 +55,9 @@ class EmailController extends Controller
             $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
 
             $MAILHTML = '';
-            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name)):
+            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('google')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
                 $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
-                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
+                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
                 $MAILHTML .= '</div>';
             endif;
             $MAILHTML .= $request->body;
@@ -66,7 +67,9 @@ class EmailController extends Controller
                     $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
 
                     foreach($emailFooters as $lf):
-                        $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                        if(Storage::disk('google')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
+                            $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                        endif;
                     endforeach;
                 $MAILHTML .= '</div>';
             endif;
@@ -77,13 +80,13 @@ class EmailController extends Controller
                 $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
-                    $path = $document->storeAs('public/applicants/'.$studentApplicantId.'/', $documentName);
+                    $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 'google');
 
                     $data = [];
                     $data['student_id'] = $student_id;
                     $data['hard_copy_check'] = 0;
                     $data['doc_type'] = $document->getClientOriginalExtension();
-                    $data['path'] = asset('storage/applicants/'.$studentApplicantId.'/'.$documentName);
+                    $data['path'] = Storage::disk('google')->url($path);
                     $data['display_file_name'] = $documentName;
                     $data['current_file_name'] = $documentName;
                     $data['created_by'] = auth()->user()->id;
@@ -97,9 +100,10 @@ class EmailController extends Controller
                         ]);
 
                         $attachmentInfo[$docCounter++] = [
-                            "pathinfo" => 'public/applicants/'.$studentApplicantId.'/'.$documentName,
+                            "pathinfo" => $path,
                             "nameinfo" => $document->getClientOriginalName(),
-                            "mimeinfo" => $document->getMimeType()
+                            "mimeinfo" => $document->getMimeType(),
+                            'disk'     => 'google'      
                         ];
                         $docCounter++;
                     endif;
@@ -230,7 +234,9 @@ class EmailController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
                     foreach($mail->documents as $doc):
-                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.asset('storage/applicants/'.$studentApplicantId.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        if(Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name)):
+                            $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        endif;
                     endforeach;
                 $html .= '</div>';
             endif;

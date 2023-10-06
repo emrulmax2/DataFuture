@@ -145,7 +145,7 @@ var table = (function () {
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
-            $("#status").val("");
+            $("#status").val("1");
             filterHTMLForm();
         });
     
@@ -243,7 +243,7 @@ var table = (function () {
                             $("#successModal .successModalTitle").html(
                                 "Success!"
                             );
-                            $("#successModal .successModalDesc").html('Data Inserted');
+                            $("#successModal .successModalDesc").html('Source of Tution Fee successfully inserted.');
                         });                
                         
                 }
@@ -347,9 +347,9 @@ var table = (function () {
                         document.getElementById("successModal")
                             .addEventListener("shown.tw.modal", function (event) {
                                 $("#successModal .successModalTitle").html(
-                                    "Success!"
+                                    "Congratulations!"
                                 );
-                                $("#successModal .successModalDesc").html('Data Updated');
+                                $("#successModal .successModalDesc").html('Source of Tution Fee successfully updated.');
                             });
                     }
                     table.init();
@@ -366,18 +366,6 @@ var table = (function () {
                                 $(`#editForm .${key}`).addClass('border-danger')
                                 $(`#editForm  .error-${key}`).html(val)
                             }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html(
-                                        "No Data Change!"
-                                    );
-                                    $("#successModal .successModalDesc").html(message);
-                                });
                         } else {
                             console.log("error");
                         }
@@ -410,7 +398,7 @@ var table = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
+                            $('#successModal .successModalDesc').html('Source of Tution Fee successfully deleted.');
                         });
                     }
                     table.init();
@@ -430,7 +418,7 @@ var table = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
+                            $('#successModal .successModalDesc').html('Source of Tution Fee successfully resotred.');
                         });
                     }
                     table.init();
@@ -453,7 +441,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
+                $('#confirmModal .confModDesc').html('Want to delete this Source of Tution Fee from applicant list? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
                 $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
             });
@@ -472,7 +460,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
+                $('#confirmModal .confModDesc').html('Want to restore this Source of Tution Fee from the trash? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });

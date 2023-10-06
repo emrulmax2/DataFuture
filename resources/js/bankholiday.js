@@ -273,7 +273,7 @@ $(".dropzone").each(function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
+                            $('#successModal .successModalDesc').html('Bank Holiday data successfully deleted!');
                         });
                     }
                     bankholidayListTable.init();

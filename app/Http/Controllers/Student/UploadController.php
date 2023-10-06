@@ -7,6 +7,7 @@ use App\Models\DocumentSettings;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
@@ -20,13 +21,13 @@ class UploadController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$studentApplicantId.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 'google');
         $data = [];
         $data['student_id'] = $student_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = asset('storage/applicants/'.$studentApplicantId.'/'.$imageName);
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -74,6 +75,11 @@ class UploadController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $url = '';
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name)):
+                    $disk = Storage::disk('google');
+                    $url = $disk->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name);
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -81,7 +87,7 @@ class UploadController extends Controller
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
                     'current_file_name'=> $list->current_file_name,
-                    'url' => asset('storage/applicants/'.$studentApplicantId.'/'.$list->current_file_name),
+                    'url' => $url,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at

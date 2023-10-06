@@ -20,6 +20,7 @@ use Mail;
 use Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class LetterController extends Controller
 {
@@ -90,7 +91,7 @@ class LetterController extends Controller
                 $PDFHTML .= '<body>';
                     if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
                         $PDFHTML .= '<header>';
-                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
                         $PDFHTML .= '</header>';
                     endif;
 
@@ -104,7 +105,7 @@ class LetterController extends Controller
                                         $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
 
                                         foreach($LetterFooters as $lf):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
                                         endforeach;
                                     $PDFHTML .= '</td>';
                                 $PDFHTML .= '</tr>';
@@ -134,8 +135,8 @@ class LetterController extends Controller
                         $signatory = Signatory::find($signatory_id);
                         $PDFHTML .= '<p>';
                             $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                            if(isset($signatory->signature) && !empty($signatory->signature)):
-                                $signatureImage = asset('storage/signatories/'.$signatory->signature); 
+                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
+                                $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature); 
                                 $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
                             endif;
                             $PDFHTML .= $signatory->signatory_name.'<br/>';
@@ -149,14 +150,16 @@ class LetterController extends Controller
             $fileName = time().'_'.$student_id.'_Letter.pdf';
             $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
                 ->setPaper('a4', 'portrait')
-                ->setWarnings(false)
-                ->save(storage_path('app/public/applicants/'.$studentApplicantId.'/').$fileName);
+                ->setWarnings(false);
+            $content = $pdf->output();
+            Storage::disk('google')->put('public/applicants/'.$studentApplicantId.'/'.$fileName, $content );
+
 
             $data = [];
             $data['student_id'] = $student_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = asset('storage/applicants/'.$studentApplicantId.'/'.$fileName);
+            $data['path'] = Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$fileName);
             $data['display_file_name'] = $letter_title;
             $data['current_file_name'] = $fileName;
             $data['created_by'] = auth()->user()->id;
@@ -175,8 +178,8 @@ class LetterController extends Controller
                 $signatory = Signatory::find($signatory_id);
                 $signatoryHTML .= '<p>';
                     $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
-                    if(isset($signatory->signature) && !empty($signatory->signature)):
-                        $signatureImage = asset('storage/signatories/'.$signatory->signature);
+                    if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
+                        $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature);
                         $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
                     endif;
                     $signatoryHTML .= $signatory->signatory_name.'<br/>';
@@ -199,7 +202,8 @@ class LetterController extends Controller
                 $attachmentFiles[] = [
                     "pathinfo" => 'public/applicants/'.$studentApplicantId.'/'.$fileName,
                     "nameinfo" => $fileName,
-                    "mimeinfo" => 'application/pdf'
+                    "mimeinfo" => 'application/pdf',
+                    "disk" => 'google'
                 ];
             else:
                 $emailHTML .= $letter_body;
@@ -278,7 +282,7 @@ class LetterController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->current_file_name)):
-                    $docURL = (!empty($list->current_file_name) ? asset('storage/applicants/'.$studentApplicantId.'/'.$list->current_file_name) : '');
+                    $docURL = (!empty($list->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,

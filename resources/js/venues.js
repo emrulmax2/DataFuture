@@ -48,6 +48,15 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "IP",
+                    field: "ip",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        return '<div class="font-medium whitespace-normal text-slate-500">'+cell.getData().ip+'</div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -174,12 +183,14 @@ var table = (function () {
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addVenueModal .acc__input-error').html('');
             $('#addVenueModal input').val('');
+            $('#addVenueModal textarea').val('');
         });
         
         const editModalEl = document.getElementById('editVenueModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editVenueModal .acc__input-error').html('');
             $('#editVenueModal input').val('');
+            $('#editVenueModal textarea').val('');
             $('#editVenueModal input[name="id"]').val('0');
         });
 
@@ -253,6 +264,7 @@ var table = (function () {
                         $('#editVenueModal input[name="idnumber"]').val(dataset.idnumber ? dataset.idnumber : '');
                         $('#editVenueModal input[name="ukprn"]').val(dataset.ukprn ? dataset.ukprn : '');
                         $('#editVenueModal input[name="postcode"]').val(dataset.postcode ? dataset.postcode : '');
+                        $('#editVenueModal textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : '');
 
                         $('#editVenueModal input[name="id"]').val(editId);
                     }

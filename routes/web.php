@@ -9,15 +9,14 @@ use App\Http\Controllers\DarkModeController;
 use App\Http\Controllers\ColorSchemeController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SemesterController;
-use App\Http\Controllers\CourseQualificationController;
-use App\Http\Controllers\SourceTutionFeeController;
-use App\Http\Controllers\AwardingBodyController;
-use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\Settings\CourseQualificationController;
+use App\Http\Controllers\Settings\SourceTutionFeeController;
+use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\GroupController;
-use App\Http\Controllers\VenueController;
+use App\Http\Controllers\Settings\VenueController;
 use App\Http\Controllers\CoursCreationController;
 use App\Http\Controllers\ModuleLevelController;
 use App\Http\Controllers\CourseModuleController;
@@ -30,25 +29,25 @@ use App\Http\Controllers\CourseCreationInstanceController;
 use App\Http\Controllers\InstanceTermController;
 use App\Http\Controllers\TermModuleCreationController;
 use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\RoomController;
+use App\Http\Controllers\Settings\RoomController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
-use App\Http\Controllers\Studentoptions\TitleController;
-use App\Http\Controllers\Studentoptions\EthnicityController;
-use App\Http\Controllers\Studentoptions\KinsRelationController;
-use App\Http\Controllers\Studentoptions\SexualOrientationController;
-use App\Http\Controllers\Studentoptions\ReligionController;
-use App\Http\Controllers\StatusController;
-use App\Http\Controllers\Studentoptions\CountryController;
-use App\Http\Controllers\Studentoptions\DisabilityController;
-use App\Http\Controllers\DocumentSettingsController;
+use App\Http\Controllers\Settings\Studentoptions\TitleController;
+use App\Http\Controllers\Settings\Studentoptions\EthnicityController;
+use App\Http\Controllers\Settings\Studentoptions\KinsRelationController;
+use App\Http\Controllers\Settings\Studentoptions\SexualOrientationController;
+use App\Http\Controllers\Settings\Studentoptions\ReligionController;
+use App\Http\Controllers\Settings\StatusController;
+use App\Http\Controllers\Settings\Studentoptions\CountryController;
+use App\Http\Controllers\Settings\Studentoptions\DisabilityController;
+use App\Http\Controllers\Settings\DocumentSettingsController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PermissionCategoryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionTemplateController;
-use App\Http\Controllers\ProcessListController;
-use App\Http\Controllers\TaskListController;
+use App\Http\Controllers\Settings\ProcessListController;
+use App\Http\Controllers\Settings\TaskListController;
 
 use App\Http\Controllers\InterviewListController;
 use App\Http\Controllers\ApplicantInterviewListController;
@@ -67,20 +66,22 @@ use App\Models\ApplicantUser;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\ApplicantQualificationCongroller;
 use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
-use App\Http\Controllers\CommonSmtpController;
-use App\Http\Controllers\LetterSetController;
-use App\Http\Controllers\SignatoryController;
+use App\Http\Controllers\Settings\CommonSmtpController;
+use App\Http\Controllers\Settings\LetterSetController;
+use App\Http\Controllers\Settings\SignatoryController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\SmsTemplateController;
-use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\Settings\SmsTemplateController;
+use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
-use App\Http\Controllers\ConsentPolicyController;
-use App\Http\Controllers\LetterHeaderFooterController;
+use App\Http\Controllers\Settings\ConsentPolicyController;
+use App\Http\Controllers\Settings\LetterHeaderFooterController;
+use App\Http\Controllers\Settings\SettingController;
+use App\Http\Controllers\Settings\AwardingBodyController;
 use App\Http\Controllers\Student\AwardingBodyDetailController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
-use App\Http\Controllers\Studentoptions\HesaGenderController;
-use App\Http\Controllers\Studentoptions\FeeEligibilityController;
+use App\Http\Controllers\Settings\Studentoptions\HesaGenderController;
+use App\Http\Controllers\Settings\Studentoptions\FeeEligibilityController;
 use App\Http\Controllers\Student\ConsentController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
@@ -96,16 +97,16 @@ use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProcessController;
 use App\Http\Controllers\Student\ProofIdCheckController;
 use App\Http\Controllers\Student\SmsController;
-use App\Http\Controllers\Studentoptions\StudentIdentifierController;
-use App\Http\Controllers\Studentoptions\TermTimeAccommodationTypeController;
+use App\Http\Controllers\Settings\Studentoptions\StudentIdentifierController;
+use App\Http\Controllers\Settings\Studentoptions\TermTimeAccommodationTypeController;
 use App\Http\Controllers\Student\UploadController;
-use App\Http\Controllers\StudentOptionController;
-use App\Http\Controllers\Studentoptions\ApelCreditController;
-use App\Http\Controllers\Studentoptions\CountryOfPermanentAddressController;
-use App\Http\Controllers\Studentoptions\HighestQualificationOnEntryController;
-use App\Http\Controllers\Studentoptions\PreviousProviderController;
-use App\Http\Controllers\Studentoptions\QualificationTypeIdentifierController;
-use App\Http\Controllers\Studentoptions\ReasonForEngagementEndingController;
+use App\Http\Controllers\Settings\StudentOptionController;
+use App\Http\Controllers\Settings\Studentoptions\ApelCreditController;
+use App\Http\Controllers\Settings\Studentoptions\CountryOfPermanentAddressController;
+use App\Http\Controllers\Settings\Studentoptions\HighestQualificationOnEntryController;
+use App\Http\Controllers\Settings\Studentoptions\PreviousProviderController;
+use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierController;
+use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -347,57 +348,6 @@ Route::middleware('auth')->group(function() {
         Route::post('plan-dates/store', 'store')->name('plan.dates.store'); 
         Route::delete('plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
         Route::post('plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
-    });
-
-    Route::controller(ConsentPolicyController::class)->group(function() {
-        Route::get('consent', 'index')->name('consent'); 
-        Route::get('consent/list', 'list')->name('consent.list'); 
-        Route::post('consent/store', 'store')->name('consent.store'); 
-        Route::get('consent/edit/{id}', 'edit')->name('consent.edit');
-        Route::post('consent/update', 'update')->name('consent.update');
-        Route::delete('consent/delete/{id}', 'destroy')->name('consent.destory');
-        Route::post('consent/restore/{id}', 'restore')->name('consent.restore');
-    });
-
-    Route::controller(StatusController::class)->group(function() {
-        Route::get('statuses', 'index')->name('statuses'); 
-        Route::get('statuses/list', 'list')->name('statuses.list'); 
-        Route::post('statuses/store', 'store')->name('statuses.store'); 
-        Route::get('statuses/edit/{id}', 'edit')->name('statuses.edit');
-        Route::post('statuses/update', 'update')->name('statuses.update');
-        Route::delete('statuses/delete/{id}', 'destroy')->name('statuses.destory');
-        Route::post('statuses/restore/{id}', 'restore')->name('statuses.restore');
-    });
-
-    Route::controller(CommonSmtpController::class)->group(function() {
-        Route::get('common-smtp', 'index')->name('common.smtp'); 
-        Route::get('common-smtp/list', 'list')->name('common.smtp.list'); 
-        Route::post('common-smtp/store', 'store')->name('common.smtp.store');
-        Route::get('common-smtp/edit/{id}', 'edit')->name('common.smtp.edit');
-        Route::post('common-smtp/update/{id}', 'update')->name('common.smtp.update');
-
-        Route::delete('common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
-        Route::post('common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
-    });
-
-    Route::controller(LetterSetController::class)->group(function() {
-        Route::get('letter-sets', 'index')->name('letter.set'); 
-        Route::get('letter-sets/list', 'list')->name('letter.set.list'); 
-        Route::post('letter-sets/store', 'store')->name('letter.set.store');
-        Route::get('letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
-        Route::post('letter-sets/update', 'update')->name('letter.set.update');
-        Route::delete('letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
-        Route::post('letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
-    });
-
-    Route::controller(SignatoryController::class)->group(function() {
-        Route::get('signatory', 'index')->name('signatory'); 
-        Route::get('signatory/list', 'list')->name('signatory.list'); 
-        Route::post('signatory/store', 'store')->name('signatory.store');
-        Route::post('signatory/edit', 'edit')->name('signatory.edit');
-        Route::post('signatory/update', 'update')->name('signatory.update');
-        Route::delete('signatory/delete/{id}', 'destroy')->name('signatory.destory');
-        Route::post('signatory/restore/{id}', 'restore')->name('signatory.restore');
     });
 
     Route::controller(StudentController::class)->group(function() {
@@ -756,48 +706,6 @@ Route::middleware('auth')->group(function() {
         Route::delete('semester/delete/{id}', 'destroy')->name('semester.destory');
         Route::post('semester/restore/{id}', 'restore')->name('semester.restore');
     });
-   
-    Route::controller(CourseQualificationController::class)->group(function() {
-        Route::get('coursequalification', 'index')->name('coursequalification'); 
-        Route::get('coursequalification/list', 'list')->name('coursequalification.list');        
-        Route::post('coursequalification/store', 'store')->name('coursequalification.store');
-        Route::get('coursequalification/edit/{id}', 'edit')->name('coursequalification.edit');
-        Route::post('coursequalification/update/{id}', 'update')->name('coursequalification.update');
-        Route::delete('coursequalification/delete/{id}', 'destroy')->name('coursequalification.destory');
-        Route::post('coursequalification/restore/{id}', 'restore')->name('coursequalification.restore');
-    });
- 
-    Route::controller(SourceTutionFeeController::class)->group(function() {
-        Route::get('sourcetutionfees', 'index')->name('sourcetutionfees'); 
-        Route::get('sourcetutionfees/list', 'list')->name('sourcetutionfees.list');        
-        Route::post('sourcetutionfees/store', 'store')->name('sourcetutionfees.store');
-
-        Route::get('sourcetutionfees/edit/{id}', 'edit')->name('sourcetutionfees.edit');
-        Route::post('sourcetutionfees/update/{id}', 'update')->name('sourcetutionfees.update');
-        Route::delete('sourcetutionfees/delete/{id}', 'destroy')->name('sourcetutionfees.destory');
-        Route::post('sourcetutionfees/restore/{id}', 'restore')->name('sourcetutionfees.restore');
-    });
-
-    Route::controller(AwardingBodyController::class)->group(function() {
-        Route::get('awardingbody', 'index')->name('awardingbody'); 
-        Route::get('awardingbody/list', 'list')->name('awardingbody.list');        
-        Route::post('awardingbody/store', 'store')->name('awardingbody.store');
-        Route::get('awardingbody/edit/{id}', 'edit')->name('awardingbody.edit');
-        Route::post('awardingbody/update/{id}', 'update')->name('awardingbody.update');
-        Route::delete('awardingbody/delete/{id}', 'destroy')->name('awardingbody.destory');
-        Route::post('awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
-    });
-
-    Route::controller(AcademicYearController::class)->group(function() {
-        Route::get('academicyears', 'index')->name('academicyears'); 
-        Route::get('academicyears/list', 'list')->name('academicyears.list');    
-        Route::get('academicyears/show/{id}', 'show')->name('academicyears.show');    
-        Route::post('academicyears/store', 'store')->name('academicyears.store');
-        Route::get('academicyears/edit/{id}', 'edit')->name('academicyears.edit');
-        Route::post('academicyears/update/{id}', 'update')->name('academicyears.update');
-        Route::delete('academicyears/delete/{id}', 'destroy')->name('academicyears.destory');
-        Route::post('academicyears/restore/{id}', 'restore')->name('academicyears.restore');
-    });
 
     Route::controller(GroupController::class)->group(function() {
         Route::get('groups', 'index')->name('groups'); 
@@ -807,17 +715,6 @@ Route::middleware('auth')->group(function() {
         Route::post('groups/update/{id}', 'update')->name('groups.update');
         Route::delete('groups/delete/{id}', 'destroy')->name('groups.destory');
         Route::post('groups/restore/{id}', 'restore')->name('groups.restore');
-    });
-
-    Route::controller(VenueController::class)->group(function() {
-        Route::get('venues', 'index')->name('venues'); 
-        Route::get('venues/list', 'list')->name('venues.list');        
-        Route::post('venues/store', 'store')->name('venues.store');
-        Route::get('venues/edit/{id}', 'edit')->name('venues.edit');
-        Route::post('venues/update/{id}', 'update')->name('venues.update');
-        Route::get('venues/show/{id}', 'show')->name('venues.show');
-        Route::delete('venues/delete/{id}', 'destroy')->name('venues.destory');
-        Route::post('venues/restore/{id}', 'restore')->name('venues.restore');
     });
 
     Route::controller(ModuleLevelController::class)->group(function() {
@@ -830,16 +727,6 @@ Route::middleware('auth')->group(function() {
         Route::post('modulelevels/restore/{id}', 'restore')->name('modulelevels.restore');
     });
 
-    Route::controller(RoomController::class)->group(function() {
-        Route::post('room/store', 'store')->name('room.store');
-        Route::get('room/list', 'list')->name('room.list'); 
-        Route::get('room/show/{id}', 'show')->name('room.show'); 
-        Route::get('room/edit/{id}', 'edit')->name('room.edit');
-        Route::post('room/update', 'update')->name('room.update');
-        Route::delete('room/delete/{id}', 'destroy')->name('room.destory');
-        Route::post('room/restore/{id}', 'restore')->name('room.restore');        
-    });
-
     Route::controller(BankHolidayController::class)->group(function() {      
         Route::get('bankholidays/list', 'list')->name('bankholidays.list');
         Route::post('bankholidays/store', 'store')->name('bankholidays.store'); 
@@ -850,16 +737,6 @@ Route::middleware('auth')->group(function() {
         
         Route::get('bankholidays/export/', 'export')->name('bankholidays.export');
         Route::post('bankholidays/import', 'import')->name('bankholidays.import');
-    });
-
-    Route::controller(DocumentSettingsController::class)->group(function() {
-        Route::get('documentsettings', 'index')->name('documentsettings'); 
-        Route::get('documentsettings/list', 'list')->name('documentsettings.list'); 
-        Route::post('documentsettings/store', 'store')->name('documentsettings.store'); 
-        Route::get('documentsettings/edit/{id}', 'edit')->name('documentsettings.edit');
-        Route::post('documentsettings/update', 'update')->name('documentsettings.update');
-        Route::delete('documentsettings/delete/{id}', 'destroy')->name('documentsettings.destory');
-        Route::post('documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
     });
 
     Route::controller(DepartmentController::class)->group(function() {
@@ -903,26 +780,6 @@ Route::middleware('auth')->group(function() {
         Route::post('permissiontemplate/restore/{id}', 'restore')->name('permissiontemplate.restore');
     });
 
-    Route::controller(ProcessListController::class)->group(function() {
-        Route::get('processlist', 'index')->name('processlist'); 
-        Route::get('processlist/list', 'list')->name('processlist.list'); 
-        Route::post('processlist/store', 'store')->name('processlist.store'); 
-        Route::get('processlist/edit/{id}', 'edit')->name('processlist.edit');
-        Route::post('processlist/update', 'update')->name('processlist.update');
-        Route::delete('processlist/delete/{id}', 'destroy')->name('processlist.destory');
-        Route::post('processlist/restore/{id}', 'restore')->name('processlist.restore');
-    });
-
-    Route::controller(TaskListController::class)->group(function() {
-        Route::get('tasklist', 'index')->name('tasklist'); 
-        Route::get('tasklist/list', 'list')->name('tasklist.list'); 
-        Route::post('tasklist/store', 'store')->name('tasklist.store'); 
-        Route::get('tasklist/edit/{id}', 'edit')->name('tasklist.edit');
-        Route::post('tasklist/update', 'update')->name('tasklist.update');
-        Route::delete('tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
-        Route::post('tasklist/restore/{id}', 'restore')->name('tasklist.restore');
-    });
-
     Route::controller(InterviewListController::class)->group(function() {
         Route::get('interviewlist', 'index')->name('interviewlist');
         Route::get('interviewlist/list', 'list')->name('interviewlist.list');
@@ -962,40 +819,191 @@ Route::middleware('auth')->group(function() {
     });
     // a pdf will be saved
 
-    Route::controller(SmsTemplateController::class)->group(function() {
-        Route::get('sms-template', 'index')->name('sms.template'); 
-        Route::get('sms-template/list', 'list')->name('sms.template.list'); 
-        Route::post('sms-template/store', 'store')->name('sms.template.store');
-        Route::get('sms-template/edit/{id}', 'edit')->name('sms.template.edit');
-        Route::post('sms-template/update', 'update')->name('sms.template.update');
+    Route::controller(SettingController::class)->group(function(){
+        Route::get('site-settings', 'index')->name('site.setting');
+        Route::get('site-settings/address-api', 'addressApi')->name('site.setting.addr.api');
+        Route::get('site-settings/sms-api', 'smsApi')->name('site.setting.sms.api');
+        Route::post('site-settings/update', 'update')->name('site.setting.update');
+    });
+    
+    Route::controller(AwardingBodyController::class)->group(function() {
+        Route::get('site-settings/awardingbody', 'index')->name('awardingbody'); 
+        Route::get('site-settings/awardingbody/list', 'list')->name('awardingbody.list');        
+        Route::post('site-settings/awardingbody/store', 'store')->name('awardingbody.store');
+        Route::get('site-settings/awardingbody/edit/{id}', 'edit')->name('awardingbody.edit');
+        Route::post('site-settings/awardingbody/update/{id}', 'update')->name('awardingbody.update');
+        Route::delete('site-settings/awardingbody/delete/{id}', 'destroy')->name('awardingbody.destory');
+        Route::post('site-settings/awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
+    });
 
-        Route::delete('sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
-        Route::post('sms-template/restore/{id}', 'restore')->name('sms.template.restore');
+    Route::controller(AcademicYearController::class)->group(function() {
+        Route::get('site-settings/academicyears', 'index')->name('academicyears'); 
+        Route::get('site-settings/academicyears/list', 'list')->name('academicyears.list');    
+        Route::get('site-settings/academicyears/show/{id}', 'show')->name('academicyears.show');    
+        Route::post('site-settings/academicyears/store', 'store')->name('academicyears.store');
+        Route::get('site-settings/academicyears/edit/{id}', 'edit')->name('academicyears.edit');
+        Route::post('site-settings/academicyears/update/{id}', 'update')->name('academicyears.update');
+        Route::delete('site-settings/academicyears/delete/{id}', 'destroy')->name('academicyears.destory');
+        Route::post('site-settings/academicyears/restore/{id}', 'restore')->name('academicyears.restore');
+    });
+ 
+    Route::controller(SourceTutionFeeController::class)->group(function() {
+        Route::get('site-settings/sourcetutionfees', 'index')->name('sourcetutionfees'); 
+        Route::get('site-settings/sourcetutionfees/list', 'list')->name('sourcetutionfees.list');        
+        Route::post('site-settings/sourcetutionfees/store', 'store')->name('sourcetutionfees.store');
+
+        Route::get('site-settings/sourcetutionfees/edit/{id}', 'edit')->name('sourcetutionfees.edit');
+        Route::post('site-settings/sourcetutionfees/update/{id}', 'update')->name('sourcetutionfees.update');
+        Route::delete('site-settings/sourcetutionfees/delete/{id}', 'destroy')->name('sourcetutionfees.destory');
+        Route::post('site-settings/sourcetutionfees/restore/{id}', 'restore')->name('sourcetutionfees.restore');
+    });
+   
+    Route::controller(CourseQualificationController::class)->group(function() {
+        Route::get('site-settings/coursequalification', 'index')->name('coursequalification'); 
+        Route::get('site-settings/coursequalification/list', 'list')->name('coursequalification.list');        
+        Route::post('site-settings/coursequalification/store', 'store')->name('coursequalification.store');
+        Route::get('site-settings/coursequalification/edit/{id}', 'edit')->name('coursequalification.edit');
+        Route::post('site-settings/coursequalification/update/{id}', 'update')->name('coursequalification.update');
+        Route::delete('site-settings/coursequalification/delete/{id}', 'destroy')->name('coursequalification.destory');
+        Route::post('site-settings/coursequalification/restore/{id}', 'restore')->name('coursequalification.restore');
+    });
+
+    Route::controller(ConsentPolicyController::class)->group(function() {
+        Route::get('site-settings/consent', 'index')->name('consent'); 
+        Route::get('site-settings/consent/list', 'list')->name('consent.list'); 
+        Route::post('site-settings/consent/store', 'store')->name('consent.store'); 
+        Route::get('site-settings/consent/edit/{id}', 'edit')->name('consent.edit');
+        Route::post('site-settings/consent/update', 'update')->name('consent.update');
+        Route::delete('site-settings/consent/delete/{id}', 'destroy')->name('consent.destory');
+        Route::post('site-settings/consent/restore/{id}', 'restore')->name('consent.restore');
+    });
+
+    Route::controller(VenueController::class)->group(function() {
+        Route::get('site-settings/venues', 'index')->name('venues'); 
+        Route::get('site-settings/venues/list', 'list')->name('venues.list');        
+        Route::post('site-settings/venues/store', 'store')->name('venues.store');
+        Route::get('site-settings/venues/edit/{id}', 'edit')->name('venues.edit');
+        Route::post('site-settings/venues/update/{id}', 'update')->name('venues.update');
+        Route::get('site-settings/venues/show/{id}', 'show')->name('venues.show');
+        Route::delete('site-settings/venues/delete/{id}', 'destroy')->name('venues.destory');
+        Route::post('site-settings/venues/restore/{id}', 'restore')->name('venues.restore');
+    });
+
+    Route::controller(RoomController::class)->group(function() {
+        Route::post('site-settings/venues/room/store', 'store')->name('room.store');
+        Route::get('site-settings/venues/room/list', 'list')->name('room.list'); 
+        Route::get('site-settings/venues/room/show/{id}', 'show')->name('room.show'); 
+        Route::get('site-settings/venues/room/edit/{id}', 'edit')->name('room.edit');
+        Route::post('site-settings/venues/room/update', 'update')->name('room.update');
+        Route::delete('site-settings/venues/room/delete/{id}', 'destroy')->name('room.destory');
+        Route::post('site-settings/venues/room/restore/{id}', 'restore')->name('room.restore');        
+    });
+
+    Route::controller(StatusController::class)->group(function() {
+        Route::get('site-settings/statuses', 'index')->name('statuses'); 
+        Route::get('site-settings/statuses/list', 'list')->name('statuses.list'); 
+        Route::post('site-settings/statuses/store', 'store')->name('statuses.store'); 
+        Route::get('site-settings/statuses/edit/{id}', 'edit')->name('statuses.edit');
+        Route::post('site-settings/statuses/update', 'update')->name('statuses.update');
+        Route::delete('site-settings/statuses/delete/{id}', 'destroy')->name('statuses.destory');
+        Route::post('site-settings/statuses/restore/{id}', 'restore')->name('statuses.restore');
+    });
+
+    Route::controller(DocumentSettingsController::class)->group(function() {
+        Route::get('site-settings/documentsettings', 'index')->name('documentsettings'); 
+        Route::get('site-settings/documentsettings/list', 'list')->name('documentsettings.list'); 
+        Route::post('site-settings/documentsettings/store', 'store')->name('documentsettings.store'); 
+        Route::get('site-settings/documentsettings/edit/{id}', 'edit')->name('documentsettings.edit');
+        Route::post('site-settings/documentsettings/update', 'update')->name('documentsettings.update');
+        Route::delete('site-settings/documentsettings/delete/{id}', 'destroy')->name('documentsettings.destory');
+        Route::post('site-settings/documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
+    });
+
+    Route::controller(ProcessListController::class)->group(function() {
+        Route::get('site-settings/processlist', 'index')->name('processlist'); 
+        Route::get('site-settings/processlist/list', 'list')->name('processlist.list'); 
+        Route::post('site-settings/processlist/store', 'store')->name('processlist.store'); 
+        Route::get('site-settings/processlist/edit/{id}', 'edit')->name('processlist.edit');
+        Route::post('site-settings/processlist/update', 'update')->name('processlist.update');
+        Route::delete('site-settings/processlist/delete/{id}', 'destroy')->name('processlist.destory');
+        Route::post('site-settings/processlist/restore/{id}', 'restore')->name('processlist.restore');
+    });
+
+    Route::controller(TaskListController::class)->group(function() {
+        Route::get('site-settings/tasklist', 'index')->name('tasklist'); 
+        Route::get('site-settings/tasklist/list', 'list')->name('tasklist.list'); 
+        Route::post('site-settings/tasklist/store', 'store')->name('tasklist.store'); 
+        Route::get('site-settings/tasklist/edit/{id}', 'edit')->name('tasklist.edit');
+        Route::post('site-settings/tasklist/update', 'update')->name('tasklist.update');
+        Route::delete('site-settings/tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
+        Route::post('site-settings/tasklist/restore/{id}', 'restore')->name('tasklist.restore');
+    });
+
+    Route::controller(SmsTemplateController::class)->group(function() {
+        Route::get('site-settings/sms-template', 'index')->name('sms.template'); 
+        Route::get('site-settings/sms-template/list', 'list')->name('sms.template.list'); 
+        Route::post('site-settings/sms-template/store', 'store')->name('sms.template.store');
+        Route::get('site-settings/sms-template/edit/{id}', 'edit')->name('sms.template.edit');
+        Route::post('site-settings/sms-template/update', 'update')->name('sms.template.update');
+
+        Route::delete('site-settings/sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
+        Route::post('site-settings/sms-template/restore/{id}', 'restore')->name('sms.template.restore');
     });
 
     Route::controller(EmailTemplateController::class)->group(function() {
-        Route::get('email-template', 'index')->name('email.template'); 
-        Route::get('email-template/list', 'list')->name('email.template.list'); 
-        Route::post('email-template/store', 'store')->name('email.template.store');
-        Route::get('email-template/edit/{id}', 'edit')->name('email.template.edit');
-        Route::post('email-template/update', 'update')->name('email.template.update');
+        Route::get('site-settings/email-template', 'index')->name('email.template'); 
+        Route::get('site-settings/email-template/list', 'list')->name('email.template.list'); 
+        Route::post('site-settings/email-template/store', 'store')->name('email.template.store');
+        Route::get('site-settings/email-template/edit/{id}', 'edit')->name('email.template.edit');
+        Route::post('site-settings/email-template/update', 'update')->name('email.template.update');
 
-        Route::delete('email-template/delete/{id}', 'destroy')->name('email.template.destory');
-        Route::post('email-template/restore/{id}', 'restore')->name('email.template.restore');
+        Route::delete('site-settings/email-template/delete/{id}', 'destroy')->name('email.template.destory');
+        Route::post('site-settings/email-template/restore/{id}', 'restore')->name('email.template.restore');
+    });
+
+    Route::controller(CommonSmtpController::class)->group(function() {
+        Route::get('site-settings/common-smtp', 'index')->name('common.smtp'); 
+        Route::get('site-settings/common-smtp/list', 'list')->name('common.smtp.list'); 
+        Route::post('site-settings/common-smtp/store', 'store')->name('common.smtp.store');
+        Route::get('site-settings/common-smtp/edit/{id}', 'edit')->name('common.smtp.edit');
+        Route::post('site-settings/common-smtp/update/{id}', 'update')->name('common.smtp.update');
+
+        Route::delete('site-settings/common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
+        Route::post('site-settings/common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
+    });
+
+    Route::controller(LetterSetController::class)->group(function() {
+        Route::get('site-settings/letter-sets', 'index')->name('letter.set'); 
+        Route::get('site-settings/letter-sets/list', 'list')->name('letter.set.list'); 
+        Route::post('site-settings/letter-sets/store', 'store')->name('letter.set.store');
+        Route::get('site-settings/letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
+        Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
+        Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
+    });
+
+    Route::controller(SignatoryController::class)->group(function() {
+        Route::get('site-settings/signatory', 'index')->name('signatory'); 
+        Route::get('site-settings/signatory/list', 'list')->name('signatory.list'); 
+        Route::post('site-settings/signatory/store', 'store')->name('signatory.store');
+        Route::post('site-settings/signatory/edit', 'edit')->name('signatory.edit');
+        Route::post('site-settings/signatory/update', 'update')->name('signatory.update');
+        Route::delete('site-settings/signatory/delete/{id}', 'destroy')->name('signatory.destory');
+        Route::post('site-settings/signatory/restore/{id}', 'restore')->name('signatory.restore');
     });
 
     Route::controller(LetterHeaderFooterController::class)->group(function() {
-        Route::get('letterheaderfooter', 'index')->name('letterheaderfooter'); 
-        Route::get('letterheaderfooter/headerlist', 'letterheaderlist')->name('letterheader.list');
-        Route::get('letterheaderfooter/footerlist', 'letterfooterlist')->name('letterfooter.list');
-        Route::post('letterheaderfooter/upload-letterheader', 'uploadLetterHeader')->name('letterheaderfooter.upload.letterhead'); 
-        Route::post('letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
-        Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
-        Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+        Route::get('site-settings/letterheaderfooter', 'index')->name('letterheaderfooter'); 
+        Route::get('site-settings/letterheaderfooter/headerlist', 'letterheaderlist')->name('letterheader.list');
+        Route::get('site-settings/letterheaderfooter/footerlist', 'letterfooterlist')->name('letterfooter.list');
+        Route::post('site-settings/letterheaderfooter/upload-letterheader', 'uploadLetterHeader')->name('letterheaderfooter.upload.letterhead'); 
+        Route::post('site-settings/letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
+        Route::delete('site-settings/letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
+        Route::post('site-settings/letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
     });
 
     Route::controller(StudentOptionController::class)->group(function(){
-        Route::get('student-options', 'index')->name('student.options');
+        Route::get('site-settings/student-options', 'index')->name('student.options');
     });
 
     Route::controller(TitleController::class)->group(function() {

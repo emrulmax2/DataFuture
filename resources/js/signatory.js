@@ -34,6 +34,22 @@ var signatoryListTable = (function () {
                     width: "120",
                 },
                 {
+                    title: "Signature",
+                    field: "url",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().url != ''){
+                            html += '<div class="flex lg:justify-start">\
+                                    <div class="intro-x">\
+                                        <img alt="'+cell.getData().signatory_name+'" class="rounded-0 h-10 w-auto relative" src="'+cell.getData().url+'">\
+                                    </div>\
+                                </div>';
+                        }
+                        return html;
+                    }
+                },
+                {
                     title: "Name",
                     field: "signatory_name",
                     headerHozAlign: "left",

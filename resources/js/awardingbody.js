@@ -52,19 +52,10 @@ var table = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
                         return btns;
@@ -155,7 +146,7 @@ var table = (function () {
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
-            $("#status").val("");
+            $("#status").val("1");
             filterHTMLForm();
         });
 
@@ -252,7 +243,7 @@ var table = (function () {
                             $("#successModal .successModalTitle").html(
                                 "Success!"
                             );
-                            $("#successModal .successModalDesc").html('Data Inserted');
+                            $("#successModal .successModalDesc").html('Awarding body successfully inserted');
                         });                
                         
                 }
@@ -284,42 +275,40 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        
-                        if(dataset.is_hesa == 1){
-                            document.querySelector('#editModal #is_hesa').checked = true;
-                            $('#editModal .hesa_code_area').fadeIn(500, function () {
-                                $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
-                            });
-                        }else{
-                            document.querySelector('#editModal #is_hesa').checked = false;
-                            $('#editModal .hesa_code_area').fadeOut(500, function () {
-                                $('#editModal input[name="hesa_code"]').val('');
-                            });
-                        }
-                        
-                        if(dataset.is_df == 1){
-                            document.querySelector('#editModal #is_df').checked = true;
-                            $('#editModal .df_code_area').fadeIn(500, function () {
-                                $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
-                            });
-                        }else{
-                            document.querySelector('#editModal #is_df').checked = false;
-                            $('#editModal .df_code_area').fadeOut(500, function () {
-                                $('#editModal input[name="df_code"]').val('');
-                            });
-                        }
-
-                        $('#editModal input[name="id"]').val(editId);
+            }).then((response) => {
+                if (response.status == 200) {
+                    let dataset = response.data;
+                    $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                    
+                    if(dataset.is_hesa == 1){
+                        document.querySelector('#editModal #is_hesa').checked = true;
+                        $('#editModal .hesa_code_area').fadeIn(500, function () {
+                            $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
+                        });
+                    }else{
+                        document.querySelector('#editModal #is_hesa').checked = false;
+                        $('#editModal .hesa_code_area').fadeOut(500, function () {
+                            $('#editModal input[name="hesa_code"]').val('');
+                        });
                     }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    
+                    if(dataset.is_df == 1){
+                        document.querySelector('#editModal #is_df').checked = true;
+                        $('#editModal .df_code_area').fadeIn(500, function () {
+                            $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
+                        });
+                    }else{
+                        document.querySelector('#editModal #is_df').checked = false;
+                        $('#editModal .df_code_area').fadeOut(500, function () {
+                            $('#editModal input[name="df_code"]').val('');
+                        });
+                    }
+
+                    $('#editModal input[name="id"]').val(editId);
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
 
         // Update Course Data
@@ -343,53 +332,45 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document.querySelector("#update").removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText = "display: none;";
+            }).then((response) => {
+                if (response.status == 200) {
+                    document.querySelector("#update").removeAttribute("disabled");
+                    document.querySelector("#update svg").style.cssText = "display: none;";
+                    editModal.hide();
+
+                    succModal.show();
+                    document.getElementById("successModal")
+                        .addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html(
+                                "Success!"
+                            );
+                            $("#successModal .successModalDesc").html('Awarding body successfully updated');
+                        });
+                }
+                table.init();
+            }).catch((error) => {
+                document.querySelector("#update").removeAttribute("disabled");
+                document.querySelector("#update svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#editForm .${key}`).addClass('border-danger')
+                            $(`#editForm  .error-${key}`).html(val)
+                        }
+                    }else if (error.response.status == 304) {
                         editModal.hide();
 
+                        let message = error.response.statusText;
                         succModal.show();
-                        document.getElementById("successModal")
-                            .addEventListener("shown.tw.modal", function (event) {
-                                $("#successModal .successModalTitle").html(
-                                    "Success!"
-                                );
-                                $("#successModal .successModalDesc").html('Data Updated');
-                            });
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html("No Data Change!");
+                            $("#successModal .successModalDesc").html(message);
+                        });
+                    } else {
+                        console.log("error");
                     }
-                    table.init();
-                })
-                .catch((error) => {
-                    document
-                        .querySelector("#update")
-                        .removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText =
-                        "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#editForm .${key}`).addClass('border-danger')
-                                $(`#editForm  .error-${key}`).html(val)
-                            }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html(
-                                        "No Data Change!"
-                                    );
-                                    $("#successModal .successModalDesc").html(message);
-                                });
-                        } else {
-                            console.log("error");
-                        }
-                    }
-                });
+                }
+            });
         });
 
         // Confirm Modal Action
@@ -418,7 +399,7 @@ var table = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
+                            $('#successModal .successModalDesc').html('Awarding body successfully deleted!');
                         });
                     }
                     table.init();
@@ -438,7 +419,7 @@ var table = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
+                            $('#successModal .successModalDesc').html('Awarding body successfully restored!');
                         });
                     }
                     table.init();
@@ -461,7 +442,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
+                $('#confirmModal .confModDesc').html('Want to delete this Awarding Body from applicant list? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
                 $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
             });
@@ -480,7 +461,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
+                $('#confirmModal .confModDesc').html('Want to restore this Awarding Body from the trash? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });

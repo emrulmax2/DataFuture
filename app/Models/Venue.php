@@ -25,4 +25,8 @@ class Venue extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function ips(){
+        return $this->hasMany(VenueIpAddress::class, 'venue_id', 'id');
+    }
 }

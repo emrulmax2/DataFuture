@@ -541,3 +541,20 @@
 .emailGroup input.form-control{
     width: calc(100% - 120px);
 }
+
+.settingsMenu ul li ul{
+    position: relative;
+    top: 0;
+    display: none;
+}
+.settingsMenu ul li > a .menuAgnle{
+    transition: all ease 350ms;
+}
+.settingsMenu ul li > a.active .menuAgnle{
+    transform: rotate(-180deg);
+}
+.imgUploadWrap > img{
+    max-height: 98%;
+    width: auto;
+    max-width: 100%;
+}

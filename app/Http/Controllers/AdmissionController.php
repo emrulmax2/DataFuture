@@ -683,12 +683,13 @@ class AdmissionController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'google');
+
         $data = [];
         $data['applicant_id'] = $applicant_id;
         $data['hard_copy_check'] = 0;
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$imageName);
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = (!empty($taskName) ? $taskName : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -705,7 +706,7 @@ class AdmissionController extends Controller
                 'actions' => 'Document',
                 'field_name' => '',
                 'prev_field_value' => '',
-                'current_field_value' => asset('storage/applicants/'.$applicant_id.'/'.$imageName),
+                'current_field_value' => Storage::disk('google')->url($path),
                 'created_by' => auth()->user()->id
             ]);
         endif;
@@ -1012,13 +1013,13 @@ class AdmissionController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'google');
         $data = [];
         $data['applicant_id'] = $applicant_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$imageName);
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -1071,7 +1072,7 @@ class AdmissionController extends Controller
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
                     'current_file_name'=> $list->current_file_name,
-                    'url' => asset('storage/applicants/'.$list->applicant_id.'/'.$list->current_file_name),
+                    'url' => Storage::disk('google')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -1124,13 +1125,13 @@ class AdmissionController extends Controller
             if($request->hasFile('document')):
                 $document = $request->file('document');
                 $documentName = time().'_'.$document->getClientOriginalName();
-                $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $documentName);
+                $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, 'google');
 
                 $data = [];
                 $data['applicant_id'] = $applicant_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
-                $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$documentName);
+                $data['path'] = Storage::disk('google')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -1187,7 +1188,7 @@ class AdmissionController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->applicant_document_id) && isset($list->document)):
-                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? asset('storage/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) : '');
+                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name)  && Storage::diske('google')->exists('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -1214,7 +1215,7 @@ class AdmissionController extends Controller
                 $html .= $note->note;
             $html .= '</div>';
             if(isset($note->applicant_document_id) && isset($note->document)):
-                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? asset('storage/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) : '');
+                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) : '');
                 if(!empty($docURL)):
                     $btns .= '<a download href="'.$docURL.'" class="btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
                 endif;
@@ -1233,7 +1234,7 @@ class AdmissionController extends Controller
         $theNote = ApplicantNote::find($noteId);
         $docURL = '';
         if(isset($theNote->applicant_document_id) && isset($theNote->document)):
-            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? asset('storage/applicants/'.$theNote->applicant_id.'/'.$theNote->document->current_file_name) : '');
+            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$theNote->applicant_id.'/'.$theNote->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$theNote->applicant_id.'/'.$theNote->document->current_file_name) : '');
         endif;
         $theNote['docURL'] = $docURL;
 
@@ -1254,8 +1255,8 @@ class AdmissionController extends Controller
         ]);
         if($request->hasFile('document')):
             if($applicantDocumentId > 0 && isset($oleNote->document->current_file_name) && !empty($oleNote->document->current_file_name)):
-                if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name)):
-                    Storage::delete('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name);
+                if (Storage::disk('google')->exists('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name)):
+                    Storage::disk('google')->delete('public/applicants/'.$applicant_id.'/'.$oleNote->document->current_file_name);
                 endif;
 
                 $ad = ApplicantDocument::where('id', $applicantDocumentId)->forceDelete();
@@ -1263,13 +1264,13 @@ class AdmissionController extends Controller
 
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $documentName);
+            $path = $document->storeAs('public/applicants/'.$applicant_id, $documentName, 'google');
 
             $data = [];
             $data['applicant_id'] = $applicant_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$documentName);
+            $data['path'] = Storage::disk('google')->url($path);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
             $data['created_by'] = auth()->user()->id;
@@ -1318,10 +1319,10 @@ class AdmissionController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'google');
         if(!empty($oldPhoto)):
-            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
-                Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
+            if (Storage::disk('google')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
+                Storage::disk('google')->delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
             endif;
         endif;
 
@@ -1433,9 +1434,9 @@ class AdmissionController extends Controller
                                 </style>';
                 $PDFHTML .= '</head>';
                 $PDFHTML .= '<body>';
-                    if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
+                    if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('google')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
                         $PDFHTML .= '<header>';
-                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
                         $PDFHTML .= '</header>';
                     endif;
 
@@ -1449,7 +1450,9 @@ class AdmissionController extends Controller
                                         $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
 
                                         foreach($LetterFooters as $lf):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                            if(Storage::disk('google')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
+                                                $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                            endif;
                                         endforeach;
                                     $PDFHTML .= '</td>';
                                 $PDFHTML .= '</tr>';
@@ -1479,8 +1482,8 @@ class AdmissionController extends Controller
                         $signatory = Signatory::find($signatory_id);
                         $PDFHTML .= '<p>';
                             $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                            if(isset($signatory->signature) && !empty($signatory->signature)):
-                                $signatureImage = asset('storage/signatories/'.$signatory->signature); 
+                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
+                                $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature); 
                                 $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
                             endif;
                             $PDFHTML .= $signatory->signatory_name.'<br/>';
@@ -1494,14 +1497,15 @@ class AdmissionController extends Controller
             $fileName = time().'_'.$applicant_id.'_Letter.pdf';
             $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
                 ->setPaper('a4', 'portrait')
-                ->setWarnings(false)
-                ->save(storage_path('app/public/applicants/'.$applicant_id.'/').$fileName);
+                ->setWarnings(false);
+            $content = $pdf->output();
+            Storage::disk('google')->put('public/applicants/'.$applicant_id.'/'.$fileName, $content );
 
             $data = [];
             $data['applicant_id'] = $applicant_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = asset('storage/applicants/'.$applicant_id.'/'.$fileName);
+            $data['path'] = Storage::disk('google')->url('public/applicants/'.$applicant_id.'/'.$fileName);
             $data['display_file_name'] = $letter_title;
             $data['current_file_name'] = $fileName;
             $data['created_by'] = auth()->user()->id;
@@ -1520,8 +1524,8 @@ class AdmissionController extends Controller
                 $signatory = Signatory::find($signatory_id);
                 $signatoryHTML .= '<p>';
                     $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
-                    if(isset($signatory->signature) && !empty($signatory->signature)):
-                        $signatureImage = asset('storage/signatories/'.$signatory->signature);
+                    if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
+                        $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature);
                         $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
                     endif;
                     $signatoryHTML .= $signatory->signatory_name.'<br/>';
@@ -1544,7 +1548,8 @@ class AdmissionController extends Controller
                 $attachmentFiles[] = [
                     "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$fileName,
                     "nameinfo" => $fileName,
-                    "mimeinfo" => 'application/pdf'
+                    "mimeinfo" => 'application/pdf',
+                    'disk'     => 'google'
                 ];
             else:
                 $emailHTML .= $letter_body;
@@ -1620,7 +1625,7 @@ class AdmissionController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->applicant_document_id) && $list->applicant_document_id > 0 && isset($list->current_file_name)):
-                    $docURL = (!empty($list->current_file_name) ? asset('storage/applicants/'.$list->applicant_id.'/'.$list->current_file_name) : '');
+                    $docURL = (!empty($list->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -1688,9 +1693,9 @@ class AdmissionController extends Controller
             $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
 
             $MAILHTML = '';
-            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name)):
+            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('google')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
                 $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
-                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.asset('storage/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
+                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
                 $MAILHTML .= '</div>';
             endif;
             $MAILHTML .= $request->body;
@@ -1700,7 +1705,9 @@ class AdmissionController extends Controller
                     $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
 
                     foreach($emailFooters as $lf):
-                        $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.asset('storage/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                        if(Storage::disk('google')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
+                            $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                        endif;
                     endforeach;
                 $MAILHTML .= '</div>';
             endif;
@@ -1711,13 +1718,13 @@ class AdmissionController extends Controller
                 $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
-                    $path = $document->storeAs('public/applicants/'.$applicantID.'/', $documentName);
+                    $path = $document->storeAs('public/applicants/'.$applicantID, $documentName, 'google');
 
                     $data = [];
                     $data['applicant_id'] = $applicantID;
                     $data['hard_copy_check'] = 0;
                     $data['doc_type'] = $document->getClientOriginalExtension();
-                    $data['path'] = asset('storage/applicants/'.$applicantID.'/'.$documentName);
+                    $data['path'] = Storage::disk('google')->url($path);
                     $data['display_file_name'] = $documentName;
                     $data['current_file_name'] = $documentName;
                     $data['created_by'] = auth()->user()->id;
@@ -1731,9 +1738,10 @@ class AdmissionController extends Controller
                         ]);
 
                         $attachmentInfo[$docCounter++] = [
-                            "pathinfo" => 'public/applicants/'.$applicantID.'/'.$documentName,
+                            "pathinfo" => $path,
                             "nameinfo" => $document->getClientOriginalName(),
-                            "mimeinfo" => $document->getMimeType()
+                            "mimeinfo" => $document->getMimeType(),
+                            'disk'     => 'google'
                         ];
                         $docCounter++;
                     endif;
@@ -1958,7 +1966,7 @@ class AdmissionController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
                     foreach($mail->documents as $doc):
-                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.asset('storage/applicants/'.$doc->applicant_id.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('google')->url('public/applicants/'.$doc->applicant_id.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
                     endforeach;
                 $html .= '</div>';
             endif;

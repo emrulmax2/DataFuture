@@ -13,6 +13,7 @@ use App\Models\StudentTaskLog;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessController extends Controller
 {
@@ -76,12 +77,12 @@ class ProcessController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$studentApplicantId.'/', $imageName);
+        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 'google');
         $data = [];
         $data['student_id'] = $student_id;
         $data['hard_copy_check'] = 0;
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = asset('storage/applicants/'.$studentApplicantId.'/'.$imageName);
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = (!empty($taskName) ? $taskName : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -100,7 +101,7 @@ class ProcessController extends Controller
                 'actions' => 'Document',
                 'field_name' => '',
                 'prev_field_value' => '',
-                'current_field_value' => asset('storage/applicants/'.$studentApplicantId.'/'.$imageName),
+                'current_field_value' => Storage::disk('google')->url($path),
                 'created_by' => auth()->user()->id
             ]);
         endif;

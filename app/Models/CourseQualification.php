@@ -14,6 +14,10 @@ class CourseQualification extends Model
 
     protected $fillable = [
         'name',
+        'is_hesa',
+        'hesa_code',
+        'is_df',
+        'df_code',
         'created_by',
         'updated_by',
     ];

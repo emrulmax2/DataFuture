@@ -32,7 +32,6 @@ export default defineConfig({
 
                 "resources/js/status.js",
                 "resources/js/application.js",
-                "resources/js/consent-policy.js",
 
                 "resources/js/applicant-dahsboard.js",
                 "resources/js/bankholiday.js",
@@ -70,6 +69,16 @@ export default defineConfig({
                 "resources/js/student-process.js",
                 "resources/js/student-course.js",
 
+                "resources/js/settings.js",
+                "resources/js/awardingbody.js",
+                "resources/js/academicyears.js",
+                "resources/js/sourcetuitionfee.js",
+                "resources/js/coursequalification.js",
+                "resources/js/consent-policy.js",
+                "resources/js/venues.js",
+                "resources/js/rooms.js",
+                "resources/js/documentsettings.js",
+                
                 "resources/js/student-option.js",
                 "resources/js/title.js",
                 "resources/js/ethnicity.js",

@@ -67,6 +67,9 @@ var smtpSettingsListTable = (function () {
                     width: "180",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
+                        if (cell.getData().is_default == 1) {
+                            btns +='<span class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="thumbs-up" class="w-4 h-4"></i></span>';
+                        }
                         if (cell.getData().deleted_at == null) {
                             btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSmtpModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
@@ -177,16 +180,18 @@ var smtpSettingsListTable = (function () {
     const addSmtpModalEl = document.getElementById('addSmtpModal')
     addSmtpModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addSmtpModal .acc__input-error').html('');
-        $('#addSmtpModal input').val('');
+        $('#addSmtpModal input:not([type="checkbox"])').val('');
         $('#addSmtpModal select').val('');
+        $('#addSmtpModal input[type="checkbox"]').prop('checked', false);
     });
 
     const editSmtpModalEl = document.getElementById('editSmtpModal')
     editSmtpModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editSmtpModal .acc__input-error').html('');
-        $('#editSmtpModal input').val('');
+        $('#editSmtpModal input:not([type="checkbox"])').val('');
         $('#editSmtpModal input[name="id"]').val('0');
         $('#editSmtpModal select').val('');
+        $('#editSmtpModal input[type="checkbox"]').prop('checked', false);
     });
 
     document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
@@ -214,6 +219,12 @@ var smtpSettingsListTable = (function () {
                 $('#editSmtpModal input[name="smtp_port"]').val(dataset.smtp_port ? dataset.smtp_port : '');
                 $('#editSmtpModal select[name="smtp_encryption"]').val(dataset.smtp_encryption ? dataset.smtp_encryption : '');
                 $('#editSmtpModal select[name="smtp_authentication"]').val(dataset.smtp_authentication ? dataset.smtp_authentication : '');
+
+                if(dataset.is_default == 1){
+                    $('#editSmtpModal input[name="is_default"]').prop('checked', true);
+                }else{
+                    $('#editSmtpModal input[name="is_default"]').prop('checked', false);
+                }
                 
                 $('#editSmtpModal input[name="id"]').val(recordId);
             }

@@ -111,93 +111,13 @@ class TopMenu
                         ]
                     ]
                 ],
-                'settings' => [
-                    'icon' => 'settings',
-                    'title' => 'Settings',
+                'management' => [
+                    'icon' => 'layers',
+                    'title' => 'Management',
                     'sub_menu' => [
-                        'comonsettings' => [
-                            'icon' => '',
-                            'title' => 'Common Settings',
-                            'sub_menu' => [
-                                'awardingbody' => [
-                                    'icon' => '',
-                                    'route_name' => 'awardingbody',
-                                    'params' => [],
-                                    'title' =>'Awarding Body'
-                                ],
-                                'academicyears' => [
-                                    'icon' => '',
-                                    'route_name' => 'academicyears',
-                                    'params' => [],
-                                    'title' =>'Academic Years'
-                                ],                  
-                                'sourcetutionfees' => [
-                                    'icon' => '',
-                                    'route_name' => 'sourcetutionfees',
-                                    'params' => [],
-                                    'title' =>'Source of Tuition Fees'
-                                ],
-                                'coursequalification' => [
-                                    'icon' => '',
-                                    'route_name' => 'coursequalification',
-                                    'params' => [],
-                                    'title' => 'Course Qualifications'
-                                ], 
-                                'consent' => [
-                                    'icon' => '',
-                                    'route_name' => 'consent',
-                                    'params' => [],
-                                    'title' => 'Consent Policy'
-                                ], 
-                            ]
-                        ],
-                        'locations' => [
-                            'icon' => '',
-                            'title' => 'Locations',
-                            'sub_menu' => [
-                                'venues' => [
-                                    'icon' => '',
-                                    'route_name' => 'venues',
-                                    'params' => [],
-                                    'title' =>'Venues'
-                                ],
-                            ]
-                        ],
-                        'applicants' => [
-                            'icon' => '',
-                            'title' => 'Applicants',
-                            'sub_menu' => [
-                                'statuses' => [
-                                    'icon' => '',
-                                    'route_name' => 'statuses',
-                                    'params' => [],
-                                    'title' => 'Statuses'
-                                ],
-                                'documentsettings' => [
-                                    'route_name' => 'documentsettings',
-                                    'params' => [],
-                                    'title' => 'Document Settings'
-                                ],
-                                'processlist' => [
-                                    'route_name' => 'processlist',
-                                    'params' => [],
-                                    'title' => 'Process List'
-                                ],
-                                'tasklist' => [
-                                    'route_name' => 'tasklist',
-                                    'params' => [],
-                                    'title' => 'Task List'
-                                ],
-                            ]
-                        ],
-                        'student.options' => [
-                            'route_name' => 'student.options',
-                            'params' => [],
-                            'title' => 'Student Option Value'
-                        ],
                         'usersettings' => [
                             'icon' => '',
-                            'title' => 'User Settings',
+                            'title' => 'User Managment',
                             'sub_menu' => [
                                 'users' => [
                                     'icon' => '',
@@ -225,49 +145,13 @@ class TopMenu
                                 ],
                             ]
                         ],
-                        'communicationsettings' => [
-                            'icon' => '',
-                            'title' => 'Communications',
-                            'sub_menu' => [
-                                'common.smtp' => [
-                                    'icon' => '',
-                                    'route_name' => 'common.smtp',
-                                    'params' => [],
-                                    'title' => 'Common SMTP'
-                                ],
-                                'letter.set' => [
-                                    'icon' => '',
-                                    'route_name' => 'letter.set',
-                                    'params' => [],
-                                    'title' => 'Letter Sets'
-                                ],
-                                'signatory' => [
-                                    'icon' => '',
-                                    'route_name' => 'signatory',
-                                    'params' => [],
-                                    'title' => 'Signatory Sets'
-                                ],
-                                'sms.template' => [
-                                    'icon' => '',
-                                    'route_name' => 'sms.template',
-                                    'params' => [],
-                                    'title' => 'SMS Templates'
-                                ],
-                                'email.template' => [
-                                    'icon' => '',
-                                    'route_name' => 'email.template',
-                                    'params' => [],
-                                    'title' => 'Email Templates'
-                                ],
-                                'letterheaderfooter' => [
-                                    'icon' => '',
-                                    'route_name' => 'letterheaderfooter',
-                                    'params' => [],
-                                    'title' => 'Header & Footers'
-                                ]
-                            ]
-                        ],
                     ]
+                ],
+                'site.setting' => [
+                    'icon' => 'settings',
+                    'title' => 'Settings',
+                    'route_name' => 'site.setting',
+                    'params' => []
                 ],
                 /*'apps' => [ 
                     'icon' => 'activity',
