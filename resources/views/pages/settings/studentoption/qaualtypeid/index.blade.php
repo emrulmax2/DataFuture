@@ -52,6 +52,7 @@
                     </ul>
                 </div>
             </div>
+            <button data-tw-toggle="modal" data-tw-target="#qaualtypeidImportModal" type="button" class="import_btn btn btn-sm btn-pending shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
@@ -196,3 +197,35 @@
     </div>
 </div>
 <!-- END: Edit Modal -->
+<!-- BEGIN: Import Modal -->
+<div id="qaualtypeidImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="font-medium text-base mr-auto">Import Previous Provider</h2>
+                <a data-tw-dismiss="modal" href="javascript:;">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                </a>
+            </div>
+            <div class="modal-body">
+                <form method="post"  action="{{ route('qaualtypeid.import') }}" class="dropzone" id="qaualtypeidImportForm" enctype="multipart/form-data">
+                    @csrf
+                    <div class="fallback">
+                        <input name="import_qaualtypeid_file" type="file" />
+                    </div>
+                    <div class="dz-message" data-dz-message>
+                        <div class="text-lg font-medium">Drop file here or click to upload.</div>
+                        <div class="text-slate-500">                            
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a style="float: left;" href="{{ route('qaualtypeid.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample</a>
+                <button type="button" data-tw-dismiss="modal"
+                    class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                <button id="saveQaualtypeid" class="btn btn-primary w-auto">Upload</button>
+            </div>
+        </div>  
+    </div>
+</div>

@@ -168,6 +168,7 @@ var PreviousproviderListTable = (function () {
 
         const addPreviousproviderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPreviousproviderModal"));
         const editPreviousproviderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPreviousproviderModal"));
+        const previousproviderImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#previousproviderImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var PreviousproviderListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREPREVIOUSPROVIDER');
             });
+        });
+
+        $('#previousproviderImportModal').on('click','#savePreviousprovider',function(e) {
+            e.preventDefault();
+            $('#previousproviderImportModal .dropzone').get(0).dropzone.processQueue();
+            previousproviderImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);           
         });
     }
 })();

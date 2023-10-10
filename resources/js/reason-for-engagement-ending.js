@@ -168,6 +168,7 @@ var RsnengendListTable = (function () {
 
         const addRsnengendModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addRsnengendModal"));
         const editRsnengendModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editRsnengendModal"));
+        const rsnengendImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#rsnengendImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var RsnengendListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORERSNENGEND');
             });
+        });
+
+        $('#rsnengendImportModal').on('click','#saveRsnengend',function(e) {
+            e.preventDefault();
+            $('#rsnengendImportModal .dropzone').get(0).dropzone.processQueue();
+            rsnengendImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);        
         });
     }
 })();

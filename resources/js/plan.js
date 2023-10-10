@@ -277,7 +277,10 @@ var classPlanListTable = (function () {
         // On click go button
         $("#tabulator-html-filter-go-CPL").on("click", function (event) {
             var views = ($("#view-CPL").val() > 0 ? $("#view-CPL").val() : 1);
-            if(views == 2){
+
+            if(views == 3){
+                window.location.href = route('plans.tree');
+            }else if(views == 2){
                 $('#tabulator-print-CPL, #tabulator-export-CPL, #generateDaysBtn').fadeOut();
                 let courses = $("#courses-CPL").val() != "" ? $("#courses-CPL").val() : "";
                 let instance_term = $("#instance_term-CPL").val() != "" ? $("#instance_term-CPL").val() : "";
@@ -574,7 +577,8 @@ var classPlanListTable = (function () {
         $('#findModuleList').on('click', function(e){
             e.preventDefault();
             var $theBtn = $(this);
-            $('svg', $theBtn).fadeIn('fast').attr('disabled', 'disabled');
+            $('svg', $theBtn).fadeIn('fast');
+            $theBtn.attr('disabled', 'disabled');
     
             if($('#course').val() == '' || $('#instanceTermId').val() == ''){
                 if($('#course').val() == ''){
@@ -583,7 +587,8 @@ var classPlanListTable = (function () {
                 if($('#instanceTermId').val() == ''){
                     $('.error-instanceTermId').fadeIn('fast').html('This field is required.')
                 }
-                $('svg', $theBtn).fadeOut('fast').removeAttr('disabled');
+                $('svg', $theBtn).fadeOut('fast');
+                $theBtn.removeAttr('disabled');
             }else{
                 $('#classPlanAddForm .acc__input-error').fadeOut('fast').html('');
                 var courseID = $('#course').val();

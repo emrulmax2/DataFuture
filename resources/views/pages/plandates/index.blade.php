@@ -9,6 +9,7 @@
         <h2 class="text-lg font-medium mr-auto">Class plan Dates</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <button data-tw-toggle="modal" data-tw-target="#addPlansDateModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Date</button>
+            <a href="{{ route('class.plan') }}" type="button" class="btn btn-success text-white shadow-md mr-2">Back to List</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->

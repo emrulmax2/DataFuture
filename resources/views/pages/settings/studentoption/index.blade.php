@@ -27,7 +27,7 @@
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Countries</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
-                                <button data-tw-toggle="modal" data-tw-target="#addCountryModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Gender</button>
+                                <button data-tw-toggle="modal" data-tw-target="#addCountryModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Country</button>
                                 <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Fee Eligibilities</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
-                                <button data-tw-toggle="modal" data-tw-target="#addFeeEligibilityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Disability</button>
+                                <button data-tw-toggle="modal" data-tw-target="#addFeeEligibilityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
                                 <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
                             </div>
                         </div>
@@ -258,7 +258,7 @@
                 <div class="modal-body p-0">
                     <div class="p-5 text-center">
                         <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
+                        <div class="text-3xl mt-5 successModalTitle">Success</div>
                         <div class="text-slate-500 mt-2 successModalDesc"></div>
                     </div>
                     <div class="px-5 pb-8 text-center">

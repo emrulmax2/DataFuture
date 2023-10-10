@@ -169,6 +169,7 @@ var titleListTable = (function () {
 
         const addTitleModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTitleModal"));
         const editTitleModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTitleModal"));
+        const titleImportModal = tailwind.Modal.getOrCreateInstance("#titleImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -515,6 +516,15 @@ var titleListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORETITLE');
             });
+        });
+
+        $('#titleImportModal').on('click','#saveTitle',function(e) {
+            e.preventDefault();
+            $('#titleImportModal .dropzone').get(0).dropzone.processQueue();
+            titleImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

@@ -170,6 +170,7 @@ var studentidentifierListTable = (function () {
 
         const addStudentidentifierModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addStudentidentifierModal"));
         const editStudentidentifierModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editStudentidentifierModal"));
+        const studentidentifierImportModal = tailwind.Modal.getOrCreateInstance("#studentidentifierImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -518,6 +519,15 @@ var studentidentifierListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREStudentidentifier');
             });
+        });
+
+        $('#studentidentifierImportModal').on('click','#saveImportStudentIdentifier',function(e) {
+            e.preventDefault();
+            $('#studentidentifierImportModal .dropzone').get(0).dropzone.processQueue();
+            studentidentifierImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

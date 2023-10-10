@@ -73,7 +73,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
-use App\Http\Controllers\AttendanceAndResultController;
+use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
 use App\Http\Controllers\Settings\SettingController;
@@ -340,6 +340,19 @@ Route::middleware('auth')->group(function() {
 
         Route::post('plans/get-modules', 'getModulesByCourseTerms')->name('class.plan.get.modules.by.course.terms');
         Route::post('plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
+    });
+
+    Route::controller(PlanTreeController::class)->group(function() {
+        Route::get('plans/tree', 'index')->name('plans.tree');
+        Route::post('plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
+        Route::post('plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
+        Route::post('plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
+        Route::post('plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
+        Route::get('plans/tree/list', 'list')->name('plans.tree.list'); 
+        Route::get('plans/tree/edit/{id}', 'edit')->name('plans.tree.edit'); 
+        Route::post('plans/tree/update', 'update')->name('plans.tree.update'); 
+        Route::delete('plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
+        Route::post('plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
@@ -1016,6 +1029,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
         Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
         Route::post('titles/update-status/{id}', 'updateStatus')->name('titles.update.status');
+    
+        Route::get('titles/export', 'export')->name('titles.export');
+        Route::post('titles/import', 'import')->name('titles.import');
     });
 
     Route::controller(EthnicityController::class)->group(function() {
@@ -1027,6 +1043,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
         Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
         Route::post('ethnic/update-status/{id}', 'updateStatus')->name('ethnic.update.status');
+    
+        Route::get('ethnic/export', 'export')->name('ethnic.export');
+        Route::post('ethnic/import', 'import')->name('ethnic.import');
     });
 
     Route::controller(KinsRelationController::class)->group(function() {
@@ -1038,6 +1057,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
         Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
         Route::post('kin-relations/update-status/{id}', 'updateStatus')->name('kin.relations.update.status');
+    
+        Route::get('kin-relations/export', 'export')->name('kin-relations.export');
+        Route::post('kin-relations/import', 'import')->name('kin-relations.import');
     });
 
     Route::controller(SexualOrientationController::class)->group(function() {
@@ -1049,6 +1071,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
         Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
         Route::post('sex-orientation/update-status/{id}', 'updateStatus')->name('sex.orientation.update.status');
+    
+        Route::get('sex-orientation/export', 'export')->name('sex-orientation.export');
+        Route::post('sex-orientation/import', 'import')->name('sex-orientation.import');
     });
 
     Route::controller(ReligionController::class)->group(function() {
@@ -1060,6 +1085,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
         Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
         Route::post('religion/update-status/{id}', 'updateStatus')->name('religion.update.status');
+    
+        Route::get('religion/export', 'export')->name('religion.export');
+        Route::post('religion/import', 'import')->name('religion.import');
     });
     
     Route::controller(HesaGenderController::class)->group(function() {
@@ -1071,6 +1099,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
         Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
         Route::post('gender/update-status/{id}', 'updateStatus')->name('gender.update.status');
+    
+        Route::get('gender/export', 'export')->name('gender.export');
+        Route::post('gender/import', 'import')->name('gender.import');
     });
 
     Route::controller(CountryController::class)->group(function() {
@@ -1082,6 +1113,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
         Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
         Route::post('countries/update-status/{id}', 'updateStatus')->name('countries.update.status');
+    
+        Route::get('countries/export', 'export')->name('countries.export');
+        Route::post('countries/import', 'import')->name('countries.import');
     });
 
     Route::controller(DisabilityController::class)->group(function() {
@@ -1093,6 +1127,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
         Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
         Route::post('disabilities/update-status/{id}', 'updateStatus')->name('disabilities.update.status');
+    
+        Route::get('disabilities/export', 'export')->name('disabilities.export');
+        Route::post('disabilities/import', 'import')->name('disabilities.import');
     });
 
     Route::controller(FeeEligibilityController::class)->group(function() {
@@ -1104,6 +1141,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
         Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
         Route::post('feeeligibilities/update-status/{id}', 'updateStatus')->name('feeeligibilities.update.status');
+    
+        Route::get('feeeligibilities/export', 'export')->name('feeeligibilities.export');
+        Route::post('feeeligibilities/import', 'import')->name('feeeligibilities.import');
     });
 
     Route::controller(ApelCreditController::class)->group(function() {
@@ -1115,6 +1155,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('apelcred/delete/{id}', 'destroy')->name('apelcred.destory');
         Route::post('apelcred/restore/{id}', 'restore')->name('apelcred.restore');
         Route::post('apelcred/update-status/{id}', 'updateStatus')->name('apelcred.update.status');
+    
+        Route::get('apelcred/export', 'export')->name('apelcred.export');
+        Route::post('apelcred/import', 'import')->name('apelcred.import');
     });
 
     Route::controller(HighestQualificationOnEntryController::class)->group(function() {
@@ -1126,6 +1169,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('highest-qualification-on-entry/delete/{id}', 'destroy')->name('highestqoe.destory');
         Route::post('highest-qualification-on-entry/restore/{id}', 'restore')->name('highestqoe.restore');
         Route::post('highest-qualification-on-entry/update-status/{id}', 'updateStatus')->name('highestqoe.update.status');
+    
+        Route::get('highest-qualification-on-entry/export', 'export')->name('highestqoe.export');
+        Route::post('highest-qualification-on-entry/import', 'import')->name('highestqoe.import');
     });
 
     Route::controller(CountryOfPermanentAddressController::class)->group(function() {
@@ -1137,6 +1183,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('country-of-permanent-address/delete/{id}', 'destroy')->name('permaddcountry.destory');
         Route::post('country-of-permanent-address/restore/{id}', 'restore')->name('permaddcountry.restore');
         Route::post('country-of-permanent-address/update-status/{id}', 'updateStatus')->name('permaddcountry.update.status');
+    
+        Route::get('country-of-permanent-address/export', 'export')->name('permaddcountry.export');
+        Route::post('country-of-permanent-address/import', 'import')->name('permaddcountry.import');
     });
 
     Route::controller(PreviousProviderController::class)->group(function() {
@@ -1148,6 +1197,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('previous-provider/delete/{id}', 'destroy')->name('previousprovider.destory');
         Route::post('previous-provider/restore/{id}', 'restore')->name('previousprovider.restore');
         Route::post('previous-provider/update-status/{id}', 'updateStatus')->name('previousprovider.update.status');
+    
+        Route::get('previous-provider/export', 'export')->name('previousprovider.export');
+        Route::post('previous-provider/import', 'import')->name('previousprovider.import');
     });
 
     Route::controller(QualificationTypeIdentifierController::class)->group(function() {
@@ -1159,6 +1211,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('qualification-identifier/delete/{id}', 'destroy')->name('qaualtypeid.destory');
         Route::post('qualification-identifier/restore/{id}', 'restore')->name('qaualtypeid.restore');
         Route::post('qualification-identifier/update-status/{id}', 'updateStatus')->name('qaualtypeid.update.status');
+    
+        Route::get('qualification-identifier/export', 'export')->name('qaualtypeid.export');
+        Route::post('qualification-identifier/import', 'import')->name('qaualtypeid.import');
     });
 
     Route::controller(ReasonForEngagementEndingController::class)->group(function() {
@@ -1170,6 +1225,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('reason-end/delete/{id}', 'destroy')->name('rsnengend.destory');
         Route::post('reason-end/restore/{id}', 'restore')->name('rsnengend.restore');
         Route::post('reason-end/update-status/{id}', 'updateStatus')->name('rsnengend.update.status');
+    
+        Route::get('reason-end/export', 'export')->name('rsnengend.export');
+        Route::post('reason-end/import', 'import')->name('rsnengend.import');
     });    
     
     Route::controller(TermTimeAccommodationTypeController::class)->group(function() {
@@ -1181,6 +1239,9 @@ Route::middleware('auth')->group(function() {
         Route::delete('termtimeaccommodationtype/delete/{id}', 'destroy')->name('termtimeaccommodationtype.destory');
         Route::post('termtimeaccommodationtype/restore/{id}', 'restore')->name('termtimeaccommodationtype.restore');
         Route::post('termtimeaccommodationtype/update-status/{id}', 'updateStatus')->name('termtimeaccommodationtype.update.status');
+    
+        Route::get('termtimeaccommodationtype/export', 'export')->name('termtimeaccommodationtype.export');
+        Route::post('termtimeaccommodationtype/import', 'import')->name('termtimeaccommodationtype.import');
     });
 
     Route::controller(SexIdentifierController::class)->group(function() {
@@ -1192,14 +1253,13 @@ Route::middleware('auth')->group(function() {
         Route::delete('sexidentifier/delete/{id}', 'destroy')->name('sexidentifier.destory');
         Route::post('sexidentifier/restore/{id}', 'restore')->name('sexidentifier.restore');
         Route::post('sexidentifier/update-status/{id}', 'updateStatus')->name('sexidentifier.update.status');
+    
+        Route::get('studentidentifier/export', 'export')->name('studentidentifier.export');
+        Route::post('studentidentifier/import', 'import')->name('studentidentifier.import');
     });
 
     Route::controller(AddressController::class)->group(function() {
         Route::post('address/get-address', 'getAddress')->name('address.get');
         Route::post('address/store', 'store')->name('address.store');
-    });
-
-    Route::controller(AttendanceAndResultController::class)->group(function() {
-        Route::get('attendance-and-result', 'index')->name('attend.result');
     });
 });

@@ -18,7 +18,7 @@ var countryListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -174,6 +174,7 @@ var countryListTable = (function () {
 
         const addCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCountryModal"));
         const editCountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCountryModal"));
+        const countryImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#countryImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -519,6 +520,15 @@ var countryListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORECNTR');
             });
+        });
+
+        $('#countryImportModal').on('click','#saveCountry',function(e) {
+            e.preventDefault();
+            $('#countryImportModal .dropzone').get(0).dropzone.processQueue();
+            countryImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

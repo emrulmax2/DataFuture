@@ -170,6 +170,7 @@ var ethnicityListTable = (function () {
 
         const addEthnicityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEthnicityModal"));
         const editEthnicityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEthnicityModal"));
+        const ethnicityImportModal = tailwind.Modal.getOrCreateInstance("#ethnicityImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -518,6 +519,15 @@ var ethnicityListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREETHNIC');
             });
+        });
+
+        $('#ethnicityImportModal').on('click','#saveEthnicities',function(e) {
+            e.preventDefault();
+            $('#ethnicityImportModal .dropzone').get(0).dropzone.processQueue();
+            ethnicityImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

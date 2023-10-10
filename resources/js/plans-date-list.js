@@ -30,13 +30,28 @@ var classPlanDateListsTable = (function () {
                     width: "180",
                 },
                 {
-                    title: "Name",
+                    title: "Date",
+                    field: "date",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Type",
                     field: "name",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Date",
-                    field: "date",
+                    title: "Room",
+                    field: "room",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Time",
+                    field: "time",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status",
                     headerHozAlign: "left",
                 },
                 {

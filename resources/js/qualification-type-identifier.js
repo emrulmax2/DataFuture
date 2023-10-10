@@ -168,6 +168,7 @@ var QaualtypeidListTable = (function () {
 
         const addQaualtypeidModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addQaualtypeidModal"));
         const editQaualtypeidModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editQaualtypeidModal"));
+        const qaualtypeidImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#qaualtypeidImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var QaualtypeidListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREQUALTYPEID');
             });
+        });
+
+        $('#qaualtypeidImportModal').on('click','#saveQaualtypeid',function(e) {
+            e.preventDefault();
+            $('#qaualtypeidImportModal .dropzone').get(0).dropzone.processQueue();
+            qaualtypeidImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);           
         });
     }
 })();

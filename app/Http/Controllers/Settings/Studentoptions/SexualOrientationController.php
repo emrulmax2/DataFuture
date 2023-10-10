@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Settings\Studentoptions;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SexualOrientation;
-use App\Http\Requests\SexualOrientationRequest;
+use App\Http\Requests\SexualOrientationRequest;            
+use App\Exports\SexualOrientationExport;
+use App\Imports\SexualOrientationImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SexualOrientationController extends Controller
 {
@@ -136,5 +139,17 @@ class SexualOrientationController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new SexualOrientationExport(), 'sexorientation.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new SexualOrientationImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

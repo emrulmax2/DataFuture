@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\HesaGender;
 use Illuminate\Http\Request;
 use App\Http\Requests\HesaGenderRequest;
+use App\Exports\HesaGenderExport;
+use App\Imports\HesaGenderImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HesaGenderController extends Controller
 {
@@ -136,5 +139,17 @@ class HesaGenderController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new HesaGenderExport(), 'hesagender.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new HesaGenderImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

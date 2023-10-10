@@ -168,6 +168,7 @@ var hgenListTable = (function () {
 
         const addHgenModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHgenModal"));
         const editHgenModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editHgenModal"));
+        const genderImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#genderImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var hgenListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREHGEN');
             });
+        });
+
+        $('#genderImportModal').on('click','#saveGender',function(e) {
+            e.preventDefault();
+            $('#genderImportModal .dropzone').get(0).dropzone.processQueue();
+            genderImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

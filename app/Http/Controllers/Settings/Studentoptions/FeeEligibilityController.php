@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\FeeEligibility;
 use Illuminate\Http\Request;
 use App\Http\Requests\FeeEligibilityRequest;
+use App\Exports\FeeEligibilityExport;
+use App\Imports\FeeEligibilityImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FeeEligibilityController extends Controller
 {
@@ -138,5 +141,17 @@ class FeeEligibilityController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new FeeEligibilityExport(), 'feeeligibilities.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new FeeEligibilityImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

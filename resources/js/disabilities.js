@@ -170,6 +170,7 @@ var disabilityListTable = (function () {
 
         const addDisabilityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addDisabilityModal"));
         const editDisabilityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editDisabilityModal"));
+        const disabilitiesImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#disabilitiesImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -515,6 +516,15 @@ var disabilityListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREDISABILITY');
             });
+        });
+
+        $('#disabilitiesImportModal').on('click','#saveDisabilities',function(e) {
+            e.preventDefault();
+            $('#disabilitiesImportModal .dropzone').get(0).dropzone.processQueue();
+            disabilitiesImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

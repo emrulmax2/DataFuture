@@ -115,12 +115,6 @@ class TopMenu
                     'icon' => 'layers',
                     'title' => 'Management',
                     'sub_menu' => [
-                        'attend.result' => [
-                            'icon' => '',
-                            'title' => 'Attendance & Result',
-                            'route_name' => 'attend.result',
-                            'params' => []
-                        ],
                         'usersettings' => [
                             'icon' => '',
                             'title' => 'User Managment',

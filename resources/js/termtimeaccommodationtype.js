@@ -170,6 +170,7 @@ var termtimeaccommodationtypeListTable = (function () {
 
         const addTTACCOMModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTTACCOMModal"));
         const editTTACCOMModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTTACCOMModal"));
+        const accommodationImportModal = tailwind.Modal.getOrCreateInstance("#accommodationImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -518,6 +519,15 @@ var termtimeaccommodationtypeListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORETTACCOM');
             });
+        });
+
+        $('#accommodationImportModal').on('click','#saveTermtimeAccommodation',function(e) {
+            e.preventDefault();
+            $('#accommodationImportModal .dropzone').get(0).dropzone.processQueue();
+            accommodationImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);       
         });
     }
 })();

@@ -169,6 +169,7 @@ var apelcredListTable = (function () {
 
         const addApelcredModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addApelcredModal"));
         const editApelcredModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editApelcredModal"));
+        const apelCreditImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#apelCreditImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -513,6 +514,15 @@ var apelcredListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREAPEL');
             });
+        });
+
+        $('#apelCreditImportModal').on('click','#saveApelCredit',function(e) {
+            e.preventDefault();
+            $('#apelCreditImportModal .dropzone').get(0).dropzone.processQueue();
+            apelCreditImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

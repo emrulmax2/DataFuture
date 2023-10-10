@@ -169,6 +169,7 @@ var feeEligibilitiesListTable = (function () {
 
         const addFeeEligibilityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFeeEligibilityModal"));
         const editFeeEligibilityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFeeEligibilityModal"));
+        const feeeligibilityImportModal = tailwind.Modal.getOrCreateInstance("#feeeligibilityImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -516,6 +517,15 @@ var feeEligibilitiesListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREFEEELIGIBILITY');
             });
+        });
+
+        $('#feeeligibilityImportModal').on('click','#saveFeeEligibility',function(e) {
+            e.preventDefault();
+            $('#feeeligibilityImportModal .dropzone').get(0).dropzone.processQueue();
+            feeeligibilityImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);         
         });
     }
 })();

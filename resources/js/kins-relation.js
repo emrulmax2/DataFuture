@@ -170,6 +170,7 @@ var kinsListTable = (function () {
 
         const addKinsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addKinsModal"));
         const editKinsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editKinsModal"));
+        const kinsrelationImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#kinsrelationImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -514,6 +515,15 @@ var kinsListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREKINS');
             });
+        });
+
+        $('#kinsrelationImportModal').on('click','#saveKinsrelation',function(e) {
+            e.preventDefault();
+            $('#kinsrelationImportModal .dropzone').get(0).dropzone.processQueue();
+            kinsrelationImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

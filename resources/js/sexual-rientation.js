@@ -168,6 +168,7 @@ var sexoListTable = (function () {
 
         const addSexoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSexoModal"));
         const editSexoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSexoModal"));
+        const sexorientationImportModal = tailwind.Modal.getOrCreateInstance("#sexorientationImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -510,6 +511,15 @@ var sexoListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORESEXO');
             });
+        });
+
+        $('#sexorientationImportModal').on('click','#saveImportSexorientation',function(e) {
+            e.preventDefault();
+            $('#sexorientationImportModal .dropzone').get(0).dropzone.processQueue();
+            sexorientationImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

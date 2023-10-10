@@ -389,16 +389,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "3.7.0",
+            "version": "3.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "00d03067f07482f025d41ab55e4ba0db5eca2cdf"
+                "reference": "5b7bd66c9ff58c04c5474ab85edce442f8081cb2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/00d03067f07482f025d41ab55e4ba0db5eca2cdf",
-                "reference": "00d03067f07482f025d41ab55e4ba0db5eca2cdf",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/5b7bd66c9ff58c04c5474ab85edce442f8081cb2",
+                "reference": "5b7bd66c9ff58c04c5474ab85edce442f8081cb2",
                 "shasum": ""
             },
             "require": {
@@ -482,7 +482,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/3.7.0"
+                "source": "https://github.com/doctrine/dbal/tree/3.7.1"
             },
             "funding": [
                 {
@@ -498,7 +498,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-09-26T20:56:55+00:00"
+            "time": "2023-10-06T05:06:20+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -931,16 +931,16 @@
         },
         {
             "name": "egulias/email-validator",
-            "version": "4.0.1",
+            "version": "4.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "3a85486b709bc384dae8eb78fb2eec649bdb64ff"
+                "reference": "ebaaf5be6c0286928352e054f2d5125608e5405e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/3a85486b709bc384dae8eb78fb2eec649bdb64ff",
-                "reference": "3a85486b709bc384dae8eb78fb2eec649bdb64ff",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/ebaaf5be6c0286928352e054f2d5125608e5405e",
+                "reference": "ebaaf5be6c0286928352e054f2d5125608e5405e",
                 "shasum": ""
             },
             "require": {
@@ -949,8 +949,8 @@
                 "symfony/polyfill-intl-idn": "^1.26"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.5.27",
-                "vimeo/psalm": "^4.30"
+                "phpunit/phpunit": "^10.2",
+                "vimeo/psalm": "^5.12"
             },
             "suggest": {
                 "ext-intl": "PHP Internationalization Libraries are required to use the SpoofChecking validation"
@@ -986,7 +986,7 @@
             ],
             "support": {
                 "issues": "https://github.com/egulias/EmailValidator/issues",
-                "source": "https://github.com/egulias/EmailValidator/tree/4.0.1"
+                "source": "https://github.com/egulias/EmailValidator/tree/4.0.2"
             },
             "funding": [
                 {
@@ -994,7 +994,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-01-14T14:17:03+00:00"
+            "time": "2023-10-06T06:47:41+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -1059,16 +1059,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v6.8.1",
+            "version": "v6.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "5dbc8959427416b8ee09a100d7a8588c00fb2e26"
+                "reference": "f03270e63eaccf3019ef0f32849c497385774e11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/5dbc8959427416b8ee09a100d7a8588c00fb2e26",
-                "reference": "5dbc8959427416b8ee09a100d7a8588c00fb2e26",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/f03270e63eaccf3019ef0f32849c497385774e11",
+                "reference": "f03270e63eaccf3019ef0f32849c497385774e11",
                 "shasum": ""
             },
             "require": {
@@ -1116,9 +1116,9 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v6.8.1"
+                "source": "https://github.com/firebase/php-jwt/tree/v6.9.0"
             },
-            "time": "2023-07-14T18:33:00+00:00"
+            "time": "2023-10-05T00:24:42+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -1262,16 +1262,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.318.0",
+            "version": "v0.319.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "908a866797b9731352e650997112c8c3a0347ac5"
+                "reference": "9206f4d8cfacbec3c494d68f1758b2c8ca5b179d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/908a866797b9731352e650997112c8c3a0347ac5",
-                "reference": "908a866797b9731352e650997112c8c3a0347ac5",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/9206f4d8cfacbec3c494d68f1758b2c8ca5b179d",
+                "reference": "9206f4d8cfacbec3c494d68f1758b2c8ca5b179d",
                 "shasum": ""
             },
             "require": {
@@ -1300,22 +1300,22 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.318.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.319.0"
             },
-            "time": "2023-10-02T01:10:14+00:00"
+            "time": "2023-10-08T01:02:14+00:00"
         },
         {
             "name": "google/auth",
-            "version": "v1.30.0",
+            "version": "v1.31.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "6028b072aa444d7edecbed603431322026704627"
+                "reference": "22209fddd0c06f3f8e3cb4aade0b352aa00f9888"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/6028b072aa444d7edecbed603431322026704627",
-                "reference": "6028b072aa444d7edecbed603431322026704627",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/22209fddd0c06f3f8e3cb4aade0b352aa00f9888",
+                "reference": "22209fddd0c06f3f8e3cb4aade0b352aa00f9888",
                 "shasum": ""
             },
             "require": {
@@ -1358,9 +1358,9 @@
             "support": {
                 "docs": "https://googleapis.github.io/google-auth-library-php/main/",
                 "issues": "https://github.com/googleapis/google-auth-library-php/issues",
-                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.30.0"
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.31.0"
             },
-            "time": "2023-09-07T19:13:44+00:00"
+            "time": "2023-10-05T20:39:00+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -1915,16 +1915,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v9.52.15",
+            "version": "v9.52.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "e3350e87a52346af9cc655a3012d2175d2d05ad7"
+                "reference": "082345d76fc6a55b649572efe10b11b03e279d24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/e3350e87a52346af9cc655a3012d2175d2d05ad7",
-                "reference": "e3350e87a52346af9cc655a3012d2175d2d05ad7",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/082345d76fc6a55b649572efe10b11b03e279d24",
+                "reference": "082345d76fc6a55b649572efe10b11b03e279d24",
                 "shasum": ""
             },
             "require": {
@@ -2109,7 +2109,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2023-08-08T14:28:40+00:00"
+            "time": "2023-10-03T13:02:30+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -2565,16 +2565,16 @@
         },
         {
             "name": "league/flysystem",
-            "version": "3.16.0",
+            "version": "3.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "4fdf372ca6b63c6e281b1c01a624349ccb757729"
+                "reference": "bd4c9b26849d82364119c68429541f1631fba94b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/4fdf372ca6b63c6e281b1c01a624349ccb757729",
-                "reference": "4fdf372ca6b63c6e281b1c01a624349ccb757729",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/bd4c9b26849d82364119c68429541f1631fba94b",
+                "reference": "bd4c9b26849d82364119c68429541f1631fba94b",
                 "shasum": ""
             },
             "require": {
@@ -2592,8 +2592,8 @@
                 "symfony/http-client": "<5.2"
             },
             "require-dev": {
-                "async-aws/s3": "^1.5",
-                "async-aws/simple-s3": "^1.1",
+                "async-aws/s3": "^1.5 || ^2.0",
+                "async-aws/simple-s3": "^1.1 || ^2.0",
                 "aws/aws-sdk-php": "^3.220.0",
                 "composer/semver": "^3.0",
                 "ext-fileinfo": "*",
@@ -2639,7 +2639,7 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/3.16.0"
+                "source": "https://github.com/thephpleague/flysystem/tree/3.17.0"
             },
             "funding": [
                 {
@@ -2651,7 +2651,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-09-07T19:22:17+00:00"
+            "time": "2023-10-05T20:15:05+00:00"
         },
         {
             "name": "league/flysystem-local",
@@ -3515,16 +3515,16 @@
         },
         {
             "name": "nette/schema",
-            "version": "v1.2.4",
+            "version": "v1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/schema.git",
-                "reference": "c9ff517a53903b3d4e29ec547fb20feecb05b8ab"
+                "reference": "0462f0166e823aad657c9224d0f849ecac1ba10a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/schema/zipball/c9ff517a53903b3d4e29ec547fb20feecb05b8ab",
-                "reference": "c9ff517a53903b3d4e29ec547fb20feecb05b8ab",
+                "url": "https://api.github.com/repos/nette/schema/zipball/0462f0166e823aad657c9224d0f849ecac1ba10a",
+                "reference": "0462f0166e823aad657c9224d0f849ecac1ba10a",
                 "shasum": ""
             },
             "require": {
@@ -3571,9 +3571,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nette/schema/issues",
-                "source": "https://github.com/nette/schema/tree/v1.2.4"
+                "source": "https://github.com/nette/schema/tree/v1.2.5"
             },
-            "time": "2023-08-05T18:56:25+00:00"
+            "time": "2023-10-05T20:37:59+00:00"
         },
         {
             "name": "nette/utils",
@@ -5121,21 +5121,21 @@
         },
         {
             "name": "spatie/browsershot",
-            "version": "3.58.2",
+            "version": "3.59.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/browsershot.git",
-                "reference": "6503b2b429e10ff28a4cdb9fffaecc25ba6d032c"
+                "reference": "1b74e71fdd1c30fa1de45465bacc1cf5dc852881"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/browsershot/zipball/6503b2b429e10ff28a4cdb9fffaecc25ba6d032c",
-                "reference": "6503b2b429e10ff28a4cdb9fffaecc25ba6d032c",
+                "url": "https://api.github.com/repos/spatie/browsershot/zipball/1b74e71fdd1c30fa1de45465bacc1cf5dc852881",
+                "reference": "1b74e71fdd1c30fa1de45465bacc1cf5dc852881",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "^7.4|^8.0",
+                "php": "^8.0",
                 "spatie/image": "^1.5.3|^2.0",
                 "spatie/temporary-directory": "^1.1|^2.0",
                 "symfony/process": "^4.2|^5.0|^6.0"
@@ -5175,7 +5175,7 @@
                 "webpage"
             ],
             "support": {
-                "source": "https://github.com/spatie/browsershot/tree/3.58.2"
+                "source": "https://github.com/spatie/browsershot/tree/3.59.0"
             },
             "funding": [
                 {
@@ -5183,7 +5183,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-07-27T07:51:54+00:00"
+            "time": "2023-10-09T12:59:37+00:00"
         },
         {
             "name": "spatie/image",
@@ -7623,16 +7623,16 @@
         },
         {
             "name": "tightenco/ziggy",
-            "version": "v1.6.2",
+            "version": "v1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tighten/ziggy.git",
-                "reference": "41eb6384a9f9ae85cf54d6dc8f98dab282b07890"
+                "reference": "638a4c0d8592af991514a6ab0b3b12c867fdc1f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tighten/ziggy/zipball/41eb6384a9f9ae85cf54d6dc8f98dab282b07890",
-                "reference": "41eb6384a9f9ae85cf54d6dc8f98dab282b07890",
+                "url": "https://api.github.com/repos/tighten/ziggy/zipball/638a4c0d8592af991514a6ab0b3b12c867fdc1f6",
+                "reference": "638a4c0d8592af991514a6ab0b3b12c867fdc1f6",
                 "shasum": ""
             },
             "require": {
@@ -7684,9 +7684,9 @@
             ],
             "support": {
                 "issues": "https://github.com/tighten/ziggy/issues",
-                "source": "https://github.com/tighten/ziggy/tree/v1.6.2"
+                "source": "https://github.com/tighten/ziggy/tree/v1.8.0"
             },
-            "time": "2023-08-18T20:28:21+00:00"
+            "time": "2023-10-06T14:01:40+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",

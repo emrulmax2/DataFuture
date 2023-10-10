@@ -168,6 +168,7 @@ var HighestqoeListTable = (function () {
 
         const addHighestqoeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHighestqoeModal"));
         const editHighestqoeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editHighestqoeModal"));
+        const highestqoeImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#highestqoeImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var HighestqoeListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREHIGHESTQOE');
             });
+        });
+
+        $('#highestqoeImportModal').on('click','#saveHighestqoe',function(e) {
+            e.preventDefault();
+            $('#highestqoeImportModal .dropzone').get(0).dropzone.processQueue();
+            highestqoeImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

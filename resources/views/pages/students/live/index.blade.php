@@ -14,7 +14,34 @@
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         <form id="tabulatorFilterForm-LSD">
-            <div class="grid grid-cols-12 gap-4">
+            <div class="grid grid-cols-12 gap-0 gap-x-4">
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0 gap-x-4">
+                        <label class="col-span-12 sm:col-span-4 form-label pt-2">Student Search</label>
+                        <div class="col-span-12 sm:col-span-8">
+                            <div class="autoCompleteField" data-table="students" data-fields="registration_no,application_no,uhn_no,ssn_no">
+                                <input type="text" name="student_id" class="form-control" value="" placeholder="LCC000001"/>
+                                <ul class="autoFillDropdown">
+                                    <li>
+                                        <a href="javascript:void(0);" class="dropdown-item">LCC000001</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="dropdown-item">LCC000002</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-4 text-right"></div>
+                <div class="col-span-12 sm:col-span-4 text-right">
+                    <div class="flex justify-end items-center">
+                        <button type="submit" class="btn btn-facebook ml-1 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
+                        <button type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-4 mt-5">
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Ref. No.</div>

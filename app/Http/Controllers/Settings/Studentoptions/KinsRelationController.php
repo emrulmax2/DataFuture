@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\KinsRelation;
 use App\Http\Requests\KinsRelationRequest;
+use App\Exports\KinsRelationExport;
+use App\Imports\KinsRelationImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KinsRelationController extends Controller
 {
@@ -136,5 +139,17 @@ class KinsRelationController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new KinsRelationExport(), 'kin-relations.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new KinsRelationImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

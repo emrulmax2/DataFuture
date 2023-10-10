@@ -168,6 +168,7 @@ var PermaddcountryListTable = (function () {
 
         const addPermaddcountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPermaddcountryModal"));
         const editPermaddcountryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPermaddcountryModal"));
+        const permaddcountryImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#permaddcountryImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -512,6 +513,15 @@ var PermaddcountryListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTOREPERMADDCOUNTRY');
             });
+        });
+
+        $('#permaddcountryImportModal').on('click','#savePermaddcountry',function(e) {
+            e.preventDefault();
+            $('#permaddcountryImportModal .dropzone').get(0).dropzone.processQueue();
+            permaddcountryImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

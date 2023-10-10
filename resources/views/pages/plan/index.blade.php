@@ -116,6 +116,7 @@
                         <select id="view-CPL" name="view" class="w-full">
                             <option value="1" selected>List View</option>
                             <option value="2">Grid View</option>
+                            <option value="3">Term View</option>
                         </select>
                     </div>
                 </div>
@@ -186,7 +187,7 @@
 
     <!-- BEGIN: Add Modal -->
     <div id="editPlanModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editPlanForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -196,7 +197,7 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-3">
+                    <div class="grid grid-cols-12 gap-3">
                             <div class="col-span-6">
                                 <div class="grid grid-cols-12 gap-0">
                                     <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Course</div></label>
@@ -209,7 +210,7 @@
                                     <div class="col-span-8"><div class="text-left font-medium font-bold moduleName">Module Name</div></div>
                                 </div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="group_id" class="form-label">Group <span class="text-danger">*</span></label>
                                 <select id="group_id" name="group_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -221,7 +222,7 @@
                                 </select>
                                 <div class="acc__input-error error-group_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="rooms_id" class="form-label">Room <span class="text-danger">*</span></label>
                                 <select id="rooms_id" name="rooms_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -233,7 +234,7 @@
                                 </select>
                                 <div class="acc__input-error error-rooms_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="tutor_id" class="form-label">Tutor <span class="text-danger">*</span></label>
                                 <select id="tutor_id" name="tutor_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -245,7 +246,7 @@
                                 </select>
                                 <div class="acc__input-error error-tutor_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="personal_tutor_id" class="form-label">Personal Tutor <span class="text-danger">*</span></label>
                                 <select id="personal_tutor_id" name="personal_tutor_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -257,7 +258,7 @@
                                 </select>
                                 <div class="acc__input-error error-personal_tutor_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="class_type" class="form-label">Class Type</label>
                                 <select id="class_type" name="class_type" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -267,22 +268,22 @@
                                     <option value="Seminar">Seminar</option>
                                 </select>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="module_enrollment_key" class="form-label">Enrollment Key <span class="text-danger">*</span></label>
                                 <input id="module_enrollment_key" type="text" name="module_enrollment_key" class="form-control w-full">
                                 <div class="acc__input-error error-module_enrollment_key text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
                                 <input id="start_time" type="text" name="start_time" class="form-control w-full theTimeField" placeholder="00:00">
                                 <div class="acc__input-error error-start_time text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="end_time" class="form-label">End Time <span class="text-danger">*</span></label>
                                 <input id="end_time" type="text" name="end_time" class="form-control w-full theTimeField" placeholder="00:00">
                                 <div class="acc__input-error error-end_time text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-4">
                                 <label for="submission_date" class="form-label">Submission Date <span class="text-danger">*</span></label>
                                 <input id="submission_date" type="text" name="submission_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
                                 <div class="acc__input-error error-submission_date text-danger mt-2"></div>
@@ -321,12 +322,12 @@
                                 </div>
                                 <div class="acc__input-error error-class_day text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-12">
+                            <div class="col-span-12 sm:col-span-6">
                                 <label for="virtual_room" class="form-label">Virtual Room</label>
-                                <input id="virtual_room" type="text" name="virtual_room" class="form-control w-full">
+                                <textarea id="virtual_room" name="virtual_room" class="form-control w-full"></textarea>
                                 <div class="acc__input-error error-virtual_room text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-12">
+                            <div class="col-span-12 sm:col-span-6">
                                 <label for="note" class="form-label">Note</label>
                                 <textarea id="note" name="note" class="form-control w-full"></textarea>
                                 <div class="acc__input-error error-note text-danger mt-2"></div>
@@ -415,4 +416,8 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
-    @endsection
+@endsection
+
+@section('script')
+    @vite('resources/js/plan.js')
+@endsection

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Settings\Studentoptions;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Religion;
-use App\Http\Requests\ReligionRequest;
+use App\Http\Requests\ReligionRequest;     
+use App\Exports\ReligionExport;
+use App\Imports\ReligionImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReligionController extends Controller
 {
@@ -136,5 +139,17 @@ class ReligionController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new ReligionExport(), 'religion.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new ReligionImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

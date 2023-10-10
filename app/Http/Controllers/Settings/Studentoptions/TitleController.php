@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Title;
 use App\Http\Requests\TitleRequest;
+use App\Exports\TitleExport;
+use App\Imports\TitleImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TitleController extends Controller
 {
@@ -136,5 +139,17 @@ class TitleController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new TitleExport(), 'title.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new TitleImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

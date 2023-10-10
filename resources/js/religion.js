@@ -168,6 +168,7 @@ var relgnListTable = (function () {
 
         const addRelgnModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addRelgnModal"));
         const editRelgnModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editRelgnModal"));
+        const religionImportModal = tailwind.Modal.getOrCreateInstance("#religionImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
@@ -513,6 +514,15 @@ var relgnListTable = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORERELGN');
             });
+        });
+
+        $('#religionImportModal').on('click','#saveReligion',function(e) {
+            e.preventDefault();
+            $('#religionImportModal .dropzone').get(0).dropzone.processQueue();
+            religionImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);           
         });
     }
 })();

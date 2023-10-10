@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OptionValueRequest;
 use App\Models\QualificationTypeIdentifier;
 use Illuminate\Http\Request;
+use App\Exports\QualificationTypeIdentifierExport;
+use App\Imports\QualificationTypeIdentifierImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QualificationTypeIdentifierController extends Controller
 {
@@ -126,5 +129,17 @@ class QualificationTypeIdentifierController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new QualificationTypeIdentifierExport(), 'qaualtypeid.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new QualificationTypeIdentifierImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

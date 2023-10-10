@@ -95,10 +95,11 @@ export default defineConfig({
                 "resources/js/previous-provider.js",
                 "resources/js/reason-for-engagement-ending.js",  
                 "resources/js/termtimeaccommodationtype.js",
-                "resources/js/studentidentifier.js",
+                "resources/js/sexidentifier.js",
                 "resources/js/student-awarding-body.js",
 
-                "resources/js/attedance-and-management.js",
+                "resources/js/plan.js",
+                "resources/js/plan-tree.js",
                 
             ],
             refresh: true,

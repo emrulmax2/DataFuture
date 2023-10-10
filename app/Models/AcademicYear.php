@@ -41,4 +41,19 @@ class AcademicYear extends Model
     public function getTargetDateHesaReportAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
+
+    public function crc_instance(){
+        return $this->hasMany(CourseCreationInstance::class, 'academic_year_id', 'id');
+    }
+
+    public function terms(){
+        return $this->hasManyThrough(
+            InstanceTerm::class,
+            CourseCreationInstance::class,
+            'academic_year_id',
+            'course_creation_instance_id',
+            'id',
+            'id'
+        );
+    }
 }

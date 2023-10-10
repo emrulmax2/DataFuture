@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\TermTimeAccommodationType;
 use Illuminate\Http\Request;
 use App\Http\Requests\TermTimeAccommodationTypeRequest;
+use App\Exports\TermTimeAccommodationTypeExport;
+use App\Imports\TermTimeAccommodationTypeImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TermTimeAccommodationTypeController extends Controller
 {
@@ -134,5 +137,17 @@ class TermTimeAccommodationTypeController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new TermTimeAccommodationTypeExport(), 'termtimeaccommodationtype.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new TermTimeAccommodationTypeImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

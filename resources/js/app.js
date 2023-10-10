@@ -74,7 +74,6 @@ import "./course-creation-instance";
 import "./instance-term";
 import "./term-module-creation";
 import "./assessment";
-import "./plan";
 import "./plans-date-list";
 
 import "./admission-global";

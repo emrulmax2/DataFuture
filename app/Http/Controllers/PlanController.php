@@ -23,7 +23,7 @@ class PlanController extends Controller
 {
     public function index()
     {
-        return view('pages/plan/index', [
+        return view('pages.plan.index', [
             'title' => 'Class Plans - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']

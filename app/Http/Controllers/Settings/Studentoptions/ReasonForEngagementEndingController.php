@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OptionValueRequest;
 use App\Models\ReasonForEngagementEnding;
 use Illuminate\Http\Request;
+use App\Exports\ReasonForEngagementEndingExport;
+use App\Imports\ReasonForEngagementEndingImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReasonForEngagementEndingController extends Controller
 {
@@ -126,5 +129,17 @@ class ReasonForEngagementEndingController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new ReasonForEngagementEndingExport(), 'rsnengend.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new ReasonForEngagementEndingImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

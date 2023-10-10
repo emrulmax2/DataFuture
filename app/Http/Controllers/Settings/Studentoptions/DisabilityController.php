@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Disability;
 use App\Http\Requests\DisabilityRequest;
+use App\Exports\DisabilityExport;
+use App\Imports\DisabilityImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DisabilityController extends Controller
 {
@@ -136,5 +139,17 @@ class DisabilityController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new DisabilityExport(), 'disabilities.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new DisabilityImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

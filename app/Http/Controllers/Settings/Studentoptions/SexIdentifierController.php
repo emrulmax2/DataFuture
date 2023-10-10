@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\SexIdentifier;
 use Illuminate\Http\Request;        
 use App\Http\Requests\SexIdentifierRequest;
+use App\Exports\SexIdentifierExport;
+use App\Imports\SexIdentifierImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SexIdentifierController extends Controller
 {
@@ -134,5 +137,17 @@ class SexIdentifierController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new SexIdentifierExport(), 'sexidentifier.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new SexIdentifierImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

@@ -44,4 +44,8 @@ class Course extends Model
     public function modules(){
         return $this->hasMany(CourseModule::class);
     }
+
+    public function groups(){
+        return $this->hasMany(Group::class);
+    }
 }

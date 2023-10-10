@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OptionValueRequest;
 use App\Models\CountryOfPermanentAddress;
 use Illuminate\Http\Request;
+use App\Exports\CountryOfPermanentAddressExport;
+use App\Imports\CountryOfPermanentAddressImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CountryOfPermanentAddressController extends Controller
 {
@@ -126,5 +129,17 @@ class CountryOfPermanentAddressController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new CountryOfPermanentAddressExport(), 'permaddcountry.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new CountryOfPermanentAddressImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }

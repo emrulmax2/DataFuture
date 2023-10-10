@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Country;
 use App\Http\Requests\CountryRequest;
+use App\Exports\CountryExport;
+use App\Imports\CountryImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CountryController extends Controller
 {
@@ -39,9 +42,9 @@ class CountryController extends Controller
             $query->where('active', $status);
         endif;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -139,5 +142,17 @@ class CountryController extends Controller
         ]);
 
         return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new CountryExport(), 'country.csv');        
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file');
+        
+        Excel::import(new CountryImport(),$file);
+        return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }
