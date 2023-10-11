@@ -58,6 +58,10 @@ use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
 
+use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
+use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
+use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
+
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Applicant\Auth\VerificationController;
@@ -108,6 +112,7 @@ use App\Http\Controllers\Settings\Studentoptions\HighestQualificationOnEntryCont
 use App\Http\Controllers\Settings\Studentoptions\PreviousProviderController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
+use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -192,6 +197,55 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
         
+    });
+
+});
+
+// all student have a prefix route name student.* value
+Route::prefix('/students')->name('students.')->group(function() {
+
+    Route::controller(StudentLoginController::class)->middleware('students.loggedin')->group(function() {
+        
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+
+
+    });
+    
+
+    Route::middleware('auth.students')->group(function() {
+
+        Route::get('logout', [StudentLoginController::class, 'logout'])->name('logout');
+
+        Route::controller(StudentDashboardController::class)->group(function() {
+            Route::get('/dashboard', 'index')->name('dashboard');
+            Route::get('/dashboard/list', 'list')->name('dashboard.list');
+        });
+
+        Route::controller(StudentFirstLoginDataController::class)->group(function() {
+            Route::post('/first/data', 'firstData')->name('first.data');
+            Route::post('/first/address', 'addressesConfirm')->name('address.confirm.data');
+            Route::post('/first/consent', 'consentConfirm')->name('consent.confirm.data');
+            Route::get('/first/review', 'reviewShows')->name('review.show.data');
+            Route::post('/first/review', 'reviewDone')->name('review.done.data');
+        });
+
+    });
+    
+    /**
+    * Verification Routes
+    */
+
+    // Route::controller(VerificationController::class)->group(function() {
+        
+    //     Route::get('email/verify', 'show')->name('verification.notice');
+    //     Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    // });
+
+    Route::controller(GoogleSocialiteStudentController::class)->middleware('student.loggedin')->group(function() {
+        Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
+        Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
     });
 
 });

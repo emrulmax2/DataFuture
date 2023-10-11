@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\ApplicantUser;
 
 use App\Models\Role;
+use App\Models\StudentUser;
 use App\Models\UserRole;
 
 class ProcessStudents implements ShouldQueue
@@ -41,12 +42,12 @@ class ProcessStudents implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
         $student = new Student();
         $applicantArray = [
             'applicant_id' => $this->applicant->id,
             'applicant_user_id' => $this->applicant->applicant_user_id,
-            'user_id' => $user->id,
+            'student_user_id' => $user->id,
             'application_no'=> $this->applicant->application_no,
             'title_id'=> $this->applicant->title_id,
             'first_name'=> $this->applicant->first_name,

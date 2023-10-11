@@ -21,6 +21,15 @@ class TopMenu
                     'route_name' => 'applicant.dashboard'
                 ],
             ];
+        elseif(!is_null(\Auth::guard('student')->user())):
+            return [
+                'dashboard' => [
+                    'icon' => 'home',
+                    'title' => 'Dashboard',
+                    'params' => [],
+                    'route_name' => 'students.dashboard'
+                ],
+            ];
         else:
             return [
                 'dashboard' => [

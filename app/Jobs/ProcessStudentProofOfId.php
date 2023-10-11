@@ -18,7 +18,7 @@ use App\Models\User;
 
 use App\Models\ApplicantProofOfId;
 use App\Models\StudentProofOfId;
-
+use App\Models\StudentUser;
 
 class ProcessStudentProofOfId implements ShouldQueue
 {
@@ -43,8 +43,8 @@ class ProcessStudentProofOfId implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         //Begin
         $applicantSetData = ApplicantProofOfId::where('applicant_id',$this->applicant->id)->get();

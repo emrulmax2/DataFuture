@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\ApplicantNote;
 use App\Models\ApplicantDocument;
+use App\Models\StudentUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -44,8 +45,8 @@ class ProcessStudentNoteDetails implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         foreach ($this->applicant->notes as $note):
             

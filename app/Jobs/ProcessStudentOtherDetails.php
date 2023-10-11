@@ -16,6 +16,7 @@ use App\Models\ApplicantOtherDetail;
 use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\StudentOtherDetail;
+use App\Models\StudentUser;
 use App\Models\User;
 
 
@@ -42,8 +43,8 @@ class ProcessStudentOtherDetails implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         //Begin
         $applicantSetData= ApplicantOtherDetail::where('applicant_id',$this->applicant->id)->get();

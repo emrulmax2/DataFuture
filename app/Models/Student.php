@@ -15,7 +15,7 @@ class Student extends Model
     protected $fillable = [
         'applicant_user_id',
         'applicant_id',
-        'user_id',
+        'student_user_id',
         'application_no',
         'registration_no',
         'ssn_no',
@@ -87,7 +87,7 @@ class Student extends Model
     }
 
     public function users(){
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(StudentUser::class, 'student_user_id');
     }
 
     public function setDateOfBirthAttribute($value) {  

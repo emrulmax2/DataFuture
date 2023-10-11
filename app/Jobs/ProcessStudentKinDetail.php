@@ -17,6 +17,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\StudentKin;
+use App\Models\StudentUser;
 
 class ProcessStudentKinDetail implements ShouldQueue
 {
@@ -41,8 +42,8 @@ class ProcessStudentKinDetail implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         //StudentKinDetails
         $applicantKinData= ApplicantKin::where('applicant_id',$this->applicant->id)->get();

@@ -15,6 +15,8 @@ use App\Models\ApplicantFeeEligibility;
 use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\StudentFeeEligibility;
+use App\Models\StudentProposedCourse;
+use App\Models\StudentUser;
 use App\Models\User;
 
 class ProcessStudentFeeEligibility implements ShouldQueue
@@ -40,14 +42,16 @@ class ProcessStudentFeeEligibility implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first();
-
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
+        
+        $getStudentCourseRelationData= StudentProposedCourse::where('student_id',$student->id)->get()->first();
         //Begin
         $applicantSetData = ApplicantFeeEligibility::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantSetData as $applicantSet):
             $dataArray = [
                 'student_id' => $student->id,
+                'student_course_relation_id' => $getStudentCourseRelationData->student_course_relation_id,
                 'fee_eligibility_id' => ($applicantSet->fee_eligibility_id) ?? 'NULL',
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];

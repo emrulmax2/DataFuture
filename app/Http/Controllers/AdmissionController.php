@@ -90,6 +90,7 @@ use App\Models\AcademicYear;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
+use App\Models\ApplicantUser;
 use App\Models\EmailTemplate;
 use App\Models\FeeEligibility;
 use App\Models\LetterHeaderFooter;
@@ -97,7 +98,11 @@ use App\Models\LetterSet;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\JobBatch;
-
+use App\Models\Student;
+use App\Models\StudentCourseRelation;
+use App\Models\StudentFeeEligibility;
+use App\Models\StudentProposedCourse;
+use App\Models\StudentUser;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
@@ -2211,13 +2216,36 @@ class AdmissionController extends Controller
             //dd($e);
         }
     }
-    // public $applicant;
-    // public function convertStudentDemo() {
-    //     $this->applicant  = Applicant::find(1);  
-    //     $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-    //     $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-    //     $student = Student::where(["user_id"=> $user->id])->get()->first();
+    public $applicant;
+    public function convertStudentDemo() {
+
+        // $this->applicant  = Applicant::find(1);  
+        // $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
+        // $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        // $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
         
-    // }
+        // $getStudentCourseRelationData= StudentProposedCourse::where('student_id',$student->id)->get()->first();
+        // //Begin
+        // $applicantSetData = ApplicantFeeEligibility::where('applicant_id',$this->applicant->id)->get();
+
+        // foreach($applicantSetData as $applicantSet):
+
+        //     $dataArray = [
+        //         'student_id' => $student->id,
+        //         'student_course_relation_id' => $getStudentCourseRelationData->student_course_relation_id,
+        //         'fee_eligibility_id' => ($applicantSet->fee_eligibility_id) ?? 'NULL',
+        //         'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+        //     ];
+
+        //     $data = new StudentFeeEligibility();
+
+        //     $data->fill($dataArray);
+
+        //     $data->save();
+        //     unset ($dataArray);
+
+        // endforeach;
+    
+    }
 
 }
