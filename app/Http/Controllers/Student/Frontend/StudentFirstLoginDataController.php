@@ -60,6 +60,7 @@ class StudentFirstLoginDataController extends Controller
         // "permanent_country" => "Bangladesh"
         // "permanent_address_id" => null
         // "student_id" => "52"
+        // "term_time_accommodation_type_id" => something
         if($request->current_address_id==null) {
             // New Address insert then connect link
                 $address = new Address();
@@ -79,6 +80,7 @@ class StudentFirstLoginDataController extends Controller
                 $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
                 $studentContact = StudentContact::find($studentContactId[0]);
                 $studentContact->term_time_address_id = $address->id;
+                $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
                 $studentContact->save();
 
         } 
@@ -88,6 +90,7 @@ class StudentFirstLoginDataController extends Controller
             $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
             $studentContact = StudentContact::find($studentContactId[0]);
             $studentContact->permanent_address_id  = $request->current_address_id;
+            $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
             $studentContact->save();
 
         } else if($request->permanent_address_id==null && $request->permanent_address_line_1 != null) {
@@ -109,6 +112,29 @@ class StudentFirstLoginDataController extends Controller
                 $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
                 $studentContact = StudentContact::find($studentContactId[0]);
                 $studentContact->permanent_address_id = $address->id;
+                $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
+                $studentContact->save();
+
+        }else if($request->permanent_address_id==null && $request->permanent_address_line_1 == null && $request->current_address_id==null && $request->address_line_1!=null)  {
+            //get the permanent address data and insert it
+                $address = new Address();
+                $addressData = [
+                    "address_line_1" =>$request->address_line_1,
+                    "address_line_2" =>$request->address_line_2,
+                    "state" =>$request->state,
+                    "post_code" =>$request->post_code,
+                    "city" =>$request->city,
+                    "country" =>$request->country,
+                    "active" =>1,
+                    "created_by" =>1
+                ];
+                $address->fill($addressData);
+                $address->save();
+                
+                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+                $studentContact = StudentContact::find($studentContactId[0]);
+                $studentContact->permanent_address_id = $address->id;
+                $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
                 $studentContact->save();
 
         } else if($request->permanent_address_id!=null) {
@@ -116,6 +142,7 @@ class StudentFirstLoginDataController extends Controller
             $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
             $studentContact = StudentContact::find($studentContactId[0]);
             $studentContact->permanent_address_id  = $request->permanent_address_id;
+            $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
             $studentContact->save();
         }
 

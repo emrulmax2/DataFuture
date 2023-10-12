@@ -245,8 +245,24 @@
                         <input name="current_address_id" type="hidden" value="" />
                         <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}</div>
                     </div>
+                    
+                    <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
+                        <label for="input-wizard-4" class="form-label inline-flex">Please Select your current accomodation type <span class="text-danger">*</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-4" name="term_time_accommodation_type_id" class="w-full ">
+                            
+                            @foreach($termTimeAccomadtionTypes as $termTimeAccomadtionType)
+                                <option {{ ($studentData["term_time_accommodation_type_id"] == $termTimeAccomadtionType->id  ? "selected":"") }} value="{{ $termTimeAccomadtionType->id }}">{{ $termTimeAccomadtionType->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="nationality-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Please specify your current term accomodation Type.</div>
+                            </div>
+                        </div>
+                        <!-- END: Custom Tooltip Content -->
+                    </div>
                 </div>
-                
                 <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                 <div id="askPermanentAdress" class="grid grid-cols-12 gap-4 gap-y-5 mt-5 hidden">
                     <div class="col-span-12">
@@ -344,6 +360,7 @@
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
             <form method="post" action="#" id="appicantFormStep_3" class="wizard-step-form">
                 <input type="hidden" name="url" value="{{ route('students.dashboard') }}"/>
+                
                 <div class="font-normal text-base">
                     <label for="input-wizard-4" class="form-label inline-flex">We kindly request your permission for email and SMS communications, with a focus on safeguarding your privacy and tailoring messages to your preferences. To grant permission, please click below.<i data-theme="light" data-tooltip-content="#consent-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
 

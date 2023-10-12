@@ -58,8 +58,8 @@ import {createApp} from 'vue'
         var formID = parentForm.attr('id');
         const form = document.getElementById(formID);
         let studentId = $("#studentId").val();
-         $('.form-wizard-next-btn, .form-wizard-previous-btn', parentForm).attr('disabled', 'disabled');
-         $('.form-wizard-next-btn svg', parentForm).fadeIn();
+        $('.form-wizard-next-btn, .form-wizard-previous-btn', parentForm).attr('disabled', 'disabled');
+        $('.form-wizard-next-btn svg', parentForm).fadeIn();
 
         let form_data = new FormData(form);
         form_data.append("student_id", studentId);
@@ -190,6 +190,7 @@ import {createApp} from 'vue'
         $('#currentAdressQuestion').fadeOut(300,function(e) {
             $("#currentAddress").fadeIn(150,function(e) { $("#currenAddress__yes").fadeIn(); });
             $("#askPermanentAdress").fadeIn();
+            $("#accomodationType__next").fadeIn();
         });
     });
 
@@ -199,12 +200,24 @@ import {createApp} from 'vue'
         $('#currentAdressQuestion').fadeOut(300,function(e) {
             $("#currentAddress").fadeIn(150,function(e) { $("#currenAdress__no").fadeIn(); });
             $("#askPermanentAdress").fadeIn();
+            $("#accomodationType__next").fadeIn();
         });
     });
     
     $('#agreePermanentAddress').on('click', function (e) {
         e.preventDefault();
         let addressId = $(this).data('addressid');
+        let currentAddressId = $("input[name='current_address_id']").val();
+        
+        if(!currentAddressId) {
+            let addressHtml = $("input[name='address_line_1']").val() + ', ';
+            addressHtml += $("input[name='address_line_2']").val() + '<br />';
+            addressHtml += $("input[name='post_code']").val() + '<br />';
+            addressHtml += $("input[name='state']").val() + ', ';
+            addressHtml += $("input[name='city']").val() + '<br />';
+            addressHtml += $("input[name='country']").val() + '';
+            $("#permanentAddress__yes div").html(addressHtml)
+        }
         $("input[name='permanent_address_id']").val(addressId);
         $('#askPermanentAdress').fadeOut(300,function(e) {
 

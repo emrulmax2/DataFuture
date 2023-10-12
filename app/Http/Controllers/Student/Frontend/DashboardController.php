@@ -51,7 +51,7 @@ class DashboardController extends Controller
             "current_address" => $currentAddress,
             "permanent_address" => $permanentAddress,
             "consents" => $consentList,
-            
+            "term_time_accommodation_type_id" => $studentContact->term_time_accommodation_type_id
         ];
 
         if($studentData->users->first_login==1)
@@ -66,21 +66,14 @@ class DashboardController extends Controller
             "sexIdentifiers" => $sexIdentifiers,
             "genderIdentities" => $genderIdentities,
             "studentData" => $data,
-            "consents" =>$consentList
+            "consents" =>$consentList,
+            "termTimeAccomadtionTypes" => $terTimeAccomadtionType
         ]);
         else
         return view('pages.students.frontend.dashboard.index', [
             'title' => 'Student Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
             'user' => $userData,
-            "countries" =>$countries,
-            "ethnicities" => $ethnicities,
-            "religions" => $religions,
-            "sexualOrientations" => $sexualOrientations,
-            "sexIdentifiers" => $sexIdentifiers,
-            "genderIdentities" => $genderIdentities,
-            "studentData" => $data,
-            "consents" =>$consentList
         ]);
 
     }
