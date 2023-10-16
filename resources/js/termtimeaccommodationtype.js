@@ -18,7 +18,7 @@ var termtimeaccommodationtypeListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -57,6 +57,7 @@ var termtimeaccommodationtypeListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "120",
+                    download:false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

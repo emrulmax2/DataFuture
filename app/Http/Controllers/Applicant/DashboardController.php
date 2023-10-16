@@ -28,9 +28,9 @@ class DashboardController extends Controller
 
         $query = Applicant::orderByRaw(implode(',', $sorts))->where('applicant_user_id', \Auth::guard('applicant')->user()->id);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

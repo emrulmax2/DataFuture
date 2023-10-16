@@ -37,9 +37,6 @@ class EmailTemplateController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = EmailTemplate::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->orWhere('email_title','LIKE','%'.$queryStr.'%');
@@ -50,6 +47,8 @@ class EmailTemplateController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

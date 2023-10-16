@@ -14,8 +14,6 @@ class CourseCreationInstanceController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $creationid = (isset($request->creationid) && $request->creationid > 0 ? $request->creationid : 0);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $query = CourseCreationInstance::where('course_creation_id', $creationid);
         if(!empty($queryStr)):
             $query->where('start_date','LIKE','%'.$queryStr.'%');
@@ -23,6 +21,8 @@ class CourseCreationInstanceController extends Controller
             $query->orWhere('total_teaching_week','LIKE','%'.$queryStr.'%');
         endif;
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));

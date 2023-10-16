@@ -25,7 +25,7 @@ var admissionListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -105,7 +105,7 @@ var admissionListTable = (function () {
         $("#tabulator-export-xlsx-ADM").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Admission Details",
             });
         });
 
@@ -143,7 +143,7 @@ var educationQualTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -184,6 +184,7 @@ var educationQualTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -228,7 +229,7 @@ var educationQualTable = (function () {
         $("#tabulator-export-xlsx-EQ").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Education Qualification Details",
             });
         });
 
@@ -266,7 +267,7 @@ var employmentHistoryTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -331,6 +332,7 @@ var employmentHistoryTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -375,7 +377,7 @@ var employmentHistoryTable = (function () {
         $("#tabulator-export-xlsx-EH").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Employment History Details",
             });
         });
 

@@ -62,6 +62,7 @@ var countryListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "120",
+                    download:false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -106,7 +107,7 @@ var countryListTable = (function () {
         $("#tabulator-export-xlsx-CNTR").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Course Details",
+                sheetName: "Course Details"
             });
         });
 

@@ -84,21 +84,21 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-json-UP" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-UP" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-html-UP" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                     </a>
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                     </div>

@@ -20,7 +20,7 @@ var studentNotesListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -71,6 +71,7 @@ var studentNotesListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "230",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().url != ''){
@@ -119,7 +120,7 @@ var studentNotesListTable = (function () {
         $("#tabulator-export-xlsx-AN").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Student Note Details",
             });
         });
 

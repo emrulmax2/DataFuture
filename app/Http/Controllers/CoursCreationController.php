@@ -28,8 +28,6 @@ class CoursCreationController extends Controller
         $course = (isset($request->course) && $request->course > 0 ? $request->course : '');
         $semester = (isset($request->semester) && $request->semester > 0 ? $request->semester : '');
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $query = CourseCreation::where('id', '!=', 0);
         if(!empty($queryStr)):
             $query->where('duration','LIKE','%'.$queryStr.'%');
@@ -43,6 +41,8 @@ class CoursCreationController extends Controller
             $query->where('semester_id', $semester);
         endif;
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));

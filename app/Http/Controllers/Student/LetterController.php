@@ -242,9 +242,6 @@ class LetterController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = DB::table('student_letters as sl')
                         ->select('sl.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'sdc.current_file_name')
                         ->leftJoin('letter_sets as ls', 'sl.letter_set_id', '=', 'ls.id')
@@ -266,6 +263,8 @@ class LetterController extends Controller
         $query->orderByRaw(implode(',', $sorts));
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

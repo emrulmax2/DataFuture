@@ -41,8 +41,6 @@ class ApplicantInterviewListController extends Controller
             foreach($sorters as $sort):
                 $sorts[] = $sort['field'].' '.$sort['dir'];
             endforeach;
-            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-            $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
             
             $query = ApplicantInterview::with('applicant','task','document')->orderByRaw(implode(',', $sorts));
             if(!empty($queryStr)):
@@ -55,6 +53,8 @@ class ApplicantInterviewListController extends Controller
             });
             
             $total_rows = $query->count();
+            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+            $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
             $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
             
             $limit = $perpage;

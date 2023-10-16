@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SignatoryRequest;
 use App\Http\Requests\SignatoryUpdateRequest;
 use App\Models\Signatory;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class SignatoryController extends Controller
@@ -38,9 +40,6 @@ class SignatoryController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = Signatory::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('signatory_name','LIKE','%'.$queryStr.'%');
@@ -51,6 +50,8 @@ class SignatoryController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

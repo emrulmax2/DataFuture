@@ -37,15 +37,14 @@ class PlansDateListController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = PlansDateList::orderByRaw(implode(',', $sorts));
         if(!empty($planid)): $query->where('plan_id', $planid); endif;
         if(!empty($dates)): $query->where('date', $dates); endif;
         if($status == 2): $query->onlyTrashed(); endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -82,8 +81,6 @@ class PlansDateListController extends Controller
         
         return response()->json($data);
     }
-
-    
 
     public function destroy($id){
         $data = PlansDateList::find($id)->delete();

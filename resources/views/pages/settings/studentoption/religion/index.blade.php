@@ -34,25 +34,25 @@
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a id="tabulator-export-json-RELGN" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                             </a>
-                        </li>
+                        </li> --}}
                         <li>
                             <a id="tabulator-export-xlsx-RELGN" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a id="tabulator-export-html-RELGN" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </div>
-            <button data-tw-toggle="modal" data-tw-target="#religionImportModal" type="button" class="import_btn btn btn-sm btn-pending shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
+            <button data-tw-toggle="modal" data-tw-target="#religionImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">

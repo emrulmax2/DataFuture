@@ -26,17 +26,11 @@ class GroupController extends Controller
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $query = Group::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
@@ -47,7 +41,11 @@ class GroupController extends Controller
         endif;
 
         $total_rows = $count = $query->count();
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $Query= $query->skip($offset)
                ->take($limit)

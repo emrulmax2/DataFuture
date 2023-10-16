@@ -20,13 +20,13 @@ class BankHolidayController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $academicyear = (isset($request->academicyear) && $request->academicyear > 0 ? $request->academicyear : '');
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $query = BankHoliday::where('academic_year_id', $academicyear);
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));

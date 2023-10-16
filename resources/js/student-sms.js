@@ -20,7 +20,7 @@ var studentCommSMSListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -79,6 +79,7 @@ var studentCommSMSListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "120",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -123,7 +124,7 @@ var studentCommSMSListTable = (function () {
         $("#tabulator-export-xlsx-CMS").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Student SMS Details",
             });
         });
 

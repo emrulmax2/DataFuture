@@ -160,9 +160,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = Applicant::orderByRaw(implode(',', $sorts))->whereNotNull('submission_date');
         if(!empty($refno)): $query->where('application_no', $refno); endif;
         if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
@@ -177,6 +174,8 @@ class AdmissionController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -679,7 +678,6 @@ class AdmissionController extends Controller
         endif;
     }
 
-
     public function admissionUploadTaskDocument(Request $request){
         $applicant_id = $request->applicant_id;
         $applicant_task_id = $request->applicant_task_id;
@@ -829,9 +827,10 @@ class AdmissionController extends Controller
         endif;
         $query->orderByRaw(implode(',', $sorts))->onlyTrashed();
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -934,10 +933,10 @@ class AdmissionController extends Controller
         endforeach;
 
         $query = ApplicantTaskLog::where('applicant_tasks_id', $applicantTaskId)->orderByRaw(implode(',', $sorts));
-
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+     
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -1044,9 +1043,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = ApplicantDocument::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
             $query->where('display_file_name','LIKE','%'.$queryStr.'%');
@@ -1056,6 +1052,8 @@ class AdmissionController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -1165,9 +1163,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = ApplicantNote::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
             $query->where('note','LIKE','%'.$queryStr.'%');
@@ -1177,6 +1172,8 @@ class AdmissionController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -1316,7 +1313,6 @@ class AdmissionController extends Controller
         return response()->json(['message' => 'Successfully restored'], 200);
     }
 
-
     public function admissionUploadApplicantPhoto(Request $request){
         $applicant_id = $request->applicant_id;
         $applicantOldRow = Applicant::where('id', $applicant_id)->first();
@@ -1355,7 +1351,6 @@ class AdmissionController extends Controller
         return response()->json(['message' => 'Photo successfully change & updated'], 200);
     }
 
-    
     public function admissionCommunication($applicantId){
         return view('pages.students.admission.communication', [
             'title' => 'Admission Management - LCC Data Future Managment',
@@ -1590,9 +1585,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = DB::table('applicant_letters as al')
                         ->select('al.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'adc.current_file_name')
                         ->leftJoin('letter_sets as ls', 'al.letter_set_id', '=', 'ls.id')
@@ -1614,6 +1606,8 @@ class AdmissionController extends Controller
         $query->orderByRaw(implode(',', $sorts));
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -1772,9 +1766,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = ApplicantEmail::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
             $query->where('subject','LIKE','%'.$queryStr.'%');
@@ -1785,6 +1776,8 @@ class AdmissionController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -1868,9 +1861,6 @@ class AdmissionController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = ApplicantSms::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
         if(!empty($queryStr)):
             $query->where('subject','LIKE','%'.$queryStr.'%');
@@ -1881,6 +1871,8 @@ class AdmissionController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -2163,9 +2155,10 @@ class AdmissionController extends Controller
 
         $query = ApplicantInterview::where('applicant_id', $applicantId)->where('applicant_task_id', $applicantTaskId)->orderByRaw(implode(',', $sorts));
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
+        
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

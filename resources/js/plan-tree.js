@@ -22,7 +22,7 @@ var classPlanTreeListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -35,6 +35,7 @@ var classPlanTreeListTable = (function () {
                     headerHozAlign: "left",
                     width: "60",
                     headerSort: false, 
+                    download: false,
                     cellClick:function(e, cell){
                         cell.getRow().toggleSelect();
                     }
@@ -77,6 +78,7 @@ var classPlanTreeListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "left",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -134,7 +136,7 @@ var classPlanTreeListTable = (function () {
         $("#tabulator-export-xlsx-CPL").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Plan Tree Details",
             });
         });
 

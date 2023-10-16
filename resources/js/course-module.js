@@ -19,7 +19,7 @@ var courseModuleListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -65,6 +65,7 @@ var courseModuleListTable = (function () {
                     headerSort: false,
                     hozAlign: 'left',
                     headerHozAlign: 'left',
+                    download: false,
                     formatter(cell, formatterParams){
                         if(cell.getData().active == 1){
                             return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" checked value="'+cell.getData().active+'" type="checkbox" class="active_updater form-check-input"> </div>';
@@ -80,6 +81,7 @@ var courseModuleListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -115,7 +117,7 @@ var courseModuleListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Source of Tuition Fees",
+                sheetName: "Course Module Details",
             });
         });
 

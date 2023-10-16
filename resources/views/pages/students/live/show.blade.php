@@ -224,21 +224,21 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-json-PIC" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                             </a>
-                                        </li>
+                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx-PIC" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-html-PIC" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                             </a>
-                                        </li>
+                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -504,21 +504,21 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-json-SEQ" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                             </a>
-                                        </li>
+                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx-SEQ" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-html-SEQ" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                             </a>
-                                        </li>
+                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -594,21 +594,21 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-json-SEH" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                             </a>
-                                        </li>
+                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx-SEH" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        <li>
+                                        {{-- <li>
                                             <a id="tabulator-export-html-SEH" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                             </a>
-                                        </li>
+                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>

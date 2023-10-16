@@ -129,9 +129,6 @@ class EmailController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = StudentEmail::orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
         if(!empty($queryStr)):
             $query->where('subject','LIKE','%'.$queryStr.'%');
@@ -142,6 +139,8 @@ class EmailController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

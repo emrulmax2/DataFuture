@@ -16,7 +16,7 @@ var applicantApplicantionList = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -62,6 +62,7 @@ var applicantApplicantionList = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().submission_date == '') {
