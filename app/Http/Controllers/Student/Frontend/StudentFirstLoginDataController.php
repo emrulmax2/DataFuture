@@ -23,12 +23,12 @@ class StudentFirstLoginDataController extends Controller
     public function firstData(Request $request)
     { 
 
-        $hesaGender = HesaGender::find($request->gender);
+        $sexIdentifier = SexIdentifier::find($request->gender);
 
         $StudentData = Student::find($request->student_id);
         $StudentData->nationality_id = $request->nationality; 
         $StudentData->country_id = $request->birth_country; 
-        $StudentData->gender = strtoupper($hesaGender->name);
+        $StudentData->gender = strtoupper($sexIdentifier->name);
         $StudentData->save();
 
         $otherDetailsId = StudentOtherDetail::where('student_id',$request->student_id)->get()->first()->pluck('id')->toArray();

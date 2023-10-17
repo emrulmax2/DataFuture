@@ -55,7 +55,7 @@ class ProcessStudents implements ShouldQueue
             'photo'=> $this->applicant->photo,
             'date_of_birth'=> $this->applicant->date_of_birth,
             'marital_status'=> $this->applicant->marital_status,
-            'gender'=> $this->applicant->gender,
+            'sex_identifier_id'=> $this->applicant->sex_identifier_id,
             'submission_date'=> $this->applicant->submission_date,
             'status_id'=> $this->applicant->status_id,
             'nationality_id'=> $this->applicant->nationality_id,

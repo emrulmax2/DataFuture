@@ -50,7 +50,7 @@ class DashboardController extends Controller
                     'sl' => $i,
                     'name' => $list->title->name.' '.$list->first_name.' '.$list->last_name,
                     'dob' => $list->date_of_birth,
-                    'gender' => $list->gender,
+                    'gender' => isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : '',
                     'course' => (isset($list->course->creation->course->name) ? $list->course->creation->course->name : '').(isset($list->course->semester->name) ? ' - '.$list->course->semester->name : ''),
                     'submission_date' => $list->submission_date,
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),

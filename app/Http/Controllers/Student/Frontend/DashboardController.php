@@ -32,7 +32,7 @@ class DashboardController extends Controller
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
         $permanentAddress = Address::find($studentContact->permanent_address_id);
-        $gender = HesaGender::where("name",$studentData->gender)->get()->first();
+        $gender = SexIdentifier::where("name", ucfirst($studentData->gender))->get()->first();
 
         $terTimeAccomadtionType = TermTimeAccommodationType::all();
         

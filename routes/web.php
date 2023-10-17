@@ -430,6 +430,7 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
+        Route::post('student/id-filter', 'StudentIDFilter')->name('student.filter.id');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {

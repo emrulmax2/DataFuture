@@ -53,8 +53,8 @@
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Gender</div>
-                        <div class="col-span-8 font-medium">{{ $student->gender }}</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Sex Identifier/Gender</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->sexid->name) ? $student->sexid->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3"></div>

@@ -50,7 +50,7 @@ class ProcessStudentProposedCourse implements ShouldQueue
         $studentCourseRelation = StudentCourseRelation::create([
                 "student_id" => $student->id,
                 "course_creation_id" => $applicantProposedCourse->course_creation_id,
-                "active"=> 0,
+                "active"=> 1,
                 "created_by" => 1
         ]);
                                 

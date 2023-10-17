@@ -39,14 +39,16 @@
                             <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
-                            <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
-                            <select id="gender" class="lccTom lcc-tom-select w-full" name="gender">
+                            <label for="sex_identifier_id" class="form-label">Sex Identifier/Gender <span class="text-danger">*</span></label>
+                            <select id="sex_identifier_id" class="lccTom lcc-tom-select w-full" name="sex_identifier_id">
                                 <option value="" selected>Please Select</option>
-                                <option {{ isset($student->gender) && $student->gender == 'MALE' ? 'Selected' : '' }} value="MALE">MALE</option>
-                                <option {{ isset($student->gender) && $student->gender == 'FEMALE' ? 'Selected' : '' }} value="FEMALE">FEMALE</option>
-                                <option {{ isset($student->gender) && $student->gender == 'OTHERS' ? 'Selected' : '' }} value="OTHERS">OTHERS</option>
+                                @if($sexid->count() > 0)
+                                    @foreach($sexid as $si)
+                                        <option {{ isset($student->sex_identifier_id) && $student->sex_identifier_id == $si->id ? 'Selected' : '' }} value="{{ $si->id }}">{{ $si->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <div class="acc__input-error error-gender text-danger mt-2"></div>
+                            <div class="acc__input-error error-sex_identifier_id text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="nationality_id" class="form-label">Nationality <span class="text-danger">*</span></label>

@@ -13,22 +13,15 @@
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
-        <form id="tabulatorFilterForm-LSD">
+        <form id="studentSearchForm" method="post" action="#">
             <div class="grid grid-cols-12 gap-0 gap-x-4">
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0 gap-x-4">
                         <label class="col-span-12 sm:col-span-4 form-label pt-2">Student Search</label>
                         <div class="col-span-12 sm:col-span-8">
-                            <div class="autoCompleteField" data-table="students" data-fields="registration_no,application_no,uhn_no,ssn_no">
-                                <input type="text" name="student_id" class="form-control" value="" placeholder="LCC000001"/>
-                                <ul class="autoFillDropdown">
-                                    <li>
-                                        <a href="javascript:void(0);" class="dropdown-item">LCC000001</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="dropdown-item">LCC000002</a>
-                                    </li>
-                                </ul>
+                            <div class="autoCompleteField" data-table="students">
+                                <input type="text" autocomplete="off" id="registration_no" name="student_id" class="form-control registration_no" value="" placeholder="LCC000001"/>
+                                <ul class="autoFillDropdown"></ul>
                             </div>
                         </div>
                     </div>
@@ -36,109 +29,203 @@
                 <div class="col-span-12 sm:col-span-4 text-right"></div>
                 <div class="col-span-12 sm:col-span-4 text-right">
                     <div class="flex justify-end items-center">
-                        <button type="submit" class="btn btn-facebook ml-1 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
-                        <button type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                        <button id="studentIDSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                        <button id="resetStudentSearch" type="button" class="btn btn-danger w-auto ml-2" ><i class="w-4 h-4 mr-2" data-lucide="rotate-cw"></i> Reset</button>
+                        <button id="advanceSearchToggle" type="button" class="btn btn-facebook ml-2 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
                     </div>
                 </div>
-            </div>
-            <div class="grid grid-cols-12 gap-4 mt-5">
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Ref. No.</div>
-                        <input type="text" id="refno-LSD" name="refno-LSD" placeholder="Ref. No." value="" class="w-full"/>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">First Name(s)</div>
-                        <input type="text" id="firstname-LSD" name="firstname-LSD" placeholder="First Name" value="" class="w-full"/>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Last Name</div>
-                        <input type="text" id="lastname-LSD" name="lastname-LSD" placeholder="Last Name" value="" class="w-full"/>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Date of Birth</div>
-                        <input type="text" id="dob-LSD" name="dob-LSD" placeholder="DD-MM-YYYY" value="" data-format="DD-MM-YYYY" data-single-mode="true" class="w-full datepicker"/>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Semester</div>
-                        <select id="semesters-LSD" name="semesters[]" class="w-full tom-selects" multiple>
-                            @if(!empty($semesters))
-                                @foreach($semesters as $sem)
-                                    <option value="{{ $sem->id }}">{{ $sem->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Courses</div>
-                        <select id="courses-LSD" name="courses[]" class="w-full tom-selects" multiple>
-                            @if(!empty($courses))
-                                @foreach($courses as $crs)
-                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Status</div>
-                        <select id="statuses-LSD" name="statuses[]" class="w-full tom-selects" multiple>
-                            @if(!empty($allStatuses))
-                                @foreach($allStatuses as $sts)
-                                    <option value="{{ $sts->id }}">{{ $sts->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-12"></div>
-                <div class="col-span-6">
-                    <button id="tabulator-html-filter-go-LSD" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset-LSD" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-                <div class="col-span-6 text-right">
-                    <div class="flex mt-5 sm:mt-0 justify-end">
-                        <button id="tabulator-print-LSD" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                        </button>
-                        <div class="dropdown w-1/2 sm:w-auto mr-2" id="tabulator-export-LSD">
-                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                            </button>
-                            <div class="dropdown-menu w-40">
-                                <ul class="dropdown-content">
-                                    <li>
-                                        <a id="tabulator-export-csv-LSD" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                        </a>
-                                    </li>
-                                    {{-- <li>
-                                        <a id="tabulator-export-json-LSD" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                        </a>
-                                    </li> --}}
-                                    <li>
-                                        <a id="tabulator-export-xlsx-LSD" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                        </a>
-                                    </li>
-                                    {{-- <li>
-                                        <a id="tabulator-export-html-LSD" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                        </a>
-                                    </li> --}}
-                                </ul>
+                <div class="col-span-12 sm:col-span-12">
+                    <div id="studentSearchAccordionWrap" class="pt-4 mb-2" style="display: none;">
+                        <div id="studentSearchAccordion" class="accordion accordion-boxed pt-2">
+                            <div class="accordion-item">
+                                <div id="studentSearchAccordion-1" class="accordion-header">
+                                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentSearchAccordion-collapse-1" aria-expanded="false" aria-controls="studentSearchAccordion-collapse-1">
+                                        Search By Student
+                                        <span class="accordionCollaps"></span>
+                                    </button>
+                                </div>
+                                <div id="studentSearchAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="studentSearchAccordion-1" data-tw-parent="#studentSearchAccordion">
+                                    <div class="accordion-body">
+                                        <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_id" class="form-label">ID</label>
+                                                <div class="autoCompleteField" data-table="students">
+                                                    <input type="text" autocomplete="off" id="student_id" name="student[student_id]" class="form-control registration_no" value="" placeholder="LCC000001"/>
+                                                    <ul class="autoFillDropdown"></ul>
+                                                </div>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_name" class="form-label">Name</label>
+                                                <input type="text" value="" id="student_name" class="form-control" name="student[student_name]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_dob" class="form-label">DOB</label>
+                                                <input type="text" value="" placeholder="DD-MM-YYYY" id="student_dob" class="form-control datepicker" name="student[student_dob]" data-format="DD-MM-YYYY" data-single-mode="true">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_post_code" class="form-label">Post Code</label>
+                                                <input type="text" value="" id="student_post_code" class="form-control" name="student[student_post_code]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_email" class="form-label">Email Address</label>
+                                                <input type="text" value="" id="student_email" class="form-control" name="student[student_email]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_mobile" class="form-label">Mobile No</label>
+                                                <input type="text" value="" id="student_mobile" class="form-control" name="student[student_mobile]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_uhn" class="form-label">UHN</label>
+                                                <input type="text" value="" id="student_uhn" class="form-control" name="student[student_uhn]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_ssn" class="form-label">SSN</label>
+                                                <input type="text" value="" id="student_ssn" class="form-control" name="student[student_ssn]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_abr" class="form-label">Awarding Body Ref</label>
+                                                <input type="text" value="" id="student_abr" class="form-control" name="student[student_abr]">
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_status" class="form-label">Student Status</label>
+                                                <select id="student_status" class="w-full tom-selects" name="student[student_status][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($allStatuses))
+                                                        @foreach($allStatuses as $sts)
+                                                            <option value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3"></div>
+                                            <div class="col-span-12 sm:col-span-3 text-right pt-7">
+                                                <button id="studentSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" value="0" id="studentSearchStatus" class="form-control" name="student[stataus]">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div id="studentSearchAccordion-1" class="accordion-header">
+                                    <button  id="studentGroupSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentSearchAccordion-collapse-1" aria-expanded="false" aria-controls="studentSearchAccordion-collapse-1">
+                                        Group Search
+                                        <span class="accordionCollaps"></span>
+                                    </button>
+                                </div>
+                                <div id="studentSearchAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="studentSearchAccordion-1" data-tw-parent="#studentSearchAccordion">
+                                    <div class="accordion-body">
+                                        <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="academic_year" class="form-label">Academic Year</label>
+                                                <select id="academic_year" class="w-full tom-selects" name="group[academic_year][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($academicYear))
+                                                        @foreach($academicYear as $acy)
+                                                            <option value="{{ $acy->id }}">{{ $acy->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="intake_semester" class="form-label">Intake Semester</label>
+                                                <select id="intake_semester" class="w-full tom-selects" name="group[intake_semester][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($semesters))
+                                                        @foreach($semesters as $sem)
+                                                            <option value="{{ $sem->id }}">{{ $sem->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="attendance_semester" class="form-label">Attendance Semester</label>
+                                                <select id="attendance_semester" class="w-full tom-selects" name="group[attendance_semester][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($terms))
+                                                        @foreach($terms as $trm)
+                                                            <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="instance_year" class="form-label">Instance Year</label>
+                                                <select id="instance_year" class="w-full tom-selects" name="group[instance_year][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="course" class="form-label">Course</label>
+                                                <select id="course" class="w-full tom-selects" name="group[course][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($courses))
+                                                        @foreach($courses as $crs)
+                                                            <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="group" class="form-label">Group</label>
+                                                <select id="group" class="w-full tom-selects" name="group[group][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($groups))
+                                                        @foreach($groups as $grps)
+                                                            <option value="{{ $grps->id }}">{{ $grps->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="module" class="form-label">Module</label>
+                                                <select id="module" class="w-full tom-selects" name="group[module][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($modules))
+                                                        @foreach($modules as $mod)
+                                                            <option value="{{ $mod->id }}">{{ $mod->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="term_status" class="form-label">Student Term Status</label>
+                                                <select id="term_status" class="w-full tom-selects" name="group[term_status][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="evening_weekend" class="form-label">Evening / Weekend</label>
+                                                <select id="evening_weekend" class="form-control" name="group[evening_weekend]">
+                                                    <option value="">Please Select</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="student_type" class="form-label">Student Type</label>
+                                                <select id="student_type" class="w-full tom-selects" name="group[student_type][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="group_student_status" class="form-label">Student Status</label>
+                                                <select id="group_student_status" class="w-full tom-selects" name="group[group_student_status][]" multiple>
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($allStatuses))
+                                                        @foreach($allStatuses as $sts)
+                                                            <option value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3 text-right pt-7">
+                                                <button id="studentGroupSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                            </div>
+                                            <input type="hidden" id="groupSearchStatus" value="0" class="form-control" name="group[stataus]">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

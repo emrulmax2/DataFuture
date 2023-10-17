@@ -676,3 +676,16 @@
 .dropdown-item:hover {
     background-color: rgb(226 232 240 / 0.6);
 }
+
+#studentSearchAccordion.accordion .accordion-item:first-child{
+    margin-top: -.5rem;
+}
+#studentSearchAccordion.accordion .accordion-item:last-child{
+    margin-bottom: -.5rem;
+}
+#studentSearchAccordion.accordion .accordion-item .accordion-header .accordion-button{
+    padding-left: 0;
+}
+#studentSearchAccordion.accordion .accordion-button .accordionCollaps{
+    right: 0;
+}

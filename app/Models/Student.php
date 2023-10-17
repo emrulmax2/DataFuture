@@ -26,7 +26,7 @@ class Student extends Model
         'photo',
         'date_of_birth',
         'marital_status',
-        'gender',
+        'sex_identifier_id',
         'submission_date',
         'status_id',
         'rejected_reason',
@@ -160,6 +160,10 @@ class Student extends Model
 
     public function crel(){
         return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
+    }
+
+    public function sexid(){
+        return $this->belongsTo(SexIdentifier::class, 'sex_identifier_id');
     }
     
 }

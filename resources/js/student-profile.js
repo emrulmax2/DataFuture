@@ -204,7 +204,7 @@ import TomSelect from "tom-select";
                 });      
                 
                 setTimeout(function(){
-                    successModal.show();
+                    successModal.hide();
                     window.location.reload();
                 }, 5000);
             }

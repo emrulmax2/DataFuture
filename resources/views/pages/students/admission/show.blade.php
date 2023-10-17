@@ -52,7 +52,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Gender</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->gender }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($applicant->sexid->name) && !empty($applicant->sexid->name) ? $applicant->sexid->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">

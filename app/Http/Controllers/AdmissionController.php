@@ -98,6 +98,7 @@ use App\Models\LetterSet;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\JobBatch;
+use App\Models\SexIdentifier;
 use App\Models\Student;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentFeeEligibility;
@@ -199,7 +200,7 @@ class AdmissionController extends Controller
                     'date_of_birth'=> $list->date_of_birth,
                     'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
-                    'gender'=> $list->gender,
+                    'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
                     'url' => route('admission.show', $list->id),
                     'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId)
@@ -225,6 +226,7 @@ class AdmissionController extends Controller
             'disability' => Disability::all(),
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
+            'sexid' => SexIdentifier::all(),
             'users' => User::all(),
             'instance' => CourseCreationInstance::all(),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),

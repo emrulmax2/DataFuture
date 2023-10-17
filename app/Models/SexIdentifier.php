@@ -27,4 +27,12 @@ class SexIdentifier extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function applicants(){
+        return $this->hasMany(Applicant::class, 'sex_identifier_id', 'id');
+    }
+
+    public function students(){
+        return $this->hasMany(Student::class, 'sex_identifier_id', 'id');
+    }
 }

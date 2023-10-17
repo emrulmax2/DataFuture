@@ -8,17 +8,12 @@ import TomSelect from "tom-select";
 var liveStudentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let semesters = $("#semesters-LSD").val() != "" ? $("#semesters-LSD").val() : "";
-        let courses = $("#courses-LSD").val() != "" ? $("#courses-LSD").val() : "";
-        let statuses = $("#courses-LSD").val() != "" ? $("#statuses-LSD").val() : "";
-        let refno = $("#refno-LSD").val() != "" ? $("#refno-LSD").val() : "";
-        let firstname = $("#firstname-LSD").val() != "" ? $("#firstname-LSD").val() : "";
-        let lastname = $("#lastname-LSD").val() != "" ? $("#lastname-LSD").val() : "";
-        let dob = $("#dob-LSD").val() != "" ? $("#dob-LSD").val() : "";
+        const form = document.getElementById('studentSearchForm');
+        let form_data = new FormData(form);
 
         let tableContent = new Tabulator("#liveStudentsListTable", {
             ajaxURL: route("student.list"),
-            ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob},
+            ajaxParams: { form_data: form_data},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -159,47 +154,150 @@ var liveStudentsListTable = (function () {
     })
 
     if($('#liveStudentsListTable').length > 0){
-        var semestersLSD = new TomSelect('#semesters-LSD', tomOptions);
-        var coursesLSD = new TomSelect('#courses-LSD', tomOptions);
-        var statusesLSD = new TomSelect('#statuses-LSD', tomOptions);
+        let tomOptionsMul = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+                remove_button: {
+                    title: "Remove this item",
+                },
+            }
+        };
+        var student_status = new TomSelect('#student_status', tomOptionsMul);
+        var academic_year = new TomSelect('#academic_year', tomOptionsMul);
+        var intake_semester = new TomSelect('#intake_semester', tomOptionsMul);
+        var attendance_semester = new TomSelect('#attendance_semester', tomOptionsMul);
+        var instance_year = new TomSelect('#instance_year', tomOptionsMul);
+        var course = new TomSelect('#course', tomOptionsMul);
+        var group = new TomSelect('#group', tomOptionsMul);
+        var module = new TomSelect('#module', tomOptionsMul);
+        var term_status = new TomSelect('#term_status', tomOptionsMul);
+        var student_type = new TomSelect('#student_type', tomOptionsMul);
+        var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
 
-        // Init Table
-        liveStudentsListTable.init();
-
-        // Filter function
-        function filterHTMLFormLSD() {
-            liveStudentsListTable.init();
+        // Reset Tom Select
+        function resetStudentIDSearch(){
+            $('#registration_no').val('');
         }
 
-        // On submit filter form
-        $("#tabulatorFilterForm-LSD")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormLSD();
-                }
-            }
-        );
+        function resetStudentSearch(){
+            student_status.clear(true);
+            $('#studentSearchStatus').val('0');
+            $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
+        }
 
-        // On click go button
-        $("#tabulator-html-filter-go-LSD").on("click", function (event) {
-            filterHTMLFormLSD();
+        function resetGroupSearch(){
+            academic_year.clear(true);
+            intake_semester.clear(true);
+            attendance_semester.clear(true);
+            instance_year.clear(true);
+            course.clear(true);
+            group.clear(true);
+            module.clear(true);
+            term_status.clear(true);
+            student_type.clear(true);
+            group_student_status.clear(true);
+            $('#evening_weekend').val('');
+            $('#groupSearchStatus').val('0');
+        }
+
+        /* Start List Table Inits */
+            liveStudentsListTable.init();
+
+            function filterStudentListTable() {
+                liveStudentsListTable.init();
+            }
+
+            $("#studentIDSearchBtn, #studentSearchBtn, #studentGroupSearchBtn").on("click", function (event) {
+                filterStudentListTable();
+            });
+
+            $("#resetStudentSearch").on("click", function (event) {
+                resetStudentSearch();
+                resetGroupSearch();
+                resetStudentIDSearch();
+
+                filterStudentListTable();
+            });
+        /* End List Table Inits */
+
+
+        
+        const studentSearchAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#studentSearchAccordion"));
+        $('#advanceSearchToggle').on('click', function(e){
+            e.preventDefault();
+            $('#studentSearchAccordionWrap').slideToggle();
+            $('#studentIDSearchBtn').fadeToggle();
+            studentSearchAccordion.toggle();
+            resetStudentSearch();
+            resetGroupSearch();
+            resetStudentIDSearch();
+
+            filterStudentListTable();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset-LSD").on("click", function (event) {
-            semestersLSD.clear(true);
-            coursesLSD.clear(true);
-            statusesLSD.clear(true);
+        $('#studentSearchBtn').on('click', function(){
+            resetStudentSearch();
+            resetGroupSearch();
+            resetStudentIDSearch();
 
-            $("#refno-LSD").val('');
-            $("#firstname-LSD").val('');
-            $("#lastname-LSD").val('');
-            $("#dob-LSD").val('');
+            if($(this).hasClass('collapsed')){
+                $('#studentSearchStatus').val(1);
+                $('#groupSearchStatus').val(0);
+            }else{
+                $('#studentSearchStatus').val(0);
+                $('#groupSearchStatus').val(0);
+            }
 
-            filterHTMLFormLSD();
+            filterStudentListTable();
+        });
+
+        $('#studentGroupSearchBtn').on('click', function(){
+            resetStudentSearch();
+            resetGroupSearch();
+            resetStudentIDSearch();
+
+            if($(this).hasClass('collapsed')){
+                $('#studentSearchStatus').val(0);
+                $('#groupSearchStatus').val(1);
+            }else{
+                $('#studentSearchStatus').val(0);
+                $('#groupSearchStatus').val(0);
+            }
+
+            filterStudentListTable();
+        });
+
+        $('.registration_no').on('keyup', function(){
+            var $theInput = $(this);
+            var SearchVal = $theInput.val();
+
+            if(SearchVal.length >= 3){
+                axios({
+                    method: "post",
+                    url: route('student.filter.id'),
+                    data: {SearchVal : SearchVal},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $theInput.siblings('.autoFillDropdown').html(response.data.htm).fadeIn();
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                        $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+                    }
+                });
+            }else{
+                $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+            }
+        });
+
+        $('.autoFillDropdown').on('click', 'li a:not(".disable")', function(e){
+            e.preventDefault();
+            var registration_no = $(this).attr('href');
+            $(this).parent('li').parent('ul.autoFillDropdown').siblings('.registration_no').val(registration_no);
+            $(this).parent('li').parent('.autoFillDropdown').html('').fadeOut();
         });
     }
 })();

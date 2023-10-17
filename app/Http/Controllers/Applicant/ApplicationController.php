@@ -28,6 +28,7 @@ use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
 use App\Models\ReferralCode;
+use App\Models\SexIdentifier;
 use Illuminate\Support\Carbon;
 
 class ApplicationController extends Controller
@@ -45,6 +46,7 @@ class ApplicationController extends Controller
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
             'users' => User::all(),
+            'sexid' => SexIdentifier::all(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => Applicant::where('applicant_user_id', \Auth::guard('applicant')->user()->id)->whereNull('submission_date')->orderBy('id', 'DESC')->first(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
@@ -66,7 +68,7 @@ class ApplicationController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
+            'sex_identifier_id' => $request->sex_identifier_id,
             'status_id' => 1,
             'nationality_id' => $request->nationality_id,
             'country_id' => $request->country_id,

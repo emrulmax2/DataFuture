@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Cache;
@@ -16,18 +17,22 @@ use App\Models\Country;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseModule;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\EmailTemplate;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
+use App\Models\Group;
 use App\Models\HesaGender;
+use App\Models\InstanceTerm;
 use App\Models\KinsRelation;
 use App\Models\LetterSet;
 use App\Models\ProcessList;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Semester;
+use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
@@ -41,6 +46,7 @@ use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
 use App\Models\TermTimeAccommodationType;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -66,37 +72,70 @@ class StudentController extends Controller
             'semesters' => $semesters,
             'courses' => $courses,
             'allStatuses' => $statuses,
+            'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
+            'terms' => InstanceTerm::all()->sortByDesc('id'),
+            'groups' => Group::all(),
+            'modules' => CourseModule::all(),
         ]);
     }
 
     public function list(Request $request){
-        $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
-        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
-        $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
-        $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
-        $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
-        $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
-        $dob = (isset($request->dob) && !empty($request->dob) ? date('Y-m-d', strtotime($request->dob)) : '');
+        $student_id = isset($request->student_id) && !empty($request->student_id) ? $request->student_id : '';
 
-        $courseCreationId = [];
-        if(!empty($courses)):
-            $courseCreations = CourseCreation::whereIn('course_id', $courses)->get();
-            if(!$courseCreations->isEmpty()):
-                foreach($courseCreations as $cc):
-                    $courseCreationId[] = $cc->id;
-                endforeach;
-            else:
-                $courseCreationId[1] = '0';
-            endif;
+        $studentParams = isset($request->student) && !empty($request->student) ? $request->student : [];
+        $groupParams = isset($request->group) && !empty($request->group) ? $request->group : [];
+        $studentSearch = (isset($studentParams['stataus']) && $studentParams['stataus'] == 1 ? true : false);
+        $groupSearch = (isset($groupParams['stataus']) && $groupParams['stataus'] == 1 ? true : false);
+
+        $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
+
+        $Query = DB::table('students as std')
+                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name')
+                    ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
+                    ->leftJoin('student_contacts as scn', 'std.id', 'scn.student_id')
+                    ->leftJoin('student_users as su', 'std.student_user_id', 'su.id')
+                    ->leftJoin('student_course_relations as scr', function($join){
+                            $join->on('std.id', '=', 'scr.student_id');
+                            $join->on('scr.active', '=', DB::raw(1));
+                    })
+                    ->leftJoin('student_awarding_body_details as sabd', 'scr.id', 'sabd.student_course_relation_id')
+                    ->leftJoin('course_creations as cc', 'cc.id', 'scr.course_creation_id')
+                    ->leftJoin('courses as cr', 'cr.id', 'cc.course_id')
+                    ->leftJoin('semesters as sm', 'sm.id', 'cc.semester_id')
+                    ->leftJoin('student_proposed_courses as spc', 'spc.student_course_relation_id', 'scr.id')
+                    ->leftJoin('sex_identifiers as si', 'std.sex_identifier_id', 'si.id');
+        
+        //$Query = Student::orderByRaw(implode(',', $sorts));
+        if(!empty($student_id)): $Query->where('registration_no', $student_id); endif;
+        if($studentSearch):
+            foreach($studentParams as $field => $value):
+                $$field = (isset($value) && !empty($value) ? ($field == 'student_dob' ? date('Y-m-d', strtotime($value)) :$value) : '');
+            endforeach;
+            if(!empty($student_name)): $Query->where('std.first_name','LIKE','%'.$student_name.'%'); endif;
+            if(!empty($student_name)): $Query->where('std.last_name','LIKE','%'.$student_name.'%'); endif;
+            if(!empty($student_dob)): $Query->where('std.date_of_birth', $student_dob); endif;
+            if(!empty($student_post_code)): $Query->where('scn.term_time_post_code', $student_post_code); endif;
+            if(!empty($student_email)): $Query->where('su.email', $student_email); endif;
+            if(!empty($student_mobile)): $Query->where('scn.mobile', $student_mobile); endif;
+            if(!empty($student_uhn)): $Query->where('std.uhn_no', $student_uhn); endif;
+            if(!empty($student_ssn)): $Query->where('std.ssn_no', $student_ssn); endif;
+            if(!empty($student_abr)): $Query->where('sabd.reference', $student_abr); endif;
+            if(!empty($student_status)): $Query->whereIn('std.status_id', $student_status); endif;
         endif;
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
-        $sorts = [];
-        foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
-        endforeach;
+        if($groupSearch):
+            foreach($groupParams as $field => $value):
+                $$field = (isset($value) && !empty($value) ? $value : '');
+            endforeach;
+            if(!empty($academic_year)): $Query->whereIn('spc.academic_year_id', $academic_year); endif;
+            if(!empty($intake_semester)): $Query->whereIn('spc.semester_id', $intake_semester); endif;
 
-        $query = Student::orderByRaw(implode(',', $sorts));
+            if(!empty($evening_weekend)): $Query->whereIn('spc.full_time', $evening_weekend); endif;
+            if(!empty($group_student_status)): $Query->whereIn('std.status_id', $group_student_status); endif;
+        endif;
+
+
+        /*$query = Student::orderByRaw(implode(',', $sorts));
         if(!empty($refno)): $query->where('application_no', $refno); endif;
         if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
         if(!empty($lastname)): $query->where('last_name', 'LIKE', '%'.$lastname.'%'); endif;
@@ -107,9 +146,9 @@ class StudentController extends Controller
                 if(!empty($semesters)): $qs->whereIn('semester_id', $semesters); endif;
                 if(!empty($courses) && !empty($courseCreationId)): $qs->whereIn('course_creation_id', $courseCreationId); endif;
             });
-        endif;
+        endif;*/
 
-        $total_rows = $query->count();
+        $total_rows = $Query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
@@ -117,7 +156,13 @@ class StudentController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query = $query->skip($offset)
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $Query = $Query->orderByRaw(implode(',', $sorts))->skip($offset)
                ->take($limit)
                ->get();
 
@@ -133,12 +178,11 @@ class StudentController extends Controller
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
                     'date_of_birth'=> $list->date_of_birth,
-                    'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
-                    'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
-                    'gender'=> $list->gender,
-                    'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
-                    'url' => route('student.show', $list->id),
-                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId)
+                    'course'=> (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
+                    'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
+                    'gender'=> (isset($list->sexid_name) && !empty($list->sexid_name) ? $list->sexid_name : ''),
+                    'status_id'=> (isset($list->status_name) && !empty($list->status_name) ? $list->status_name : ''),
+                    'url' => route('student.show', $list->id)
                 ];
                 $i++;
             endforeach;
@@ -172,6 +216,7 @@ class StudentController extends Controller
             'documents' => DocumentSettings::where('live', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::where('active', 1)->get(),
             'sexualOrientation' => SexualOrientation::where('active', 1)->get(),
+            'sexid' => SexIdentifier::where('active', 1)->get(),
             'hesaGender' => HesaGender::where('active', 1)->get(),
             'religion' => Religion::where('active', 1)->get(),
             'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
@@ -321,5 +366,26 @@ class StudentController extends Controller
         endif;
 
         return response()->json(['message' => 'Photo successfully change & updated'], 200);
+    }
+
+    public function StudentIDFilter(Request $request){
+        $SearchVal = $request->SearchVal;
+
+        $html = '';
+        $Query = Student::orderBy('registration_no', 'ASC')->where('registration_no', 'LIKE', '%'.$SearchVal.'%')->get();
+        
+        if($Query->count() > 0):
+            foreach($Query as $qr):
+                $html .= '<li>';
+                    $html .= '<a href="'.$qr->registration_no.'" class="dropdown-item">'.$qr->registration_no.'</a>';
+                $html .= '</li>';
+            endforeach;
+        else:
+            $html .= '<li>';
+                $html .= '<a href="javascript:void(0);" class="dropdown-item disable">Nothing found!</a>';
+            $html .= '</li>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
     }
 }

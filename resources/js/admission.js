@@ -1256,7 +1256,7 @@ var employmentHistoryTable = (function () {
                     });      
                     
                     setTimeout(function(){
-                        successModal.show();
+                        successModal.hide();
                         window.location.reload();
                     }, 5000);
                 }
