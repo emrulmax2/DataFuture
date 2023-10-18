@@ -17,3 +17,5 @@ yarn-error.log
 .env.live2
 pnpm-lock.yaml
 composer.lock
+composer.lock
+pnpm-lock.yaml
