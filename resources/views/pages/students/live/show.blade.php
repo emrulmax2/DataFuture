@@ -48,7 +48,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Date of Birth</div>
-                        <div class="col-span-8 font-medium">{{ $student->date_of_birth }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('jS M, Y', strtotime($student->date_of_birth)) : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
@@ -96,19 +96,19 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Sexual Orientation</div>
-                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->sexori->name) && !empty($student->otherPerInfo->sexori->name) ? $student->otherPerInfo->sexori->name : '---') }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->other->sexori->name) && !empty($student->other->sexori->name) ? $student->other->sexori->name : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Gender Identity</div>
-                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->gender->name) && !empty($student->otherPerInfo->gender->name) ? $student->otherPerInfo->gender->name : '---') }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->other->gender->name) && !empty($student->other->gender->name) ? $student->other->gender->name : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Religion or Belief</div>
-                        <div class="col-span-8 font-medium">{{ (isset($student->otherPerInfo->religion->name) && !empty($student->otherPerInfo->religion->name) ? $student->otherPerInfo->religion->name : '---') }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($student->other->religion->name) && !empty($student->other->religion->name) ? $student->other->religion->name : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3"></div>
@@ -639,7 +639,7 @@
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Student Consent</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Communication Consent</div>
                         <div class="col-span-8"> 
                             @if(!empty($stdConsentIds) && $consent->count() > 0)
                                 <ul class="m-0 p-0 mb-2">

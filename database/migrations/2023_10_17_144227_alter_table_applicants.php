@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::table('applicants', function (Blueprint $table) {
             $table->dropColumn('gender');
-            $table->bigInteger('sex_identifier_id')->unsigned()->after('date_of_birth');
-            $table->foreign('sex_identifier_id')->references('id')->on('sex_identifiers')->onDelete('cascade')->onUpdate('cascade');
+            $table->bigInteger('sex_identifier_id')->unsigned()->nullable()->after('date_of_birth');
+            $table->foreign('sex_identifier_id')->references('id')->on('sex_identifiers')->onDelete('set null')->onUpdate('set null');
         });
     }
 
@@ -28,7 +28,9 @@ return new class extends Migration
     public function down()
     {
         Schema::table('applicants', function (Blueprint $table) {
-            $table->dropColumn('gender');
+
+            $table->enum('gender',['MALE','FEMALE','OTHERS'])->after('date_of_birth');
+            $table->dropForeign('applicants_sex_identifier_id_foreign');
             $table->dropColumn('sex_identifier_id');
         });
     }

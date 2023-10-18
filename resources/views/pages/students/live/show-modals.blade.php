@@ -132,7 +132,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($sexualOrientation))
                                     @foreach($sexualOrientation as $so)
-                                        <option {{ isset($student->otherPerInfo->sexual_orientation_id) && $so->id == $student->otherPerInfo->sexual_orientation_id ? 'Selected' : '' }} value="{{ $so->id }}">{{ $so->name }}</option>
+                                        <option {{ isset($student->other->sexual_orientation_id) && $so->id == $student->other->sexual_orientation_id ? 'Selected' : '' }} value="{{ $so->id }}">{{ $so->name }}</option>
                                     @endforeach 
                                 @endif 
                             </select>
@@ -144,7 +144,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($hesaGender))
                                     @foreach($hesaGender as $hg)
-                                        <option {{ isset($student->otherPerInfo->hesa_gender_id) && $hg->id == $student->otherPerInfo->hesa_gender_id ? 'Selected' : '' }} value="{{ $hg->id }}">{{ $hg->name }}</option>
+                                        <option {{ isset($student->other->hesa_gender_id) && $hg->id == $student->other->hesa_gender_id ? 'Selected' : '' }} value="{{ $hg->id }}">{{ $hg->name }}</option>
                                     @endforeach 
                                 @endif 
                             </select>
@@ -156,7 +156,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($religion))
                                     @foreach($religion as $reg)
-                                        <option {{ isset($student->otherPerInfo->religion_id) && $reg->id == $student->otherPerInfo->religion_id ? 'Selected' : '' }} value="{{ $reg->id }}">{{ $reg->name }}</option>
+                                        <option {{ isset($student->other->religion_id) && $reg->id == $student->other->religion_id ? 'Selected' : '' }} value="{{ $reg->id }}">{{ $reg->name }}</option>
                                     @endforeach 
                                 @endif 
                             </select>
@@ -214,7 +214,7 @@
                         </svg>
                     </button>
                     <input type="hidden" value="{{ $student->id }}" name="student_id"/>
-                    <input type="hidden" value="{{ isset($student->otherPerInfo->id) && $student->otherPerInfo->id > 0 ? $student->otherPerInfo->id : 0 }}" name="student_other_personal_information_id"/>
+                    <input type="hidden" value="{{ isset($student->other->id) && $student->other->id > 0 ? $student->other->id : 0 }}" name="student_other_detail_id"/>
                 </div>
             </div>
         </form>

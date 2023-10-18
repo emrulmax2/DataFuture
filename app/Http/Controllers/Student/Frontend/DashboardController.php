@@ -32,7 +32,6 @@ class DashboardController extends Controller
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
         $permanentAddress = Address::find($studentContact->permanent_address_id);
-        $gender = SexIdentifier::where("name", ucfirst($studentData->gender))->get()->first();
 
         $terTimeAccomadtionType = TermTimeAccommodationType::all();
         
@@ -46,7 +45,7 @@ class DashboardController extends Controller
             "permanent_country" => $studentData->country_id,
             "ethnicity" => $studentData->nationality_id,
             "religion" => $studentData->nationality_id,
-            "gender" => $gender->id,
+            "sex_identifier_id" => $studentData->sex_identifier_id,
             "sexualOrientation" => "",
             "current_address" => $currentAddress,
             "permanent_address" => $permanentAddress,
