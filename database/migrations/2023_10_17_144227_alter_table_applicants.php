@@ -15,8 +15,7 @@ return new class extends Migration
     {
         Schema::table('applicants', function (Blueprint $table) {
             $table->dropColumn('gender');
-            $table->bigInteger('sex_identifier_id')->unsigned()->after('date_of_birth');
-            $table->foreign('sex_identifier_id')->references('id')->on('sex_identifiers')->onDelete('cascade')->onUpdate('cascade');
+            $table->bigInteger('sex_identifier_id')->unsigned()->nullable()->after('date_of_birth');
             $table->foreign('sex_identifier_id')->references('id')->on('sex_identifiers')->onDelete('set null')->onUpdate('set null');
         });
     }
