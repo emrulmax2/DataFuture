@@ -7,56 +7,27 @@ use App\Http\Requests\OtherPersonalInformationRequest;
 use App\Models\StudentArchive;
 use App\Models\StudentDisability;
 use App\Models\StudentOtherDetail;
-use App\Models\StudentOtherPersonalInformation;
 use Illuminate\Http\Request;
 
 class OtherPersonalInformationController extends Controller
 {
     public function update(OtherPersonalInformationRequest $request){
         $student_id = $request->student_id;
-        $student_other_personal_information_id = $request->student_other_personal_information_id;
-        $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();
-        $otherPersonalOldRow = StudentOtherPersonalInformation::where('student_id', $student_id)->where('id', $student_other_personal_information_id)->first();
-        
-        $opData = [
-            'student_id' => $student_id,
-            'sexual_orientation_id' => isset($request->sexual_orientation_id) && $request->sexual_orientation_id > 0 ? $request->sexual_orientation_id : null,
-            'hesa_gender_id' => isset($request->hesa_gender_id) && $request->hesa_gender_id > 0 ? $request->hesa_gender_id : null,
-            'religion_id' => isset($request->religion_id) && $request->religion_id > 0 ? $request->religion_id : null,
-        ];
-        if($student_other_personal_information_id == 0):
-            $opData['created_by'] = auth()->user()->id;
-            StudentOtherPersonalInformation::create([$opData]);
-        else:
-            $opData['updated_by'] = auth()->user()->id;
-            $otherPersonalInfo = StudentOtherPersonalInformation::where('student_id', $student_id)->where('id', $student_other_personal_information_id)->first();
-            $otherPersonalInfo->fill($opData);
-            $changes = $otherPersonalInfo->getDirty();
-            $otherPersonalInfo->save();
-
-            if($otherPersonalInfo->wasChanged() && !empty($changes)):
-                foreach($changes as $field => $value):
-                    $data = [];
-                    $data['student_id'] = $student_id;
-                    $data['table'] = 'student_other_personal_information';
-                    $data['field_name'] = $field;
-                    $data['field_value'] = $otherPersonalOldRow->$field;
-                    $data['field_new_value'] = $value;
-                    $data['created_by'] = auth()->user()->id;
-
-                    StudentArchive::create($data);
-                endforeach;
-            endif;
-        endif;
+        $student_other_detail_id = $request->student_other_detail_id;
+        $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->where('id', $student_other_detail_id)->first();
 
         $disability_status = (isset($request->disability_status) && $request->disability_status > 0 ? $request->disability_status : 0);
         $disability_id = ($disability_status == 1 && isset($request->disability_id) && !empty($request->disability_id) ? $request->disability_id : []);
         $disabilty_allowance = ($disability_status == 1 && !empty($disability_id) && (isset($request->disabilty_allowance) && $request->disabilty_allowance > 0) ? $request->disabilty_allowance : 0);
 
-        $otherDetails = StudentOtherDetail::where('student_id', $student_id)->first();
+        $otherDetails = StudentOtherDetail::where('student_id', $student_id)->where('id', $student_other_detail_id)->first();
         $otherDetails->fill([
             'disability_status' => $disability_status,
             'disabilty_allowance' => $disabilty_allowance,
+
+            'sexual_orientation_id' => isset($request->sexual_orientation_id) && $request->sexual_orientation_id > 0 ? $request->sexual_orientation_id : null,
+            'hesa_gender_id' => isset($request->hesa_gender_id) && $request->hesa_gender_id > 0 ? $request->hesa_gender_id : null,
+            'religion_id' => isset($request->religion_id) && $request->religion_id > 0 ? $request->religion_id : null,
         ]);
         $changes = $otherDetails->getDirty();
         $otherDetails->save();

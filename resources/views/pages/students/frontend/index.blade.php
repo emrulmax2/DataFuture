@@ -60,7 +60,6 @@
                 <div class="intro-y col-span-12 sm:col-span-6">
                     <label for="input-wizard-4" class="form-label inline-flex">Country of Birth <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#country-birth-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                     <select id="data-5" name="birth_country" class="w-full  lccTom lcc-tom-select">
-                        
                         @foreach($countries as $country)
                             <option  {{ ($studentData["nationality"] == $country->id  ? "selected":"") }}  value="{{ $country->id }}">{{ $country->name }}</option>              
                         @endforeach
@@ -93,7 +92,6 @@
                 <div class="intro-y col-span-12 sm:col-span-6">
                     <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                     <select id="data-3" name="religion" class="w-full  lccTom lcc-tom-select">
-                        
                         @foreach($religions as $religion)
                             <option {{ ($studentData["religion"] == $religion->id  ? "selected":"") }} value="{{ $religion->id }}">{{ $religion->name }}</option>              
                         @endforeach
@@ -127,7 +125,7 @@
                     <label for="input-wizard-2" class="form-label inline-flex">Gender identity <i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                     <select id="data-2" name="gender" class="w-full  lccTom lcc-tom-select">
                         @foreach($genderIdentities as $genderIdentity)
-                            <option {{ ($studentData["gender"] == $genderIdentity->name  ? "selected":"") }} value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
+                            <option value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
                         @endforeach
                     </select>
                     <!-- BEGIN: Custom Tooltip Content -->
@@ -140,9 +138,9 @@
                 </div>
                 <div class="intro-y col-span-12 sm:col-span-6">
                     <label for="input-wizard-4" class="form-label inline-flex">Sex identifier/Gender <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#gender-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-7" name="sex_identifier" class="w-full  lccTom lcc-tom-select">
+                    <select id="data-7" name="sex_identifier_id" class="w-full  lccTom lcc-tom-select">
                         @foreach($sexIdentifiers as $sexIdentifier)
-                            <option  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
+                            <option {{ ($studentData["sex_identifier_id"] == $sexIdentifier->id  ? "selected":"") }}  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
                         @endforeach
                     </select>
                     <!-- BEGIN: Custom Tooltip Content -->

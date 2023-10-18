@@ -57,7 +57,7 @@ class ProcessStudentOtherDetails implements ShouldQueue
                 'is_education_qualification'=> ($applicantSet->is_edication_qualification) ?? 0,
                 'employment_status'=> $applicantSet->employment_status,
                 'college_introduction'=> $applicantSet->college_introduction,
-                'gender_identity'=> $applicantSet->gender_identity,
+                'hesa_gender_id'=> $applicantSet->hesa_gender_id,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
             if($applicantSet->sexual_orientation_id) {

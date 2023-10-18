@@ -28,7 +28,7 @@ class StudentFirstLoginDataController extends Controller
         $StudentData = Student::find($request->student_id);
         $StudentData->nationality_id = $request->nationality; 
         $StudentData->country_id = $request->birth_country; 
-        $StudentData->gender = strtoupper($sexIdentifier->name);
+        $StudentData->sex_identifier_id = $request->sex_identifier_id;
         $StudentData->save();
 
         $otherDetailsId = StudentOtherDetail::where('student_id',$request->student_id)->get()->first()->pluck('id')->toArray();
@@ -37,7 +37,7 @@ class StudentFirstLoginDataController extends Controller
         $studentOtherDetails->religion_id  = $request->ethnicity;
         $studentOtherDetails->ethnicity_id = $request->religion;
         $studentOtherDetails->sexual_orientation_id = $request->sexual_orientation;
-        $studentOtherDetails->sex_identifier = $request->sex_identifier;
+        $studentOtherDetails->hesa_gender_id = $request->gender;
         $studentOtherDetails->save();
 
         return response()->json("Data Updated");

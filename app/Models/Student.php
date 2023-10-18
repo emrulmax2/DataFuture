@@ -32,6 +32,8 @@ class Student extends Model
         'rejected_reason',
         'nationality_id',
         'country_id',
+        'referral_code',
+        'is_referral_varified',
         'created_by',
         'updated_by', 
     ];

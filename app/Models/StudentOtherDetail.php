@@ -18,7 +18,7 @@ class StudentOtherDetail extends Model
         'is_education_qualification',
         'employment_status',
         'college_introduction',
-        'gender_identity',
+        'hesa_gender_id',
         'sexual_orientation_id',
         'religion_id',
         'created_by',
@@ -38,5 +38,17 @@ class StudentOtherDetail extends Model
 
     public function ethnicity(){
         return $this->belongsTo(Ethnicity::class, 'ethnicity_id');
+    }
+
+    public function sexori(){
+        return $this->belongsTo(SexualOrientation::class, 'sexual_orientation_id');
+    }
+
+    public function gender(){
+        return $this->belongsTo(HesaGender::class, 'hesa_gender_id');
+    }
+
+    public function religion(){
+        return $this->belongsTo(Religion::class, 'religion_id');
     }
 }
