@@ -23,6 +23,18 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_other_personal_information');
+        Schema::create('student_other_personal_information', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('student_id')->unsigned();
+            $table->bigInteger('sexual_orientation_id')->unsigned()->nullable();
+            $table->bigInteger('hesa_gender_id')->unsigned()->nullable();
+            $table->bigInteger('religion_id')->unsigned()->nullable();
+            $table->softDeletes();
+            $table->timestamps();
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('sexual_orientation_id')->references('id')->on('sexual_orientations')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('hesa_gender_id')->references('id')->on('hesa_genders')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('religion_id')->references('id')->on('religions')->onDelete('cascade')->onUpdate('cascade');
+        });
     }
 };

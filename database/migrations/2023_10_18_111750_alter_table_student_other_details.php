@@ -18,7 +18,7 @@ return new class extends Migration
             $table->dropColumn('sex_identifier');
             $table->dropColumn('gender_identity');
             $table->bigInteger('hesa_gender_id')->unsigned()->after('college_introduction')->nullable();
-            $table->foreign('hesa_gender_id')->references('id')->on('hesa_genders')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('hesa_gender_id')->references('id')->on('hesa_genders')->onDelete('CASCADE')->onUpdate('CASCADE');
         });
     }
 
@@ -29,6 +29,14 @@ return new class extends Migration
      */
     public function down()
     {
-
+        Schema::table('student_other_details', function (Blueprint $table) {
+            $table->dropForeign('student_other_details_hesa_gender_id_foreign');
+            $table->enum('gender_identity',['Yes','No','Refused'])->after('hesa_gender_id');
+            
+            $table->dropColumn('hesa_gender_id');
+            
+            $table->bigInteger('sex_identifier')->unsigned()->after('sexual_orientation_id')->nullable();
+            $table->foreign('sex_identifier')->references('id')->on('sex_identifiers')->onDelete('CASCADE')->onUpdate('CASCADE');
+        });
     }
 };
