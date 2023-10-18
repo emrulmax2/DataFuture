@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('student_proposed_courses', function (Blueprint $table) {
             
             $table->bigInteger('semester_id')->unsigned()->nullable()->after("course_creation_id");
-            $table->foreign('semester_id')->references('id')->on('semesters')->onDelete('set null')->onUpdate('set null');
+            $table->foreign('semester_id')->references('id')->on('semesters')->onDelete('cascade')->onUpdate('cascade');
 
         });
     }
