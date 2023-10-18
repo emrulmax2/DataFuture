@@ -518,7 +518,7 @@ var employmentHistoryTable = (function () {
             $('#editQualificationModal .modal-footer input[name="id"]').val('0');
         });
 
-        $('#addQualificationForm').on('submit', function(e){
+        $('#addQualificationForm').on('submit', function(e) {
             e.preventDefault();
             var $form = $(this);
             const form = document.getElementById('addQualificationForm');
@@ -1354,7 +1354,8 @@ var employmentHistoryTable = (function () {
     /* Edit Contact Details*/
 
     /* Edit Kin Details */
-    if($('#editAdmissionKinDetailsForm').length > 0){
+    if($('#editAdmissionKinDetailsForm').length > 0) {
+        
         const editAdmissionKinDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionKinDetailsModal"));
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         $('#editAdmissionKinDetailsForm').on('submit', function(e){

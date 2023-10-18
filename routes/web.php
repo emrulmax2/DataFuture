@@ -77,6 +77,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -658,7 +659,18 @@ Route::middleware('auth')->group(function() {
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
     });
+    Route::controller(EmployeeController::class)->group(function(){
+        Route::get('employee','index')->name('employee');
+        Route::get('employee/new','create')->name('employee.create');
+        Route::post('employee/save','save')->name('employee.save');
+        
+        Route::post('employement/save','saveEmployment')->name('employement.save');
+        Route::post('eligibility/save','saveEligibility')->name('eligibility.save');
+        Route::post('emergency-contact/save','saveEmergencyContact')->name('emergency-contact.save');
 
+        Route::get('/first/review', 'reviewShows')->name('employeereview.show.data');
+        Route::post('/first/review', 'reviewDone')->name('employeereview.done.data');
+    });
     Route::controller(StaffDashboard::class)->group(function() {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');

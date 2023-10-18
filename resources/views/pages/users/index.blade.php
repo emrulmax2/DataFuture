@@ -8,7 +8,8 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">All Users</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addUserModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New User</button>
+            {{-- <button data-tw-toggle="modal" data-tw-target="#addUserModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New User</button> --}}
+            <a href="{{ route('employee.create') }}" class="add_btn btn btn-primary shadow-md mr-2">Add New User</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
