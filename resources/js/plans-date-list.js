@@ -19,7 +19,7 @@ var classPlanDateListsTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -30,13 +30,28 @@ var classPlanDateListsTable = (function () {
                     width: "180",
                 },
                 {
-                    title: "Name",
+                    title: "Date",
+                    field: "date",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Type",
                     field: "name",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Date",
-                    field: "date",
+                    title: "Room",
+                    field: "room",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Time",
+                    field: "time",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status",
                     headerHozAlign: "left",
                 },
                 {
@@ -46,6 +61,7 @@ var classPlanDateListsTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -89,7 +105,7 @@ var classPlanDateListsTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Semester Details",
+                sheetName: "Plan Date List Details",
             });
         });
 

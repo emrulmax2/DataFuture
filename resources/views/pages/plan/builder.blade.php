@@ -282,4 +282,8 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
-    @endsection
+@endsection
+
+@section('script')
+    @vite('resources/js/plan.js')
+@endsection

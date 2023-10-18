@@ -30,9 +30,6 @@ class TermModuleCreationController extends Controller
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : 0);
         $instance_term = (isset($request->instance_term) && $request->instance_term > 0 ? $request->instance_term : 0);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = DB::table('instance_terms as it')
                     ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name')
                     ->leftJoin('course_creation_instances as cci', 'it.course_creation_instance_id', '=', 'cci.id')
@@ -47,6 +44,8 @@ class TermModuleCreationController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $limit = $perpage;
@@ -166,9 +165,6 @@ class TermModuleCreationController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = ModuleCreation::where('instance_term_id', $terminstanceid)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('module_name','LIKE','%'.$queryStr.'%');
@@ -181,6 +177,8 @@ class TermModuleCreationController extends Controller
         endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $limit = $perpage;

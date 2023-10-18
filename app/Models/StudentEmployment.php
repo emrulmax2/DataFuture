@@ -12,18 +12,13 @@ class StudentEmployment extends Model
 
     protected $fillable = [
         'student_id',
+        'address_id',
         'company_name',
         'company_phone',
         'position',
         'start_date',
         'end_date',
         'continuing',
-        'address_line_1',
-        'address_line_2',
-        'state',
-        'post_code',
-        'city',
-        'country',
         'created_by',
         'updated_by',
     ];
@@ -40,6 +35,10 @@ class StudentEmployment extends Model
     }
     
     public function reference(){
-        return $this->hasMany(EmploymentReference::class, 'student_employment_id', 'id');
+        return $this->hasMany(StudentEmploymentReference::class, 'student_employment_id', 'id');
+    }
+    
+    public function address(){
+        return $this->belongsTo(Address::class, 'address_id');
     }
 }

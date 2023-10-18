@@ -8,7 +8,8 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">All Users</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addUserModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New User</button>
+            {{-- <button data-tw-toggle="modal" data-tw-target="#addUserModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New User</button> --}}
+            <a href="{{ route('employee.create') }}" class="add_btn btn btn-primary shadow-md mr-2">Add New User</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
@@ -46,21 +47,21 @@
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                 </a>
-                            </li>
+                            </li> --}}
                             <li>
                                 <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
                 </div>
@@ -172,7 +173,7 @@
     <!-- BEGIN: Edit Modal -->
     <div id="editUsersModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="editUsersForm">
+            <form method="POST" action="#" id="editUsersForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit User</h2>

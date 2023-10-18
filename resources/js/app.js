@@ -60,13 +60,8 @@ import "./dark-mode-switcher";
 //all Form Data                                // Added on 05.12.22
 import "./form";                              // Added on 05.12.22
 import "./courses";                           // Added on 12.12.22
-import "./semester";                          // Added on 13.12.22
-import "./sourcetuitionfee";
-import "./coursequalification";
-import "./awardingbody";
-import "./academicyears";
-import "./groups";      
-import "./venues"; 
+import "./semester";          
+import "./groups";  
 import "./modulelevels";
 import "./course-module";
 import "./course-datafuture";
@@ -79,9 +74,6 @@ import "./course-creation-instance";
 import "./instance-term";
 import "./term-module-creation";
 import "./assessment";
-import "./rooms";
-import "./plan";
 import "./plans-date-list";
-import "./documentsettings";
 
 import "./admission-global";

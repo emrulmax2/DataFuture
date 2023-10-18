@@ -12,10 +12,11 @@ class CourseCreationAvailabilityController extends Controller
     public function list(Request $request){
         $coursecreationid = (isset($request->coursecreationid) && $request->coursecreationid > 0 ? $request->coursecreationid : '');
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         
         $total_rows = CourseCreationAvailability::where('course_creation_id', $coursecreationid)->count();
+        
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));

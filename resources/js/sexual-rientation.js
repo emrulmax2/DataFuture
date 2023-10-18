@@ -3,12 +3,12 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
  
 ("use strict");
-var settingsListTable = (function () {
+var sexoListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
-        let tableContent = new Tabulator("#settingsListTable", {
+        let querystr = $("#query-SEXO").val() != "" ? $("#query-SEXO").val() : "";
+        let status = $("#status-SEXO").val() != "" ? $("#status-SEXO").val() : "";
+        let tableContent = new Tabulator("#sexoListTable", {
             ajaxURL: route("sex.orientation.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
@@ -17,7 +17,7 @@ var settingsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,7 +25,6 @@ var settingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
                 },
                 {
                     title: "Name",
@@ -43,16 +42,25 @@ var settingsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "120",
+                    download:false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSettingsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSexoModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -82,29 +90,29 @@ var settingsListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv").on("click", function (event) {
+        $("#tabulator-export-csv-SEXO").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
+        $("#tabulator-export-json-SEXO").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx-SEXO").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Course Details",
+                sheetName: "Orientation Details",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
+        $("#tabulator-export-html-SEXO").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print-SEXO").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -117,130 +125,140 @@ var settingsListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#settingsListTable").length) {
-        // Init Table
-        settingsListTable.init();
+    if ($("#sexoListTable").length) {
+        $('.optionBoxTitle').on('click', function(e){
+            e.preventDefault();
+            var $title = $(this);
+            var $box = $title.parents('.optionBox');
+            var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
+            var table = $boxBody.attr('data-tableid');
+    
+            if($box.hasClass('active') && table == 'sexoListTable'){
+                sexoListTable.init();
+            }
+        });
 
         // Filter function
-        function filterHTMLForm() {
-            settingsListTable.init();
+        function filterHTMLFormSEXO() {
+            sexoListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
+        $("#tabulatorFilterForm-SEXO")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLForm();
+                    filterHTMLFormSEXO();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
+        $("#tabulator-html-filter-go-SEXO").on("click", function (event) {
+            filterHTMLFormSEXO();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLForm();
+        $("#tabulator-html-filter-reset-SEXO").on("click", function (event) {
+            $("#query-SEXO").val("");
+            $("#status-SEXO").val("1");
+            filterHTMLFormSEXO();
         });
 
-        const addSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSettingsModal"));
-        const editSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSettingsModal"));
+        const addSexoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSexoModal"));
+        const editSexoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSexoModal"));
+        const sexorientationImportModal = tailwind.Modal.getOrCreateInstance("#sexorientationImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addSettingsModalEl = document.getElementById('addSettingsModal')
-        addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addSettingsModal .acc__input-error').html('');
-            $('#addSettingsModal .modal-body input:not([type="checkbox"])').val('');
+        const addSexoModalEl = document.getElementById('addSexoModal')
+        addSexoModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addSexoModal .acc__input-error').html('');
+            $('#addSexoModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addSettingsModal input[name="is_hesa"]').prop('checked', false);
-            $('#addSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addSettingsModal .hesa_code_area input').val('');
+            $('#addSexoModal input[name="is_hesa"]').prop('checked', false);
+            $('#addSexoModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addSexoModal .hesa_code_area input').val('');
             });
-            $('#addSettingsModal input[name="is_df"]').prop('checked', false);
-            $('#addSettingsModal .df_code_area').fadeOut('fast', function(){
-                $('#addSettingsModal .df_code_area input').val('');
+            $('#addSexoModal input[name="is_df"]').prop('checked', false);
+            $('#addSexoModal .df_code_area').fadeOut('fast', function(){
+                $('#addSexoModal .df_code_area input').val('');
             })
         });
         
-        const editSettingsModalEl = document.getElementById('editSettingsModal')
-        editSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editSettingsModal .acc__input-error').html('');
-            $('#editSettingsModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editSettingsModal input[name="id"]').val('0');
+        const editSexoModalEl = document.getElementById('editSexoModal')
+        editSexoModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editSexoModal .acc__input-error').html('');
+            $('#editSexoModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editSexoModal input[name="id"]').val('0');
 
-            $('#editSettingsModal input[name="is_hesa"]').prop('checked', false);
-            $('#editSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editSettingsModal .hesa_code_area input').val('');
+            $('#editSexoModal input[name="is_hesa"]').prop('checked', false);
+            $('#editSexoModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editSexoModal .hesa_code_area input').val('');
             });
-            $('#editSettingsModal input[name="is_df"]').prop('checked', false);
-            $('#editSettingsModal .df_code_area').fadeOut('fast', function(){
-                $('#editSettingsModal .df_code_area input').val('');
+            $('#editSexoModal input[name="is_df"]').prop('checked', false);
+            $('#editSexoModal .df_code_area').fadeOut('fast', function(){
+                $('#editSexoModal .df_code_area input').val('');
             })
         });
         
-        $('#addSettingsForm input[name="is_hesa"]').on('change', function(){
+        $('#addSexoForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSettingsForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addSettingsForm .hesa_code_area input').val('');
+                $('#addSexoForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addSexoForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addSettingsForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addSettingsForm .hesa_code_area input').val('');
+                $('#addSexoForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addSexoForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addSettingsForm input[name="is_df"]').on('change', function(){
+        $('#addSexoForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSettingsForm .df_code_area').fadeIn('fast', function(){
-                    $('#addSettingsForm .df_code_area input').val('');
+                $('#addSexoForm .df_code_area').fadeIn('fast', function(){
+                    $('#addSexoForm .df_code_area input').val('');
                 })
             }else{
-                $('#addSettingsForm .df_code_area').fadeOut('fast', function(){
-                    $('#addSettingsForm .df_code_area input').val('');
+                $('#addSexoForm .df_code_area').fadeOut('fast', function(){
+                    $('#addSexoForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editSettingsForm input[name="is_hesa"]').on('change', function(){
+        $('#editSexoForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSettingsForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editSettingsForm .hesa_code_area input').val('');
+                $('#editSexoForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editSexoForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editSettingsForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editSettingsForm .hesa_code_area input').val('');
+                $('#editSexoForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editSexoForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editSettingsForm input[name="is_df"]').on('change', function(){
+        $('#editSexoForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSettingsForm .df_code_area').fadeIn('fast', function(){
-                    $('#editSettingsForm .df_code_area input').val('');
+                $('#editSexoForm .df_code_area').fadeIn('fast', function(){
+                    $('#editSexoForm .df_code_area input').val('');
                 })
             }else{
-                $('#editSettingsForm .df_code_area').fadeOut('fast', function(){
-                    $('#editSettingsForm .df_code_area input').val('');
+                $('#editSexoForm .df_code_area').fadeOut('fast', function(){
+                    $('#editSexoForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addSettingsForm').on('submit', function(e){
+        $('#addSexoForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addSettingsForm');
+            const form = document.getElementById('addSexoForm');
         
-            document.querySelector('#saveSettings').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveSettings svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveSexo').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveSexo svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
@@ -249,11 +267,11 @@ var settingsListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                document.querySelector('#saveSexo').removeAttribute('disabled');
+                document.querySelector("#saveSexo svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addSettingsModal.hide();
+                    addSexoModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -261,15 +279,15 @@ var settingsListTable = (function () {
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                settingsListTable.init();
+                sexoListTable.init();
             }).catch(error => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                document.querySelector('#saveSexo').removeAttribute('disabled');
+                document.querySelector("#saveSexo svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addSettingsForm .${key}`).addClass('border-danger');
-                            $(`#addSettingsForm  .error-${key}`).html(val);
+                            $(`#addSexoForm .${key}`).addClass('border-danger');
+                            $(`#addSexoForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -278,7 +296,7 @@ var settingsListTable = (function () {
             });
         });
 
-        $("#settingsListTable").on("click", ".edit_btn", function () {      
+        $("#sexoListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
@@ -292,31 +310,36 @@ var settingsListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editSettingsModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                        $('#editSexoModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editSettingsModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editSettingsModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editSettingsModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editSexoModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editSexoModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editSexoModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editSettingsModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editSettingsModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editSettingsModal input[name="hesa_code"]').val('');
+                            $('#editSexoModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editSexoModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editSexoModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editSettingsModal input[name="is_df"]').prop('checked', true);
-                            $('#editSettingsModal .df_code_area').fadeIn('fast', function(){
-                                $('#editSettingsModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editSexoModal input[name="is_df"]').prop('checked', true);
+                            $('#editSexoModal .df_code_area').fadeIn('fast', function(){
+                                $('#editSexoModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editSettingsModal input[name="is_df"]').prop('checked', false);
-                            $('#editSettingsModal .df_code_area').fadeOut('fast', function(){
-                                $('#editSettingsModal input[name="df_code"]').val('');
+                            $('#editSexoModal input[name="is_df"]').prop('checked', false);
+                            $('#editSexoModal .df_code_area').fadeOut('fast', function(){
+                                $('#editSexoModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editSettingsModal input[name="id"]').val(editId);
+                        $('#editSexoModal input[name="id"]').val(editId);
+                        if(dataset.active == 1){
+                            $('#editSexoModal input[name="active"]').prop('checked', true);
+                        }else{
+                            $('#editSexoModal input[name="active"]').prop('checked', false);
+                        }
                     }
                 })
                 .catch((error) => {
@@ -325,13 +348,13 @@ var settingsListTable = (function () {
         });
 
         // Update Course Data
-        $("#editSettingsForm").on("submit", function (e) {
+        $("#editSexoForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editSettingsForm input[name="id"]').val();
-            const form = document.getElementById("editSettingsForm");
+            let editId = $('#editSexoForm input[name="id"]').val();
+            const form = document.getElementById("editSexoForm");
 
-            document.querySelector('#updateSettings').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateSettings svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateSexo').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateSexo svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
@@ -344,9 +367,9 @@ var settingsListTable = (function () {
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateSettings").removeAttribute("disabled");
-                    document.querySelector("#updateSettings svg").style.cssText = "display: none;";
-                    editSettingsModal.hide();
+                    document.querySelector("#updateSexo").removeAttribute("disabled");
+                    document.querySelector("#updateSexo svg").style.cssText = "display: none;";
+                    editSexoModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -354,18 +377,18 @@ var settingsListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                settingsListTable.init();
+                sexoListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateSettings").removeAttribute("disabled");
-                document.querySelector("#updateSettings svg").style.cssText = "display: none;";
+                document.querySelector("#updateSexo").removeAttribute("disabled");
+                document.querySelector("#updateSexo svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editSettingsForm .${key}`).addClass('border-danger')
-                            $(`#editSettingsForm  .error-${key}`).html(val)
+                            $(`#editSexoForm .${key}`).addClass('border-danger')
+                            $(`#editSexoForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editSettingsModal.hide();
+                        editSexoModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -387,7 +410,7 @@ var settingsListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            if(action == 'DELETESEXO'){
                 axios({
                     method: 'delete',
                     url: route('sex.orientation.destory', recordID),
@@ -403,11 +426,11 @@ var settingsListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    settingsListTable.init();
+                    sexoListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORE'){
+            } else if(action == 'RESTORESEXO'){
                 axios({
                     method: 'post',
                     url: route('sex.orientation.restore', recordID),
@@ -423,15 +446,48 @@ var settingsListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    settingsListTable.init();
+                    sexoListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            } else if(action == 'CHANGESTATSEXO'){
+                axios({
+                    method: 'post',
+                    url: route('sex.orientation.update.status', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('WOW!');
+                            $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        });
+                    }
+                    sexoListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
+        $('#sexoListTable').on('click', '.status_updater', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confirmModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATSEXO');
+            });
+        });
+
         // Delete Course
-        $('#settingsListTable').on('click', '.delete_btn', function(){
+        $('#sexoListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -440,12 +496,12 @@ var settingsListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETESEXO');
             });
         });
 
         // Restore Course
-        $('#settingsListTable').on('click', '.restore_btn', function(){
+        $('#sexoListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -454,8 +510,17 @@ var settingsListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTORESEXO');
             });
+        });
+
+        $('#sexorientationImportModal').on('click','#saveImportSexorientation',function(e) {
+            e.preventDefault();
+            $('#sexorientationImportModal .dropzone').get(0).dropzone.processQueue();
+            sexorientationImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

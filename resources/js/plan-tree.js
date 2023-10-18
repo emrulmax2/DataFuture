@@ -1,0 +1,641 @@
+import IMask from 'imask';
+import xlsx from "xlsx";
+import { createIcons, icons } from "lucide";
+import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
+
+("use strict");
+var classPlanTreeListTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let courses = $("#classPlanTreeListTable").attr('data-course') ;
+        let instance_term = $("#classPlanTreeListTable").attr('data-term');
+        let group = $("#classPlanTreeListTable").attr('data-group');
+        let year = $("#classPlanTreeListTable").attr('data-year');
+
+        let tableContent = new Tabulator("#classPlanTreeListTable", {
+            ajaxURL: route("plans.tree.list"),
+            ajaxParams: { courses: courses, instance_term: instance_term, group: group, year: year},
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            selectable:true,
+            columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
+                {
+                    title: "Module",
+                    field: "module",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Tutor",
+                    field: "tutor",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Personal Tutor",
+                    field: "personalTutor",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "No of Student",
+                    field: "on_of_student",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Class Days",
+                    field: "dates",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        if(cell.getData().dates > 0){
+                            return '<a target="_blank" href="'+route('plan.dates', cell.getData().id)+'" class="text-primary font-medium"><u>'+cell.getData().dates+'</u></a>';
+                        }else{
+                            return '<span>0</span>';
+                        }
+                    }
+                },
+                {
+                    title: "Actions",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "left",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        if (cell.getData().deleted_at == null) {
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 ml-1"><i data-lucide="edit-3" class="w-4 h-4 mr-1"></i> Edit Plan</a>';
+                            btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="trash" class="w-4 h-4 mr-1"></i> Delete</button>';
+                        }  else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        }
+
+                        btns += '<input type="hidden" class="classPlanId" name="classPlanIds[]" value="'+cell.getData().id+'"/>';
+                        
+                        return '<div style="white-space: normal; text-align: left;">'+btns+'</div>';
+                    },
+                },
+            ],
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                if(rows.length > 0){
+                    $('#generateDaysBtn').fadeIn();
+                }else{
+                    $('#generateDaysBtn').fadeOut();
+                }
+            },
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+            selectableCheck:function(row){
+                return row.getData().dates < 1; //allow selection of rows where the age is greater than 18
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+        // Export
+        $("#tabulator-export-csv-CPL").on("click", function (event) {
+            tableContent.download("csv", "data.csv");
+        });
+
+        $("#tabulator-export-json-CPL").on("click", function (event) {
+            tableContent.download("json", "data.json");
+        });
+
+        $("#tabulator-export-xlsx-CPL").on("click", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "data.xlsx", {
+                sheetName: "Plan Tree Details",
+            });
+        });
+
+        $("#tabulator-export-html-CPL").on("click", function (event) {
+            tableContent.download("html", "data.html", {
+                style: true,
+            });
+        });
+
+        // Print
+        $("#tabulator-print-CPL").on("click", function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
+
+(function(){
+    const warningModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModalCP"));
+    const successModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalCP"));
+    const editPlanModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPlanModal"));
+    const confirmModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalCP"));
+        
+    let confModalDelTitle = 'Are you sure?';
+
+    const editPlanModalEl = document.getElementById('editPlanModal')
+    editPlanModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editPlanModal .acc__input-error').html('');
+        $('#editPlanModal .modal-body select').val('');
+        $('#editPlanModal .modal-body input:not([type="radio"])').val('');
+        $('#editPlanModal input[name="id"]').val('0');
+        $('#editPlanModal input[type="radio"]').prop('checked', false);
+    });
+
+
+    /* Get Term By AC Year */
+    $('.classPlanTree').on('click', '.academicYear', function(e){
+        e.preventDefault();
+        var $link = $(this);
+        var $parent = $link.parent('li');
+
+        if($parent.hasClass('hasData')){
+            $('> .theChild', $parent).slideToggle();
+            $parent.toggleClass('opened');
+        }else{
+            $('svg', $link).fadeIn();
+            var academicyear = $link.attr('data-yearid');
+            axios({
+                method: "post",
+                url: route('plans.tree.get.terms'),
+                data: {academicyear : academicyear},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('svg', $link).fadeOut();
+                if (response.status == 200) {
+                    $parent.addClass('hasData opened');
+                    $parent.append(response.data.htm);
+
+                    $('.classPlanTreeResultWrap').fadeOut('fast', function(){
+                        $('.classPlanTreeResultWrap').html('');
+                        $('.classPlanTreeResultNotice').fadeIn('fast', function(){
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                        })
+                    });
+
+                    tailwind.svgLoader();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                if (error.response) {
+                    $('svg', $link).fadeOut();
+                    console.log('error');
+                }
+            });
+        }
+    });
+    /* Get Term By AC Year */
+
+    /* Get Course By Term */
+    $('.classPlanTree').on('click', '.theTerm', function(e){
+        e.preventDefault();
+        var $link = $(this);
+        var $parent = $link.parent('li');
+
+        
+        if($parent.hasClass('hasData')){
+            $('> .theChild', $parent).slideToggle();
+            $parent.toggleClass('opened');
+        }else{
+            $('svg', $link).fadeIn();
+            var academicYearId = $link.attr('data-yearid');
+            var instanceTermId = $link.attr('data-termid');
+            axios({
+                method: "post",
+                url: route('plans.tree.get.courses'),
+                data: {academicYearId : academicYearId, instanceTermId : instanceTermId},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('svg', $link).fadeOut();
+                if (response.status == 200) {
+                    $parent.addClass('hasData opened');
+                    $parent.append(response.data.htm);
+
+                    $('.classPlanTreeResultWrap').fadeOut('fast', function(){
+                        $('.classPlanTreeResultWrap').html('');
+                        $('.classPlanTreeResultNotice').fadeIn('fast', function(){
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                        })
+                    });
+
+                    tailwind.svgLoader();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                if (error.response) {
+                    $('svg', $link).fadeOut();
+                    console.log('error');
+                }
+            });
+        }
+    });
+    /* Get Course By Term */
+
+    /* Get Group By Course */
+    $('.classPlanTree').on('click', '.theCourse', function(e){
+        e.preventDefault();
+        var $link = $(this);
+        var $parent = $link.parent('li');
+
+        
+        if($parent.hasClass('hasData')){
+            $('> .theChild', $parent).slideToggle();
+            $parent.toggleClass('opened');
+        }else{
+            $('svg', $link).fadeIn();
+            var courseId = $link.attr('data-courseid');
+            var termId = $link.attr('data-termid');
+            var academicYearId = $link.attr('data-yearid');
+            axios({
+                method: "post",
+                url: route('plans.tree.get.groups'),
+                data: {courseId : courseId, termId : termId, academicYearId : academicYearId},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('svg', $link).fadeOut();
+                    $parent.addClass('hasData opened');
+                    $parent.append(response.data.htm);
+
+                    $('.classPlanTreeResultWrap').fadeOut('fast', function(){
+                        $('.classPlanTreeResultWrap').html('');
+                        $('.classPlanTreeResultNotice').fadeIn('fast', function(){
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                        })
+                    });
+
+                    tailwind.svgLoader();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                if (error.response) {
+                    $('svg', $link).fadeOut();
+                    console.log('error');
+                }
+            });
+        }
+    });
+    /* Get Group By Course */
+
+    /* Get Module By Group */
+    $('.classPlanTree').on('click', '.theGroup', function(e){
+        e.preventDefault();
+        var $link = $(this);
+        var $parent = $link.parent('li');
+
+        
+        if(!$parent.hasClass('hasData')){
+            $parent.siblings('li').removeClass('hasData opened');
+            $('svg', $link).fadeIn();
+            var courseId = $link.attr('data-courseid');
+            var termId = $link.attr('data-termid');
+            var academicYearId = $link.attr('data-yearid');
+            var groupId = $link.attr('data-groupid');
+            axios({
+                method: "post",
+                url: route('plans.tree.get.module'),
+                data: {courseId : courseId, termId : termId, academicYearId : academicYearId, groupId : groupId},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('svg', $link).fadeOut();
+                    $parent.addClass('hasData opened');
+                    
+                    $('.classPlanTreeResultNotice').fadeOut('fast', function(){
+                        $('.classPlanTreeResultWrap').fadeIn('fast', function(){
+                            $('.classPlanTreeResultWrap').html(response.data.htm);
+                            
+                            if($('#classPlanTreeListTable').length > 0){
+                                classPlanTreeListTable.init();
+                            }
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                        })
+                    });
+
+                    tailwind.svgLoader();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                if (error.response) {
+                    $('svg', $link).fadeOut();
+                    console.log('error');
+                }
+            });
+        }
+    });
+    /* Get Modul By Group */
+
+
+    /* Edit Plan */
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .edit_btn', function(e){
+        var $btn = $(this);
+        var planid = $btn.attr('data-id');
+        
+        axios({
+            method: "get",
+            url: route("plans.tree.edit", planid),
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                let dataset = response.data;
+                
+                $('#editPlanModal .courseName').html(dataset.plan.course ? dataset.plan.course : '');
+                $('#editPlanModal .moduleName').html(dataset.plan.module ? dataset.plan.module : '');
+                $('#editPlanModal select[name="group_id"]').val(dataset.plan.group_id ? dataset.plan.group_id : '');
+                $('#editPlanModal select[name="rooms_id"]').val(dataset.plan.rooms_id ? dataset.plan.rooms_id : '');
+                $('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+                $('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
+                $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
+                $('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
+                $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
+                $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
+                $('#editPlanModal input[name="submission_date"]').val(dataset.plan.submission_date ? dataset.plan.submission_date : '');
+                $('#editPlanModal input[name="virtual_room"]').val(dataset.plan.virtual_room ? dataset.plan.virtual_room : '');
+                $('#editPlanModal textarea[name="note"]').val(dataset.plan.note ? dataset.plan.note : '');
+
+                if(dataset.plan.sat == 1){
+                    $('#editPlanModal #day_sat').prop('checked', true);
+                }else if(dataset.plan.sun == 1){
+                    $('#editPlanModal #day_sun').prop('checked', true);
+                }else if(dataset.plan.mon == 1){
+                    $('#editPlanModal #day_mon').prop('checked', true);
+                }else if(dataset.plan.tue == 1){
+                    $('#editPlanModal #day_tue').prop('checked', true);
+                }else if(dataset.plan.wed == 1){
+                    $('#editPlanModal #day_wed').prop('checked', true);
+                }else if(dataset.plan.thu == 1){
+                    $('#editPlanModal #day_thu').prop('checked', true);
+                }else if(dataset.plan.fri == 1){
+                    $('#editPlanModal #day_fri').prop('checked', true);
+                }
+
+                $('#editPlanModal input[name="id"]').val(planid);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $('#editPlanForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('editPlanForm');
+    
+        document.querySelector('#updatePlans').setAttribute('disabled', 'disabled');
+        document.querySelector("#updatePlans svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('plans.tree.update'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                console.log(response.data)
+                document.querySelector('#updatePlans').removeAttribute('disabled');
+                document.querySelector("#updatePlans svg").style.cssText = "display: none;";
+
+                editPlanModal.hide();
+
+                successModalCP.show();
+                document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                    $("#successModalCP .successModalDescCP").html('Class Plan date successfully updated.');
+                });                
+                    
+            }
+            classPlanTreeListTable.init();
+        }).catch(error => {
+            document.querySelector('#updatePlans').removeAttribute('disabled');
+            document.querySelector("#updatePlans svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editPlanForm .${key}`).addClass('border-danger');
+                        $(`#editPlanForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* Edit Plan */
+
+
+    /* Delete & Restore Plan */
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .delete_btn', function(e){
+        e.preventDefault();
+        let $deleteBTN = $(this);
+        let rowID = $deleteBTN.attr('data-id');
+
+        confirmModalCP.show();
+        document.getElementById('confirmModalCP').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModalCP .confModTitleCP').html(confModalDelTitle);
+            $('#confirmModalCP .confModDescCP').html('Do you really want to delete these record? Click on agree to continue.');
+            $('#confirmModalCP .agreeWithCP').attr('data-id', rowID);
+            $('#confirmModalCP .agreeWithCP').attr('data-action', 'DELETE');
+        });
+    });
+
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .restore_btn', function(e){
+        e.preventDefault();
+        let $statusBTN = $(this);
+        let courseID = $statusBTN.attr('data-id');
+
+        confirmModalCP.show();
+        document.getElementById('confirmModalCP').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModalCP .confModTitleCP').html(confModalDelTitle);
+            $('#confirmModalCP .confModDescCP').html('Do you really want to restore these record? Click on agree to continue.');
+            $('#confirmModalCP .agreeWithCP').attr('data-id', courseID);
+            $('#confirmModalCP .agreeWithCP').attr('data-action', 'RESTORE');
+        });
+    });
+
+    $('#confirmModalCP .agreeWithCP').on('click', function(e){
+        e.preventDefault();
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModalDP button').attr('disabled', 'disabled');
+        if(action == 'DELETE'){
+            axios({
+                method: 'delete',
+                url: route('plans.tree.destory', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModalCP button').removeAttr('disabled');
+                    confirmModalCP.hide();
+
+                    successModalCP.show();
+                    document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                        $("#successModalCP .successModalDescCP").html('Class Plan successfully deleted form the list.');
+                    }); 
+                }
+                classPlanTreeListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'RESTORE'){
+            axios({
+                method: 'post',
+                url: route('plans.tree.restore', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModalCP button').removeAttr('disabled');
+                    confirmModalCP.hide();
+
+                    successModalCP.show();
+                    document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                        $("#successModalCP .successModalDescCP").html('Class Plan successfully restored to the list.');
+                    }); 
+                }
+                classPlanTreeListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    });
+    /* Delete & Restore Plan */
+
+    /* Generate Days For Plan */
+    $('.classPlanTreeResultWrap').on('click', '#generateDaysBtn', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var ids = [];
+        
+        $('#classPlanTreeListTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.classPlanId').val());
+        });
+
+        if(ids.length > 0){
+            $btn.attr('disabled', 'disabled');
+            $('svg', $btn).fadeIn('fast');
+
+            axios({
+                method: "post",
+                url: route('plan.dates.generate'),
+                data: {classPlansIds : ids},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $btn.removeAttr('disabled', 'disabled');
+                    $('svg', $btn).fadeOut('fast');
+                    successModalCP.show();
+                    document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModalCP .successModalTitleCP").html(response.data.title);
+                        $("#successModalCP .successModalDescCP").html(response.data.Message);
+                    });
+
+                    setTimeout(function(){
+                        successModalCP.hide();
+                    }, 3000);
+
+                    classPlanTreeListTable.init();
+                }
+            }).catch(error => {
+                $btn.removeAttr('disabled', 'disabled');
+                $('svg', $btn).fadeOut('fast');
+                if (error.response.status == 422 || error.response.status == 304) {
+                    warningModalCP.show();
+                    document.getElementById("warningModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModalCP .warningModalTitleCP").html(error.response.data.title);
+                        $("#warningModalCP .warningModalDescCP").html(error.response.data.Message);
+                    });
+                    console.log(error.response);
+                    setTimeout(function(){
+                        warningModalCP.hide();
+                    }, 3000);
+
+                    classPlanTreeListTable.init();
+                } else {
+                    console.log('error');
+                }
+            });
+        }else{
+            warningModalCP.show();
+            document.getElementById("warningModalCP").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModalCP .warningModalTitleCP").html("Error Found!");
+                $("#warningModalCP .warningModalDescCP").html('Selected plans id not foudn. Please select some plan first or contact with the site administrator.');
+            });
+        }
+    });
+    /* Generate Days For Plan */
+
+
+
+})();

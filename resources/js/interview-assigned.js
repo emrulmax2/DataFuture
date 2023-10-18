@@ -37,7 +37,7 @@ var interviewListTable = (function () {
             //columnDefs: [ { orderable: false, targets: [0,2], }],
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -59,6 +59,7 @@ var interviewListTable = (function () {
                     field: "data",
                     width: "280",
                     headerSort:false,
+                    download: false,
                     formatter: (cell) => {
                         const value = cell.getValue();
                         
@@ -162,7 +163,7 @@ var interviewListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Semester Details",
+                sheetName: "Interview Assigned Details",
             });
         });
 

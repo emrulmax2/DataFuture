@@ -13,6 +13,7 @@ use App\Models\Applicant;
 use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\Role;
+use App\Models\StudentUser;
 use App\Models\UserRole;
 
 class ProcessNewStudentToUser implements ShouldQueue
@@ -37,23 +38,15 @@ class ProcessNewStudentToUser implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=>$ApplicantUser->email])->get()->first();
+        $user = StudentUser::where(["email"=>$ApplicantUser->email])->get()->first();
         if(!$user) {
-            $user = User::create([ 
+            $user = StudentUser::create([ 
                 'email' => $ApplicantUser->email,
                 'name' => $this->applicant->full_name,
                 'password' =>$ApplicantUser->password,
                 'photo' =>$this->applicant->photo,
-                'gender' =>$this->applicant->gender,
+                'gender' => (isset($this->applicant->sexid->name) ? $this->applicant->sexid->name : ''),
                 'active' =>1,
-            ]);
-        }
-        if($user) {
-            $role = Role::where(["type"=>"Student"])->get()->first();
-
-            $role = UserRole::create([
-                'role_id' => $role->id,
-                'user_id' => $user->id,
             ]);
         }
     }

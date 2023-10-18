@@ -16,6 +16,7 @@ use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\ApplicantDisability;
 use App\Models\StudentDisability;
+use App\Models\StudentUser;
 
 class ProcessStudentDisability implements ShouldQueue
 {
@@ -39,11 +40,11 @@ class ProcessStudentDisability implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first(); 
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first();  
         
         //StudentDisabilities
-        $applicantDisabilityData= ApplicantDisability::where('applicant_id',$student->id)->get();
+        $applicantDisabilityData= ApplicantDisability::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantDisabilityData as $applicantDisability):
             $dataArray = [
                 'student_id' => $student->id,

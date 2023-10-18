@@ -15,7 +15,7 @@ class StudentOtherDetail extends Model
         'ethnicity_id',
         'disability_status',
         'disabilty_allowance',
-        'is_edication_qualification',
+        'is_education_qualification',
         'employment_status',
         'college_introduction',
         'gender_identity',

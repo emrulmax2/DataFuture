@@ -12,7 +12,7 @@ use App\Models\Role;
 use App\Models\UserRole;
 use App\Models\User;
 use App\Http\Requests\InterviewerUpdateRequest;
-
+use Illuminate\Support\Facades\Storage;
 
 class ApplicantInterviewListController extends Controller
 {
@@ -41,8 +41,6 @@ class ApplicantInterviewListController extends Controller
             foreach($sorters as $sort):
                 $sorts[] = $sort['field'].' '.$sort['dir'];
             endforeach;
-            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-            $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
             
             $query = ApplicantInterview::with('applicant','task','document')->orderByRaw(implode(',', $sorts));
             if(!empty($queryStr)):
@@ -55,6 +53,8 @@ class ApplicantInterviewListController extends Controller
             });
             
             $total_rows = $query->count();
+            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+            $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
             $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
             
             $limit = $perpage;
@@ -99,11 +99,11 @@ class ApplicantInterviewListController extends Controller
 
             $document = $request->file('file');
             $imageName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/interviewresult/',$imageName);
+            $path = $document->storeAs('public/interviewresult/'.$applicantInterviewData->applicant_id, $imageName, 'google');
             $data = [];
             $data['applicant_id'] = $applicantInterviewData->applicant_id;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = asset('storage/interviewresult/'.$imageName);
+            $data['path'] = Storage::disk('google')->url($path);
             $data['display_file_name'] = $imageName;
             $data['current_file_name'] = $imageName;
             $data['created_by'] = auth()->user()->id;

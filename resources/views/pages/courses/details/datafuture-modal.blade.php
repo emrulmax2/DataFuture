@@ -60,8 +60,8 @@
     </div>
     <!-- END: Add  Base Data Future Modal -->
 
-<!-- BEGIN: Add Base Data Future Modal -->
-<div id="courseDataFutureEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <!-- BEGIN: Add Base Data Future Modal -->
+    <div id="courseDataFutureEditModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="courseDataFutureEditForm" enctype="multipart/form-data">
                 <div class="modal-content">

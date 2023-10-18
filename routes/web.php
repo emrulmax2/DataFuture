@@ -9,14 +9,14 @@ use App\Http\Controllers\DarkModeController;
 use App\Http\Controllers\ColorSchemeController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SemesterController;
-use App\Http\Controllers\CourseQualificationController;
-use App\Http\Controllers\SourceTutionFeeController;
-use App\Http\Controllers\AwardingBodyController;
-use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\Settings\CourseQualificationController;
+use App\Http\Controllers\Settings\SourceTutionFeeController;
+use App\Http\Controllers\Settings\AcademicYearController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\GroupController;
-use App\Http\Controllers\VenueController;
+use App\Http\Controllers\Settings\VenueController;
 use App\Http\Controllers\CoursCreationController;
 use App\Http\Controllers\ModuleLevelController;
 use App\Http\Controllers\CourseModuleController;
@@ -29,25 +29,25 @@ use App\Http\Controllers\CourseCreationInstanceController;
 use App\Http\Controllers\InstanceTermController;
 use App\Http\Controllers\TermModuleCreationController;
 use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\RoomController;
+use App\Http\Controllers\Settings\RoomController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
-use App\Http\Controllers\TitleController;
-use App\Http\Controllers\EthnicityController;
-use App\Http\Controllers\KinsRelationController;
-use App\Http\Controllers\SexualOrientationController;
-use App\Http\Controllers\ReligionController;
-use App\Http\Controllers\StatusController;
-use App\Http\Controllers\CountryController;
-use App\Http\Controllers\DisabilityController;
-use App\Http\Controllers\DocumentSettingsController;
+use App\Http\Controllers\Settings\Studentoptions\TitleController;
+use App\Http\Controllers\Settings\Studentoptions\EthnicityController;
+use App\Http\Controllers\Settings\Studentoptions\KinsRelationController;
+use App\Http\Controllers\Settings\Studentoptions\SexualOrientationController;
+use App\Http\Controllers\Settings\Studentoptions\ReligionController;
+use App\Http\Controllers\Settings\StatusController;
+use App\Http\Controllers\Settings\Studentoptions\CountryController;
+use App\Http\Controllers\Settings\Studentoptions\DisabilityController;
+use App\Http\Controllers\Settings\DocumentSettingsController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PermissionCategoryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionTemplateController;
-use App\Http\Controllers\ProcessListController;
-use App\Http\Controllers\TaskListController;
+use App\Http\Controllers\Settings\ProcessListController;
+use App\Http\Controllers\Settings\TaskListController;
 
 use App\Http\Controllers\InterviewListController;
 use App\Http\Controllers\ApplicantInterviewListController;
@@ -58,6 +58,10 @@ use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
 
+use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
+use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
+use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
+
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Applicant\Auth\VerificationController;
@@ -66,24 +70,50 @@ use App\Models\ApplicantUser;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\ApplicantQualificationCongroller;
 use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
-use App\Http\Controllers\CommonSmtpController;
-use App\Http\Controllers\LetterSetController;
-use App\Http\Controllers\SignatoryController;
+use App\Http\Controllers\Settings\CommonSmtpController;
+use App\Http\Controllers\Settings\LetterSetController;
+use App\Http\Controllers\Settings\SignatoryController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\SmsTemplateController;
-use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\Settings\SmsTemplateController;
+use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
-use App\Http\Controllers\LetterHeaderFooterController;
+use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\PlanTreeController;
+use App\Http\Controllers\Settings\ConsentPolicyController;
+use App\Http\Controllers\Settings\LetterHeaderFooterController;
+use App\Http\Controllers\Settings\SettingController;
+use App\Http\Controllers\Settings\AwardingBodyController;
+use App\Http\Controllers\Student\AwardingBodyDetailController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
-use App\Http\Controllers\HesaGenderController;
-use App\Http\Controllers\FeeEligibilityController;
-
-
+use App\Http\Controllers\Settings\Studentoptions\HesaGenderController;
+use App\Http\Controllers\Settings\Studentoptions\FeeEligibilityController;
+use App\Http\Controllers\Student\ConsentController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\PersonalDetailController;
 use App\Http\Controllers\Student\KinDetailController;
 use App\Http\Controllers\Student\ContactDetailController;
+use App\Http\Controllers\Student\CourseDetailController;
+use App\Http\Controllers\Student\EducationQualificationController;
+use App\Http\Controllers\Student\EmailController;
+use App\Http\Controllers\Student\EmploymentHistoryController;
+use App\Http\Controllers\Student\LetterController;
+use App\Http\Controllers\Student\NoteController;
+use App\Http\Controllers\Student\OtherPersonalInformationController;
+use App\Http\Controllers\Student\ProcessController;
+use App\Http\Controllers\Student\ProofIdCheckController;
+use App\Http\Controllers\Student\SmsController;
+use App\Http\Controllers\Settings\Studentoptions\SexIdentifierController;
+use App\Http\Controllers\Settings\Studentoptions\TermTimeAccommodationTypeController;
+use App\Http\Controllers\Student\UploadController;
+use App\Http\Controllers\Settings\StudentOptionController;
+use App\Http\Controllers\Settings\Studentoptions\ApelCreditController;
+use App\Http\Controllers\Settings\Studentoptions\CountryOfPermanentAddressController;
+use App\Http\Controllers\Settings\Studentoptions\HighestQualificationOnEntryController;
+use App\Http\Controllers\Settings\Studentoptions\PreviousProviderController;
+use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierController;
+use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
+use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +167,8 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
+
+            Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
         });
 
         Route::controller(ApplicantQualificationCongroller::class)->group(function() {
@@ -166,6 +198,55 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
         
+    });
+
+});
+
+// all student have a prefix route name student.* value
+Route::prefix('/students')->name('students.')->group(function() {
+
+    Route::controller(StudentLoginController::class)->middleware('students.loggedin')->group(function() {
+        
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+
+
+    });
+    
+
+    Route::middleware('auth.students')->group(function() {
+
+        Route::get('logout', [StudentLoginController::class, 'logout'])->name('logout');
+
+        Route::controller(StudentDashboardController::class)->group(function() {
+            Route::get('/dashboard', 'index')->name('dashboard');
+            Route::get('/dashboard/list', 'list')->name('dashboard.list');
+        });
+
+        Route::controller(StudentFirstLoginDataController::class)->group(function() {
+            Route::post('/first/data', 'firstData')->name('first.data');
+            Route::post('/first/address', 'addressesConfirm')->name('address.confirm.data');
+            Route::post('/first/consent', 'consentConfirm')->name('consent.confirm.data');
+            Route::get('/first/review', 'reviewShows')->name('review.show.data');
+            Route::post('/first/review', 'reviewDone')->name('review.done.data');
+        });
+
+    });
+    
+    /**
+    * Verification Routes
+    */
+
+    // Route::controller(VerificationController::class)->group(function() {
+        
+    //     Route::get('email/verify', 'show')->name('verification.notice');
+    //     Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    // });
+
+    Route::controller(GoogleSocialiteStudentController::class)->middleware('student.loggedin')->group(function() {
+        Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
+        Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
     });
 
 });
@@ -316,6 +397,19 @@ Route::middleware('auth')->group(function() {
         Route::post('plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
     });
 
+    Route::controller(PlanTreeController::class)->group(function() {
+        Route::get('plans/tree', 'index')->name('plans.tree');
+        Route::post('plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
+        Route::post('plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
+        Route::post('plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
+        Route::post('plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
+        Route::get('plans/tree/list', 'list')->name('plans.tree.list'); 
+        Route::get('plans/tree/edit/{id}', 'edit')->name('plans.tree.edit'); 
+        Route::post('plans/tree/update', 'update')->name('plans.tree.update'); 
+        Route::delete('plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
+        Route::post('plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
+    });
+
     Route::controller(PlansDateListController::class)->group(function() {
         Route::get('plan-dates/all/{planId}', 'index')->name('plan.dates'); 
         Route::get('plan-dates/list', 'list')->name('plan.dates.list'); 
@@ -325,134 +419,137 @@ Route::middleware('auth')->group(function() {
         Route::post('plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
     });
 
-    Route::controller(TitleController::class)->group(function() {
-        Route::get('titles', 'index')->name('titles'); 
-        Route::get('titles/list', 'list')->name('titles.list'); 
-        Route::post('titles/store', 'store')->name('titles.store'); 
-        Route::get('titles/edit/{id}', 'edit')->name('titles.edit');
-        Route::post('titles/update', 'update')->name('titles.update');
-        Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
-        Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
-    });
-
-    Route::controller(EthnicityController::class)->group(function() {
-        Route::get('ethnic', 'index')->name('ethnic'); 
-        Route::get('ethnic/list', 'list')->name('ethnic.list'); 
-        Route::post('ethnic/store', 'store')->name('ethnic.store'); 
-        Route::get('ethnic/edit/{id}', 'edit')->name('ethnic.edit');
-        Route::post('ethnic/update', 'update')->name('ethnic.update');
-        Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
-        Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
-    });
-
-    Route::controller(KinsRelationController::class)->group(function() {
-        Route::get('kin-relations', 'index')->name('kin.relations'); 
-        Route::get('kin-relations/list', 'list')->name('kin.relations.list'); 
-        Route::post('kin-relations/store', 'store')->name('kin.relations.store'); 
-        Route::get('kin-relations/edit/{id}', 'edit')->name('kin.relations.edit');
-        Route::post('kin-relations/update', 'update')->name('kin.relations.update');
-        Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
-        Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
-    });
-
-    Route::controller(SexualOrientationController::class)->group(function() {
-        Route::get('sex-orientation', 'index')->name('sex.orientation'); 
-        Route::get('sex-orientation/list', 'list')->name('sex.orientation.list'); 
-        Route::post('sex-orientation/store', 'store')->name('sex.orientation.store'); 
-        Route::get('sex-orientation/edit/{id}', 'edit')->name('sex.orientation.edit');
-        Route::post('sex-orientation/update', 'update')->name('sex.orientation.update');
-        Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
-        Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
-    });
-
-    Route::controller(ReligionController::class)->group(function() {
-        Route::get('religion', 'index')->name('religion'); 
-        Route::get('religion/list', 'list')->name('religion.list'); 
-        Route::post('religion/store', 'store')->name('religion.store'); 
-        Route::get('religion/edit/{id}', 'edit')->name('religion.edit');
-        Route::post('religion/update', 'update')->name('religion.update');
-        Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
-        Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
-    });
-
-    Route::controller(StatusController::class)->group(function() {
-        Route::get('statuses', 'index')->name('statuses'); 
-        Route::get('statuses/list', 'list')->name('statuses.list'); 
-        Route::post('statuses/store', 'store')->name('statuses.store'); 
-        Route::get('statuses/edit/{id}', 'edit')->name('statuses.edit');
-        Route::post('statuses/update', 'update')->name('statuses.update');
-        Route::delete('statuses/delete/{id}', 'destroy')->name('statuses.destory');
-        Route::post('statuses/restore/{id}', 'restore')->name('statuses.restore');
-    });
-
-    Route::controller(CountryController::class)->group(function() {
-        Route::get('countries', 'index')->name('countries'); 
-        Route::get('countries/list', 'list')->name('countries.list'); 
-        Route::post('countries/store', 'store')->name('countries.store'); 
-        Route::get('countries/edit/{id}', 'edit')->name('countries.edit');
-        Route::post('countries/update', 'update')->name('countries.update');
-        Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
-        Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
-    });
-
-    Route::controller(DisabilityController::class)->group(function() {
-        Route::get('disabilities', 'index')->name('disabilities'); 
-        Route::get('disabilities/list', 'list')->name('disabilities.list'); 
-        Route::post('disabilities/store', 'store')->name('disabilities.store'); 
-        Route::get('disabilities/edit/{id}', 'edit')->name('disabilities.edit');
-        Route::post('disabilities/update', 'update')->name('disabilities.update');
-        Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
-        Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
-    });
-
-    Route::controller(CommonSmtpController::class)->group(function() {
-        Route::get('common-smtp', 'index')->name('common.smtp'); 
-        Route::get('common-smtp/list', 'list')->name('common.smtp.list'); 
-        Route::post('common-smtp/store', 'store')->name('common.smtp.store');
-        Route::get('common-smtp/edit/{id}', 'edit')->name('common.smtp.edit');
-        Route::post('common-smtp/update/{id}', 'update')->name('common.smtp.update');
-
-        Route::delete('common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
-        Route::post('common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
-    });
-
-    Route::controller(LetterSetController::class)->group(function() {
-        Route::get('letter-sets', 'index')->name('letter.set'); 
-        Route::get('letter-sets/list', 'list')->name('letter.set.list'); 
-        Route::post('letter-sets/store', 'store')->name('letter.set.store');
-        Route::get('letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
-        Route::post('letter-sets/update', 'update')->name('letter.set.update');
-        Route::delete('letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
-        Route::post('letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
-    });
-
-    Route::controller(SignatoryController::class)->group(function() {
-        Route::get('signatory', 'index')->name('signatory'); 
-        Route::get('signatory/list', 'list')->name('signatory.list'); 
-        Route::post('signatory/store', 'store')->name('signatory.store');
-        Route::post('signatory/edit', 'edit')->name('signatory.edit');
-        Route::post('signatory/update', 'update')->name('signatory.update');
-        Route::delete('signatory/delete/{id}', 'destroy')->name('signatory.destory');
-        Route::post('signatory/restore/{id}', 'restore')->name('signatory.restore');
-    });
-
     Route::controller(StudentController::class)->group(function() {
-
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
         Route::get('student/show/{id}', 'show')->name('student.show');
+        Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
+        Route::get('student/communication/{id}', 'communications')->name('student.communication');
+        Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
+        Route::get('student/notes/{id}', 'notes')->name('student.notes');
+        Route::get('student/process/{id}', 'process')->name('student.process');
 
+        Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
+
+        Route::post('student/id-filter', 'StudentIDFilter')->name('student.filter.id');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
-        Route::get('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+        Route::post('student/update-personal-details', 'update')->name('student.update.personal.details'); 
+        Route::post('student/update-personal-identification-details', 'updateOtherIdentificationDetails')->name('student.update.other.identification'); 
+    });
+    
+    Route::controller(OtherPersonalInformationController::class)->group(function() {
+        Route::post('student/update-other-personal-details', 'update')->name('student.update.other.personal.details'); 
+    });
+    
+    Route::controller(ProofIdCheckController::class)->group(function() {
+        Route::get('student/proof-list', 'list')->name('student.proof.id.check.list'); 
+        Route::post('student/proof-store', 'store')->name('student.proof.id.check.store'); 
+        Route::get('student/proof-edit/{id}', 'edit')->name('student.proof.id.check.edit');
+        Route::post('student/proof-update', 'update')->name('student.proof.id.check.update');
+
+        Route::delete('student/delete-proof/{id}', 'destroy')->name('student.proof.id.check.destory');
+        Route::post('student/restore-proof/{id}', 'restore')->name('student.proof.id.check.restore');
     });
 
     Route::controller(ContactDetailController::class)->group(function() {
-        Route::get('student/update-contact-details', 'update')->name('student.update.contact.details'); 
+        Route::post('student/update-contact-details', 'update')->name('student.update.contact.details'); 
     });
+    
     Route::controller(KinDetailController::class)->group(function() {
         Route::post('student/update-kin-details', 'update')->name('student.update.kin.details');
+    });
+    
+    Route::controller(ConsentController::class)->group(function() {
+        Route::post('student/update-consent', 'update')->name('student.update.consent');
+    });
+
+    Route::controller(EducationQualificationController::class)->group(function() {
+        Route::post('student/update-qualification-status', 'updateStudentQualificationStatus')->name('student.qualification.status.update');
+
+        Route::get('student/qualification-list', 'list')->name('student.qualification.list');
+        Route::post('student/qualification-store', 'store')->name('student.qualification.store');
+        Route::get('student/qualification-edit/{id}', 'edit')->name('student.qualification.edit');
+        Route::post('student/qualification-update', 'update')->name('student.qualification.update');
+        Route::delete('student/qualification-delete/{id}', 'destroy')->name('student.qualification.destory');
+        Route::post('student/qualification-restore/{id}', 'restore')->name('student.qualification.restore');
+    });
+
+    Route::controller(EmploymentHistoryController::class)->group(function() {
+        Route::post('student/update-employment-status', 'updateStudentEmploymentStatus')->name('student.employment.status.update');
+
+        Route::get('student/employment-list', 'list')->name('student.employment.list');
+        Route::post('student/employment-store', 'store')->name('student.employment.store');
+        Route::get('student/employment-edit/{id}', 'edit')->name('student.employment.edit');
+        Route::post('student/employment-update', 'update')->name('student.employment.update');
+        Route::delete('student/employment-delete/{id}', 'destroy')->name('student.employment.destory');
+        Route::post('student/employment-restore/{id}', 'restore')->name('student.employment.restore');
+    });
+
+    Route::controller(LetterController::class)->group(function() {
+        Route::post('student/get-letter-set', 'getLetterSet')->name('student.get.letter.set');
+        Route::post('student/letter-store', 'store')->name('student.send.letter');
+        Route::get('student/letter-list', 'list')->name('student.letter.list');
+        Route::delete('student/letter-delete', 'destroy')->name('student.letter.destroy');
+        Route::post('student/restore-letter', 'restore')->name('student.letter.restore');
+    });
+
+    Route::controller(EmailController::class)->group(function() {
+        Route::post('student/send-mail', 'store')->name('student.send.mail');
+        Route::get('student/mail-list', 'list')->name('student.mail.list');
+        Route::post('student/mail-show', 'show')->name('student.mail.show');
+        Route::delete('student/destory-mail', 'destroy')->name('student.mail.destroy');
+        Route::post('student/restore-mail', 'restore')->name('student.mail.restore');
+        Route::post('student/get-mail-template', 'getEmailTemplate')->name('student.get.mail.template');
+    });
+
+    Route::controller(SmsController::class)->group(function() {
+        Route::post('student/send-sms', 'store')->name('student.send.sms');
+        Route::get('student/sms-list', 'list')->name('student.sms.list');
+        Route::post('student/sms-show', 'show')->name('student.sms.show');
+        Route::delete('student/destory-sms', 'destroy')->name('student.sms.destroy');
+        Route::post('student/restore-sms', 'restore')->name('student.sms.restore');
+        Route::post('student/get-sms-template', 'getSmsTemplate')->name('student.get.sms.template');
+    });
+
+    Route::controller(NoteController::class)->group(function() {
+        Route::post('student/store-notes', 'store')->name('student.store.note');
+        Route::get('student/notes-list', 'list')->name('student.note.list');
+        Route::post('student/show-note', 'show')->name('student.show.note');
+        Route::post('student/get-note', 'edit')->name('student.get.note');
+        Route::post('student/update-note', 'update')->name('student.update.note');
+        Route::delete('student/destory-note', 'destroy')->name('student.destory.note');
+        Route::post('student/restore-note', 'restore')->name('student.resotore.note');
+    });
+
+    Route::controller(UploadController::class)->group(function() {
+        Route::post('student/uploads-documents', 'store')->name('student.upload.documents');
+        Route::get('student/uploads-list', 'list')->name('student.uploads.list');
+        Route::delete('student/uploads-destroy', 'destroy')->name('student.destory.uploads');
+        Route::post('student/uploads-restore', 'restore')->name('student.resotore.uploads');
+    });
+
+    Route::controller(ProcessController::class)->group(function() {
+        Route::post('student/store-process-task', 'storeProcessTask')->name('student.process.store.task.list');
+        Route::post('student/upload-task-documents', 'uploadTaskDocument')->name('student.upload.task.documents');
+        Route::delete('student/delete-task', 'deleteTask')->name('student.destory.task');
+        Route::post('student/completed-task', 'completedTask')->name('student.completed.task');
+        Route::post('student/pending-task', 'pendingTask')->name('student.pending.task');
+        Route::get('student/archived-process-list', 'archivedProcessList')->name('student.archived.process.list');
+        Route::post('student/restore-task', 'resotreTask')->name('student.resotore.task');
+        Route::post('student/show-task-statuses', 'showTaskStatuses')->name('student.show.task.outmoce.statuses');
+        Route::post('student/task-result-update', 'taskResultUpdate')->name('student.process.task.result.update');
+        Route::get('student/task-log-list', 'taskLogList')->name('student.process.log.list');
+    });
+
+    Route::controller(CourseDetailController::class)->group(function() {
+        Route::post('student/update-course-details', 'update')->name('student.update.course.details');
+    });
+
+    Route::controller(AwardingBodyDetailController::class)->group(function() {
+        Route::post('student/update-awarding-body-details', 'update')->name('student.update.awarding.body.details');
+        Route::post('student/update-awarding-body-status', 'updateStatus')->name('student.update.awarding.body.status');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
@@ -528,7 +625,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
 
-        Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
+        //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
         
     });
 
@@ -562,7 +659,18 @@ Route::middleware('auth')->group(function() {
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
     });
+    Route::controller(EmployeeController::class)->group(function(){
+        Route::get('employee','index')->name('employee');
+        Route::get('employee/new','create')->name('employee.create');
+        Route::post('employee/save','save')->name('employee.save');
+        
+        Route::post('employement/save','saveEmployment')->name('employement.save');
+        Route::post('eligibility/save','saveEligibility')->name('eligibility.save');
+        Route::post('emergency-contact/save','saveEmergencyContact')->name('emergency-contact.save');
 
+        Route::get('/first/review', 'reviewShows')->name('employeereview.show.data');
+        Route::post('/first/review', 'reviewDone')->name('employeereview.done.data');
+    });
     Route::controller(StaffDashboard::class)->group(function() {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');
@@ -679,48 +787,6 @@ Route::middleware('auth')->group(function() {
         Route::delete('semester/delete/{id}', 'destroy')->name('semester.destory');
         Route::post('semester/restore/{id}', 'restore')->name('semester.restore');
     });
-   
-    Route::controller(CourseQualificationController::class)->group(function() {
-        Route::get('coursequalification', 'index')->name('coursequalification'); 
-        Route::get('coursequalification/list', 'list')->name('coursequalification.list');        
-        Route::post('coursequalification/store', 'store')->name('coursequalification.store');
-        Route::get('coursequalification/edit/{id}', 'edit')->name('coursequalification.edit');
-        Route::post('coursequalification/update/{id}', 'update')->name('coursequalification.update');
-        Route::delete('coursequalification/delete/{id}', 'destroy')->name('coursequalification.destory');
-        Route::post('coursequalification/restore/{id}', 'restore')->name('coursequalification.restore');
-    });
- 
-    Route::controller(SourceTutionFeeController::class)->group(function() {
-        Route::get('sourcetutionfees', 'index')->name('sourcetutionfees'); 
-        Route::get('sourcetutionfees/list', 'list')->name('sourcetutionfees.list');        
-        Route::post('sourcetutionfees/store', 'store')->name('sourcetutionfees.store');
-
-        Route::get('sourcetutionfees/edit/{id}', 'edit')->name('sourcetutionfees.edit');
-        Route::post('sourcetutionfees/update/{id}', 'update')->name('sourcetutionfees.update');
-        Route::delete('sourcetutionfees/delete/{id}', 'destroy')->name('sourcetutionfees.destory');
-        Route::post('sourcetutionfees/restore/{id}', 'restore')->name('sourcetutionfees.restore');
-    });
-
-    Route::controller(AwardingBodyController::class)->group(function() {
-        Route::get('awardingbody', 'index')->name('awardingbody'); 
-        Route::get('awardingbody/list', 'list')->name('awardingbody.list');        
-        Route::post('awardingbody/store', 'store')->name('awardingbody.store');
-        Route::get('awardingbody/edit/{id}', 'edit')->name('awardingbody.edit');
-        Route::post('awardingbody/update/{id}', 'update')->name('awardingbody.update');
-        Route::delete('awardingbody/delete/{id}', 'destroy')->name('awardingbody.destory');
-        Route::post('awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
-    });
-
-    Route::controller(AcademicYearController::class)->group(function() {
-        Route::get('academicyears', 'index')->name('academicyears'); 
-        Route::get('academicyears/list', 'list')->name('academicyears.list');    
-        Route::get('academicyears/show/{id}', 'show')->name('academicyears.show');    
-        Route::post('academicyears/store', 'store')->name('academicyears.store');
-        Route::get('academicyears/edit/{id}', 'edit')->name('academicyears.edit');
-        Route::post('academicyears/update/{id}', 'update')->name('academicyears.update');
-        Route::delete('academicyears/delete/{id}', 'destroy')->name('academicyears.destory');
-        Route::post('academicyears/restore/{id}', 'restore')->name('academicyears.restore');
-    });
 
     Route::controller(GroupController::class)->group(function() {
         Route::get('groups', 'index')->name('groups'); 
@@ -730,17 +796,6 @@ Route::middleware('auth')->group(function() {
         Route::post('groups/update/{id}', 'update')->name('groups.update');
         Route::delete('groups/delete/{id}', 'destroy')->name('groups.destory');
         Route::post('groups/restore/{id}', 'restore')->name('groups.restore');
-    });
-
-    Route::controller(VenueController::class)->group(function() {
-        Route::get('venues', 'index')->name('venues'); 
-        Route::get('venues/list', 'list')->name('venues.list');        
-        Route::post('venues/store', 'store')->name('venues.store');
-        Route::get('venues/edit/{id}', 'edit')->name('venues.edit');
-        Route::post('venues/update/{id}', 'update')->name('venues.update');
-        Route::get('venues/show/{id}', 'show')->name('venues.show');
-        Route::delete('venues/delete/{id}', 'destroy')->name('venues.destory');
-        Route::post('venues/restore/{id}', 'restore')->name('venues.restore');
     });
 
     Route::controller(ModuleLevelController::class)->group(function() {
@@ -753,16 +808,6 @@ Route::middleware('auth')->group(function() {
         Route::post('modulelevels/restore/{id}', 'restore')->name('modulelevels.restore');
     });
 
-    Route::controller(RoomController::class)->group(function() {
-        Route::post('room/store', 'store')->name('room.store');
-        Route::get('room/list', 'list')->name('room.list'); 
-        Route::get('room/show/{id}', 'show')->name('room.show'); 
-        Route::get('room/edit/{id}', 'edit')->name('room.edit');
-        Route::post('room/update', 'update')->name('room.update');
-        Route::delete('room/delete/{id}', 'destroy')->name('room.destory');
-        Route::post('room/restore/{id}', 'restore')->name('room.restore');        
-    });
-
     Route::controller(BankHolidayController::class)->group(function() {      
         Route::get('bankholidays/list', 'list')->name('bankholidays.list');
         Route::post('bankholidays/store', 'store')->name('bankholidays.store'); 
@@ -773,16 +818,6 @@ Route::middleware('auth')->group(function() {
         
         Route::get('bankholidays/export/', 'export')->name('bankholidays.export');
         Route::post('bankholidays/import', 'import')->name('bankholidays.import');
-    });
-
-    Route::controller(DocumentSettingsController::class)->group(function() {
-        Route::get('documentsettings', 'index')->name('documentsettings'); 
-        Route::get('documentsettings/list', 'list')->name('documentsettings.list'); 
-        Route::post('documentsettings/store', 'store')->name('documentsettings.store'); 
-        Route::get('documentsettings/edit/{id}', 'edit')->name('documentsettings.edit');
-        Route::post('documentsettings/update', 'update')->name('documentsettings.update');
-        Route::delete('documentsettings/delete/{id}', 'destroy')->name('documentsettings.destory');
-        Route::post('documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
     });
 
     Route::controller(DepartmentController::class)->group(function() {
@@ -826,26 +861,6 @@ Route::middleware('auth')->group(function() {
         Route::post('permissiontemplate/restore/{id}', 'restore')->name('permissiontemplate.restore');
     });
 
-    Route::controller(ProcessListController::class)->group(function() {
-        Route::get('processlist', 'index')->name('processlist'); 
-        Route::get('processlist/list', 'list')->name('processlist.list'); 
-        Route::post('processlist/store', 'store')->name('processlist.store'); 
-        Route::get('processlist/edit/{id}', 'edit')->name('processlist.edit');
-        Route::post('processlist/update', 'update')->name('processlist.update');
-        Route::delete('processlist/delete/{id}', 'destroy')->name('processlist.destory');
-        Route::post('processlist/restore/{id}', 'restore')->name('processlist.restore');
-    });
-
-    Route::controller(TaskListController::class)->group(function() {
-        Route::get('tasklist', 'index')->name('tasklist'); 
-        Route::get('tasklist/list', 'list')->name('tasklist.list'); 
-        Route::post('tasklist/store', 'store')->name('tasklist.store'); 
-        Route::get('tasklist/edit/{id}', 'edit')->name('tasklist.edit');
-        Route::post('tasklist/update', 'update')->name('tasklist.update');
-        Route::delete('tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
-        Route::post('tasklist/restore/{id}', 'restore')->name('tasklist.restore');
-    });
-
     Route::controller(InterviewListController::class)->group(function() {
         Route::get('interviewlist', 'index')->name('interviewlist');
         Route::get('interviewlist/list', 'list')->name('interviewlist.list');
@@ -885,36 +900,261 @@ Route::middleware('auth')->group(function() {
     });
     // a pdf will be saved
 
-    Route::controller(SmsTemplateController::class)->group(function() {
-        Route::get('sms-template', 'index')->name('sms.template'); 
-        Route::get('sms-template/list', 'list')->name('sms.template.list'); 
-        Route::post('sms-template/store', 'store')->name('sms.template.store');
-        Route::get('sms-template/edit/{id}', 'edit')->name('sms.template.edit');
-        Route::post('sms-template/update', 'update')->name('sms.template.update');
+    Route::controller(SettingController::class)->group(function(){
+        Route::get('site-settings', 'index')->name('site.setting');
+        Route::get('site-settings/address-api', 'addressApi')->name('site.setting.addr.api');
+        Route::get('site-settings/sms-api', 'smsApi')->name('site.setting.sms.api');
+        Route::post('site-settings/update', 'update')->name('site.setting.update');
+    });
+    
+    Route::controller(AwardingBodyController::class)->group(function() {
+        Route::get('site-settings/awardingbody', 'index')->name('awardingbody'); 
+        Route::get('site-settings/awardingbody/list', 'list')->name('awardingbody.list');        
+        Route::post('site-settings/awardingbody/store', 'store')->name('awardingbody.store');
+        Route::get('site-settings/awardingbody/edit/{id}', 'edit')->name('awardingbody.edit');
+        Route::post('site-settings/awardingbody/update/{id}', 'update')->name('awardingbody.update');
+        Route::delete('site-settings/awardingbody/delete/{id}', 'destroy')->name('awardingbody.destory');
+        Route::post('site-settings/awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
+    });
 
-        Route::delete('sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
-        Route::post('sms-template/restore/{id}', 'restore')->name('sms.template.restore');
+    Route::controller(AcademicYearController::class)->group(function() {
+        Route::get('site-settings/academicyears', 'index')->name('academicyears'); 
+        Route::get('site-settings/academicyears/list', 'list')->name('academicyears.list');    
+        Route::get('site-settings/academicyears/show/{id}', 'show')->name('academicyears.show');    
+        Route::post('site-settings/academicyears/store', 'store')->name('academicyears.store');
+        Route::get('site-settings/academicyears/edit/{id}', 'edit')->name('academicyears.edit');
+        Route::post('site-settings/academicyears/update/{id}', 'update')->name('academicyears.update');
+        Route::delete('site-settings/academicyears/delete/{id}', 'destroy')->name('academicyears.destory');
+        Route::post('site-settings/academicyears/restore/{id}', 'restore')->name('academicyears.restore');
+    });
+ 
+    Route::controller(SourceTutionFeeController::class)->group(function() {
+        Route::get('site-settings/sourcetutionfees', 'index')->name('sourcetutionfees'); 
+        Route::get('site-settings/sourcetutionfees/list', 'list')->name('sourcetutionfees.list');        
+        Route::post('site-settings/sourcetutionfees/store', 'store')->name('sourcetutionfees.store');
+
+        Route::get('site-settings/sourcetutionfees/edit/{id}', 'edit')->name('sourcetutionfees.edit');
+        Route::post('site-settings/sourcetutionfees/update/{id}', 'update')->name('sourcetutionfees.update');
+        Route::delete('site-settings/sourcetutionfees/delete/{id}', 'destroy')->name('sourcetutionfees.destory');
+        Route::post('site-settings/sourcetutionfees/restore/{id}', 'restore')->name('sourcetutionfees.restore');
+    });
+   
+    Route::controller(CourseQualificationController::class)->group(function() {
+        Route::get('site-settings/coursequalification', 'index')->name('coursequalification'); 
+        Route::get('site-settings/coursequalification/list', 'list')->name('coursequalification.list');        
+        Route::post('site-settings/coursequalification/store', 'store')->name('coursequalification.store');
+        Route::get('site-settings/coursequalification/edit/{id}', 'edit')->name('coursequalification.edit');
+        Route::post('site-settings/coursequalification/update/{id}', 'update')->name('coursequalification.update');
+        Route::delete('site-settings/coursequalification/delete/{id}', 'destroy')->name('coursequalification.destory');
+        Route::post('site-settings/coursequalification/restore/{id}', 'restore')->name('coursequalification.restore');
+    });
+
+    Route::controller(ConsentPolicyController::class)->group(function() {
+        Route::get('site-settings/consent', 'index')->name('consent'); 
+        Route::get('site-settings/consent/list', 'list')->name('consent.list'); 
+        Route::post('site-settings/consent/store', 'store')->name('consent.store'); 
+        Route::get('site-settings/consent/edit/{id}', 'edit')->name('consent.edit');
+        Route::post('site-settings/consent/update', 'update')->name('consent.update');
+        Route::delete('site-settings/consent/delete/{id}', 'destroy')->name('consent.destory');
+        Route::post('site-settings/consent/restore/{id}', 'restore')->name('consent.restore');
+    });
+
+    Route::controller(VenueController::class)->group(function() {
+        Route::get('site-settings/venues', 'index')->name('venues'); 
+        Route::get('site-settings/venues/list', 'list')->name('venues.list');        
+        Route::post('site-settings/venues/store', 'store')->name('venues.store');
+        Route::get('site-settings/venues/edit/{id}', 'edit')->name('venues.edit');
+        Route::post('site-settings/venues/update/{id}', 'update')->name('venues.update');
+        Route::get('site-settings/venues/show/{id}', 'show')->name('venues.show');
+        Route::delete('site-settings/venues/delete/{id}', 'destroy')->name('venues.destory');
+        Route::post('site-settings/venues/restore/{id}', 'restore')->name('venues.restore');
+    });
+
+    Route::controller(RoomController::class)->group(function() {
+        Route::post('site-settings/venues/room/store', 'store')->name('room.store');
+        Route::get('site-settings/venues/room/list', 'list')->name('room.list'); 
+        Route::get('site-settings/venues/room/show/{id}', 'show')->name('room.show'); 
+        Route::get('site-settings/venues/room/edit/{id}', 'edit')->name('room.edit');
+        Route::post('site-settings/venues/room/update', 'update')->name('room.update');
+        Route::delete('site-settings/venues/room/delete/{id}', 'destroy')->name('room.destory');
+        Route::post('site-settings/venues/room/restore/{id}', 'restore')->name('room.restore');        
+    });
+
+    Route::controller(StatusController::class)->group(function() {
+        Route::get('site-settings/statuses', 'index')->name('statuses'); 
+        Route::get('site-settings/statuses/list', 'list')->name('statuses.list'); 
+        Route::post('site-settings/statuses/store', 'store')->name('statuses.store'); 
+        Route::get('site-settings/statuses/edit/{id}', 'edit')->name('statuses.edit');
+        Route::post('site-settings/statuses/update', 'update')->name('statuses.update');
+        Route::delete('site-settings/statuses/delete/{id}', 'destroy')->name('statuses.destory');
+        Route::post('site-settings/statuses/restore/{id}', 'restore')->name('statuses.restore');
+    });
+
+    Route::controller(DocumentSettingsController::class)->group(function() {
+        Route::get('site-settings/documentsettings', 'index')->name('documentsettings'); 
+        Route::get('site-settings/documentsettings/list', 'list')->name('documentsettings.list'); 
+        Route::post('site-settings/documentsettings/store', 'store')->name('documentsettings.store'); 
+        Route::get('site-settings/documentsettings/edit/{id}', 'edit')->name('documentsettings.edit');
+        Route::post('site-settings/documentsettings/update', 'update')->name('documentsettings.update');
+        Route::delete('site-settings/documentsettings/delete/{id}', 'destroy')->name('documentsettings.destory');
+        Route::post('site-settings/documentsettings/restore/{id}', 'restore')->name('documentsettings.restore');
+    });
+
+    Route::controller(ProcessListController::class)->group(function() {
+        Route::get('site-settings/processlist', 'index')->name('processlist'); 
+        Route::get('site-settings/processlist/list', 'list')->name('processlist.list'); 
+        Route::post('site-settings/processlist/store', 'store')->name('processlist.store'); 
+        Route::get('site-settings/processlist/edit/{id}', 'edit')->name('processlist.edit');
+        Route::post('site-settings/processlist/update', 'update')->name('processlist.update');
+        Route::delete('site-settings/processlist/delete/{id}', 'destroy')->name('processlist.destory');
+        Route::post('site-settings/processlist/restore/{id}', 'restore')->name('processlist.restore');
+    });
+
+    Route::controller(TaskListController::class)->group(function() {
+        Route::get('site-settings/tasklist', 'index')->name('tasklist'); 
+        Route::get('site-settings/tasklist/list', 'list')->name('tasklist.list'); 
+        Route::post('site-settings/tasklist/store', 'store')->name('tasklist.store'); 
+        Route::get('site-settings/tasklist/edit/{id}', 'edit')->name('tasklist.edit');
+        Route::post('site-settings/tasklist/update', 'update')->name('tasklist.update');
+        Route::delete('site-settings/tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
+        Route::post('site-settings/tasklist/restore/{id}', 'restore')->name('tasklist.restore');
+    });
+
+    Route::controller(SmsTemplateController::class)->group(function() {
+        Route::get('site-settings/sms-template', 'index')->name('sms.template'); 
+        Route::get('site-settings/sms-template/list', 'list')->name('sms.template.list'); 
+        Route::post('site-settings/sms-template/store', 'store')->name('sms.template.store');
+        Route::get('site-settings/sms-template/edit/{id}', 'edit')->name('sms.template.edit');
+        Route::post('site-settings/sms-template/update', 'update')->name('sms.template.update');
+
+        Route::delete('site-settings/sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
+        Route::post('site-settings/sms-template/restore/{id}', 'restore')->name('sms.template.restore');
     });
 
     Route::controller(EmailTemplateController::class)->group(function() {
-        Route::get('email-template', 'index')->name('email.template'); 
-        Route::get('email-template/list', 'list')->name('email.template.list'); 
-        Route::post('email-template/store', 'store')->name('email.template.store');
-        Route::get('email-template/edit/{id}', 'edit')->name('email.template.edit');
-        Route::post('email-template/update', 'update')->name('email.template.update');
+        Route::get('site-settings/email-template', 'index')->name('email.template'); 
+        Route::get('site-settings/email-template/list', 'list')->name('email.template.list'); 
+        Route::post('site-settings/email-template/store', 'store')->name('email.template.store');
+        Route::get('site-settings/email-template/edit/{id}', 'edit')->name('email.template.edit');
+        Route::post('site-settings/email-template/update', 'update')->name('email.template.update');
 
-        Route::delete('email-template/delete/{id}', 'destroy')->name('email.template.destory');
-        Route::post('email-template/restore/{id}', 'restore')->name('email.template.restore');
+        Route::delete('site-settings/email-template/delete/{id}', 'destroy')->name('email.template.destory');
+        Route::post('site-settings/email-template/restore/{id}', 'restore')->name('email.template.restore');
+    });
+
+    Route::controller(CommonSmtpController::class)->group(function() {
+        Route::get('site-settings/common-smtp', 'index')->name('common.smtp'); 
+        Route::get('site-settings/common-smtp/list', 'list')->name('common.smtp.list'); 
+        Route::post('site-settings/common-smtp/store', 'store')->name('common.smtp.store');
+        Route::get('site-settings/common-smtp/edit/{id}', 'edit')->name('common.smtp.edit');
+        Route::post('site-settings/common-smtp/update/{id}', 'update')->name('common.smtp.update');
+
+        Route::delete('site-settings/common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
+        Route::post('site-settings/common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
+    });
+
+    Route::controller(LetterSetController::class)->group(function() {
+        Route::get('site-settings/letter-sets', 'index')->name('letter.set'); 
+        Route::get('site-settings/letter-sets/list', 'list')->name('letter.set.list'); 
+        Route::post('site-settings/letter-sets/store', 'store')->name('letter.set.store');
+        Route::get('site-settings/letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
+        Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
+        Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
+    });
+
+    Route::controller(SignatoryController::class)->group(function() {
+        Route::get('site-settings/signatory', 'index')->name('signatory'); 
+        Route::get('site-settings/signatory/list', 'list')->name('signatory.list'); 
+        Route::post('site-settings/signatory/store', 'store')->name('signatory.store');
+        Route::post('site-settings/signatory/edit', 'edit')->name('signatory.edit');
+        Route::post('site-settings/signatory/update', 'update')->name('signatory.update');
+        Route::delete('site-settings/signatory/delete/{id}', 'destroy')->name('signatory.destory');
+        Route::post('site-settings/signatory/restore/{id}', 'restore')->name('signatory.restore');
     });
 
     Route::controller(LetterHeaderFooterController::class)->group(function() {
-        Route::get('letterheaderfooter', 'index')->name('letterheaderfooter'); 
-        Route::get('letterheaderfooter/headerlist', 'letterheaderlist')->name('letterheader.list');
-        Route::get('letterheaderfooter/footerlist', 'letterfooterlist')->name('letterfooter.list');
-        Route::post('letterheaderfooter/upload-letterheader', 'uploadLetterHeader')->name('letterheaderfooter.upload.letterhead'); 
-        Route::post('letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
-        Route::delete('letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
-        Route::post('letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+        Route::get('site-settings/letterheaderfooter', 'index')->name('letterheaderfooter'); 
+        Route::get('site-settings/letterheaderfooter/headerlist', 'letterheaderlist')->name('letterheader.list');
+        Route::get('site-settings/letterheaderfooter/footerlist', 'letterfooterlist')->name('letterfooter.list');
+        Route::post('site-settings/letterheaderfooter/upload-letterheader', 'uploadLetterHeader')->name('letterheaderfooter.upload.letterhead'); 
+        Route::post('site-settings/letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
+        Route::delete('site-settings/letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
+        Route::post('site-settings/letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
+
+    Route::controller(StudentOptionController::class)->group(function(){
+        Route::get('site-settings/student-options', 'index')->name('student.options');
+    });
+
+    Route::controller(TitleController::class)->group(function() {
+        Route::get('titles', 'index')->name('titles'); 
+        Route::get('titles/list', 'list')->name('titles.list'); 
+        Route::post('titles/store', 'store')->name('titles.store'); 
+        Route::get('titles/edit/{id}', 'edit')->name('titles.edit');
+        Route::post('titles/update', 'update')->name('titles.update');
+        Route::delete('titles/delete/{id}', 'destroy')->name('titles.destory');
+        Route::post('titles/restore/{id}', 'restore')->name('titles.restore');
+        Route::post('titles/update-status/{id}', 'updateStatus')->name('titles.update.status');
+    
+        Route::get('titles/export', 'export')->name('titles.export');
+        Route::post('titles/import', 'import')->name('titles.import');
+    });
+
+    Route::controller(EthnicityController::class)->group(function() {
+        Route::get('ethnic', 'index')->name('ethnic'); 
+        Route::get('ethnic/list', 'list')->name('ethnic.list'); 
+        Route::post('ethnic/store', 'store')->name('ethnic.store'); 
+        Route::get('ethnic/edit/{id}', 'edit')->name('ethnic.edit');
+        Route::post('ethnic/update', 'update')->name('ethnic.update');
+        Route::delete('ethnic/delete/{id}', 'destroy')->name('ethnic.destory');
+        Route::post('ethnic/restore/{id}', 'restore')->name('ethnic.restore');
+        Route::post('ethnic/update-status/{id}', 'updateStatus')->name('ethnic.update.status');
+    
+        Route::get('ethnic/export', 'export')->name('ethnic.export');
+        Route::post('ethnic/import', 'import')->name('ethnic.import');
+    });
+
+    Route::controller(KinsRelationController::class)->group(function() {
+        Route::get('kin-relations', 'index')->name('kin.relations'); 
+        Route::get('kin-relations/list', 'list')->name('kin.relations.list'); 
+        Route::post('kin-relations/store', 'store')->name('kin.relations.store'); 
+        Route::get('kin-relations/edit/{id}', 'edit')->name('kin.relations.edit');
+        Route::post('kin-relations/update', 'update')->name('kin.relations.update');
+        Route::delete('kin-relations/delete/{id}', 'destroy')->name('kin.relations.destory');
+        Route::post('kin-relations/restore/{id}', 'restore')->name('kin.relations.restore');
+        Route::post('kin-relations/update-status/{id}', 'updateStatus')->name('kin.relations.update.status');
+    
+        Route::get('kin-relations/export', 'export')->name('kin-relations.export');
+        Route::post('kin-relations/import', 'import')->name('kin-relations.import');
+    });
+
+    Route::controller(SexualOrientationController::class)->group(function() {
+        Route::get('sex-orientation', 'index')->name('sex.orientation'); 
+        Route::get('sex-orientation/list', 'list')->name('sex.orientation.list'); 
+        Route::post('sex-orientation/store', 'store')->name('sex.orientation.store'); 
+        Route::get('sex-orientation/edit/{id}', 'edit')->name('sex.orientation.edit');
+        Route::post('sex-orientation/update', 'update')->name('sex.orientation.update');
+        Route::delete('sex-orientation/delete/{id}', 'destroy')->name('sex.orientation.destory');
+        Route::post('sex-orientation/restore/{id}', 'restore')->name('sex.orientation.restore');
+        Route::post('sex-orientation/update-status/{id}', 'updateStatus')->name('sex.orientation.update.status');
+    
+        Route::get('sex-orientation/export', 'export')->name('sex-orientation.export');
+        Route::post('sex-orientation/import', 'import')->name('sex-orientation.import');
+    });
+
+    Route::controller(ReligionController::class)->group(function() {
+        Route::get('religion', 'index')->name('religion'); 
+        Route::get('religion/list', 'list')->name('religion.list'); 
+        Route::post('religion/store', 'store')->name('religion.store'); 
+        Route::get('religion/edit/{id}', 'edit')->name('religion.edit');
+        Route::post('religion/update', 'update')->name('religion.update');
+        Route::delete('religion/delete/{id}', 'destroy')->name('religion.destory');
+        Route::post('religion/restore/{id}', 'restore')->name('religion.restore');
+        Route::post('religion/update-status/{id}', 'updateStatus')->name('religion.update.status');
+    
+        Route::get('religion/export', 'export')->name('religion.export');
+        Route::post('religion/import', 'import')->name('religion.import');
     });
     
     Route::controller(HesaGenderController::class)->group(function() {
@@ -925,6 +1165,38 @@ Route::middleware('auth')->group(function() {
         Route::post('gender/update', 'update')->name('gender.update');
         Route::delete('gender/delete/{id}', 'destroy')->name('gender.destory');
         Route::post('gender/restore/{id}', 'restore')->name('gender.restore');
+        Route::post('gender/update-status/{id}', 'updateStatus')->name('gender.update.status');
+    
+        Route::get('gender/export', 'export')->name('gender.export');
+        Route::post('gender/import', 'import')->name('gender.import');
+    });
+
+    Route::controller(CountryController::class)->group(function() {
+        Route::get('countries', 'index')->name('countries'); 
+        Route::get('countries/list', 'list')->name('countries.list'); 
+        Route::post('countries/store', 'store')->name('countries.store'); 
+        Route::get('countries/edit/{id}', 'edit')->name('countries.edit');
+        Route::post('countries/update', 'update')->name('countries.update');
+        Route::delete('countries/delete/{id}', 'destroy')->name('countries.destory');
+        Route::post('countries/restore/{id}', 'restore')->name('countries.restore');
+        Route::post('countries/update-status/{id}', 'updateStatus')->name('countries.update.status');
+    
+        Route::get('countries/export', 'export')->name('countries.export');
+        Route::post('countries/import', 'import')->name('countries.import');
+    });
+
+    Route::controller(DisabilityController::class)->group(function() {
+        Route::get('disabilities', 'index')->name('disabilities'); 
+        Route::get('disabilities/list', 'list')->name('disabilities.list'); 
+        Route::post('disabilities/store', 'store')->name('disabilities.store'); 
+        Route::get('disabilities/edit/{id}', 'edit')->name('disabilities.edit');
+        Route::post('disabilities/update', 'update')->name('disabilities.update');
+        Route::delete('disabilities/delete/{id}', 'destroy')->name('disabilities.destory');
+        Route::post('disabilities/restore/{id}', 'restore')->name('disabilities.restore');
+        Route::post('disabilities/update-status/{id}', 'updateStatus')->name('disabilities.update.status');
+    
+        Route::get('disabilities/export', 'export')->name('disabilities.export');
+        Route::post('disabilities/import', 'import')->name('disabilities.import');
     });
 
     Route::controller(FeeEligibilityController::class)->group(function() {
@@ -935,5 +1207,126 @@ Route::middleware('auth')->group(function() {
         Route::post('feeeligibilities/update', 'update')->name('feeeligibilities.update');
         Route::delete('feeeligibilities/delete/{id}', 'destroy')->name('feeeligibilities.destory');
         Route::post('feeeligibilities/restore/{id}', 'restore')->name('feeeligibilities.restore');
+        Route::post('feeeligibilities/update-status/{id}', 'updateStatus')->name('feeeligibilities.update.status');
+    
+        Route::get('feeeligibilities/export', 'export')->name('feeeligibilities.export');
+        Route::post('feeeligibilities/import', 'import')->name('feeeligibilities.import');
+    });
+
+    Route::controller(ApelCreditController::class)->group(function() {
+        Route::get('apelcred', 'index')->name('apelcred'); 
+        Route::get('apelcred/list', 'list')->name('apelcred.list'); 
+        Route::post('apelcred/store', 'store')->name('apelcred.store'); 
+        Route::get('apelcred/edit/{id}', 'edit')->name('apelcred.edit');
+        Route::post('apelcred/update', 'update')->name('apelcred.update');
+        Route::delete('apelcred/delete/{id}', 'destroy')->name('apelcred.destory');
+        Route::post('apelcred/restore/{id}', 'restore')->name('apelcred.restore');
+        Route::post('apelcred/update-status/{id}', 'updateStatus')->name('apelcred.update.status');
+    
+        Route::get('apelcred/export', 'export')->name('apelcred.export');
+        Route::post('apelcred/import', 'import')->name('apelcred.import');
+    });
+
+    Route::controller(HighestQualificationOnEntryController::class)->group(function() {
+        Route::get('highest-qualification-on-entry', 'index')->name('highestqoe'); 
+        Route::get('highest-qualification-on-entry/list', 'list')->name('highestqoe.list'); 
+        Route::post('highest-qualification-on-entry/store', 'store')->name('highestqoe.store'); 
+        Route::get('highest-qualification-on-entry/edit/{id}', 'edit')->name('highestqoe.edit');
+        Route::post('highest-qualification-on-entry/update', 'update')->name('highestqoe.update');
+        Route::delete('highest-qualification-on-entry/delete/{id}', 'destroy')->name('highestqoe.destory');
+        Route::post('highest-qualification-on-entry/restore/{id}', 'restore')->name('highestqoe.restore');
+        Route::post('highest-qualification-on-entry/update-status/{id}', 'updateStatus')->name('highestqoe.update.status');
+    
+        Route::get('highest-qualification-on-entry/export', 'export')->name('highestqoe.export');
+        Route::post('highest-qualification-on-entry/import', 'import')->name('highestqoe.import');
+    });
+
+    Route::controller(CountryOfPermanentAddressController::class)->group(function() {
+        Route::get('country-of-permanent-address', 'index')->name('permaddcountry'); 
+        Route::get('country-of-permanent-address/list', 'list')->name('permaddcountry.list'); 
+        Route::post('country-of-permanent-address/store', 'store')->name('permaddcountry.store'); 
+        Route::get('country-of-permanent-address/edit/{id}', 'edit')->name('permaddcountry.edit');
+        Route::post('country-of-permanent-address/update', 'update')->name('permaddcountry.update');
+        Route::delete('country-of-permanent-address/delete/{id}', 'destroy')->name('permaddcountry.destory');
+        Route::post('country-of-permanent-address/restore/{id}', 'restore')->name('permaddcountry.restore');
+        Route::post('country-of-permanent-address/update-status/{id}', 'updateStatus')->name('permaddcountry.update.status');
+    
+        Route::get('country-of-permanent-address/export', 'export')->name('permaddcountry.export');
+        Route::post('country-of-permanent-address/import', 'import')->name('permaddcountry.import');
+    });
+
+    Route::controller(PreviousProviderController::class)->group(function() {
+        Route::get('previous-provider', 'index')->name('previousprovider'); 
+        Route::get('previous-provider/list', 'list')->name('previousprovider.list'); 
+        Route::post('previous-provider/store', 'store')->name('previousprovider.store'); 
+        Route::get('previous-provider/edit/{id}', 'edit')->name('previousprovider.edit');
+        Route::post('previous-provider/update', 'update')->name('previousprovider.update');
+        Route::delete('previous-provider/delete/{id}', 'destroy')->name('previousprovider.destory');
+        Route::post('previous-provider/restore/{id}', 'restore')->name('previousprovider.restore');
+        Route::post('previous-provider/update-status/{id}', 'updateStatus')->name('previousprovider.update.status');
+    
+        Route::get('previous-provider/export', 'export')->name('previousprovider.export');
+        Route::post('previous-provider/import', 'import')->name('previousprovider.import');
+    });
+
+    Route::controller(QualificationTypeIdentifierController::class)->group(function() {
+        Route::get('qualification-identifier', 'index')->name('qaualtypeid'); 
+        Route::get('qualification-identifier/list', 'list')->name('qaualtypeid.list'); 
+        Route::post('qualification-identifier/store', 'store')->name('qaualtypeid.store'); 
+        Route::get('qualification-identifier/edit/{id}', 'edit')->name('qaualtypeid.edit');
+        Route::post('qualification-identifier/update', 'update')->name('qaualtypeid.update');
+        Route::delete('qualification-identifier/delete/{id}', 'destroy')->name('qaualtypeid.destory');
+        Route::post('qualification-identifier/restore/{id}', 'restore')->name('qaualtypeid.restore');
+        Route::post('qualification-identifier/update-status/{id}', 'updateStatus')->name('qaualtypeid.update.status');
+    
+        Route::get('qualification-identifier/export', 'export')->name('qaualtypeid.export');
+        Route::post('qualification-identifier/import', 'import')->name('qaualtypeid.import');
+    });
+
+    Route::controller(ReasonForEngagementEndingController::class)->group(function() {
+        Route::get('reason-end', 'index')->name('rsnengend'); 
+        Route::get('reason-end/list', 'list')->name('rsnengend.list'); 
+        Route::post('reason-end/store', 'store')->name('rsnengend.store'); 
+        Route::get('reason-end/edit/{id}', 'edit')->name('rsnengend.edit');
+        Route::post('reason-end/update', 'update')->name('rsnengend.update');
+        Route::delete('reason-end/delete/{id}', 'destroy')->name('rsnengend.destory');
+        Route::post('reason-end/restore/{id}', 'restore')->name('rsnengend.restore');
+        Route::post('reason-end/update-status/{id}', 'updateStatus')->name('rsnengend.update.status');
+    
+        Route::get('reason-end/export', 'export')->name('rsnengend.export');
+        Route::post('reason-end/import', 'import')->name('rsnengend.import');
+    });    
+    
+    Route::controller(TermTimeAccommodationTypeController::class)->group(function() {
+        Route::get('termtimeaccommodationtype', 'index')->name('termtimeaccommodationtype'); 
+        Route::get('termtimeaccommodationtype/list', 'list')->name('termtimeaccommodationtype.list'); 
+        Route::post('termtimeaccommodationtype/store', 'store')->name('termtimeaccommodationtype.store'); 
+        Route::get('termtimeaccommodationtype/edit/{id}', 'edit')->name('termtimeaccommodationtype.edit');
+        Route::post('termtimeaccommodationtype/update', 'update')->name('termtimeaccommodationtype.update');
+        Route::delete('termtimeaccommodationtype/delete/{id}', 'destroy')->name('termtimeaccommodationtype.destory');
+        Route::post('termtimeaccommodationtype/restore/{id}', 'restore')->name('termtimeaccommodationtype.restore');
+        Route::post('termtimeaccommodationtype/update-status/{id}', 'updateStatus')->name('termtimeaccommodationtype.update.status');
+    
+        Route::get('termtimeaccommodationtype/export', 'export')->name('termtimeaccommodationtype.export');
+        Route::post('termtimeaccommodationtype/import', 'import')->name('termtimeaccommodationtype.import');
+    });
+
+    Route::controller(SexIdentifierController::class)->group(function() {
+        Route::get('sexidentifier', 'index')->name('sexidentifier'); 
+        Route::get('sexidentifier/list', 'list')->name('sexidentifier.list'); 
+        Route::post('sexidentifier/store', 'store')->name('sexidentifier.store'); 
+        Route::get('sexidentifier/edit/{id}', 'edit')->name('sexidentifier.edit');
+        Route::post('sexidentifier/update', 'update')->name('sexidentifier.update');
+        Route::delete('sexidentifier/delete/{id}', 'destroy')->name('sexidentifier.destory');
+        Route::post('sexidentifier/restore/{id}', 'restore')->name('sexidentifier.restore');
+        Route::post('sexidentifier/update-status/{id}', 'updateStatus')->name('sexidentifier.update.status');
+    
+        Route::get('studentidentifier/export', 'export')->name('studentidentifier.export');
+        Route::post('studentidentifier/import', 'import')->name('studentidentifier.import');
+    });
+
+    Route::controller(AddressController::class)->group(function() {
+        Route::post('address/get-address', 'getAddress')->name('address.get');
+        Route::post('address/store', 'store')->name('address.store');
     });
 });

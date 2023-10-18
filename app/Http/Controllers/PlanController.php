@@ -23,7 +23,7 @@ class PlanController extends Controller
 {
     public function index()
     {
-        return view('pages/plan/index', [
+        return view('pages.plan.index', [
             'title' => 'Class Plans - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']
@@ -62,9 +62,6 @@ class PlanController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-
         $query = Plan::orderByRaw(implode(',', $sorts));
         if(!empty($courses)): $query->whereIn('course_id', $courses); endif;
         if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
@@ -82,6 +79,8 @@ class PlanController extends Controller
         if($status == 2): $query->onlyTrashed(); endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;

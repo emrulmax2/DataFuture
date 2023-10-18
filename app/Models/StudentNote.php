@@ -13,6 +13,7 @@ class StudentNote extends Model
     protected $fillable = [
         'student_id',
         'student_document_id',
+        'opening_date',
         'note',
         'phase',
         'created_by',
@@ -32,5 +33,13 @@ class StudentNote extends Model
     
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function setOpeningDateAttribute($value) {  
+        $this->attributes['opening_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+
+    public function getOpeningDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }

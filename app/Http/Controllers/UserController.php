@@ -11,7 +11,9 @@ use App\Models\PermissionCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserUpdateRequest;
+use App\Models\ReferralCode;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -71,9 +73,9 @@ class UserController extends Controller
             $query->onlyTrashed();
         endif;
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -125,7 +127,7 @@ class UserController extends Controller
             if($request->hasFile('photo')):
                 $photo = $request->file('photo');
                 $imageName = 'Avatar_'.$user->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-                $path = $request->file('photo')->storeAs('public/users/'.$user->id.'/', $imageName);
+                $path = $photo->storeAs('public/users/'.$user->id, $imageName, 'google');
 
                 $userUpdate = User::where('id', $user->id)->update([
                     'photo' => $imageName
@@ -133,10 +135,20 @@ class UserController extends Controller
             endif;
             if(!empty($role_id)):
                 foreach($role_id as $role):
-                    $role = UserRole::create([
+                    $userRole = UserRole::create([
                         'role_id' => $role,
                         'user_id' => $user->id,
                     ]);
+                    $role = Role::find($role);
+                    if($userRole && $role->type == 'Agent'):
+                        $referralCode = Str::upper(Str::random(9));
+                        $referral = ReferralCode::create([
+                            'code' => $referralCode,
+                            'type' => 'Agent',
+                            'user_id' => $user->id,
+                            'created_by' => auth()->user()->id,
+                        ]);
+                    endif;
                 endforeach;
             endif;
 
@@ -184,7 +196,6 @@ class UserController extends Controller
         $newData = [
             'name'=> $request->name,
             'email'=> $request->email,
-            'password'=> Hash::make($request->password),
             'gender'=> $request->gender,
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0)
         ];
@@ -198,10 +209,10 @@ class UserController extends Controller
         if($request->hasFile('photo')):
 
             $imageName = 'Avatar_'.$userID.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-            $path = $request->file('photo')->storeAs('public/users/'.$userID.'/', $imageName);
+            $path = $request->file('photo')->storeAs('public/users/'.$userID, $imageName, 'google');
             if(isset($userOldRow->photo) && !empty($userOldRow->photo)):
-                if (Storage::disk('local')->exists('public/users/'.$userID.'/'.$userOldRow->photo)):
-                    Storage::delete('public/users/'.$userID.'/'.$userOldRow->photo);
+                if (Storage::disk('google')->exists('public/users/'.$userID.'/'.$userOldRow->photo)):
+                    Storage::disk('google')->delete('public/users/'.$userID.'/'.$userOldRow->photo);
                 endif;
             endif;
             $newImageName = $imageName;
@@ -216,13 +227,30 @@ class UserController extends Controller
         $isChanged = false;
         $role_id = $request->role_id;
         if(!empty($role_id)):
-            $userRole = UserRole::where('user_id', $userID)->forceDelete();
+            $delUserRole = UserRole::where('user_id', $userID)->forceDelete();
+            $isAgent = false;
             foreach($role_id as $role):
-                $role = UserRole::create([
+                $userRole = UserRole::create([
                     'role_id' => $role,
                     'user_id' => $userID,
                 ]);
+                $role = Role::find($role);
+                if($userRole && $role->type == 'Agent'):
+                    $isAgent = true;
+                    $referralCode = Str::upper(Str::random(9));
+                    $referral = ReferralCode::create([
+                        'code' => $referralCode,
+                        'type' => 'Agent',
+                        'user_id' => $userID,
+                        'created_by' => auth()->user()->id,
+                    ]);
+                endif;
             endforeach;
+            if(!$isAgent):
+                $userRole = ReferralCode::where('user_id', $userID)->forceDelete();
+            endif;
+        else:
+            $userRole = ReferralCode::where('user_id', $userID)->forceDelete();
         endif;
 
         if($user->wasChanged() || $isChanged) {

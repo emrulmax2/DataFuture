@@ -18,36 +18,26 @@
                     </div>
                     <div class="grid grid-cols-12 gap-6 mt-5">
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
+                            <a href="{{ route('admission') }}" class="report-box zoom-in">
                                 <div class="box p-5">
                                     <div class="flex">
-                                        <i data-lucide="shopping-cart" class="report-box__icon text-primary"></i>
-                                        <div class="ml-auto">
-                                            <div class="report-box__indicator bg-success tooltip cursor-pointer" title="33% Higher than last month">
-                                                % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
-                                            </div>
-                                        </div>
+                                        <i data-lucide="user" class="report-box__icon text-pending"></i>
                                     </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">0.00</div>                                    
-                                    <div class="text-base text-slate-500 mt-1">Content</div> 
+                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $applicant }}</div>                                    
+                                    <div class="text-base text-slate-500 mt-1">Applicant</div> 
                                 </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
+                            <a href="{{ route('student') }}" class="report-box zoom-in">
                                 <div class="box p-5">
                                     <div class="flex">
-                                        <i data-lucide="credit-card" class="report-box__icon text-pending"></i>
-                                        <div class="ml-auto">
-                                            <div class="report-box__indicator bg-danger tooltip cursor-pointer" title="2% Lower than last month">
-                                                % <i data-lucide="chevron-down" class="w-4 h-4 ml-0.5"></i>
-                                            </div>
-                                        </div>
+                                        <i data-lucide="user-check" class="report-box__icon text-success"></i>
                                     </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                    <div class="text-base text-slate-500 mt-1">Content</div>
+                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $student }}</div>
+                                    <div class="text-base text-slate-500 mt-1">Live Student</div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="report-box zoom-in">

@@ -17,7 +17,7 @@ var processTaskArchiveListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -49,6 +49,7 @@ var processTaskArchiveListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         btns += '<button data-id="' +cell.getData().id +'" style="top: -7px;"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9">\
@@ -98,7 +99,7 @@ var processTaskLogTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -193,7 +194,7 @@ var applicantInterviewLogTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",

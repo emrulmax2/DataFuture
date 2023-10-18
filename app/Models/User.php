@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -62,8 +62,8 @@ class User extends Authenticatable
      */
     public function getPhotoUrlAttribute()
     {
-        if ($this->photo !== null) {
-            return asset('storage/users/'.$this->id.'/'.$this->photo);
+        if ($this->photo !== null && Storage::disk('google')->exists('public/users/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('google')->url('public/users/'.$this->id.'/'.$this->photo);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }

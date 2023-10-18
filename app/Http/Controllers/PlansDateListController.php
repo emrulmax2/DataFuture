@@ -11,11 +11,12 @@ use App\Models\CourseCreationInstance;
 use App\Models\AcademicYear;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\PlansDatesRequest;
+use Carbon\Carbon;
 
 class PlansDateListController extends Controller
 {
     public function index($planId){
-        return view('pages/plandates/index', [
+        return view('pages.plandates.index', [
             'title' => 'Class Plan Dates - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
@@ -30,14 +31,11 @@ class PlansDateListController extends Controller
         $dates = (isset($request->dates) && !empty($request->dates) ? date('Y-m-d', strtotime($request->dates)) : '');
         $status = (isset($request->status) && !empty($request->status) ? $request->status : '1');
         
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'date', 'dir' => 'DESC']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'date', 'dir' => 'ASC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
 
         $query = PlansDateList::orderByRaw(implode(',', $sorts));
         if(!empty($planid)): $query->where('plan_id', $planid); endif;
@@ -45,6 +43,8 @@ class PlansDateListController extends Controller
         if($status == 2): $query->onlyTrashed(); endif;
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -61,8 +61,11 @@ class PlansDateListController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'name' => $list->name,
-                    'date'=> $list->date,
+                    'name' => (isset($list->plan->virtual_room) && !empty($list->plan->virtual_room) ? 'Virtual - ' : 'Physical - ').$list->name,
+                    'date'=> date('l jS M, Y', strtotime($list->date)),
+                    'room' => (isset($list->plan->room->name) && !empty($list->plan->room->name) ? $list->plan->room->name : ''),
+                    'time' => (isset($list->plan->start_time) && !empty($list->plan->start_time) ? date('H:i', strtotime($list->plan->start_time)) : 'Unknown').' - '.(isset($list->plan->end_time) && !empty($list->plan->end_time) ? date('H:i', strtotime($list->plan->end_time)) : 'Unknown'),
+                    'status' => '',
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -78,8 +81,6 @@ class PlansDateListController extends Controller
         
         return response()->json($data);
     }
-
-    
 
     public function destroy($id){
         $data = PlansDateList::find($id)->delete();
@@ -146,14 +147,15 @@ class PlansDateListController extends Controller
                     endif;
                 endif;
             endforeach;
+            
             $message = '';
             $title = '';
             if(empty($errorIDs) &&  !empty($insertIDs)):
                 return response()->json(['Message' => 'All selected plans date list successfully generated.', 'title' => 'Congratulations!'], 200);
             elseif(empty($insertIDs) && !empty($errorIDs)):
-                return response()->json(['Message' => 'Selected plans date can not be generated due to date existence or technical errors.', 'title' => 'Oops!'], 304);
+                return response()->json(['Message' => 'Selected plans date can not be generated due to date existence or technical errors.', 'title' => 'Oops!'], 422);
             elseif(!empty($insertIDs) && !empty($errorIDs)):
-                return response()->json(['Message' => 'Selected plans date can not be generated due to date existence or technical errors.', 'title' => 'Oops!'], 304);
+                return response()->json(['Message' => 'Some of them ('.count($insertIDs).') are successfully generated and rest of team ('.count($errorIDs).') can not be generated because of date existence.', 'title' => 'Congratulations!'], 200);
             endif;
         else:
             return response()->json(['Message' => 'Plan ID not found. Please select some of the plan from the list table after that submit again.', 'title' => 'Error!'], 422);

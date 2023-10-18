@@ -3,12 +3,12 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
  
 ("use strict");
-var gendersListTable = (function () {
+var hgenListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
-        let tableContent = new Tabulator("#gendersListTable", {
+        let querystr = $("#query-HGEN").val() != "" ? $("#query-HGEN").val() : "";
+        let status = $("#status-HGEN").val() != "" ? $("#status-HGEN").val() : "";
+        let tableContent = new Tabulator("#hgenListTable", {
             ajaxURL: route("gender.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
@@ -17,7 +17,7 @@ var gendersListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,7 +25,6 @@ var gendersListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
                 },
                 {
                     title: "Title",
@@ -43,16 +42,25 @@ var gendersListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "120",
+                    download:false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editGendersModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editHgenModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -82,29 +90,29 @@ var gendersListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv").on("click", function (event) {
+        $("#tabulator-export-csv-HGEN").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
+        $("#tabulator-export-json-HGEN").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx-HGEN").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Gender Details",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
+        $("#tabulator-export-html-HGEN").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print-HGEN").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -117,130 +125,142 @@ var gendersListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#gendersListTable").length) {
-        // Init Table
-        gendersListTable.init();
+    if ($("#hgenListTable").length) {
+        $('.optionBoxTitle').on('click', function(e){
+            e.preventDefault();
+            var $title = $(this);
+            var $box = $title.parents('.optionBox');
+            var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
+            var table = $boxBody.attr('data-tableid');
+    
+            if($box.hasClass('active') && table == 'hgenListTable'){
+                hgenListTable.init();
+            }
+        });
 
         // Filter function
-        function filterHTMLForm() {
-            gendersListTable.init();
+        function filterHTMLFormHGEN() {
+            hgenListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
+        $("#tabulatorFilterForm-HGEN")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLForm();
+                    filterHTMLFormHGEN();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
+        $("#tabulator-html-filter-go-HGEN").on("click", function (event) {
+            filterHTMLFormHGEN();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLForm();
+        $("#tabulator-html-filter-reset-HGEN").on("click", function (event) {
+            $("#query-HGEN").val("");
+            $("#status-HGEN").val("1");
+            filterHTMLFormHGEN();
         });
 
-        const addGendersModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addGendersModal"));
-        const editGendersModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editGendersModal"));
+        const addHgenModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHgenModal"));
+        const editHgenModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editHgenModal"));
+        const genderImportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#genderImportModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addGendersModalEl = document.getElementById('addGendersModal')
-        addGendersModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addGendersModal .acc__input-error').html('');
-            $('#addGendersModal .modal-body input:not([type="checkbox"])').val('');
+        const addHgenModalEl = document.getElementById('addHgenModal')
+        addHgenModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addHgenModal .acc__input-error').html('');
+            $('#addHgenModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addGendersModal input[name="is_hesa"]').prop('checked', false);
-            $('#addGendersModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addGendersModal .hesa_code_area input').val('');
+            $('#addHgenModal input[name="is_hesa"]').prop('checked', false);
+            $('#addHgenModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addHgenModal .hesa_code_area input').val('');
             });
-            $('#addGendersModal input[name="is_df"]').prop('checked', false);
-            $('#addGendersModal .df_code_area').fadeOut('fast', function(){
-                $('#addGendersModal .df_code_area input').val('');
+            $('#addHgenModal input[name="is_df"]').prop('checked', false);
+            $('#addHgenModal .df_code_area').fadeOut('fast', function(){
+                $('#addHgenModal .df_code_area input').val('');
             })
+            $('#addHgenModal input[name="active"]').prop('checked', true);
         });
         
-        const editGendersModalEl = document.getElementById('editGendersModal')
-        editGendersModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editGendersModal .acc__input-error').html('');
-            $('#editGendersModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editGendersModal input[name="id"]').val('0');
+        const editHgenModalEl = document.getElementById('editHgenModal')
+        editHgenModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editHgenModal .acc__input-error').html('');
+            $('#editHgenModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editHgenModal input[name="id"]').val('0');
 
-            $('#editGendersModal input[name="is_hesa"]').prop('checked', false);
-            $('#editGendersModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editGendersModal .hesa_code_area input').val('');
+            $('#editHgenModal input[name="is_hesa"]').prop('checked', false);
+            $('#editHgenModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editHgenModal .hesa_code_area input').val('');
             });
-            $('#editGendersModal input[name="is_df"]').prop('checked', false);
-            $('#editGendersModal .df_code_area').fadeOut('fast', function(){
-                $('#editGendersModal .df_code_area input').val('');
+            $('#editHgenModal input[name="is_df"]').prop('checked', false);
+            $('#editHgenModal .df_code_area').fadeOut('fast', function(){
+                $('#editHgenModal .df_code_area input').val('');
             })
+            $('#editHgenModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addGendersForm input[name="is_hesa"]').on('change', function(){
+        $('#addHgenForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addGendersForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addGendersForm .hesa_code_area input').val('');
+                $('#addHgenForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addHgenForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addGendersForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addGendersForm .hesa_code_area input').val('');
+                $('#addHgenForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addHgenForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addGendersForm input[name="is_df"]').on('change', function(){
+        $('#addHgenForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addGendersForm .df_code_area').fadeIn('fast', function(){
-                    $('#addGendersForm .df_code_area input').val('');
+                $('#addHgenForm .df_code_area').fadeIn('fast', function(){
+                    $('#addHgenForm .df_code_area input').val('');
                 })
             }else{
-                $('#addGendersForm .df_code_area').fadeOut('fast', function(){
-                    $('#addGendersForm .df_code_area input').val('');
+                $('#addHgenForm .df_code_area').fadeOut('fast', function(){
+                    $('#addHgenForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editGendersForm input[name="is_hesa"]').on('change', function(){
+        $('#editHgenForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editGendersForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editGendersForm .hesa_code_area input').val('');
+                $('#editHgenForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editHgenForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editGendersForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editGendersForm .hesa_code_area input').val('');
+                $('#editHgenForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editHgenForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editGendersForm input[name="is_df"]').on('change', function(){
+        $('#editHgenForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editGendersForm .df_code_area').fadeIn('fast', function(){
-                    $('#editGendersForm .df_code_area input').val('');
+                $('#editHgenForm .df_code_area').fadeIn('fast', function(){
+                    $('#editHgenForm .df_code_area input').val('');
                 })
             }else{
-                $('#editGendersForm .df_code_area').fadeOut('fast', function(){
-                    $('#editGendersForm .df_code_area input').val('');
+                $('#editHgenForm .df_code_area').fadeOut('fast', function(){
+                    $('#editHgenForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addGendersForm').on('submit', function(e){
+        $('#addHgenForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addGendersForm');
+            const form = document.getElementById('addHgenForm');
         
-            document.querySelector('#saveGenders').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveGenders svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveHgen').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveHgen svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
@@ -249,11 +269,11 @@ var gendersListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveGenders').removeAttribute('disabled');
-                document.querySelector("#saveGenders svg").style.cssText = "display: none;";
+                document.querySelector('#saveHgen').removeAttribute('disabled');
+                document.querySelector("#saveHgen svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addGendersModal.hide();
+                    addHgenModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -261,15 +281,15 @@ var gendersListTable = (function () {
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                gendersListTable.init();
+                hgenListTable.init();
             }).catch(error => {
-                document.querySelector('#saveGenders').removeAttribute('disabled');
-                document.querySelector("#saveGenders svg").style.cssText = "display: none;";
+                document.querySelector('#saveHgen').removeAttribute('disabled');
+                document.querySelector("#saveHgen svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addGendersForm .${key}`).addClass('border-danger');
-                            $(`#addGendersForm  .error-${key}`).html(val);
+                            $(`#addHgenForm .${key}`).addClass('border-danger');
+                            $(`#addHgenForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -278,7 +298,7 @@ var gendersListTable = (function () {
             });
         });
 
-        $("#gendersListTable").on("click", ".edit_btn", function () {      
+        $("#hgenListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
@@ -292,31 +312,36 @@ var gendersListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editGendersModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                        $('#editHgenModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editGendersModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editGendersModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editGendersModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editHgenModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editHgenModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editHgenModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editGendersModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editGendersModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editGendersModal input[name="hesa_code"]').val('');
+                            $('#editHgenModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editHgenModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editHgenModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editGendersModal input[name="is_df"]').prop('checked', true);
-                            $('#editGendersModal .df_code_area').fadeIn('fast', function(){
-                                $('#editGendersModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editHgenModal input[name="is_df"]').prop('checked', true);
+                            $('#editHgenModal .df_code_area').fadeIn('fast', function(){
+                                $('#editHgenModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editGendersModal input[name="is_df"]').prop('checked', false);
-                            $('#editGendersModal .df_code_area').fadeOut('fast', function(){
-                                $('#editGendersModal input[name="df_code"]').val('');
+                            $('#editHgenModal input[name="is_df"]').prop('checked', false);
+                            $('#editHgenModal .df_code_area').fadeOut('fast', function(){
+                                $('#editHgenModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editGendersModal input[name="id"]').val(editId);
+                        $('#editHgenModal input[name="id"]').val(editId);
+                        if(dataset.active == 1){
+                            $('#editHgenModal input[name="active"]').prop('checked', true);
+                        }else{
+                            $('#editHgenModal input[name="active"]').prop('checked', false);
+                        }
                     }
                 })
                 .catch((error) => {
@@ -325,13 +350,13 @@ var gendersListTable = (function () {
         });
 
         // Update Course Data
-        $("#editGendersForm").on("submit", function (e) {
+        $("#editHgenForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editGendersForm input[name="id"]').val();
-            const form = document.getElementById("editGendersForm");
+            let editId = $('#editHgenForm input[name="id"]').val();
+            const form = document.getElementById("editHgenForm");
 
-            document.querySelector('#updateGenders').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateGenders svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateHgen').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateHgen svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
@@ -344,9 +369,9 @@ var gendersListTable = (function () {
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateGenders").removeAttribute("disabled");
-                    document.querySelector("#updateGenders svg").style.cssText = "display: none;";
-                    editGendersModal.hide();
+                    document.querySelector("#updateHgen").removeAttribute("disabled");
+                    document.querySelector("#updateHgen svg").style.cssText = "display: none;";
+                    editHgenModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -354,18 +379,18 @@ var gendersListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                gendersListTable.init();
+                hgenListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateGenders").removeAttribute("disabled");
-                document.querySelector("#updateGenders svg").style.cssText = "display: none;";
+                document.querySelector("#updateHgen").removeAttribute("disabled");
+                document.querySelector("#updateHgen svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editGendersForm .${key}`).addClass('border-danger')
-                            $(`#editGendersForm  .error-${key}`).html(val)
+                            $(`#editHgenForm .${key}`).addClass('border-danger')
+                            $(`#editHgenForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editGendersModal.hide();
+                        editHgenModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -387,7 +412,7 @@ var gendersListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            if(action == 'DELETEHGEN'){
                 axios({
                     method: 'delete',
                     url: route('gender.destory', recordID),
@@ -403,11 +428,11 @@ var gendersListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    gendersListTable.init();
+                    hgenListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORE'){
+            } else if(action == 'RESTOREHGEN'){
                 axios({
                     method: 'post',
                     url: route('gender.restore', recordID),
@@ -423,15 +448,48 @@ var gendersListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    gendersListTable.init();
+                    hgenListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            }else if(action == 'CHANGESTATHGEN'){
+                axios({
+                    method: 'post',
+                    url: route('gender.update.status', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('WOW!');
+                            $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        });
+                    }
+                    hgenListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
             }
         })
 
+        $('#hgenListTable').on('click', '.status_updater', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confirmModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATHGEN');
+            });
+        });
+
         // Delete Course
-        $('#gendersListTable').on('click', '.delete_btn', function(){
+        $('#hgenListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -440,12 +498,12 @@ var gendersListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETEHGEN');
             });
         });
 
         // Restore Course
-        $('#gendersListTable').on('click', '.restore_btn', function(){
+        $('#hgenListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -454,8 +512,17 @@ var gendersListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTOREHGEN');
             });
+        });
+
+        $('#genderImportModal').on('click','#saveGender',function(e) {
+            e.preventDefault();
+            $('#genderImportModal .dropzone').get(0).dropzone.processQueue();
+            genderImportModal.hide();
+
+            succModal.show();   
+            setTimeout(function() { succModal.hide(); }, 3000);          
         });
     }
 })();

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('student_id')->unsigned();
             $table->bigInteger('disability_id')->unsigned();
+            $table->softDeletes();
             $table->timestamps();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('disability_id')->references('id')->on('disabilities')->onDelete('cascade')->onUpdate('cascade');

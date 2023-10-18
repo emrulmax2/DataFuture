@@ -477,3 +477,215 @@
 .la-ball-scale-multiple.la-2x>div{width:64px;height:64px}
 .la-ball-scale-multiple.la-3x{width:96px;height:96px}
 .la-ball-scale-multiple.la-3x>div{width:96px;height:96px}@-webkit-keyframes ball-scale-multiple{0%{opacity:0;-webkit-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-webkit-transform:scale(1);transform:scale(1)}}@-moz-keyframes ball-scale-multiple{0%{opacity:0;-moz-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-moz-transform:scale(1);transform:scale(1)}}@-o-keyframes ball-scale-multiple{0%{opacity:0;-o-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-o-transform:scale(1);transform:scale(1)}}@keyframes ball-scale-multiple{0%{opacity:0;-webkit-transform:scale(0);-moz-transform:scale(0);-o-transform:scale(0);transform:scale(0)}5%{opacity:.75}100%{opacity:0;-webkit-transform:scale(1);-moz-transform:scale(1);-o-transform:scale(1);transform:scale(1)}}
+
+.liveStudentMainMenu{
+    position: relative;
+}
+.liveStudentSubMenu{
+    position: absolute;
+    left: 0;
+    top: calc(100% - 55px);
+    display: none;
+}
+.liveStudentSubMenu.show{
+    display: flex;
+}
+
+#editStudentConsentModal .readOnlyConsent{
+    cursor: not-allowed;
+}
+
+
+.validationGroup{
+    position: relative;
+}
+.validationGroup button{
+    right: 0;
+    top: 0;
+}
+.mw-120{
+    min-width: 120px;
+}
+.cursor-pointer{
+    cursor: pointer;
+}
+.optionBox .optionBoxBody{
+    position: relative;
+    display: none;
+}
+.optionBox.active .optionBoxBody{
+    position: relative;
+    display: block;
+}
+.optionBox .optionBoxTitle{
+    padding: 7px 0;
+}
+.optionBox.active .optionBoxTitle{
+    color: rgb(var(--color-primary) / var(--tw-text-opacity));
+}
+.optionBox .optionBoxHeader button{
+    display: none;
+}
+.optionBox.active .optionBoxHeader button{
+    display: inline-flex;
+}
+.optionBox.active .optionBoxHeader svg.arrowNavigation{
+    display: none;
+}
+
+.emailGroup .input-group-text{
+    width: 120px;
+    padding: 0;
+    border: none;
+}
+.emailGroup input.form-control{
+    width: calc(100% - 120px);
+}
+
+.settingsMenu ul li ul{
+    position: relative;
+    top: 0;
+    display: none;
+}
+.settingsMenu ul li > a .menuAgnle{
+    transition: all ease 350ms;
+}
+.settingsMenu ul li > a.active .menuAgnle{
+    transform: rotate(-180deg);
+}
+.imgUploadWrap > img{
+    max-height: 98%;
+    width: auto;
+    max-width: 100%;
+}
+
+
+
+#attendanceAndResultAccr.accordion .accordion-item:first-child{
+    margin-top: -.5rem;
+}
+#attendanceAndResultAccr.accordion .accordion-item:last-child{
+    margin-bottom: -.5rem;
+}
+#attendanceAndResultAccr.accordion .accordion-item .accordion-header .accordion-button{
+    padding-left: .5rem;
+}
+#attendanceAndResultAccr .accordion-button .accordionCollaps{
+    right: 0;
+}
+#attendanceAndResultAccr.accordion .accordion-item:not(:last-child) {
+    border-bottom-width: 1px;
+    border-color: rgb(var(--color-slate-300) / 0.6);
+}
+
+
+.planTreeWrap{
+    position: relative;
+}
+.planTreeWrap ul{
+    margin: 0;
+    padding: 0;
+}
+.planTreeWrap ul li{
+    position: relative;
+    cursor: pointer;
+    margin: 0 0 11px;
+}
+.planTreeWrap ul li.hasChildren{
+    padding: 0 0 0 22px;
+}
+.planTreeWrap ul li.hasChildren::before{
+    content: '+';
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    font-size: 12px;
+    color: rgb(22, 78, 99);
+    font-weight: 500;
+    background: #FFF;
+    border: 1px solid rgb(22, 78, 99);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    top: 2px;
+}
+.planTreeWrap ul li.hasChildren.opened::before{
+    content: '-';
+}
+.planTreeWrap ul li a svg{
+    display: none;
+}
+.planTreeWrap ul li.hasChildren > ul{
+    border-left: 1px solid rgb(22, 78, 99);
+    padding: 0 0 0 20px;
+    margin: 10px 0 0;
+}
+.planTreeWrap ul li.hasChildren > ul li{
+    margin: 0 0 10px;
+}
+.planTreeWrap ul li.hasChildren > ul li:last-child{
+    margin: 0;
+}
+.planTreeWrap ul li.hasChildren > ul li::after{
+    content: '';
+    width: 10px;
+    height: 1px;
+    background-color: rgb(22, 78, 99);
+    position: absolute;
+    left: -20px;
+    top: 9px;
+}
+
+.autoCompleteField{
+    position: relative;
+}
+.autoFillDropdown{
+    transition: margin-top 0.2s;
+    box-shadow: 0px 3px 10px #00000017;
+    position: relative;
+    margin-top: .25rem;
+    width: 100%;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    background-color: rgb(255 255 255 / 1);
+    border: 1px solid rgb(226 232 240);
+
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 99;
+    display: none;
+}
+.autoFillDropdown li{
+    margin: 0;
+    padding: 0;
+}
+.autoFillDropdown li a {
+    display: flex;
+    align-items: center;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dropdown-item:hover {
+    background-color: rgb(226 232 240 / 0.6);
+}
+
+#studentSearchAccordion.accordion .accordion-item:first-child{
+    margin-top: -.5rem;
+}
+#studentSearchAccordion.accordion .accordion-item:last-child{
+    margin-bottom: -.5rem;
+}
+#studentSearchAccordion.accordion .accordion-item .accordion-header .accordion-button{
+    padding-left: 0;
+}
+#studentSearchAccordion.accordion .accordion-button .accordionCollaps{
+    right: 0;
+}

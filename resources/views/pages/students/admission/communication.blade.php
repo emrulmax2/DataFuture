@@ -59,21 +59,21 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-json-CML" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-html-CML" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                     </a>
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -130,21 +130,21 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-json-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-html-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                     </a>
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -201,21 +201,21 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-json-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a id="tabulator-export-html-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                     </a>
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                     </div>

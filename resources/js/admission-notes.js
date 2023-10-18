@@ -23,7 +23,7 @@ var applicantNotesListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -68,6 +68,7 @@ var applicantNotesListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "230",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().url != ''){
@@ -116,7 +117,7 @@ var applicantNotesListTable = (function () {
         $("#tabulator-export-xlsx-AN").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Applicant Notes Details",
             });
         });
 

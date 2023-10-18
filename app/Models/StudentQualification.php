@@ -28,7 +28,7 @@ class StudentQualification extends Model
      */
     protected $dates = ['deleted_at'];
 
-    public function applicant(){
+    public function student(){
         return $this->belongsTo(Student::class, 'student_id');
     }
 

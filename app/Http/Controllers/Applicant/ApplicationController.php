@@ -27,6 +27,8 @@ use App\Models\ApplicantQualification;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
+use App\Models\ReferralCode;
+use App\Models\SexIdentifier;
 use Illuminate\Support\Carbon;
 
 class ApplicationController extends Controller
@@ -44,6 +46,7 @@ class ApplicationController extends Controller
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
             'users' => User::all(),
+            'sexid' => SexIdentifier::all(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => Applicant::where('applicant_user_id', \Auth::guard('applicant')->user()->id)->whereNull('submission_date')->orderBy('id', 'DESC')->first(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
@@ -61,12 +64,11 @@ class ApplicationController extends Controller
         $applicant_id = $request->applicant_id;
         $applicant = Applicant::updateOrCreate([ 'applicant_user_id' => $applicantUserId, 'id' => $applicant_id ], [
             'applicant_id' => $applicantUserId,
-            //'application_no' => '',
             'title_id' => $request->title_id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
+            'sex_identifier_id' => $request->sex_identifier_id,
             'status_id' => 1,
             'nationality_id' => $request->nationality_id,
             'country_id' => $request->country_id,
@@ -176,13 +178,14 @@ class ApplicationController extends Controller
                 $applicantEmployments = ApplicantEmployment::where('applicant_id', $applicant_id)->forceDelete();
             endif;
 
-            if(isset($request->referral_code) && !empty($request->referral_code)):
+            /*if(isset($request->referral_code) && !empty($request->referral_code)):
                 $ref = Applicant::where('id', $applicant_id)->update([
                     'referral_code' => $request->referral_code,
                     'is_referral_varified' => 0,
                     'updated_by' => \Auth::guard('applicant')->user()->id,
                 ]);
-            endif;
+            endif;*/
+            
             return response()->json(['message' => 'Course details successfully inserted or updated', 'applicant_id' => $applicant_id], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
@@ -657,5 +660,30 @@ class ApplicationController extends Controller
             ],
             'applicant' => Applicant::where('id', $id)->first(),
         ]);
+    }
+
+    public function verifyReferralCode(Request $request){
+        $applicantId = $request->applicantId;
+        $code = $request->code;
+        $applicant = Applicant::find($applicantId);
+
+        $res = [];
+        $referralCodes = ReferralCode::where('code', $code)->first();
+        if(isset($referralCodes->code) && !empty($referralCodes->code) && $referralCodes->code == $code){
+            $applicantUpdate = Applicant::where('id', $applicantId)->update([
+                'referral_code' => $code,
+                'is_referral_varified' => 1
+            ]);
+
+            $res['suc'] = 1;
+            $res['code'] = $code;
+            $res['is_referral_varified'] = 1;
+        }else{
+            $res['suc'] = 2;
+            $res['code'] = $applicant->referral_code;
+            $res['is_referral_varified'] = $applicant->is_referral_varified;
+        }
+
+        return response()->json(['msg' => $res], 200);
     }
 }

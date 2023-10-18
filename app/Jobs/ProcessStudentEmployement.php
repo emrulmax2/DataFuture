@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Address;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -15,7 +16,10 @@ use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\ApplicantEmployment;
+use App\Models\EmploymentReference;
 use App\Models\StudentEmployment;
+use App\Models\StudentEmploymentReference;
+use App\Models\StudentUser;
 
 class ProcessStudentEmployement implements ShouldQueue
 {
@@ -39,8 +43,8 @@ class ProcessStudentEmployement implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first(); 
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         //StudentEmployments
         $applicantEmploymentsData= ApplicantEmployment::where('applicant_id',$this->applicant->id)->get();
@@ -54,19 +58,48 @@ class ProcessStudentEmployement implements ShouldQueue
                 'start_date' => $applicantEmployments->start_date,
                 'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : 'NULL',
                 'continuing' => isset($applicantEmployments->continuing) ? ($applicantEmployments->continuing) : '0',
-                'address_line_1' => $applicantEmployments->address_line_1,
-                'address_line_2' => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
-                'state' => isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
-                'post_code' => $applicantEmployments->post_code,
-                'city' => $applicantEmployments->city,
-                'country' => $applicantEmployments->country,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
 
+            $Address = new Address();
+            $dataAddress = [
+                "address_line_1" => $applicantEmployments->address_line_1,
+                "address_line_2" => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
+                "state"	=> isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
+                "post_code"	=> $applicantEmployments->post_code,
+                "city" =>$applicantEmployments->city,
+                "country" =>$applicantEmployments->country,
+                'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+            ];
+       
+            $Address->fill($dataAddress);
+            $Address->save();
+            if($Address->id) {
+                $applicantEmploymentArray = array_merge($applicantEmploymentArray,["address_id"=>$Address->id]);
+            }
             $data = new StudentEmployment();
             $data->fill($applicantEmploymentArray);
             $data->save();
             unset ($dataArray);
+
+            $dataSet = EmploymentReference::where('applicant_employment_id',$applicantEmployments->id)->get();
+            foreach($dataSet as $employmentData):
+                $applicantEmploymentArray = [
+
+                    'student_employment_id' => $data->id, 
+                    'name' => $employmentData->name,
+                    'position' => $employmentData->position,
+                    'phone' => $employmentData->phone,
+                    'email' => $employmentData->email,
+                    'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
+                ];
+    
+                $data = new StudentEmploymentReference();
+                $data->fill($applicantEmploymentArray);
+                $data->save();
+                unset ($applicantEmploymentArray);
+            endforeach;
+
         endforeach;
   
 

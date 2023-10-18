@@ -18,7 +18,7 @@ var table = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -65,6 +65,7 @@ var table = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -119,7 +120,7 @@ var table = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Course Details",
+                sheetName: "Academic Years Details",
             });
         });
 
@@ -172,7 +173,7 @@ var table = (function () {
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
-            $("#status").val("");
+            $("#status").val("1");
             filterHTMLForm();
         });
 
@@ -280,8 +281,8 @@ var table = (function () {
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Data Inserted');
+                        $("#successModal .successModalTitle").html("Congratulations!");
+                        $("#successModal .successModalDesc").html('Academic years data successfully inserted.');
                     });         
                 }
                 table.init();
@@ -380,8 +381,8 @@ var table = (function () {
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Data Updated');
+                        $("#successModal .successModalTitle").html("Congratulations!");
+                        $("#successModal .successModalDesc").html('Academic years data successfully updated.');
                     });
                 }
                 table.init();
@@ -487,7 +488,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
+                $('#confirmModal .confModDesc').html('Want to restore this Academic year from the trash? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });

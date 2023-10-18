@@ -13,8 +13,6 @@ class CourseBaseDatafutureCntroller extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $course = (isset($request->course) && $request->course > 0 ? $request->course : 0);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $query = CourseBaseDatafutures::where('course_id', $course);
         if(!empty($queryStr)):
             $query->where('field_name','LIKE','%'.$queryStr.'%');
@@ -23,6 +21,8 @@ class CourseBaseDatafutureCntroller extends Controller
             $query->orWhere('field_desc','LIKE','%'.$queryStr.'%');
         endif;
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));

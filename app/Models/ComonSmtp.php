@@ -19,6 +19,7 @@ class ComonSmtp extends Model
         'smtp_encryption',
         'smtp_authentication',
         'account_type',
+        'is_default',
         'created_by',
         'updated_by',
     ];

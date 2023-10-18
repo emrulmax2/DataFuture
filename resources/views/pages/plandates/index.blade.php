@@ -9,6 +9,7 @@
         <h2 class="text-lg font-medium mr-auto">Class plan Dates</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <button data-tw-toggle="modal" data-tw-target="#addPlansDateModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Date</button>
+            <a href="{{ route('class.plan') }}" type="button" class="btn btn-success text-white shadow-md mr-2">Back to List</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
@@ -46,21 +47,21 @@
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                 </a>
-                            </li>
+                            </li> --}}
                             <li>
                                 <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
                 </div>

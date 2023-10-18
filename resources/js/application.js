@@ -21,7 +21,7 @@ var educationQualTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -62,6 +62,7 @@ var educationQualTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -143,7 +144,7 @@ var employmentHistoryTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -208,6 +209,7 @@ var employmentHistoryTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -252,7 +254,7 @@ var employmentHistoryTable = (function () {
         $("#tabulator-export-xlsx-EH").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Applicant Details",
             });
         });
 
@@ -1168,13 +1170,85 @@ var employmentHistoryTable = (function () {
     })
     
 
-    $('#referral_code').on('keyup', function(){
-        if($(this).val() != ''){
-            $('.varifiedReferralWrap').fadeIn();
+    $('#referral_code').on('keyup paste', function(){
+        var $input = $(this);
+        var $btn = $(this).siblings('#varifiedReferral');
+        var $orgStatusInput = $(this).siblings('.is_referral_varified');
+
+        var orgCode = $input.attr('data-org');
+        var code = $input.val();
+        var orgStatus = $orgStatusInput.attr('data-org');
+        var status = $orgStatusInput.val();
+        if(code != orgCode){
+            $btn.css({'display': 'inline-flex'});
+            $input.css({'border-color': 'red'});
+            $input.closest('form').find('.form-wizard-next-btn').attr('disabled', 'disabled');
+            $orgStatusInput.val('0');
+            status = 0;
+        }else if(code == orgCode){
+            $btn.fadeOut();
+            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
+            $orgStatusInput.val(orgStatus);
+            status = orgStatus;
         }else{
-            $('.varifiedReferralWrap').fadeOut();
+            $input.val(orgCode)
+            $btn.fadeOut();
+            $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+            $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
+            $orgStatusInput.val(orgStatus);
+            status = orgStatus;
         }
     });
+
+    $('#varifiedReferral').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var $input = $btn.siblings('#referral_code');
+        var $orgStatusInput = $btn.siblings('.is_referral_varified');
+
+        if(!$btn.hasClass('verified')){
+            var applicantId = $btn.attr('data-applicant-id');
+            var code = $btn.siblings('#referral_code').val();
+            $btn.attr('disabled', 'disabled');
+
+            axios({
+                method: 'POST',
+                url: route('applicant.application.verify.referral.code'),
+                data: {applicantId : applicantId, code : code},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $input.closest('form').find('.form-wizard-next-btn').removeAttr('disabled');
+                    if(response.data.msg.suc == 1){
+                        $btn.removeAttr('disabled').html('<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified').removeClass('btn-danger').addClass('btn-primary verified');
+                        $input.css({'border-color': 'rgba(226, 232, 240, 1)'}).attr('data-org', response.data.msg.code).attr('readonly', 'readonly');
+                        $orgStatusInput.val(response.data.msg.is_referral_varified).attr('data-org', response.data.msg.is_referral_varified);
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
+
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    }else{
+                        $btn.fadeOut().removeAttr('disabled');
+                        $input.val('').css({'border-color': 'rgba(226, 232, 240, 1)'});
+                        $orgStatusInput.val('0');
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('Referral code does not match. Please insert a valid one.')
+                    }
+
+                    setTimeout(function(){
+                        $input.parent('.validationGroup').siblings('.error-verificationError').html('');
+                    }, 5000)
+                }
+            }).catch(error =>{
+                if (error.response){
+                    console.log(error)
+                }
+            });
+        }
+    })
 
     $('#student_loan').on('change', function(){
         var $this = $(this);

@@ -20,7 +20,7 @@ var applicantCommLetterListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -67,6 +67,7 @@ var applicantCommLetterListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "230",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().docurl != ''){
@@ -113,7 +114,7 @@ var applicantCommLetterListTable = (function () {
         $("#tabulator-export-xlsx-CML").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Admission Communication Details",
             });
         });
 
@@ -150,7 +151,7 @@ var applicantCommEmailListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -192,6 +193,7 @@ var applicantCommEmailListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "230",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -236,7 +238,7 @@ var applicantCommEmailListTable = (function () {
         $("#tabulator-export-xlsx-CME").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Applicant Email Details",
             });
         });
 
@@ -274,7 +276,7 @@ var applicantCommSMSListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -333,6 +335,7 @@ var applicantCommSMSListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "120",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -377,7 +380,7 @@ var applicantCommSMSListTable = (function () {
         $("#tabulator-export-xlsx-CMS").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Applicant SMS Details",
             });
         });
 

@@ -20,7 +20,7 @@ class Applicant extends Model
         'last_name',
         'photo',
         'date_of_birth',
-        'gender',
+        'sex_identifier_id',
         'submission_date',
         'status_id',
         'rejected_reason',
@@ -161,5 +161,9 @@ class Applicant extends Model
 
     public function feeeligibility(){
         return $this->hasOne(ApplicantFeeEligibility::class, 'applicant_id', 'id')->latestOfMany();
+    }
+
+    public function sexid(){
+        return $this->belongsTo(SexIdentifier::class, 'sex_identifier_id');
     }
 }

@@ -19,7 +19,7 @@ use App\Models\ApplicantDocument;
 use App\Models\StudentDocument;
 use App\Models\StudentTask;
 use App\Models\StudentTaskDocument;
-
+use App\Models\StudentUser;
 
 class ProcessStudentTaskDocument implements ShouldQueue
 {
@@ -43,8 +43,8 @@ class ProcessStudentTaskDocument implements ShouldQueue
     public function handle()
     {
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        $user = User::where(["email"=> $ApplicantUser->email])->get()->first();
-        $student = Student::where(["user_id"=> $user->id])->get()->first(); 
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        $student = Student::where(["student_user_id"=> $user->id])->get()->first();
         //--BEGIN: Student Document Sync
         $applicantTaskidList = [];
         $studentDocumentList = [];
@@ -72,7 +72,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
                         'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
                     ];
                     if($applicantDocument->document_setting_id) {
-                        array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                        $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
                     }
                     $studentDocument->fill($applicantArray);
 

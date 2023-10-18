@@ -14,14 +14,14 @@ class CourseModuleBaseAssesmentController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $module = (isset($request->module) && $request->module > 0 ? $request->module : 0);
 
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
         $query = CourseModuleBaseAssesment::where('course_module_id', $module);
         if(!empty($queryStr)):
             $query->where('assesment_code','LIKE','%'.$queryStr.'%');
             $query->orWhere('assesment_name','LIKE','%'.$queryStr.'%');
         endif;
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
@@ -29,9 +29,9 @@ class CourseModuleBaseAssesmentController extends Controller
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
+
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);        
         $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $query = CourseModuleBaseAssesment::where('course_module_id', $module)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):

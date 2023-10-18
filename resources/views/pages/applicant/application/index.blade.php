@@ -63,14 +63,16 @@
                             <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
-                            <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
-                            <select id="gender" class="lccTom lcc-tom-select w-full" name="gender">
+                            <label for="sex_identifier_id" class="form-label">Sex Identifier / Gender <span class="text-danger">*</span></label>
+                            <select id="sex_identifier_id" class="lccTom lcc-tom-select w-full" name="sex_identifier_id">
                                 <option value="" selected>Please Select</option>
-                                <option {{ isset($apply->gender) && $apply->gender == 'MALE' ? 'Selected' : '' }} value="MALE">MALE</option>
-                                <option {{ isset($apply->gender) && $apply->gender == 'FEMALE' ? 'Selected' : '' }} value="FEMALE">FEMALE</option>
-                                <option {{ isset($apply->gender) && $apply->gender == 'OTHERS' ? 'Selected' : '' }} value="OTHERS">OTHERS</option>
+                                @if($sexid->count() > 0)
+                                    @foreach($sexid as $si)
+                                        <option {{ isset($apply->sex_identifier_id) && $apply->sex_identifier_id == $si->id ? 'Selected' : '' }} value="{{ $si->id }}">{{ $si->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <div class="acc__input-error error-gender text-danger mt-2"></div>
+                            <div class="acc__input-error error-sex_identifier_id text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="nationality_id" class="form-label">Nationality <span class="text-danger">*</span></label>
@@ -459,21 +461,21 @@
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                                     </a>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <a id="tabulator-export-json-EQ" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                                     </a>
-                                                </li>
+                                                </li> --}}
                                                 <li>
                                                     <a id="tabulator-export-xlsx-EQ" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                                     </a>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <a id="tabulator-export-html-EQ" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                                     </a>
-                                                </li>
+                                                </li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -556,21 +558,21 @@
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                                     </a>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <a id="tabulator-export-json-EH" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                                                     </a>
-                                                </li>
+                                                </li> --}}
                                                 <li>
                                                     <a id="tabulator-export-xlsx-EH" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                                     </a>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <a id="tabulator-export-html-EH" href="javascript:;" class="dropdown-item">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                                                     </a>
-                                                </li>
+                                                </li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -589,12 +591,23 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by Somone/ Agent, Please enter the Referral Code.</label>
                                 <div class="col-span-12 sm:col-span-6">
-                                    <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
-                                    <div class="mt-5 varifiedReferralWrap" style="display: none;">
-                                        <button id="varifiedReferral" data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" class="btn btn-primary w-auto mr-0 mb-0">
-                                            <i data-lucide="link" class="w-4 h-4 mr-2"></i> Varify Code
+                                    <div class="validationGroup">
+                                        <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
+                                        <button id="varifiedReferral" 
+                                            data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" 
+                                            class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
+                                            style="display: {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'inline-flex' : 'none' }};" 
+                                            {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'readonly' : '' }}
+                                            >
+                                            @if(isset($apply->is_referral_varified) && $apply->is_referral_varified == 1)
+                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified
+                                            @else
+                                                <i data-lucide="link" class="w-4 h-4 mr-2"></i> Verify Code
+                                            @endif 
                                         </button>
+                                        <input type="hidden" class="is_referral_varified" name="is_referral_varified" value="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" data-org="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" />
                                     </div>
+                                    <div class="acc__input-error error-verificationError text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>

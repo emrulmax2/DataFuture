@@ -31,7 +31,7 @@ var interviewListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -90,6 +90,7 @@ var interviewListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="profile-lock__button btn btn-secondary w-48 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
@@ -156,7 +157,7 @@ var interviewListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Tasks List",
+                sheetName: "Staff Interview List",
             });
         });
 

@@ -20,7 +20,7 @@ var instancetermListtable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -82,6 +82,7 @@ var instancetermListtable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -141,7 +142,7 @@ var courseCreationINListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -157,6 +158,7 @@ var courseCreationINListTable = (function () {
                     title: "&nbsp;", 
                     width: "100",
                     headerSort: false, 
+                    download: false,
                     cellClick:function(e, row, formatterParams){
                         const courseCreationInstanceId = row.getData().id;
                         let holderWrapEl = document.getElementById('subTableWrap_'+courseCreationInstanceId);
@@ -204,6 +206,7 @@ var courseCreationINListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    download: false,
                     //width: "180",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -267,7 +270,7 @@ var courseCreationINListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Source of Tuition Fees",
+                sheetName: "Course Creation Instances",
             });
         });
 

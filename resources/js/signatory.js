@@ -22,7 +22,7 @@ var signatoryListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -32,6 +32,22 @@ var signatoryListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "120",
+                },
+                {
+                    title: "Signature",
+                    field: "url",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().url != ''){
+                            html += '<div class="flex lg:justify-start">\
+                                    <div class="intro-x">\
+                                        <img alt="'+cell.getData().signatory_name+'" class="rounded-0 h-10 w-auto relative" src="'+cell.getData().url+'">\
+                                    </div>\
+                                </div>';
+                        }
+                        return html;
+                    }
                 },
                 {
                     title: "Name",
@@ -66,6 +82,7 @@ var signatoryListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     width: "230",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().url != ''){
@@ -113,7 +130,7 @@ var signatoryListTable = (function () {
         $("#tabulator-export-xlsx-SG").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+                sheetName: "Signatory Details",
             });
         });
 

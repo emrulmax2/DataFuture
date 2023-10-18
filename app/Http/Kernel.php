@@ -56,6 +56,8 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.applicant' => \App\Http\Middleware\AuthApplicant::class,
         'applicant.loggedin' => \App\Http\Middleware\ApplicantLoggedIn::class,
+        'auth.students' => \App\Http\Middleware\AuthStudent::class,
+        'students.loggedin' => \App\Http\Middleware\StudentLoggedIn::class,
         'loggedin' => \App\Http\Middleware\LoggedIn::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,

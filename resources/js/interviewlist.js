@@ -37,7 +37,7 @@ var interviewListTable = (function () {
             //columnDefs: [ { orderable: false, targets: [0,2], }],
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No interview access to you or no matching records found",
@@ -121,6 +121,7 @@ var interviewListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
+                    download: false,
                     formatter(cell, formatterParams) {    
                         const data = cell.getValue();                    
                         var btns = ""; 
@@ -211,7 +212,7 @@ var interviewListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Semester Details",
+                sheetName: "Interview List Details",
             });
         });
 
@@ -249,7 +250,7 @@ var applicantInterviewListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -313,6 +314,7 @@ var applicantInterviewListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="applicantprofile-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
@@ -389,7 +391,7 @@ var interviewCompletedListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -453,6 +455,7 @@ var interviewCompletedListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="completed-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\

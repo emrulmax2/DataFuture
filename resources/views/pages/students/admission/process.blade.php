@@ -173,13 +173,17 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
-                                                                                        </a>
+                                                                                        @if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
-                                                                                        </a>
+                                                                                        if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @endif
                                                                                 @endforeach
                                                                             </div>
@@ -335,13 +339,17 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
-                                                                                        </a>
+                                                                                        @if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
-                                                                                        </a>
+                                                                                        if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @endif
                                                                                 @endforeach
                                                                             </div>
@@ -497,13 +505,17 @@
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                                                                        <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
-                                                                                        </a>
+                                                                                        @if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 image-fit mr-1 zoom-in" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <img alt="{{ $task->task->name }}" class="rounded-md border border-white" src="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}">
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @else 
-                                                                                        <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ asset('storage/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
-                                                                                            <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
-                                                                                        </a>
+                                                                                        if(Storage::disk('google')->exists('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                                                                            <a target="_blank" class="w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="{{ Storage::disk('google')->url('public/applicants/'.$tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" download>
+                                                                                                <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+                                                                                            </a>
+                                                                                        @endif
                                                                                     @endif
                                                                                 @endforeach
                                                                             </div>

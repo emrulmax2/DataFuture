@@ -21,6 +21,15 @@ class TopMenu
                     'route_name' => 'applicant.dashboard'
                 ],
             ];
+        elseif(!is_null(\Auth::guard('student')->user())):
+            return [
+                'dashboard' => [
+                    'icon' => 'home',
+                    'title' => 'Dashboard',
+                    'params' => [],
+                    'route_name' => 'students.dashboard'
+                ],
+            ];
         else:
             return [
                 'dashboard' => [
@@ -29,67 +38,69 @@ class TopMenu
                     'route_name' => 'dashboard',
                     'params' => []
                 ],
-                'courses' => [
+                'coursemanagement' => [
                     'icon' => 'book-open',
-                    'title' => 'Courses & Semesters',
+                    'title' => 'Courses Management',
                     'sub_menu' => [
-                        'semester' => [
-                            'route_name' => 'semester',
-                            'params' => [],
-                            'title' => 'Semesters'
-                        ],
                         'courses' => [
-                            'route_name' => 'courses',
-                            'params' => [],
-                            'title' => 'Courses'
+                            'icon' => '',
+                            'title' => 'Courses & Semesters',
+                            'sub_menu' => [
+                                'semester' => [
+                                    'icon' => '',
+                                    'route_name' => 'semester',
+                                    'params' => [],
+                                    'title' => 'Semesters'
+                                ],
+                                'courses' => [
+                                    'icon' => '',
+                                    'route_name' => 'courses',
+                                    'params' => [],
+                                    'title' => 'Courses'
+                                ],
+                                'course.creation' => [
+                                    'icon' => '',
+                                    'route_name' => 'course.creation',
+                                    'params' => [],
+                                    'title' => 'Course Creations'
+                                ],
+                            ]
                         ],
-                        'course.creation' => [
-                            'route_name' => 'course.creation',
-                            'params' => [],
-                            'title' => 'Course Creations'
+                        'terms' => [
+                            'icon' => '',
+                            'title' => 'Terms & Modules',
+                            'sub_menu' => [
+                                'term.module.creation' => [
+                                    'icon' => '',
+                                    'route_name' => 'term.module.creation',
+                                    'params' => [],
+                                    'title' =>'Term Module Creations'
+                                ],
+                                'modulelevels' => [
+                                    'icon' => '',
+                                    'route_name' => 'modulelevels',
+                                    'params' => [],
+                                    'title' =>'Module Levels'
+                                ],
+                                'groups' => [
+                                    'icon' => '',
+                                    'route_name' => 'groups',
+                                    'params' => [],
+                                    'title' =>'Groups'
+                                ],
+                            ]
                         ],
-                    ]
-                ],
-                'terms' => [
-                    'icon' => 'calendar',
-                    'title' => 'Terms & Modules',
-                    'sub_menu' => [
-                        'term.module.creation' => [
-                            'route_name' => 'term.module.creation',
-                            'params' => [],
-                            'title' =>'Term Module Creations'
-                        ],
-                        'modulelevels' => [
-                            'route_name' => 'modulelevels',
-                            'params' => [],
-                            'title' =>'Module Levels'
-                        ],
-                        'groups' => [
-                            'route_name' => 'groups',
-                            'params' => [],
-                            'title' =>'Groups'
-                        ],
-                    ]
-                ],
-                'plans' => [
-                    'icon' => 'calendar',
-                    'title' => 'Plans',
-                    'sub_menu' => [
-                        'venues' => [
-                            'route_name' => 'class.plan',
-                            'params' => [],
-                            'title' =>'Class Plans'
-                        ],
-                    ]
-                ],
-                'campuses' => [
-                    'icon' => 'map-pin',
-                    'title' => 'Locations',
-                    'sub_menu' => [
-                        'venues' => [
-                            'route_name' => 'venues',
-                            'params' => [],
-                            'title' =>'Venues'
+                        'plans' => [
+                            'icon' => '',
+                            'title' => 'Plans',
+                            'sub_menu' => [
+                                'venues' => [
+                                    'icon' => '',
+                                    'route_name' => 'class.plan',
+                                    'params' => [],
+                                    'title' =>'Class Plans'
+                                ],
+                            ]
                         ],
                     ]
                 ],
@@ -101,127 +112,21 @@ class TopMenu
                             'route_name' => 'admission',
                             'params' => [],
                             'title' => 'Admission'
+                        ],
+                        'student' => [
+                            'route_name' => 'student',
+                            'params' => [],
+                            'title' => 'Live'
                         ]
                     ]
                 ],
-                'settings' => [
-                    'icon' => 'settings',
-                    'title' => 'Settings',
+                'management' => [
+                    'icon' => 'layers',
+                    'title' => 'Management',
                     'sub_menu' => [
-                        'comonsettings' => [
-                            'icon' => '',
-                            'title' => 'Common Settings',
-                            'sub_menu' => [
-                                'awardingbody' => [
-                                    'icon' => '',
-                                    'route_name' => 'awardingbody',
-                                    'params' => [],
-                                    'title' =>'Awarding Body'
-                                ],
-                                'academicyears' => [
-                                    'icon' => '',
-                                    'route_name' => 'academicyears',
-                                    'params' => [],
-                                    'title' =>'Academic Years'
-                                ],
-                                'sourcetutionfees' => [
-                                    'icon' => '',
-                                    'route_name' => 'sourcetutionfees',
-                                    'params' => [],
-                                    'title' =>'Source of Tuition Fees'
-                                ],
-                                'coursequalification' => [
-                                    'icon' => '',
-                                    'route_name' => 'coursequalification',
-                                    'params' => [],
-                                    'title' => 'Course Qualifications'
-                                ],
-                                'countries' => [
-                                    'icon' => '',
-                                    'route_name' => 'countries',
-                                    'params' => [],
-                                    'title' => 'Countries'
-                                ],
-                            ]
-                        ],
-                        'applicants' => [
-                            'icon' => '',
-                            'title' => 'Applicants',
-                            'sub_menu' => [
-                                'titles' => [
-                                    'icon' => '',
-                                    'route_name' => 'titles',
-                                    'params' => [],
-                                    'title' => 'Title'
-                                ],
-                                'ethnicities' => [
-                                    'icon' => '',
-                                    'route_name' => 'ethnic',
-                                    'params' => [],
-                                    'title' => 'Ethnicities'
-                                ],
-                                'kin.relations' => [
-                                    'icon' => '',
-                                    'route_name' => 'kin.relations',
-                                    'params' => [],
-                                    'title' => 'Kins Relations'
-                                ],
-                                'sex.orientation' => [
-                                    'icon' => '',
-                                    'route_name' => 'sex.orientation',
-                                    'params' => [],
-                                    'title' => 'Sexual Orientation'
-                                ],
-                                'religion' => [
-                                    'icon' => '',
-                                    'route_name' => 'religion',
-                                    'params' => [],
-                                    'title' => 'Religions'
-                                ],
-                                'gender' => [
-                                    'icon' => '',
-                                    'route_name' => 'gender',
-                                    'params' => [],
-                                    'title' => 'Hesa Gender'
-                                ],
-                                'feeeligibilities' => [
-                                    'icon' => '',
-                                    'route_name' => 'feeeligibilities',
-                                    'params' => [],
-                                    'title' => 'Fee Eligibility'
-                                ],
-                                'statuses' => [
-                                    'icon' => '',
-                                    'route_name' => 'statuses',
-                                    'params' => [],
-                                    'title' => 'Statuses'
-                                ],
-                                'disabilities' => [
-                                    'icon' => '',
-                                    'route_name' => 'disabilities',
-                                    'params' => [],
-                                    'title' => 'Disabilities'
-                                ],
-                                'documentsettings' => [
-                                    'route_name' => 'documentsettings',
-                                    'params' => [],
-                                    'title' => 'Document Settings'
-                                ],
-                                'processlist' => [
-                                    'route_name' => 'processlist',
-                                    'params' => [],
-                                    'title' => 'Process List'
-                                ],
-                                'tasklist' => [
-                                    'route_name' => 'tasklist',
-                                    'params' => [],
-                                    'title' => 'Task List'
-                                ],
-                            ]
-                        ],
                         'usersettings' => [
                             'icon' => '',
-                            'title' => 'User Settings',
+                            'title' => 'User Managment',
                             'sub_menu' => [
                                 'users' => [
                                     'icon' => '',
@@ -249,51 +154,15 @@ class TopMenu
                                 ],
                             ]
                         ],
-                        'communicationsettings' => [
-                            'icon' => '',
-                            'title' => 'Communications',
-                            'sub_menu' => [
-                                'common.smtp' => [
-                                    'icon' => '',
-                                    'route_name' => 'common.smtp',
-                                    'params' => [],
-                                    'title' => 'Common SMTP'
-                                ],
-                                'letter.set' => [
-                                    'icon' => '',
-                                    'route_name' => 'letter.set',
-                                    'params' => [],
-                                    'title' => 'Letter Sets'
-                                ],
-                                'signatory' => [
-                                    'icon' => '',
-                                    'route_name' => 'signatory',
-                                    'params' => [],
-                                    'title' => 'Signatory Sets'
-                                ],
-                                'sms.template' => [
-                                    'icon' => '',
-                                    'route_name' => 'sms.template',
-                                    'params' => [],
-                                    'title' => 'SMS Templates'
-                                ],
-                                'email.template' => [
-                                    'icon' => '',
-                                    'route_name' => 'email.template',
-                                    'params' => [],
-                                    'title' => 'Email Templates'
-                                ],
-                                'letterheaderfooter' => [
-                                    'icon' => '',
-                                    'route_name' => 'letterheaderfooter',
-                                    'params' => [],
-                                    'title' => 'Header & Footers'
-                                ]
-                            ]
-                        ],
                     ]
                 ],
-                /*'apps' => [
+                'site.setting' => [
+                    'icon' => 'settings',
+                    'title' => 'Settings',
+                    'route_name' => 'site.setting',
+                    'params' => []
+                ],
+                /*'apps' => [ 
                     'icon' => 'activity',
                     'title' => 'Apps',
                     'sub_menu' => [
@@ -687,266 +556,266 @@ class TopMenu
                         ]
                     ]
                 ],*/
-                //'components' => [
-//                    'icon' => 'inbox',
-//                    'title' => 'Components',
-//                    'sub_menu' => [
-//                        'grid' => [
-//                            'icon' => '',
-//                            'title' => 'Grid',
-//                            'sub_menu' => [
-//                                'regular-table' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'regular-table',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Regular Table'
-//                                ],
-//                                'tabulator' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'tabulator',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Tabulator'
-//                                ]
-//                            ]
-//                        ],
-//                        'overlay' => [
-//                            'icon' => '',
-//                            'title' => 'Overlay',
-//                            'sub_menu' => [
-//                                'modal' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'modal',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Modal'
-//                                ],
-//                                'slide-over' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'slide-over',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Slide Over'
-//                                ],
-//                                'notification' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'notification',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Notification'
-//                                ],
-//                            ]
-//                        ],
-//                        'tab' => [
-//                            'icon' => '',
-//                            'route_name' => 'tab',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Tab'
-//                        ],
-//                        'accordion' => [
-//                            'icon' => '',
-//                            'route_name' => 'accordion',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Accordion'
-//                        ],
-//                        'button' => [
-//                            'icon' => '',
-//                            'route_name' => 'button',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Button'
-//                        ],
-//                        'alert' => [
-//                            'icon' => '',
-//                            'route_name' => 'alert',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Alert'
-//                        ],
-//                        'progress-bar' => [
-//                            'icon' => '',
-//                            'route_name' => 'progress-bar',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Progress Bar'
-//                        ],
-//                        'tooltip' => [
-//                            'icon' => '',
-//                            'route_name' => 'tooltip',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Tooltip'
-//                        ],
-//                        'dropdown' => [
-//                            'icon' => '',
-//                            'route_name' => 'dropdown',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Dropdown'
-//                        ],
-//                        'typography' => [
-//                            'icon' => '',
-//                            'route_name' => 'typography',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Typography'
-//                        ],
-//                        'icon' => [
-//                            'icon' => '',
-//                            'route_name' => 'icon',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Icon'
-//                        ],
-//                        'loading-icon' => [
-//                            'icon' => '',
-//                            'route_name' => 'loading-icon',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Loading Icon'
-//                        ]
-//                    ]
-//                ],
-//                'forms' => [
-//                    'icon' => 'sidebar',
-//                    'title' => 'Forms',
-//                    'sub_menu' => [
-//                        'regular-form' => [
-//                            'icon' => '',
-//                            'route_name' => 'regular-form',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Regular Form'
-//                        ],
-//                        'datepicker' => [
-//                            'icon' => '',
-//                            'route_name' => 'datepicker',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Datepicker'
-//                        ],
-//                        'tom-select' => [
-//                            'icon' => '',
-//                            'route_name' => 'tom-select',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Tom Select'
-//                        ],
-//                        'file-upload' => [
-//                            'icon' => '',
-//                            'route_name' => 'file-upload',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'File Upload'
-//                        ],
-//                        'wysiwyg-editor' => [
-//                            'icon' => '',
-//                            'title' => 'Wysiwyg Editor',
-//                            'sub_menu' => [
-//                                'wysiwyg-editor-classic' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'wysiwyg-editor-classic',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Classic'
-//                                ],
-//                                'wysiwyg-editor-inline' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'wysiwyg-editor-inline',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Inline'
-//                                ],
-//                                'wysiwyg-editor-balloon' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'wysiwyg-editor-balloon',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Balloon'
-//                                ],
-//                                'wysiwyg-editor-balloon-block' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'wysiwyg-editor-balloon-block',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Balloon Block'
-//                                ],
-//                                'wysiwyg-editor-document' => [
-//                                    'icon' => '',
-//                                    'route_name' => 'wysiwyg-editor-document',
-//                                    'params' => [
-//                                        'layout' => 'top-menu'
-//                                    ],
-//                                    'title' => 'Document'
-//                                ],
-//                            ]
-//                        ],
-//                        'validation' => [
-//                            'icon' => '',
-//                            'route_name' => 'validation',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Validation'
-//                        ]
-//                    ]
-//                ],
-//                'widgets' => [
-//                    'icon' => 'hard-drive',
-//                    'title' => 'Widgets',
-//                    'sub_menu' => [
-//                        'chart' => [
-//                            'icon' => '',
-//                            'route_name' => 'chart',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Chart'
-//                        ],
-//                        'slider' => [
-//                            'icon' => '',
-//                            'route_name' => 'slider',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Slider'
-//                        ],
-//                        'image-zoom' => [
-//                            'icon' => '',
-//                            'route_name' => 'image-zoom',
-//                            'params' => [
-//                                'layout' => 'top-menu'
-//                            ],
-//                            'title' => 'Image Zoom'
-//                        ]
-//                    ]
-//                ]
+                // 'components' => [
+                //     'icon' => 'inbox',
+                //     'title' => 'Components',
+                //     'sub_menu' => [
+                //         'grid' => [
+                //             'icon' => '',
+                //             'title' => 'Grid',
+                //             'sub_menu' => [
+                //                 'regular-table' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'regular-table',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Regular Table'
+                //                 ],
+                //                 'tabulator' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'tabulator',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Tabulator'
+                //                 ]
+                //             ]
+                //         ],
+                //         'overlay' => [
+                //             'icon' => '',
+                //             'title' => 'Overlay',
+                //             'sub_menu' => [
+                //                 'modal' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'modal',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Modal'
+                //                 ],
+                //                 'slide-over' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'slide-over',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Slide Over'
+                //                 ],
+                //                 'notification' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'notification',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Notification'
+                //                 ],
+                //             ]
+                //         ],
+                //         'tab' => [
+                //             'icon' => '',
+                //             'route_name' => 'tab',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Tab'
+                //         ],
+                //         'accordion' => [
+                //             'icon' => '',
+                //             'route_name' => 'accordion',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Accordion'
+                //         ],
+                //         'button' => [
+                //             'icon' => '',
+                //             'route_name' => 'button',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Button'
+                //         ],
+                //         'alert' => [
+                //             'icon' => '',
+                //             'route_name' => 'alert',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Alert'
+                //         ],
+                //         'progress-bar' => [
+                //             'icon' => '',
+                //             'route_name' => 'progress-bar',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Progress Bar'
+                //         ],
+                //         'tooltip' => [
+                //             'icon' => '',
+                //             'route_name' => 'tooltip',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Tooltip'
+                //         ],
+                //         'dropdown' => [
+                //             'icon' => '',
+                //             'route_name' => 'dropdown',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Dropdown'
+                //         ],
+                //         'typography' => [
+                //             'icon' => '',
+                //             'route_name' => 'typography',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Typography'
+                //         ],
+                //         'icon' => [
+                //             'icon' => '',
+                //             'route_name' => 'icon',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Icon'
+                //         ],
+                //         'loading-icon' => [
+                //             'icon' => '',
+                //             'route_name' => 'loading-icon',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Loading Icon'
+                //         ]
+                //     ]
+                // ],
+                // 'forms' => [
+                //     'icon' => 'sidebar',
+                //     'title' => 'Forms',
+                //     'sub_menu' => [
+                //         'regular-form' => [
+                //             'icon' => '',
+                //             'route_name' => 'regular-form',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Regular Form'
+                //         ],
+                //         'datepicker' => [
+                //             'icon' => '',
+                //             'route_name' => 'datepicker',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Datepicker'
+                //         ],
+                //         'tom-select' => [
+                //             'icon' => '',
+                //             'route_name' => 'tom-select',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Tom Select'
+                //         ],
+                //         'file-upload' => [
+                //             'icon' => '',
+                //             'route_name' => 'file-upload',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'File Upload'
+                //         ],
+                //         'wysiwyg-editor' => [
+                //             'icon' => '',
+                //             'title' => 'Wysiwyg Editor',
+                //             'sub_menu' => [
+                //                 'wysiwyg-editor-classic' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'wysiwyg-editor-classic',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Classic'
+                //                 ],
+                //                 'wysiwyg-editor-inline' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'wysiwyg-editor-inline',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Inline'
+                //                 ],
+                //                 'wysiwyg-editor-balloon' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'wysiwyg-editor-balloon',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Balloon'
+                //                 ],
+                //                 'wysiwyg-editor-balloon-block' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'wysiwyg-editor-balloon-block',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Balloon Block'
+                //                 ],
+                //                 'wysiwyg-editor-document' => [
+                //                     'icon' => '',
+                //                     'route_name' => 'wysiwyg-editor-document',
+                //                     'params' => [
+                //                         'layout' => 'top-menu'
+                //                     ],
+                //                     'title' => 'Document'
+                //                 ],
+                //             ]
+                //         ],
+                //         'validation' => [
+                //             'icon' => '',
+                //             'route_name' => 'validation',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Validation'
+                //         ]
+                //     ]
+                // ],
+                // 'widgets' => [
+                //     'icon' => 'hard-drive',
+                //     'title' => 'Widgets',
+                //     'sub_menu' => [
+                //         'chart' => [
+                //             'icon' => '',
+                //             'route_name' => 'chart',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Chart'
+                //         ],
+                //         'slider' => [
+                //             'icon' => '',
+                //             'route_name' => 'slider',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Slider'
+                //         ],
+                //         'image-zoom' => [
+                //             'icon' => '',
+                //             'route_name' => 'image-zoom',
+                //             'params' => [
+                //                 'layout' => 'top-menu'
+                //             ],
+                //             'title' => 'Image Zoom'
+                //         ]
+                //     ]
+                // ]
             ];
         endif;
     }

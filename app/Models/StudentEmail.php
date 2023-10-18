@@ -12,7 +12,7 @@ class StudentEmail extends Model
 
     protected $fillable = [
         'student_id',
-        'comon_smtp_id',
+        'common_smtp_id',
         'email_template_id',
         'subject',
         'body',

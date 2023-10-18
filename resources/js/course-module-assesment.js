@@ -19,7 +19,7 @@ var moduleAssesmentListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -46,6 +46,7 @@ var moduleAssesmentListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     width: "180",
+                    download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -80,7 +81,7 @@ var moduleAssesmentListTable = (function () {
         $("#tabulator-export-xlsx").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Source of Tuition Fees",
+                sheetName: "Course Module Assessment",
             });
         });
 

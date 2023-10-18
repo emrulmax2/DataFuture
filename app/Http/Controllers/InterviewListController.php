@@ -71,16 +71,14 @@ class InterviewListController extends Controller
             foreach($sorters as $sort):
                 $sorts[] = $sort['field'].' '.$sort['dir'];
             endforeach;
-            
-            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-            $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
-            
+         
             $query = TaskList::with('applicant')->orderByRaw(implode(',', $sorts));
-            
- 
+             
             $query->where('interview','yes');
             
-            $total_rows = $query->count();
+            $total_rows = $query->count();            
+            $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+            $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
             $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
             
             $limit = $perpage;
@@ -188,17 +186,12 @@ class InterviewListController extends Controller
     public function completedList(Request $request){
         $instances = (isset($request->instances) && !empty($request->instances) ? $request->instances : []);
         $courseCreationId = (isset($request->courseCreationId) && !empty($request->courseCreationId) ? $request->courseCreationId : []);
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size > 0 ? $request->size : 10);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $applicants = ApplicantProposedCourse::select(DB::raw('group_concat(applicant_id) as applicant_ids'))
                                                     ->where(["course_creation_id" => $courseCreationId])
@@ -211,8 +204,13 @@ class InterviewListController extends Controller
                                     ->where('interview_status','Completed');
 
         $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
+                
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
         $Query = $query->skip($offset)
                ->take($limit)
                ->get();
