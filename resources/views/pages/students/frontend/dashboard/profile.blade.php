@@ -16,12 +16,6 @@
             <div class="col-span-6">
                 <div class="font-medium text-base">Personal Details</div>
             </div>
-
-            <div class="col-span-6 text-right">
-                <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
-                    <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Details
-                </button>
-            </div>
         </div>
         
         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>

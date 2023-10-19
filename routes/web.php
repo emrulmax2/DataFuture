@@ -61,6 +61,7 @@ use App\Http\Controllers\Auth\GoogleSocialiteController;
 use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
 use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\Frontend\PersonalDetailController as StudentPersonalDetailController;
 
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
@@ -221,6 +222,10 @@ Route::prefix('/students')->name('students.')->group(function() {
         Route::controller(StudentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/profile/{id}', 'profileView')->name('dashboard.profile');
+        });
+
+        Route::controller(StudentPersonalDetailController::class)->group(function() {
+            //Route::post('/update-personal-details', 'update')->name('update.personal.details');
         });
 
         Route::controller(StudentFirstLoginDataController::class)->group(function() {

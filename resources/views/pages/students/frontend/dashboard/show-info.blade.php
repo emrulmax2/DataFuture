@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
-                <div class="font-medium text-center lg:text-left lg:mt-5">Address</div>
+                <div class="font-medium text-center lg:text-left lg:mt-5">Correspondence Address</div>
                 <div class="flex flex-col justify-center items-center lg:items-start mt-4">
                     <div class="truncate sm:whitespace-normal flex items-start">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 

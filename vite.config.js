@@ -97,6 +97,7 @@ export default defineConfig({
                 "resources/js/termtimeaccommodationtype.js",
                 "resources/js/sexidentifier.js",
                 "resources/js/student-awarding-body.js",
+                "resources/js/qualification-type-identifier.js",
 
                 "resources/js/plan.js",
                 "resources/js/plan-tree.js",
