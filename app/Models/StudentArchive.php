@@ -16,6 +16,7 @@ class StudentArchive extends Model
         'field_name',
         'field_value',
         'field_new_value',
+        'student_user_id',
         'created_by',
         'updated_by',
     ];

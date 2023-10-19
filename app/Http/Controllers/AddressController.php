@@ -32,7 +32,11 @@ class AddressController extends Controller
         $data['city'] = $city;
         $data['country'] = $country;
         $data['active'] = 1;
-        $data['created_by'] = auth()->user()->id;
+        if(!is_null(\Auth::guard('student')->user())):
+            $data['student_user_id'] = auth('student')->user()->id;
+        else:
+            $data['created_by'] = auth()->user()->id;
+        endif;
 
         if($address_id > 0){
             $theAddr = Address::find($address_id);
@@ -43,7 +47,14 @@ class AddressController extends Controller
             ):
                 $res['id'] = $address_id;
             else:
-                Address::where('id', $address_id)->update(['active' => 0, 'updated_by' => auth()->user()->id]);
+                $updateData = [];
+                $updateData['active'] = 0;
+                if(!is_null(\Auth::guard('student')->user())):
+                    $updateData['student_user_id'] = auth('student')->user()->id;
+                else:
+                    $updateData['updated_by'] = auth()->user()->id;
+                endif;
+                Address::where('id', $address_id)->update($updateData);
 
                 $address = Address::create($data);
                 $insertId = $address->id;

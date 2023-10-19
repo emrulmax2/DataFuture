@@ -50,7 +50,7 @@
         </ul>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="{{ route('students.dashboard.profile', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'students.dashboard.profile' ? 'active' : '' }}">
+        <a href="{{ route('students.dashboard.profile') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'students.dashboard.profile' ? 'active' : '' }}">
             Profile
         </a>
     </li>

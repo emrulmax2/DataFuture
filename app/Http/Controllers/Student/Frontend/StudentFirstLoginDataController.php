@@ -150,7 +150,7 @@ class StudentFirstLoginDataController extends Controller
     }
     public function consentConfirm(Request $request)
     {
-        
+        $consentIds = [];
         foreach($request->consent_number as $consent) {
                 $studentConsent = new StudentConsent();
                 $data = [
@@ -161,8 +161,25 @@ class StudentFirstLoginDataController extends Controller
                 ];
                 $studentConsent->fill($data);
                 $studentConsent->save();
-                
+                $consentIds[] = $consent;
         }
+
+        $consentPolicies = ConsentPolicy::all();
+        if(!empty($consentPolicies)):
+            foreach($consentPolicies as $csp):
+                if(!in_array($csp->id, $consentIds)):
+                    $studentConsent = new StudentConsent();
+                    $data = [
+                        "student_id" => $request->student_id,
+                        "consent_policy_id" => $csp->id,
+                        "status" => "Disagree",
+                        "created_by" => 1
+                    ];
+                    $studentConsent->fill($data);
+                    $studentConsent->save();
+                endif;
+            endforeach;
+        endif;
 
         $student = Student::find($request->student_id);
         
