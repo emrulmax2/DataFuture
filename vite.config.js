@@ -98,6 +98,12 @@ export default defineConfig({
                 "resources/js/sexidentifier.js",
                 "resources/js/student-awarding-body.js",
                 "resources/js/qualification-type-identifier.js",
+                "resources/js/sms-template.js",
+                "resources/js/email-template.js",
+                "resources/js/common-smtp.js",
+                "resources/js/letter-set.js",
+                "resources/js/signatory.js",
+                "resources/js/letterfooter.js",
 
                 "resources/js/plan.js",
                 "resources/js/plan-tree.js",
