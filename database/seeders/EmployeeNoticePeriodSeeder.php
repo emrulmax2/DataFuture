@@ -15,38 +15,17 @@ class EmployeeNoticePeriodSeeder extends Seeder
      */
     public function run()
     {
-        EmployeeNoticePeriod::insert([
-            
-            [
-                "name" => "1 Week",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                "name" => "2 Weeks",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                "name" => "3 Weeks",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                "name" => "4 Weeks",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                "name" => "1 Calendar Month",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                "name" => "2 Months",
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-        ]);
+
+        EmployeeNoticePeriod::factory()
+                ->count(6)
+                ->sequence(
+                    ['name' => '1 Week'],
+                    ['name' => '2 Weeks'],
+                    ['name' => '3 Weeks'],
+                    ['name' => '4 Weeks'],
+                    ['name' => '1 Calendar Month'],
+                    ['name' => '2 Months'],
+                )
+                ->create();
     }
 }

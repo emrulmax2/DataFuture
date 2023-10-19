@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmploymentPeriod>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EmployeeNoticePeriod>
  */
-class EmploymentPeriodFactory extends Factory
+class EmployeeNoticePeriodFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +17,7 @@ class EmploymentPeriodFactory extends Factory
     public function definition()
     {
         return [
-            'name' => "Fixed Term",
+            'name' => "1 Week",
             'created_by' => 1,
             'created_at' => now()
         ];

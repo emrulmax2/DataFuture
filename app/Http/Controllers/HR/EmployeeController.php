@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeDataSaveRequest;
+use App\Http\Requests\EmploymentDataSaveRequest;
 use App\Models\HesaGender;
 use App\Models\Title;
 use App\Models\Country;
@@ -66,7 +67,7 @@ class EmployeeController extends Controller
             'employmentPeriods' => $employmentPeriods
         ]);
     }
-    public function save(EmployeeDataSaveRequest $request)
+    public function save(EmploymentDataSaveRequest $request)
     {
         Session::put([
             'title' => $request->title,
@@ -101,7 +102,7 @@ class EmployeeController extends Controller
             'started_on' => $request->started_on,
             'punch_number' => $request->punch_number,
             'site_location' => $request->site_location,
-            'type' => $request->type,
+            'employee_work_type_id' => $request->employee_work_type_id,
             'works_number' => $request->works_number,
             'job_title' => $request->job_title,
             'department' => $request->department,
