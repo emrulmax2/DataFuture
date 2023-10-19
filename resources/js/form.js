@@ -92,15 +92,15 @@ var formDataListDatatable = (function () {
                                 //'<a href="' +
                                 //route("formdatatypes.show", cell.getData().id) +
                                 //cell.getData().id +
-                                //'"  class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                                //'"  class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="EyeOff" class="w-4 h-4"></i></a>';
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editFormDataModal"  type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                                '" data-tw-toggle="modal" data-tw-target="#editFormDataModal"  type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }
                         
                         return btns;

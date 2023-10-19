@@ -220,7 +220,7 @@ Route::prefix('/students')->name('students.')->group(function() {
 
         Route::controller(StudentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
-            Route::get('/dashboard/list', 'list')->name('dashboard.list');
+            Route::get('/dashboard/profile/{id}', 'profileView')->name('dashboard.profile');
         });
 
         Route::controller(StudentFirstLoginDataController::class)->group(function() {

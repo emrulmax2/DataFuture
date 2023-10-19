@@ -102,6 +102,10 @@ export default defineConfig({
                 "resources/js/plan-tree.js",
                 "resources/js/employee-new.js",
                 "resources/js/student-frontend.js",
+
+
+                "resources/js/student-frontend-dashboard.js",
+                "resources/js/student-frontend-profile.js",
                 
             ],
             refresh: true,

@@ -59,10 +59,10 @@
                             <div class="dropdown-menu w-40">
                                 <div class="dropdown-content">
                                     <a href="" class="dropdown-item">
-                                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit
+                                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit
                                     </a>
                                     <a href="" class="dropdown-item">
-                                        <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                        <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                     </a>
                                 </div>
                             </div>

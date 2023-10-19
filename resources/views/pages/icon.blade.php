@@ -263,20 +263,20 @@
             <div class="text-center text-xs mt-2">edit</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-            <i data-lucide="edit-2" class="block mx-auto"></i>
-            <div class="text-center text-xs mt-2">edit-2</div>
+            <i data-lucide="Pencil" class="block mx-auto"></i>
+            <div class="text-center text-xs mt-2">Pencil</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-            <i data-lucide="edit-3" class="block mx-auto"></i>
-            <div class="text-center text-xs mt-2">edit-3</div>
+            <i data-lucide="Pencil" class="block mx-auto"></i>
+            <div class="text-center text-xs mt-2">Pencil</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
             <i data-lucide="eye" class="block mx-auto"></i>
             <div class="text-center text-xs mt-2">eye</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-            <i data-lucide="eye-off" class="block mx-auto"></i>
-            <div class="text-center text-xs mt-2">eye-off</div>
+            <i data-lucide="EyeOff" class="block mx-auto"></i>
+            <div class="text-center text-xs mt-2">EyeOff</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
             <i data-lucide="external-link" class="block mx-auto"></i>
@@ -803,7 +803,7 @@
             <div class="text-center text-xs mt-2">tool</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-            <i data-lucide="trash" class="block mx-auto"></i>
+            <i data-lucide="Trash2" class="block mx-auto"></i>
             <div class="text-center text-xs mt-2">trash</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">

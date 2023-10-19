@@ -11,7 +11,7 @@
             <!-- BEGIN: Inbox Menu -->
             <div class="intro-y box bg-primary p-5 mt-6">
                 <button type="button" class="btn text-slate-600 dark:text-slate-300 w-full bg-white dark:bg-darkmode-300 dark:border-darkmode-300 mt-1">
-                    <i class="w-4 h-4 mr-2" data-lucide="edit-3"></i> Compose
+                    <i class="w-4 h-4 mr-2" data-lucide="Pencil"></i> Compose
                 </button>
                 <div class="border-t border-white/10 dark:border-darkmode-400 mt-6 pt-6 text-white">
                     <a href="" class="flex items-center px-3 py-2 rounded-md bg-white/10 dark:bg-darkmode-700 font-medium">
@@ -27,7 +27,7 @@
                         <i class="w-4 h-4 mr-2" data-lucide="send"></i> Sent
                     </a>
                     <a href="" class="flex items-center px-3 py-2 mt-2 rounded-md">
-                        <i class="w-4 h-4 mr-2" data-lucide="trash"></i> Trash
+                        <i class="w-4 h-4 mr-2" data-lucide="Trash2"></i> Trash
                     </a>
                 </div>
                 <div class="border-t border-white/10 dark:border-darkmode-400 mt-4 pt-4 text-white">
