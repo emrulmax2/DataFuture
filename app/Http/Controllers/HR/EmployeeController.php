@@ -15,6 +15,7 @@ use App\Models\Disability;
 use App\Models\EmployeeNoticePeriod;
 use App\Models\EmployeeWorkType;
 use App\Models\EmploymentPeriod;
+use App\Models\EmploymentSspTerm;
 use App\Models\Venue;
 use App\Models\WorkType;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class EmployeeController extends Controller
         $departments = Department::all();
         $noticePeriods = EmployeeNoticePeriod::all();
         $employmentPeriods = EmploymentPeriod::all();
+        $sspTerms = EmploymentSspTerm::all();
 
         return view('pages.employee.index',[
             'title' => 'Add new Employee - LCC Data Future Managment',
@@ -64,7 +66,8 @@ class EmployeeController extends Controller
             'workTypes' => $workTypes,
             'departments' => $departments,
             'noticePeriods' => $noticePeriods,
-            'employmentPeriods' => $employmentPeriods
+            'employmentPeriods' => $employmentPeriods,
+            'sspTerms' => $sspTerms
         ]);
     }
     public function save(EmploymentDataSaveRequest $request)
