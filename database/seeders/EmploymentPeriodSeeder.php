@@ -15,22 +15,14 @@ class EmploymentPeriodSeeder extends Seeder
      */
     public function run()
     {
-        EmploymentPeriod::insert([
-            [
-                'name' => 'Fixed Term', 
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                'name' => 'Permanent', 
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                'name' => 'Temporary', 
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-        ]);
+
+        EmploymentPeriod::factory()
+                ->count(3)
+                ->sequence(
+                    ['name' => 'Fixed Term'],
+                    ['name' => 'Permanent'],
+                    ['name' => 'Temporary'],
+                )
+                ->create();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeDataSaveRequest;
+use App\Http\Requests\EmploymentDataSaveRequest;
 use App\Models\HesaGender;
 use App\Models\Title;
 use App\Models\Country;
@@ -14,6 +15,7 @@ use App\Models\Disability;
 use App\Models\EmployeeNoticePeriod;
 use App\Models\EmployeeWorkType;
 use App\Models\EmploymentPeriod;
+use App\Models\EmploymentSspTerm;
 use App\Models\Venue;
 use App\Models\WorkType;
 use Illuminate\Http\Request;
@@ -49,6 +51,7 @@ class EmployeeController extends Controller
         $departments = Department::all();
         $noticePeriods = EmployeeNoticePeriod::all();
         $employmentPeriods = EmploymentPeriod::all();
+        $sspTerms = EmploymentSspTerm::all();
 
         return view('pages.employee.index',[
             'title' => 'Add new Employee - LCC Data Future Managment',
@@ -63,10 +66,11 @@ class EmployeeController extends Controller
             'workTypes' => $workTypes,
             'departments' => $departments,
             'noticePeriods' => $noticePeriods,
-            'employmentPeriods' => $employmentPeriods
+            'employmentPeriods' => $employmentPeriods,
+            'sspTerms' => $sspTerms
         ]);
     }
-    public function save(EmployeeDataSaveRequest $request)
+    public function save(EmploymentDataSaveRequest $request)
     {
         Session::put([
             'title' => $request->title,
@@ -101,7 +105,7 @@ class EmployeeController extends Controller
             'started_on' => $request->started_on,
             'punch_number' => $request->punch_number,
             'site_location' => $request->site_location,
-            'type' => $request->type,
+            'employee_work_type_id' => $request->employee_work_type_id,
             'works_number' => $request->works_number,
             'job_title' => $request->job_title,
             'department' => $request->department,

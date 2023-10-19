@@ -378,8 +378,9 @@
                                 <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span></label>
                                 <select id="ssp-term" name="ssp_term" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
-                                    <option value="Company Sick Pay">Company Sick Pay</option>
-                                    <option value="Occupetional Sick Pay">Occupetional Sick Pay</option>
+                                    @foreach($sspTerms as $sspterm)
+                                        <option  value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>              
+                                    @endforeach
                                 </select>
                                 <div class="acc__input-error error-ssp_term text-danger mt-2"></div>
         
