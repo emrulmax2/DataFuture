@@ -66,9 +66,9 @@ var applicantApplicantionList = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().submission_date == '') {
-                            btns += '<a href="'+route('applicant.application')+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<a href="'+route('applicant.application')+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                         }else{
-                            btns += '<a href="'+route('applicant.application.show', cell.getData().id)+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            btns += '<a href="'+route('applicant.application.show', cell.getData().id)+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="EyeOff" class="w-4 h-4"></i></a>';
                         }
                         
                         return btns;

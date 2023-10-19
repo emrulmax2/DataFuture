@@ -46,11 +46,11 @@ var table = (function () {
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editDepartmentModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                                '" data-tw-toggle="modal" data-tw-target="#editDepartmentModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns +=
                                 '<button data-id="' +

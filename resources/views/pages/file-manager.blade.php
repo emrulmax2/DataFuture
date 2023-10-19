@@ -24,7 +24,7 @@
                         <i class="w-4 h-4 mr-2" data-lucide="users"></i> Shared
                     </a>
                     <a href="" class="flex items-center px-3 py-2 mt-2 rounded-md">
-                        <i class="w-4 h-4 mr-2" data-lucide="trash"></i> Trash
+                        <i class="w-4 h-4 mr-2" data-lucide="Trash2"></i> Trash
                     </a>
                 </div>
                 <div class="border-t border-slate-200 dark:border-darkmode-400 mt-4 pt-4">
@@ -155,7 +155,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>

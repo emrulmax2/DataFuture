@@ -468,7 +468,7 @@
                                 <i data-lucide="download" class="w-4 h-4 mr-2"></i> Pending
                             </button>
                             <button class="btn btn-danger w-32 mr-2 mb-2">
-                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Trash
+                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Trash
                             </button>
                             <button class="btn btn-dark w-32 mr-2 mb-2">
                                 <i data-lucide="image" class="w-4 h-4 mr-2"></i> Image
@@ -499,7 +499,7 @@
                                             <i data-lucide="download" class="w-4 h-4 mr-2"></i> Pending
                                         </button>
                                         <button class="btn btn-danger w-32 mr-2 mb-2">
-                                            <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Trash
+                                            <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Trash
                                         </button>
                                         <button class="btn btn-dark w-32 mr-2 mb-2">
                                             <i data-lucide="image" class="w-4 h-4 mr-2"></i> Image
@@ -539,7 +539,7 @@
                             <i data-lucide="download" class="w-5 h-5"></i>
                         </button>
                         <button class="btn btn-danger mr-1 mb-2">
-                            <i data-lucide="trash" class="w-5 h-5"></i>
+                            <i data-lucide="Trash2" class="w-5 h-5"></i>
                         </button>
                         <button class="btn btn-dark mr-1 mb-2">
                             <i data-lucide="image" class="w-5 h-5"></i>
@@ -569,7 +569,7 @@
                                             <i data-lucide="download" class="w-5 h-5"></i>
                                         </button>
                                         <button class="btn btn-danger mr-1 mb-2">
-                                            <i data-lucide="trash" class="w-5 h-5"></i>
+                                            <i data-lucide="Trash2" class="w-5 h-5"></i>
                                         </button>
                                         <button class="btn btn-dark mr-1 mb-2">
                                             <i data-lucide="image" class="w-5 h-5"></i>

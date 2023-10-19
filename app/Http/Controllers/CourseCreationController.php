@@ -78,8 +78,8 @@ class CourseCreationController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'course' => $list->course->name,
-                    'semester' => $list->semester->name,
+                    'course' => (isset($list->course->name) ? $list->course->name : ''),
+                    'semester' => (isset($list->semester->name) ? $list->semester->name : ''),
                     'duration' => $list->duration,
                     'unit_length' => $list->unit_length,
                     'slc_code'=> $list->slc_code,

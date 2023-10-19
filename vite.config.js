@@ -97,11 +97,22 @@ export default defineConfig({
                 "resources/js/termtimeaccommodationtype.js",
                 "resources/js/sexidentifier.js",
                 "resources/js/student-awarding-body.js",
+                "resources/js/qualification-type-identifier.js",
+                "resources/js/sms-template.js",
+                "resources/js/email-template.js",
+                "resources/js/common-smtp.js",
+                "resources/js/letter-set.js",
+                "resources/js/signatory.js",
+                "resources/js/letterfooter.js",
 
                 "resources/js/plan.js",
                 "resources/js/plan-tree.js",
                 "resources/js/employee-new.js",
                 "resources/js/student-frontend.js",
+
+
+                "resources/js/student-frontend-dashboard.js",
+                "resources/js/student-frontend-profile.js",
                 
             ],
             refresh: true,

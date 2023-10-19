@@ -32,7 +32,7 @@
 
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Personal Details
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Personal Details
                     </button>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                 
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherPersonalInfoModal" type="button" class="editOtherInfo btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Other Info
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Other Info
                     </button>
                 </div>
             </div>
@@ -155,7 +155,7 @@
 
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherItentificationModal" type="button" class="editOtherIdentification btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Identification
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Identification
                     </button>
                 </div>
             </div>
@@ -261,7 +261,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Contact Details
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Contact Details
                     </button>
                 </div>
             </div>
@@ -389,7 +389,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editAdmissionKinDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Next of Kin
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Next of Kin
                     </button>
                 </div>
             </div>
@@ -458,7 +458,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editStudentQualStatusModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Status
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Status
                     </button>
                 </div>
             </div>
@@ -548,7 +548,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editStudentEmpStatusModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Status
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Status
                     </button>
                 </div>
             </div>
@@ -631,7 +631,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editStudentConsentModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Consent
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Consent
                     </button>
                 </div>
             </div>

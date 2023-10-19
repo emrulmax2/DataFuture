@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     {{-- <button data-applicant="{{ $applicant->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Personal Details
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Personal Details
                     </button> --}}
                 </div>
             </div>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     {{-- <button data-applicant="{{ $applicant->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Contact Details
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Contact Details
                     </button> --}}
                 </div>
             </div>
@@ -187,7 +187,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     {{-- <button data-tw-toggle="modal" data-tw-target="#editAdmissionKinDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Next of Kin
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Next of Kin
                     </button> --}}
                 </div>
             </div>
@@ -252,7 +252,7 @@
                 </div>
                 <div class="col-span-6 text-right">
                     {{-- <button data-tw-toggle="modal" data-tw-target="#editAdmissionCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Course & Programme
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Course & Programme
                     </button> --}}
                 </div>
             </div>

@@ -202,12 +202,12 @@
                                     <ul class="dropdown-content">
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> New Dropdown
+                                                <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> New Dropdown
                                             </a>
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete Dropdown
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete Dropdown
                                             </a>
                                         </li>
                                     </ul>
@@ -229,12 +229,12 @@
                                                 <ul class="dropdown-content">
                                                     <li>
                                                         <a href="" class="dropdown-item">
-                                                            <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> New Dropdown
+                                                            <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> New Dropdown
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a href="" class="dropdown-item">
-                                                            <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete Dropdown
+                                                            <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete Dropdown
                                                         </a>
                                                     </li>
                                                 </ul>

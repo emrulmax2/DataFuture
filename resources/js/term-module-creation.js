@@ -77,7 +77,7 @@ var termModuleCreationsListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().modules_count > 0) {
-                            btns += '<a href="'+route('term.module.creation.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            btns += '<a href="'+route('term.module.creation.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="EyeOff" class="w-4 h-4"></i></a>';
                         } else {
                             btns += '<a href="'+route('term.module.creation.add', { instanceTermId : cell.getData().id, courseId : cell.getData().course_id})+'" class="btn btn-success text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="plus-circle" class="w-4 h-4"></i></a>';
                         }
@@ -207,11 +207,11 @@ var termModuleListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().assessment_count > 0){
-                            btns += '<a data-modulecreationid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewModuleAssessmentModal" class="view_assessment btn-round btn btn-linkedin text-xs text-white px-2 py-1 ml-1"><i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> Assessment</a>';
+                            btns += '<a data-modulecreationid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewModuleAssessmentModal" class="view_assessment btn-round btn btn-linkedin text-xs text-white px-2 py-1 ml-1"><i data-lucide="EyeOff" class="w-4 h-4 mr-2"></i> Assessment</a>';
                         }else{
                             btns += '<a data-modulecreationid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addModuleAssessmentModal" class="add_assessment btn-round btn btn-success text-xs text-white px-2 py-1 ml-1"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Assessment</a>';
                         }
-                        btns += '<a data-modulecreationid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#editModuleCreationModal" class="eidt_module btn btn-primary text-white btn-round text-xs ml-1 px-2 py-1"><i data-lucide="edit-3" class="w-4 h-4 mr-2"></i> Edit Module</a>';
+                        btns += '<a data-modulecreationid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#editModuleCreationModal" class="eidt_module btn btn-primary text-white btn-round text-xs ml-1 px-2 py-1"><i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Module</a>';
                         
                         
                         return btns;

@@ -141,7 +141,7 @@
                     <span class="btn btn-ekey px-2 py-1 text-white"><i data-lucide="key" class="w-4 h-4 mr-1"></i> Enrollment</span>
                     <span class="btn btn-submission px-2 py-1 text-white"><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> Submission</span>
                     <span class="btn btn-vroom px-2 py-1 text-white"><i data-lucide="video" class="w-4 h-4 mr-1"></i> Virtual Room</span>
-                    <span class="btn btn-note px-2 py-1 text-white"><i data-lucide="edit-2" class="w-4 h-4 mr-1"></i> Note</span>
+                    <span class="btn btn-note px-2 py-1 text-white"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Note</span>
                 </div>
                 <div class="flex">
                     <button id="saveUpdatePlans" type="submit" class="btn btn-primary w-auto" >

@@ -405,7 +405,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>
@@ -427,7 +427,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>
@@ -456,7 +456,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>
@@ -493,7 +493,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>
@@ -515,7 +515,7 @@
                                         </li>
                                         <li>
                                             <a href="" class="dropdown-item">
-                                                <i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete
+                                                <i data-lucide="Trash2" class="w-4 h-4 mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>

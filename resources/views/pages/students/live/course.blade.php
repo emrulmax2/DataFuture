@@ -20,7 +20,7 @@
             </div>
             <div class="col-span-6 text-right">
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                    <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Course Informations
+                    <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Course Informations
                 </button>
             </div>
         </div>
@@ -74,7 +74,7 @@
             </div>
             <div class="col-span-6 text-right">
                 <button data-tw-toggle="modal" data-tw-target="#editStudentAWBModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                    <i data-lucide="edit-2" class="w-4 h-4 mr-2"></i> Edit Awarding Body
+                    <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Awarding Body
                 </button>
             </div>
         </div>

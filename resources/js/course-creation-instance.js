@@ -86,8 +86,8 @@ var instancetermListtable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#instancetermEditModal" type="button" class="editTermBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="deleteTermBtn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#instancetermEditModal" type="button" class="editTermBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'"  class="deleteTermBtn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
@@ -212,9 +212,9 @@ var courseCreationINListTable = (function () {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
                             btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal"  data-tw-target="#instancetermAddModal" class="addInstanceTermBtn btn btn-linkedin text-white btn-rounded ml-1 p-0 px-4 w-auto h-9"><i data-lucide="plus" class="w-4 h-4"></i> Add Term</button>';
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCourseCreationInstModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="edit-3" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCourseCreationInstModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             if(cell.getData().has_terms < 1){
-                                btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                                btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                             }
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';

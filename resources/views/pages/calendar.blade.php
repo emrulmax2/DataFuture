@@ -37,7 +37,7 @@
         <div class="col-span-12 xl:col-span-4 2xl:col-span-3">
             <div class="box p-5 intro-y">
                 <button type="button" class="btn btn-primary w-full mt-2">
-                    <i class="w-4 h-4 mr-2" data-lucide="edit-3"></i> Add New Schedule
+                    <i class="w-4 h-4 mr-2" data-lucide="Pencil"></i> Add New Schedule
                 </button>
                 <div class="border-t border-b border-slate-200/60 dark:border-darkmode-400 mt-6 mb-5 py-3" id="calendar-events">
                     <div class="relative">
