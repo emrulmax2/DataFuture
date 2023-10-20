@@ -15,17 +15,13 @@ class EmploymentSspTermSeeder extends Seeder
      */
     public function run()
     {
-        EmploymentSspTerm::insert([
-            [
-                'name' => 'Company Sick Pay', 
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-            [
-                'name' => 'Occupetional Sick Pay', 
-                'created_by' => 1, 
-                'created_at' => date("Y-m-d", time())
-            ],
-        ]);
+
+        EmploymentSspTerm::factory()
+                ->count(2)
+                ->sequence(
+                    ['name' => 'Company Sick Pay'],
+                    ['name' => 'Occupetional Sick Pay'],
+                )
+                ->create();
     }
 }

@@ -387,7 +387,7 @@
                             <div class="mt-3 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                         </div>
                         @php
-                            $permanent_address_id = (isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0 ? $student->contact->term_time_address_id : 0);
+                            $permanent_address_id = (isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0 ? $student->contact->permanent_address_id : 0);
                             $address2 = '';
                             if(isset($student->contact->permaddress->address_line_1) && !empty($student->contact->permaddress->address_line_1)):
                                 $address2 .= '<span class="text-slate-600 font-medium">'.$student->contact->permaddress->address_line_1.'</span><br/>';

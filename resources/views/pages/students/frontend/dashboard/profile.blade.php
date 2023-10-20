@@ -173,10 +173,6 @@
                     <div class="col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
                     <div class="col-span-8 font-medium">{{ (isset($student->contact->ttacom->name) && !empty($student->contact->ttacom->name) ? $student->contact->ttacom->name : '---') }}</div>
                 </div>
-                <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Term Time Address Postcode</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->contact->term_time_post_code) && !empty($student->contact->term_time_post_code) ? $student->contact->term_time_post_code : '---') }}</div>
-                </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0 mb-3">
@@ -205,14 +201,6 @@
                             <span class="font-medium text-warning">Not Set Yet!</span><br/>
                         @endif
                     </div>
-                </div>
-                <div class="grid grid-cols-12 gap-0 mb-3">
-                    <div class="col-span-4 text-slate-500 font-medium">Permanent Country code</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->contact->pcountry->name) && !empty($student->contact->pcountry->name) ? $student->contact->pcountry->name : '---') }}</div>
-                </div>
-                <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Permanent Post code</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->contact->permanent_post_code) && !empty($student->contact->permanent_post_code) ? $student->contact->permanent_post_code : '---') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
@@ -374,4 +362,5 @@
 @section('script')
     @vite('resources/js/student-frontend-dashboard.js')
     @vite('resources/js/student-frontend-profile.js')
+    @vite('resources/js/student-frontend-consent.js')
 @endsection

@@ -62,6 +62,10 @@ use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
 use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\Frontend\PersonalDetailController as StudentPersonalDetailController;
+use App\Http\Controllers\Student\Frontend\OtherPersonalInformationController as StudentOtherPersonalInformationController;
+use App\Http\Controllers\Student\Frontend\ContactDetailController as StudentContactDetailController;
+use App\Http\Controllers\Student\Frontend\KinDetailController as StudentKinDetailController;
+use App\Http\Controllers\Student\Frontend\ConsentController as StudentConsentController;
 
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboard;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
@@ -221,11 +225,23 @@ Route::prefix('/students')->name('students.')->group(function() {
 
         Route::controller(StudentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
-            Route::get('/dashboard/profile/{id}', 'profileView')->name('dashboard.profile');
+            Route::get('/dashboard/profile', 'profileView')->name('dashboard.profile');
         });
 
-        Route::controller(StudentPersonalDetailController::class)->group(function() {
-            //Route::post('/update-personal-details', 'update')->name('update.personal.details');
+        Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
+            Route::post('/update-other-personal-details', 'update')->name('update.other.personal.details');
+        });
+
+        Route::controller(StudentContactDetailController::class)->group(function() {
+            Route::post('/update-contact-details', 'update')->name('update.contact.details'); 
+        });
+
+        Route::controller(StudentKinDetailController::class)->group(function() {
+            Route::post('/update-kin-details', 'update')->name('update.kin.details');
+        });
+
+        Route::controller(StudentConsentController::class)->group(function() {
+            Route::post('/update-consent', 'update')->name('update.consent');
         });
 
         Route::controller(StudentFirstLoginDataController::class)->group(function() {
@@ -234,6 +250,11 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::post('/first/consent', 'consentConfirm')->name('consent.confirm.data');
             Route::get('/first/review', 'reviewShows')->name('review.show.data');
             Route::post('/first/review', 'reviewDone')->name('review.done.data');
+        });
+
+        Route::controller(AddressController::class)->group(function() {
+            Route::post('address/get-address', 'getAddress')->name('address.get');
+            Route::post('address/store', 'store')->name('address.store');
         });
 
     });

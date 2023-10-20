@@ -19,7 +19,7 @@ import { createIcons, icons } from "lucide";
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('student.update.consent'),
+            url: route('students.update.consent'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {

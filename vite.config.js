@@ -104,6 +104,7 @@ export default defineConfig({
                 "resources/js/letter-set.js",
                 "resources/js/signatory.js",
                 "resources/js/letterfooter.js",
+                "resources/js/letterheader.js",
 
                 "resources/js/plan.js",
                 "resources/js/plan-tree.js",
@@ -113,6 +114,7 @@ export default defineConfig({
 
                 "resources/js/student-frontend-dashboard.js",
                 "resources/js/student-frontend-profile.js",
+                "resources/js/student-frontend-consent.js",
                 
             ],
             refresh: true,

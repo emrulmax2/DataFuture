@@ -85,8 +85,9 @@ class DashboardController extends Controller
 
     }
 
-    public function profileView($studentId){
-        $student = Student::find($studentId);
+    public function profileView(){
+        $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
+
         return view('pages.students.frontend.dashboard.profile', [
             'title' => 'Live Students - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -106,7 +107,7 @@ class DashboardController extends Controller
             'sexid' => SexIdentifier::where('active', 1)->get(),
             'hesaGender' => HesaGender::where('active', 1)->get(),
             'religion' => Religion::where('active', 1)->get(),
-            'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
+            'stdConsentIds' => StudentConsent::where('student_id', $student->id)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
             'consent' => ConsentPolicy::all(),
             'ttacom' => TermTimeAccommodationType::where('active', 1)->get()
         ]);
