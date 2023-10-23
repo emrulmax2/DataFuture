@@ -160,10 +160,35 @@ var classPlanTreeListTable = (function () {
 
 
 (function(){
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {},
+            remove_button: {
+                title: "Remove this item",
+            },
+        },
+        placeholder: 'Search Here...',
+        persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    let assigned_user_ids = new TomSelect(document.getElementById('assigned_user_ids'), tomOptions);
+
     const warningModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModalCP"));
     const successModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalCP"));
     const editPlanModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPlanModal"));
     const confirmModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalCP"));
+    const assignManagerOrCoOrdinatorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#assignManagerOrCoOrdinatorModal"));
+
+    const assignManagerOrCoOrdinatorModalEl = document.getElementById('assignManagerOrCoOrdinatorModal')
+    assignManagerOrCoOrdinatorModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#assignManagerOrCoOrdinatorModalEl .acc__input-error').html('');
+        $('#assignManagerOrCoOrdinatorModalEl input[type="hidden"]').val('');
+        assigned_user_ids.clear(true);
+    });
         
     let confModalDelTitle = 'Are you sure?';
 
@@ -637,5 +662,212 @@ var classPlanTreeListTable = (function () {
     /* Generate Days For Plan */
 
 
+    /* Assign Manager & Co-Ordinator */
+    $(document).on('click', '.assignManager', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        
+        
+        var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
+        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
+        var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
+
+        assignManagerOrCoOrdinatorModal.show();
+        $('.assignRoleTitle').text('Manager');
+
+        axios({
+            method: "post",
+            url: route('plans.get.assign.details'),
+            data: {yearid : yearid, termid : termid, courseid : courseid, groupid : groupid, type: 'Manager'},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                let plans = response.data.plans;
+                let participants = response.data.participants;
+                let title = response.data.title;
+                $('#assignManagerOrCoOrdinatorModal .theModTitle').html(title);
+
+                if(plans.length > 0){
+                    $('#assignManagerOrCoOrdinatorModal input[name="plan_ids"]').val(plans.join());
+                };
+
+                if(participants.length > 0){
+                    $.each(participants, function(name, value) {
+                        assigned_user_ids.addItem(value, true);
+                    });
+                }else{
+                    assigned_user_ids.clear(true);
+                }
+                $('#assignManagerOrCoOrdinatorModal input[name="type"]').val('Manager');
+            }
+        }).catch(error => {
+            if (error.response.status == 422 || error.response.status == 304) {
+                console.log('error');
+            }
+        });
+    })
+    $(document).on('click', '.assignCoOrdinator', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        
+        
+        var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
+        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
+        var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
+
+        assignManagerOrCoOrdinatorModal.show();
+        $('.assignRoleTitle').text('Audit User');
+
+        axios({
+            method: "post",
+            url: route('plans.get.assign.details'),
+            data: {yearid : yearid, termid : termid, courseid : courseid, groupid : groupid, type: 'Auditor'},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                let plans = response.data.plans;
+                let participants = response.data.participants;
+                let title = response.data.title;
+                $('#assignManagerOrCoOrdinatorModal .theModTitle').html(title);
+
+                if(plans.length > 0){
+                    $('#assignManagerOrCoOrdinatorModal input[name="plan_ids"]').val(plans.join());
+                };
+
+                if(participants.length > 0){
+                    $.each(participants, function(name, value) {
+                        assigned_user_ids.addItem(value, true);
+                    });
+                }else{
+                    assigned_user_ids.clear(true);
+                }
+                $('#assignManagerOrCoOrdinatorModal input[name="type"]').val('Auditor');
+            }
+        }).catch(error => {
+            if (error.response.status == 422 || error.response.status == 304) {
+                console.log('error');
+            }
+        });
+    })
+
+    $('#assignManagerOrCoOrdinatorForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('assignManagerOrCoOrdinatorForm');
+    
+        document.querySelector('#updateParticipants').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateParticipants svg").style.cssText ="display: inline-block;";
+
+        let plan_id = $('#assignManagerOrCoOrdinatorForm input[name="plan_ids"]').val();
+        if(plan_id == ''){
+            $('participantError', $form).remove();
+            $('participantError', $form).prepend('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Plan Id Not found. Please add plan first.</div>');
+            
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+
+            setTimeout(function(){
+                $('participantError', $form).remove();
+            }, 3000);
+        }else{
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('plans.assign.participants'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    document.querySelector('#updateParticipants').removeAttribute('disabled');
+                    document.querySelector("#updateParticipants svg").style.cssText = "display: none;";
+
+                    assignManagerOrCoOrdinatorModal.hide();
+
+                    successModalCP.show();
+                    document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                        $("#successModalCP .successModalDescCP").html('Participants are successfully assignd.');
+                    });                
+                    
+                    setTimeout(function(){
+                        successModalCP.hide();
+                    }, 4000);
+                }
+            }).catch(error => {
+                document.querySelector('#updateParticipants').removeAttribute('disabled');
+                document.querySelector("#updateParticipants svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#assignManagerOrCoOrdinatorForm .${key}`).addClass('border-danger');
+                            $(`#assignManagerOrCoOrdinatorForm  .error-${key}`).html(val);
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        }
+    });
+    /* Assign Manager & Co-Ordinator */
+
+    /* Plan Visibility Set */
+    $(document).on('click', '.visibilityBtn', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        
+        var visibility = ((typeof $btn.attr('data-visibility') !== 'undefined' && $btn.attr('data-visibility') !== false) ? $btn.attr('data-visibility') : 1);
+        var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
+        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
+        var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
+
+        $btn.attr('disabled', 'disabled');
+
+        axios({
+            method: "post",
+            url: route('plans.update.visibility'),
+            data: {yearid : yearid, termid : termid, courseid : courseid, groupid : groupid, visibility : visibility},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                console.log(response.data);
+                var suc = response.data.suc;
+                var visibilities = response.data.visibility;
+                $btn.removeAttr('disabled').removeClass('visibility_'+visibilities).addClass('visibility_'+(visibilities == 1 ? 0 : 1)).attr('data-visibility', visibilities);
+                if(suc == 2){
+                    warningModalCP.show();
+                    document.getElementById("warningModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModalCP .warningModalTitleCP").html("Oops!" );
+                        $("#warningModalCP .warningModalDescCP").html('Plans not found under selectd criteria. Please add class plans first.');
+                    }); 
+                    
+                    setTimeout(function(){
+                        warningModalCP.hide();
+                    }, 5000)
+                }else{
+                    successModalCP.show();
+                    document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                        $("#successModalCP .successModalDescCP").html('Plans visibility successfully updated.');
+                    });                
+                    
+                    setTimeout(function(){
+                        successModalCP.hide();
+                    }, 5000);
+                }
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+    /* Plan Visibility Set */
 
 })();

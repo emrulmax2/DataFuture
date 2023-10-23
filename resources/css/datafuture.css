@@ -614,7 +614,7 @@
 .planTreeWrap ul li.hasChildren.opened::before{
     content: '-';
 }
-.planTreeWrap ul li a svg{
+.planTreeWrap ul li > a > svg{
     display: none;
 }
 .planTreeWrap ul li.hasChildren > ul{
@@ -688,4 +688,30 @@
 }
 #studentSearchAccordion.accordion .accordion-button .accordionCollaps{
     right: 0;
+}
+
+.r-0{
+    right: 0;
+}
+.t-0{
+    top: 0;
+}
+.settingBtns{
+    right: 0;
+    top: 0;
+}
+.visibilityBtn{
+    position: relative;
+    top: -2px;
+}
+.visibilityBtn.visibility_0:after {
+    content: '';
+    width: 1px;
+    height: 20px;
+    background: rgb(100, 116, 139);
+    position: absolute;
+    transform: rotate(45deg);
+    left: 7px;
+    margin: 0;
+    top: -2px;
 }
