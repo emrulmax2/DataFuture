@@ -435,6 +435,10 @@ Route::middleware('auth')->group(function() {
         Route::post('plans/tree/update', 'update')->name('plans.tree.update'); 
         Route::delete('plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
         Route::post('plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
+
+        Route::post('plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
+        Route::post('plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
+        Route::post('plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
