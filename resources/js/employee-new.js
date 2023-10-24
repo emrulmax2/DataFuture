@@ -82,12 +82,7 @@ import IMask from 'imask';
             url = route('eligibility.save');
         }else if(parentFieldset.index() == 4){
             url = route('emergency-contact.save');
-        }else if(parentFieldset.index() == 5){
-            url = route('employeereview.show.data');
-        }else if(parentFieldset.index() == 6){
-            url = route('employeereview.done.data');
-                   
-            redURL = $('input[name="url"]', parentForm).val();
+              
         }else{
             url = route('employee.save');
         }
@@ -114,21 +109,19 @@ import IMask from 'imask';
                     if(parentFieldset.index() == 1){
                         //No work load here still
                     } else if(parentFieldset.index() == 2){
-                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id);
+                        $('.reviewContentWrap').attr('data-review-id', res.user_id);
                     } else if(parentFieldset.index() == 3){
-                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id);
-                        //window.location.href = redURL;
+                        $('.reviewContentWrap').attr('data-review-id', res.user_id);
+                       
                     } else if(parentFieldset.index() == 4){
-                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id);
-                    } else if(parentFieldset.index() == 5){        
-                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id); 
-                    } else if(parentFieldset.index() == 6){        
-                        window.location.href = redURL;
-                    }
+                        $('.reviewContentWrap').attr('data-review-id', res.user_id);
+                        window.location.href = route('profile.employee.view',res.user_id);
+                    } 
                 }
                 nextWizardStep = true;
             },
             error: function (jqXHR, textStatus, errorThrown) {
+                $('.acc__input-error').html('');
                 $('.form-wizard-next-btn, .form-wizard-previous-btn', parentForm).removeAttr('disabled');
                 $('.form-wizard-next-btn svg', parentForm).fadeOut();
                 if(jqXHR.status == 422){
@@ -229,7 +222,7 @@ import IMask from 'imask';
         }
     });
 
-    $('#employee_work_type_id').on('change', function() {
+    $('#employee_work_type').on('change', function() {
         let tthis = $(this)
 
         let typeText = $('option:selected',tthis).text();
@@ -240,6 +233,37 @@ import IMask from 'imask';
             $('input[name="works_number"]').parent().addClass('visible')
         }
         
+
+    });
+
+    
+    $('#eligible_to_work_status').on('change', function() {
+        let tthis = $(this)
+
+        if(tthis.prop('checked')){
+
+            $('select[name="workpermit_type"]').parent().removeClass('invisible')
+            
+        }  else {
+
+            $('select[name="workpermit_type"]').parent().addClass('invisible')
+        }
+        
+
+    });
+    $('select[name="workpermit_type"]').on('change', function() {
+        let tthis = $(this)
+
+        let typeText = $('option:selected',tthis).text();
+
+        if(typeText.match(/British Citizen/gi)==null) {
+            $('input[name="workpermit_number"]').parent().removeClass('invisible')
+            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
+        } else {
+
+            $('input[name="workpermit_number"]').parent().addClass('invisible')
+            $('input[name="workpermit_expire"]').parent().addClass('invisible')
+        }
 
     });
     

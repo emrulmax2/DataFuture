@@ -31,10 +31,6 @@
                     <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Emergency Contact</div>
                 </li>
 
-                <li class="intro-x lg:text-center flex items-center mt-5 lg:mt-0 lg:block flex-1 z-10 form-wizard-step-item">
-                    <button class="w-10 h-10 rounded-full btn text-slate-500 bg-slate-100 dark:bg-darkmode-400 dark:border-darkmode-400">5</button>
-                    <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Finalize your Profile</div>
-                </li>
             </ul>
         </div>
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400 show"> 
@@ -275,7 +271,7 @@
                     </div>            
                     <div class="intro-y col-span-12 sm:col-span-4">
                         <label for="vertical-form-3" class="form-label inline-flex">Site Location <span class="text-danger">*</span></label>
-                        <select id="vertical-form-11" name="site_location" class=" w-full lccTom lcc-tom-select" multiple>
+                        <select id="vertical-form-11" name="site_location[]" class=" w-full lccTom lcc-tom-select" multiple>
                             <option value="">Please Select</option>
                             @foreach($venues as $venue)
                                 <option  value="{{ $venue->id }}">{{ $venue->name }}</option>              
@@ -291,35 +287,40 @@
                     </div>  
    
                     <div class="intro-y col-span-12 sm:col-span-6"> <!-- Type selection based with work number available('employee') -->
-                        <label for="employee_work_type_id" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
-                        <select id="employee_work_type_id" name="employee_work_type_id" class=" w-full lccTom lcc-tom-select">
+                        <label for="employee_work_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
+                        <select id="employee_work_type" name="employee_work_type" class=" w-full lccTom lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($workTypes as $type)
                                 <option  value="{{ $type->id }}">{{ $type->name }}</option>              
                             @endforeach
                         </select> 
-                        <div class="acc__input-error error-employee_work_type_id text-danger mt-2"></div>
+                        <div class="acc__input-error error-employee_work_type text-danger mt-2"></div>
                     </div>
                     
                     <div class="intro-y col-span-12 sm:col-span-6 invisible">
-                        <label for="vertical-form-5" class="form-label inline-flex">Works Number </label>
+                        <label for="vertical-form-5" class="form-label inline-flex">Works Number <span class="text-danger">*</span></label>
                         <input id="vertical-form-5" type="text" class="form-control rounded-none form-control-lg"  name="works_number" aria-label="default input example">
-                        
+                        <div class="acc__input-error error-works_number text-danger mt-2"></div>  
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="vertical-form-6" class="form-label inline-flex">Job Title <span class="text-danger">*</span></label>
-                        <input id="vertical-form-6" type="text" class="form-control rounded-none form-control-lg"  name="job_title" aria-label="default input example">
+                        <label for="job_title" class="form-label inline-flex">Job Title <span class="text-danger">*</span></label>
+                        <select id="job_title" name="job_title" class=" w-full lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
+                            @foreach($jobTitles as $jobTitle)
+                                <option  value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>              
+                            @endforeach
+                        </select> 
                         <div class="acc__input-error error-job_title text-danger mt-2"></div>
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="department_id" class="form-label inline-flex">Department <span class="text-danger">*</span></label>
-                        <select id="department_id" name="department_id" class=" w-full lccTom lcc-tom-select">
+                        <label for="department" class="form-label inline-flex">Department <span class="text-danger">*</span></label>
+                        <select id="department" name="department" class=" w-full lccTom lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($departments as $department)
                                 <option  value="{{ $department->id }}">{{ $department->name }}</option>              
                             @endforeach
                         </select> 
-                        <div class="acc__input-error error-department_id text-danger mt-2"></div>
+                        <div class="acc__input-error error-department text-danger mt-2"></div>
                     </div>                      
                     <div class="intro-y col-span-12 sm:col-span-4">
                         <label for="vertical-form-8" class="form-label inline-flex">Office Telephone / Ext. No</label>
@@ -332,8 +333,9 @@
                         
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-4">
-                        <label for="vertical-form-11" class="form-label inline-flex">Email (username)</label>
-                        <input id="vertical-form-11" type="text" class="form-control rounded-none form-control-lg"  name="email" aria-label="default input example">                           
+                        <label for="email" class="form-label inline-flex">Email (username) <span class="text-danger">*</span> </label>
+                        <input id="email" type="text" class="form-control rounded-none form-control-lg"  name="email" aria-label="default input example">   
+                        <div class="acc__input-error error-email text-danger mt-2"></div>                        
                     </div>
                 
 
@@ -419,53 +421,69 @@
                 <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                     
                     
-                    <div class="col-span-12 sm:col-span-4">
-                        <label for="eligible_to_work_status" class="form-label">Do this person is eligible to work in UK? <span class="text-danger"> *</span></label>
+                    <div class="col-span-12 sm:col-span-3">
+                        <label for="eligible_to_work_status" class="form-label">Do this person is eligible to work in UK?</label>
                         <div class="form-check form-switch">
-                            <input  id="eligible_to_work_status" class="form-check-input" name="eligible_to_work" value="1" type="checkbox">
+                            <input  id="eligible_to_work_status" class="form-check-input" name="eligible_to_work_status" value="Yes" type="checkbox">
                             <label class="form-check-label" for="eligible_to_work">&nbsp;</label>
                         </div>
                     </div>
-                    <div class="intro-y col-span-12 sm:col-span-4">
-                        <label for="vertical-form-2" class="form-label inline-flex">Work Permit Number </label>
-                        <input id="vertical-form-2" type="text" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
+
+                    <div id="workpermit_type" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <label for="workpermit_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
+                        <select id="workpermit_type" name="workpermit_type" class=" w-full lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
+                            @foreach($workPermitTypes as $workPermitType)
+                                <option  value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>              
+                            @endforeach
+                        </select> 
+                        <div class="acc__input-error error-workpermit_type text-danger mt-2"></div>
+                    </div>
+                    <div id="workpermit-number" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <label for="workpermit_number" class="form-label inline-flex">Work Permit Number </label>
+                        <input id="workpermit_number" type="text" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
                         <div class="acc__input-error error-workpermit_number text-danger mt-2"></div>
                     </div>              
-                    <div class="intro-y col-span-12 sm:col-span-4">
-                        <label for="vertical-form-3" class="form-label inline-flex">Work Permit Expiry Date </label>
-                        <input id="vertical-form-3" type="text" placeholder="DD-MM-YYYY" id="workpermit_expire" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
-                        
+                    <div id="workpermit-expire" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <label for="workpermit_expire" class="form-label inline-flex">Work Permit Expiry Date </label>
+                        <input id="workpermit_expire" type="text" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
+                        <div class="acc__input-error error-workpermit_expire text-danger mt-2"></div>
                     </div>   
                     
                     <div class="intro-y col-span-12">
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-6 py-1"> <!-- checkbox for yes/no -->
-                                <label for="vertical-form-1" class="form-label inline-flex">Document Type <span class="text-danger"> *</span></label>
-                                <select id="vertical-form-1" name="eligible_to_work" class="form-control lccTom">
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
+                                <label for="document_type" class="form-label inline-flex">Document Type <span class="text-danger"> *</span></label>
+                                <select id="document_type" name="document_type" class="form-control lccTom lcc-tom-select">
+                                    <option value="">Please Select</option>
+                                    @foreach($documentTypes as $documentType)
+                                        <option  value="{{ $documentType->id }}">{{ $documentType->name }}</option>              
+                                    @endforeach
                                 </select>
-                                <div class="acc__input-error error-eligible_to_work text-danger mt-2"></div>
+                                <div class="acc__input-error error-document_type text-danger mt-2"></div>
                             </div>
 
                             <div class="intro-y col-span-12 sm:col-span-6 py-1">
-                                <label for="vertical-form-4" class="form-label inline-flex">Document Number </label>
+                                <label for="vertical-form-4" class="form-label inline-flex">Document Number <span class="text-danger"> *</span></label>
                                 <input id="vertical-form-4" type="text" name="doc_number" value="" class="w-full text-sm" />
+                                <div class="acc__input-error error-doc_number text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-6 py-1">
-                                <label for="vertical-form-5" class="form-label inline-flex">Document Expiry Date </label>
+                                <label for="vertical-form-5" class="form-label inline-flex">Document Expiry Date <span class="text-danger"> *</span></label>
                                 <input id="vertical-form-5" type="text" placeholder="DD-MM-YYYY" id="doc_expire" class="form-control  datepicker rounded-none" name="doc_expire" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-doc_expire text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-6 py-1">
-                                <label for="vertical-form-6" class="form-label inline-flex">Document Issue Country </label>
+                                <label for="vertical-form-6" class="form-label inline-flex">Document Issue Country <span class="text-danger"> *</span></label>
                                 <select id="vertical-form-6" name="doc_issue_country" class="form-control w-full">
                                     <option value="">Please Select</option>
                                     @foreach($country as $countries)
                                         <option  value="{{ $countries->id }}">{{ $countries->name }}</option>              
                                     @endforeach
                                 </select>
+                                <div class="acc__input-error error-doc_issue_country text-danger mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -498,13 +516,13 @@
                 <div class="font-medium text-base">Emergency Contact</div>
                 <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="vertical-form-1" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
-                        <input id="vertical-form-1" type="text" class="form-control rounded-none form-control-lg"  name="emergency_contact_name" aria-label="default input example">
+                        <label for="emergency_contact_name" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
+                        <input id="emergency_contact_name" type="text" class="form-control rounded-none form-control-lg"  name="emergency_contact_name" aria-label="default input example">
                         <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                     </div>              
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="vertical-form-3" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
-                        <select id="relationship" name="relationship" class="form-control lccTom">
+                        <label for="relationship" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
+                        <select id="relationship" name="relationship" class="form-control lccTom lcc-tom-select">
                             @foreach($relation as $kins)
                                 <option  value="{{ $kins->id }}">{{ $kins->name }}</option>              
                             @endforeach
@@ -517,36 +535,46 @@
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="address-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Please your term time address the same as your permanent address?</div>
+                                <div class="text-slate-500 dark:text-slate-400">Please add the emergency contact?</div>
                             </div>
                         </div>
                         <!-- END: Custom Tooltip Content -->
                     </div> 
                     <div class="intro-y col-span-12">
                         <div class="grid grid-cols-12 gap-x-4">
-                            <div class="intro-y col-span-12 sm:col-span-6">
+                            <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                <input id="vertical-form-13" type="text" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-            
+                                <input id="vertical-form-13" type="text" name="emergency_contact_address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                
+                                <div class="acc__input-error error-emergency_contact_address_line_1 text-danger mt-2"></div>
                             </div>
-                            <div class="intro-y col-span-12 sm:col-span-6">
+                            <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                                <input id="vertical-form-14" type="text" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-            
+                                <input id="vertical-form-14" type="text" name="emergency_contact_address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                
+                            </div>
+                            
+                            <div class="intro-y col-span-12 sm:col-span-4">
+                                <label for="vertical-form-14" class="form-label inline-flex">Post Code</label>
+                                <input id="vertical-form-14" type="text" name="emergency_contact_post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
                             </div>
                              <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                <input  id="vertical-form-13" type="text" name="city" value="" class="w-full text-sm"  />
+                                <input  id="vertical-form-13" type="text" name="emergency_contact_city" value="" class="w-full text-sm"  />
+                                <div class="acc__input-error error-emergency_contact_city text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                <input id="vertical-form-14" type="text" name="state" value="" class="w-full text-sm" />
+                                <input id="vertical-form-14" type="text" name="emergency_contact_state" value="" class="w-full text-sm" />
+                                <div class="acc__input-error error-emergency_contact_state text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                <input id="vertical-form-15" type="text" name="country" value="" class="w-full text-sm" />
+                                <input id="vertical-form-15" type="text" name="emergency_contact_country" value="" class="w-full text-sm" />
+                                <div class="acc__input-error error-emergency_contact_country text-danger mt-2"></div>
                             </div>
                         </div>
                     </div>            
@@ -562,18 +590,18 @@
                     </div>
     
                     <div class="intro-y col-span-12 sm:col-span-4">
-                        <label for="vertical-form-6" class="form-label inline-flex">Email <span class="text-danger">*</span></label>
+                        <label for="vertical-form-6" class="form-label inline-flex">Email </label>
                         <input id="vertical-form-6" type="text" name="emergency_contact_email" class="form-control rounded-none form-control-lg" aria-label="default input example">
-                        <div class="acc__input-error error-emergency_contact_email text-danger mt-2"></div>
+                        
                     </div>
                 </div>
-
+                <input type="hidden" name="url" value=""/> 
                 <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
                     <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn mr-2">
                         Back
                     </button>
                     <button id="form4SaveButton" type="button" class="btn btn-primary w-auto  form-wizard-next-btn">
-                        Save & Continue 
+                        Finished and Create 
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2 svg_2">
                             <g fill="none" fill-rule="evenodd">
@@ -590,26 +618,6 @@
                 </div>
 
                 
-            </form>
-        </fieldset>
-        <fieldset class="wizard-fieldset wizard-last-step px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
-            <form method="post" action="#" id="appicantFormStep_5" class="wizard-step-form">
-                <div class="reviewLoader flex pt-5 pb-5 justify-center text-center">
-                </div>
-                <div class="reviewContentWrap" data-review-id="0" style="display: none;">
-                    <div class="font-medium text-base mb-5">Review</div>
-                    <div class="reviewContent pt-3 pb-5"></div>
-                </div>
-
-                <div class="col-span-12 flex items-center justify-between sm:justify-between mt-5">
-                    <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn">
-                        Back
-                    </button>
-                    <button type="button" class="btn btn-primary w-auto  form-wizard-next-btn">
-                        Finished 
-                    </button>
-                    {{-- <input type="hidden" name="url" value="{{ route('students.dashboard') }}"/> --}}
-                </div>
             </form>
         </fieldset>
     </div>

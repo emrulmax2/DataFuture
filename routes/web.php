@@ -83,6 +83,7 @@ use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\HR\EmployeeProfileController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -681,7 +682,7 @@ Route::middleware('auth')->group(function() {
         Route::post('users/update/{id}', 'update')->name('users.update');
         Route::delete('users/delete/{id}', 'destroy')->name('users.destory');
         Route::post('users/restore/{id}', 'restore')->name('users.restore');
-
+        
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
     });
@@ -689,7 +690,6 @@ Route::middleware('auth')->group(function() {
         Route::get('employee','index')->name('employee');
         Route::get('employee/new','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
-        
         Route::post('employement/save','saveEmployment')->name('employement.save');
         Route::post('eligibility/save','saveEligibility')->name('eligibility.save');
         Route::post('emergency-contact/save','saveEmergencyContact')->name('emergency-contact.save');
@@ -697,6 +697,12 @@ Route::middleware('auth')->group(function() {
         Route::get('/first/review', 'reviewShows')->name('employeereview.show.data');
         Route::post('/first/review', 'reviewDone')->name('employeereview.done.data');
     });
+
+    Route::controller(EmployeeProfileController::class)->group(function(){
+        
+        Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
+    });
+    
     Route::controller(StaffDashboard::class)->group(function() {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');

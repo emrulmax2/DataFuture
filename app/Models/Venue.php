@@ -29,4 +29,9 @@ class Venue extends Model
     public function ips(){
         return $this->hasMany(VenueIpAddress::class, 'venue_id', 'id');
     }
+
+    public function employees()
+    {
+        return $this->belongsToMany(Employee::class);
+    }
 }
