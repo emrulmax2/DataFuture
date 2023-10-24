@@ -120,6 +120,7 @@ use App\Http\Controllers\Settings\Studentoptions\PreviousProviderController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
 use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
+use App\Http\Controllers\Settings\ELearningActivitySettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1117,6 +1118,17 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
         Route::delete('site-settings/letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
         Route::post('site-settings/letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
+
+    Route::controller(ELearningActivitySettingController::class)->group(function() {
+        Route::get('site-settings/e-learning', 'index')->name('elearning'); 
+        Route::post('site-settings/e-learning/store', 'store')->name('elearning.store'); 
+        Route::get('site-settings/e-learning/list', 'list')->name('elearning.list');
+        Route::post('site-settings/e-learning/edit', 'edit')->name('elearning.edit');
+        Route::post('site-settings/e-learning/update', 'update')->name('elearning.update');
+        Route::delete('site-settings/e-learning/delete/{id}', 'destroy')->name('elearning.destory');
+        Route::post('site-settings/e-learning/restore/{id}', 'restore')->name('elearning.restore');
+        Route::post('site-settings/e-learning/update-status/{id}', 'updateStatus')->name('elearning.update.status');
     });
 
     Route::controller(StudentOptionController::class)->group(function(){

@@ -159,6 +159,11 @@
                     </li>
                 </ul>
             </li>
+            <li>
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'elearning' ? 'active text-primary font-medium' : '' }}" href="{{ route('elearning') }}">
+                    <i data-lucide="frame" class="w-4 h-4 mr-2"></i> E-Learning Activity Setting
+                </a>
+            </li>
         </ul>
     </div>
 </div>

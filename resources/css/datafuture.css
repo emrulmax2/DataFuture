@@ -715,3 +715,9 @@
     margin: 0;
     top: -2px;
 }
+.w-30{
+    width: 7.5rem;
+}
+.h-30{
+    height: 7.5rem;
+}

@@ -105,6 +105,7 @@ export default defineConfig({
                 "resources/js/signatory.js",
                 "resources/js/letterfooter.js",
                 "resources/js/letterheader.js",
+                "resources/js/e-learning-activity-settings.js",
 
                 "resources/js/plan.js",
                 "resources/js/plan-tree.js",
