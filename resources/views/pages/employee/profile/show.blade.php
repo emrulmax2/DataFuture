@@ -8,8 +8,6 @@
 
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}</strong></u></h2>
-        
-        
     </div>
 
     <!-- BEGIN: Profile Info -->

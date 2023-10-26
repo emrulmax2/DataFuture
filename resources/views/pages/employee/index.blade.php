@@ -3,7 +3,7 @@
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
-<script src="https://unpkg.com/imask"></script>
+
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Create New Employee</h2>

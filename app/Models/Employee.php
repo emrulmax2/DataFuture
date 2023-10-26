@@ -92,4 +92,16 @@ class Employee extends Model
         $retirementAge = Carbon::parse($this->attributes['date_of_birth'])->addYears(60);
         return $retirementAge->diff(Carbon::now())->format('%y years, %m months and %d days');
     }
+
+    public function payment(){
+        return $this->hasOne(EmployeePaymentSetting::class, 'employee_id', 'id')->latestOfMany();
+    }
+
+    public function hourauth(){
+        return $this->hasMany(EmployeeHourAuthorisedBy::class, 'employee_id', 'id');
+    }
+
+    public function holidayAuth(){
+        return $this->hasMany(EmployeeHolidayAuthorisedBy::class, 'employee_id', 'id');
+    }
 }

@@ -9,10 +9,11 @@
     </li>
     
     <li class="nav-item" role="presentation">
-        <a href="{{ route('student.notes', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.notes' ? 'active' : '' }}">
-            Documents
+        <a href="{{ route('employee.payment.settings', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.payment.settings' ? 'active' : '' }}">
+            Payment Settings
         </a>
     </li>
+    
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.notes', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.notes' ? 'active' : '' }}">
             Notes
