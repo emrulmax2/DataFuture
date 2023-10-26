@@ -117,7 +117,7 @@ import IMask from 'imask';
     const editEmploymentlModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmploymentDetailsModal"));
     const editEligibilitesModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEligibilitesDetailsModal"));
     const editTermDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTermDetailsModal"));
-
+    const editAddressUpdateModal= tailwind.Modal.getOrCreateInstance(document.querySelector("#editAddressUpdateModal"));
     $('.save').on('click', function (e) {
         e.preventDefault();
 
@@ -151,6 +151,7 @@ import IMask from 'imask';
                     editEmploymentlModal.hide();
                     editEligibilitesModal.hide();
                     editTermDetailsModal.hide();
+                    editAddressUpdateModal.hide();
                     successModal.show();
 
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {

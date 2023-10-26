@@ -82,6 +82,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeProfileController;
@@ -711,9 +712,13 @@ Route::middleware('auth')->group(function() {
         Route::post('employment/update/{employment}','update')->name('employment.update');
     });
 
+    Route::controller(EmployeeAddressController::class)->group(function() {
+        Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
+    });
     Route::controller(EmployeeEligibilityController::class)->group(function() {
         Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
     });
+    
 
     Route::controller(EmployeeProfileController::class)->group(function() {
         

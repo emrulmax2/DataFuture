@@ -314,7 +314,7 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <div class="intro-y col-span-12 sm:col-span-6 py-1"> <!-- checkbox for yes/no -->
                                     <label for="document_type" class="form-label inline-flex">Document Type <span class="text-danger"> *</span></label>
-                                    <select id="document_type" name="document_type"  class="form-control lccTom lcc-tom-select">
+                                    <select id="document_type" name="document_type" class="form-control lccTom lcc-tom-select">
                                         <option value="" selected>Please Select</option>
                                         @if($documentTypes->count() > 0)
                                             @foreach($documentTypes as $documentType)
@@ -346,7 +346,7 @@
                                         @if($country->count() > 0)
                                             @foreach($country as $countries)
                                                 <option {{ isset($employeeEligibilites->docIssueCountry->id) && $employeeEligibilites->docIssueCountry->id == $countries->id ? 'Selected' : '' }} value="{{ $countries->id }}">{{ $countries->name }}</option>
-                                                
+                                                {{-- <option  value="{{ $countries->id }}">{{ $countries->name }}</option>               --}}
                                             @endforeach
                                         @endif
                                     </select>
@@ -599,6 +599,97 @@
     </div>
 </div>
 <!-- END: Edit Terms Details Modal -->
+
+<!-- BEGIN: Edit editAddressUpdateModal Details Modal -->
+<div id="editAddressUpdateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" action="#" id="editAddressUpdateForm" enctype="multipart/form-data">
+            
+            <input type="hidden" name="url" value="{{ route('employee.address.update',$employee->id) }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Address Details</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4 gap-y-5">
+                        <div class="intro-y col-span-12">
+                            <div class="grid grid-cols-12 gap-x-4">
+                                <div class="intro-y col-span-12 sm:col-span-4">
+                                    <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
+                                    @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
+                                        <input id="vertical-form-13" type="text" value="{{ $employee->address->address_line_1 }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                    @endif
+                                    <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
+                                </div>
+                                <div class="intro-y col-span-12 sm:col-span-4">
+                                    <label for="address_line_2" class="form-label inline-flex">Address Line 2</label>
+                                    @if(isset($employee->address->address_line_2) && !empty($employee->address->address_line_2))
+                                        <input id="address_line_2" type="text" value="{{ $employee->address->address_line_2 }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                    @endif
+                                </div>
+                                
+                                <div class="intro-y col-span-12 sm:col-span-4">
+                                    <label for="post_code" class="form-label inline-flex">Post Code</label>
+                                    @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
+                                        <input id="post_code" type="text" value="{{ $employee->address->post_code }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                    @endif    
+                                    <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
+                                </div>
+                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                    <label for="city" class="form-label inline-flex">City <span class="text-danger">*</span></label>
+                                    @if(isset($employee->address->city) && !empty($employee->address->city))
+                                        <input  id="city" type="text" value="{{ $employee->address->city }}" name="city" class="w-full text-sm"  />
+                                    @endif
+                                    <div class="acc__input-error error-city text-danger mt-2"></div>
+                                </div>
+        
+                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                    <label for="state" class="form-label inline-flex">State <span class="text-danger">*</span></label>
+                                    @if(isset($employee->address->state) && !empty($employee->address->state))
+                                        <input id="state" type="text" name="state" value="{{ $employee->address->state }}" class="w-full text-sm" />
+                                    @endif
+                                    <div class="acc__input-error error-state text-danger mt-2"></div>
+                                </div>
+        
+                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                    <label for="country" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
+                                    @if(isset($employee->address->country) && !empty($employee->address->country))
+                                        <input id="country" type="text" name="country" value="{{ $employee->address->country }}" class="w-full text-sm" />
+                                    @endif
+                                    <div class="acc__input-error error-country text-danger mt-2"></div>
+                                </div>
+
+                            </div>
+                        </div>          
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Emergency Contact Details Modal -->
 
 <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
