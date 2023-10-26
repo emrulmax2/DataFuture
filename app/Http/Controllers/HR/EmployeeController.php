@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeDataSaveRequest;
+use App\Http\Requests\EmployeeDataUpdateRequest;
 use App\Http\Requests\EmployeeEligibilityDataSaveRequest;
 use App\Http\Requests\EmployeeEmergencyContactDataSaveRequest;
 use App\Http\Requests\EmploymentDataSaveRequest;
@@ -27,6 +28,7 @@ use App\Models\EmployeeWorkType;
 use App\Models\Employment;
 use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
+use App\Models\SexIdentifier;
 use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Http\Request;
@@ -69,6 +71,7 @@ class EmployeeController extends Controller
         $jobTitles = EmployeeJobTitle::all();
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
+        
         return view('pages.employee.index',[
             'title' => 'Add new Employee - LCC Data Future Managment',
             'breadcrumbs' => [],
@@ -141,7 +144,7 @@ class EmployeeController extends Controller
     public function saveEligibility(EmployeeEligibilityDataSaveRequest $request)
     {
         Session::put([
-            'eligible_to_work' => $request->eligible_to_work,
+            'eligible_to_work' => $request->eligible_to_work_status,
             'workpermit_number' => $request->workpermit_number,
             'workpermit_expire' => $request->workpermit_expire,
             'document_type' => $request->document_type,
@@ -209,6 +212,7 @@ class EmployeeController extends Controller
             "telephone"  => Session::get('telephone'),
             "mobile"  => Session::get('mobile'),
             "email"  => Session::get('email'),
+            "sex_identifier_id"=>Session::get('sex'),
             "date_of_birth"  => Session::get('date_of_birth') ,
             "ni_number"  => Session::get('ni_number'),
             "nationality_id"  => Session::get('nationality'),
@@ -216,9 +220,10 @@ class EmployeeController extends Controller
             "car_reg_number"  => Session::get('car_reg_number'),
             "drive_license_number"  => Session::get('drive_license_number'),
             "disability_status" => (Session::get('disability_status')) ? "Yes" : "No",
-            "disability_id" =>  (Session::get('disability_id')) ? Session::get('disability_id')[0] : null,
             "address_id" =>   $address->id,
         ]);
+
+        $employee->disability()->sync(Session::get('disability_id'));
 
         
         $employment = Employment::create([
@@ -311,9 +316,21 @@ class EmployeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(EmployeeDataUpdateRequest $request, Employee $employee)
     {
-        //
+        $request->merge(['disability_status' => ($request->disability_status)? "Yes":"No"]);
+        $input = $request->all();
+        $employee->fill($input);
+        $changes = $employee->getDirty();
+        $employee->save();
+
+        $employee->disability()->sync($request->disability_id);
+
+        
+        if($employee->wasChanged())
+            return response()->json(["message"=>"updated","data"=>$changes]);
+        else
+            return response()->json(["no update"]);
     }
 
     /**

@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="ml-5">
-                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $employee->id }}</div>
+                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg"></div>
                 <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $employee->title->name.' '.$employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
                 
             </div>
@@ -24,9 +24,6 @@
                 </div>
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $employee->mobile }}
-                </div>
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="calculator" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Age :</span> {{ $employee->age }}
                 </div>
                 
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">

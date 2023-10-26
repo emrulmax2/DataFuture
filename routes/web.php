@@ -695,6 +695,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee','index')->name('employee');
         Route::get('employee/new','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
+        Route::post('employee/update/{employee}','update')->name('employee.update');
         Route::post('employement/save','saveEmployment')->name('employement.save');
         Route::post('eligibility/save','saveEligibility')->name('eligibility.save');
         Route::post('emergency-contact/save','saveEmergencyContact')->name('emergency-contact.save');

@@ -22,7 +22,6 @@ class Employee extends Model
         'sex_identifier_id',
         'nationality_id',
         'address_id',
-        'disability_id',
         'ethnicity_id',
         'telephone',
         'mobile',
@@ -44,7 +43,7 @@ class Employee extends Model
     }
     
     public function getFullNameAttribute() {
-        return $this->first_name . ' ' . $this->last_name.'';
+        return $this->first_name . ' ' . $this->last_name;
     }
 
     public function venues()
@@ -69,7 +68,8 @@ class Employee extends Model
     }
 
     public function disability(){
-        return $this->belongsTo(Disability::class, 'disability_id');
+
+        return $this->belongsToMany(Disability::class, 'employee_disability', 'employee_id','disability_id');
     }
 
     public function sex(){
