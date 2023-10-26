@@ -85,6 +85,7 @@ use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
 use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeProfileController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\PlanTreeController;
@@ -713,14 +714,21 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
     });
 
+    Route::controller(EmployeeAddressController::class)->group(function() {
+        Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
+    });
+    Route::controller(EmploymentController::class)->group(function() {
+        Route::post('employment/update/{employment}','update')->name('employment.update');
+    });
+    Route::controller(EmployeeEligibilityController::class)->group(function() {
+        Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
+    });
+
     Route::controller(EmployeePaymentSettingsController::class)->group(function(){
         Route::get('employee-profile/payment-settings/{id}', 'index')->name('employee.payment.settings'); 
         Route::post('employee-profile/payment-settings/store', 'store')->name('employee.payment.settings.store'); 
     });
 
-    Route::controller(EmployeeAddressController::class)->group(function() {
-        Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
-    });
     Route::controller(EmployeeBankDetailController::class)->group(function(){
         Route::post('employee-profile/bank/store', 'store')->name('employee.bank.store'); 
         Route::post('employee-profile/bank/edit', 'edit')->name('employee.bank.edit'); 
