@@ -1,13 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Settings;
 
+use App\Http\Controllers\Controller;
+
+use App\Models\Role;
+use App\Models\Department;
 use App\Models\PermissionCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\PermissionCategoryRequest;
-use App\Http\Requests\PermissionCategoryUpdateRequest;
+use App\Http\Requests\RoleRequest;
+use App\Http\Requests\RoleUpdateRequest;
+use App\Models\PermissionTemplate;
+use App\Models\PermissionTemplateGroup;
 
-class PermissionCategoryController extends Controller
+class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,10 +23,12 @@ class PermissionCategoryController extends Controller
      */
     public function index()
     {
-        return view('pages/permissioncategory/index', [
-            'title' => 'Permission Category - LCC Data Future Managment',
+        return view('pages.settings.role.index', [
+            'title' => 'Roles - LCC Data Future Managment',
+            'subtitle' => 'User Privilege',
             'breadcrumbs' => [
-                ['label' => 'Permission Category', 'href' => 'javascript:void(0);']
+                ['label' => 'Site Settings', 'href' => route('site.setting')],
+                ['label' => 'Roles', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -34,9 +43,9 @@ class PermissionCategoryController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = PermissionCategory::orderByRaw(implode(',', $sorts));
+        $query = Role::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
+            $query->where('display_name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -63,7 +72,8 @@ class PermissionCategoryController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'name' => $list->name,
+                    'display_name' => $list->display_name,
+                    'type' => $list->type,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -78,10 +88,11 @@ class PermissionCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(PermissionCategoryRequest $request)
+    public function store(RoleRequest $request)
     {
-        $data = PermissionCategory::create([
-            'name'=> $request->name,
+        $data = Role::create([
+            'display_name' => $request->display_name,
+            'type' => $request->type,
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -90,22 +101,37 @@ class PermissionCategoryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\PermissionCategory  $permissionCategory
+     * @param  \App\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
-    public function show(PermissionCategory $permissionCategory)
+    public function show($id)
     {
-        //
+        $permissionTemplateIds = PermissionTemplate::where('role_id', $id)->pluck('id')->toArray();
+        return view('pages.settings.role.show', [
+            'title' => 'Roles - LCC Data Future Managment',
+            'subtitle' => 'User Privilege',
+            'breadcrumbs' => [
+                ['label' => 'Site Settings', 'href' => route('site.setting')],
+                ['label' => 'Roles', 'href' => route('roles')],
+                ['label' => 'Details', 'href' => 'javascript:void(0);']
+            ],
+            'role' => Role::find($id),
+            'department' => Department::all(),
+            'permissioncategory' => PermissionCategory::orderBy('name', 'ASC')->get(),
+            'savedCategoryIds' => PermissionTemplate::where('role_id', $id)->pluck('permission_category_id')->toArray(),
+            'permissionTemplate' => PermissionTemplate::where('role_id', $id)->orderBy('id', 'ASC')->get()
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\PermissionCategory  $permissionCategory
+     * @param  \App\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
-    public function edit($id){
-        $data = PermissionCategory::find($id);
+    public function edit($id)
+    {
+        $data = Role::find($id);
 
         if($data){
             return response()->json($data);
@@ -118,12 +144,13 @@ class PermissionCategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\PermissionCategory  $permissionCategory
+     * @param  \App\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
-    public function update(PermissionCategoryUpdateRequest $request, PermissionCategory $dataId){      
-        $data = PermissionCategory::where('id', $request->id)->update([
-            'name'=> $request->name,
+    public function update(RoleUpdateRequest $request, Role $dataId){      
+        $data = Role::where('id', $request->id)->update([
+            'display_name' => $request->display_name,
+            'type' => $request->type,
             'updated_by' => auth()->user()->id
         ]);
 
@@ -138,16 +165,16 @@ class PermissionCategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\PermissionCategory  $permissionCategory
+     * @param  \App\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
-        $data = PermissionCategory::find($id)->delete();
+        $data = Role::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = PermissionCategory::where('id', $id)->withTrashed()->restore();
+        $data = Role::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }

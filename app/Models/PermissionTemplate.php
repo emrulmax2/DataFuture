@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Department;
 use App\Models\PermissionCategory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\PermissionTemplate;
 
 class PermissionTemplate extends Model
 {
@@ -31,11 +30,15 @@ class PermissionTemplate extends Model
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    public function permissioncategory(){
+    public function category(){
         return $this->belongsTo(PermissionCategory::class, 'permission_category_id');
     }
 
     public function department(){
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function groups(){
+        return $this->hasMany(PermissionTemplateGroup::class, 'permission_template_id', 'id');
     }
 }

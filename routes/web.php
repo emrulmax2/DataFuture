@@ -42,10 +42,10 @@ use App\Http\Controllers\Settings\StatusController;
 use App\Http\Controllers\Settings\Studentoptions\CountryController;
 use App\Http\Controllers\Settings\Studentoptions\DisabilityController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\PermissionCategoryController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionTemplateController;
+use App\Http\Controllers\Settings\DepartmentController;
+use App\Http\Controllers\Settings\PermissionCategoryController;
+use App\Http\Controllers\Settings\RoleController;
+use App\Http\Controllers\Settings\PermissionTemplateController;
 use App\Http\Controllers\Settings\ProcessListController;
 use App\Http\Controllers\Settings\TaskListController;
 
@@ -121,6 +121,7 @@ use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierCont
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
 use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 use App\Http\Controllers\Settings\ELearningActivitySettingController;
+use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -859,44 +860,44 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(DepartmentController::class)->group(function() {
-        Route::get('department', 'index')->name('department'); 
-        Route::get('department/list', 'list')->name('department.list'); 
-        Route::post('department/store', 'store')->name('department.store'); 
-        Route::get('department/edit/{id}', 'edit')->name('department.edit');
-        Route::post('department/update', 'update')->name('department.update');
-        Route::delete('department/delete/{id}', 'destroy')->name('department.destory');
-        Route::post('department/restore/{id}', 'restore')->name('department.restore');
+        Route::get('site-settings/department', 'index')->name('department'); 
+        Route::get('site-settings/department/list', 'list')->name('department.list'); 
+        Route::post('site-settings/department/store', 'store')->name('department.store'); 
+        Route::get('site-settings/department/edit/{id}', 'edit')->name('department.edit');
+        Route::post('site-settings/department/update', 'update')->name('department.update');
+        Route::delete('site-settings/department/delete/{id}', 'destroy')->name('department.destory');
+        Route::post('site-settings/department/restore/{id}', 'restore')->name('department.restore');
     });
 
     Route::controller(PermissionCategoryController::class)->group(function() {
-        Route::get('permissioncategory', 'index')->name('permissioncategory'); 
-        Route::get('permissioncategory/list', 'list')->name('permissioncategory.list'); 
-        Route::post('permissioncategory/store', 'store')->name('permissioncategory.store'); 
-        Route::get('permissioncategory/edit/{id}', 'edit')->name('permissioncategory.edit');
-        Route::post('permissioncategory/update', 'update')->name('permissioncategory.update');
-        Route::delete('permissioncategory/delete/{id}', 'destroy')->name('permissioncategory.destory');
-        Route::post('permissioncategory/restore/{id}', 'restore')->name('permissioncategory.restore');
+        Route::get('site-settings/permissioncategory', 'index')->name('permissioncategory'); 
+        Route::get('site-settings/permissioncategory/list', 'list')->name('permissioncategory.list'); 
+        Route::post('site-settings/permissioncategory/store', 'store')->name('permissioncategory.store'); 
+        Route::get('site-settings/permissioncategory/edit/{id}', 'edit')->name('permissioncategory.edit');
+        Route::post('site-settings/permissioncategory/update', 'update')->name('permissioncategory.update');
+        Route::delete('site-settings/permissioncategory/delete/{id}', 'destroy')->name('permissioncategory.destory');
+        Route::post('site-settings/permissioncategory/restore/{id}', 'restore')->name('permissioncategory.restore');
     });
 
     
     Route::controller(RoleController::class)->group(function() {
-        Route::get('roles', 'index')->name('roles'); 
-        Route::get('roles/list', 'list')->name('roles.list'); 
-        Route::post('roles/store', 'store')->name('roles.store'); 
-        Route::get('roles/show/{id}', 'show')->name('roles.show');
-        Route::get('roles/edit/{id}', 'edit')->name('roles.edit');
-        Route::post('roles/update', 'update')->name('roles.update');
-        Route::delete('roles/delete/{id}', 'destroy')->name('roles.destory');
-        Route::post('roles/restore/{id}', 'restore')->name('roles.restore');
+        Route::get('site-settings/roles', 'index')->name('roles'); 
+        Route::get('site-settings/roles/list', 'list')->name('roles.list'); 
+        Route::post('site-settings/roles/store', 'store')->name('roles.store'); 
+        Route::get('site-settings/roles/show/{id}', 'show')->name('roles.show');
+        Route::get('site-settings/roles/edit/{id}', 'edit')->name('roles.edit');
+        Route::post('site-settings/roles/update', 'update')->name('roles.update');
+        Route::delete('site-settings/roles/delete/{id}', 'destroy')->name('roles.destory');
+        Route::post('site-settings/roles/restore/{id}', 'restore')->name('roles.restore');
     });
 
     Route::controller(PermissionTemplateController::class)->group(function() {
-        Route::get('permissiontemplate/list', 'list')->name('permissiontemplate.list'); 
-        Route::post('permissiontemplate/store', 'store')->name('permissiontemplate.store'); 
-        Route::get('permissiontemplate/edit/{id}', 'edit')->name('permissiontemplate.edit');
-        Route::post('permissiontemplate/update', 'update')->name('permissiontemplate.update');
-        Route::delete('permissiontemplate/delete/{id}', 'destroy')->name('permissiontemplate.destory');
-        Route::post('permissiontemplate/restore/{id}', 'restore')->name('permissiontemplate.restore');
+        Route::post('site-settings/permissiontemplate/store', 'store')->name('permissiontemplate.store'); 
+        Route::post('site-settings/permissiontemplate/update', 'update')->name('permissiontemplate.update');
+    });
+
+    Route::controller(PermissionTemplateGroupController::class)->group(function() {
+        Route::post('site-settings/permissiontemplate/group/store', 'store')->name('permissiontemplate.group.store'); 
     });
 
     Route::controller(InterviewListController::class)->group(function() {
