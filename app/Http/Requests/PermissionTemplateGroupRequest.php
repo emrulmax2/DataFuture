@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PermissionTemplateRequest extends FormRequest
+class PermissionTemplateGroupRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,7 @@ class PermissionTemplateRequest extends FormRequest
     public function rules()
     {
         return [
-            'role_id' => 'required',
-            'permission_category_id' => 'required',
-            'department_id' => 'required',
-            'type' => 'required',
+            'name' => 'required'
         ];
     }
 }

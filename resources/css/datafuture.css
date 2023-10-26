@@ -721,3 +721,28 @@
 .h-30{
     height: 7.5rem;
 }
+
+#permissionTemplateAccr.accordion .accordion-item:first-child{
+    margin-top: -.5rem;
+}
+#permissionTemplateAccr.accordion .accordion-item:last-child{
+    margin-bottom: -.5rem;
+}
+#permissionTemplateAccr.accordion .accordion-item .accordion-header .accordion-button{
+    padding-left: 0;
+}
+#permissionTemplateAccr.accordion .accordion-item {
+    box-shadow: 0px 3px 20px #0000000b;
+}
+#permissionTemplateAccr.accordion .accordion-button .accordionCollaps{
+    right: 0;
+}
+#permissionTemplateAccr.accordion .accordion-header{
+    position: relative;
+    padding: 0 0 0 53px;
+}
+#permissionTemplateAccr.accordion .accordion-header .form-check{
+    position: absolute;
+    left: 0;
+    top: 2px;
+}

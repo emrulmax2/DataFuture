@@ -6,78 +6,97 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Departments List</h2>
+        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addDepartmentModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Department</button>
+            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
         </div>
     </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+
+    <!-- BEGIN: Settings Page Content -->
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
+            <!-- BEGIN: Profile Info -->
+            @include('pages.settings.sidebar')
+            <!-- END: Profile Info -->
+        </div>
+
+        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+            <!-- BEGIN: Display Information -->
+            <div class="intro-y box lg:mt-5">
+                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                    <h2 class="font-medium text-base mr-auto">Permission Category List</h2>
+                    <button data-tw-toggle="modal" data-tw-target="#addPermissionModal" type="button" class="add_btn btn btn-primary shadow-md mr-0">Add New Category</button>
                 </div>
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                    <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                        <option value="1">Active</option>
-                        <option value="2">Archived</option>
-                    </select>
-                </div>
-                <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-            </form>
-            <div class="flex mt-5 sm:mt-0">
-                <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                </button>
-                <div class="dropdown w-1/2 sm:w-auto">
-                    <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                    </button>
-                    <div class="dropdown-menu w-40">
-                        <ul class="dropdown-content">
-                            <li>
-                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                </a>
-                            </li>
-                            {{-- <li>
-                                <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                </a>
-                            </li> --}}
-                            <li>
-                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                </a>
-                            </li>
-                            {{-- <li>
-                                <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                </a>
-                            </li> --}}
-                        </ul>
+                <div class="p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
+                                <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
+                                <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="1">Active</option>
+                                    <option value="2">Archived</option>
+                                </select>
+                            </div>
+                            <div class="mt-2 xl:mt-0">
+                                <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                                <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                            </div>
+                        </form>
+                        <div class="flex mt-5 sm:mt-0">
+                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                            </button>
+                            <div class="dropdown w-1/2 sm:w-auto">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                </button>
+                                <div class="dropdown-menu w-40">
+                                    <ul class="dropdown-content">
+                                        <li>
+                                            <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                            </a>
+                                        </li>
+                                        {{-- <li>
+                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
+                                            </a>
+                                        </li> --}}
+                                        <li>
+                                            <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                            </a>
+                                        </li>
+                                        {{-- <li>
+                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
+                                            </a>
+                                        </li> --}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto scrollbar-hidden">
+                        <div id="permissioncategoryTableId" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="departmentTableId" class="mt-5 table-report table-report--tabulator"></div>
-        </div>
     </div>
-    <!-- END: HTML Table Data -->
+    <!-- END: Settings Page Content -->
+
     <!-- BEGIN: Add Modal -->
-    <div id="addDepartmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div id="addPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="#" id="addDepartmentForm" enctype="multipart/form-data">
+            <form method="POST" action="#" id="addPermissionForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Department</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Permission Category</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
@@ -116,12 +135,12 @@
     </div>
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
-    <div id="editDepartmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div id="editPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="#" id="editDepartmentForm">
+            <form method="POST" action="#" id="editPermissionForm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Department</h2>
+                        <h2 class="font-medium text-base mr-auto">Edit Permission Category</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
@@ -197,5 +216,6 @@
     <!-- END: Delete Confirm Modal Content -->
 @endsection
 @section('script')
-    @vite('resources/js/department.js')
+    @vite('resources/js/settings.js')
+    @vite('resources/js/permissioncategory.js')
 @endsection

@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Settings;
 
-use App\Models\Role;
+use App\Http\Controllers\Controller;
 use App\Models\Department;
-use App\Models\PermissionCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\RoleRequest;
-use App\Http\Requests\RoleUpdateRequest;
+use App\Http\Requests\DepartmentRequest;
+use App\Http\Requests\DepartmentUpdateRequest;
 
-class RoleController extends Controller
+class DepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,10 +18,12 @@ class RoleController extends Controller
      */
     public function index()
     {
-        return view('pages/role/index', [
-            'title' => 'Roles - LCC Data Future Managment',
+        return view('pages.settings.department.index', [
+            'title' => 'Departments - LCC Data Future Managment',
+            'subtitle' => 'User Privilege',
             'breadcrumbs' => [
-                ['label' => 'Roles', 'href' => 'javascript:void(0);']
+                ['label' => 'Site Settings', 'href' => route('site.setting')],
+                ['label' => 'Departments', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -37,9 +38,9 @@ class RoleController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Role::orderByRaw(implode(',', $sorts));
+        $query = Department::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('display_name','LIKE','%'.$queryStr.'%');
+            $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -48,7 +49,6 @@ class RoleController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -66,8 +66,7 @@ class RoleController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'display_name' => $list->display_name,
-                    'type' => $list->type,
+                    'name' => $list->name,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -82,11 +81,10 @@ class RoleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RoleRequest $request)
+    public function store(DepartmentRequest $request)
     {
-        $data = Role::create([
-            'display_name' => $request->display_name,
-            'type' => $request->type,
+        $data = Department::create([
+            'name'=> $request->name,
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -95,32 +93,22 @@ class RoleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Department $department)
     {
-        return view('pages/role/show', [
-            'title' => 'Roles - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'Roles', 'href' => route('roles')],
-                ['label' => 'Role Details', 'href' => 'javascript:void(0);']
-            ],
-            'role' => Role::find($id),
-            'department' => Department::all(),
-            'permissioncategory' => PermissionCategory::all(),
-        ]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        $data = Role::find($id);
+    public function edit($id){
+        $data = Department::find($id);
 
         if($data){
             return response()->json($data);
@@ -133,13 +121,12 @@ class RoleController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function update(RoleUpdateRequest $request, Role $dataId){      
-        $data = Role::where('id', $request->id)->update([
-            'display_name' => $request->display_name,
-            'type' => $request->type,
+    public function update(DepartmentUpdateRequest $request, Department $dataId){      
+        $data = Department::where('id', $request->id)->update([
+            'name'=> $request->name,
             'updated_by' => auth()->user()->id
         ]);
 
@@ -154,16 +141,16 @@ class RoleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Role  $role
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
-        $data = Role::find($id)->delete();
+        $data = Department::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Role::where('id', $id)->withTrashed()->restore();
+        $data = Department::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }

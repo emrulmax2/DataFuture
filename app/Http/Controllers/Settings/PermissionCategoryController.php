@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Settings;
 
-use App\Models\Department;
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Models\PermissionCategory;
 use Illuminate\Http\Request;
-use App\Http\Requests\DepartmentRequest;
-use App\Http\Requests\DepartmentUpdateRequest;
+use App\Http\Requests\PermissionCategoryRequest;
+use App\Http\Requests\PermissionCategoryUpdateRequest;
 
-class DepartmentController extends Controller
+class PermissionCategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,10 +17,12 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        return view('pages/department/index', [
-            'title' => 'Departments - LCC Data Future Managment',
+        return view('pages.settings.permissioncategory.index', [
+            'title' => 'Permission Category - LCC Data Future Managment',
+            'subtitle' => 'User Privilege',
             'breadcrumbs' => [
-                ['label' => 'Departments', 'href' => 'javascript:void(0);']
+                ['label' => 'Site Settings', 'href' => route('site.setting')],
+                ['label' => 'Permission Category', 'href' => 'javascript:void(0);']
             ],
         ]);
     }
@@ -35,7 +37,7 @@ class DepartmentController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Department::orderByRaw(implode(',', $sorts));
+        $query = PermissionCategory::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
@@ -46,6 +48,7 @@ class DepartmentController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
@@ -78,9 +81,9 @@ class DepartmentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(DepartmentRequest $request)
+    public function store(PermissionCategoryRequest $request)
     {
-        $data = Department::create([
+        $data = PermissionCategory::create([
             'name'=> $request->name,
             'created_by' => auth()->user()->id
         ]);
@@ -90,10 +93,10 @@ class DepartmentController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Department  $department
+     * @param  \App\Models\PermissionCategory  $permissionCategory
      * @return \Illuminate\Http\Response
      */
-    public function show(Department $department)
+    public function show(PermissionCategory $permissionCategory)
     {
         //
     }
@@ -101,11 +104,11 @@ class DepartmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Department  $department
+     * @param  \App\Models\PermissionCategory  $permissionCategory
      * @return \Illuminate\Http\Response
      */
     public function edit($id){
-        $data = Department::find($id);
+        $data = PermissionCategory::find($id);
 
         if($data){
             return response()->json($data);
@@ -118,11 +121,11 @@ class DepartmentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Department  $department
+     * @param  \App\Models\PermissionCategory  $permissionCategory
      * @return \Illuminate\Http\Response
      */
-    public function update(DepartmentUpdateRequest $request, Department $dataId){      
-        $data = Department::where('id', $request->id)->update([
+    public function update(PermissionCategoryUpdateRequest $request, PermissionCategory $dataId){      
+        $data = PermissionCategory::where('id', $request->id)->update([
             'name'=> $request->name,
             'updated_by' => auth()->user()->id
         ]);
@@ -138,16 +141,16 @@ class DepartmentController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Department  $department
+     * @param  \App\Models\PermissionCategory  $permissionCategory
      * @return \Illuminate\Http\Response
      */
     public function destroy($id){
-        $data = Department::find($id)->delete();
+        $data = PermissionCategory::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = Department::where('id', $id)->withTrashed()->restore();
+        $data = PermissionCategory::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
