@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class EmployeeEligibilites extends Model
 {
     use HasFactory;
-
+    protected $guard = ['id'];
+    
     protected $fillable = [
         'employee_id',
         'eligible_to_work',
+        'employee_work_permit_type_id',
         'workpermit_number',
         'workpermit_expire',
         'document_type',

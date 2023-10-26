@@ -38,12 +38,15 @@ class EmployeeProfileController extends Controller
         
         $employee = Employee::find($id);
         $userData = User::find($employee->user_id);
-        
+        $venues = Venue::all();
         $employment = Employment::where("employee_id",$id)->get()->first();
         $employeeEligibilites = EmployeeEligibilites::where("employee_id",$id)->get()->first();
         $emergencyContacts = EmployeeEmergencyContact::where("employee_id",$id)->get()->first();
         $employeeTerms = EmployeeTerm::where("employee_id",$id)->get()->first();
-
+        $i = 0;
+        foreach($employee->venues as $venue) {
+            $employmentVenue[$i++] = $venue->id;
+        }
         $titles = Title::all();
         $sexids = SexIdentifier::all();
         $ethnicities = Ethnicity::all();
@@ -85,6 +88,8 @@ class EmployeeProfileController extends Controller
             "employeeJobTitles" => $jobTitles,
             "documentTypes" => $documentTypes,
             "workPermitTypes" => $workPermitTypes,
+            "venues" => $venues,
+            "employmentVenue" => $employmentVenue,
         ]);
     }
     

@@ -174,7 +174,19 @@
                         <div class="col-span-8 font-medium">{{ isset($employment->department->name) ? $employment->department->name : '' }}</div>
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-6"></div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Site locations </div>
+                        <div class="col-span-8 font-medium">
+                            <ul class="m-0 p-0"> 
+                                @foreach($employee->venues as $dis)
+                                    <li class="text-left font-normal mb-1 flex pl-5 relative"><i data-lucide="check-circle" class="w-3 h-3 text-success absolute" style="left: 0; top: 4px;"></i>{{ $dis->name }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-3"></div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Office telephone</div>

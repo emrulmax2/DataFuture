@@ -83,7 +83,9 @@ use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeProfileController;
+use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -704,8 +706,16 @@ Route::middleware('auth')->group(function() {
         Route::get('/first/review', 'reviewShows')->name('employeereview.show.data');
         Route::post('/first/review', 'reviewDone')->name('employeereview.done.data');
     });
+    
+    Route::controller(EmploymentController::class)->group(function() {
+        Route::post('employment/update/{employment}','update')->name('employment.update');
+    });
 
-    Route::controller(EmployeeProfileController::class)->group(function(){
+    Route::controller(EmployeeEligibilityController::class)->group(function() {
+        Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
+    });
+
+    Route::controller(EmployeeProfileController::class)->group(function() {
         
         Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
     });

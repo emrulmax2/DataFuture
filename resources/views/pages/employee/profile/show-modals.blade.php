@@ -150,6 +150,9 @@
 <div id="editEmploymentDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEmploymentDetailsForm" enctype="multipart/form-data">
+            
+            <input type="hidden" name="url" value="{{ route("employment.update",$employment->id) }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Employement Details</h2>
@@ -213,14 +216,26 @@
                             <div class="acc__input-error error-office_telephone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
-                            <label for="mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
+                            <label for="mobile" class="form-label">Mobile</label>
                             <input type="text" value="{{ isset($employment->mobile) ? $employee->mobile : '' }}" id="mobile" class="form-control" name="mobile"  >
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-4 disabled" >
                             <label for="email" class="form-label">Email (username) <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($employment->email) ? $employee->email : '' }}" id="email" class="form-control" name="email"  >
+                            <input disabled type="text" value="{{ isset($employment->email) ? $employee->email : '' }}" id="email" class="form-control" name="email"  >
                             <div class="acc__input-error error-email text-danger mt-2"></div>
+                        </div>
+
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="site_location[]" class="form-label">Site locations: <span class="text-danger">*</span></label>
+                            <select id="site_location[]" class="lccTom lcc-tom-select w-full" name="site_location[]" multiple>
+                                @if($venues->count() > 0)
+                                    @foreach($venues as $si)
+                                        <option {{ in_array($si->id,$employmentVenue) ? "selected" : "" }}  value="{{ $si->id }}">{{ $si->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-site_location text-danger mt-2"></div>
                         </div>
                     </div>
                 </div>
@@ -255,6 +270,8 @@
 <div id="editEligibilitesDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEligibilitesDetailsForm" enctype="multipart/form-data">
+            <input type="hidden" name="url" value="{{ route('employeeeligibility.update',$employeeEligibilites->id) }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Eligibilites Details</h2>
@@ -267,29 +284,29 @@
                         <div class="col-span-12 sm:col-span-3">
                             <label for="eligible_to_work_status" class="form-label">Do this person is eligible to work in UK?</label>
                             <div class="form-check form-switch">
-                                <input  id="eligible_to_work_status" class="form-check-input" name="eligible_to_work_status" value="Yes" type="checkbox">
+                                <input {{ ($employeeEligibilites->eligible_to_work == "Yes") ? "checked" : '' }} id="eligible_to_work_status" class="form-check-input" name="eligible_to_work_status" value="Yes" type="checkbox">
                                 <label class="form-check-label" for="eligible_to_work">&nbsp;</label>
                             </div>
                         </div>
     
-                        <div id="workpermit_type" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <div id="workpermit_type" class="intro-y col-span-12 sm:col-span-3 {{ ($employeeEligibilites->eligible_to_work == "Yes") ? "visible" : "invisible" }} ">
                             <label for="workpermit_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
                             <select id="workpermit_type" name="workpermit_type" class=" w-full lccTom lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @foreach($workPermitTypes as $workPermitType)
-                                    <option  value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>       
+                                    <option {{ ($employeeEligibilites->employee_work_permit_type_id == $workPermitType->id) ? "selected" : "" }} value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>       
                                 @endforeach
                             </select> 
                             <div class="acc__input-error error-workpermit_type text-danger mt-2"></div>
                         </div>
-                        <div id="workpermit-number" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <div id="workpermit-number" class="intro-y col-span-12 sm:col-span-3 {{ ($employeeEligibilites->employee_work_permit_type_id > 1) ? "visible" : "invisible" }} ">
                             <label for="workpermit_number" class="form-label inline-flex">Work Permit Number </label>
-                            <input id="workpermit_number" type="text" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
+                            <input id="workpermit_number" type="text" value="{{ $employeeEligibilites->workpermit_number }}" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
                             <div class="acc__input-error error-workpermit_number text-danger mt-2"></div>
                         </div>              
-                        <div id="workpermit-expire" class="intro-y col-span-12 sm:col-span-3 invisible">
+                        <div id="workpermit-expire" class="intro-y col-span-12 sm:col-span-3  {{ ($employeeEligibilites->employee_work_permit_type_id > 1) ? "visible" : "invisible" }} ">
                             <label for="workpermit_expire" class="form-label inline-flex">Work Permit Expiry Date </label>
-                            <input id="workpermit_expire" type="text" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
+                            <input id="workpermit_expire" type="text" value="{{ $employeeEligibilites->workpermit_expire }}" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
                             <div class="acc__input-error error-workpermit_expire text-danger mt-2"></div>
                         </div>   
                         
@@ -297,7 +314,7 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <div class="intro-y col-span-12 sm:col-span-6 py-1"> <!-- checkbox for yes/no -->
                                     <label for="document_type" class="form-label inline-flex">Document Type <span class="text-danger"> *</span></label>
-                                    <select id="document_type" name="document_type" class="form-control lccTom lcc-tom-select">
+                                    <select id="document_type" name="document_type"  class="form-control lccTom lcc-tom-select">
                                         <option value="" selected>Please Select</option>
                                         @if($documentTypes->count() > 0)
                                             @foreach($documentTypes as $documentType)
@@ -329,7 +346,7 @@
                                         @if($country->count() > 0)
                                             @foreach($country as $countries)
                                                 <option {{ isset($employeeEligibilites->docIssueCountry->id) && $employeeEligibilites->docIssueCountry->id == $countries->id ? 'Selected' : '' }} value="{{ $countries->id }}">{{ $countries->name }}</option>
-                                                {{-- <option  value="{{ $countries->id }}">{{ $countries->name }}</option>               --}}
+                                                
                                             @endforeach
                                         @endif
                                     </select>
@@ -341,7 +358,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePD" class="btn btn-primary w-auto">     
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
                         Update                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -356,7 +373,6 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $employee->id }}" name="id"/>
                 </div>
             </div>
         </form>
@@ -371,6 +387,9 @@
 <div id="editEmergencyContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEmergencyContactDetailsForm" enctype="multipart/form-data">
+            
+            <input type="hidden" name="url" value="{{ route('employeeeligibility.update',$employeeEligibilites->id) }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Emergency Contact Details</h2>
@@ -473,7 +492,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePD" class="btn btn-primary w-auto">     
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
                         Update                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -488,7 +507,6 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $employee->id }}" name="id"/>
                 </div>
             </div>
         </form>
@@ -500,6 +518,9 @@
 <div id="editTermDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editTermDetailsForm" enctype="multipart/form-data">
+            
+            <input type="hidden" name="url" value="{{ route('employeeeligibility.update',$employeeEligibilites->id) }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Term Details</h2>
@@ -557,7 +578,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePD" class="btn btn-primary w-auto">     
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
                         Update                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -572,7 +593,6 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $employee->id }}" name="id"/>
                 </div>
             </div>
         </form>

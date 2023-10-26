@@ -331,6 +331,7 @@ class EmployeeController extends Controller
             return response()->json(["message"=>"updated","data"=>$changes]);
         else
             return response()->json(["no update"]);
+        
     }
 
     /**
