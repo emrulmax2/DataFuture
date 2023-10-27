@@ -3,7 +3,97 @@ import IMask from 'imask';
 
 ("use strict");
 (function(){
+/* Start Dropzone */
+if($("#addStudentPhotoModal").length > 0){
+    let dzErrors = false;
+    Dropzone.autoDiscover = false;
+    Dropzone.options.addStudentPhotoForm = {
+        autoProcessQueue: false,
+        maxFiles: 1,
+        maxFilesize: 5,
+        parallelUploads: 1,
+        acceptedFiles: ".jpeg,.jpg,.png,.gif",
+        addRemoveLinks: true,
+        //thumbnailWidth: 100,
+        //thumbnailHeight: 100,
+    };
 
+    let options = {
+        accept: (file, done) => {
+            console.log("Uploaded");
+            done();
+        },
+    };
+
+
+    var drzn1 = new Dropzone('#addStudentPhotoForm', options);
+
+    drzn1.on("maxfilesexceeded", (file) => {
+        $('#addStudentPhotoModal .modal-content .uploadError').remove();
+        $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
+        drzn1.removeFile(file);
+        setTimeout(function(){
+            $('#addStudentPhotoModal .modal-content .uploadError').remove();
+        }, 4000)
+    });
+
+    drzn1.on("error", function(file, response){
+        dzErrors = true;
+    });
+
+    drzn1.on("success", function(file, response){
+        //console.log(response);
+        return file.previewElement.classList.add("dz-success");
+    });
+
+    drzn1.on("complete", function(file) {
+        //drzn1.removeFile(file);
+    }); 
+
+    drzn1.on('queuecomplete', function(){
+        $('#uploadStudentPhotoBtn').removeAttr('disabled');
+        document.querySelector("#uploadStudentPhotoBtn svg").style.cssText ="display: none;";
+
+        if(!dzErrors){
+            drzn1.removeAllFiles();
+
+            $('#addStudentPhotoModal .modal-content .uploadError').remove();
+            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+
+            setTimeout(function(){
+                $('#addStudentPhotoModal .modal-content .uploadError').remove();
+                window.location.reload();
+            }, 3000);
+        }else{
+            $('#addStudentPhotoModal .modal-content .uploadError').remove();
+            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+            
+            setTimeout(function(){
+                $('#addStudentPhotoModal .modal-content .uploadError').remove();
+            }, 5000);
+        }
+    })
+
+    $('#uploadStudentPhotoBtn').on('click', function(e){
+        e.preventDefault();
+        document.querySelector('#uploadStudentPhotoBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#uploadStudentPhotoBtn svg").style.cssText ="display: inline-block;";
+        
+        drzn1.processQueue();
+        
+    });
+}
+/* End Dropzone */
     let tomOptions = {
         plugins: {
             dropdown_input: {}
@@ -48,6 +138,7 @@ import IMask from 'imask';
         };
         var mask = IMask(this, maskOptions);
     });
+
     $('#employee_work_type').on('change', function() {
         let tthis = $(this)
 
@@ -113,11 +204,12 @@ import IMask from 'imask';
         }
     });
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    //const editPersonalModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));
+    const editPersonalModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));
     const editEmploymentlModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmploymentDetailsModal"));
     const editEligibilitesModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEligibilitesDetailsModal"));
     const editTermDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTermDetailsModal"));
-    const editAddressUpdateModal= tailwind.Modal.getOrCreateInstance(document.querySelector("#editAddressUpdateModal"));
+    const editAddressUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAddressUpdateModal"));
+    const editEmergencyContactDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmergencyContactDetailsModal"));
     $('.save').on('click', function (e) {
         e.preventDefault();
 
@@ -152,6 +244,7 @@ import IMask from 'imask';
                     editEligibilitesModal.hide();
                     editTermDetailsModal.hide();
                     editAddressUpdateModal.hide();
+                    editEmergencyContactDetailsModal.hide();
                     successModal.show();
 
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {

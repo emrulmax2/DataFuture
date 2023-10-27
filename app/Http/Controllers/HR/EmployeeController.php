@@ -29,12 +29,13 @@ use App\Models\Employment;
 use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
 use App\Models\SexIdentifier;
+use App\Models\StudentArchive;
 use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EmployeeController extends Controller
@@ -343,5 +344,44 @@ class EmployeeController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function UploadEmployeePhoto(Request $request){
+       
+        $data = Employee::find($request->employee_id);
+        $oldPhoto = (isset($data->photo) && !empty($data->photo) ? $data->photo : '');
+
+        $document = $request->file('file');
+        $imageName = time().'_'.$document->getClientOriginalName();
+        $path = $document->storeAs('public/employees/'.$data->id, $imageName, 'google');
+        if(!empty($oldPhoto)):
+            if (Storage::disk('google')->exists('public/employees/'.$data->id.'/'.$oldPhoto)):
+                Storage::delete('public/employees/'.$data->id.'/'.$oldPhoto);
+            endif;
+        endif;
+
+        $data2 = Employee::find($data->id);
+        $data2->fill([
+            'photo' => $imageName
+        ]);
+        $changes = $data2->getDirty();
+        $data2->save();
+
+        // if($data2->wasChanged() && !empty($changes)):
+        //     foreach($changes as $field => $value):
+        //         $dataArchive = [];
+        //         $dataArchive['employee_id'] = $data->id;
+        //         $dataArchive['table'] = 'employees';
+        //         $dataArchive['field_name'] = $field;
+        //         $dataArchive['field_value'] = $data->$field;
+        //         $dataArchive['field_new_value'] = $value;
+        //         $dataArchive['created_by'] = auth()->user()->id;
+
+        //         EmployeeArchive::create($dataArchive);
+        //     endforeach;
+        // endif;
+
+        return response()->json(['message' => 'Photo successfully change & updated'], 200);
     }
 }

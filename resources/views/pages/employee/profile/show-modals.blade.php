@@ -33,12 +33,29 @@
                             <input type="text" value="{{ isset($employee->last_name) ? $employee->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name">
                             <div class="acc__input-error error-last_name text-danger mt-2"></div>
                         </div>
-                        
+                                 
+                        <div class="intro-y col-span-12 sm:col-span-4">
+                            <label for="employee_telephone" class="form-label inline-flex">Telephone </label>
+                            <input id="employee_telephone" type="text" value="{{ isset($employee->telephone) ? $employee->telephone : '' }}" class="form-control rounded-none form-control-lg" name="telephone" aria-label="default input example">
+                                            
+                        </div>
+                        <div class="intro-y col-span-12 sm:col-span-4">
+                            <label for="employee_mobile" class="form-label inline-flex">Mobile <span class="text-danger"> *</span></label>
+                            <input id="employee_mobile" type="text" value="{{ isset($employee->mobile) ? $employee->mobile : '' }}" class="form-control rounded-none form-control-lg" name="mobile" aria-label="default input example">
+                            <div class="acc__input-error error-mobile text-danger mt-2"></div>
+                        </div>
+        
+                        <div class="intro-y col-span-12 sm:col-span-4">
+                            <label for="employee_email" class="form-label inline-flex">Email </label>
+                            <input id="employee_email" type="text" value="{{ isset($employee->email) ? $employee->email : '' }}" name="email" class="form-control rounded-none form-control-lg" aria-label="default input example">
+                            
+                        </div>   
                         <div class="col-span-12 sm:col-span-4">
                             <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="text" value="{{ isset($employee->date_of_birth) ? $employee->date_of_birth : '' }}" placeholder="DD-MM-YYYY" id="date_of_birth" class="form-control datepicker" name="date_of_birth" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                         </div>
+                        
                         <div class="col-span-12 sm:col-span-4">
                             <label for="sex_identifier_id" class="form-label">Sex Identifier/Gender <span class="text-danger">*</span></label>
                             <select id="sex_identifier_id" class="lccTom lcc-tom-select w-full" name="sex_identifier_id">
@@ -63,7 +80,7 @@
                             </select>
                             <div class="acc__input-error error-nationality_id text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label for="ethnicity_id" class="form-label">Ethnicity <span class="text-danger">*</span></label>
                             <select id="ethnicity_id" class="lccTom lcc-tom-select w-full" name="ethnicity_id">
                                 <option value="" selected>Please Select</option>
@@ -76,19 +93,19 @@
                             <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
                         </div>
                         
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label for="ni_number" class="form-label">NI Number <span class="text-danger">*</span></label>
                             <input type="text" value="{{ isset($employee->ni_number) ? $employee->ni_number : '' }}" id="ni_number" class="form-control ni-number" name="ni_number"  >
                             <div class="acc__input-error error-ni_number text-danger mt-2"></div>
                         </div>
                         
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label for="car_reg_number" class="form-label">Car Reg. Number </label>
                             <input type="text" value="{{ isset($employee->car_reg_number) ? $employee->car_reg_number : '' }}" id="car_reg_number" class="form-control " name="car_reg_number"  >
                             
                         </div>
                         
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label for="drive_license_number" class="form-label">Driving License </label>
                             <input type="text" value="{{ isset($employee->drive_license_number) ? $employee->drive_license_number : '' }}" id="drive_license_number" class="form-control" name="drive_license_number"  >
                             
@@ -222,8 +239,8 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4 disabled" >
                             <label for="email" class="form-label">Email (username) <span class="text-danger">*</span></label>
-                            <input disabled type="text" value="{{ isset($employment->email) ? $employee->email : '' }}" id="email" class="form-control" name="email"  >
-                            <div class="acc__input-error error-email text-danger mt-2"></div>
+                            <input disabled type="text" value="{{ isset($employee->user->email) ? $employee->user->email : '' }}" id="email" class="form-control"  >
+                            <input type="hidden" value="{{ isset($employee->user->email) ? $employee->user->email : '' }}" name="email"/>
                         </div>
 
                         <div class="col-span-12 sm:col-span-4">
@@ -388,7 +405,7 @@
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEmergencyContactDetailsForm" enctype="multipart/form-data">
             
-            <input type="hidden" name="url" value="{{ route('employeeeligibility.update',$employeeEligibilites->id) }}" />
+            <input type="hidden" name="url" value="{{ route('employee.emergency.update',$emergencyContacts->id) }}" />
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
@@ -405,13 +422,13 @@
                             <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                         </div>              
                         <div class="intro-y col-span-12 sm:col-span-6">
-                            <label for="relationship" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
-                            <select id="relationship" name="relationship" class="form-control lccTom lcc-tom-select">
+                            <label for="kins_relation_id" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
+                            <select id="kins_relation_id" name="kins_relation_id" class="form-control lccTom lcc-tom-select">
                                 @foreach($relation as $kins)
                                     <option  value="{{ $kins->id }}">{{ $kins->name }}</option>              
                                 @endforeach
                             </select>
-                            <div class="acc__input-error error-relationship text-danger mt-2"></div>
+                            <div class="acc__input-error error-kins_relation_id text-danger mt-2"></div>
                         </div>
                         <div class="font-medium text-base intro-y col-span-12">
                             <label for="input-wizard-4" class="form-label inline-flex">Address <i data-theme="light" data-tooltip-content="#address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
@@ -429,63 +446,63 @@
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
                                     @if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1))
-                                        <input id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->address_line_1 }}" name="emergency_contact_address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                        <input id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->address_line_1 }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
                                     @endif
-                                    <div class="acc__input-error error-emergency_contact_address_line_1 text-danger mt-2"></div>
+                                    <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
                                 </div>
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
                                     @if(isset($emergencyContacts->address->address_line_2) && !empty($emergencyContacts->address->address_line_2))
-                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->address_line_2 }}" name="emergency_contact_address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->address_line_2 }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
                                     @endif
                                 </div>
                                 
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-14" class="form-label inline-flex">Post Code</label>
                                     @if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code))
-                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->post_code }}" name="emergency_contact_post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->post_code }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
                                     @endif    
-                                    <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
+                                    <div class="acc__input-error error-post_code text-danger mt-2"></div>
                                 </div>
                                  <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
                                     @if(isset($emergencyContacts->address->city) && !empty($emergencyContacts->address->city))
-                                        <input  id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->city }}" name="emergency_contact_city" class="w-full text-sm"  />
+                                        <input  id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->city }}" name="city" class="w-full text-sm"  />
                                     @endif
-                                    <div class="acc__input-error error-emergency_contact_city text-danger mt-2"></div>
+                                    <div class="acc__input-error error-city text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
                                     @if(isset($emergencyContacts->address->state) && !empty($emergencyContacts->address->state))
-                                        <input id="vertical-form-14" type="text" name="emergency_contact_state" value="{{ $emergencyContacts->address->state }}" class="w-full text-sm" />
+                                        <input id="vertical-form-14" type="text" name="state" value="{{ $emergencyContacts->address->state }}" class="w-full text-sm" />
                                     @endif
-                                    <div class="acc__input-error error-emergency_contact_state text-danger mt-2"></div>
+                                    <div class="acc__input-error error-state text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
                                     @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
-                                        <input id="vertical-form-15" type="text" name="emergency_contact_country" value="{{ $emergencyContacts->address->country }}" class="w-full text-sm" />
+                                        <input id="vertical-form-15" type="text" name="country" value="{{ $emergencyContacts->address->country }}" class="w-full text-sm" />
                                     @endif
-                                    <div class="acc__input-error error-emergency_contact_country text-danger mt-2"></div>
+                                    <div class="acc__input-error error-country text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>            
                         <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="vertical-form-4" class="form-label inline-flex">Telephone </label>
-                            <input id="vertical-form-4" type="text" value="{{ $emergencyContacts->emergency_contact_telephone }}" class="form-control rounded-none form-control-lg" name="emergency_contact_telephone" aria-label="default input example">
+                            <label for="emergency_contact_telephone" class="form-label inline-flex">Telephone </label>
+                            <input id="emergency_contact_telephone" type="text" value="{{ $emergencyContacts->emergency_contact_telephone }}" class="form-control rounded-none form-control-lg" name="emergency_contact_telephone" aria-label="default input example">
                                             
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="vertical-form-5" class="form-label inline-flex">Mobile <span class="text-danger"> *</span></label>
-                            <input id="vertical-form-5" type="text" value="{{ $emergencyContacts->emergency_contact_mobile }}" class="form-control rounded-none form-control-lg" name="emergency_contact_mobile" aria-label="default input example">
+                            <label for="emergency_contact_mobile" class="form-label inline-flex">Mobile <span class="text-danger"> *</span></label>
+                            <input id="emergency_contact_mobile" type="text" value="{{ $emergencyContacts->emergency_contact_mobile }}" class="form-control rounded-none form-control-lg" name="emergency_contact_mobile" aria-label="default input example">
                             <div class="acc__input-error error-emergency_contact_mobile text-danger mt-2"></div>
                         </div>
         
                         <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="vertical-form-6" class="form-label inline-flex">Email </label>
-                            <input id="vertical-form-6" type="text" value="{{ isset($emergencyContacts->emergency_contact_email) ? $emergencyContacts->emergency_contact_email : '' }}" name="emergency_contact_email" class="form-control rounded-none form-control-lg" aria-label="default input example">
+                            <label for="emergency_contact_email" class="form-label inline-flex">Email </label>
+                            <input id="emergency_contact_email" type="text" value="{{ isset($emergencyContacts->emergency_contact_email) ? $emergencyContacts->emergency_contact_email : '' }}" name="emergency_contact_email" class="form-control rounded-none form-control-lg" aria-label="default input example">
                             
                         </div>        
                     </div>
@@ -519,7 +536,7 @@
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editTermDetailsForm" enctype="multipart/form-data">
             
-            <input type="hidden" name="url" value="{{ route('employeeeligibility.update',$employeeEligibilites->id) }}" />
+            <input type="hidden" name="url" value="{{ route('employee.term.update',$employeeTerms->id) }}" />
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
@@ -532,7 +549,7 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span></label>
-                            <select id="notice-period" name="notice_period" class="form-control lccTom lcc-tom-select">
+                            <select id="notice-period" name="employee_notice_period_id" class="form-control lccTom lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @if($noticePeriods->count() > 0)
                                     @foreach($noticePeriods as $noticePeriod)
@@ -541,13 +558,13 @@
                                     @endforeach
                                 @endif
                             </select>
-                            <div class="acc__input-error error-notice_period text-danger mt-2"></div>
+                            <div class="acc__input-error error-employee_notice_period_id text-danger mt-2"></div>
         
                         </div> 
 
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span></label>
-                            <select id="employment-period" name="employment_period" class="form-control lccTom lcc-tom-select">
+                            <select id="employment-period" name="employment_period_id" class="form-control lccTom lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @if($employmentPeriods->count() > 0)
                                     @foreach($employmentPeriods as $employmentPeriod)
@@ -556,23 +573,20 @@
                                     @endforeach
                                 @endif
                             </select>
-                            <div class="acc__input-error error-employment_period text-danger mt-2"></div>
-    
+                            <div class="acc__input-error error-employment_period_id text-danger mt-2"></div>
                         </div>
-
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span></label>
-                            <select id="ssp-term" name="ssp_term" class="form-control lccTom lcc-tom-select">
+                            <select id="ssp-term" name="employment_ssp_term_id" class="form-control lccTom lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @if($sspTerms->count() > 0)
                                     @foreach($sspTerms as $sspterm)
                                         <option {{ isset($employeeTerms->notice->id) && $employeeTerms->notice->id == $sspterm->id ? 'Selected' : '' }} value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>
-                                        {{-- <option  value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>               --}}
+                                        
                                     @endforeach
                                 @endif
                             </select>
-                            <div class="acc__input-error error-ssp_term text-danger mt-2"></div>
-    
+                            <div class="acc__input-error error-employment_ssp_term_id text-danger mt-2"></div>
                         </div>
                     </div>
                 </div>

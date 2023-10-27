@@ -86,7 +86,9 @@ use App\Http\Controllers\HR\EmployeeBankDetailController;
 use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
+use App\Http\Controllers\HR\EmployeeEmergencyContactController;
 use App\Http\Controllers\HR\EmployeeProfileController;
+use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
@@ -698,6 +700,7 @@ Route::middleware('auth')->group(function() {
     });
     Route::controller(EmployeeController::class)->group(function(){
         Route::get('employee','index')->name('employee');
+        Route::post('employee/upload-photo', 'UploadEmployeePhoto')->name('employee.upload.photo');
         Route::get('employee/new','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
         Route::post('employee/update/{employee}','update')->name('employee.update');
@@ -722,6 +725,15 @@ Route::middleware('auth')->group(function() {
     });
     Route::controller(EmployeeEligibilityController::class)->group(function() {
         Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
+    });
+    
+    Route::controller(EmployeeEmergencyContactController::class)->group(function() {
+        Route::post('employee-emergency/update/{contact}','update')->name('employee.emergency.update');
+    });
+
+    
+    Route::controller(EmployeeTermController::class)->group(function() {
+        Route::post('employee-term/update/{term}','update')->name('employee.term.update');
     });
 
     Route::controller(EmployeePaymentSettingsController::class)->group(function(){

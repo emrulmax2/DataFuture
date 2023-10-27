@@ -33,6 +33,7 @@ class EmployeeDataUpdateRequest extends FormRequest
             'nationality_id' => "required",
             'ethnicity_id' => "required",
             "user_id" => "required",
+            "mobile" => "required",
         ];
     }
 }

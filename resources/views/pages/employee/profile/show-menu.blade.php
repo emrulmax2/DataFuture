@@ -3,7 +3,7 @@
     style="padding-bottom: {{ Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
     >
     <li class="nav-item" role="presentation">
-        <a href="{{ route('student.show', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.show' ? 'active' : '' }}">
+        <a href="{{ route('profile.employee.view', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'profile.employee.view' ? 'active' : '' }}">
             Profile
         </a>
     </li>

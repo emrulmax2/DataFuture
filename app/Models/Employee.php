@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Employee extends Model
 {
     use HasFactory ,SoftDeletes;
 
-    protected $appends = ['full_name','age','retire'];
+    protected $appends = ['full_name','age','retire','photo', 'photo_url'];
 
     protected $fillable = [
         'user_id',
@@ -32,7 +33,26 @@ class Employee extends Model
         'car_reg_number',
         'drive_license_number',
         'disability_status',
+        "photo",
     ];
+
+    /**
+     * The getter that return accessible URL for user photo.
+     *
+     * @var array
+     */
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo !== null && Storage::disk('google')->exists('public/users/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('google')->url('public/users/'.$this->id.'/'.$this->photo);
+        } else {
+            return asset('build/assets/images/placeholders/200x200.jpg');
+        }
+    }
+
+    public function getPhotoAttribute($value){
+        return $value;
+    }
 
     public function setDateOfBirthAttribute($value) {  
         $this->attributes['date_of_birth'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');

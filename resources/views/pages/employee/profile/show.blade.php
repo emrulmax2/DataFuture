@@ -202,7 +202,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Email (username)</div>
-                        <div class="col-span-8 font-medium">{{ isset($employment->email) ? $employment->email : '' }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($employee->user->email) ? $employee->user->email : '' }}</div>
                     </div>
                 </div>
                 
@@ -426,5 +426,4 @@
 
 @section('script')
     @vite('resources/js/employee-global.js')
-    @vite('resources/js/employee-profile.js')
 @endsection
