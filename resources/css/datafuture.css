@@ -746,3 +746,38 @@
     left: 0;
     top: 2px;
 }
+
+.weekDays{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+.weekDay{
+    position: relative;
+    margin: 0 5px 5px 0;
+}
+.weekDay input[type="checkbox"]{
+    width: 0;
+    height: 0;
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+.weekDay label{
+    position: relative;
+    cursor: pointer;
+}
+.weekDay label .checkIcon{
+    display: none;
+}
+.weekDay input[type="checkbox"]:checked + label{
+    border-color: rgb(var(--color-primary) / var(--tw-border-opacity));
+    background-color: rgb(var(--color-primary) / var(--tw-bg-opacity));
+    color: #FFF;
+}
+.weekDay input[type="checkbox"]:checked + label .checkIcon{
+    display: inline-flex;
+}
+.weekDay input[type="checkbox"]:checked + label .closeIcon{
+    display: none;
+}

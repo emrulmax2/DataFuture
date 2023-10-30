@@ -119,6 +119,7 @@ export default defineConfig({
 
                 "resources/js/employee-payment-setting.js",
                 "resources/js/employee-penssion-scheem.js",
+                "resources/js/employee-working-pattern.js",
                 
             ],
             refresh: true,

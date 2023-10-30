@@ -30,8 +30,12 @@ import IMask from 'imask';
     var hour_authorised_by = new TomSelect('#hour_authorised_by', tomOptionsMul);
     var holiday_authorised_by = new TomSelect('#holiday_authorised_by', tomOptionsMul);
 
+    var edit_hour_authorised_by = new TomSelect('#edit_hour_authorised_by', tomOptionsMul);
+    var edit_holiday_authorised_by = new TomSelect('#edit_holiday_authorised_by', tomOptionsMul);
+
     
     const addEmployeePaymentSettingModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmployeePaymentSettingModal"));
+    const editEmployeePaymentSettingModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmployeePaymentSettingModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     let confModalDelTitle = 'Are you sure?';
@@ -75,6 +79,20 @@ import IMask from 'imask';
         }
     });
 
+    $('#editEmployeePaymentSettingForm [name="subject_to_clockin"]').on('change', function(e){
+        var $input = $(this);
+
+        if($input.prop('checked')){
+            $('#editEmployeePaymentSettingForm .hourAuthorisedByArea').fadeIn('fast', function(){
+                edit_hour_authorised_by.clear(true);
+            })
+        }else{
+            $('#editEmployeePaymentSettingForm .hourAuthorisedByArea').fadeOut('fast', function(){
+                edit_hour_authorised_by.clear(true);
+            })
+        }
+    });
+
     $('#addEmployeePaymentSettingForm [name="holiday_entitled"]').on('change', function(e){
         var $input = $(this);
 
@@ -89,6 +107,24 @@ import IMask from 'imask';
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
                 holiday_authorised_by.clear(true);
+            });
+        }
+    });
+
+    $('#editEmployeePaymentSettingForm [name="holiday_entitled"]').on('change', function(e){
+        var $input = $(this);
+
+        if($input.prop('checked')){
+            $('#editEmployeePaymentSettingForm .holidayEntitlementArea').fadeIn('fast', function(){
+                $('input:not([type="checkbox"])', this).val('');
+                $('input[type="checkbox"]', this).prop('checked', false);
+                edit_holiday_authorised_by.clear(true);
+            });
+        }else{
+            $('#editEmployeePaymentSettingForm .holidayEntitlementArea').fadeOut('fast', function(){
+                $('input:not([type="checkbox"])', this).val('');
+                $('input[type="checkbox"]', this).prop('checked', false);
+                edit_holiday_authorised_by.clear(true);
             });
         }
     });
@@ -158,6 +194,54 @@ import IMask from 'imask';
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
                         $(`#addEmployeePaymentSettingForm .${key}`).addClass('border-danger');
                         $(`#addEmployeePaymentSettingForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#editEmployeePaymentSettingForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('editEmployeePaymentSettingForm');
+    
+        document.querySelector('#updatePBS').setAttribute('disabled', 'disabled');
+        document.querySelector("#updatePBS svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('employee.payment.settings.update'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updatePBS').removeAttribute('disabled');
+            document.querySelector("#updatePBS svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                editEmployeePaymentSettingModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Employee\'s Payment Settings successfully updated.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });   
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 5000)
+            }
+        }).catch(error => {
+            document.querySelector('#updatePBS').removeAttribute('disabled');
+            document.querySelector("#updatePBS svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editEmployeePaymentSettingForm .${key}`).addClass('border-danger');
+                        $(`#editEmployeePaymentSettingForm  .error-${key}`).html(val);
                     }
                 } else {
                     console.log('error');

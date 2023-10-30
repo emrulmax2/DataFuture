@@ -32,4 +32,20 @@ class EmployeePenssionScheme extends Model
     public function penssion(){
         return $this->belongsTo(EmployeeInfoPenssionScheme::class, 'employee_info_penssion_scheme_id');
     }
+
+    public function setJoiningDateAttribute($value) {  
+        $this->attributes['joining_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+
+    public function getJoiningDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setDateLeftAttribute($value) {  
+        $this->attributes['date_left'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+
+    public function getDateLeftAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
 }

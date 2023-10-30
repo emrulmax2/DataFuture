@@ -13,7 +13,7 @@ class EmployeeBankDetailController extends Controller
     public function list(Request $request){
         $employee_id = (isset($request->employee_id) && $request->employee_id > 0 ? $request->employee_id : 0);
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 3);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -29,7 +29,7 @@ class EmployeeBankDetailController extends Controller
         endif;
         if($status == 2):
             $query->onlyTrashed();
-        else:
+        elseif($status == 1 || $status == 0):
             $query->where('active', $status);
         endif;
 
@@ -108,5 +108,32 @@ class EmployeeBankDetailController extends Controller
         }
 
         return response()->json(['msg' => 'Bank Successfully updated'], 200);
+    }
+
+    public function destroy($id){
+        $data = EmployeeBankDetail::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function restore($id) {
+        $data = EmployeeBankDetail::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
+    }
+
+    public function changeStatus($id){
+        $title = EmployeeBankDetail::find($id);
+        $active = (isset($title->active) && $title->active == 1 ? 0 : 1);
+
+        EmployeeBankDetail::where('id', $id)->update([
+            'active'=> $active,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        if($active == 1):
+            EmployeeBankDetail::where('id', '!=', $id)->where('active', 1)->update(['active' => 0]);
+        endif;
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

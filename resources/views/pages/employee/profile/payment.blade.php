@@ -64,6 +64,7 @@
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status-BNK" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="3">All</option>
                                     <option value="1">Active</option>
                                     <option value="0">In Active</option>
                                     <option value="2">Archived</option>
@@ -102,10 +103,11 @@
                     <div class="overflow-x-auto scrollbar-hidden">
                         <div id="employeeBankListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
-                    <div class="pt-5 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div>
                 </div>
                 @endif
 
+                <div class="col-span-12"><div class="pt-5 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div></div>
+                
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Subject To Clockin</div>
@@ -197,7 +199,7 @@
                             <button id="tabulator-print-PNS" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
+                            <div class="dropdown w-1/2 sm:w-auto mr-2">
                                 <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
@@ -216,6 +218,9 @@
                                     </ul>
                                 </div>
                             </div>
+                            <button data-tw-toggle="modal" data-tw-target="#addEmpPenssionModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add New
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto scrollbar-hidden">
@@ -227,7 +232,70 @@
             </div>
         </div>
     </div>
-    
+
+
+    <div class="intro-y mt-5">
+        <div class="intro-y box p-5 pb-7">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Working Pattern</div>
+                </div>
+                <div class="col-span-6 text-right">
+                    <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Working Pattern
+                    </button>
+                </div>
+            </div>
+            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12">
+                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                        <form id="tabulatorFilterForm-EWP" class="xl:flex sm:mr-auto" >
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
+                                <select id="status-EWP" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="1">Active</option>
+                                    <option value="0">In Active</option>
+                                    <option value="2">Archived</option>
+                                </select>
+                            </div>
+                            <div class="mt-2 xl:mt-0">
+                                <button id="tabulator-html-filter-go-EWP" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                                <button id="tabulator-html-filter-reset-EWP" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                            </div>
+                        </form>
+                        <div class="flex mt-5 sm:mt-0">
+                            <button id="tabulator-print-EWP" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                            </button>
+                            <div class="dropdown w-1/2 sm:w-auto">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                </button>
+                                <div class="dropdown-menu w-40">
+                                    <ul class="dropdown-content">
+                                        <li>
+                                            <a id="tabulator-export-csv-EWP" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="tabulator-export-xlsx-EWP" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto scrollbar-hidden">
+                        <div id="employeePatternListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- BEGIN: Payment Modals -->
     @include('pages.employee.profile.payment-modal')
@@ -239,4 +307,5 @@
     @vite('resources/js/employee-payment-setting.js')
     @vite('resources/js/employee-banks.js')
     @vite('resources/js/employee-penssion-scheem.js')
+    @vite('resources/js/employee-working-pattern.js')
 @endsection

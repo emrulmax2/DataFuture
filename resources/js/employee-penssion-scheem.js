@@ -55,7 +55,7 @@ var employeePenssionListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmpPenssionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -154,19 +154,243 @@ var employeePenssionListTable = (function () {
         });
     }
 
+    $('#successModal .successCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            successModal.hide();
+            window.location.reload();
+        }else{
+            successModal.hide();
+        }
+    });
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const addBankModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addBankModal"));
-    //const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+    const addEmpPenssionModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmpPenssionModal"));
+    const editEmpPenssionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmpPenssionModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 
     let confModalDelTitle = 'Are you sure?';
 
-    const addBankModalEl = document.getElementById('addBankModal')
-    addBankModalEl.addEventListener('hide.tw.modal', function(event) {
+    const addEmpPenssionModalEl = document.getElementById('addEmpPenssionModal')
+    addEmpPenssionModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addModal .acc__input-error').html('');
         $('#addModal .modal-body input').val('');
         $('#addModal .modal-body select').val('');
-        $('#addModal input[name="active"]').prop('checked', false);
     });
+
+    const editEmpPenssionModalEl = document.getElementById('editEmpPenssionModal')
+    editEmpPenssionModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addModal .acc__input-error').html('');
+        $('#addModal .modal-body input').val('');
+        $('#addModal .modal-body select').val('');
+        $('#addModal .modal-footer input[name="id"]').val('0');
+    });
+
+    $('#addEmpPenssionForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addEmpPenssionForm');
+    
+        document.querySelector('#saveEPS').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveEPS svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('employee.penssion.store'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveEPS').removeAttribute('disabled');
+            document.querySelector("#saveEPS svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                document.querySelector('#saveEPS').removeAttribute('disabled');
+                document.querySelector("#saveEPS svg").style.cssText = "display: none;";
+                
+                addEmpPenssionModal.hide();
+                
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Success!" );
+                    $("#successModal .successModalDesc").html('Employee penssion scheme details successfully inserted.');
+                    $("#successModal .successCloser").attr('data-action', 'NONE');
+                });                
+                    
+                setTimeout(function(){
+                    successModal.hide();
+                }, 5000);
+            }
+            employeePenssionListTable.init();
+        }).catch(error => {
+            document.querySelector('#saveEPS').removeAttribute('disabled');
+            document.querySelector("#saveEPS svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addEmpPenssionForm .${key}`).addClass('border-danger')
+                        $(`#addEmpPenssionForm  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#employeePenssionListTable').on('click', '.edit_btn', function(){
+        let $editBtn = $(this);
+        let editId = $editBtn.attr("data-id");
+
+        axios({
+            method: "post",
+            url: route("employee.penssion.edit"),
+            data: {editId: editId},
+            headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+        }).then((response) => {
+            if (response.status == 200) {
+                let dataset = response.data.res;
+                $('#editEmpPenssionModal [name="employee_info_penssion_scheme_id"]').val(dataset.employee_info_penssion_scheme_id ? dataset.employee_info_penssion_scheme_id : '');
+                $('#editEmpPenssionModal [name="joining_date"]').val(dataset.joining_date ? dataset.joining_date : '');
+                $('#editEmpPenssionModal [name="date_left"]').val(dataset.date_left ? dataset.date_left : '');
+
+                $('#editEmpPenssionModal input[name="id"]').val(editId);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $('#editEmpPenssionForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('editEmpPenssionForm');
+    
+        document.querySelector('#updateEPS').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateEPS svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('employee.penssion.update'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateEPS').removeAttribute('disabled');
+            document.querySelector("#updateEPS svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                document.querySelector('#updateEPS').removeAttribute('disabled');
+                document.querySelector("#updateEPS svg").style.cssText = "display: none;";
+                
+                editEmpPenssionModal.hide();
+                
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Success!" );
+                    $("#successModal .successModalDesc").html('Employee penssion scheme details successfully updated.');
+                    $("#successModal .successCloser").attr('data-action', 'NONE');
+                });                
+                    
+                setTimeout(function(){
+                    successModal.hide();
+                }, 5000);
+            }
+            employeePenssionListTable.init();
+        }).catch(error => {
+            document.querySelector('#updateEPS').removeAttribute('disabled');
+            document.querySelector("#updateEPS svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editEmpPenssionForm .${key}`).addClass('border-danger')
+                        $(`#editEmpPenssionForm  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    // Confirm Modal Action
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'DELETEEPS'){
+            axios({
+                method: 'delete',
+                url: route('employee.penssion.destory', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Employee Penssion Scheme details successfully deleted!');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });
+                }
+                employeePenssionListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'RESTOREEPS'){
+            axios({
+                method: 'post',
+                url: route('employee.penssion.restore', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Success!');
+                        $('#successModal .successModalDesc').html('Employee Penssion Scheme details Successfully Restored!');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });
+                }
+                employeePenssionListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } 
+    })
+
+    // Delete Course
+    $('#employeePenssionListTable').on('click', '.delete_btn', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to delete these record?  If yes, the please click on agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETEEPS');
+        });
+    });
+
+    // Restore Course
+    $('#employeePenssionListTable').on('click', '.restore_btn', function(){
+        let $statusBTN = $(this);
+        let courseID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to restore this record?  If yes, the please click on agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', courseID);
+            $('#confirmModal .agreeWith').attr('data-action', 'RESTOREEPS');
+        });
+    });
+
 })();

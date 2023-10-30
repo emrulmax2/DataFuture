@@ -82,12 +82,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\EmployeeWorkingPatternDetailController;
+use App\Http\Controllers\HR\EmployeePaymentSettingsController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
+use App\Http\Controllers\HR\EmployeePenssionSchemeController;
 use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeEmergencyContactController;
 use App\Http\Controllers\HR\EmployeeProfileController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternController;
 use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\PlanTreeController;
@@ -739,6 +743,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeePaymentSettingsController::class)->group(function(){
         Route::get('employee-profile/payment-settings/{id}', 'index')->name('employee.payment.settings'); 
         Route::post('employee-profile/payment-settings/store', 'store')->name('employee.payment.settings.store'); 
+        Route::post('employee-profile/payment-settings/update', 'update')->name('employee.payment.settings.update'); 
     });
 
     Route::controller(EmployeeBankDetailController::class)->group(function(){
@@ -746,12 +751,35 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/bank/edit', 'edit')->name('employee.bank.edit'); 
         Route::post('employee-profile/bank/update', 'update')->name('employee.bank.update'); 
         Route::get('employee-profile/bank/list', 'list')->name('employee.bank.list'); 
+        Route::delete('employee-profile/bank/delete/{id}', 'destroy')->name('employee.bank.destory');
+        Route::post('employee-profile/bank/restore/{id}', 'restore')->name('employee.bank.restore');
+        Route::post('employee-profile/bank/change-status/{id}', 'changeStatus')->name('employee.bank.changestatus');
     });
     
 
     Route::controller(EmployeePenssionSchemeController::class)->group(function(){
-        ///Route::post('employee-profile/bank/store', 'store')->name('employee.bank.store'); 
         Route::get('employee-profile/penssion/list', 'list')->name('employee.penssion.list'); 
+        Route::post('employee-profile/penssion/store', 'store')->name('employee.penssion.store'); 
+        Route::post('employee-profile/penssion/edit', 'edit')->name('employee.penssion.edit'); 
+        Route::post('employee-profile/penssion/update', 'update')->name('employee.penssion.update'); 
+        Route::delete('employee-profile/penssion/delete/{id}', 'destroy')->name('employee.penssion.destory');
+        Route::post('employee-profile/penssion/restore/{id}', 'restore')->name('employee.penssion.restore');
+    });
+
+    Route::controller(EmployeeWorkingPatternController::class)->group(function(){
+        Route::get('employee-profile/pattern/list', 'list')->name('employee.pattern.list'); 
+        Route::post('employee-profile/pattern/store', 'store')->name('employee.pattern.store'); 
+        Route::post('employee-profile/pattern/edit', 'edit')->name('employee.pattern.edit'); 
+        Route::post('employee-profile/pattern/update', 'update')->name('employee.pattern.update'); 
+        Route::delete('employee-profile/pattern/delete/{id}', 'destroy')->name('employee.pattern.destory');
+        Route::post('employee-profile/pattern/restore/{id}', 'restore')->name('employee.pattern.restore');
+    });
+
+    Route::controller(EmployeeWorkingPatternDetailController::class)->group(function(){
+        Route::get('employee-profile/pattern-details/list', 'list')->name('employee.pattern.details.list'); 
+        Route::post('employee-profile/pattern-details/store', 'store')->name('employee.pattern.details.store'); 
+        Route::post('employee-profile/pattern-details/edit', 'edit')->name('employee.pattern.details.edit'); 
+        Route::post('employee-profile/pattern-details/update', 'update')->name('employee.pattern.details.update'); 
     });
     
     Route::controller(StaffDashboard::class)->group(function() {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmpoyeePenssionSchemeRequest;
 use App\Models\EmployeePenssionScheme;
 use Illuminate\Http\Request;
 
@@ -57,5 +58,54 @@ class EmployeePenssionSchemeController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function store(EmpoyeePenssionSchemeRequest $request){
+        $employee_id = $request->employee_id;
+
+        $adata = [];
+        $adata['employee_id'] = $employee_id;
+        $adata['employee_info_penssion_scheme_id'] = (isset($request->employee_info_penssion_scheme_id) && !empty($request->employee_info_penssion_scheme_id) ? $request->employee_info_penssion_scheme_id : null);
+        $adata['joining_date'] = (isset($request->joining_date) && !empty($request->joining_date) ? date('Y-m-d', strtotime($request->joining_date)) : null);
+        $adata['date_left'] = (isset($request->date_left) && !empty($request->date_left) ? date('Y-m-d', strtotime($request->date_left)) : null);
+        $adata['created_by'] = auth()->user()->id;
+
+        EmployeePenssionScheme::create($adata);
+
+        return response()->json(['message' => 'Data successfully inserted'], 200);
+    }
+
+    public function edit(Request $request){
+        $editId = $request->editId;
+        $bank = EmployeePenssionScheme::find($editId);
+
+        return response()->json(['res' => $bank], 200);
+    }
+
+    public function update(EmpoyeePenssionSchemeRequest $request){
+        $employee_id = $request->employee_id;
+        $id = $request->id;
+
+        $adata = [];
+        $adata['employee_id'] = $employee_id;
+        $adata['employee_info_penssion_scheme_id'] = (isset($request->employee_info_penssion_scheme_id) && !empty($request->employee_info_penssion_scheme_id) ? $request->employee_info_penssion_scheme_id : null);
+        $adata['joining_date'] = (isset($request->joining_date) && !empty($request->joining_date) ? date('Y-m-d', strtotime($request->joining_date)) : null);
+        $adata['date_left'] = (isset($request->date_left) && !empty($request->date_left) ? date('Y-m-d', strtotime($request->date_left)) : null);
+        $adata['updated_by'] = auth()->user()->id;
+
+        EmployeePenssionScheme::where('id', $id)->update($adata);
+
+        return response()->json(['message' => 'Data successfully updated'], 200);
+    }
+
+    public function destroy($id){
+        $data = EmployeePenssionScheme::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function restore($id) {
+        $data = EmployeePenssionScheme::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
     }
 }

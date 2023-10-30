@@ -56,8 +56,8 @@ var employeeBankListTable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
                     width: "180",
                     download: false,
                     formatter(cell, formatterParams) {                        
@@ -65,6 +65,9 @@ var employeeBankListTable = (function () {
                         if (cell.getData().deleted_at == null) {
                             btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            if(cell.getData().active == 1){
+                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></a>';
+                            }
                         }  else if (cell.getData().deleted_at != null) {
                             btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
@@ -156,10 +159,20 @@ var employeeBankListTable = (function () {
         // On reset filter form
         $("#tabulator-html-filter-reset-BNK").on("click", function (event) {
             $("#query-BNK").val("");
-            $("#status-BNK").val("1");
+            $("#status-BNK").val("3");
             filterHTMLFormBNK();
         });
     }
+
+    $('#successModal .successCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            successModal.hide();
+            window.location.reload();
+        }else{
+            successModal.hide();
+        }
+    });
 
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -317,6 +330,95 @@ var employeeBankListTable = (function () {
         });
     });
 
+    // Confirm Modal Action
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'DELETEBNK'){
+            axios({
+                method: 'delete',
+                url: route('employee.bank.destory', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Employee Bank details successfully deleted!');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });
+                }
+                employeeBankListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'RESTOREBNK'){
+            axios({
+                method: 'post',
+                url: route('employee.bank.restore', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Success!');
+                        $('#successModal .successModalDesc').html('Employee Bank details Successfully Restored!');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });
+                }
+                employeeBankListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'CHANGESTATBNK'){
+            axios({
+                method: 'post',
+                url: route('employee.bank.changestatus', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Success!');
+                        $('#successModal .successModalDesc').html('Employee Bank details status successfully updated!');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });
+                }
+                employeeBankListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    })
+
+    //Change Status
+    $('#employeeBankListTable').on('click', '.status_updater', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATBNK');
+        });
+    });
+
     // Delete Course
     $('#employeeBankListTable').on('click', '.delete_btn', function(){
         let $statusBTN = $(this);
@@ -327,7 +429,7 @@ var employeeBankListTable = (function () {
             $('#confirmModal .confModTitle').html(confModalDelTitle);
             $('#confirmModal .confModDesc').html('Do you really want to delete these record?  If yes, the please click on agree btn.');
             $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETEBNK');
         });
     });
 
@@ -341,7 +443,7 @@ var employeeBankListTable = (function () {
             $('#confirmModal .confModTitle').html(confModalDelTitle);
             $('#confirmModal .confModDesc').html('Do you really want to restore this record?');
             $('#confirmModal .agreeWith').attr('data-id', courseID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+            $('#confirmModal .agreeWith').attr('data-action', 'RESTOREBNK');
         });
     });
 
