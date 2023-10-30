@@ -781,3 +781,16 @@
 .weekDay input[type="checkbox"]:checked + label .closeIcon{
     display: none;
 }
+
+.chellIconWrapper{
+    border-color: rgb(var(--color-primary) / var(--tw-border-opacity));
+    background-color: rgb(var(--color-primary) / var(--tw-bg-opacity));
+    font-weight: 500;
+    color: #FFF;
+    font-size: 18px;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
