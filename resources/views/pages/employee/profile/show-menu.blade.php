@@ -1,7 +1,4 @@
-<ul 
-    class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu" 
-    style="padding-bottom: {{ Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
-    >
+<ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu">
     <li class="nav-item" role="presentation">
         <a href="{{ route('profile.employee.view', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'profile.employee.view' ? 'active' : '' }}">
             Profile
@@ -15,13 +12,8 @@
     </li>
     
     <li class="nav-item" role="presentation">
-        <a href="{{ route('student.notes', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.notes' ? 'active' : '' }}">
-            Notes
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('student.communication', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.communication' ? 'active' : '' }}">
-            Priviliges
+        <a href="{{ route('employee.holiday', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.holiday' ? 'active' : '' }}">
+            Holidays
         </a>
     </li>
     

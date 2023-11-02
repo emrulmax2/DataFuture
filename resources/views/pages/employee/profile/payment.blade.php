@@ -233,7 +233,7 @@
         </div>
     </div>
 
-
+    @if(isset($employee->payment->id) && $employee->payment->id > 0)
     <div class="intro-y mt-5">
         <div class="intro-y box p-5 pb-7">
             <div class="grid grid-cols-12 gap-0 items-center">
@@ -241,9 +241,11 @@
                     <div class="font-medium text-base">Working Pattern</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Working Pattern
-                    </button>
+                    @if(isset($employee->activePatterns) && $employee->activePatterns->count() == 0)
+                        <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Working Pattern
+                        </button>
+                    @endif
                 </div>
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
@@ -296,9 +298,10 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- BEGIN: Payment Modals -->
-    @include('pages.employee.profile.payment-modal')
+    @include('pages.employee.profile.payment-modal');
     <!-- END: Payment Modals -->
 @endsection
 

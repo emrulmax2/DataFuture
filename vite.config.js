@@ -120,6 +120,11 @@ export default defineConfig({
                 "resources/js/employee-payment-setting.js",
                 "resources/js/employee-penssion-scheem.js",
                 "resources/js/employee-working-pattern.js",
+
+                "resources/js/holiday-years.js",
+                "resources/js/bank-holiday.js",
+                "resources/js/leave-options.js",
+                "resources/js/employee-holiday.js",
                 
             ],
             refresh: true,

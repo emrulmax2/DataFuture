@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\HR;
 
+use App\Http\Controllers\Controller;
 use App\Models\EmployeeWorkingPatternDetail;
 use Illuminate\Http\Request;
 
