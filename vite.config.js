@@ -126,6 +126,9 @@ export default defineConfig({
                 "resources/js/leave-options.js",
                 "resources/js/employee-holiday.js",
                 
+
+                "resources/js/attendance.js",
+                
             ],
             refresh: true,
         }),
