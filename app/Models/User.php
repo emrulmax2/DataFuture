@@ -88,5 +88,9 @@ class User extends Authenticatable
         return $this->hasMany(ApplicantInterview::class);
     }
 
+
+    public function employee(){
+        return $this->hasOne(Employee::class, 'user_id', 'id')->latestOfMany();
+    }
     
 }

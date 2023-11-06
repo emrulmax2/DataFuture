@@ -136,6 +136,8 @@ use App\Http\Controllers\Settings\ELearningActivitySettingController;
 use App\Http\Controllers\Settings\HolidayYearController;
 use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
+use App\Http\Controllers\User\UserHolidayController;
+use App\Http\Controllers\User\UserProfileController;
 use App\Models\BankHoliday;
 
 /*
@@ -707,6 +709,15 @@ Route::middleware('auth')->group(function() {
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
     });
+
+    Route::controller(UserProfileController::class)->group(function() {
+        Route::get('my-account', 'index')->name('user.account'); 
+    });
+
+    Route::controller(UserHolidayController::class)->group(function(){
+        Route::get('my-account/holidays/{id}', 'index')->name('user.account.holiday'); 
+    });
+
     Route::controller(EmployeeController::class)->group(function(){
         Route::get('employee','index')->name('employee');
         Route::post('employee/upload-photo', 'UploadEmployeePhoto')->name('employee.upload.photo');

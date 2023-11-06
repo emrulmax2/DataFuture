@@ -240,7 +240,7 @@
                             <div class="col-span-8 font-medium">{{ (isset($employeeEligibilites->employeeWorkPermitType->name) && !empty($employeeEligibilites->employeeWorkPermitType->name) ? $employeeEligibilites->employeeWorkPermitType->name : '') }}</div>
                         </div>
                     </div>
-                    @if($employeeEligibilites->employeeWorkPermitType->name != "British Citizen")
+                    @if(isset($employeeEligibilites->employeeWorkPermitType->name) && $employeeEligibilites->employeeWorkPermitType->name != "British Citizen")
                     <div class="col-span-12 sm:col-span-3">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Workpermit Number</div>
