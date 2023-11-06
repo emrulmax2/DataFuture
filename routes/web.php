@@ -84,7 +84,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
-use App\Http\Controllers\EmployeeWorkingPatternDetailController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
 use App\Http\Controllers\HR\EmployeePaymentSettingsController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
 use App\Http\Controllers\HR\EmployeePenssionSchemeController;
@@ -92,9 +92,11 @@ use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeEmergencyContactController;
+use App\Http\Controllers\HR\EmployeeHolidayController;
 use App\Http\Controllers\HR\EmployeeProfileController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternController;
 use App\Http\Controllers\HR\EmployeeTermController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
@@ -133,8 +135,11 @@ use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierCont
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
 use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 use App\Http\Controllers\Settings\ELearningActivitySettingController;
+use App\Http\Controllers\Settings\HolidayYearController;
+use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
+use App\Models\BankHoliday;
 
 /*
 |--------------------------------------------------------------------------
@@ -783,6 +788,20 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/pattern-details/store', 'store')->name('employee.pattern.details.store'); 
         Route::post('employee-profile/pattern-details/edit', 'edit')->name('employee.pattern.details.edit'); 
         Route::post('employee-profile/pattern-details/update', 'update')->name('employee.pattern.details.update'); 
+    });
+
+    Route::controller(EmployeeWorkingPatternPayController::class)->group(function(){
+        Route::get('employee-profile/pattern-pay/list', 'list')->name('employee.pattern.pay.list'); 
+        Route::post('employee-profile/pattern-pay/edit', 'edit')->name('employee.pattern.pay.edit'); 
+        Route::post('employee-profile/pattern-pay/update', 'update')->name('employee.pattern.pay.update');
+        Route::post('employee-profile/pattern-pay/getPattern', 'getPattern')->name('employee.pattern.pay.get.pattern');
+        Route::post('employee-profile/pattern-pay/store', 'store')->name('employee.pattern.pay.store'); 
+    });
+
+    Route::controller(EmployeeHolidayController::class)->group(function(){
+        Route::get('employee-profile/holidays/{id}', 'index')->name('employee.holiday'); 
+        Route::post('employee-profile/holidays/update-adjustment', 'updateAdjustment')->name('employee.holiday.update.adjustment'); 
+        //Route::post('employee-profile/payment-settings/update', 'update')->name('employee.payment.settings.update'); 
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -1448,6 +1467,32 @@ Route::middleware('auth')->group(function() {
     
         Route::get('studentidentifier/export', 'export')->name('studentidentifier.export');
         Route::post('studentidentifier/import', 'import')->name('studentidentifier.import');
+    });
+    
+    Route::controller(HolidayYearController::class)->group(function() {
+        Route::get('site-settings/holiday-year', 'index')->name('holiday.year'); 
+        Route::get('site-settings/holiday-year/list', 'list')->name('holiday.year.list');        
+        Route::post('site-settings/holiday-year/store', 'store')->name('holiday.year.store');
+        Route::post('site-settings/holiday-year/edit', 'edit')->name('holiday.year.edit');
+        Route::post('site-settings/holiday-year/update', 'update')->name('holiday.year.update');
+        Route::delete('site-settings/holiday-year/delete/{id}', 'destroy')->name('holiday.year.destory');
+        Route::post('site-settings/holiday-year/restore/{id}', 'restore')->name('holiday.year.restore');
+        Route::post('site-settings/holiday-year/update-status', 'updateStatus')->name('holiday.year.update.status'); 
+
+        Route::get('site-settings/holiday-year/leave-options/{id}', 'leaveOptions')->name('holiday.year.leave.option'); 
+        Route::post('site-settings/holiday-year/leave-options', 'updateLeaveOptions')->name('holiday.year.update.leave.option'); 
+    });
+    
+    Route::controller(HrBankHolidayController::class)->group(function() {
+        Route::get('site-settings/bank-holiday/all/{id}', 'index')->name('hr.bank.holiday'); 
+        Route::get('site-settings/bank-holiday/list', 'list')->name('hr.bank.holiday.list');
+        Route::post('site-settings/bank-holiday/edit', 'edit')->name('hr.bank.holiday.edit');
+        Route::post('site-settings/bank-holiday/update', 'update')->name('hr.bank.holiday.update');
+        Route::delete('site-settings/bank-holiday/delete/{id}', 'destroy')->name('hr.bank.holiday.destory');
+        Route::post('site-settings/bank-holiday/restore/{id}', 'restore')->name('hr.bank.holiday.restore');
+
+        Route::get('site-settings/bank-holiday/export/{id}', 'export')->name('hr.bank.holiday.export');
+        Route::post('site-settings/bank-holiday/import', 'import')->name('hr.bank.holiday.import');
     });
 
     Route::controller(AddressController::class)->group(function() {

@@ -548,12 +548,12 @@
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-6">
                             <label for="effective_from" class="form-label">Effective From <span class="text-danger">*</span></label>
-                            <input type="text" id="effective_from" name="effective_from" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" id="effective_from" name="effective_from" class="form-control w-full">
                             <div class="acc__input-error error-effective_from text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="end_to" class="form-label">End Date</label>
-                            <input type="text" id="end_to" name="end_to" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" id="end_to" name="end_to" class="form-control w-full end_to_date">
                             <div class="acc__input-error error-end_to text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -614,29 +614,19 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="effective_from" class="form-label">Effective From <span class="text-danger">*</span></label>
-                            <input type="text" id="effective_from" name="effective_from" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <label for="edit_effective_from" class="form-label">Effective From <span class="text-danger">*</span></label>
+                            <input type="text" id="edit_effective_from" name="effective_from" class="form-control w-full">
                             <div class="acc__input-error error-effective_from text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="end_to" class="form-label">End Date</label>
-                            <input type="text" id="end_to" name="end_to" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <label for="edit_end_to" class="form-label">End Date</label>
+                            <input type="text" id="edit_end_to" name="end_to" class="form-control w-full">
                             <div class="acc__input-error error-end_to text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="contracted_hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
                             <input type="text" id="contracted_hour" name="contracted_hour" placeholder="00:00" class="form-control w-full">
                             <div class="acc__input-error error-contracted_hour text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="salary" class="form-label">Salary <span class="text-danger">*</span></label>
-                            <input type="number" step="any" id="salary" name="salary" class="form-control w-full">
-                            <div class="acc__input-error error-salary text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="hourly_rate" class="form-label">Hourly Rate <span class="text-danger">*</span></label>
-                            <input type="number" step="any" readonly id="hourly_rate" name="hourly_rate" class="form-control w-full">
-                            <div class="acc__input-error error-hourly_rate text-danger mt-2"></div>
                         </div>
                     </div>
                 </div>
@@ -932,6 +922,143 @@
 </div>
 <!-- END: Edit Calendar Modal -->
 
+<!-- BEGIN: add Working Pattern Pay Modal -->
+<div id="addEmployeePatternPayModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="addEmployeePatternPayForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Working Pattern Pay</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_add_effective_from" class="form-label">Effective From <span class="text-danger">*</span></label>
+                            <input type="text" id="pay_add_effective_from" name="effective_from" class="form-control w-full">
+                            <div class="acc__input-error error-effective_from text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_add_end_to" class="form-label">End Date</label>
+                            <input type="text" id="pay_add_end_to" name="end_to" class="form-control w-full">
+                            <div class="acc__input-error error-end_to text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_add_contracted_hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
+                            <input type="text" id="pay_add_contracted_hour" readonly name="contracted_hour" placeholder="00:00" class="form-control w-full">
+                            <div class="acc__input-error error-contracted_hour text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_add_salary" class="form-label">Salary <span class="text-danger">*</span></label>
+                            <input type="number" step="any" id="pay_add_salary" name="salary" class="form-control w-full">
+                            <div class="acc__input-error error-salary text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-12">
+                            <label for="pay_add_hourly_rate" class="form-label">Hourly Rate <span class="text-danger">*</span></label>
+                            <input type="number" step="any" readonly id="pay_add_hourly_rate" name="hourly_rate" class="form-control w-full">
+                            <div class="acc__input-error error-hourly_rate text-danger mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                        <label class="form-check-label mr-3 ml-0" for="pay_add_active">Active</label>
+                        <input id="pay_add_active" class="form-check-input m-0" checked name="active" value="1" type="checkbox">
+                    </div>
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="addEWPPAY" class="btn btn-primary w-auto">     
+                        Save                   
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                    <input type="hidden" name="employee_working_pattern_id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: add Working Pattern Pay Modal -->
+
+<!-- BEGIN: Edit Working Pattern Pay Modal -->
+<div id="editEmployeePatternPayModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editEmployeePatternPayForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Working Pattern Pay</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_edit_effective_from" class="form-label">Effective From <span class="text-danger">*</span></label>
+                            <input type="text" id="pay_edit_effective_from" name="effective_from" class="form-control w-full">
+                            <div class="acc__input-error error-effective_from text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_edit_end_to" class="form-label">End Date</label>
+                            <input type="text" id="pay_edit_end_to" name="end_to" class="form-control w-full">
+                            <div class="acc__input-error error-end_to text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_contracted_hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
+                            <input type="text" id="pay_contracted_hour" readonly name="contracted_hour" placeholder="00:00" class="form-control w-full">
+                            <div class="acc__input-error error-contracted_hour text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="pay_salary" class="form-label">Salary <span class="text-danger">*</span></label>
+                            <input type="number" step="any" id="pay_salary" name="salary" class="form-control w-full">
+                            <div class="acc__input-error error-salary text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-12">
+                            <label for="pay_hourly_rate" class="form-label">Hourly Rate <span class="text-danger">*</span></label>
+                            <input type="number" step="any" readonly id="pay_hourly_rate" name="hourly_rate" class="form-control w-full">
+                            <div class="acc__input-error error-hourly_rate text-danger mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                        <label class="form-check-label mr-3 ml-0" for="pay_active">Active</label>
+                        <input id="pay_active" class="form-check-input m-0" name="active" value="1" type="checkbox">
+                    </div>
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="updateEWPPAY" class="btn btn-primary w-auto">     
+                        Update                   
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                    <input type="hidden" name="id" value="0"/>
+                    <input type="hidden" name="employee_working_pattern_id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Working Pattern Pay Modal -->
+
 
 <!-- BEGIN: Success Modal Content -->
 <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -945,6 +1072,26 @@
                 </div>
                 <div class="px-5 pb-8 text-center">
                     <button type="button" data-action="NONE" class="btn btn-primary successCloser w-24">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Success Modal Content -->
+
+<!-- BEGIN: Success Modal Content -->
+<div id="successPayModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 successPayModalTitle"></div>
+                    <div class="text-slate-500 mt-2 successPayModalDesc"></div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-auto">No, I Don't</button>
+                    <button type="button" data-pattern="0" class="btn btn-danger successPayAdder w-auto">Yes, I agree</button>
                 </div>
             </div>
         </div>

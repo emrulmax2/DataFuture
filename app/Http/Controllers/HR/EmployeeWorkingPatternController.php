@@ -4,8 +4,10 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeWorkPatternRequest;
+use App\Http\Requests\EmployeeWorkPatterUpdateRequest;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
+use App\Models\EmployeeWorkingPatternPay;
 use Illuminate\Http\Request;
 
 class EmployeeWorkingPatternController extends Controller
@@ -50,11 +52,10 @@ class EmployeeWorkingPatternController extends Controller
                     'effective_from' => $list->effective_from,
                     'end_to' => $list->end_to,
                     'contracted_hour' => $list->contracted_hour,
-                    'salary' => $list->salary,
-                    'hourly_rate' => $list->hourly_rate,
                     'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at,
-                    'has_days' => (isset($list->patterns) ? $list->patterns->count() : 0)
+                    'has_days' => (isset($list->patterns) ? $list->patterns->count() : 0),
+                    'has_pays' => (isset($list->pays) ? $list->pays->count() : 0)
                 ];
                 $i++;
             endforeach;
@@ -67,20 +68,34 @@ class EmployeeWorkingPatternController extends Controller
         $employee_id = $request->employee_id;
 
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
+        $salary = (isset($request->salary) ? $request->salary : 0);
+        $hourlyRate = (isset($request->hourly_rate) ? $request->hourly_rate : 0);
+        $effectiveFrom = (isset($request->effective_from) && !empty($request->effective_from) ? date('Y-m-d', strtotime($request->effective_from)) : null);
+        $endTo = (isset($request->end_to) && !empty($request->end_to) ? date('Y-m-d', strtotime($request->end_to)) : NULL);
 
         $data = [];
         $data['employee_id'] = $employee_id;
-        $data['effective_from'] = (isset($request->effective_from) && !empty($request->effective_from) ? date('Y-m-d', strtotime($request->effective_from)) : null);
-        $data['end_to'] = (isset($request->end_to) && !empty($request->end_to) ? date('Y-m-d', strtotime($request->end_to)) : NULL);
+        $data['effective_from'] = $effectiveFrom;
+        $data['end_to'] = $endTo;
         $data['contracted_hour'] = (isset($request->contracted_hour) ? $request->contracted_hour : null);
-        $data['salary'] = (isset($request->salary) ? $request->salary : null);
-        $data['hourly_rate'] = (isset($request->hourly_rate) ? $request->hourly_rate : null);
         $data['active'] = $active;
         $data['created_by'] = auth()->user()->id;
 
         $pattern = EmployeeWorkingPattern::create($data);
-        if($active == 1):
-            EmployeeWorkingPattern::where('id', '!=', $pattern->id)->where('active', 1)->update(['active' => 0]);
+        if($pattern):
+            $data = [];
+            $data['employee_working_pattern_id'] = $pattern->id;
+            $data['effective_from'] = $effectiveFrom;
+            $data['end_to'] = $endTo;
+            $data['salary'] = $salary;
+            $data['hourly_rate'] = $hourlyRate;
+            $data['active'] = $active;
+            $data['created_by'] = auth()->user()->id;
+
+            EmployeeWorkingPatternPay::create($data);
+            if($active == 1):
+                EmployeeWorkingPattern::where('id', '!=', $pattern->id)->where('active', 1)->update(['active' => 0]);
+            endif;
         endif;
 
         return response()->json(['msg' => 'Data successfully inserted.'], 200);
@@ -89,12 +104,13 @@ class EmployeeWorkingPatternController extends Controller
     public function edit(Request $request){
         $id = $request->editId;
         $pattern = EmployeeWorkingPattern::find($id);
+        $pattern['efffected_from_modified'] = (isset($pattern->effective_from) && !empty($pattern->effective_from) ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
 
         return response()->json(['res' => $pattern], 200);
     }
 
 
-    public function update(EmployeeWorkPatternRequest $request){
+    public function update(EmployeeWorkPatterUpdateRequest $request){
         $employee_id = $request->employee_id;
         $id = $request->id;
 
@@ -107,8 +123,6 @@ class EmployeeWorkingPatternController extends Controller
         $data['effective_from'] = (isset($request->effective_from) && !empty($request->effective_from) ? date('Y-m-d', strtotime($request->effective_from)) : null);
         $data['end_to'] = (isset($request->end_to) && !empty($request->end_to) ? date('Y-m-d', strtotime($request->end_to)) : NULL);
         $data['contracted_hour'] = (isset($request->contracted_hour) ? $request->contracted_hour : null);
-        $data['salary'] = (isset($request->salary) ? $request->salary : null);
-        $data['hourly_rate'] = (isset($request->hourly_rate) ? $request->hourly_rate : null);
         $data['active'] = $active;
         $data['updated_by'] = auth()->user()->id;
 

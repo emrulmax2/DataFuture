@@ -4,7 +4,98 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import IMask from 'imask';
 
+import dayjs from "dayjs";
+import Litepicker from "litepicker";
+
 ("use strict");
+var employeeWorkingPatternPaysListTable = (function () {
+    var _tableGen = function (employeeWorkingPatternId = 0) {
+        // Setup Tabulator
+        let tableID = 'patternPayDetailsTable_'+employeeWorkingPatternId;
+
+        let tableContent = new Tabulator("#"+tableID, {
+            ajaxURL: route("employee.pattern.pay.list"),
+            ajaxParams: { employeeWorkingPatternId: employeeWorkingPatternId },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Effective From",
+                    field: "effective_from",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "End To",
+                    field: "end_to",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Salary",
+                    field: "salary",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Hourly Rate",
+                    field: "hourly_rate",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return cell.getData().active == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>';
+                    }
+                },
+                {
+                    title: "Actions",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: "120",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        btns +='<button data-patternid="'+cell.getData().employee_working_pattern_id +'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployeePatternPayModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                        
+                        return btns;
+                    },
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+    };
+    return {
+        init: function (employeeWorkingPatternId) {
+            _tableGen(employeeWorkingPatternId);
+        },
+    };
+})();
 var employeeWorkingPatternDaysListTable = (function () {
     var _tableGen = function (employeeWorkingPatternId = 0) {
         // Setup Tabulator
@@ -116,7 +207,8 @@ var employeePatternListTable = (function () {
                     cellClick:function(e, row, formatterParams){
                         const employeeWorkingPatternId = row.getData().id;
                         let holderWrapEl = document.getElementById('subTableWrap_'+employeeWorkingPatternId);
-                        let termTableID = 'patternDetailsTable_'+employeeWorkingPatternId;
+                        let patternDetailsTableID = 'patternDetailsTable_'+employeeWorkingPatternId;
+                        let patternPayDetailsTableID = 'patternPayDetailsTable_'+employeeWorkingPatternId;
 
                         if(row.getElement().classList.contains('active')){
                             row.getElement().classList.remove('active');
@@ -128,8 +220,12 @@ var employeePatternListTable = (function () {
                             holderWrapEl.style.display = 'block';
                             holderWrapEl.style.width = '100%';
 
-                            if($('#'+termTableID).length > 0){
+                            if($('#'+patternDetailsTableID).length > 0){
                                 employeeWorkingPatternDaysListTable.init(employeeWorkingPatternId)
+                            }
+
+                            if($('#'+patternPayDetailsTableID).length > 0){
+                                employeeWorkingPatternPaysListTable.init(employeeWorkingPatternId)
                             }
                         }     
                     }
@@ -147,16 +243,6 @@ var employeePatternListTable = (function () {
                 {
                     title: "Contracted Hour",
                     field: "contracted_hour",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Salary",
-                    field: "salary",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Hourly Rate",
-                    field: "hourly_rate",
                     headerHozAlign: "left",
                 },
                 {
@@ -203,24 +289,50 @@ var employeePatternListTable = (function () {
             rowFormatter: function(row, e) {
                 const employeeWorkingPatternId = row.getData().id;
                 const has_days = row.getData().has_days;
+                const has_pays = row.getData().has_pays;
 
                 var holderEl = document.createElement("div");
                 holderEl.setAttribute('class', "pt-3 px-5 pb-5 overflow-x-auto scrollbar-hidden subTableWrap_"+employeeWorkingPatternId);
                 holderEl.setAttribute('id', "subTableWrap_"+employeeWorkingPatternId);
                 holderEl.style.display = "none";
                 holderEl.style.boxSizing = "border-box";
-                //holderEl.style.borderTop = "1px solid #e5e7eb";
 
+                var gridEl = document.createElement('div');
+                gridEl.setAttribute('class', 'grid grid-cols-12 gap-0 gap-x-4');
+                holderEl.appendChild(gridEl);
+
+                var leftColEl = document.createElement('div');
+                leftColEl.setAttribute('class', 'col-span-12 sm:col-span-6 bg-white');
+                leftColEl.style.padding = "0 10px";
+                gridEl.appendChild(leftColEl)
+
+                var rightColEl = document.createElement('div');
+                rightColEl.setAttribute('class', 'col-span-12 sm:col-span-6 bg-white');
+                rightColEl.style.padding = "0 10px";
+                gridEl.appendChild(rightColEl);
 
                 if(has_days > 0){
                     var tableEl = document.createElement("div");
                     tableEl.setAttribute('class', "table-report table-report--tabulator subTable"+employeeWorkingPatternId);
                     tableEl.setAttribute('id', "patternDetailsTable_"+employeeWorkingPatternId);
                     tableEl.setAttribute('data-employeeWorkingPatternId', employeeWorkingPatternId);
+                    tableEl.style.background = "#FFFFFF";
 
-                    holderEl.appendChild(tableEl);
+                    leftColEl.appendChild(tableEl);
                 }else{
-                    holderEl.innerHTML = '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp;No details found under this pattern.</div>';
+                    leftColEl.innerHTML = '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp;No details found under this pattern.</div>';
+                }
+
+                if(has_pays > 0){
+                    var payTableEl = document.createElement("div");
+                    payTableEl.setAttribute('class', "table-report table-report--tabulator empWorkingPayTable subPayTable"+employeeWorkingPatternId);
+                    payTableEl.setAttribute('id', "patternPayDetailsTable_"+employeeWorkingPatternId);
+                    payTableEl.setAttribute('data-employeeWorkingPatternId', employeeWorkingPatternId);
+                    payTableEl.style.background = "#FFFFFF";
+
+                    rightColEl.appendChild(payTableEl);
+                }else{
+                    rightColEl.innerHTML = '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp;No active pay info found under this pattern.</div>';
                 }
 
                 row.getElement().appendChild(holderEl);
@@ -374,6 +486,56 @@ var employeePatternListTable = (function () {
         })
     }
 
+    let dateOption = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: true,
+        format: "DD-MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+
+    const effective_from = new Litepicker({
+        element: document.getElementById('effective_from'),
+        ...dateOption,
+        setup: (picker) => {
+            picker.on('selected', (date1, date2) => {
+                end_to.setOptions({
+                    minDate: picker.getDate()
+                });
+            });
+        }
+    });
+
+    const end_to = new Litepicker({
+        element: document.getElementById('end_to'),
+        ...dateOption
+    });
+    
+    const edit_effective_from = new Litepicker({
+        element: document.getElementById('edit_effective_from'),
+        ...dateOption,
+        setup: (picker) => {
+            picker.on('selected', (date1, date2) => {
+                edit_end_to.clearSelection();
+                edit_end_to.setOptions({
+                    minDate: picker.getDate()
+                });
+            });
+        }
+    });
+
+    const edit_end_to = new Litepicker({
+        element: document.getElementById('edit_end_to'),
+        ...dateOption
+    });
+
     $('#addEmployeeWorkingPatternForm [name="contracted_hour"], #addEmployeeWorkingPatternForm [name="salary"]').on('keyup', function(){
         var contractedHour = $('#addEmployeeWorkingPatternForm [name="contracted_hour"]').val();
         var salary = $('#addEmployeeWorkingPatternForm [name="salary"]').val();
@@ -384,7 +546,7 @@ var employeePatternListTable = (function () {
             var mn = parseInt(hrmnArray[1], 10) / 60;
             var hrmn = (hr + mn);
 
-            var hrRate = (salary / hrmn);
+            var hrRate = (salary / 52 / hrmn);
             $('#addEmployeeWorkingPatternForm [name="hourly_rate"]').val(hrRate.toFixed(2));
         }else{
             $('#addEmployeeWorkingPatternForm [name="hourly_rate"]').val('');
@@ -415,7 +577,7 @@ var employeePatternListTable = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html('Employee\'s working pattern successfully inserted.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });   
                 
                 setTimeout(function(){
@@ -451,11 +613,24 @@ var employeePatternListTable = (function () {
         }).then((response) => {
             if (response.status == 200) {
                 let dataset = response.data.res;
-                $('#editEmployeeWorkingPatternModal [name="effective_from"]').val(dataset.effective_from ? dataset.effective_from : '');
-                $('#editEmployeeWorkingPatternModal [name="end_to"]').val(dataset.end_to ? dataset.end_to : '');
                 $('#editEmployeeWorkingPatternModal [name="contracted_hour"]').val(dataset.contracted_hour ? dataset.contracted_hour : '');
-                $('#editEmployeeWorkingPatternModal [name="salary"]').val(dataset.salary ? dataset.salary : '');
-                $('#editEmployeeWorkingPatternModal [name="hourly_rate"]').val(dataset.hourly_rate ? dataset.hourly_rate : '');
+
+                var effectiveFromDate = new Date(dataset.efffected_from_modified);
+                edit_effective_from.setOptions({
+                    startDate : dataset.effective_from
+                });
+
+                if(dataset.end_to && dataset.end_to != ''){
+                    edit_end_to.setOptions({
+                        startDate : dataset.end_to,
+                        minDate : effectiveFromDate
+                    });
+                }else{
+                    edit_end_to.clearSelection();
+                    edit_end_to.setOptions({
+                        minDate : effectiveFromDate
+                    });
+                }
 
                 if(dataset.active == 1){
                     $('#editEmployeeWorkingPatternModal [name="active"]').prop('checked', true);
@@ -493,11 +668,12 @@ var employeePatternListTable = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html('Employee\'s working pattern successfully updated.');
-                    $("#successModal .successCloser").attr('data-action', 'NONE');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });   
                 
                 setTimeout(function(){
                     successModal.hide();
+                    window.location.reload();
                 }, 5000)
             }
             employeePatternListTable.init();
@@ -1045,6 +1221,280 @@ var employeePatternListTable = (function () {
                 }
             });
         }
+    });
+
+    //Pattern Pay JS
+    const editEmployeePatternPayModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmployeePatternPayModal"));
+    const addEmployeePatternPayModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmployeePatternPayModal"));
+    const successPayModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successPayModal"));
+
+    const editEmployeePatternPayModalEl = document.getElementById('editEmployeePatternPayModal')
+    editEmployeePatternPayModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editEmployeePatternPayModal .acc__input-error').html('');
+        $('#editEmployeePatternPayModal .modal-body input').val('');
+        $('#editEmployeePatternPayModal .modal-footer input[name="active"]').prop('checked', false);
+        $('#editEmployeePatternPayModal .modal-footer input[name="id"]').val('0');
+        $('#editEmployeePatternPayModal .modal-footer input[name="employee_working_pattern_id"]').val('0');
+    });
+
+    const addEmployeePatternPayModalEl = document.getElementById('addEmployeePatternPayModal')
+    addEmployeePatternPayModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addEmployeePatternPayModal .acc__input-error').html('');
+        $('#addEmployeePatternPayModal .modal-body input').val('');
+        $('#addEmployeePatternPayModal .modal-footer input[name="active"]').prop('checked', true);
+        $('#addEmployeePatternPayModal .modal-footer input[name="id"]').val('0');
+        $('#addEmployeePatternPayModal .modal-footer input[name="employee_working_pattern_id"]').val('0');
+    });
+
+
+    const successPayModalEl = document.getElementById('successPayModal')
+    successPayModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#successPayModal .successPayAdder').attr('data-pattern', '0');
+    });
+
+    const pay_add_effective_from = new Litepicker({
+        element: document.getElementById('pay_add_effective_from'),
+        ...dateOption,
+        setup: (picker) => {
+            picker.on('selected', (date1, date2) => {
+                pay_add_end_to.clearSelection();
+                pay_add_end_to.setOptions({
+                    minDate: picker.getDate()
+                });
+            });
+        }
+    });
+
+    const pay_add_end_to = new Litepicker({
+        element: document.getElementById('pay_add_end_to'),
+        ...dateOption
+    });
+
+
+    const pay_edit_effective_from = new Litepicker({
+        element: document.getElementById('pay_edit_effective_from'),
+        ...dateOption,
+        setup: (picker) => {
+            picker.on('selected', (date1, date2) => {
+                pay_edit_end_to.clearSelection();
+                pay_edit_end_to.setOptions({
+                    minDate: picker.getDate()
+                });
+            });
+        }
+    });
+
+    const pay_edit_end_to = new Litepicker({
+        element: document.getElementById('pay_edit_end_to'),
+        ...dateOption
+    });
+
+    $(document).on('click', '.empWorkingPayTable .edit_btn', function(){
+        var $theBtn = $(this);
+        var payId = $theBtn.attr('data-id');
+        var patternId = $theBtn.attr('data-patternid');
+
+        axios({
+            method: "post",
+            url: route('employee.pattern.pay.edit'),
+            data: {payId : payId, patternId : patternId},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                let dataset = response.data.res;
+                $('#editEmployeePatternPayModal [name="end_to"]').val(dataset.end_to ? dataset.end_to : '');
+                $('#editEmployeePatternPayModal [name="contracted_hour"]').val(dataset.pattern.contracted_hour ? dataset.pattern.contracted_hour : '');
+                $('#editEmployeePatternPayModal [name="salary"]').val(dataset.salary ? dataset.salary : '');
+                $('#editEmployeePatternPayModal [name="hourly_rate"]').val(dataset.hourly_rate ? dataset.hourly_rate : '');
+
+                var effectiveFromDate = new Date(dataset.efffected_from_modified);
+                pay_edit_effective_from.setOptions({
+                    startDate : dataset.effective_from
+                });
+
+                if(dataset.end_to && dataset.end_to != ''){
+                    pay_edit_end_to.setOptions({
+                        startDate : dataset.end_to,
+                        minDate : effectiveFromDate
+                    });
+                }else{
+                    pay_edit_end_to.clearSelection();
+                    pay_edit_end_to.setOptions({
+                        minDate : effectiveFromDate
+                    });
+                }
+
+                if(dataset.active == 1){
+                    $('#editEmployeePatternPayModal [name="active"]').prop('checked', true);
+                }else{
+                    $('#editEmployeePatternPayModal [name="active"]').prop('checked', false);
+                }
+
+                $('#editEmployeePatternPayModal [name="id"]').val(payId);
+                $('#editEmployeePatternPayModal [name="employee_working_pattern_id"]').val(patternId);
+            }
+        }).catch(error => {
+            if (error.response) {
+                if (error.response.status == 422) {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#editEmployeePatternPayForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('editEmployeePatternPayForm');
+        var employee_working_pattern_id = $('[name="employee_working_pattern_id"]', $form).val();
+    
+        document.querySelector('#updateEWPPAY').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateEWPPAY svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('employee.pattern.pay.update'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateEWPPAY').removeAttribute('disabled');
+            document.querySelector("#updateEWPPAY svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                editEmployeePatternPayModal.hide();
+                let dataset = response.data.res;
+
+                if(dataset.end == 1){
+                    successPayModal.show();
+                    document.getElementById("successPayModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successPayModal .successPayModalTitle").html( "Congratulations!" );
+                        $("#successPayModal .successPayModalDesc").html('Employee\'s working pattern pay details successfully inserted. If you want to add a new pay info then please click on agree to continue.');
+                        $("#successPayModal .successPayAdder").attr('data-pattern', dataset.employee_working_pattern_id);
+                    }); 
+                }else{
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "Congratulations!" );
+                        $("#successModal .successModalDesc").html('Employee\'s working pattern pay details successfully updated.');
+                        $("#successModal .successCloser").attr('data-action', 'NONE');
+                    });   
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 5000)
+                }
+            }
+            employeeWorkingPatternPaysListTable.init(employee_working_pattern_id)
+        }).catch(error => {
+            document.querySelector('#updateEWPPAY').removeAttribute('disabled');
+            document.querySelector("#updateEWPPAY svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editEmployeePatternPayForm .${key}`).addClass('border-danger');
+                        $(`#editEmployeePatternPayForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#successPayModal .successPayAdder').on('click', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        var pattern_id = $theBtn.attr('data-pattern');
+
+        axios({
+            method: "post",
+            url: route('employee.pattern.pay.get.pattern'),
+            data: {pattern_id : pattern_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                let dataset = response.data.res;
+
+                successPayModal.hide();
+                addEmployeePatternPayModal.show();
+                $('#addEmployeePatternPayModal [name="contracted_hour"]').val(dataset.contracted_hour ? dataset.contracted_hour : '');
+                $('#addEmployeePatternPayModal [name="employee_working_pattern_id"]').val(pattern_id);
+            }
+        }).catch(error => {
+            if (error.response) {
+                if (error.response.status == 422) {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#addEmployeePatternPayModal [name="contracted_hour"], #addEmployeePatternPayModal [name="salary"]').on('keyup', function(){
+        var contractedHour = $('#addEmployeePatternPayModal [name="contracted_hour"]').val();
+        var salary = $('#addEmployeePatternPayModal [name="salary"]').val();
+
+        if(contractedHour.length == 5 && salary > 0){
+            var hrmnArray = contractedHour.split(':');
+            var hr = parseInt(hrmnArray[0], 10);
+            var mn = parseInt(hrmnArray[1], 10) / 60;
+            var hrmn = (hr + mn);
+
+            var hrRate = (salary / 52 / hrmn);
+            $('#addEmployeePatternPayModal [name="hourly_rate"]').val(hrRate.toFixed(2));
+        }else{
+            $('#addEmployeePatternPayModal [name="hourly_rate"]').val('');
+        }
+    });
+
+    $('#addEmployeePatternPayForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('addEmployeePatternPayForm');
+        var employee_working_pattern_id = $('[name="employee_working_pattern_id"]', $form).val();
+    
+        document.querySelector('#addEWPPAY').setAttribute('disabled', 'disabled');
+        document.querySelector("#addEWPPAY svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('employee.pattern.pay.store'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#addEWPPAY').removeAttribute('disabled');
+            document.querySelector("#addEWPPAY svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                addEmployeePatternPayModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Employee\'s working pattern pay details successfully inserted.');
+                    $("#successModal .successCloser").attr('data-action', 'NONE');
+                });   
+                
+                setTimeout(function(){
+                    successModal.hide();
+                }, 5000)
+            }
+            employeeWorkingPatternPaysListTable.init(employee_working_pattern_id)
+        }).catch(error => {
+            document.querySelector('#addEWPPAY').removeAttribute('disabled');
+            document.querySelector("#addEWPPAY svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addEmployeePatternPayForm .${key}`).addClass('border-danger');
+                        $(`#addEmployeePatternPayForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
     });
 
 })();
