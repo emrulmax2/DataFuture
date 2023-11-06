@@ -38,7 +38,9 @@
                                     <div class="text-base text-slate-500 mt-1">Live Student</div>
                                 </div>
                             </a>
-                        </div>
+                        </div> 
+                        
+                        <a href="{{ route('tutor-dashboard.show',8) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="report-box zoom-in">
                                 <div class="box p-5">
@@ -51,10 +53,11 @@
                                         </div>
                                     </div>
                                     <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                    <div class="text-base text-slate-500 mt-1">Content</div>
+                                    <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
                                 </div>
                             </div>
                         </div>
+                        </a>
                         <a href="{{ route('interviewlist') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                         {{-- <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">--}}                            
                             <div class="report-box zoom-in">                               

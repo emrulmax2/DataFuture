@@ -82,6 +82,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\EmployeeWorkingPatternDetailController;
 use App\Http\Controllers\HR\EmployeePaymentSettingsController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
@@ -132,6 +134,7 @@ use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingContro
 use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 use App\Http\Controllers\Settings\ELearningActivitySettingController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
+use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -1450,5 +1453,27 @@ Route::middleware('auth')->group(function() {
     Route::controller(AddressController::class)->group(function() {
         Route::post('address/get-address', 'getAddress')->name('address.get');
         Route::post('address/store', 'store')->name('address.store');
+    });
+
+    
+    Route::controller(AttendanceController::class)->group(function() {
+        Route::get('attendance', 'index')->name('attendance'); 
+        Route::get('attendance/list', 'list')->name('attendance.list'); 
+        Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
+        Route::post('attendance/save', 'store')->name('attendance.store'); 
+    });
+    //GET|HEAD        tutor-attendance ................................................................................. tutor-attendance.index › Attendance\TutorAttendanceController@index  
+    //POST            tutor-attendance ................................................................................. tutor-attendance.store › Attendance\TutorAttendanceController@store  
+    //GET|HEAD        tutor-attendance/create ........................................................................ tutor-attendance.create › Attendance\TutorAttendanceController@create  
+    //GET|HEAD        tutor-attendance/{tutor_attendance} ................................................................ tutor-attendance.show › Attendance\TutorAttendanceController@show  
+    //PUT|PATCH       tutor-attendance/{tutor_attendance} ............................................................ tutor-attendance.update › Attendance\TutorAttendanceController@update  
+    //DELETE          tutor-attendance/{tutor_attendance} .......................................................... tutor-attendance.destroy › Attendance\TutorAttendanceController@destroy  
+    //GET|HEAD        tutor-attendance/{tutor_attendance}/edit ........................................................... tutor-attendance.edit › Attendance\TutorAttendanceController@edit 
+    Route::resource('tutor-attendance', TutorAttendanceController::class);
+
+
+    Route::controller(TutorDashboard::class)->group(function() {
+        Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
+        Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
     });
 });

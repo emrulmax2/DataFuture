@@ -23,4 +23,12 @@ class Assign extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function plan(){
+        return $this->belongsTo(Student::class, 'plan_id');
+    }
 }

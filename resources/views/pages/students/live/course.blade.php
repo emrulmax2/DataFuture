@@ -19,6 +19,9 @@
                 <div class="font-medium text-base">Course Details</div>
             </div>
             <div class="col-span-6 text-right">
+
+                <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1"><i data-lucide="hard-drive" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
+                
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                     <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Course Informations
                 </button>
@@ -223,7 +226,96 @@
         </div>
     </div>
     <!-- END: Update Modal -->
-    
+        <!-- BEGIN: Edit Modal -->
+        <div id="editStudentCourseChangeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <form method="POST" action="#" id="editStudentCourseChangeForm" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="font-medium text-base mr-auto">Change Course</h2>
+                            <a data-tw-dismiss="modal" href="javascript:;">
+                                <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-12">
+                                    <div class="grid grid-cols-12 gap-x-4">
+                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Academic year <span class="text-danger">*</span></label>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
+                                                <option value="">Please Select</option>
+                                                @if($academicYears->count() > 0)
+                                                    @foreach($academicYears as $data)
+                                                        <option {{ isset($student->crel->academic_year_id) && $student->crel->academic_year_id == $data->id ? 'Selected' : '' }} value="{{ $data->id }}">{{ $data->name }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-12">
+                                    <div class="grid grid-cols-12 gap-x-4">
+                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Semester <span class="text-danger">*</span></label>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
+                                                <option value="">Please Select</option>
+                                                @if($semesters->count() > 0)
+                                                    @foreach($semesters as $data)
+                                                        <option {{ isset($student->crel->course_creation_id) && $student->crel->course_creation_id == $data->id ? 'Selected' : '' }} value="{{ $data->id }}">{{ $data->name }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-12">
+                                    <div class="grid grid-cols-12 gap-x-4">
+                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course <span class="text-danger">*</span></label>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
+                                                <option value="">Please Select</option>
+                                                @if($courseCreations->count() > 0)
+                                                    @foreach($courseCreations as $cc)
+                                                        <option {{ isset($student->crel->course_creation_id) && $student->crel->course_creation_id == $cc->id ? 'Selected' : '' }} value="{{ $cc->course_creation_id }}">{{ $cc->course->name }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                            <button type="submit" id="savePCP" class="btn btn-danger w-auto">     
+                                Change Now                      
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                    stroke="white" class="w-4 h-4 ml-2">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </button>
+                            <input type="hidden" value="{{ $student->id }}" name="student_id"/>
+                            <input type="hidden" value="{{ $student->crel->id }}" name="student_course_relation_id"/>
+                            <input type="hidden" value="{{ (isset($student->crel->propose->id) ? $student->crel->propose->id : 0) }}" name="id"/>
+                            <input type="hidden" value="{{ (isset($student->crel->feeeligibility->id) && $student->crel->feeeligibility->id > 0 ? $student->crel->feeeligibility->id : 0) }}" name="student_fee_eligibility_id"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- END: Update Modal -->
     <!-- BEGIN: Edit Modal -->
     <div id="editStudentAWBModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
