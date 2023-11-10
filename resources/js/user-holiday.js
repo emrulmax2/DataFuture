@@ -9,33 +9,9 @@ import Litepicker from "litepicker";
 import 'litepicker/dist/plugins/multiselect';
 
 (function(){
-    const empHolidayAdjustmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empHolidayAdjustmentModal"));
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
-
-    const empHolidayAdjustmentModalEl = document.getElementById('empHolidayAdjustmentModal')
-    empHolidayAdjustmentModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#empHolidayAdjustmentModal [name="adjustmentOpt"]').prop('checked', false);
-        $('#empHolidayAdjustmentModal [name="adjustment"]').val('');
-        $('#empHolidayAdjustmentModal [name="hr_holiday_year_id"]').val('0');
-        $('#empHolidayAdjustmentModal [name="employee_working_pattern_id"]').val('0');
-    });
-
-    const empNewLeaveRequestModalEl = document.getElementById('empNewLeaveRequestModal')
-    empNewLeaveRequestModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#empNewLeaveRequestModal .modal-body').html('');
-        $('#empNewLeaveRequestModal [name="employee_leave_id"]').val('0');
-    });
-
-    const confirmModalEl = document.getElementById('confirmModal')
-    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#confirmModal .confModTitle').html('');
-        $('#confirmModal .confModDesc').html('');
-        $('#confirmModal .agreeWith').attr('data-id', '0').attr('data-action', 'NONE');
-    });
-
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
         if($(this).attr('data-action') == 'RELOAD'){
@@ -46,8 +22,6 @@ import 'litepicker/dist/plugins/multiselect';
         }
     });
 
-
-    /* Leave Form Start */
     let dateOption = {
         autoApply: true,
         singleMode: true,
@@ -126,7 +100,7 @@ import 'litepicker/dist/plugins/multiselect';
             if(LeaveDates.length > 0){
                 axios({
                     method: "POST",
-                    url: route('employee.holiday.ajax.limit'),
+                    url: route('user.account.holiday.ajax.limit'),
                     data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType, LeaveDates : LeaveDates},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
@@ -248,7 +222,7 @@ import 'litepicker/dist/plugins/multiselect';
             }else{
                 axios({
                     method: "POST",
-                    url: route('employee.holiday.ajax.statistics'),
+                    url: route('user.account.holiday.ajax.statistics'),
                     data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
@@ -421,7 +395,7 @@ import 'litepicker/dist/plugins/multiselect';
             let form_data = new FormData(form);
             axios({
                 method: "POST",
-                url: route('employee.holiday.leave.submission'),
+                url: route('user.account.holiday.leave.submission'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -462,267 +436,6 @@ import 'litepicker/dist/plugins/multiselect';
 
             $form.remove('.errorAlert').prepend('<div class="alert errorAlert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Form validation error found. Please fill out all fields and select some date first. </div>');
         }
-    });
-    /* Leave Form End */
-
-
-    /* Leave Request Start */
-    $('.newRequestRow').on('click', function(e){
-        e.preventDefault();
-        var $theTr = $(this);
-        var employee_leave_id = $theTr.attr('data-id');
-
-        axios({
-            method: "post",
-            url: route('employee.holiday.get.leave'),
-            data: {employee_leave_id : employee_leave_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                empNewLeaveRequestModal.show();
-                $('#empNewLeaveRequestModal .modal-body').html(response.data.res);
-                $('#empNewLeaveRequestModal [name="employee_leave_id"]').val(employee_leave_id);
-            } 
-        }).catch(error => {
-            if(error.response){
-                if(error.response.status == 422){
-                    console.log('error');
-                }
-            }
-        });
     })
-    $('#empNewLeaveRequestForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('empNewLeaveRequestForm');
-
-        document.querySelector('#updateNLR').setAttribute('disabled', 'disabled');
-        document.querySelector('#updateNLR svg').style.cssText = 'display: inline-block;';
-
-        var err = 0;
-        $('#empNewLeaveRequestModal .leaveRequestDaysTable tbody tr').each(function(){
-            var $tableTr = $(this);
-            if($('input[type="radio"]:checked', $tableTr).length == 0){
-                err += 1;
-            }
-        });
-
-        if(err > 0){
-            alert('hi')
-            document.querySelector('#updateNLR').removeAttribute('disabled');
-            document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
-
-            $('#empNewLeaveRequestForm .validationWarning').remove();
-            $('#empNewLeaveRequestForm .modal-content').prepend('<div class="alert validationWarning alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Validation error found! Leave status can nto be un-checked.</div>')
-            
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-            
-            setTimeout(function(){
-                $('#empNewLeaveRequestForm .validationWarning').remove()
-            }, 4000);
-        }else{
-            let form_data = new FormData(form);
-            axios({
-                method: "POST",
-                url: route('employee.holiday.update.leave'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#updateNLR').removeAttribute('disabled');
-                document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
-                
-                if (response.status == 200) {
-                    empNewLeaveRequestModal.hide();
-                    
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulations!');
-                        $('#successModal .successModalDesc').html('Employee leave request successfully updated.');
-                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                        window.location.reload();
-                    }, 5000);
-                } 
-            }).catch(error => {
-                document.querySelector('#updateNLR').removeAttribute('disabled');
-                document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
-                if(error.response){
-                    console.log('error');
-                }
-            });
-        }
-    }); //confirmModal
-
-    $('.rejectedDayRow').on('click', function(){
-        var $theRow = $(this);
-        var leave_day_id = $theRow.attr('data-leavedayid');
-
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to approve this day\'s leave hour? Then click on agree to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', leave_day_id).attr('data-action', 'APPROVELEAVE');
-        });
-    });
-
-    $('.approvedDayRow').on('click', function(){
-        var $theRow = $(this);
-        var leave_day_id = $theRow.attr('data-leavedayid');
-
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to reject this day\'s leave hour? Then click on agree to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', leave_day_id).attr('data-action', 'REJECTLEAVE');
-        });
-    });
-
-    $('#confirmModal .agreeWith').on('click', function(e){
-        e.preventDefault();
-        var $theBtn = $(this);
-        var row_id = $theBtn.attr('data-id');
-        var action = $theBtn.attr('data-action');
-
-        if(action == 'APPROVELEAVE'){
-            axios({
-                method: 'post',
-                url: route('employee.holiday.approve.leave'),
-                data: {row_id : row_id},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulations!');
-                        $('#successModal .successModalDesc').html('Employee leave day successfully approved.');
-                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                        window.location.reload();
-                    }, 5000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'REJECTLEAVE'){
-            axios({
-                method: 'post',
-                url: route('employee.holiday.rject.leave'),
-                data: {row_id : row_id},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulations!');
-                        $('#successModal .successModalDesc').html('Employee leave day successfully rejected.');
-                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                        window.location.reload();
-                    }, 5000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }
-    })
-    /* Leave Request End */
-
-    /* Holiday Adjustment Start */
-    if($('input[name="adjustment"]').length > 0){
-        var maskOptions = {
-            mask: '00:00'
-        };
-        $('input[name="adjustment"]').each(function(){
-            var mask = IMask(this, maskOptions);
-        })
-    }
-
-
-    $('.holidayAdjustmentBtn').on('click', function(){
-        var year = $(this).attr('data-year');
-        var pattern = $(this).attr('data-pattern');
-
-        $('#empHolidayAdjustmentModal [name="hr_holiday_year_id"]').val(year);
-        $('#empHolidayAdjustmentModal [name="employee_working_pattern_id"]').val(pattern);
-    })
-
-    $('#empHolidayAdjustmentModal [name="adjustmentOpt"]').on('change', function(){
-        if($('#empHolidayAdjustmentModal [name="adjustmentOpt"]:checked').length > 0){
-            $('#empHolidayAdjustmentModal [name="adjustment"]').val('').removeAttr('disabled');
-        }else{
-            $('#empHolidayAdjustmentModal [name="adjustment"]').val('').attr('disabled', 'disabled');
-        }
-    });
-
-    $('#empHolidayAdjustmentForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('empHolidayAdjustmentForm');
-
-        $('#empHolidayAdjustmentForm').find('input').removeClass('border-danger')
-        $('#empHolidayAdjustmentForm').find('.acc__input-error').html('')
-
-        document.querySelector('#updateADJ').setAttribute('disabled', 'disabled');
-        document.querySelector('#updateADJ svg').style.cssText = 'display: inline-block;';
-
-        let form_data = new FormData(form);
-
-        axios({
-            method: "post",
-            url: route('employee.holiday.update.adjustment'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#updateADJ').removeAttribute('disabled');
-            document.querySelector('#updateADJ svg').style.cssText = 'display: none;';
-            
-            if (response.status == 200) {
-                empHolidayAdjustmentModal.hide();
-                
-                successModal.show();
-                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                    $('#successModal .successModalTitle').html('Congratulations!');
-                    $('#successModal .successModalDesc').html('Holiday adjustment successfully updated.');
-                    $('#successModal .successCloser').attr('data-action', 'RELOAD');
-                });
-
-                setTimeout(function(){
-                    successModal.hide();
-                    window.location.reload();
-                }, 5000);
-            } 
-        }).catch(error => {
-            document.querySelector('#updateADJ').removeAttribute('disabled');
-            document.querySelector('#updateADJ svg').style.cssText = 'display: none;';
-            if(error.response){
-                if(error.response.status == 422){
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#empHolidayAdjustmentForm .${key}`).addClass('border-danger')
-                        $(`#empHolidayAdjustmentForm  .error-${key}`).html(val)
-                    }
-                }else{
-                    console.log('error');
-                }
-            }
-        });
-    });
-    /* Holiday Adjustment End */
-
+    
 })();

@@ -128,6 +128,9 @@ export default defineConfig({
                 
 
                 "resources/js/attendance.js",
+
+                "resources/js/user-holiday.js",
+                "resources/js/machine-live.js",
                 
             ],
             refresh: true,

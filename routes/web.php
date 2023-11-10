@@ -98,6 +98,8 @@ use App\Http\Controllers\HR\EmployeeWorkingPatternController;
 use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
+use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
+use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -165,6 +167,24 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
+
+Route::prefix('/machine')->name('machine.')->group(function() {
+    Route::controller(MachineLoginController::class)->middleware('machine.loggedin')->group(function() {
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+    });
+
+    Route::middleware('auth.machine')->group(function() {
+        Route::get('logout', [MachineLoginController::class, 'logout'])->name('logout');
+
+        Route::controller(MachineDashboardController::class)->group(function() {
+            Route::get('/live', 'index')->name('dashboard');
+            Route::post('/live/get-attendance-history', 'getAttendanceHistory')->name('get.attendance.history');
+            Route::post('/live/store-attendance', 'store')->name('store.attendance');
+        });
+    });
+});
+
 // all applicant have a prefix route name applicant.* value
 Route::prefix('/applicant')->name('applicant.')->group(function() {
 
@@ -719,6 +739,9 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(UserHolidayController::class)->group(function(){
         Route::get('my-account/holidays/{id}', 'index')->name('user.account.holiday'); 
+        Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('user.account.holiday.ajax.statistics'); 
+        Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('user.account.holiday.ajax.limit'); 
+        Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('user.account.holiday.leave.submission'); 
     });
 
     Route::controller(EmployeeController::class)->group(function(){
@@ -812,7 +835,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeHolidayController::class)->group(function(){
         Route::get('employee-profile/holidays/{id}', 'index')->name('employee.holiday'); 
         Route::post('employee-profile/holidays/update-adjustment', 'updateAdjustment')->name('employee.holiday.update.adjustment'); 
-        //Route::post('employee-profile/payment-settings/update', 'update')->name('employee.payment.settings.update'); 
+
+        Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('employee.holiday.ajax.statistics'); 
+        Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('employee.holiday.ajax.limit'); 
+        Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('employee.holiday.leave.submission'); 
+
+        Route::post('my-account/holidays/get-leave', 'getEmployeeLeave')->name('employee.holiday.get.leave'); 
+        Route::post('my-account/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
+        Route::post('my-account/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
+        Route::post('my-account/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -1517,6 +1548,8 @@ Route::middleware('auth')->group(function() {
         Route::get('attendance/list', 'list')->name('attendance.list'); 
         Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
         Route::post('attendance/save', 'store')->name('attendance.store'); 
+
+        Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
     });
     //GET|HEAD        tutor-attendance ................................................................................. tutor-attendance.index › Attendance\TutorAttendanceController@index  
     //POST            tutor-attendance ................................................................................. tutor-attendance.store › Attendance\TutorAttendanceController@store  

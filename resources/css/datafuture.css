@@ -872,3 +872,108 @@
     background-color: rgb(var(--color-success) / var(--tw-bg-opacity));
     color: #FFF;
 }
+
+.leaveCalendar .litepicker:before,
+.leaveCalendar .litepicker::after{
+    display: none;
+}
+/* .leaveCalendar .litepicker{
+    display: block !important;
+    width: 100%;
+}
+.leaveCalendar .litepicker .container__months{
+    width: 100%;
+}
+.leaveCalendar .litepicker .container__months .month-item{
+    width: 100%;
+}
+.leaveCalendar .litepicker .container__days > div{
+    flex-grow: 1;
+    width: 12.5%;
+} */
+.leaveCalendar .litepicker .container__days .day-item{
+    cursor: pointer;
+}
+.leaveCalendar .litepicker .container__days .day-item.is-locked,
+.leaveCalendar .litepicker .container__days .day-item.is-locked:hover{
+    color: rgba(185, 28, 28, 1);
+    background: rgba(185, 28, 28, .15);
+    cursor: not-allowed;
+}
+.leaveDayTable{
+    width: 100%;
+}
+.leaveDayTable tr td {
+    padding: 0 5px 10px;
+}
+.leaveDayTable tr:last-child td {
+    padding: 0 5px 0;
+}
+.leaveDayTable tr td:first-child {
+    text-align: right;
+}
+.leaveDayTable tr td:nth-child(2) {
+    width: 60px;
+    text-align: center;
+}
+.leaveDayTable tr td:last-child {
+    width: 111px;
+    padding-right: 0;
+}
+.newRequestRow{
+    cursor: pointer;
+    background: rgba(245, 158, 11, .2);
+}
+
+.bankHolidayRow{
+    background: rgba(74, 179, 244, .2);
+    cursor: pointer;
+}
+.rejectedDayRow{
+    background: rgba(185, 28, 28, .2);
+    cursor: pointer;
+}
+.approvedDayRow{
+    cursor: pointer;
+}
+
+
+/* Live Attendance Machine */
+.content.content--top-nav.machineLiveBody{
+    margin: 1.25rem;
+    padding: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.content.content--top-nav.machineLiveBody::before{
+    display: none;
+}
+.theLiveCard{
+    max-width: 768px;
+    width: 100%;
+}
+#liveAttendanceForm .clock_in_no.form-control {
+    height: 70px;
+    font-size: 1.5rem;
+}
+.liveAttendanceFormBtnGroup{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+.liveAttendanceFormBtnGroup .btn {
+    width: calc(50% - 3px);
+    display: inline-flex;
+    height: 55px;
+    font-size: 1.09rem;
+    text-transform: capitalize;
+    margin: 0 0 5px 0;
+    display: none;
+}
+.liveAttendanceFormBtnGroup .btn:nth-child(odd){
+    margin-right: 3px;
+}
+.liveAttendanceFormBtnGroup .btn:nth-child(even){
+    margin-left: 3px;
+}

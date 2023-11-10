@@ -7,7 +7,8 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Feed Attendance</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-          <a href="{{ route('attendance') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Attendance</a>
+            <a href="{{ route('attendance') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Attendance</a>
+            <a style="float: right;" target="_blank" href="{{ route('attendance.print',$dateListId) }}" data-id="{{ $dateListId }}" class="btn btn-success text-white w-auto"><i data-lucide="printer" class="w-4 h-4 mr-2"></i>Print</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->

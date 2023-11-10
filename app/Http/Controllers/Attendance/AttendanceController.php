@@ -10,8 +10,10 @@ use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\Semester;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 class AttendanceController extends Controller
 {
@@ -169,7 +171,80 @@ class AttendanceController extends Controller
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
             'data' => $data,
+            'dateListId' => PlansDateList::find($list->id)
         ]);
+    }
+
+    public function generatePDF(PlansDateList $data)
+    {
+        $Query = DB::table('plans_date_lists as datelist')
+                    ->select('datelist.*','terms.name as term_name','terms.term as term','plan.id as plan_id','plan.start_time','plan.end_time','plan.virtual_room','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username",'course_creation.semester_id as semester_id' )
+                    ->leftJoin('plans as plan', 'datelist.plan_id', 'plan.id')
+                    ->leftJoin('courses as course', 'plan.course_id', 'course.id')
+                    ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
+                    ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')        
+                    ->leftJoin('course_creation_instances as course_instance', 'terms.course_creation_instance_id', 'course_instance.id')
+                    ->leftJoin('course_creations as course_creation', 'course_instance.course_creation_id', 'course_creation.id')
+                    ->leftJoin('venues as venue', 'plan.venue_id', 'venue.id')
+                    ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
+                    ->leftJoin('groups as group', 'plan.group_id', 'group.id')
+                    ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
+                    ->where('datelist.id', $data->id);
+
+        $Query = $Query->get();  
+        
+
+        foreach($Query as $list):
+            $dateListId = PlansDateList::find($list->id);
+            $plan = Plan::find($list->plan_id);
+
+            $start_time = date("Y-m-d ".$list->start_time);
+            $start_time = date('h:i A', strtotime($start_time));
+                
+            $end_time = date("Y-m-d ".$list->end_time);
+            $end_time = date('h:i A', strtotime($end_time));
+            $assignStudentList = Assign::where("plan_id",$list->plan_id)->get();
+            $attendanceFeedStatus = AttendanceFeedStatus::all();
+
+            $attendance = Attendance::where("plans_date_list_id",$data->id)->get();
+            $attendanceFeedByAttendance = AttendanceFeedStatus::find($attendance[0]['id']);
+
+            $semester = Semester::find($list->semester_id);
+            //dd($semster);
+            $data = [
+                'plan_id' => $list->plan_id,
+                'id' => $list->id,
+                'plan' => $plan,
+                'term_name' => $list->term_name,
+                'term' => $list->term,
+                'date' => date("d-m-Y",strtotime($list->date)),
+                'course' => $list->course_name,
+                'module' => $list->module_name,
+                'group'=> $list->group_name,
+                'tutor'=> $list->username,
+                "start_time" => $start_time,
+                "end_time" => $end_time,
+                'venue' => $list->venue_name,
+                "room" => $list->room_name,
+                'virtual_room'=> $list->virtual_room,
+                'lecture_type'=> "",
+                'captured_by'=> "",
+                'captured_at'=> "",
+                'join_request'=> "",
+                'status'=> "",   
+                'assignStudentList' => $assignStudentList,  
+                'AttendanceFeedStatus' => $attendanceFeedStatus,            
+            ];
+        endforeach;
+        $pdf = PDF::loadView(
+            'pages.attendance.pdfprint', 
+            compact('data','dateListId','attendanceFeedByAttendance','semester')
+        )->setPaper('a4', 'portrait')
+        ->setWarnings(false);
+        $pdf->set_option('defaultMediaType', 'all');
+        $pdf->set_option('isFontSubsettingEnabled', true);
+        return $pdf->download("Feed Attendance List.pdf");
+        //return view('pages.attendance.pdfprint', compact('data','dateListId','attendanceFeedByAttendance','semester'));
     }
 
     /**

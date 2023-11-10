@@ -25,6 +25,10 @@ class Employment extends Model
         
     ];
 
+    public function employee() {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
     public function employeeWorkType() {
         
         return $this->belongsTo(EmployeeWorkType::class, 'employee_work_type_id');

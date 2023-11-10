@@ -46,4 +46,8 @@ class HrHolidayYear extends Model
     public function bankHolidays(){
         return $this->hasMany(HrBankHoliday::class, 'hr_holiday_year_id', 'id');
     }
+
+    public function leaveOption(){
+        return $this->hasMany(HrHolidayYearLeaveOption::class, 'hr_holiday_year_id', 'id');
+    }
 }
