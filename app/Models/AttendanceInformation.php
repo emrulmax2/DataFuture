@@ -11,6 +11,8 @@ class AttendanceInformation extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table =  "attendance_informations";
+
     protected $fillable = [
         "plans_date_list_id",
         "tutor_id",

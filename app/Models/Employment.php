@@ -25,10 +25,12 @@ class Employment extends Model
         
     ];
 
+
     public function employee() {
+        
         return $this->belongsTo(Employee::class, 'employee_id');
     }
-
+    
     public function employeeWorkType() {
         
         return $this->belongsTo(EmployeeWorkType::class, 'employee_work_type_id');
@@ -40,17 +42,22 @@ class Employment extends Model
 
     }
     public function department() {
+
         return $this->belongsTo(Department::class, 'department_id');
     }
     
+
     protected $dates = ['deleted_at'];
 
     protected $hidden = ['created_at', 'updated_at'];
 
     public function setStartedOnAttribute($value) {  
+
         $this->attributes['started_on'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
     }
+    
     public function getStartedOnAttribute($value) {
+
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }

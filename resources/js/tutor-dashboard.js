@@ -150,19 +150,27 @@ var attendanceListTable = (function () {
                 },
                 
                 {
-                    title: "JOIN",
-                    field: "join_request",
-                    vertAlign: "middle",
-                    hozAlign:  "center",
-                    headerHozAlign: "center",
-                },
-                
-                {
                     title: "STATUS",
                     field: "status",
+                    width: 150,
                     vertAlign: "middle",
                     hozAlign:  "center",
                     headerHozAlign: "center",
+                    formatter(cell, formatterParams) {
+                        let dropdown = [];
+                        let attendanceInformation = cell.getData().attendance_information
+                        if(attendanceInformation!=null) {
+                            if(attendanceInformation.end_time==null) { 
+                            dropdown =`<div data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&amp;:hover:not(:disabled)]:bg-success/10 mb-2 mr-1  w-24">Class Started</div>`;
+                            } else {
+                                dropdown =`<div data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-primary text-primary dark:border-primary [&amp;:hover:not(:disabled)]:bg-primary/10 mb-2 mr-1  w-24 ">Class Ended</div>`;  
+                            }
+                        }else {
+                            dropdown =`<div class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-pending text-pending dark:border-pending [&amp;:hover:not(:disabled)]:bg-pending/10 mb-2 mr-1  w-24 ">Pending</div>`;
+                        
+                        }
+                        return dropdown;
+                    },
                 },
                 {
                     title: "ACTIONS",
@@ -175,12 +183,49 @@ var attendanceListTable = (function () {
                     print: false,
                     download: false,
                     formatter(cell, formatterParams) {
+                        let dropdown = [];
                         
-                        let dropdown =`<button data-tw-toggle="modal" data-id="${
-                            cell.getData().id
-                        }" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-success border-success text-slate-900 dark:border-success mb-2 mr-2 w-32 "><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>
-                        Start Class</button>`;
+                        let attendanceInformation = cell.getData().attendance_information
+                        if(attendanceInformation!=null) {
+                            if(attendanceInformation.end_time==null) { 
+                                
+                                    dropdown =`<a data-attendanceinfo="${
+                                        attendanceInformation.id
+                                    }" data-id="${
+                                        cell.getData().id
+                                    }" href="${
+                                        cell.getData().tutor_id
+                                    }/attendance/${
+                                        cell.getData().id
+                                    }" class="start-punch transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32"><i data-lucide="activity" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                    Feed Attendance</a>`;
+                                
+                                dropdown +=`<button data-tw-toggle="modal" data-attendanceinfo="${
+                                    attendanceInformation.id
+                                }" data-id="${
+                                    cell.getData().id
+                                }" data-tw-target="#endClassModal" class="start-punch transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-danger border-danger text-white dark:border-danger mb-2 mr-2 w-32  "><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                End Class</button>`;
+                            } else {
+                                dropdown =`<a href="${
+                                    cell.getData().tutor_id
+                                }/attendance/${
+                                    cell.getData().id
+                                }"  data-attendanceinfo="${
+                                    attendanceInformation.id
+                                }" data-id="${
+                                    cell.getData().id
+                                }" data-tw-target="#viewFeed" class="start-punch transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                                View Feed</a>`;
+                            }
+                        }else {
 
+                             dropdown =`<button data-tw-toggle="modal" data-id="${
+                                cell.getData().id
+                            }" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-success border-success text-slate-900 dark:border-success mb-2 mr-2 w-32 "><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>
+                            Start Class</button>`;
+                            
+                        }
                         return dropdown;
                     },
                 },
@@ -198,7 +243,7 @@ var attendanceListTable = (function () {
 
                     //let url = route('attendance.infomation.save');
 
-                    $("#plan_date_list_id").val(data);
+                    $(".plan-datelist").val(data);
 
                 });
             },
@@ -223,6 +268,7 @@ var attendanceListTable = (function () {
         },
     };
 })();
+
 
 (function(){
     if($('#tutorClassList').length > 0){
@@ -257,6 +303,9 @@ var attendanceListTable = (function () {
 
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const editPunchNumberDeteilsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPunchNumberDeteilsModal"));
+        
+        const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
         $('.save').on('click', function (e) {
             e.preventDefault();
 
@@ -283,12 +332,12 @@ var attendanceListTable = (function () {
                 success: function(res, textStatus, xhr) {
 
                     $('.acc__input-error', parentForm).html('');
-                    
-                    if(xhr.status == 200){
+                    if(xhr.status == 206){
                         //update Alert
                         editPunchNumberDeteilsModal.hide();
                         successModal.show();
-
+                        confirmModal.hide();
+                        errorModal.hide()
                         document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                             $("#successModal .successModalTitle").html("Congratulations!");
                             $("#successModal .successModalDesc").html('Data updated.');
@@ -296,7 +345,23 @@ var attendanceListTable = (function () {
                         
                         setTimeout(function(){
                             successModal.hide();
-                            location.reload()
+                            location.href= route("tutor-dashboard.attendance",[res.data.tutor ,res.data.plandate])
+                        }, 1000);
+
+                    } else if(xhr.status == 200){
+                        //update Alert
+                        editPunchNumberDeteilsModal.hide();
+                        successModal.show();
+                        confirmModal.hide();
+                        errorModal.hide()
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html("Congratulations!");
+                            $("#successModal .successModalDesc").html('Data updated.');
+                        });                
+                        
+                        setTimeout(function(){
+                            successModal.hide();
+                            location.reload();
                         }, 1000);
                     }
                     
@@ -309,6 +374,47 @@ var attendanceListTable = (function () {
                             $(`#${formID} .${key}`).addClass('border-danger');
                             $(`#${formID}  .error-${key}`).html(val);
                         }
+                    }else if(jqXHR.status == 303){
+
+                        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#confirmModal .confModTitle").html("End Class!");
+                            $("#confirmModal .confModDesc").html('Do you want to End Class.');
+                        });   
+                        confirmModal.show();
+                        editPunchNumberDeteilsModal.hide();
+
+                    }else if(jqXHR.status == 302)
+                    {
+                        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#confirmModal .confModTitle").html("Different Tutor ?");
+                            $("#confirmModal .confModDesc").html('Please Put a note Below, why are you taking this class?');
+                        });  
+                        editPunchNumberDeteilsModal.hide();
+                        confirmModal.show();
+                    }else if(jqXHR.status == 304)
+                    {
+                        document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#errorModal .errorModalTitle").html("Wrong Punch Number");
+                            $("#errorModal .errorModalDesc").html('It is not your punch number');
+                        });  
+                        editPunchNumberDeteilsModal.hide();
+                        errorModal.show();
+                        setTimeout(function(){
+                            errorModal.hide();
+                            editPunchNumberDeteilsModal.show();
+                        }, 1000);
+                    }else if(jqXHR.status == 402)
+                    {
+                        document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#errorModal .errorModalTitle").html("Invalid Punch");
+                            $("#errorModal .errorModalDesc").html('Invalid Punch Number');
+                        });  
+                        editPunchNumberDeteilsModal.hide();
+                        errorModal.show();
+                        setTimeout(function(){
+                            errorModal.hide();
+                            editPunchNumberDeteilsModal.show();
+                        }, 1000);
                     }else{
                         console.log(textStatus+' => '+errorThrown);
                     }
@@ -318,4 +424,5 @@ var attendanceListTable = (function () {
             
         });
     }
+    
 })();

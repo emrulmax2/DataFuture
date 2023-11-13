@@ -22,7 +22,8 @@ class CoursCreationController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request) {
+        
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $course = (isset($request->course) && $request->course > 0 ? $request->course : '');
@@ -101,7 +102,8 @@ class CoursCreationController extends Controller
         return response()->json($courseCreation);
     }
 
-    public function show($id){
+    public function show($id) {
+
         return view('pages/course-creation/show', [
             'title' => 'Course Creations - LCC Data Future Managment',
             'breadcrumbs' => [

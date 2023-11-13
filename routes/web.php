@@ -1542,7 +1542,6 @@ Route::middleware('auth')->group(function() {
         Route::post('address/store', 'store')->name('address.store');
     });
 
-    
     Route::controller(AttendanceController::class)->group(function() {
         Route::get('attendance', 'index')->name('attendance'); 
         Route::get('attendance/list', 'list')->name('attendance.list'); 
@@ -1551,6 +1550,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
     });
+
     //GET|HEAD        tutor-attendance ................................................................................. tutor-attendance.index › Attendance\TutorAttendanceController@index  
     //POST            tutor-attendance ................................................................................. tutor-attendance.store › Attendance\TutorAttendanceController@store  
     //GET|HEAD        tutor-attendance/create ........................................................................ tutor-attendance.create › Attendance\TutorAttendanceController@create  
@@ -1560,9 +1560,19 @@ Route::middleware('auth')->group(function() {
     //GET|HEAD        tutor-attendance/{tutor_attendance}/edit ........................................................... tutor-attendance.edit › Attendance\TutorAttendanceController@edit 
     Route::resource('tutor-attendance', TutorAttendanceController::class);
 
+    Route::controller(TutorAttendanceController::class)->group(function() {
+
+        Route::post('tutor-attendance/check', 'check')->name('tutor-attendance.check'); 
+    });
 
     Route::controller(TutorDashboard::class)->group(function() {
+
         Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
+        Route::get('tutor-dashboard/term/list', 'tutorTermShowsList')->name('tutor-dashboard.term.list'); 
         Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
+        Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
+
     });
+
+
 });
