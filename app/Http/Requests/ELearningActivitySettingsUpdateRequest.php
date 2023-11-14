@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ELearningActivitySettingsRequest extends FormRequest
+class ELearningActivitySettingsUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +25,8 @@ class ELearningActivitySettingsRequest extends FormRequest
     {
         return [
             'category' => 'required',
-            'name' => 'required|unique:e_learning_activity_settings,name',
+            'name' => 'required|unique:e_learning_activity_settings,name' . ($this->name ? ",$this->name" : ''),
             'logo' => 'required'
         ];
     }
 }
-

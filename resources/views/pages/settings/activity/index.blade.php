@@ -116,6 +116,11 @@
                             </div>
                             <div class="col-span-8">
                                 <div >
+                                    <label for="name" class="form-label">Activity Label <span class="text-danger">*</span></label>
+                                    <input id="days_name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div  class="mt-3">
                                     <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
                                     <select id="category" name="category" class="form-control w-full">
                                         <option value="">Please Select</option>
@@ -199,6 +204,12 @@
                                 <div class="acc__input-error error-logo text-danger mt-2"></div>
                             </div>
                             <div class="col-span-8">
+                                
+                                <div class="mt-3" >
+                                    <label for="name" class="form-label">Activity Label <span class="text-danger">*</span></label>
+                                    <input id="days_name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
                                 <div >
                                     <label for="edit_category" class="form-label">Category <span class="text-danger">*</span></label>
                                     <select id="edit_category" name="category" class="form-control w-full">
@@ -212,7 +223,7 @@
                                     <div class="acc__input-error error-category text-danger mt-2"></div>
                                 </div>
                                 <div class="mt-3">
-                                    <label for="edit_has_week" class="form-label">Has Week</label>
+                                    <label for="edit_has_week" class="form-label">Repeat Weekly</label>
                                     <div class="form-check form-switch ml-0">
                                         <input id="edit_has_week" class="form-check-input m-0" name="has_week" value="1" type="checkbox">
                                     </div>
@@ -220,7 +231,7 @@
                                 <div class="mt-3">
                                     <label for="has_week" class="form-label">Is Mandatory</label>
                                     <div class="form-check form-switch ml-0">
-                                        <input id="is_mandatory" class="form-check-input m-0" name="is_mandatory" value="1" type="checkbox">
+                                        <input id="is_mandatory" class="form-check-input m-0" checked name="is_mandatory" value="1" type="checkbox">
                                     </div>
                                 </div>
                                 <div class="mt-3" >

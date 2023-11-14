@@ -13,6 +13,7 @@ class ELearningActivitySetting extends Model
     protected $fillable = [
         'category',
         'logo',
+        'name',
         'has_week',
         'days_reminder',
         'is_mandatory',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ELearningActivitySettingsRequest;
+use App\Http\Requests\ELearningActivitySettingsUpdateRequest;
 use App\Models\ELearningActivitySetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -68,6 +69,7 @@ class ELearningActivitySettingController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'category' => $list->category,
+                    'name' => $list->name,
                     'logo_url' => $logoUrl,
                     'has_week' => $list->has_week,
                     'days_reminder'=> (isset($list->days_reminder) ? $list->days_reminder : NULL),
@@ -84,6 +86,7 @@ class ELearningActivitySettingController extends Controller
     public function store(ELearningActivitySettingsRequest $request){
         $eLearning = ELearningActivitySetting::create([
             'category'=> $request->category,
+            'name' => $request->name,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
             'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
             'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
@@ -121,13 +124,13 @@ class ELearningActivitySettingController extends Controller
         }
     }
 
-    public function update(ELearningActivitySettingsRequest $request){     
+    public function update(ELearningActivitySettingsUpdateRequest $request){     
         $oldRow = ELearningActivitySetting::find($request->id);
 
         $data = ELearningActivitySetting::where('id', $request->id)->update([
             'category'=> $request->category,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
-            
+            'name' => $request->name,
             'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
             'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
