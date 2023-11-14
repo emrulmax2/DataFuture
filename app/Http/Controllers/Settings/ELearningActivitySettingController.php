@@ -70,6 +70,8 @@ class ELearningActivitySettingController extends Controller
                     'category' => $list->category,
                     'logo_url' => $logoUrl,
                     'has_week' => $list->has_week,
+                    'days_reminder'=> (isset($list->days_reminder) ? $list->days_reminder : NULL),
+                    'is_mandatory'=> (isset($list->is_mandatory) && $list->is_mandatory > 0 ? $list->is_mandatory : 0),
                     'active' => $list->active,
                     'deleted_at' => $list->deleted_at
                 ];
@@ -83,6 +85,8 @@ class ELearningActivitySettingController extends Controller
         $eLearning = ELearningActivitySetting::create([
             'category'=> $request->category,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
+            'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
+            'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'created_by' => auth()->user()->id
         ]);
@@ -123,6 +127,9 @@ class ELearningActivitySettingController extends Controller
         $data = ELearningActivitySetting::where('id', $request->id)->update([
             'category'=> $request->category,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
+            
+            'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
+            'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);

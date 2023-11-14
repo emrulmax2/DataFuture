@@ -24,14 +24,17 @@ var ELearningActivityList = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
+                    title: "#",
                     field: "id",
-                    width: "180",
+                    headerSort:false,
+                    width: "50",
                 },
                 {
                     title: "Category",
                     field: "category",
                     headerHozAlign: "left",
+                    
+                    width: "250",
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div class="flex lg:justify-start items-center">';
@@ -53,6 +56,24 @@ var ELearningActivityList = (function () {
                     }
                 },
                 {
+                    title: "Mandatory",
+                    field: "is_mandatory",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return (cell.getData().is_mandatory == 1 ? 'Yes' : 'No');
+                    }
+                },
+                
+                {
+                    title: "Reminder",
+                    field: "days_reminder",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return (cell.getData().days_reminder > 1 ? cell.getData().days_reminder+' Days' : cell.getData().days_reminder+' Day');
+                    }
+                    
+                },
+                {
                     title: "Status",
                     field: "active",
                     headerHozAlign: "left",
@@ -66,7 +87,7 @@ var ELearningActivityList = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: "120",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";

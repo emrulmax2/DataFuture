@@ -14,6 +14,8 @@ class ELearningActivitySetting extends Model
         'category',
         'logo',
         'has_week',
+        'days_reminder',
+        'is_mandatory',
         'active',
         'created_by',
         'updated_by',

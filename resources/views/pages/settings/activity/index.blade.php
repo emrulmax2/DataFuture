@@ -133,6 +133,18 @@
                                         <input id="has_week" class="form-check-input m-0" name="has_week" value="1" type="checkbox">
                                     </div>
                                 </div>
+                                
+                                <div class="mt-3">
+                                    <label for="has_week" class="form-label">Is Mandatory</label>
+                                    <div class="form-check form-switch ml-0">
+                                        <input id="is_mandatory" class="form-check-input m-0" name="is_mandatory" value="1" type="checkbox">
+                                    </div>
+                                </div>
+                                <div class="mt-3" style="">
+                                    <label for="days_reminder" class="form-label">Days for reminders</label>
+                                    <input id="days_reminder" type="number" name="days_reminder" class="form-control w-full">
+                                    <div class="acc__input-error error-days_reminder text-danger mt-2"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -204,6 +216,17 @@
                                     <div class="form-check form-switch ml-0">
                                         <input id="edit_has_week" class="form-check-input m-0" name="has_week" value="1" type="checkbox">
                                     </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="has_week" class="form-label">Is Mandatory</label>
+                                    <div class="form-check form-switch ml-0">
+                                        <input id="is_mandatory" class="form-check-input m-0" name="is_mandatory" value="1" type="checkbox">
+                                    </div>
+                                </div>
+                                <div class="mt-3" >
+                                    <label for="days_reminder" class="form-label">Days for reminders</label>
+                                    <input id="days_reminder" type="number" name="days_reminder" class="form-control w-full">
+                                    <div class="acc__input-error error-days_reminder text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>
