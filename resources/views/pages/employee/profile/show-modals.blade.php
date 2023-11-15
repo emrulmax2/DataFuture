@@ -168,7 +168,7 @@
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEmploymentDetailsForm" enctype="multipart/form-data">
             
-            <input type="hidden" name="url" value="{{ route("employment.update",$employment->id) }}" />
+            <input type="hidden" name="url" value="{{ route("employee.employment.update",$employment->id) }}" />
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">

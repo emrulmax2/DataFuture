@@ -767,7 +767,7 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
     });
     Route::controller(EmploymentController::class)->group(function() {
-        Route::post('employment/update/{employment}','update')->name('employment.update');
+        Route::post('employment/update/{employment}','update')->name('employee.employment.update');
     });
     Route::controller(EmployeeEligibilityController::class)->group(function() {
         Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
