@@ -1,5 +1,6 @@
 @php
-$employeeUser = cache()->get('employeeCache'); 
+
+$employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee'); 
 @endphp
 <!-- BEGIN: Top Bar -->
 <div class="top-bar-boxed {{ isset($class) ? $class : '' }} h-[70px] md:h-[65px] z-[51] border-b border-white/[0.08] mt-12 md:mt-0 -mx-3 sm:-mx-8 md:-mx-0 px-3 md:border-b-0 relative md:fixed md:inset-x-0 md:top-0 sm:px-8 md:px-10 md:pt-10 md:bg-gradient-to-b md:from-slate-100 md:to-transparent dark:md:from-darkmode-700">
