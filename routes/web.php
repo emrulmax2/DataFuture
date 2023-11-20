@@ -100,6 +100,8 @@ use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
+use App\Http\Controllers\PlanContentUploadController;
+use App\Http\Controllers\PlanTaskUploadController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -143,7 +145,9 @@ use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
+use App\Http\Controllers\TutorModuleActivityController;
 use App\Models\BankHoliday;
+use App\Models\PlanContentUpload;
 
 /*
 |--------------------------------------------------------------------------
@@ -1570,9 +1574,45 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
         Route::get('tutor-dashboard/term/list', 'tutorTermShowsList')->name('tutor-dashboard.term.list'); 
         Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
+        Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
-
     });
 
+    // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  
+    // POST            tutor_module_activity ............................ tutor_module_activity.store › TutorModuleActivityController@store
+    // GET|HEAD        tutor_module_activity/create ................... tutor_module_activity.create › TutorModuleActivityController@create  
+    // GET|HEAD        tutor_module_activity/{tutor_module_activity} ...... tutor_module_activity.show › TutorModuleActivityController@show  
+    // PUT|PATCH       tutor_module_activity/{tutor_module_activity} .. tutor_module_activity.update › TutorModuleActivityController@update  
+    // DELETE          tutor_module_activity/{tutor_module_activity} tutor_module_activity.destroy › TutorModuleActivityController@destroy   
+    // GET|HEAD        tutor_module_activity/{tutor_module_activity}/edit . tutor_module_activity.edit › TutorModuleActivityController@edit  
+    //Route::resource('tutor_module_activity', TutorModuleActivityController::class);
 
+    Route::controller(TutorModuleActivityController::class)->group(function() {
+
+        Route::get('tutor_module_activity/create/{plansDateList}/{activity}', 'create')->name('tutor_module_activity.create'); 
+        Route::post('tutor_module_activity', 'store')->name('tutor_module_activity.store'); 
+        
+        
+    });
+    // GET|HEAD        plan-contentupload .................................... plan-contentupload.index › PlanContentUploadController@index  
+    // POST            plan-contentupload .................................... plan-contentupload.store › PlanContentUploadController@store  
+    // GET|HEAD        plan-contentupload/create ........................... plan-contentupload.create › PlanContentUploadController@create  
+    // GET|HEAD        plan-contentupload/{plan_contentupload} ................. plan-contentupload.show › PlanContentUploadController@show  
+    // PUT|PATCH       plan-contentupload/{plan_contentupload} ............. plan-contentupload.update › PlanContentUploadController@update
+    // DELETE          plan-contentupload/{plan_contentupload} ........... plan-contentupload.destroy › PlanContentUploadController@destroy  
+    // GET|HEAD        plan-contentupload/{plan_contentupload}/edit ............ plan-contentupload.edit › PlanContentUploadController@edit  
+    
+    Route::resource('plan-contentupload', PlanContentUploadController::class);
+
+    // GET|HEAD        plan-taskupload .............................................................. plan-taskupload.index › PlanTaskUploadController@index  
+    // POST            plan-taskupload .............................................................. plan-taskupload.store › PlanTaskUploadController@store  
+    // GET|HEAD        plan-taskupload/create ..................................................... plan-taskupload.create › PlanTaskUploadController@create  
+    // GET|HEAD        plan-taskupload/{plan_taskupload} .............................................. plan-taskupload.show › PlanTaskUploadController@show  
+    // PUT|PATCH       plan-taskupload/{plan_taskupload} .......................................... plan-taskupload.update › PlanTaskUploadController@update  
+    // DELETE          plan-taskupload/{plan_taskupload} ........................................ plan-taskupload.destroy › PlanTaskUploadController@destroy  
+    // GET|HEAD        plan-taskupload/{plan_taskupload}/edit ......................................... plan-taskupload.edit › PlanTaskUploadController@edit  
+    
+    Route::resource('plan-taskupload', PlanTaskUploadController::class);
+
+    
 });

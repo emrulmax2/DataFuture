@@ -5,7 +5,7 @@
 @endsection
 
 @section('subcontent')
-<div class="intro-y flex items-center mt-8">
+    <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Course Creation Details</h2>
     </div>
     <!-- BEGIN: Profile Info -->

@@ -8,10 +8,16 @@ use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
 use App\Models\AttendanceInformation;
 use App\Models\CourseModule;
+use App\Models\ELearningActivitySetting;
 use App\Models\Employee;
 use App\Models\InstanceTerm;
+use App\Models\ModuleCreation;
 use App\Models\Plan;
+use App\Models\PlanContent;
+use App\Models\PlanContentUpload;
 use App\Models\PlansDateList;
+use App\Models\PlanTask;
+use App\Models\PlanTaskUpload;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -160,7 +166,6 @@ class DahsboardController extends Controller
             endforeach;
         endif;
         
-        
         return view('pages.tutor.dashboard.index', [
             'title' => 'Tutor Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
@@ -276,6 +281,72 @@ class DahsboardController extends Controller
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
             'data' => $data,
+        ]);
+    }
+
+    public function showCourseContent(Plan $plan) {
+
+        $userData = User::find(Auth::user()->id);
+        $employee = Employee::where("user_id",$userData->id)->get()->first();
+
+        $tutor = Employee::where("user_id",$plan->tutor->id)->get()->first();
+        
+        $personalTutor = Employee::where("user_id",$plan->personalTutor->id)->get()->first();
+        
+        $planTask = PlanTask::where("plan_id",$plan->id)->get();  
+        
+        $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
+        $eLearningActivites = ELearningActivitySetting::all();
+        foreach($planDates as $classDate) {
+            $content = PlanContent::where("plans_date_list_id", $classDate->id)->get();
+            foreach($content as $singleContent){
+                $uploads = PlanContentUpload::where("plan_content_id",$singleContent->id)->get();
+    
+                $planDateWiseContent[$classDate->id] = (object) [
+                    "task" => $content,
+                    "taskUploads" => $uploads,
+                ];
+            }
+            
+        }
+
+        foreach($planTask as $task){
+            $uploads = PlanTaskUpload::where("plan_task_id",$task->id)->get();
+
+            $allPlanTasks[$task->id] = (object) [
+                "task"=> $task,
+                "taskUploads" => $uploads
+            ]; 
+        }
+        $moduleCreations = ModuleCreation::find($plan->creations->id);
+                    $data = (object) [
+                        'id' => $plan->id,
+                        'term_name' => $moduleCreations->term->name,
+                        'course' => $plan->course->name,
+                        
+                        'classType' => $plan->creations->class_type,
+                        'module' => $plan->creations->module_name,
+                        'group'=> $plan->group->name,           
+                        'room'=> $plan->room->name,           
+                        'venue'=> $plan->venu->name,           
+                        'tutor'=> ($tutor->full_name) ?? null,           
+                        'personalTutor'=> ($personalTutor->full_name) ?? null,           
+                    ];
+
+                
+       
+        return view('pages.tutor.module.view', [
+            'title' => 'Attendance - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Attendance', 'href' => 'javascript:void(0);']
+            ],
+            "user" => $userData,
+            "employee" => $employee,
+            "data" => $data,
+            'planTasks' => $allPlanTasks,
+            'planDates' => $planDateWiseContent,
+            'planDateList' => $planDateList,
+            'eLearningActivites' => $eLearningActivites
         ]);
     }
     /**

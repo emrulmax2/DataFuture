@@ -30,14 +30,15 @@ import Litepicker from "litepicker";
         if ($(this).data("format")) {
             options.format = $(this).data("format");
         }
-
-        /*if (!$(this).val()) {
-            let date = dayjs().format(options.format);
-            date += !options.singleMode
-                ? " - " + dayjs().add(1, "month").format(options.format)
-                : "";
-            $(this).val(date);
-        }*/
+        if ($(this).data("show-current")==true) {
+            if (!$(this).val()) {
+                let date = dayjs().format(options.format);
+                date += !options.singleMode
+                    ? " - " + dayjs().add(1, "month").format(options.format)
+                    : "";
+                $(this).val(date);
+            }
+        }
 
         new Litepicker({
             element: this,

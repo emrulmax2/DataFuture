@@ -73,7 +73,7 @@
                                 <div class="tab-content mt-5">
                                     <div id="process-tab-{{ $term->id }}-1" class="tab-pane leading-relaxed active" role="tabpanel" aria-labelledby="process-{{ $term->id }}-1-tab">
                                         @foreach($data[$term->id] as $moduleInfo)
-                                            <a href="#" class="alert relative border cursor-pointer rounded-md px-5 py-4 bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 mb-2 flex items-center w-auto" role="alert">
+                                            <a href="{{ route('tutor-dashboard.plan.module.show',$moduleInfo->id) }}" class="alert relative border cursor-pointer rounded-md px-5 py-4 bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 mb-2 flex items-center w-auto" role="alert">
                                                 <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> {{ $moduleInfo->module }} - {{ $moduleInfo->group }} - {{ $moduleInfo->course }}
                                             </a>
                                         @endforeach
