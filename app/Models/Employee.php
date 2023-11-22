@@ -34,6 +34,7 @@ class Employee extends Model
         'drive_license_number',
         'disability_status',
         "photo",
+        "status",
     ];
 
     /**
@@ -43,8 +44,8 @@ class Employee extends Model
      */
     public function getPhotoUrlAttribute()
     {
-        if ($this->photo !== null && Storage::disk('google')->exists('public/users/'.$this->id.'/'.$this->photo)) {
-            return Storage::disk('google')->url('public/users/'.$this->id.'/'.$this->photo);
+        if ($this->photo !== null && Storage::disk('google')->exists('public/employees/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('google')->url('public/employees/'.$this->id.'/'.$this->photo);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }
@@ -128,5 +129,9 @@ class Employee extends Model
         $patterns = $this->hasMany(EmployeeWorkingPattern::class, 'employee_id');
         $patterns->getQuery()->where('end_to', '=', '')->orWhereNull('end_to');
         return $patterns;
+    }
+
+    public function employment(){
+        return $this->hasOne(Employment::class, 'employee_id', 'id')->latestOfMany();
     }
 }

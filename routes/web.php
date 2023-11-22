@@ -89,15 +89,19 @@ use App\Http\Controllers\HR\EmployeePaymentSettingsController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
 use App\Http\Controllers\HR\EmployeePenssionSchemeController;
 use App\Http\Controllers\HR\EmployeeAddressController;
+use App\Http\Controllers\HR\EmployeeAttendanceController;
 use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\HR\EmployeeDocumentsController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeEmergencyContactController;
 use App\Http\Controllers\HR\EmployeeHolidayController;
+use App\Http\Controllers\HR\EmployeeNotesController;
 use App\Http\Controllers\HR\EmployeeProfileController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternController;
 use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
+use App\Http\Controllers\HR\EmployeePortalController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\PlanContentUploadController;
@@ -141,6 +145,7 @@ use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
 use App\Http\Controllers\Settings\ELearningActivitySettingController;
 use App\Http\Controllers\Settings\HolidayYearController;
 use App\Http\Controllers\Settings\HrBankHolidayController;
+use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
@@ -750,6 +755,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeController::class)->group(function(){
         Route::get('employee','index')->name('employee');
+        Route::get('employee/list','list')->name('employee.list');
         Route::post('employee/upload-photo', 'UploadEmployeePhoto')->name('employee.upload.photo');
         Route::get('employee/new','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
@@ -848,6 +854,54 @@ Route::middleware('auth')->group(function() {
         Route::post('my-account/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
         Route::post('my-account/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
         Route::post('my-account/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
+    });
+
+    Route::controller(EmployeeDocumentsController::class)->group(function(){
+        Route::get('employee-profile/documents/{id}', 'index')->name('employee.documents'); 
+        Route::post('employee-profile/documents/uploads-documents', 'employeeUploadDocument')->name('employee.documents.upload.documents'); 
+        Route::get('employee-profile/documents-upload/uploads-list', 'list')->name('employee.documents.uploads.list');
+        Route::delete('employee-profile/documents/uploads-destroy', 'destroy')->name('employee.documents.destory.uploads');
+        Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
+    });
+
+    Route::controller(EmployeeNotesController::class)->group(function(){
+        Route::get('employee-profile/notes/{id}', 'index')->name('employee.notes'); 
+       
+        Route::post('employee-profile/store-notes', 'store')->name('employee.store.note');
+        Route::get('employee-profile/notes-list', 'list')->name('employee.note.list');
+        Route::post('employee-profile/show-note', 'show')->name('employee.show.note');
+        Route::post('student/get-note', 'edit')->name('employee.get.note');
+        Route::post('employee-profile/update-note', 'update')->name('employee.update.note');
+        Route::delete('employee-profile/destory-note', 'destroy')->name('employee.destory.note');
+        Route::post('employee-profile/restore-note', 'restore')->name('employee.restore.note');
+    });
+
+    Route::controller(EmployeeAttendanceController::class)->group(function(){
+        Route::get('hr/attendance', 'index')->name('hr.attendance');
+        Route::get('hr/attendance/list', 'list')->name('hr.attendance.sync.list'); 
+        Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
+        Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
+        Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');
+        Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
+        Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
+        Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');
+    });
+
+    Route::controller(EmployeePortalController::class)->group(function(){
+        Route::get('hr/portal', 'index')->name('hr.portal');
+        Route::get('hr/portal/manage-holidays', 'manageHolidays')->name('hr.portal.holiday');
+        Route::get('hr/portal/holiday-list', 'list')->name('hr.portal.holiday.list'); 
+
+        Route::get('hr/portal/leave-calendar', 'leaveCalendar')->name('hr.portal.leave.calendar'); 
+        Route::post('hr/portal/filter-leave-calendar', 'filterLeaveCalendar')->name('hr.portal.filter.leave.calendar'); 
+        Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
+        
+        /*Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
+        Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
+        Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');
+        Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
+        Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
+        Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');*/
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -1539,6 +1593,11 @@ Route::middleware('auth')->group(function() {
 
         Route::get('site-settings/bank-holiday/export/{id}', 'export')->name('hr.bank.holiday.export');
         Route::post('site-settings/bank-holiday/import', 'import')->name('hr.bank.holiday.import');
+    });
+    
+    Route::controller(HrConditionController::class)->group(function() {
+        Route::get('site-settings/hr-condition', 'index')->name('hr.condition'); 
+        Route::post('site-settings/hr-condition/store', 'store')->name('hr.condition.store');
     });
 
     Route::controller(AddressController::class)->group(function() {

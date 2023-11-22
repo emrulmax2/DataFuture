@@ -47,7 +47,70 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        //
+        return view('pages.employee.index', [
+            'title' => 'Employees - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'HR Portal', 'href' => route('hr.portal')],
+                ['label' => 'Employees', 'href' => 'javascript:void(0);']
+            ],
+        ]);
+    }
+
+    public function list(Request $request){
+        $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
+        $status = (isset($request->status) ? $request->status : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Employee::orderByRaw(implode(',', $sorts));
+        if(!empty($queryStr)):
+            $query->where('first_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('mobile','LIKE','%'.$queryStr.'%');
+            $query->orWhere('email','LIKE','%'.$queryStr.'%');
+        endif;
+        if($status == 2):
+            $query->onlyTrashed();
+        else:
+            $query->where('status', $status);
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'name' => (isset($list->title->name) ? $list->title->name.' ' : '').$list->first_name.' '.$list->last_name,
+                    'jobtitle' => (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : ''),
+                    'photourl' => $list->photo_url,
+                    'department' => (isset($list->employment->department->name) ? $list->employment->department->name : ''),
+                    'works_number' => (isset($list->employment->works_number) ? $list->employment->works_number : ''),
+                    'status' => $list->status,
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
     /**
@@ -73,7 +136,7 @@ class EmployeeController extends Controller
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
         
-        return view('pages.employee.index',[
+        return view('pages.employee.create',[
             'title' => 'Add new Employee - LCC Data Future Managment',
             'breadcrumbs' => [],
             'titles' => $titles,
@@ -150,7 +213,7 @@ class EmployeeController extends Controller
             'workpermit_expire' => $request->workpermit_expire,
             'document_type' => $request->document_type,
             'doc_number' => $request->doc_number,
-            'doc_expire' => $request->doc_expire,
+            'doc_expire' => (!empty($request->doc_expire) ? date('Y-m-d', strtotime($request->doc_expire)) : null),
             'doc_issue_country' => $request->doc_issue_country
         ]);
         return response()->json(["data success",$data = session()->all()]);
@@ -248,7 +311,7 @@ class EmployeeController extends Controller
             'workpermit_expire' => Session::get('workpermit_expire'),
             'document_type' => Session::get('document_type'),
             'doc_number' => Session::get('doc_number'),
-            'doc_expire' => Session::get('doc_expire'),
+            'doc_expire' => (!empty(Session::get('doc_expire')) ? date('Y-m-d', strtotime(Session::get('doc_expire'))) : null),
             'doc_issue_country' => Session::get('doc_issue_country'),
 
         ]);
@@ -319,7 +382,10 @@ class EmployeeController extends Controller
      */
     public function update(EmployeeDataUpdateRequest $request, Employee $employee)
     {
-        $request->merge(['disability_status' => ($request->disability_status)? "Yes":"No"]);
+        $request->merge([
+            'disability_status' => ($request->disability_status)? "Yes":"No",
+            'status' => (isset($request->status) && $request->status > 0 ? 1 : 0)
+        ]);
         $input = $request->all();
         $employee->fill($input);
         $changes = $employee->getDirty();
@@ -345,7 +411,6 @@ class EmployeeController extends Controller
     {
         //
     }
-
 
     public function UploadEmployeePhoto(Request $request){
        

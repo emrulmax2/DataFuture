@@ -136,6 +136,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                        <label class="form-check-label mr-3 ml-0" for="active">Status</label>
+                        <input id="status" {{ $employee->status == 1 ? 'checked' : '' }} class="form-check-input m-0" name="status" value="1" type="checkbox">
+                    </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
                         Update                      

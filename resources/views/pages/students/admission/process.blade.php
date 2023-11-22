@@ -267,7 +267,7 @@
                                                                     <ul class="dropdown-content">
                                                                         <li>
                                                                             <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
-                                                                                <i data-lucide="EyeOff" class="w-4 h-4 mr-2"></i> View Log
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
                                                                         @if(isset($task->task->status) && $task->task->status == 'Yes')
@@ -433,7 +433,7 @@
                                                                     <ul class="dropdown-content">
                                                                         <li>
                                                                         <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
-                                                                                <i data-lucide="EyeOff" class="w-4 h-4 mr-2"></i> View Log
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
                                                                         @if(isset($task->task->status) && $task->task->status == 'Yes')
@@ -599,7 +599,7 @@
                                                                     <ul class="dropdown-content">
                                                                         <li>
                                                                         <a href="javascript:void(0);" data-interview="{{ $task->task->interview == 'Yes' ? 1 : 0 }}" data-applicantid="{{ $applicant->id }}" data-applicanttaskid="{{ $task->id }}" data-tw-toggle="modal" data-tw-target="#viewTaskLogModal" class="viewTaskLogBtn dropdown-item">
-                                                                                <i data-lucide="EyeOff" class="w-4 h-4 mr-2"></i> View Log
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
                                                                         <li>

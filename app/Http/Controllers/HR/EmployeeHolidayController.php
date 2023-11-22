@@ -1099,9 +1099,11 @@ class EmployeeHolidayController extends Controller
     }
 
     public function employeeUpdateLeave(Request $request){
-        $employee_id = $request->employee_id;
-        $employee = Employee::find($employee_id);
         $employee_leave_id = $request->employee_leave_id;
+        $employeeLeave = EmployeeLeave::find($employee_leave_id);
+
+        $employee_id = (isset($request->employee_id) && $request->employee_id > 0 ? $request->employee_id : $employeeLeave->employee_id);
+        $employee = Employee::find($employee_id);
 
         $employeeName = (isset($employee->titlle->name) ? $employee->titlle->name.' ' : '').$employee->first_name.' '.$employee->last_name;
         $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');

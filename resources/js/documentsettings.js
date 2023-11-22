@@ -63,6 +63,11 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Staff",
+                    field: "staff",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -297,6 +302,12 @@ var table = (function () {
                             document.querySelector('#editModal #student_profile').checked = true;
                         }else{
                             document.querySelector('#editModal #student_profile').checked = false;
+                        }
+
+                        if(dataset.staff == 1){
+                            document.querySelector('#editModal #staff').checked = true;
+                        }else{
+                            document.querySelector('#editModal #staff').checked = false;
                         }
 
                         $('#editModal input[name="id"]').val(editId);

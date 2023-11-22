@@ -92,7 +92,7 @@ var formDataListDatatable = (function () {
                                 //'<a href="' +
                                 //route("formdatatypes.show", cell.getData().id) +
                                 //cell.getData().id +
-                                //'"  class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="EyeOff" class="w-4 h-4"></i></a>';
+                                //'"  class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +

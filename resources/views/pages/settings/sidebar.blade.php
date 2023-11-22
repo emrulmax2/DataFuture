@@ -187,13 +187,18 @@
                 </ul>
             </li>
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'hr.condition' || Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="contact-2" class="w-4 h-4 mr-2"></i> HR Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'hr.condition' || Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'block' : 'none' }};">
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'active text-primary font-medium' : '' }}" href="{{ route('holiday.year') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Holiday Years
+                        </a>
+                    </li> 
+                    <li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'hr.condition' ? 'active text-primary font-medium' : '' }}" href="{{ route('hr.condition') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> HR Conditions
                         </a>
                     </li>
                 </ul>

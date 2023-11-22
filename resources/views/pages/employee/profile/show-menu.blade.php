@@ -16,5 +16,17 @@
             Holidays
         </a>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.documents', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.documents' ? 'active' : '' }}">
+            Documents
+        </a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.notes', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.notes' ? 'active' : '' }}">
+            Notes
+        </a>
+    </li>
     
 </ul>

@@ -977,3 +977,137 @@
 .liveAttendanceFormBtnGroup .btn:nth-child(even){
     margin-left: 3px;
 }
+
+#attendanceAccordion .accordion-button .accordionCollaps{
+    right: 0;
+}
+.dailyAttendanceTable.table.table-sm > thead > tr > th.inputCheckbox,
+.dailyAttendanceTable.table.table-sm > tbody > tr > td.inputCheckbox{
+    width: 60px;
+}
+.dailyAttendanceTable.table.table-sm tr td table{
+    border: none;
+}
+.dailyAttendanceTable.table.table-sm tr td table tr td{
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+}
+.dailyAttendanceTable.table.table-sm tr td table tr:last-child td{
+    padding-bottom: 0;
+}
+.dailyAttendanceTable tr td input{
+    max-width: 120px;
+}
+.return_list{
+    list-style-type: decimal;
+    font-weight: 500;
+    list-style-position: inside;
+    border-bottom: 2px solid rgba(226, 232, 240, 1);
+    padding: 0 0 0px 0;
+    margin: 0 0 2px;
+}
+#viewBreakModal .return_list{
+    border-bottom: none;
+    margin-bottom: 0;
+}
+#viewBreakModal .return_list li{
+    margin: 0 0 5px;
+}
+#viewBreakModal .return_list li:last-child{
+    margin: 0;
+}
+#viewBreakModal .return_list li.has_error .re_br{
+    color: rgb(185, 28, 28);
+    cursor: pointer;
+}
+#viewBreakModal .return_list li.has_error .edit_this{
+    margin: 2px 0 0 16px;
+    max-width: calc(100% - 16px);
+    display: none;
+}
+
+.leaveCalendarWrap{
+    position: relative;
+}
+.leaveTableLoader{    
+    background: rgba(22, 78, 99, .9);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    visibility: hidden;
+    z-index: -1;
+}
+.leaveTableLoader.active{
+    opacity: 1;
+    visibility: visible;
+    z-index: 9;
+}
+.leaveCalendarTable thead tr th:not(:first-child){
+    font-size: 12px;
+    line-height: 1;
+}
+.leaveCalendarTable thead tr th:not(:first-child) span{
+    display: block;
+}
+.leaveCalendarTable thead tr th:not(:first-child) span:first-child{
+    padding: 0 0 3px;
+}
+.leaveCalendarTable thead tr th:not(:first-child) span:last-child{
+    color: rgba(148, 163, 184, 1);
+}
+.leaveCalendarTable thead tr th.today,
+.leaveCalendarTable tbody tr td.today{
+    background: rgba(245, 158, 11, .1);
+}
+.leaveCalendarTable tbody tr td{
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.leaveCalendarTable tbody tr td.view_leave{
+    cursor: pointer;
+}
+.leaveCalendarTable tbody tr td.NonWorkingDay{
+    background: rgba(226, 232, 240, .75);
+    color: #5b5b5b;
+    cursor: not-allowed;
+}
+.labelsBtnsGroup span{
+    font-size: 12px;
+}
+.holidayVacationBG{
+    background: rgb(0 119 181);
+    color: #FFF;
+}
+.meetingTrainingBG{
+    background: rgb(0 0 0);
+    color: #FFF;
+}
+.sickLeaveBG{
+    background: rgb(30 41 59);
+    color: #FFF;
+}
+.authoriseUnpaidBG{
+    background: rgb(185 28 28);
+    color: #FFF;
+}
+.authorisedPaidBG{
+    background: rgb(59 89 152);
+    color: #FFF;
+}
+.bankHolidayBG{
+    background: #F36E26;
+    color: #FFF;
+}
+.pendingDay{
+    background-image: repeating-linear-gradient(180deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 6px );
+}

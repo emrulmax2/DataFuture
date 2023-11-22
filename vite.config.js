@@ -125,12 +125,21 @@ export default defineConfig({
                 "resources/js/bank-holiday.js",
                 "resources/js/leave-options.js",
                 "resources/js/employee-holiday.js",
-                
+                "resources/js/employee-upload.js",      
+                "resources/js/employee-note.js",
 
                 "resources/js/attendance.js",
 
                 "resources/js/user-holiday.js",
                 "resources/js/machine-live.js",
+                "resources/js/hr-attedance.js",
+                "resources/js/hr-conditions.js",
+                "resources/js/hr-deaily-attedance.js",
+
+                "resources/js/employee.js",
+                "resources/js/hr-portal.js",
+                "resources/js/hr-holiday-manager.js",
+                "resources/js/leave-calendar.js",
                 
             ],
             refresh: true,

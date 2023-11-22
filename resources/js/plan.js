@@ -105,7 +105,7 @@ var classPlanListTable = (function () {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
                             if(cell.getData().dates == 1){
-                                btns += '<a href="'+route('plan.dates', cell.getData().id)+'" class="view_days btn-round btn btn-success text-xs text-white px-2 py-1 ml-1"><i data-lucide="EyeOff" class="w-4 h-4 mr-1"></i> View Days</a>';
+                                btns += '<a href="'+route('plan.dates', cell.getData().id)+'" class="view_days btn-round btn btn-success text-xs text-white px-2 py-1 ml-1"><i data-lucide="eye-off" class="w-4 h-4 mr-1"></i> View Days</a>';
                             }
                             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 ml-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</a>';
                             btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';

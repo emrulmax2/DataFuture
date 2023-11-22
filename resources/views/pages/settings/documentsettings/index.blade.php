@@ -125,20 +125,24 @@
                                     <input id="application" class="form-check-input" name="application" value="1" type="checkbox">
                                 </div>
                                 <div class="mt-3 form-check form-switch">
-                                    <label class="form-check-label mr-3 ml-0" for="is_df">Admission</label>
+                                    <label class="form-check-label mr-3 ml-0" for="admission">Admission</label>
                                     <input id="admission" class="form-check-input" name="admission" value="1" type="checkbox">
                                 </div>
                                 <div class="mt-3 form-check form-switch">
-                                    <label class="form-check-label mr-3 ml-0" for="is_df">Registration</label>
+                                    <label class="form-check-label mr-3 ml-0" for="registration">Registration</label>
                                     <input id="registration" class="form-check-input" name="registration" value="1" type="checkbox">
                                 </div>
                                 <div class="mt-3 form-check form-switch">
-                                    <label class="form-check-label mr-3 ml-0" for="is_df">Live</label>
+                                    <label class="form-check-label mr-3 ml-0" for="live">Live</label>
                                     <input id="live" class="form-check-input" name="live" value="1" type="checkbox">
                                 </div>
                                 <div class="mt-3 form-check form-switch">
-                                    <label class="form-check-label mr-3 ml-0" for="is_df">Student Profile</label>
+                                    <label class="form-check-label mr-3 ml-0" for="student_profile">Student Profile</label>
                                     <input id="student_profile" class="form-check-input" name="student_profile" value="1" type="checkbox">
+                                </div>
+                                <div class="mt-3 form-check form-switch">
+                                    <label class="form-check-label mr-3 ml-0" for="staff">Staff</label>
+                                    <input id="staff" class="form-check-input" name="staff" value="1" type="checkbox">
                                 </div>
                                 <div class="acc__input-error error-choose text-danger mt-2"></div>
                             </div>
@@ -203,20 +207,24 @@
                                 <input id="application" class="form-check-input" name="application" value="1" type="checkbox">
                             </div>
                             <div class="mt-3 form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_df">Admission</label>
+                                <label class="form-check-label mr-3 ml-0" for="admission">Admission</label>
                                 <input id="admission" class="form-check-input" name="admission" value="1" type="checkbox">
                             </div>
                             <div class="mt-3 form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_df">Registration</label>
+                                <label class="form-check-label mr-3 ml-0" for="registration">Registration</label>
                                 <input id="registration" class="form-check-input" name="registration" value="1" type="checkbox">
                             </div>
                             <div class="mt-3 form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_df">Live</label>
+                                <label class="form-check-label mr-3 ml-0" for="live">Live</label>
                                 <input id="live" class="form-check-input" name="live" value="1" type="checkbox">
                             </div>
                             <div class="mt-3 form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_df">Student Profile</label>
+                                <label class="form-check-label mr-3 ml-0" for="student_profile">Student Profile</label>
                                 <input id="student_profile" class="form-check-input" name="student_profile" value="1" type="checkbox">
+                            </div>
+                            <div class="mt-3 form-check form-switch">
+                                <label class="form-check-label mr-3 ml-0" for="staff">Staff</label>
+                                <input id="staff" class="form-check-input" name="staff" value="1" type="checkbox">
                             </div>
                             {{-- <div class="acc__input-error error-choose text-danger mt-2"></div> --}}
                         </div>

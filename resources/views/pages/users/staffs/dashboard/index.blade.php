@@ -76,6 +76,17 @@
                             </div>                        
                         {{-- </div> --}}
                         </a>
+                        <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
+                            <div class="report-box zoom-in">                               
+                                <div class="box p-5">                                    
+                                    <div class="flex">
+                                        <i data-lucide="contact" class="report-box__icon text-success"></i>
+                                    </div>
+                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">04</div>
+                                    <div class="text-base text-slate-500 mt-1">HR Portal</div>                              
+                                </div>                               
+                            </div>        
+                        </a>
                     </div>
                 </div>
             </div>

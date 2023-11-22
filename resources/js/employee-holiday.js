@@ -507,7 +507,6 @@ import 'litepicker/dist/plugins/multiselect';
         });
 
         if(err > 0){
-            alert('hi')
             document.querySelector('#updateNLR').removeAttribute('disabled');
             document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
 
