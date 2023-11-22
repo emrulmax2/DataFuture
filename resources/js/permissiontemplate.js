@@ -2,446 +2,241 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
-("use strict");
-var permissionListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = $("#query-01").val() != "" ? $("#query-01").val() : "";
-        let status = $("#status-01").val() != "" ? $("#status-01").val() : "";
-        let role = $("#permissiontemplateTableId").attr('data-roleid') != "" ? $("#permissiontemplateTableId").attr('data-roleid') : "0";
-        let permissioncategory = $("#permissioncategory-01").val() != "" ? $("#permissioncategory-01").val() : "";
-        let department = $("#department-01").val() != "" ? $("#department-01").val() : "";
-
-        let tableContent = new Tabulator("#permissiontemplateTableId", {
-            ajaxURL: route("permissiontemplate.list"),
-            ajaxParams: { querystr: querystr, status: status, role: role, permissioncategory: permissioncategory, department: department},
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    width: "180",
-                },
-                {
-                    title: "Permission Category",
-                    field: "permission_category_id",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Department",
-                    field: "department_id",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Type",
-                    field: "type",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Read",
-                    field: "R",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Write",
-                    field: "W",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Delete",
-                    field: "D",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
-                    download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#permissiontemplateEditModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
-                    },
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-            },
-        });
-
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Permissions",
-            });
-        });
-
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
-        });
-    };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
 
 (function () {
-    // Tabulator
-    if ($("#permissiontemplateTableId").length) {
-        // Init Table
-        permissionListTable.init();
+    const permissionTemplateAccr = tailwind.Accordion.getInstance(document.querySelector("#permissionTemplateAccr"));
+    const permissionCategoryDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#permissionCategoryDropdown"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const addPermissionGroupModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPermissionGroupModal"));
+    let confModalDelTitle = 'Are you sure?';
 
-        // Filter function
-        function filterHTMLForm() {
-            permissionListTable.init();
+    document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
+        $('#confirmModal .agreeWith').attr('data-id', '0');
+        $('#confirmModal .agreeWith').attr('data-action', 'none');
+    });
+
+    const addPermissionGroupModalEl = document.getElementById('addPermissionGroupModal')
+    addPermissionGroupModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addPermissionGroupModal .acc__input-error').html('');
+        $('#addPermissionGroupModal input[name="name"]').val('');
+        $('#addPermissionGroupModal input[type="checkbox"]').prop('checked', false);
+        $('#addPermissionGroupModal input[name="permission_template_id"]').val('0');
+    });
+
+    $('#closePCDropdown').on('click', function(e){
+        e.preventDefault();
+        permissionCategoryDropdown.hide();
+    });
+
+    $('#successModal .successCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            successModal.hide();
+            window.location.reload();
+        }else{
+            successModal.hide();
         }
+    })
 
-        // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLForm();
-                }
+    /* Assign Category Form Submission */
+    $('#assignPermissionCategoryForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('assignPermissionCategoryForm');
+    
+        document.querySelector('#addPermissionCat').setAttribute('disabled', 'disabled');
+        document.querySelector("#addPermissionCat svg.theLoader").style.cssText ="display: inline-block;";
+
+        var permission_category_ids = [];
+        var role_id = $('input[name="role_id"]', $form).val();
+        $form.find('.permission_category_id').each(function(){
+            if($(this).prop('checked')){
+                permission_category_ids.push($(this).val());
             }
-        );
-
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("");
-            filterHTMLForm();
-        });
-
-        const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        let confModalDelTitle = 'Are you sure?';
-
-        const addModalEl = document.getElementById('permissiontemplateAddModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#permissiontemplateAddModal .acc__input-error').html('');
-            $('#permissiontemplateAddModal input:not([type="hidden"]):not([type="checkbox"])').val('');
-            $('#permissiontemplateAddModal input[type="checkbox"]').prop('checked', false);
-            $('#permissiontemplateAddModal select').val('');
-        });
-        
-        const editModalEl = document.getElementById('permissiontemplateEditModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#permissiontemplateEditModal .acc__input-error').html('');
-            $('#permissiontemplateEditModal input:not([type="hidden"]):not([type="checkbox"])').val('');
-            $('#permissiontemplateEditModal input[name="id"]').val('0');
-            $('#permissiontemplateEditModal input[type="checkbox"]').prop('checked', false);
-            $('#permissiontemplateEditModal select').val('');
-        });
-
-        $('#permissiontemplateAddForm').on('submit', function(e){
-            e.preventDefault();
-            const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#permissiontemplateAddModal"));
-            const form = document.getElementById('permissiontemplateAddForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
-
+        if(permission_category_ids.length > 0){
             let form_data = new FormData(form);
             axios({
                 method: "post",
                 url: route('permissiontemplate.store'),
-                data: form_data,
+                data: {permission_category_ids : permission_category_ids, role_id : role_id},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
                 if (response.status == 200) {
-                    document.querySelector('#save').removeAttribute('disabled');
-                    document.querySelector("#save svg").style.cssText = "display: none;";
-                    $('#permissiontemplateAddForm #permission_category_id').val('');
-                    $('#permissiontemplateAddForm #department_id').val('');
-                    $('#permissiontemplateAddForm input[type="text"]').val('');
-                    addModal.hide();
-                    succModal.show();
-                    document.getElementById("successModal")
-                        .addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html(
-                                "Success!"
-                            );
-                            $("#successModal .successModalDesc").html('Data Inserted');
-                        });                
-                        
+                    document.querySelector('#addPermissionCat').removeAttribute('disabled');
+                    document.querySelector("#addPermissionCat svg.theLoader").style.cssText = "display: none;";
+
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulation!" );
+                        $("#successModal .successModalDesc").html(response.data.message);
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });      
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 5000);
                 }
-                permissionListTable.init();
             }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
+                document.querySelector('#addPermissionCat').removeAttribute('disabled');
+                document.querySelector("#addPermissionCat svg.theLoader").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#permissiontemplateAddForm .${key}`).addClass('border-danger')
-                            $(`#permissiontemplateAddForm  .error-${key}`).html(val)
-                        }
-                        $('#permissiontemplateAddForm #permission_category_id').val('');
-                        $('#permissiontemplateAddForm #department_id').val('');
-                        $('#permissiontemplateAddForm input[type="text"]').val('');
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html("Error Found!" );
+                            $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                        });
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 5000);
                     } else {
                         console.log('error');
                     }
                 }
             });
-        });
+        }else{
+            document.querySelector('#addPermissionCat').removeAttribute('disabled');
+            document.querySelector("#addPermissionCat svg.theLoader").style.cssText = "display: none;";
 
-        $("#permissiontemplateTableId").on("click", ".edit_btn", function () {      
-            let $editBtn = $(this);
-            let editId = $editBtn.attr("data-id");
-
-            axios({
-                method: "get",
-                url: route("permissiontemplate.edit", editId),
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        $('#permissiontemplateEditModal select[name="permission_category_id"]').val(dataset.permission_category_id ? dataset.permission_category_id : '');
-                        $('#permissiontemplateEditModal select[name="department_id"]').val(dataset.department_id ? dataset.department_id : '');
-                        $('#permissiontemplateEditModal input[name="type"]').val(dataset.type ? dataset.type : '');
-                        $('#permissiontemplateEditModal input[name="role_id"]').val(dataset.role_id ? dataset.role_id : '');
-                        
-                        if(dataset.R == 1){
-                            document.querySelector('#permissiontemplateEditModal #R').checked = true;
-                        }else{
-                            document.querySelector('#permissiontemplateEditModal #R').checked = false;
-                        }
-                        
-                        if(dataset.W == 1){
-                            document.querySelector('#permissiontemplateEditModal #W').checked = true;
-                        }else{
-                            document.querySelector('#permissiontemplateEditModal #W').checked = false;
-                        }
-
-                        if(dataset.D == 1){
-                            document.querySelector('#permissiontemplateEditModal #D').checked = true;
-                        }else{
-                            document.querySelector('#permissiontemplateEditModal #D').checked = false;
-                        }
-
-                        $('#permissiontemplateEditModal input[name="id"]').val(editId);
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        });
-
-        // Update Course Data
-        $("#permissiontemplateEditForm").on("submit", function (e) {
-            let editId = $('#permissiontemplateEditModal input[name="role_id"]').val();
-            const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#permissiontemplateEditModal"));
-            const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-
-            e.preventDefault();
-            const form = document.getElementById("permissiontemplateEditForm");
-
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
-
-            let form_data = new FormData(form);
-
-            axios({
-                method: "post",
-                url: route("permissiontemplate.update", editId),
-                data: form_data,
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document.querySelector("#update").removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText = "display: none;";
-                        editModal.hide();
-
-                        succModal.show();
-                        document.getElementById("successModal")
-                            .addEventListener("shown.tw.modal", function (event) {
-                                $("#successModal .successModalTitle").html(
-                                    "Success!"
-                                );
-                                $("#successModal .successModalDesc").html('Data Updated');
-                            });
-                    }
-                    permissionListTable.init();
-                })
-                .catch((error) => {
-                    document
-                        .querySelector("#update")
-                        .removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText =
-                        "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#permissiontemplateEditForm .${key}`).addClass('border-danger')
-                                $(`#permissiontemplateEditForm  .error-${key}`).html(val)
-                            }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html(
-                                        "No Data Change!"
-                                    );
-                                    $("#successModal .successModalDesc").html(message);
-                                });
-                        } else {
-                            console.log("error");
-                        }
-                    }
-                });
-        });
-
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
+            warningModal.show();
+            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModal .warningModalTitle").html("Error Found!" );
+                $("#warningModal .warningModalDesc").html('You have to select at least one category to continue.');
             });
+
+            setTimeout(function(){
+                warningModal.hide();
+            }, 5000);
+        }
+        
+    });
+    /* Assign Category Form Submission */
+    
+    /*Insert or Delete Permission Category in Template */
+    $('.is_inserted').on('click', function(e){
+        e.preventDefault();
+        var $input = $(this);
+        var permissionTemplateId = $input.val();
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('You really want to update this category status? Click on agree to continue.');
+            $('#confirmModal .agreeWith').attr('data-id', permissionTemplateId);
+            $('#confirmModal .agreeWith').attr('data-action', 'UPDATEPCAT');
+        });
+
+    });
+    /*Insert or Delete Permission Category in Template */
+
+    /* Confirm Modal Action */
+    $('#confirmModal .agreeWith').on('click', function(){
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+        let roleID = $agreeBTN.attr('data-role');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'UPDATEPCAT'){
+            axios({
+                method: 'post',
+                url: route('permissiontemplate.update'),
+                data: {recordID : recordID, roleID : roleID},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    if(response.data.res == 2){
+                        $('#permission_category_id_'+recordID).prop('checked', false);
+                        $('#permission_category_btn_'+recordID).attr('disabled', 'disabled');
+                    }else{
+                        $('#permission_category_id_'+recordID).prop('checked', true);
+                        $('#permission_category_btn_'+recordID).removeAttr('disabled');
+                    }
+                    //permissionTemplateAccr.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('DONE!');
+                        $('#successModal .successModalDesc').html('Permission template category status successfully updated.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    }); 
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 5000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    });
+    /* Confirm Modal Action */
+
+
+
+
+    $('.addPermissionGroupBtn').on('click', function(e){
+        var $input = $(this);
+        var permission_template_id = $input.attr('data-template');
+        $('#addPermissionGroupModal input[name="permission_template_id"]').val(permission_template_id);
+    })
+
+
+    $('#addPermissionGroupForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addPermissionGroupForm');
+    
+        document.querySelector('#savePermissionGroup').setAttribute('disabled', 'disabled');
+        document.querySelector("#savePermissionGroup svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('permissiontemplate.group.store'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#savePermissionGroup').removeAttribute('disabled');
+            document.querySelector("#savePermissionGroup svg").style.cssText = "display: none;";
             
-            let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
-
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
-                axios({
-                    method: 'delete',
-                    url: route('permissiontemplate.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
-                        });
-                    }
-                    permissionListTable.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
-            } else if(action == 'RESTORE'){
-                axios({
-                    method: 'post',
-                    url: route('permissiontemplate.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
-                        });
-                    }
-                    permissionListTable.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
+            if (response.status == 200) {
+                addPermissionGroupModal.hide();
+                
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Permission template group access details successfully inserted.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });      
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 5000);
             }
-        })
-
-         // Delete Course
-         $('#permissiontemplateTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
+        }).catch(error => {
+            document.querySelector('#savePermissionGroup').removeAttribute('disabled');
+            document.querySelector("#savePermissionGroup svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addPermissionGroupForm .${key}`).addClass('border-danger')
+                        $(`#addPermissionGroupForm  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
         });
+    });
 
-        // Restore Course
-        $('#permissiontemplateTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let dataID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', dataID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
-        });
-    }
 })();

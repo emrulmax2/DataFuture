@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Request\LoginRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -33,6 +34,8 @@ class AuthController extends Controller
             'password' => $request->password
         ])) {
             throw new \Exception('Wrong email or password.');
+        } else {
+            Cache::forever('employeeCache', \Auth::user()->load('employee'));
         }
     }
 
@@ -45,6 +48,7 @@ class AuthController extends Controller
     public function logout()
     {
         \Auth::logout();
+        Cache::flush();
         return redirect('login');
     }
 }

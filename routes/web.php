@@ -42,10 +42,10 @@ use App\Http\Controllers\Settings\StatusController;
 use App\Http\Controllers\Settings\Studentoptions\CountryController;
 use App\Http\Controllers\Settings\Studentoptions\DisabilityController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\PermissionCategoryController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionTemplateController;
+use App\Http\Controllers\Settings\DepartmentController;
+use App\Http\Controllers\Settings\PermissionCategoryController;
+use App\Http\Controllers\Settings\RoleController;
+use App\Http\Controllers\Settings\PermissionTemplateController;
 use App\Http\Controllers\Settings\ProcessListController;
 use App\Http\Controllers\Settings\TaskListController;
 
@@ -82,7 +82,32 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
+use App\Http\Controllers\HR\EmployeePaymentSettingsController;
+use App\Http\Controllers\HR\EmployeeBankDetailController;
+use App\Http\Controllers\HR\EmployeePenssionSchemeController;
+use App\Http\Controllers\HR\EmployeeAddressController;
+use App\Http\Controllers\HR\EmployeeAttendanceController;
 use App\Http\Controllers\HR\EmployeeController;
+use App\Http\Controllers\HR\EmployeeDocumentsController;
+use App\Http\Controllers\HR\EmployeeEligibilityController;
+use App\Http\Controllers\HR\EmployeeEmergencyContactController;
+use App\Http\Controllers\HR\EmployeeHolidayController;
+use App\Http\Controllers\HR\EmployeeNotesController;
+use App\Http\Controllers\HR\EmployeeProfileController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternController;
+use App\Http\Controllers\HR\EmployeeTermController;
+use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
+use App\Http\Controllers\HR\EmploymentController;
+use App\Http\Controllers\HR\EmployeePortalController;
+use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
+use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
+use App\Http\Controllers\PlanContentUploadController;
+use App\Http\Controllers\PlanParticipantController;
+use App\Http\Controllers\PlanTaskController;
+use App\Http\Controllers\PlanTaskUploadController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -119,6 +144,19 @@ use App\Http\Controllers\Settings\Studentoptions\PreviousProviderController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationTypeIdentifierController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEngagementEndingController;
 use App\Http\Controllers\Student\Frontend\StudentFirstLoginDataController;
+use App\Http\Controllers\Settings\ELearningActivitySettingController;
+use App\Http\Controllers\Settings\HolidayYearController;
+use App\Http\Controllers\Settings\HrBankHolidayController;
+use App\Http\Controllers\Settings\HrConditionController;
+use App\Http\Controllers\Settings\PermissionTemplateGroupController;
+use App\Http\Controllers\Student\StudentAssignController;
+use App\Http\Controllers\User\UserHolidayController;
+use App\Http\Controllers\User\UserProfileController;
+use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
+use App\Http\Controllers\TutorModuleActivityController;
+use App\Models\BankHoliday;
+use App\Models\PlanContentUpload;
+use App\Models\PlanTask;
 
 /*
 |--------------------------------------------------------------------------
@@ -142,6 +180,24 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
+
+Route::prefix('/machine')->name('machine.')->group(function() {
+    Route::controller(MachineLoginController::class)->middleware('machine.loggedin')->group(function() {
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+    });
+
+    Route::middleware('auth.machine')->group(function() {
+        Route::get('logout', [MachineLoginController::class, 'logout'])->name('logout');
+
+        Route::controller(MachineDashboardController::class)->group(function() {
+            Route::get('/live', 'index')->name('dashboard');
+            Route::post('/live/get-attendance-history', 'getAttendanceHistory')->name('get.attendance.history');
+            Route::post('/live/store-attendance', 'store')->name('store.attendance');
+        });
+    });
+});
+
 // all applicant have a prefix route name applicant.* value
 Route::prefix('/applicant')->name('applicant.')->group(function() {
 
@@ -434,6 +490,10 @@ Route::middleware('auth')->group(function() {
         Route::post('plans/tree/update', 'update')->name('plans.tree.update'); 
         Route::delete('plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
         Route::post('plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
+
+        Route::post('plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
+        Route::post('plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
+        Route::post('plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
@@ -681,15 +741,29 @@ Route::middleware('auth')->group(function() {
         Route::post('users/update/{id}', 'update')->name('users.update');
         Route::delete('users/delete/{id}', 'destroy')->name('users.destory');
         Route::post('users/restore/{id}', 'restore')->name('users.restore');
-
+        
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
     });
+
+    Route::controller(UserProfileController::class)->group(function() {
+        Route::get('my-account', 'index')->name('user.account'); 
+    });
+
+    Route::controller(UserHolidayController::class)->group(function(){
+        Route::get('my-account/holidays/{id}', 'index')->name('user.account.holiday'); 
+        Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('user.account.holiday.ajax.statistics'); 
+        Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('user.account.holiday.ajax.limit'); 
+        Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('user.account.holiday.leave.submission'); 
+    });
+
     Route::controller(EmployeeController::class)->group(function(){
         Route::get('employee','index')->name('employee');
+        Route::get('employee/list','list')->name('employee.list');
+        Route::post('employee/upload-photo', 'UploadEmployeePhoto')->name('employee.upload.photo');
         Route::get('employee/new','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
-        
+        Route::post('employee/update/{employee}','update')->name('employee.update');
         Route::post('employement/save','saveEmployment')->name('employement.save');
         Route::post('eligibility/save','saveEligibility')->name('eligibility.save');
         Route::post('emergency-contact/save','saveEmergencyContact')->name('emergency-contact.save');
@@ -697,6 +771,143 @@ Route::middleware('auth')->group(function() {
         Route::get('/first/review', 'reviewShows')->name('employeereview.show.data');
         Route::post('/first/review', 'reviewDone')->name('employeereview.done.data');
     });
+
+    Route::controller(EmployeeProfileController::class)->group(function(){
+        
+        Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
+    });
+
+    Route::controller(EmployeeAddressController::class)->group(function() {
+        Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
+    });
+    Route::controller(EmploymentController::class)->group(function() {
+        Route::post('employment/update/{employment}','update')->name('employee.employment.update');
+    });
+    Route::controller(EmployeeEligibilityController::class)->group(function() {
+        Route::post('employee-eligibility/update/{eligibility}','update')->name('employeeeligibility.update');
+    });
+    
+    Route::controller(EmployeeEmergencyContactController::class)->group(function() {
+        Route::post('employee-emergency/update/{contact}','update')->name('employee.emergency.update');
+    });
+
+    
+    Route::controller(EmployeeTermController::class)->group(function() {
+        Route::post('employee-term/update/{term}','update')->name('employee.term.update');
+    });
+
+    Route::controller(EmployeePaymentSettingsController::class)->group(function(){
+        Route::get('employee-profile/payment-settings/{id}', 'index')->name('employee.payment.settings'); 
+        Route::post('employee-profile/payment-settings/store', 'store')->name('employee.payment.settings.store'); 
+        Route::post('employee-profile/payment-settings/update', 'update')->name('employee.payment.settings.update'); 
+    });
+
+    Route::controller(EmployeeBankDetailController::class)->group(function(){
+        Route::post('employee-profile/bank/store', 'store')->name('employee.bank.store'); 
+        Route::post('employee-profile/bank/edit', 'edit')->name('employee.bank.edit'); 
+        Route::post('employee-profile/bank/update', 'update')->name('employee.bank.update'); 
+        Route::get('employee-profile/bank/list', 'list')->name('employee.bank.list'); 
+        Route::delete('employee-profile/bank/delete/{id}', 'destroy')->name('employee.bank.destory');
+        Route::post('employee-profile/bank/restore/{id}', 'restore')->name('employee.bank.restore');
+        Route::post('employee-profile/bank/change-status/{id}', 'changeStatus')->name('employee.bank.changestatus');
+    });
+    
+
+    Route::controller(EmployeePenssionSchemeController::class)->group(function(){
+        Route::get('employee-profile/penssion/list', 'list')->name('employee.penssion.list'); 
+        Route::post('employee-profile/penssion/store', 'store')->name('employee.penssion.store'); 
+        Route::post('employee-profile/penssion/edit', 'edit')->name('employee.penssion.edit'); 
+        Route::post('employee-profile/penssion/update', 'update')->name('employee.penssion.update'); 
+        Route::delete('employee-profile/penssion/delete/{id}', 'destroy')->name('employee.penssion.destory');
+        Route::post('employee-profile/penssion/restore/{id}', 'restore')->name('employee.penssion.restore');
+    });
+
+    Route::controller(EmployeeWorkingPatternController::class)->group(function(){
+        Route::get('employee-profile/pattern/list', 'list')->name('employee.pattern.list'); 
+        Route::post('employee-profile/pattern/store', 'store')->name('employee.pattern.store'); 
+        Route::post('employee-profile/pattern/edit', 'edit')->name('employee.pattern.edit'); 
+        Route::post('employee-profile/pattern/update', 'update')->name('employee.pattern.update'); 
+        Route::delete('employee-profile/pattern/delete/{id}', 'destroy')->name('employee.pattern.destory');
+        Route::post('employee-profile/pattern/restore/{id}', 'restore')->name('employee.pattern.restore');
+    });
+
+    Route::controller(EmployeeWorkingPatternDetailController::class)->group(function(){
+        Route::get('employee-profile/pattern-details/list', 'list')->name('employee.pattern.details.list'); 
+        Route::post('employee-profile/pattern-details/store', 'store')->name('employee.pattern.details.store'); 
+        Route::post('employee-profile/pattern-details/edit', 'edit')->name('employee.pattern.details.edit'); 
+        Route::post('employee-profile/pattern-details/update', 'update')->name('employee.pattern.details.update'); 
+    });
+
+    Route::controller(EmployeeWorkingPatternPayController::class)->group(function(){
+        Route::get('employee-profile/pattern-pay/list', 'list')->name('employee.pattern.pay.list'); 
+        Route::post('employee-profile/pattern-pay/edit', 'edit')->name('employee.pattern.pay.edit'); 
+        Route::post('employee-profile/pattern-pay/update', 'update')->name('employee.pattern.pay.update');
+        Route::post('employee-profile/pattern-pay/getPattern', 'getPattern')->name('employee.pattern.pay.get.pattern');
+        Route::post('employee-profile/pattern-pay/store', 'store')->name('employee.pattern.pay.store'); 
+    });
+
+    Route::controller(EmployeeHolidayController::class)->group(function(){
+        Route::get('employee-profile/holidays/{id}', 'index')->name('employee.holiday'); 
+        Route::post('employee-profile/holidays/update-adjustment', 'updateAdjustment')->name('employee.holiday.update.adjustment'); 
+
+        Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('employee.holiday.ajax.statistics'); 
+        Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('employee.holiday.ajax.limit'); 
+        Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('employee.holiday.leave.submission'); 
+
+        Route::post('my-account/holidays/get-leave', 'getEmployeeLeave')->name('employee.holiday.get.leave'); 
+        Route::post('my-account/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
+        Route::post('my-account/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
+        Route::post('my-account/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
+    });
+
+    Route::controller(EmployeeDocumentsController::class)->group(function(){
+        Route::get('employee-profile/documents/{id}', 'index')->name('employee.documents'); 
+        Route::post('employee-profile/documents/uploads-documents', 'employeeUploadDocument')->name('employee.documents.upload.documents'); 
+        Route::get('employee-profile/documents-upload/uploads-list', 'list')->name('employee.documents.uploads.list');
+        Route::delete('employee-profile/documents/uploads-destroy', 'destroy')->name('employee.documents.destory.uploads');
+        Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
+    });
+
+    Route::controller(EmployeeNotesController::class)->group(function(){
+        Route::get('employee-profile/notes/{id}', 'index')->name('employee.notes'); 
+       
+        Route::post('employee-profile/store-notes', 'store')->name('employee.store.note');
+        Route::get('employee-profile/notes-list', 'list')->name('employee.note.list');
+        Route::post('employee-profile/show-note', 'show')->name('employee.show.note');
+        Route::post('student/get-note', 'edit')->name('employee.get.note');
+        Route::post('employee-profile/update-note', 'update')->name('employee.update.note');
+        Route::delete('employee-profile/destory-note', 'destroy')->name('employee.destory.note');
+        Route::post('employee-profile/restore-note', 'restore')->name('employee.restore.note');
+    });
+
+    Route::controller(EmployeeAttendanceController::class)->group(function(){
+        Route::get('hr/attendance', 'index')->name('hr.attendance');
+        Route::get('hr/attendance/list', 'list')->name('hr.attendance.sync.list'); 
+        Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
+        Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
+        Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');
+        Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
+        Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
+        Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');
+    });
+
+    Route::controller(EmployeePortalController::class)->group(function(){
+        Route::get('hr/portal', 'index')->name('hr.portal');
+        Route::get('hr/portal/manage-holidays', 'manageHolidays')->name('hr.portal.holiday');
+        Route::get('hr/portal/holiday-list', 'list')->name('hr.portal.holiday.list'); 
+
+        Route::get('hr/portal/leave-calendar', 'leaveCalendar')->name('hr.portal.leave.calendar'); 
+        Route::post('hr/portal/filter-leave-calendar', 'filterLeaveCalendar')->name('hr.portal.filter.leave.calendar'); 
+        Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
+        
+        /*Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
+        Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
+        Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');
+        Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
+        Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
+        Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');*/
+    });
+    
     Route::controller(StaffDashboard::class)->group(function() {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');
@@ -847,44 +1058,44 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(DepartmentController::class)->group(function() {
-        Route::get('department', 'index')->name('department'); 
-        Route::get('department/list', 'list')->name('department.list'); 
-        Route::post('department/store', 'store')->name('department.store'); 
-        Route::get('department/edit/{id}', 'edit')->name('department.edit');
-        Route::post('department/update', 'update')->name('department.update');
-        Route::delete('department/delete/{id}', 'destroy')->name('department.destory');
-        Route::post('department/restore/{id}', 'restore')->name('department.restore');
+        Route::get('site-settings/department', 'index')->name('department'); 
+        Route::get('site-settings/department/list', 'list')->name('department.list'); 
+        Route::post('site-settings/department/store', 'store')->name('department.store'); 
+        Route::get('site-settings/department/edit/{id}', 'edit')->name('department.edit');
+        Route::post('site-settings/department/update', 'update')->name('department.update');
+        Route::delete('site-settings/department/delete/{id}', 'destroy')->name('department.destory');
+        Route::post('site-settings/department/restore/{id}', 'restore')->name('department.restore');
     });
 
     Route::controller(PermissionCategoryController::class)->group(function() {
-        Route::get('permissioncategory', 'index')->name('permissioncategory'); 
-        Route::get('permissioncategory/list', 'list')->name('permissioncategory.list'); 
-        Route::post('permissioncategory/store', 'store')->name('permissioncategory.store'); 
-        Route::get('permissioncategory/edit/{id}', 'edit')->name('permissioncategory.edit');
-        Route::post('permissioncategory/update', 'update')->name('permissioncategory.update');
-        Route::delete('permissioncategory/delete/{id}', 'destroy')->name('permissioncategory.destory');
-        Route::post('permissioncategory/restore/{id}', 'restore')->name('permissioncategory.restore');
+        Route::get('site-settings/permissioncategory', 'index')->name('permissioncategory'); 
+        Route::get('site-settings/permissioncategory/list', 'list')->name('permissioncategory.list'); 
+        Route::post('site-settings/permissioncategory/store', 'store')->name('permissioncategory.store'); 
+        Route::get('site-settings/permissioncategory/edit/{id}', 'edit')->name('permissioncategory.edit');
+        Route::post('site-settings/permissioncategory/update', 'update')->name('permissioncategory.update');
+        Route::delete('site-settings/permissioncategory/delete/{id}', 'destroy')->name('permissioncategory.destory');
+        Route::post('site-settings/permissioncategory/restore/{id}', 'restore')->name('permissioncategory.restore');
     });
 
     
     Route::controller(RoleController::class)->group(function() {
-        Route::get('roles', 'index')->name('roles'); 
-        Route::get('roles/list', 'list')->name('roles.list'); 
-        Route::post('roles/store', 'store')->name('roles.store'); 
-        Route::get('roles/show/{id}', 'show')->name('roles.show');
-        Route::get('roles/edit/{id}', 'edit')->name('roles.edit');
-        Route::post('roles/update', 'update')->name('roles.update');
-        Route::delete('roles/delete/{id}', 'destroy')->name('roles.destory');
-        Route::post('roles/restore/{id}', 'restore')->name('roles.restore');
+        Route::get('site-settings/roles', 'index')->name('roles'); 
+        Route::get('site-settings/roles/list', 'list')->name('roles.list'); 
+        Route::post('site-settings/roles/store', 'store')->name('roles.store'); 
+        Route::get('site-settings/roles/show/{id}', 'show')->name('roles.show');
+        Route::get('site-settings/roles/edit/{id}', 'edit')->name('roles.edit');
+        Route::post('site-settings/roles/update', 'update')->name('roles.update');
+        Route::delete('site-settings/roles/delete/{id}', 'destroy')->name('roles.destory');
+        Route::post('site-settings/roles/restore/{id}', 'restore')->name('roles.restore');
     });
 
     Route::controller(PermissionTemplateController::class)->group(function() {
-        Route::get('permissiontemplate/list', 'list')->name('permissiontemplate.list'); 
-        Route::post('permissiontemplate/store', 'store')->name('permissiontemplate.store'); 
-        Route::get('permissiontemplate/edit/{id}', 'edit')->name('permissiontemplate.edit');
-        Route::post('permissiontemplate/update', 'update')->name('permissiontemplate.update');
-        Route::delete('permissiontemplate/delete/{id}', 'destroy')->name('permissiontemplate.destory');
-        Route::post('permissiontemplate/restore/{id}', 'restore')->name('permissiontemplate.restore');
+        Route::post('site-settings/permissiontemplate/store', 'store')->name('permissiontemplate.store'); 
+        Route::post('site-settings/permissiontemplate/update', 'update')->name('permissiontemplate.update');
+    });
+
+    Route::controller(PermissionTemplateGroupController::class)->group(function() {
+        Route::post('site-settings/permissiontemplate/group/store', 'store')->name('permissiontemplate.group.store'); 
     });
 
     Route::controller(InterviewListController::class)->group(function() {
@@ -1107,6 +1318,17 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/letterheaderfooter/upload-letterfooter', 'uploadLetterFooter')->name('letterheaderfooter.upload.letterfoot');
         Route::delete('site-settings/letterheaderfooter/uploads-destroy', 'LetterUploadDestroy')->name('letterheaderfooter.destory.uploads');
         Route::post('site-settings/letterheaderfooter/uploads-restore', 'LetterUploadRestore')->name('letterheaderfooter.resotore.uploads'); 
+    });
+
+    Route::controller(ELearningActivitySettingController::class)->group(function() {
+        Route::get('site-settings/e-learning', 'index')->name('elearning'); 
+        Route::post('site-settings/e-learning/store', 'store')->name('elearning.store'); 
+        Route::get('site-settings/e-learning/list', 'list')->name('elearning.list');
+        Route::post('site-settings/e-learning/edit', 'edit')->name('elearning.edit');
+        Route::post('site-settings/e-learning/update', 'update')->name('elearning.update');
+        Route::delete('site-settings/e-learning/delete/{id}', 'destroy')->name('elearning.destory');
+        Route::post('site-settings/e-learning/restore/{id}', 'restore')->name('elearning.restore');
+        Route::post('site-settings/e-learning/update-status/{id}', 'updateStatus')->name('elearning.update.status');
     });
 
     Route::controller(StudentOptionController::class)->group(function(){
@@ -1350,9 +1572,153 @@ Route::middleware('auth')->group(function() {
         Route::get('studentidentifier/export', 'export')->name('studentidentifier.export');
         Route::post('studentidentifier/import', 'import')->name('studentidentifier.import');
     });
+    
+    Route::controller(HolidayYearController::class)->group(function() {
+        Route::get('site-settings/holiday-year', 'index')->name('holiday.year'); 
+        Route::get('site-settings/holiday-year/list', 'list')->name('holiday.year.list');        
+        Route::post('site-settings/holiday-year/store', 'store')->name('holiday.year.store');
+        Route::post('site-settings/holiday-year/edit', 'edit')->name('holiday.year.edit');
+        Route::post('site-settings/holiday-year/update', 'update')->name('holiday.year.update');
+        Route::delete('site-settings/holiday-year/delete/{id}', 'destroy')->name('holiday.year.destory');
+        Route::post('site-settings/holiday-year/restore/{id}', 'restore')->name('holiday.year.restore');
+        Route::post('site-settings/holiday-year/update-status', 'updateStatus')->name('holiday.year.update.status'); 
+
+        Route::get('site-settings/holiday-year/leave-options/{id}', 'leaveOptions')->name('holiday.year.leave.option'); 
+        Route::post('site-settings/holiday-year/leave-options', 'updateLeaveOptions')->name('holiday.year.update.leave.option'); 
+    });
+    
+    Route::controller(HrBankHolidayController::class)->group(function() {
+        Route::get('site-settings/bank-holiday/all/{id}', 'index')->name('hr.bank.holiday'); 
+        Route::get('site-settings/bank-holiday/list', 'list')->name('hr.bank.holiday.list');
+        Route::post('site-settings/bank-holiday/edit', 'edit')->name('hr.bank.holiday.edit');
+        Route::post('site-settings/bank-holiday/update', 'update')->name('hr.bank.holiday.update');
+        Route::delete('site-settings/bank-holiday/delete/{id}', 'destroy')->name('hr.bank.holiday.destory');
+        Route::post('site-settings/bank-holiday/restore/{id}', 'restore')->name('hr.bank.holiday.restore');
+
+        Route::get('site-settings/bank-holiday/export/{id}', 'export')->name('hr.bank.holiday.export');
+        Route::post('site-settings/bank-holiday/import', 'import')->name('hr.bank.holiday.import');
+    });
+    
+    Route::controller(HrConditionController::class)->group(function() {
+        Route::get('site-settings/hr-condition', 'index')->name('hr.condition'); 
+        Route::post('site-settings/hr-condition/store', 'store')->name('hr.condition.store');
+    });
 
     Route::controller(AddressController::class)->group(function() {
         Route::post('address/get-address', 'getAddress')->name('address.get');
         Route::post('address/store', 'store')->name('address.store');
     });
+
+    Route::controller(AttendanceController::class)->group(function() {
+        Route::get('attendance', 'index')->name('attendance'); 
+        Route::get('attendance/list', 'list')->name('attendance.list'); 
+        Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
+        Route::post('attendance/save', 'store')->name('attendance.store'); 
+
+        Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
+    });
+
+    //GET|HEAD        tutor-attendance ................................................................................. tutor-attendance.index › Attendance\TutorAttendanceController@index  
+    //POST            tutor-attendance ................................................................................. tutor-attendance.store › Attendance\TutorAttendanceController@store  
+    //GET|HEAD        tutor-attendance/create ........................................................................ tutor-attendance.create › Attendance\TutorAttendanceController@create  
+    //GET|HEAD        tutor-attendance/{tutor_attendance} ................................................................ tutor-attendance.show › Attendance\TutorAttendanceController@show  
+    //PUT|PATCH       tutor-attendance/{tutor_attendance} ............................................................ tutor-attendance.update › Attendance\TutorAttendanceController@update  
+    //DELETE          tutor-attendance/{tutor_attendance} .......................................................... tutor-attendance.destroy › Attendance\TutorAttendanceController@destroy  
+    //GET|HEAD        tutor-attendance/{tutor_attendance}/edit ........................................................... tutor-attendance.edit › Attendance\TutorAttendanceController@edit 
+    Route::resource('tutor-attendance', TutorAttendanceController::class);
+
+    Route::controller(TutorAttendanceController::class)->group(function() {
+
+        Route::post('tutor-attendance/check', 'check')->name('tutor-attendance.check'); 
+    });
+
+    Route::controller(TutorDashboard::class)->group(function() {
+
+        Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
+        Route::get('tutor-dashboard/term/list', 'tutorTermShowsList')->name('tutor-dashboard.term.list'); 
+        Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
+        Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
+        Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
+    });
+
+    // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  
+    // POST            tutor_module_activity ............................ tutor_module_activity.store › TutorModuleActivityController@store
+    // GET|HEAD        tutor_module_activity/create ................... tutor_module_activity.create › TutorModuleActivityController@create  
+    // GET|HEAD        tutor_module_activity/{tutor_module_activity} ...... tutor_module_activity.show › TutorModuleActivityController@show  
+    // PUT|PATCH       tutor_module_activity/{tutor_module_activity} .. tutor_module_activity.update › TutorModuleActivityController@update  
+    // DELETE          tutor_module_activity/{tutor_module_activity} tutor_module_activity.destroy › TutorModuleActivityController@destroy   
+    // GET|HEAD        tutor_module_activity/{tutor_module_activity}/edit . tutor_module_activity.edit › TutorModuleActivityController@edit  
+    //Route::resource('tutor_module_activity', TutorModuleActivityController::class);
+
+    Route::controller(TutorModuleActivityController::class)->group(function() {
+
+        Route::get('tutor_module_activity/create/{plansDateList}/{activity}', 'create')->name('tutor_module_activity.create'); 
+        Route::post('tutor_module_activity', 'store')->name('tutor_module_activity.store'); 
+        
+        
+    });
+    // GET|HEAD        plan-contentupload .................................... plan-contentupload.index › PlanContentUploadController@index  
+    // POST            plan-contentupload .................................... plan-contentupload.store › PlanContentUploadController@store  
+    // GET|HEAD        plan-contentupload/create ........................... plan-contentupload.create › PlanContentUploadController@create  
+    // GET|HEAD        plan-contentupload/{plan_contentupload} ................. plan-contentupload.show › PlanContentUploadController@show  
+    // PUT|PATCH       plan-contentupload/{plan_contentupload} ............. plan-contentupload.update › PlanContentUploadController@update
+    // DELETE          plan-contentupload/{plan_contentupload} ........... plan-contentupload.destroy › PlanContentUploadController@destroy  
+    // GET|HEAD        plan-contentupload/{plan_contentupload}/edit ............ plan-contentupload.edit › PlanContentUploadController@edit  
+    
+    Route::resource('plan-contentupload', PlanContentUploadController::class);
+
+    // GET|HEAD        plan-taskupload .............................................................. plan-taskupload.index › PlanTaskUploadController@index  
+    // POST            plan-taskupload .............................................................. plan-taskupload.store › PlanTaskUploadController@store  
+    // GET|HEAD        plan-taskupload/create ..................................................... plan-taskupload.create › PlanTaskUploadController@create  
+    // GET|HEAD        plan-taskupload/{plan_taskupload} .............................................. plan-taskupload.show › PlanTaskUploadController@show  
+    // PUT|PATCH       plan-taskupload/{plan_taskupload} .......................................... plan-taskupload.update › PlanTaskUploadController@update  
+    // DELETE          plan-taskupload/{plan_taskupload} ........................................ plan-taskupload.destroy › PlanTaskUploadController@destroy  
+    // GET|HEAD        plan-taskupload/{plan_taskupload}/edit ......................................... plan-taskupload.edit › PlanTaskUploadController@edit  
+    
+    Route::resource('plan-taskupload', PlanTaskUploadController::class,[
+        'except' => ['create']
+    ]);
+
+    Route::resource('plan-module-task', PlanTaskController::class,[
+        'except' => ['create']
+    ]);
+
+    // GET|HEAD        plan-module-task ............................................................................................................................. plan-module-task.index › PlanTaskController@index  
+    // POST            plan-module-task ............................................................................................................................. plan-module-task.store › PlanTaskController@store  
+    // GET|HEAD        plan-module-task/create/{plan}/{activity} ................................................................................................... plan-module-task.create › PlanTaskController@create  
+    // GET|HEAD        plan-module-task/{plan_module_task} ............................................................................................................ plan-module-task.show › PlanTaskController@show  
+    // PUT|PATCH       plan-module-task/{plan_module_task} ........................................................................................................ plan-module-task.update › PlanTaskController@update  
+    // DELETE          plan-module-task/{plan_module_task} ...................................................................................................... plan-module-task.destroy › PlanTaskController@destroy  
+    // GET|HEAD        plan-module-task/{plan_module_task}/edit
+    Route::controller(PlanTaskController::class)->group(function() {
+
+        Route::get('plan-module-task/create/{plan}/{activity}', 'create')->name('plan-module-task.create'); 
+        
+    });
+
+    // GET|HEAD        plan-participant ...................................................................................................................... plan-participant.index › PlanParticipantController@index  
+    // POST            plan-participant ...................................................................................................................... plan-participant.store › PlanParticipantController@store  
+    // GET|HEAD        plan-participant/create ............................................................................................................. plan-participant.create › PlanParticipantController@create  
+    // GET|HEAD        plan-participant-list ................................................................................................................... plan-participant.list › PlanParticipantController@list  
+    // GET|HEAD        plan-participant/{plan_participant} ..................................................................................................... plan-participant.show › PlanParticipantController@show  
+    // PUT|PATCH       plan-participant/{plan_participant} ................................................................................................. plan-participant.update › PlanParticipantController@update  
+    // DELETE          plan-participant/{plan_participant} ............................................................................................... plan-participant.destroy › PlanParticipantController@destroy  
+    // GET|HEAD        plan-participant/{plan_participant}/edit 
+
+    Route::resource('plan-participant', PlanParticipantController::class);
+
+    Route::controller(PlanParticipantController::class)->group(function() {
+
+        Route::get('plan-participant-list', 'list')->name('plan-participant.list'); 
+        
+    }); 
+
+    Route::resource('student-assign',StudentAssignController::class);
+
+    Route::controller(StudentAssignController::class)->group(function() {
+
+        Route::get('student-assign-list', 'list')->name('student-assign.list'); 
+        
+    });
+    
 });

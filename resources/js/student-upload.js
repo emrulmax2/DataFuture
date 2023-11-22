@@ -193,7 +193,7 @@ var studentUploadListTable = (function () {
         confirmModal.hide();
     });
 
-    $('#successModal .successCloser').on('click', function(e){
+    $('#successModal .successCloser').on('click', function(e) {
         e.preventDefault();
         if($(this).attr('data-action') == 'RELOAD'){
             successModal.hide();

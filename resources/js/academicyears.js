@@ -69,7 +69,7 @@ var table = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<a href="'+route('academicyears.show', cell.getData().id)+'" class="edit_btn btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="EyeOff" class="w-4 h-4"></i></a>';
+                            btns +='<a href="'+route('academicyears.show', cell.getData().id)+'" class="edit_btn btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                             btns +=
                                 '<button data-id="' +
                                 cell.getData().id +

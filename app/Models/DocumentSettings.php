@@ -18,6 +18,7 @@ class DocumentSettings extends Model
         'registration',
         'live',
         'student_profile',
+        'staff',
         'created_by',
         'updated_by',
     ];

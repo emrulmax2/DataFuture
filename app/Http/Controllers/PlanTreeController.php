@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PlanAssignParticipantRequest;
 use App\Http\Requests\PlansUpdateRequest;
 use App\Models\AcademicYear;
 use App\Models\Course;
@@ -9,6 +10,7 @@ use App\Models\Group;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
+use App\Models\PlanParticipant;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -29,6 +31,7 @@ class PlanTreeController extends Controller
             'group' => Group::all(),
             'tutor' => User::all(),
             'ptutor' => User::all(),
+            'users' => User::all(),
         ]);
     }
 
@@ -40,8 +43,30 @@ class PlanTreeController extends Controller
         if($years->terms->count() > 0):
             $html .= '<ul class="theChild">';
             foreach($years->terms as $term):
-                $html .= '<li class="hasChildren">';
+                $visibility = $this->getTermVisibility($academicYear, $term->id);
+
+                $html .= '<li class="hasChildren relative">';
                     $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYear.'" data-termid="'.$term->id.'" class="theTerm flex items-center text-primary font-medium">'.$term->name.' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                    $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
+                        $html .= '<button data-yearid="'.$academicYear.'" data-termid="'.$term->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn visibility_'.$visibility.' mr-2"><i class="w-4 h-4" data-lucide="eye"></i></button>';
+                        $html .= '<div class="dropdown">';
+                            $html .= '<button class="dropdown-toggle p-0 border-0 rounded-0 text-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="settings" class="w-4 h4"></i></button>';
+                            $html .= '<div class="dropdown-menu w-48">';
+                                $html .= '<ul class="dropdown-content">';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYear.'" data-termid="'.$term->id.'" href="javascript:void(0);" class="dropdown-item assignManager">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Assign Manager';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYear.'" data-termid="'.$term->id.'" href="javascript:void(0);" class="dropdown-item assignCoOrdinator">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Audit User';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                $html .= '</ul>';
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</div>';
                 $html .= '</li>';
             endforeach;
             $html .= '</ul>';
@@ -60,12 +85,33 @@ class PlanTreeController extends Controller
 
         $term = InstanceTerm::find($instanceTermId);
         $courseCreation = (isset($term->instance->creation) ? $term->instance->creation : []);
+        $visibility = $this->getCourseVisibility($academicYearId, $instanceTermId, $courseCreation->course_id);
 
         $html = '';
         if(!empty($courseCreation)):
             $html .= '<ul class="theChild">';
                 $html .= '<li class="hasChildren">';
                     $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-termid="'.$instanceTermId.'" data-courseid="'.$courseCreation->course_id.'" class="theCourse flex items-center text-primary font-medium">'.$courseCreation->course->name.' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                    $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
+                        $html .= '<button data-yearid="'.$academicYearId.'" data-termid="'.$instanceTermId.'" data-courseid="'.$courseCreation->course_id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
+                        $html .= '<div class="dropdown">';
+                            $html .= '<button class="dropdown-toggle p-0 border-0 rounded-0 text-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="settings" class="w-4 h4"></i></button>';
+                            $html .= '<div class="dropdown-menu w-48">';
+                                $html .= '<ul class="dropdown-content">';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYearId.'" data-termid="'.$instanceTermId.'" data-courseid="'.$courseCreation->course_id.'" href="javascript:void(0);" class="dropdown-item assignManager">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Assign Manager';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYearId.'" data-termid="'.$instanceTermId.'" data-courseid="'.$courseCreation->course_id.'" href="javascript:void(0);" class="dropdown-item assignCoOrdinator">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Audit User';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                $html .= '</ul>';
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</div>';
                 $html .= '</li>';
             $html .= '</ul>';
         else:
@@ -89,8 +135,30 @@ class PlanTreeController extends Controller
         if(isset($course->groups) && $course->groups->count() > 0):
             $html .= '<ul class="theChild">';
                 foreach($course->groups as $grp):
+                    $visibility = $this->getGroupVisibility($academicYearId, $termId, $courseId, $grp->id);
+
                     $html .= '<li class="hasChildren">';
                         $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$grp->id.'" class="theGroup flex items-center text-primary font-medium">'.$grp->name.' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                        $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
+                        $html .= '<button data-yearid="'.$academicYearId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$grp->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
+                        $html .= '<div class="dropdown">';
+                            $html .= '<button class="dropdown-toggle p-0 border-0 rounded-0 text-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="settings" class="w-4 h4"></i></button>';
+                            $html .= '<div class="dropdown-menu w-48">';
+                                $html .= '<ul class="dropdown-content">';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYearId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$grp->id.'" href="javascript:void(0);" class="dropdown-item assignManager">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Assign Manager';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                    $html .= '<li>';
+                                        $html .= '<a data-yearid="'.$academicYearId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$grp->id.'" href="javascript:void(0);" class="dropdown-item assignCoOrdinator">';
+                                            $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Audit User';
+                                        $html .= '</a>';
+                                    $html .= '</li>';
+                                $html .= '</ul>';
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</div>';
                     $html .= '</li>';
                 endforeach;
             $html .= '</ul>';
@@ -103,7 +171,7 @@ class PlanTreeController extends Controller
         return response()->json(['htm' => $html], 200);
     }
 
-    public function getModule(Request $request){
+    public function getModule(Request $request) {
         $courseId = $request->courseId;
         $termId = $request->termId;
         $academicYearId = $request->academicYearId;
@@ -328,5 +396,202 @@ class PlanTreeController extends Controller
         $data = Plan::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function getAssignDetails(Request $request){
+        $type = $request->type;
+        $yearid = $request->yearid;
+        $termid = $request->termid;
+        $courseid = $request->courseid;
+        $groupid = $request->groupid;
+
+        $title = '';
+        $ACYear = AcademicYear::find($yearid);
+        $term = InstanceTerm::find($termid);
+
+        $title .= '<u>'.$ACYear->name.'</u> > ';
+        $title .= '<u>'.$term->name.'</u> > ';
+
+        if(!$courseid || empty($courseId)):
+            $courseCreation = (isset($term->instance->creation) ? $term->instance->creation : []);
+            $courseid = $courseCreation->course->id;
+        else:
+            $courseid = (int) $courseid;
+        endif;
+        $course = Course::find($courseid);
+        $title .= '<u>'.$course->name.'</u>';
+
+        if(!$groupid || empty($groupid)):
+            $course = Course::find($courseid);
+            if(isset($course->groups) && $course->groups->count() > 0):
+                foreach($course->groups as $grp):
+                    $groupIds[] = $grp->id;
+                endforeach;
+            endif;
+        else:
+            $groupIds[] = (int) $groupid;
+            $theGroup = Group::find($groupid);
+            $title .= (isset($theGroup->name) && !empty($theGroup->name) ? ' > '.$theGroup->name : '');
+        endif;
+
+        $moduleCreationIds = ModuleCreation::where('instance_term_id', $termid)->pluck('id')->unique()->toArray();
+        $query = Plan::orderBy('id', 'ASC');
+        if(!empty($courseid)): $query->where('course_id', $courseid); endif;
+        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($groupIds)): $query->whereIn('group_id', $groupIds); endif;
+        $planIds = $query->pluck('id')->unique()->toArray();
+
+        $userIds = [];
+        if(!empty($planIds)):
+            $userIds = PlanParticipant::whereIn('plan_id', $planIds)->where('type', $type)->pluck('user_id')->unique()->toArray();
+        endif;
+
+        $title .= ' > Assign <u>'.($type == 'Auditor' ? 'Audit User' : 'Manager').'</u>';
+        return response()->json(['plans' => $planIds, 'participants' => $userIds, 'title' => $title], 200);
+    }
+
+    public function assignParticipants(PlanAssignParticipantRequest $request){
+        $assigned_user_ids = $request->assigned_user_ids;
+        $plan_ids = !empty($request->plan_ids) ? explode(',', $request->plan_ids) : [];
+        $type = (isset($request->type) && !empty($request->type) ? $request->type : 'Manager');
+
+        if(!empty($plan_ids) && !empty($assigned_user_ids)):
+            foreach($plan_ids as $pid):
+                $deleteParticipants = PlanParticipant::where('plan_id', $pid)->where('type', $type)->forceDelete();
+
+                foreach($assigned_user_ids as $uid):
+                    $data = [];
+                    $data['plan_id'] = $pid;
+                    $data['user_id'] = $uid;
+                    $data['type'] = $type;
+                    $data['created_by'] = auth()->user()->id;
+
+                    PlanParticipant::create($data);
+                endforeach;
+            endforeach;
+            return response()->json(['message' => 'Participants successfully assigned.'], 200);
+        else:
+            return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+        endif;
+    }
+
+    public function getTermVisibility($academicYear, $termid){
+        $term = InstanceTerm::find($termid);
+        $courseCreation = (isset($term->instance->creation) ? $term->instance->creation : []);
+        $courseid = (isset($courseCreation->course->id) && $courseCreation->course->id > 0 ? $courseCreation->course->id : '');
+        $groupIds = [];
+
+        if(!empty($courseid)):
+            $course = Course::find($courseid);
+            if(isset($course->groups) && $course->groups->count() > 0):
+                foreach($course->groups as $grp):
+                    $groupIds[] = $grp->id;
+                endforeach;
+            endif;
+        endif;
+
+        $moduleCreationIds = ModuleCreation::where('instance_term_id', $termid)->pluck('id')->unique()->toArray();
+        $query = Plan::orderBy('id', 'ASC');
+        if(!empty($courseid)): $query->where('course_id', $courseid); endif;
+        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($groupIds)): $query->whereIn('group_id', $groupIds); endif;
+        $Query = $query->where('visibility', 1)->get();
+
+        return ($Query->count() > 0 ? 1 : 0);
+    }
+
+    public function getCourseVisibility($academicYear, $termid, $courseid){
+        $groupIds = [];
+
+        $course = Course::find($courseid);
+        if(isset($course->groups) && $course->groups->count() > 0):
+            foreach($course->groups as $grp):
+                $groupIds[] = $grp->id;
+            endforeach;
+        endif;
+
+        $moduleCreationIds = ModuleCreation::where('instance_term_id', $termid)->pluck('id')->unique()->toArray();
+        $query = Plan::orderBy('id', 'ASC');
+        if(!empty($courseid)): $query->where('course_id', $courseid); endif;
+        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($groupIds)): $query->whereIn('group_id', $groupIds); endif;
+        $Query = $query->where('visibility', 1)->get();
+
+        return ($Query->count() > 0 ? 1 : 0);
+    }
+
+    public function getGroupVisibility($academicYear, $termid, $courseid, $groupid){
+        $groupIds = [];
+
+        $course = Course::find($courseid);
+        if(isset($course->groups) && $course->groups->count() > 0):
+            foreach($course->groups as $grp):
+                $groupIds[] = $grp->id;
+            endforeach;
+        endif;
+
+        $moduleCreationIds = ModuleCreation::where('instance_term_id', $termid)->pluck('id')->unique()->toArray();
+        $query = Plan::orderBy('id', 'ASC');
+        if(!empty($courseid)): $query->where('course_id', $courseid); endif;
+        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($groupIds)): $query->where('group_id', $groupid); endif;
+        $Query = $query->where('visibility', 1)->get();
+
+        return ($Query->count() > 0 ? 1 : 0);
+    }
+
+    public function updateVisibility(Request $request){
+        $yearid = $request->yearid;
+        $termid = $request->termid;
+        $courseid = $request->courseid;
+        $groupid = $request->groupid;
+        $visibility = $request->visibility;
+
+        $ACYear = AcademicYear::find($yearid);
+        $term = InstanceTerm::find($termid);
+
+        if(!$courseid || empty($courseId)):
+            $courseCreation = (isset($term->instance->creation) ? $term->instance->creation : []);
+            $courseid = $courseCreation->course->id;
+        else:
+            $courseid = (int) $courseid;
+        endif;
+
+        if(!$groupid || empty($groupid)):
+            $course = Course::find($courseid);
+            if(isset($course->groups) && $course->groups->count() > 0):
+                foreach($course->groups as $grp):
+                    $groupIds[] = $grp->id;
+                endforeach;
+            endif;
+        else:
+            $groupIds[] = (int) $groupid;
+        endif;
+
+        $moduleCreationIds = ModuleCreation::where('instance_term_id', $termid)->pluck('id')->unique()->toArray();
+        $query = Plan::orderBy('id', 'ASC');
+        if(!empty($courseid)): $query->where('course_id', $courseid); endif;
+        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($groupIds)): $query->whereIn('group_id', $groupIds); endif;
+        $planIds = $query->pluck('id')->unique()->toArray();
+
+        if(!empty($planIds)):
+            foreach($planIds as $pid):
+                $plan = Plan::find($pid);
+
+                $data = [];
+                $data['visibility'] = $visibility;
+                $data['updated_by'] = auth()->user()->id;
+
+                Plan::where('id', $pid)->update($data);
+            endforeach;
+            $message = 'Plans visibility successfully updated.';
+            $suc = 1;
+        else:
+            $message = 'Plans not found under selected criteria.';
+            $suc = 2;
+        endif;
+
+        return response()->json(['message' => $message, 'suc' => $suc, 'visibility' => ($visibility == 1 ? 0 : 1)], 200);
     }
 }

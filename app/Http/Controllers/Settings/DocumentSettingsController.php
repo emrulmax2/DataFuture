@@ -72,6 +72,7 @@ class DocumentSettingsController extends Controller
                     'registration' => ($list->registration==1 ? 'Yes' : 'No'),
                     'live' => ($list->live==1 ? 'Yes' : 'No'),
                     'student_profile' => ($list->student_profile==1 ? 'Yes' : 'No'),
+                    'staff' => ($list->staff==1 ? 'Yes' : 'No'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -89,7 +90,7 @@ class DocumentSettingsController extends Controller
     public function store(DocumentSettingsRequests $request)
     {
         $request->request->add(['created_by' => auth()->user()->id]);
-        if((empty($request->application)) && (empty($request->admission)) && (empty($request->registration)) && (empty($request->live)) && (empty($request->student_profile))) {
+        if((empty($request->application)) && (empty($request->admission)) && (empty($request->registration)) && (empty($request->live)) && (empty($request->student_profile) && (empty($request->staff)))) {
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         } else{
             $data = DocumentSettings::create($request->all());
@@ -135,7 +136,7 @@ class DocumentSettingsController extends Controller
      */
     public function update(DocumentSettingsUpdateRequests $request, DocumentSettings $dataId)
     {
-        if((empty($request->application)) && (empty($request->admission)) && (empty($request->registration)) && (empty($request->live)) && (empty($request->student_profile))) {
+        if((empty($request->application)) && (empty($request->admission)) && (empty($request->registration)) && (empty($request->live)) && (empty($request->student_profile)) && (empty($request->staff))) {
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         } else{
             $data = DocumentSettings::where('id', $request->id)->update([
@@ -146,6 +147,7 @@ class DocumentSettingsController extends Controller
                 'registration' => (isset($request->registration) ? $request->registration : '0'),
                 'live' => (isset($request->live) ? $request->live : '0'),
                 'student_profile' => (isset($request->student_profile) ? $request->student_profile : '0'),
+                'staff' => (isset($request->staff) ? $request->staff : '0'),
                 'updated_by' => auth()->user()->id
             ]);
 

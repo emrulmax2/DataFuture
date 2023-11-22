@@ -222,7 +222,7 @@ class StudentController extends Controller
             'stdConsentIds' => StudentConsent::where('student_id', $studentId)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
             'consent' => ConsentPolicy::all(),
             'referral' => $referral,
-            'ttacom' => TermTimeAccommodationType::where('active', 1)->get()
+            'ttacom' => TermTimeAccommodationType::where('active', 1)->get(),
         ]);
     }
 
@@ -237,7 +237,10 @@ class StudentController extends Controller
             'allStatuses' => Status::where('type', 'Student')->get(),
             'instance' => CourseCreationInstance::all(),
             'feeelegibility' => FeeEligibility::all(),
-            'proposedCourse' => StudentProposedCourse::where('student_id', $studentId)->first()
+            'proposedCourse' => StudentProposedCourse::where('student_id', $studentId)->first(),
+            "courseCreations" => CourseCreation::all(),
+            "academicYears" => AcademicYear::all(),
+            "semesters" => Semester::all(),
         ]);
     }
 

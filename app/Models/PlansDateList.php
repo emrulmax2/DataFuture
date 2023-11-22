@@ -28,6 +28,12 @@ class PlansDateList extends Model
     public function plan(){
         return $this->belongsTo(Plan::class, 'plan_id');
     }
+    public function attendanceInformation() {
+        return $this->hasOne(AttendanceInformation::class);
+    }
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
+    }
 
     public function setDateAttribute($value) {  
         $this->attributes['date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');

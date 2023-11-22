@@ -7,6 +7,7 @@ use Auth;
 use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class GoogleSocialiteController extends Controller
 {
@@ -30,6 +31,7 @@ class GoogleSocialiteController extends Controller
             if($finduser){
       
                 Auth::login($finduser);
+                Cache::forever('employeeCashe', Auth::user()->load('employee'));
                 return redirect('/');
       
             }else{
@@ -43,7 +45,7 @@ class GoogleSocialiteController extends Controller
                 $finduser->save();
                 
                 Auth::login($finduser);
-      
+                Cache::forever('employeeCache', Auth::user()->load('employee'));
                 return redirect('/');
             }
      

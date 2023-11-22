@@ -152,6 +152,7 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        
     ],
 
     /*
@@ -165,6 +166,26 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'employee_work_type' => "work type"
+    ],
 
+    'values' => [
+        'employee_work_type' => [
+            3 => 'Employee'
+        ],
+        'workpermit_type' => [
+            2 => 'not a British Citizen',
+            3 => 'not a British Citizen',
+            4 => 'not a British Citizen',
+            5 => 'not a British Citizen',
+            6 => 'not a British Citizen',
+            7 => 'not a British Citizen',
+            8 => 'not a British Citizen',
+            9 => 'not a British Citizen',
+        ],
+        'workpermit_expire' => [
+            'd-m-Y' => 'DD-MM-YYYY'
+        ]
+    ],
 ];

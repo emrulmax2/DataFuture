@@ -42,6 +42,59 @@
         </div>
     </div>
 
+    <!-- BEGIN: Assign Manager Or Co-Ordinator Modal -->
+    <div id="assignManagerOrCoOrdinatorModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="assignManagerOrCoOrdinatorForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto theModTitle">Assign <span class="assignRoleTitle">Role</span></h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12">
+                                <label for="assigned_user_ids" class="form-label">Existing Staffs <span class="text-danger">*</span></label>
+                                <select id="assigned_user_ids" name="assigned_user_ids[]" class="lcc-tom-select w-full" multiple>
+                                    <option value="">Please Select</option>
+                                    @if(!empty($users))
+                                        @foreach($users as $ur)
+                                            <option value="{{ $ur->id }}">{{ $ur->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-assigned_user_ids text-danger mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateParticipants" class="btn btn-primary w-auto">
+                            Save
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="plan_ids" value=""/>
+                        <input type="hidden" name="type" value=""/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Assign Manager Or Co-Ordinator Modal -->
+
     <!-- BEGIN: Add Modal -->
     <div id="editPlanModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">

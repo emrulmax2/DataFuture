@@ -11,7 +11,11 @@ use App\Models\CourseCreationInstance;
 use App\Models\AcademicYear;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\PlansDatesRequest;
+use App\Models\ELearningActivitySetting;
+use App\Models\PlanContent;
+use App\Models\PlanTask;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PlansDateListController extends Controller
 {
@@ -58,6 +62,19 @@ class PlansDateListController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+
+                $theDay = date("Y-m-d", strtotime($list->date));
+
+                $start_time = date($theDay." ".$list->plan->start_time);
+                $start_time = date('h:i A', strtotime($start_time));
+                
+                $end_day = date($theDay." ".$list->plan->end_time);
+                $end_time = date('h:i A', strtotime($end_day));
+                if(strtotime(now())> strtotime($end_day)) {
+                    $upcommingStatus = "Unknown";
+                } else {
+                    $upcommingStatus = "Upcomming";
+                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -66,12 +83,26 @@ class PlansDateListController extends Controller
                     'room' => (isset($list->plan->room->name) && !empty($list->plan->room->name) ? $list->plan->room->name : ''),
                     'time' => (isset($list->plan->start_time) && !empty($list->plan->start_time) ? date('H:i', strtotime($list->plan->start_time)) : 'Unknown').' - '.(isset($list->plan->end_time) && !empty($list->plan->end_time) ? date('H:i', strtotime($list->plan->end_time)) : 'Unknown'),
                     'status' => '',
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'tutor_id'=>$list->plan->tutor_id,
+                    "start_time" => $start_time,
+                    "end_time" => $end_time,
+                    "end_date_time" => $end_day,
+                    'venue' => $list->plan->venu->name,
+                    'virtual_room'=> $list->plan->virtual_room,   
+                    'upcomming_status' => $upcommingStatus, 
+                    "attendance_information" => ($list->attendanceInformation) ?? null,    
+                    "foundAttendances"  => ($list->attendances) ?? null, 
                 ];
                 $i++;
             endforeach;
         endif;
         
+        
+        
+          
+
+
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
@@ -95,11 +126,35 @@ class PlansDateListController extends Controller
 
     public function generate(Request $request){
         $plan_ids = $request->classPlansIds;
-
+        $eLearningActivitySettings = ELearningActivitySetting::all();
         $errorIDs = [];
         $insertIDs = [];
         if(!empty($plan_ids)):
+            
             foreach($plan_ids as $cp_id):
+                //set Plan One Time Taskes
+                foreach($eLearningActivitySettings as $activitySetting) {
+                    $planTask = PlanTask::where('e_learning_activity_setting_id',$activitySetting->id)
+                                ->where('plan_id',$cp_id)
+                                ->get()
+                                ->first();
+                    if(!$planTask) {
+                        $planTask = new PlanTask();    
+
+                    }
+                    if($activitySetting->has_week==0 ) {
+                        $planTask->plan_id = $cp_id;
+                        $planTask->e_learning_activity_setting_id = $activitySetting->id;
+                        $planTask->logo = $activitySetting->logo;
+                        $planTask->has_week = ($activitySetting->has_week) ?? 0;
+                        $planTask->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
+                        $planTask->days_reminder = ($activitySetting->days_reminder) ?? 0;
+                        $planTask->name = $activitySetting->name;
+                        $planTask->category = $activitySetting->category;
+                        $planTask->created_by = Auth::user()->id;
+                        $planTask->save();
+                    }
+                }
                 $plan = Plan::find($cp_id);
                 $creation = $plan->creations;
                 $term = $plan->creations->term;
@@ -137,7 +192,32 @@ class PlansDateListController extends Controller
                                 $data['date'] = $start;
                                 $data['created_by'] = auth()->user()->id;
 
-                                PlansDateList::create($data);
+                                $plandateList = PlansDateList::create($data);
+                                $plandateListId = $plandateList->id;
+                                
+                                foreach($eLearningActivitySettings as $activitySetting) {
+                                    $planContent = PlanContent::where('e_learning_activity_setting_id',$activitySetting->id)
+                                                ->where('plans_date_list_id',$plandateListId)
+                                                ->get()
+                                                ->first();
+                                    if(!$planContent) {
+                                        $planContent = new PlanContent();    
+                
+                                    }
+                                    if($activitySetting->has_week==1 && $name=="Teaching") {
+                                        $planContent->plans_date_list_id  = $plandateListId;
+                                        $planContent->e_learning_activity_setting_id = $activitySetting->id;
+                                        $planContent->logo = $activitySetting->logo;
+                                        $planContent->availibility_at = now();
+                                        $planContent->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
+                                        $planContent->days_reminder = ($activitySetting->days_reminder) ?? 0;
+                                        $planContent->name = $activitySetting->name;
+                                        $planContent->category = $activitySetting->category;
+                                        $planContent->created_by = Auth::user()->id;
+                                        $planContent->save();
+                                    }
+                                }
+
                             endif;
                             $start = date("Y-m-d", strtotime("+1 day", strtotime($start)));
                         endwhile;

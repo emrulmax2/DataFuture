@@ -275,8 +275,8 @@
             <div class="text-center text-xs mt-2">eye</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
-            <i data-lucide="EyeOff" class="block mx-auto"></i>
-            <div class="text-center text-xs mt-2">EyeOff</div>
+            <i data-lucide="eye-off" class="block mx-auto"></i>
+            <div class="text-center text-xs mt-2">eye-off</div>
         </div>
         <div class="col-span-6 sm:col-span-3 lg:col-span-2 xl:col-span-1">
             <i data-lucide="external-link" class="block mx-auto"></i>
