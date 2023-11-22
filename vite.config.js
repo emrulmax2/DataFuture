@@ -141,6 +141,12 @@ export default defineConfig({
                 "resources/js/hr-holiday-manager.js",
                 "resources/js/leave-calendar.js",
                 
+                "resources/js/tutor-dashboard.js",
+                "resources/js/attendance-feed.js",
+                "resources/js/tutor-attendance-feed.js",
+                "resources/js/plan-tasks.js",
+                "resources/js/create-module-activity.js",
+                
             ],
             refresh: true,
         }),
