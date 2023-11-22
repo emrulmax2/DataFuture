@@ -62,6 +62,19 @@ class PlansDateListController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+
+                $theDay = date("Y-m-d", strtotime($list->date));
+
+                $start_time = date($theDay." ".$list->plan->start_time);
+                $start_time = date('h:i A', strtotime($start_time));
+                
+                $end_day = date($theDay." ".$list->plan->end_time);
+                $end_time = date('h:i A', strtotime($end_day));
+                if(strtotime(now())> strtotime($end_day)) {
+                    $upcommingStatus = "Unknown";
+                } else {
+                    $upcommingStatus = "Upcomming";
+                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -70,12 +83,26 @@ class PlansDateListController extends Controller
                     'room' => (isset($list->plan->room->name) && !empty($list->plan->room->name) ? $list->plan->room->name : ''),
                     'time' => (isset($list->plan->start_time) && !empty($list->plan->start_time) ? date('H:i', strtotime($list->plan->start_time)) : 'Unknown').' - '.(isset($list->plan->end_time) && !empty($list->plan->end_time) ? date('H:i', strtotime($list->plan->end_time)) : 'Unknown'),
                     'status' => '',
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'tutor_id'=>$list->plan->tutor_id,
+                    "start_time" => $start_time,
+                    "end_time" => $end_time,
+                    "end_date_time" => $end_day,
+                    'venue' => $list->plan->venu->name,
+                    'virtual_room'=> $list->plan->virtual_room,   
+                    'upcomming_status' => $upcommingStatus, 
+                    "attendance_information" => ($list->attendanceInformation) ?? null,    
+                    "foundAttendances"  => ($list->attendances) ?? null, 
                 ];
                 $i++;
             endforeach;
         endif;
         
+        
+        
+          
+
+
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 

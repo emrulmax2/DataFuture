@@ -1,10 +1,4 @@
-import IMask from 'imask';
-import xlsx from "xlsx";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { createIcons, icons } from "lucide";
-import { createElement, Plus,Minus } from 'lucide';
-import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
 import Dropzone from "dropzone";
 
 (function(){
@@ -21,6 +15,7 @@ import Dropzone from "dropzone";
     }
     /* Start Dropzone */
     if($("#uploadDocumentForm").length > 0){
+        
         let dzError = false;
         Dropzone.autoDiscover = false;
         Dropzone.options.uploadDocumentForm = {
@@ -33,6 +28,7 @@ import Dropzone from "dropzone";
             thumbnailWidth: 100,
             thumbnailHeight: 100,
         };
+
 
         let options = {
             accept: (file, done) => {
@@ -67,9 +63,16 @@ import Dropzone from "dropzone";
         }); 
 
         drzn1.on('queuecomplete', function(){
-            $('#activitySave').removeAttr('disabled');
-            document.querySelector("#activitySave span").style.cssText ="display: none;";
 
+            if($("#activitySave").length > 0){
+                $('#activitySave').removeAttr('disabled');
+                document.querySelector("#activitySave span").style.cssText ="display: none;";
+
+            } else {
+
+                $('#moduleCreateSave').removeAttr('disabled');
+                document.querySelector("#moduleCreateSave span").style.cssText ="display: none;";
+            }
             if(!dzError){
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -82,8 +85,9 @@ import Dropzone from "dropzone";
                     successModal.hide();
                     //window.location.reload();
                     let planId = $("input[name='plan_id']").val();
+                    
                     location.href = route('tutor-dashboard.plan.module.show',planId);
-                }, 5000);
+                }, 1000);
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -101,7 +105,6 @@ import Dropzone from "dropzone";
         $('#activitySave').on('click', function(e){
             e.preventDefault();
             let tthis = $(this);
-            //document.querySelector('#activitySave').setAttribute('disabled', 'disabled');
             document.querySelector("#activitySave span").style.cssText ="display: inline-block;";
             
             const title = $("input[name='title']").val();
@@ -135,42 +138,11 @@ import Dropzone from "dropzone";
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    //tthis.removeAttr('disabled');
-                    //tthis.children('span').css('display', 'none');
+
                     const LearningData = response.data.data;
-                    
                     $("input[name='plan_content_id']").val(LearningData.plan_content_id);
                     if(LearningData)
                         drzn1.processQueue();
-                    //let html = '';
-                    // for (let i=0; i<LearningData.length; i++) {
-                    //     let data =[planDateListId,LearningData[i].id
-                    //     ]
-                    //     if(LearningData[i].active==1) {
-                    //       html += `<a href="${
-                    //         route('tutor_module_activity.create',data)
-                    //       }" data-tw-toggle="modal" data-tw-target="#add-item-modal" class="intro-y block col-span-12 sm:col-span-4 2xl:col-span-3">
-                    //                  <div class="box rounded-md p-3 relative zoom-in">
-                    //                      <div class="flex-none relative block before:block before:w-full before:pt-[100%]">
-                    //                          <div class="absolute top-0 left-0 w-full h-full image-fit">
-                    //                              <img alt="Midone - HTML Admin Template" class="rounded-md" src="${
-                    //                                 LearningData[i].logo_url
-                    //                              }">
-                    //                          </div>
-                    //                      </div>
-                    //                      <div class="block font-medium text-center truncate mt-3">${
-                    //                         LearningData[i].name
-                    //                      }</div>
-                    //                 </div>
-                    //              </a>`
-                    //     }
-                    // }
-    
-                    //$("#activit-contentlist").html(html)
-    
-                    // if(html!="") {
-                    //     activityModalCP.show();
-                    // }
                 }
             }).catch(error =>{
                 errorModal.show();
@@ -181,33 +153,64 @@ import Dropzone from "dropzone";
                 location.reload();
             });
             
-            // if($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
-            //     var hardCopyChecked = $('#uploadDocumentModal [name="hard_copy_check_status"]:checked').val();
-            //     $('#uploadDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
-                
-            // }else{
-            //     $('#uploadDocumentModal .modal-content .uploadError').remove();
-            //     $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                
-            //     createIcons({
-            //         icons,
-            //         "stroke-width": 1.5,
-            //         nameAttr: "data-lucide",
-            //     });
+        });
 
-            //     setTimeout(function(){
-            //         $('#uploadDocumentModal .modal-content .uploadError').remove();
-            //         document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
-            //         document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-            //     }, 5000)
-            // }
+        $('#moduleCreateSave').on('click', function(e){
+            e.preventDefault();
+            let tthis = $(this);
+            alert("works");
+            document.querySelector("#moduleCreateSave span").style.cssText ="display: inline-block;";
+            
+            const title = $("input[name='title']").val();
+            $("input[name='name']").val(title);
+            const description = addEditor.getData();
+            $("input[name='description']").val(description);
+            const plan =  $("input[name='plan_id']").val();
+            const activity_settings_id = $("input[name='activity_settings_id']").val();
+           
+    
+            if(title!="") {
+                $('.error-title').html('');
+                $("input[name='title']").removeClass('border-danger')
+            } else {
+                $('.error-title').html('Title Field can not be empty');
+                $("input[name='title']").addClass('border-danger')
+            }
+            
+            let data = {
+                name : title,
+                description : description,
+                e_learning_activity_setting_id : activity_settings_id,
+                plan_id : plan,
+                
+            }
+            axios({
+                method: 'post',
+                url: route('plan-module-task.store', data),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+
+                    const LearningData = response.data.data;
+                    
+                    $("input[name='plan_task_id']").val(LearningData.plan_task_id);
+                    if(LearningData)
+                        drzn1.processQueue();
+                }
+            }).catch(error =>{
+                errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .title").html("Token Mismatch!" );
+                        $("#errorModal .descrtiption").html('Please reload');
+                    }); 
+                location.reload();
+            });
             
         });
+
+        
     }
     /* End Dropzone */
 
-    
-
-    
 
 })();

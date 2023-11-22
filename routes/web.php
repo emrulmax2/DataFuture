@@ -105,6 +105,8 @@ use App\Http\Controllers\HR\EmployeePortalController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\PlanContentUploadController;
+use App\Http\Controllers\PlanParticipantController;
+use App\Http\Controllers\PlanTaskController;
 use App\Http\Controllers\PlanTaskUploadController;
 use App\Http\Controllers\PlanTreeController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
@@ -147,12 +149,14 @@ use App\Http\Controllers\Settings\HolidayYearController;
 use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
+use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 use App\Models\BankHoliday;
 use App\Models\PlanContentUpload;
+use App\Models\PlanTask;
 
 /*
 |--------------------------------------------------------------------------
@@ -1671,7 +1675,50 @@ Route::middleware('auth')->group(function() {
     // DELETE          plan-taskupload/{plan_taskupload} ........................................ plan-taskupload.destroy › PlanTaskUploadController@destroy  
     // GET|HEAD        plan-taskupload/{plan_taskupload}/edit ......................................... plan-taskupload.edit › PlanTaskUploadController@edit  
     
-    Route::resource('plan-taskupload', PlanTaskUploadController::class);
+    Route::resource('plan-taskupload', PlanTaskUploadController::class,[
+        'except' => ['create']
+    ]);
 
+    Route::resource('plan-module-task', PlanTaskController::class,[
+        'except' => ['create']
+    ]);
+
+    // GET|HEAD        plan-module-task ............................................................................................................................. plan-module-task.index › PlanTaskController@index  
+    // POST            plan-module-task ............................................................................................................................. plan-module-task.store › PlanTaskController@store  
+    // GET|HEAD        plan-module-task/create/{plan}/{activity} ................................................................................................... plan-module-task.create › PlanTaskController@create  
+    // GET|HEAD        plan-module-task/{plan_module_task} ............................................................................................................ plan-module-task.show › PlanTaskController@show  
+    // PUT|PATCH       plan-module-task/{plan_module_task} ........................................................................................................ plan-module-task.update › PlanTaskController@update  
+    // DELETE          plan-module-task/{plan_module_task} ...................................................................................................... plan-module-task.destroy › PlanTaskController@destroy  
+    // GET|HEAD        plan-module-task/{plan_module_task}/edit
+    Route::controller(PlanTaskController::class)->group(function() {
+
+        Route::get('plan-module-task/create/{plan}/{activity}', 'create')->name('plan-module-task.create'); 
+        
+    });
+
+    // GET|HEAD        plan-participant ...................................................................................................................... plan-participant.index › PlanParticipantController@index  
+    // POST            plan-participant ...................................................................................................................... plan-participant.store › PlanParticipantController@store  
+    // GET|HEAD        plan-participant/create ............................................................................................................. plan-participant.create › PlanParticipantController@create  
+    // GET|HEAD        plan-participant-list ................................................................................................................... plan-participant.list › PlanParticipantController@list  
+    // GET|HEAD        plan-participant/{plan_participant} ..................................................................................................... plan-participant.show › PlanParticipantController@show  
+    // PUT|PATCH       plan-participant/{plan_participant} ................................................................................................. plan-participant.update › PlanParticipantController@update  
+    // DELETE          plan-participant/{plan_participant} ............................................................................................... plan-participant.destroy › PlanParticipantController@destroy  
+    // GET|HEAD        plan-participant/{plan_participant}/edit 
+
+    Route::resource('plan-participant', PlanParticipantController::class);
+
+    Route::controller(PlanParticipantController::class)->group(function() {
+
+        Route::get('plan-participant-list', 'list')->name('plan-participant.list'); 
+        
+    }); 
+
+    Route::resource('student-assign',StudentAssignController::class);
+
+    Route::controller(StudentAssignController::class)->group(function() {
+
+        Route::get('student-assign-list', 'list')->name('student-assign.list'); 
+        
+    });
     
 });

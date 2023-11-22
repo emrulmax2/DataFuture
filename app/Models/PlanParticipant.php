@@ -24,4 +24,8 @@ class PlanParticipant extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

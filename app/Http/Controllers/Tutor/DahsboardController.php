@@ -15,6 +15,7 @@ use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanContent;
 use App\Models\PlanContentUpload;
+use App\Models\PlanParticipant;
 use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
@@ -144,13 +145,10 @@ class DahsboardController extends Controller
             
             foreach($Query as $list):
                
-
-                //$isInArray = in_array($list->academic_year_name, array_column($data, 'year_name'));
-                //if(!$isInArray) {
                     $termData[$list->term_id] = (object) [ 
                         'id' =>$list->term_id,
                         'name' => $list->term_name,   
-                        "total_modules" => isset($data) ? count($data) : 0,
+                        "total_modules" => count($Query),
                     ];
 
                     $data[$list->term_id][] = (object) [
@@ -162,7 +160,7 @@ class DahsboardController extends Controller
                     ];
 
                     $i++;
-                //}
+           
             endforeach;
         endif;
         
@@ -291,12 +289,17 @@ class DahsboardController extends Controller
 
         $tutor = Employee::where("user_id",$plan->tutor->id)->get()->first();
         
-        $personalTutor = Employee::where("user_id",$plan->personalTutor->id)->get()->first();
+        $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
         
         $planTask = PlanTask::where("plan_id",$plan->id)->get();  
         
+        $studentAssign = Assign::where('plan_id', $plan->id)->get();
+        $studentListCount = $studentAssign->count();
+        // $planParticipant = PlanParticipant::where('plan_id', $plan->id)->get();
+        // $participantList = $planParticipant->count();
         $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
         $eLearningActivites = ELearningActivitySetting::all();
+        $planDateWiseContent = [];
         foreach($planDates as $classDate) {
             $content = PlanContent::where("plans_date_list_id", $classDate->id)->get();
             foreach($content as $singleContent){
@@ -309,15 +312,17 @@ class DahsboardController extends Controller
             }
             
         }
+        $allPlanTasks = [];
 
-        foreach($planTask as $task){
-            $uploads = PlanTaskUpload::where("plan_task_id",$task->id)->get();
+            foreach($planTask as $task){
+                $uploads = PlanTaskUpload::where("plan_task_id",$task->id)->get();
 
-            $allPlanTasks[$task->id] = (object) [
-                "task"=> $task,
-                "taskUploads" => $uploads
-            ]; 
-        }
+                $allPlanTasks[$task->id] = (object) [
+                    "task"=> $task,
+                    "taskUploads" => $uploads
+                ]; 
+            }
+        
         $moduleCreations = ModuleCreation::find($plan->creations->id);
                     $data = (object) [
                         'id' => $plan->id,
@@ -340,13 +345,15 @@ class DahsboardController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
+            "plan" => $plan,
             "user" => $userData,
             "employee" => $employee,
             "data" => $data,
             'planTasks' => $allPlanTasks,
             'planDates' => $planDateWiseContent,
             'planDateList' => $planDateList,
-            'eLearningActivites' => $eLearningActivites
+            'eLearningActivites' => $eLearningActivites,
+            'studentCount' => $studentListCount,
         ]);
     }
     /**

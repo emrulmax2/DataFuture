@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('category');
+            $table->string('description');
             $table->string('logo');
             $table->unsignedBigInteger('plan_id');
             $table->unsignedBigInteger('e_learning_activity_setting_id')->nullable();

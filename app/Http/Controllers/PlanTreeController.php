@@ -171,7 +171,7 @@ class PlanTreeController extends Controller
         return response()->json(['htm' => $html], 200);
     }
 
-    public function getModule(Request $request){
+    public function getModule(Request $request) {
         $courseId = $request->courseId;
         $termId = $request->termId;
         $academicYearId = $request->academicYearId;

@@ -71,7 +71,7 @@ class ELearningActivitySettingController extends Controller
                     'category' => $list->category,
                     'name' => $list->name,
                     'logo_url' => $logoUrl,
-                    'has_week' => $list->has_week,
+                    'has_week' => (isset($list->has_week) && $list->has_week > 0 ? $list->has_week : 0),
                     'days_reminder'=> (isset($list->days_reminder) ? $list->days_reminder : NULL),
                     'is_mandatory'=> (isset($list->is_mandatory) && $list->is_mandatory > 0 ? $list->is_mandatory : 0),
                     'active' => $list->active,
