@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 class EmployeePaymentSettingsController extends Controller
 {
     public function index($id){
-        $employee = Employee::find($id)->get()->first();
+        $employee = Employee::find($id);
         $userData = User::find($employee->user_id);
         $employment = Employment::where("employee_id",$id)->get()->first();
 

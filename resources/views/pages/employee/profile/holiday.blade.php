@@ -263,6 +263,10 @@
                                     </div>
                                 @endforeach 
                             </div>
+                            @else
+                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holida data not found!
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -288,6 +292,7 @@
                     </div>
                     <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                     <div class="relative"> 
+                        @if($holidayYears->count() > 0 && $empPatterns->count() > 0)
                         <form method="post" action="#" id="employeeLeaveForm">
                             <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
                             <div class="grid grid-cols-12 gap-0">
@@ -343,10 +348,10 @@
                                 <div class="col-span-12 sm:col-span-8">
                                     <div class="leaveCalendar" 
                                         id="leaveCalendar" 
-                                        data-start="{{ $calendarOptions['startDate'] }}" 
-                                        data-end="{{ $calendarOptions['endDate'] }}" 
-                                        data-disable-dates="{{ $calendarOptions['disableDates'] }}" 
-                                        data-disable-days="{{ $calendarOptions['disableDays'] }}" 
+                                        data-start="{{ (isset($calendarOptions['startDate']) ? $calendarOptions['startDate'] : '') }}" 
+                                        data-end="{{ (isset($calendarOptions['endDate']) ? $calendarOptions['endDate'] : '') }}" 
+                                        data-disable-dates="{{ (isset($calendarOptions['disableDates']) ? $calendarOptions['disableDates'] : '') }}" 
+                                        data-disable-days="{{ (isset($calendarOptions['disableDays']) ? $calendarOptions['disableDays'] : '') }}" 
                                         ></div>
                                 </div>
                             </div>
@@ -376,6 +381,11 @@
                                 </div>
                             </div>
                         </form>
+                        @else 
+                            <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Holiday year of Employee working pattern not found!
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

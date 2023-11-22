@@ -27,7 +27,7 @@ class EmployeeHolidayController extends Controller
 {
     public function index($id){
         $today = date('Y-m-d');
-        $employee = Employee::find($id)->get()->first();
+        $employee = Employee::find($id);
         $userData = User::find($employee->user_id);
         $employment = Employment::where("employee_id",$id)->get()->first();
         $hrHolidayYear = HrHolidayYear::where('active', 1)->where('start_date', '<=', $today)->where('end_date', '>=', $today)->orderBy('start_date', 'ASC')->get()->first();
@@ -39,9 +39,9 @@ class EmployeeHolidayController extends Controller
 
         $activePattern = $this->employeePossibleActivePattern($id);
         $empLeaveDisableDays = $this->employeeNonWorkingDays($id, $activePattern);
-        $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : []);
+        $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
-        return view('pages.employee.profile.holiday',[
+        return view('pages.employee.profile.holiday', [
             'title' => 'Welcome - LCC Data Future Managment',
             'breadcrumbs' => [],
             "user" => $userData,
@@ -50,7 +50,7 @@ class EmployeeHolidayController extends Controller
             'holidayDetails' => $this->employeeHolidayDetails($id),
             'holidayStatistics' => $this->employeeLeaveStatistics($id),
             'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get(),
-            'empPatterns' => EmployeeWorkingPattern::where('active', 1)->where(
+            'empPatterns' => EmployeeWorkingPattern::where('employee_id', $id)->where('active', 1)->where(
                     function($query) use ($today){
                         $query->whereNull('end_to')->orWhere('end_to', '>=', $today);
                     })->where('effective_from', '<=', $today)->where('active', 1)->orderBy('effective_from', 'ASC')->get(),
