@@ -121,7 +121,8 @@ class EmployeeController extends Controller
     public function create()
     {
         $titles = Title::all();
-        $gender = HesaGender::all();
+        // $gender = HesaGender::all();
+        $sexIdentifier = SexIdentifier::all();
         $country = Country::all();
         $relation = KinsRelation::all();
         $ethnicity = Ethnicity::all();
@@ -140,7 +141,7 @@ class EmployeeController extends Controller
             'title' => 'Add new Employee - LCC Data Future Managment',
             'breadcrumbs' => [],
             'titles' => $titles,
-            'gender' => $gender,
+            // 'gender' => $gender,
             'country' => $country,
             'relation' => $relation,
             'ethnicity' => $ethnicity,
@@ -154,6 +155,7 @@ class EmployeeController extends Controller
             'jobTitles' => $jobTitles,
             'documentTypes' => $documentTypes,
             'workPermitTypes' => $workPermitTypes,
+            'sexIdentifier' => $sexIdentifier,
         ]);
     }
     public function save(EmployeeDataSaveRequest $request)
