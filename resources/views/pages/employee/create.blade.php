@@ -40,6 +40,7 @@
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="input-wizard-4" class="form-label inline-flex">Title <span class="text-danger"> *</span></label>
                     <select id="data-4" name="title" class=" lcc-tom-select w-full  lccTom  ">
+                        <option  value="">Please Select</option>   
                         @foreach($titles as $title)
                             <option  value="{{ $title->id }}">{{ $title->name }}</option>              
                         @endforeach
@@ -140,6 +141,7 @@
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="vertical-form-7" class="form-label inline-flex">Sex <span class="text-danger"> *</span></label>
                     <select id="vertical-form-7" name="sex" class="lcc-tom-select w-full  lccTom ">
+                        <option  value="">Please Select</option>   
                         @foreach($sexIdentifier as $sex)
                             <option  value="{{ $sex->id }}">{{ $sex->name }}</option>              
                         @endforeach
