@@ -140,7 +140,7 @@
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="vertical-form-7" class="form-label inline-flex">Sex <span class="text-danger"> *</span></label>
                     <select id="vertical-form-7" name="sex" class="lcc-tom-select w-full  lccTom ">
-                        @foreach($gender as $sex)
+                        @foreach($sexIdentifier as $sex)
                             <option  value="{{ $sex->id }}">{{ $sex->name }}</option>              
                         @endforeach
                     </select>
