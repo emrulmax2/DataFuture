@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\HrPortalAbsentUpdateRequest;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\EmployeeAppraisal;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeEligibilites;
@@ -36,8 +38,18 @@ class EmployeePortalController extends Controller
             'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query){
                               $query->where('status', 'Approved')->where('leave_type', 1);
                           })->skip(0)->limit(5)->get(),
-            'passExpiry' => EmployeeEligibilites::where('document_type', 1)->where('doc_expire', '<=', $expireDate)->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
-            'visaExpiry' => EmployeeEligibilites::where('document_type', 2)->whereDate('doc_expire', '<=', $expireDate)->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get()
+            'passExpiry' => EmployeeEligibilites::where('document_type', 1)->where('doc_expire', '<=', $expireDate)
+                            ->whereHas('employee', function($q){
+                                $q->where('status', 1);
+                            })->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
+            'visaExpiry' => EmployeeEligibilites::where('document_type', 2)->whereDate('doc_expire', '<=', $expireDate)
+                            ->whereHas('employee', function($q){
+                                $q->where('status', 1);
+                            })->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
+            'appraisal' => EmployeeAppraisal::where('due_on', '<=', $expireDate)->whereNull('completed_on')
+                           ->whereHas('employee', function($q){
+                                $q->where('status', 1);
+                           })->skip(0)->limit(5)->get()
         ]);
     }
 
@@ -45,6 +57,7 @@ class EmployeePortalController extends Controller
         $theDate = (empty($date) ? date('Y-m-d') : $date);
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
+        $time = date('H:i');
         $employees = Employee::has('activePatterns')->where('status', 1)->orderBy('first_name', 'ASC')->get();
 
         $row = 0;
@@ -56,6 +69,9 @@ class EmployeePortalController extends Controller
 
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
                 $employee_id = $employee->id;
+                $employeeLeaveDay = EmployeeLeaveDay::where('status', 'Active')->where('leave_date', $theDate)->get()->first();
+                $leave_status = (isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0 && isset($employeeLeaveDay->leave->status) && $employeeLeaveDay->leave->status == 'Approved' ? true : false);
+
                 $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)
                                          ->where('effective_from', '<=', $theDate)
                                          ->where(function($query) use($theDate){
@@ -64,9 +80,9 @@ class EmployeePortalController extends Controller
                 $activePatternId = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
                 $patternDay = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $activePatternId)->where('day', $theDayNum)->get()->first();
                 $day_status = (isset($patternDay->id) && $patternDay->id > 0 ? true : false);
-                if($day_status):
+                if($day_status && !$leave_status):
                     $todayAttendance = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('date', $theDate)->orderBy('id', 'ASC')->get();
-                    if($todayAttendance->count() == 0):
+                    if($todayAttendance->count() == 0 && $patternDay->start <= $time):
                         $res[$employee_id]['photo_url'] = $employee->photo_url;
                         $res[$employee_id]['full_name'] = $employee->full_name;
                         $res[$employee_id]['date'] =  date('jS M, Y', strtotime($theDate));
@@ -478,5 +494,83 @@ class EmployeePortalController extends Controller
         endif;
 
         return $html;
+    }
+
+    public function updateAbsent(HrPortalAbsentUpdateRequest $request){
+        $date = $request->date;
+        $employee_id = $request->employee_id;
+        $minutes = $request->minutes;
+
+        $leave_type = $request->leave_type;
+        $hour = $request->hour;
+        $note = $request->note;
+
+        $HrHolidayYears = HrHolidayYear::where('start_date', '<=', $date)->where('end_date', '>=', $date)->where('active', 1)->get()->first();
+        $holidayYearId = (isset($HrHolidayYears->id) && $HrHolidayYears->id > 0 ? $HrHolidayYears->id : 0);
+        $activePatternId = $this->employeePossibleActivePattern($employee_id, $holidayYearId);
+
+        if($holidayYearId > 0 && $activePatternId > 0):
+            $data = [];
+            $data['employee_id'] = $employee_id;
+            $data['hr_holiday_year_id'] = $holidayYearId;
+            $data['employee_working_pattern_id'] = $activePatternId;
+            $data['leave_type'] = $leave_type;
+            $data['from_date'] = $date;
+            $data['to_date'] = $date;
+            $data['days'] = 1;
+            $data['note'] = $note;
+            $data['status'] = 'Approved';
+            $data['approved_by'] = auth()->user()->id;
+            $data['approver_note'] = $note;
+            $data['approved_at'] = date('Y-m-d H:i:s');
+            $data['created_by'] = auth()->user()->id;
+            $employeeLeave = EmployeeLeave::create($data);
+
+
+            $data = [];
+            $data['employee_leave_id'] = $employeeLeave->id;
+            $data['leave_date'] = $date;
+            $data['hour'] = $minutes;
+            $data['status'] = 'Active';
+            $data['created_by'] = auth()->user()->id;
+            EmployeeLeaveDay::create($data);
+
+            return response()->json(['res' => 'success'], 200);
+        else:
+            return response()->json(['res' => 'Holiday year or Working pattern not found.'], 422);
+        endif;
+    }
+
+    public function employeePossibleActivePattern($employee_id, $activeHolidayYearId){
+        $today = date('Y-m-d');
+        if($activeHolidayYearId > 0):
+            $hrHolidayYear = HrHolidayYear::find($activeHolidayYearId);
+        else:
+            $hrHolidayYear = HrHolidayYear::where('start_date <=', $today)->where('end_date >=', $today)->where('active', 1)->get()->first();
+        endif;
+
+        $start = (isset($hrHolidayYear->start_date) && $hrHolidayYear->start_date != '' ? $hrHolidayYear->start_date : '');
+        $end = (isset($hrHolidayYear->end_date) && $hrHolidayYear->end_date != '' ? $hrHolidayYear->end_date : '');
+
+        $pattern = 0;
+        $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
+        if(!empty($patternRes) && $patternRes->count() > 0):
+            foreach($patternRes as $r):
+                $effective_from = (isset($r->effective_from) && $r->effective_from != '' & $r->effective_from != '0000-00-00' ? $r->effective_from : '');
+                $end_to = (isset($r->end_to) && $r->end_to != '' & $r->end_to != '0000-00-00' ? $r->end_to : '');
+
+                if(
+                    ($end_to != '' && $end_to > $start && $end_to < $end) && ($effective_from < $start || ($effective_from > $start && $effective_from < $end)) 
+                    || 
+                    ($end_to != '' && $effective_from < $start && $end_to > $end) 
+                    || 
+                    ($end_to == '' && $effective_from < $end)
+                ):
+                    $pattern = $r->id;
+                endif;
+            endforeach;
+        endif;
+
+        return $pattern;
     }
 }

@@ -26,7 +26,7 @@ class EmployeeDataSaveRequest extends FormRequest
         return [
             'title' => "required",
             'first_name' => "required",
-            'sur_name' => "required",
+            'last_name' => "required",
             'mobile' => "required",
             'email' => "required",
             'sex' => "required",

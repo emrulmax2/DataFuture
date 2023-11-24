@@ -34,7 +34,7 @@ class EmployeePenssionScheme extends Model
     }
 
     public function setJoiningDateAttribute($value) {  
-        $this->attributes['joining_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['joining_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getJoiningDateAttribute($value) {
@@ -42,7 +42,7 @@ class EmployeePenssionScheme extends Model
     }
 
     public function setDateLeftAttribute($value) {  
-        $this->attributes['date_left'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['date_left'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getDateLeftAttribute($value) {

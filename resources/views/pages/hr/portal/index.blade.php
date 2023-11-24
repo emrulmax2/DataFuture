@@ -105,7 +105,7 @@
                                             <img src="{{ $leave->employee->photo_url }}" alt="{{ $leave->employee->first_name.' '.$leave->employee->last_name }}">
                                         </div>
                                         <div class="ml-4 mr-auto">
-                                            <div class="font-medium">{{ $leave->employee->first_name.' '.$leave->employee->last_name }}</div>
+                                            <div class="font-medium uppercase">{{ $leave->employee->first_name.' '.$leave->employee->last_name }}</div>
                                             <div class="mt-0.5 text-xs text-slate-500">
                                                 {{ date('jS M, Y', strtotime($leave->from_date)).' - '.date('jS M, Y', strtotime($leave->to_date))}}
                                             </div>
@@ -137,7 +137,7 @@
                                             <img src="{{ $absent['photo_url'] }}" alt="{{ $absent['full_name'] }}">
                                         </div>
                                         <div class="ml-4 mr-auto">
-                                            <div class="font-medium">{{ $absent['full_name'] }}</div>
+                                            <div class="font-medium uppercase">{{ $absent['full_name'] }}</div>
                                             <div class="mt-0.5 text-xs text-slate-500">
                                                 {{ $absent['date'] }}
                                             </div>
@@ -153,12 +153,15 @@
                                 <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not absent attendance found for today.
                             </div>
                         @endif
+                        <a href="" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
+                            View More
+                        </a>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
                     <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Holiday Today</h2>
-                        <a href="" class="ml-auto text-primary truncate">Show More</a>
+                        <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
                     </div>
                     <div class="mt-5">
                         @if($holidays->count() > 0)
@@ -177,7 +180,7 @@
                                             <img src="{{ $hol->leave->employee->photo_url }}" alt="{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}">
                                         </div>
                                         <div class="ml-4 mr-auto">
-                                            <div class="font-medium">{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}</div>
+                                            <div class="font-medium uppercase">{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}</div>
                                             <div class="mt-0.5 text-xs text-slate-500">
                                                 {{ date('jS M, Y', strtotime($hol->leave_date)) }}
                                             </div>
@@ -203,7 +206,7 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Passport Expiry</h2>
-                            <a href="" class="ml-auto text-primary truncate">Show More</a>
+                            <a href="{{ route('hr.portal.passport.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
                         <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                             @if($passExpiry->count() > 0)
@@ -216,7 +219,7 @@
                                         </div>
                                         <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
                                             <div class="flex items-center">
-                                                <div class="font-medium">{{ $pass->employee->first_name.' '.$pass->employee->first_name }}</div>
+                                                <div class="font-medium uppercase">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
                                                 <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->doc_expire))}}</div>
                                             </div>
                                             <div class="text-slate-500 mt-1">
@@ -248,7 +251,7 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Visa Expiry</h2>
-                            <a href="" class="ml-auto text-primary truncate">Show More</a>
+                            <a href="{{ route('hr.portal.visa.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
                         <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                             @if($visaExpiry->count() > 0)
@@ -261,7 +264,7 @@
                                         </div>
                                         <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
                                             <div class="flex items-center">
-                                                <div class="font-medium">{{ $pass->employee->first_name.' '.$pass->employee->first_name }}</div>
+                                                <div class="font-medium uppercase">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
                                                 <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->doc_expire))}}</div>
                                             </div>
                                             <div class="text-slate-500 mt-1">
@@ -293,50 +296,38 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Upcoming Apprisal in 60 Days</h2>
-                            <a href="" class="ml-auto text-primary truncate">Show More</a>
+                            <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
                         <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[9]['photos'][0]) }}">
-                                    </div>
-                                </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[9]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Has joined the team</div>
-                                </div>
-                            </div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[8]['photos'][0]) }}">
-                                    </div>
-                                </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[8]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500">
-                                        <div class="mt-1">Added 3 new photos</div>
-                                        <div class="flex mt-2">
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[0]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][0]) }}">
-                                            </div>
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[1]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][1]) }}">
-                                            </div>
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[2]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][2]) }}">
+                            @if($appraisal->count() > 0)
+                                @foreach($appraisal as $apr)
+                                    @php 
+                                        $today = date('Y-m-d');
+                                        $dueOn = date('Y-m-d', strtotime($apr->due_on));
+                                        $label = ($dueOn < $today ? 'Overdue' : 'Due');
+                                    @endphp
+                                    <div class="intro-x relative flex items-center mb-3">
+                                        <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
+                                            <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                                                <img src="{{ $apr->employee->photo_url }}" alt="{{ $apr->employee->first_name.' '.$apr->employee->last_name }}">
                                             </div>
                                         </div>
+                                        <a href="{{ route('employee.appraisal', $apr->employee_id) }}" class="box px-5 py-3 ml-4 flex-1 zoom-in">
+                                            <div class="flex items-center">
+                                                <div class="font-medium uppercase">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
+                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>
+                                            </div>
+                                            <div class="text-slate-500 mt-1">
+                                                <span class="{{ ($dueOn < $today ? 'text-danger' : 'text-warning') }}">{{ $label }}</span>
+                                            </div>
+                                        </a>
                                     </div>
+                                @endforeach
+                            @else 
+                                <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!.
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 

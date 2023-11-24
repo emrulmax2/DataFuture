@@ -7,7 +7,7 @@
 @section('subcontent')
 
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Profile of <u><strong>{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}</strong></u></h2>
     </div>
 
     <!-- BEGIN: Profile Info -->
@@ -241,7 +241,7 @@
                     <div class="font-medium text-base">Working Pattern</div>
                 </div>
                 <div class="col-span-6 text-right">
-                    @if(isset($employee->activePatterns) && $employee->activePatterns->count() == 0)
+                    @if($numOfActivePattern == 0)
                         <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                             <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Working Pattern
                         </button>

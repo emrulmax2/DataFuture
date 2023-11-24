@@ -1,5 +1,7 @@
 import TomSelect from "tom-select";
 import IMask from 'imask';
+import { createIcons, icons } from "lucide";
+import Dropzone from "dropzone";
 
 ("use strict");
 (function(){
@@ -58,7 +60,7 @@ if($("#addStudentPhotoModal").length > 0){
             drzn1.removeAllFiles();
 
             $('#addStudentPhotoModal .modal-content .uploadError').remove();
-            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Employee photo successfully uploaded.</div>');
             createIcons({
                 icons,
                 "stroke-width": 1.5,
@@ -149,10 +151,23 @@ if($("#addStudentPhotoModal").length > 0){
         }  else {
             $('input[name="works_number"]').parent().addClass('visible')
         }
-        
-
     });
 
+    $('#employee_work_type_id').on('change', function() {
+        let tthis = $(this)
+
+        let typeText = $('option:selected',tthis).text();
+        if(typeText.match(/employee/gi)!=null) {
+            $('.worksNumberWrap').show()
+        }  else {
+            $('.worksNumberWrap').hide()
+        }
+    });
+
+    
+    $('.inputUppercase').on('keyup', function() {
+		$(this).val($(this).val().toUpperCase());
+	});
     
     $('#eligible_to_work_status').on('change', function() {
         let tthis = $(this)
@@ -174,14 +189,14 @@ if($("#addStudentPhotoModal").length > 0){
         let tthis = $(this)
 
         let typeText = $('option:selected',tthis).text();
-
-        if(typeText.match(/British Citizen/gi)==null) {
-            $('input[name="workpermit_number"]').parent().removeClass('invisible')
-            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
-        } else {
-
+        
+        if(typeText.match(/Student Visa/gi)==null) {
             $('input[name="workpermit_number"]').parent().addClass('invisible')
             $('input[name="workpermit_expire"]').parent().addClass('invisible')
+        } else {
+
+            $('input[name="workpermit_number"]').parent().removeClass('invisible')
+            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
         }
 
     });

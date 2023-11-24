@@ -25,12 +25,12 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="first_name" class="form-label">First Name(s) <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($employee->first_name) ? $employee->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name">
+                            <input type="text" value="{{ isset($employee->first_name) ? $employee->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control inputUppercase" name="first_name">
                             <div class="acc__input-error error-first_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($employee->last_name) ? $employee->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name">
+                            <input type="text" value="{{ isset($employee->last_name) ? $employee->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control inputUppercase" name="last_name">
                             <div class="acc__input-error error-last_name text-danger mt-2"></div>
                         </div>
                                  
@@ -95,7 +95,7 @@
                         
                         <div class="col-span-12 sm:col-span-3">
                             <label for="ni_number" class="form-label">NI Number <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($employee->ni_number) ? $employee->ni_number : '' }}" id="ni_number" class="form-control ni-number" name="ni_number"  >
+                            <input type="text" value="{{ isset($employee->ni_number) ? $employee->ni_number : '' }}" id="ni_number" class="form-control inputUppercase ni-number" name="ni_number"  >
                             <div class="acc__input-error error-ni_number text-danger mt-2"></div>
                         </div>
                         
@@ -114,14 +114,14 @@
                         <div class="col-span-12 sm:col-span-12">
                             <label for="disability_status" class="form-label">Do you have any disabilities?</label>
                             <div class="form-check form-switch">
-                                <input id="disability_status" class="form-check-input" name="disability_status" value="1" type="checkbox">
+                                <input {{ (isset($employee->disability_status) && $employee->disability_status == 'Yes' ? 'checked' : '') }} id="disability_status" class="form-check-input" name="disability_status" value="1" type="checkbox">
                                 <label class="form-check-label" for="disability_status">&nbsp;</label>
                             </div>
                         </div>
-                        <div id="disabilityItems" class="col-span-12 sm:col-span-12 disabilityItems hidden">
+                        <div id="disabilityItems" class="col-span-12 sm:col-span-12 disabilityItems {{ (isset($employee->disability_status) && $employee->disability_status == 'Yes' ? '' : 'hidden') }}">
                             <label for="disability_id" class="form-label">Disabilities <span class="text-danger">*</span></label>
                             @php 
-                                $ids = [];
+                                $ids = (isset($empDisIds) && !empty($empDisIds) ? $empDisIds : []);
                             @endphp
                             @if(!empty($disability))
                                 @foreach($disability as $d)
@@ -200,6 +200,11 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-first_name text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4 worksNumberWrap" style="display: none;">
+                            <label for="works_number" class="form-label">Works Number<span class="text-danger">*</span></label>
+                            <input type="text" value="{{ isset($employment->works_number) ? $employment->works_number : '' }}" placeholder="" id="works_number" class="form-control" name="works_number">
+                            <div class="acc__input-error error-works_number text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="punch_number" class="form-label">Punch Number<span class="text-danger">*</span></label>
@@ -422,14 +427,15 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="intro-y col-span-12 sm:col-span-6">
                             <label for="emergency_contact_name" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
-                            <input id="emergency_contact_name" type="text" value="{{ $emergencyContacts->emergency_contact_name }}" class="form-control rounded-none form-control-lg"  name="emergency_contact_name" aria-label="default input example">
+                            <input id="emergency_contact_name" type="text" value="{{ $emergencyContacts->emergency_contact_name }}" class="form-control rounded-none form-control-lg inputUppercase"  name="emergency_contact_name" aria-label="default input example">
                             <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                         </div>              
                         <div class="intro-y col-span-12 sm:col-span-6">
                             <label for="kins_relation_id" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
                             <select id="kins_relation_id" name="kins_relation_id" class="form-control lccTom lcc-tom-select">
+                                <option value="">Please Select</option>
                                 @foreach($relation as $kins)
-                                    <option  value="{{ $kins->id }}">{{ $kins->name }}</option>              
+                                    <option {{ (isset($emergencyContacts->kins_relation_id) && $emergencyContacts->kins_relation_id == $kins->id ? 'selected' : '') }} value="{{ $kins->id }}">{{ $kins->name }}</option>              
                                 @endforeach
                             </select>
                             <div class="acc__input-error error-kins_relation_id text-danger mt-2"></div>
@@ -449,46 +455,35 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                    @if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1))
-                                        <input id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->address_line_1 }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif
+                                    <input id="vertical-form-13" type="text" value="{{ (isset($emergencyContacts->address->address_line_1) ? $emergencyContacts->address->address_line_1 : '') }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
                                     <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
                                 </div>
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                                    @if(isset($emergencyContacts->address->address_line_2) && !empty($emergencyContacts->address->address_line_2))
-                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->address_line_2 }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif
+                                    <input id="vertical-form-14" type="text" value="{{ (isset($emergencyContacts->address->address_line_2) ? $emergencyContacts->address->address_line_2 : '') }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
                                 </div>
                                 
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-14" class="form-label inline-flex">Post Code</label>
-                                    @if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code))
-                                        <input id="vertical-form-14" type="text" value="{{ $emergencyContacts->address->post_code }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif    
+                                    <input id="vertical-form-14" type="text" value="{{ (isset($emergencyContacts->address->post_code) ? $emergencyContacts->address->post_code : '') }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                       
                                     <div class="acc__input-error error-post_code text-danger mt-2"></div>
                                 </div>
                                  <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                    @if(isset($emergencyContacts->address->city) && !empty($emergencyContacts->address->city))
-                                        <input  id="vertical-form-13" type="text" value="{{ $emergencyContacts->address->city }}" name="city" class="w-full text-sm"  />
-                                    @endif
+                                    <input  id="vertical-form-13" type="text" value="{{ (isset($emergencyContacts->address->city) ? $emergencyContacts->address->city : '') }}" name="city" class="w-full text-sm"  />
                                     <div class="acc__input-error error-city text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                    @if(isset($emergencyContacts->address->state) && !empty($emergencyContacts->address->state))
-                                        <input id="vertical-form-14" type="text" name="state" value="{{ $emergencyContacts->address->state }}" class="w-full text-sm" />
-                                    @endif
+                                    <input id="vertical-form-14" type="text" name="state" value="{{ (isset($emergencyContacts->address->state) ?  $emergencyContacts->address->state : '') }}" class="w-full text-sm" />
                                     <div class="acc__input-error error-state text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                    @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
-                                        <input id="vertical-form-15" type="text" name="country" value="{{ $emergencyContacts->address->country }}" class="w-full text-sm" />
-                                    @endif
+                                    <input id="vertical-form-15" type="text" name="country" value="{{ (isset($emergencyContacts->address->country) ? $emergencyContacts->address->country : '') }}" class="w-full text-sm" />
                                     <div class="acc__input-error error-country text-danger mt-2"></div>
                                 </div>
                             </div>
@@ -638,46 +633,34 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                    @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
-                                        <input id="vertical-form-13" type="text" value="{{ $employee->address->address_line_1 }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif
+                                    <input id="vertical-form-13" type="text" value="{{ (isset($employee->address->address_line_1) ? $employee->address->address_line_1 : '') }}" name="address_line_1" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
                                     <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
                                 </div>
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                    @if(isset($employee->address->address_line_2) && !empty($employee->address->address_line_2))
-                                        <input id="address_line_2" type="text" value="{{ $employee->address->address_line_2 }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif
+                                    <input id="address_line_2" type="text" value="{{ (isset($employee->address->address_line_2) ? $employee->address->address_line_2 : '') }}" name="address_line_2" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
                                 </div>
                                 
                                 <div class="intro-y col-span-12 sm:col-span-4">
                                     <label for="post_code" class="form-label inline-flex">Post Code</label>
-                                    @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
-                                        <input id="post_code" type="text" value="{{ $employee->address->post_code }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    @endif    
+                                    <input id="post_code" type="text" value="{{ (isset($employee->address->post_code) ? $employee->address->post_code : '') }}" name="post_code" class="form-control inputUppercase rounded-none form-control-lg"  aria-label="default input example">
                                     <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
                                 </div>
                                  <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="city" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                    @if(isset($employee->address->city) && !empty($employee->address->city))
-                                        <input  id="city" type="text" value="{{ $employee->address->city }}" name="city" class="w-full text-sm"  />
-                                    @endif
+                                    <input  id="city" type="text" value="{{ (isset($employee->address->city) ? $employee->address->city : '') }}" name="city" class="w-full inputUppercase text-sm"  />
                                     <div class="acc__input-error error-city text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="state" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                    @if(isset($employee->address->state) && !empty($employee->address->state))
-                                        <input id="state" type="text" name="state" value="{{ $employee->address->state }}" class="w-full text-sm" />
-                                    @endif
+                                    <input id="state" type="text" name="state" value="{{ (isset($employee->address->state) ? $employee->address->state : '') }}" class="w-full inputUppercase text-sm" />
                                     <div class="acc__input-error error-state text-danger mt-2"></div>
                                 </div>
         
                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                     <label for="country" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                    @if(isset($employee->address->country) && !empty($employee->address->country))
-                                        <input id="country" type="text" name="country" value="{{ $employee->address->country }}" class="w-full text-sm" />
-                                    @endif
+                                    <input id="country" type="text" name="country" value="{{ (isset($employee->address->country) ? $employee->address->country : '') }}" class="w-full inputUppercase text-sm" />
                                     <div class="acc__input-error error-country text-danger mt-2"></div>
                                 </div>
 

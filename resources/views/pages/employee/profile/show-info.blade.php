@@ -9,7 +9,7 @@
             </div>
             <div class="ml-5">
                 <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg"></div>
-                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg uppercase"> {{ $employee->title->name.' '.$employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
+                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->title->name.' '.$employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
                 <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium {{ $employee->status == 1 ? 'text-success' : 'text-danger' }}">{{ ($employee->status == 1 ? 'Active' : 'In Active') }}</span></div>
                 
             </div>
@@ -27,9 +27,9 @@
                     <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $employee->mobile }}
                 </div>
                 
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
+                {{--<div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="tent-tree" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Expected Retirement :</span> {{ $employee->retire }}
-                </div>
+                </div>--}}
             </div>
         </div>
         <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
@@ -38,7 +38,7 @@
             <div class="flex flex-col justify-center items-center lg:items-start mt-4">
                 <div class="truncate sm:whitespace-normal flex items-start">
                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                    <span>
+                    <span class="uppercase">
                         @if(isset($employee->address->address_line_1) && $employee->address->address_line_1 > 0)
                             @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
                                 <span class="font-medium">{{ $employee->address->address_line_1 }}</span><br/>

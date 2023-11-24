@@ -52,6 +52,10 @@ import IMask from 'imask';
         var mask = IMask(this, maskOptions);
     });
 
+    $('.inputUppercase').on('keyup', function() {
+		$(this).val($(this).val().toUpperCase());
+	});
+
     // const studenttermTimeAddressAlertModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#termtime-address-modal"));
     // const studentpermanentAddressAlertModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#permanent-address-modal"));
 
@@ -257,13 +261,14 @@ import IMask from 'imask';
 
         let typeText = $('option:selected',tthis).text();
 
-        if(typeText.match(/British Citizen/gi)==null) {
-            $('input[name="workpermit_number"]').parent().removeClass('invisible')
-            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
-        } else {
 
+        if(typeText.match(/Student Visa/gi)==null) {
             $('input[name="workpermit_number"]').parent().addClass('invisible')
             $('input[name="workpermit_expire"]').parent().addClass('invisible')
+        } else {
+
+            $('input[name="workpermit_number"]').parent().removeClass('invisible')
+            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
         }
 
     });

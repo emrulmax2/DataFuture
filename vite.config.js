@@ -140,6 +140,11 @@ export default defineConfig({
                 "resources/js/hr-portal.js",
                 "resources/js/hr-holiday-manager.js",
                 "resources/js/leave-calendar.js",
+
+                "resources/js/employee-appraisal.js",
+                "resources/js/employee-appraisal-documents.js",
+                "resources/js/hr-upcoming-appraisal.js",
+                "resources/js/hr-visa-expiry.js",
                 
                 "resources/js/tutor-dashboard.js",
                 "resources/js/attendance-feed.js",

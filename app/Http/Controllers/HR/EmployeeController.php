@@ -102,10 +102,12 @@ class EmployeeController extends Controller
                     'name' => (isset($list->title->name) ? $list->title->name.' ' : '').$list->first_name.' '.$list->last_name,
                     'jobtitle' => (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : ''),
                     'photourl' => $list->photo_url,
+                    'work_type' => (isset($list->employment->employeeWorkType->name) ? $list->employment->employeeWorkType->name : ''),
                     'department' => (isset($list->employment->department->name) ? $list->employment->department->name : ''),
                     'works_number' => (isset($list->employment->works_number) ? $list->employment->works_number : ''),
                     'status' => $list->status,
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'url' => route('profile.employee.view', $list->id)
                 ];
                 $i++;
             endforeach;
@@ -163,7 +165,7 @@ class EmployeeController extends Controller
         Session::put([
             'title' => $request->title,
             'first_name' => $request->first_name,
-            'sur_name' => $request->sur_name,
+            'last_name' => $request->last_name,
             'telephone' => $request->telephone,
             'mobile' => $request->mobile,
             'email' => $request->email,
@@ -211,6 +213,7 @@ class EmployeeController extends Controller
     {
         Session::put([
             'eligible_to_work' => $request->eligible_to_work_status,
+            'workpermit_type' => $request->workpermit_type,
             'workpermit_number' => $request->workpermit_number,
             'workpermit_expire' => $request->workpermit_expire,
             'document_type' => $request->document_type,
@@ -273,14 +276,14 @@ class EmployeeController extends Controller
         $employee = Employee::create([
             "title_id" => Session::get('title'),
             "user_id" =>  $user->id,
-            "first_name" => Session::get('first_name'),
-            "last_name"  => Session::get('last_name'),
+            "first_name" => strtoupper(Session::get('first_name')),
+            "last_name"  => strtoupper(Session::get('last_name')),
             "telephone"  => Session::get('telephone'),
             "mobile"  => Session::get('mobile'),
             "email"  => Session::get('email'),
             "sex_identifier_id"=>Session::get('sex'),
             "date_of_birth"  => Session::get('date_of_birth') ,
-            "ni_number"  => Session::get('ni_number'),
+            "ni_number"  => strtoupper(Session::get('ni_number')),
             "nationality_id"  => Session::get('nationality'),
             "ethnicity_id"  => Session::get('ethnicity'),
             "car_reg_number"  => Session::get('car_reg_number'),
@@ -309,6 +312,7 @@ class EmployeeController extends Controller
         $EmployeeEligibilites = EmployeeEligibilites::create([
             "employee_id" => $employee->id,
             'eligible_to_work' => Session::get('eligible_to_work'),
+            'employee_work_permit_type_id' => Session::get('workpermit_type'),
             'workpermit_number' => Session::get('workpermit_number'),
             'workpermit_expire' => Session::get('workpermit_expire'),
             'document_type' => Session::get('document_type'),
