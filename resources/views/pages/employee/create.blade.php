@@ -156,7 +156,7 @@
                     <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                 </div>
                 <div class="intro-y col-span-12 sm:col-span-4">
-                    <label for="vertical-form-9" class="form-label inline-flex">NI Number <span class="text-danger"> *</span></label>
+                    <label for="vertical-form-9" class="form-label inline-flex">NI Number</label>
                     <input id="vertical-form-9" type="text" name="ni_number" class="form-control rounded-none form-control-lg ni-number"  aria-label="default input example">
                     <div class="acc__input-error error-ni_number text-danger mt-2"></div>
                 </div>

@@ -47,7 +47,7 @@ import IMask from 'imask';
 
     $(".ni-number").each(function () {
         var maskOptions = {
-            mask: 'aa-000000-a'
+            mask: 'AA-000000-A'
         };
         var mask = IMask(this, maskOptions);
     });
