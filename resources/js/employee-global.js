@@ -149,10 +149,23 @@ if($("#addStudentPhotoModal").length > 0){
         }  else {
             $('input[name="works_number"]').parent().addClass('visible')
         }
-        
-
     });
 
+    $('#employee_work_type_id').on('change', function() {
+        let tthis = $(this)
+
+        let typeText = $('option:selected',tthis).text();
+        if(typeText.match(/employee/gi)!=null) {
+            $('.worksNumberWrap').show()
+        }  else {
+            $('.worksNumberWrap').hide()
+        }
+    });
+
+    
+    $('.inputUppercase').on('keyup', function() {
+		$(this).val($(this).val().toUpperCase());
+	});
     
     $('#eligible_to_work_status').on('change', function() {
         let tthis = $(this)
@@ -174,14 +187,14 @@ if($("#addStudentPhotoModal").length > 0){
         let tthis = $(this)
 
         let typeText = $('option:selected',tthis).text();
-
-        if(typeText.match(/British Citizen/gi)==null) {
-            $('input[name="workpermit_number"]').parent().removeClass('invisible')
-            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
-        } else {
-
+        
+        if(typeText.match(/Student Visa/gi)==null) {
             $('input[name="workpermit_number"]').parent().addClass('invisible')
             $('input[name="workpermit_expire"]').parent().addClass('invisible')
+        } else {
+
+            $('input[name="workpermit_number"]').parent().removeClass('invisible')
+            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
         }
 
     });

@@ -79,7 +79,7 @@ class EmployeeEligibilityController extends Controller
             'workpermit_expire'=> $request->workpermit_expire,
             'document_type' => $request->document_type,
             'doc_number'=> $request->doc_number,
-            'doc_expire'=> $request->doc_expire,
+            'doc_expire'=> !empty($request->doc_expire) ? date('Y-m-d', strtotime($request->doc_expire)) : '',
             'doc_issue_country'=> $request->doc_issue_country
         ];
         

@@ -84,11 +84,14 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
 use App\Http\Controllers\HR\EmployeePaymentSettingsController;
 use App\Http\Controllers\HR\EmployeeBankDetailController;
 use App\Http\Controllers\HR\EmployeePenssionSchemeController;
 use App\Http\Controllers\HR\EmployeeAddressController;
+use App\Http\Controllers\HR\EmployeeAppraisalController;
+use App\Http\Controllers\HR\EmployeeAppraisalDocumentController;
 use App\Http\Controllers\HR\EmployeeAttendanceController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeDocumentsController;
@@ -96,12 +99,14 @@ use App\Http\Controllers\HR\EmployeeEligibilityController;
 use App\Http\Controllers\HR\EmployeeEmergencyContactController;
 use App\Http\Controllers\HR\EmployeeHolidayController;
 use App\Http\Controllers\HR\EmployeeNotesController;
+use App\Http\Controllers\HR\EmployeePassportExpiryController;
 use App\Http\Controllers\HR\EmployeeProfileController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternController;
 use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\HR\EmployeePortalController;
+use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\PlanContentUploadController;
@@ -880,6 +885,26 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/restore-note', 'restore')->name('employee.restore.note');
     });
 
+    Route::controller(EmployeeAppraisalController::class)->group(function(){
+        Route::get('employee-profile/appraisal/{id}', 'index')->name('employee.appraisal'); 
+        Route::post('employee-profile/appraisal-store', 'store')->name('employee.appraisal.store');
+        Route::get('employee-profile/appraisal-list', 'list')->name('employee.appraisal.list');
+        Route::post('employee-profile/appraisal-edit', 'edit')->name('employee.appraisal.edit');
+        Route::post('employee-profile/appraisal-update', 'update')->name('employee.appraisal.update');
+        Route::post('employee-profile/get-note', 'getNote')->name('employee.appraisal.get.note');
+
+        Route::delete('employee-profile/appraisal-destroy', 'destroy')->name('employee.appraisal.destory');
+        Route::post('employee-profile/appraisal-restore', 'restore')->name('employee.appraisal.restore');
+    });
+
+    Route::controller(EmployeeAppraisalDocumentController::class)->group(function(){
+        Route::get('employee-profile/appraisal/documents/{id}/{appraisalid}', 'index')->name('employee.appraisal.documents'); 
+        Route::post('employee-profile/appraisal-upload-documents', 'uploadDocuments')->name('employee.appraisal.upload.documents'); 
+        Route::get('employee-profile/appraisal-document-list', 'list')->name('employee.appraisal.documents.list'); 
+        Route::delete('employee-profile/appraisal-document-destroy', 'destroy')->name('employee.appraisal.document.destory');
+        Route::post('employee-profile/appraisal-document-restore', 'restore')->name('employee.appraisal.document.restore');
+    });
+
     Route::controller(EmployeeAttendanceController::class)->group(function(){
         Route::get('hr/attendance', 'index')->name('hr.attendance');
         Route::get('hr/attendance/list', 'list')->name('hr.attendance.sync.list'); 
@@ -895,17 +920,27 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal', 'index')->name('hr.portal');
         Route::get('hr/portal/manage-holidays', 'manageHolidays')->name('hr.portal.holiday');
         Route::get('hr/portal/holiday-list', 'list')->name('hr.portal.holiday.list'); 
+        Route::post('hr/portal/update-absent', 'updateAbsent')->name('hr.portal.update.absent'); 
 
         Route::get('hr/portal/leave-calendar', 'leaveCalendar')->name('hr.portal.leave.calendar'); 
         Route::post('hr/portal/filter-leave-calendar', 'filterLeaveCalendar')->name('hr.portal.filter.leave.calendar'); 
         Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
         
-        /*Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
-        Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
-        Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');
-        Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
-        Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
-        Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');*/
+    });
+
+    Route::controller(EmployeeUpcomingAppraisalController::class)->group(function(){
+        Route::get('hr/portal/upcoming-appraisal', 'index')->name('hr.portal.upcoming.appraisal');
+        Route::get('hr/attendance/upcoming-appraisal/list', 'list')->name('hr.portal.upcoming.appraisal.list');
+    });
+
+    Route::controller(EmployeeVisaExpiryController::class)->group(function(){
+        Route::get('hr/portal/visa-expiry', 'index')->name('hr.portal.visa.expiry');
+        Route::get('hr/portal/visa-expiry/list', 'list')->name('hr.portal.visa.expiry.list');
+    });
+
+    Route::controller(EmployeePassportExpiryController::class)->group(function(){
+        Route::get('hr/portal/passport-expiry', 'index')->name('hr.portal.passport.expiry');
+        Route::get('hr/portal/passport-expiry/list', 'list')->name('hr.portal.passport.expiry.list');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {

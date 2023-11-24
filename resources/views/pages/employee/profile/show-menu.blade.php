@@ -28,5 +28,11 @@
             Notes
         </a>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.appraisal', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.appraisal.documents' || Route::currentRouteName() == 'employee.appraisal' ? 'active' : '' }}">
+            Appraisals
+        </a>
+    </li>
     
 </ul>

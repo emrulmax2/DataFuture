@@ -380,13 +380,13 @@ class EmployeeHolidayController extends Controller
     }
 
     public function employeePossibleActivePattern($employee_id, $year_id = 0){
+        $today = date('Y-m-d');
         $activeHolidayYearId = 0;
         if($year_id > 0):
             $activeHolidayYearId = $year_id;
         else:
             $HrHolidayYears = HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get();
 
-            $today = date('Y-m-d');
             if(!empty($HrHolidayYears)):
                 foreach($HrHolidayYears as $hy):
                     if($today >= $hy->start_date && $today <= $hy->end_date):

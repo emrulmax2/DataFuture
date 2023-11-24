@@ -38,7 +38,7 @@ var employeeListTable = (function () {
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
                                 html += '</div>';
                                 html += '<div>';
-                                    html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
                                     html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().jobtitle != '' ? cell.getData().jobtitle : 'Unknown')+'</div>';
                                 html += '</div>';
                             html += '</div>';
@@ -48,6 +48,11 @@ var employeeListTable = (function () {
                 {
                     title: "Department",
                     field: "department",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Work Type",
+                    field: "work_type",
                     headerHozAlign: "left",
                 },
                 {
@@ -62,22 +67,7 @@ var employeeListTable = (function () {
                     formatter(cell, formatterParams){
                         return (cell.getData().status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">In Active</span>');
                     }
-                },
-                {
-                    title: "Actions",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "120",
-                    download:false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        btns += '<a href="'+route('profile.employee.view', cell.getData().id)+'" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                        
-                        return btns;
-                    },
-                },
+                }
             ],
             renderComplete() {
                 createIcons({
@@ -86,6 +76,9 @@ var employeeListTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
+            rowClick:function(e, row){
+                window.open(row.getData().url, '_blank');
+            }
         });
 
         // Redraw table onresize
@@ -179,5 +172,48 @@ var employeeListTable = (function () {
         $('#absentUpdateForm input[name="hour"]').val(hourminute);
         $('#absentUpdateForm input[name="employee_id"]').val(employee)
         $('#absentUpdateForm input[name="minutes"]').val(minute)
+    });
+
+    $('#absentUpdateForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('absentUpdateForm');
+    
+        document.querySelector('#updateAbsent').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateAbsent svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('hr.portal.update.absent'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateAbsent').removeAttribute('disabled');
+            document.querySelector("#updateAbsent svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                absentUpdateModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "Congratulations!" );
+                        $("#successModal .successModalDesc").html('Absent details successfully updated .');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });     
+            }
+        }).catch(error => {
+            document.querySelector('#updateAbsent').removeAttribute('disabled');
+            document.querySelector("#updateAbsent svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#absentUpdateForm .${key}`).addClass('border-danger');
+                        $(`#absentUpdateForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
     });
 })();

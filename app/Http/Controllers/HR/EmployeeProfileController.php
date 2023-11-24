@@ -26,6 +26,7 @@ use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EmployeeProfileController extends Controller
 {
@@ -39,7 +40,7 @@ class EmployeeProfileController extends Controller
         $employee = Employee::find($id);
         $userData = User::find($employee->user_id);
         $venues = Venue::all();
-        $employment = Employment::where("employee_id",$id)->get()->first();
+        $employment = Employment::where("employee_id", $id)->get()->first();
         $employeeEligibilites = EmployeeEligibilites::where("employee_id",$id)->get()->first();
         $emergencyContacts = EmployeeEmergencyContact::where("employee_id",$id)->get()->first();
         $employeeTerms = EmployeeTerm::where("employee_id",$id)->get()->first();
@@ -63,6 +64,7 @@ class EmployeeProfileController extends Controller
         $jobTitles = EmployeeJobTitle::all();
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
+        $employeeDisablities = DB::table('employee_disability')->where('employee_id', $id)->pluck('disability_id')->toArray();
 
         return view('pages.employee.profile.show',[
             'title' => 'Welcome - LCC Data Future Managment',
@@ -90,6 +92,7 @@ class EmployeeProfileController extends Controller
             "workPermitTypes" => $workPermitTypes,
             "venues" => $venues,
             "employmentVenue" => $employmentVenue,
+            "empDisIds" => $employeeDisablities,
         ]);
     }
     

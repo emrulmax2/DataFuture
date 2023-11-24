@@ -67,16 +67,15 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->current_file_name)):
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->employee_id.'/'.$list->current_file_name)):
                     $disk = Storage::disk('google');
-                    $url = $disk->url('public/employees/'.$list->current_file_name);
+                    $url = $disk->url('public/employees/'.$list->employee_id.'/'.$list->current_file_name);
                 endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'display_file_name' => (!empty($list->display_file_name) ? $list->display_file_name : 'Unknown'),
                     'hard_copy_check' => $list->hard_copy_check,    
-                    //'url' => isset($list->current_file_name) ? asset('storage/employees/'.$list->current_file_name) : null,
                     'url' => $url,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
@@ -90,83 +89,27 @@ class EmployeeDocumentsController extends Controller
 
     public function employeeUploadDocument(Request $request){
         $employee_id = $request->employee_id;
-        //$employee = Employee::find($employee_id);
         $document_setting_id = $request->document_setting_id;
         $documentSetting = DocumentSettings::find($document_setting_id);
         $hard_copy_check = $request->hard_copy_check;
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employee/', $imageName, 'google');
-        //$path = $document->storeAs('public/employees/', $imageName);
+        $path = $document->storeAs('public/employee/'.$employee_id, $imageName, 'google');
+        
         $data = [];
         $data['employee_id'] = $employee_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('google')->url($path);
-        //$data['path'] = asset('storage/employees/'.$imageName);
+        
         $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
         $employeeDoc = EmployeeDocuments::create($data);
 
         return response()->json(['message' => 'Document successfully uploaded.'], 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\EmployeeDocuments  $employeeDocuments
-     * @return \Illuminate\Http\Response
-     */
-    public function show(EmployeeDocuments $employeeDocuments)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\EmployeeDocuments  $employeeDocuments
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(EmployeeDocuments $employeeDocuments)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\EmployeeDocuments  $employeeDocuments
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, EmployeeDocuments $employeeDocuments)
-    {
-        //
     }
 
     /**

@@ -50,13 +50,13 @@
 
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="vertical-form-2" class="form-label inline-flex">First name(s) <span class="text-danger">*</span></label>
-                    <input id="vertical-form-2" type="text" class="form-control rounded-none form-control-lg" name="first_name" aria-label="default input example">
+                    <input id="vertical-form-2" type="text" class="form-control rounded-none form-control-lg inputUppercase" name="first_name" aria-label="default input example">
                     <div class="acc__input-error error-first_name text-danger mt-2"></div>
                 </div>
 
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="vertical-form-1" class="form-label inline-flex">Surname <span class="text-danger">*</span></label>
-                    <input id="vertical-form-1" type="text" class="form-control rounded-none form-control-lg"  name="sur_name" aria-label="default input example">
+                    <input id="vertical-form-1" type="text" class="form-control rounded-none form-control-lg inputUppercase"  name="last_name" aria-label="default input example">
                     <div class="acc__input-error error-sur_name text-danger mt-2"></div>
                 </div>
                 
@@ -93,34 +93,34 @@
                     <div class="grid grid-cols-12 gap-x-4">
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="vertical-form-13" class="form-label inline-flex">Address Line 1 <span class="text-danger">*</span></label>
-                            <input id="vertical-form-13" type="text" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                            <input id="vertical-form-13" type="text" name="address_line_1" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
                             <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                            <input id="vertical-form-14" type="text" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                            <input id="vertical-form-14" type="text" name="address_line_2" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
                             
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                             <label for="post_code" class="form-label inline-flex">Post Code <span class="text-danger">*</span></label>
-                            <input  id="post_code" type="text" name="post_code" value="" class="w-full text-sm"  />
+                            <input  id="post_code" type="text" name="post_code" value="" class="w-full text-sm inputUppercase"  />
                             <div class="acc__input-error error-post_code text-danger mt-2"></div>
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                             <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                            <input  id="vertical-form-13" type="text" name="city" value="" class="w-full text-sm"  />
+                            <input  id="vertical-form-13" type="text" name="city" value="" class="w-full text-sm inputUppercase"  />
                             <div class="acc__input-error error-city text-danger mt-2"></div>
                         </div>
 
                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                             <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                            <input id="vertical-form-14" type="text" name="state" value="" class="w-full text-sm" />
+                            <input id="vertical-form-14" type="text" name="state" value="" class="w-full text-sm inputUppercase" />
                             <div class="acc__input-error error-state text-danger mt-2"></div>
                         </div>
 
                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                             <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                            <input id="vertical-form-15" type="text" name="country" value="" class="w-full text-sm" />
+                            <input id="vertical-form-15" type="text" name="country" value="" class="w-full text-sm inputUppercase" />
                             <div class="acc__input-error error-country text-danger mt-2"></div>
                         </div>
                     </div>
@@ -157,7 +157,7 @@
                 </div>
                 <div class="intro-y col-span-12 sm:col-span-4">
                     <label for="vertical-form-9" class="form-label inline-flex">NI Number</label>
-                    <input id="vertical-form-9" type="text" name="ni_number" class="form-control rounded-none form-control-lg ni-number"  aria-label="default input example">
+                    <input id="vertical-form-9" type="text" name="ni_number" class="form-control rounded-none form-control-lg ni-number inputUppercase"  aria-label="default input example">
                     <div class="acc__input-error error-ni_number text-danger mt-2"></div>
                 </div>
                 <div class="intro-y col-span-12">
@@ -169,13 +169,10 @@
                                 <label class="form-check-label" for="disability_status">&nbsp;</label>
                             </div>
                         </div>
-                        <div id="disabilityItems" class="col-span-12 sm:col-span-12 disabilityItems hidden">
+                        <div id="disabilityItems" class="col-span-12 sm:col-span-12 pt-4 disabilityItems hidden">
                             <label for="disability_id" class="form-label">Disabilities <span class="text-danger">*</span></label>
                             @php 
                                 $ids = [];
-                                // if(!empty($apply->disability)):
-                                //     foreach($apply->disability as $dis): $ids[] = $dis->disabilitiy_id; endforeach;
-                                // endif;
                             @endphp
                             @if(!empty($disability))
                                 @foreach($disability as $d)
@@ -188,9 +185,9 @@
                             <div class="acc__input-error error-disability_id text-danger mt-2"></div>
                         </div>
 
-                        <div class="intro-y col-span-12 sm:col-span-6 py-1">
+                        <div class="intro-y col-span-12 sm:col-span-6 pt-4">
                             <label for="vertical-form-11" class="form-label inline-flex">Nationality <span class="text-danger"> *</span></label>
-                            <select id="vertical-form-11" name="nationality" class="form-control w-full">
+                            <select id="vertical-form-11" name="nationality" class="lcc-tom-select w-full  lccTom">
                                 <option value="">Please Select</option>
                                 @foreach($country as $countries)
                                     <option  value="{{ $countries->id }}">{{ $countries->name }}</option>              
@@ -199,9 +196,9 @@
                             <div class="acc__input-error error-nationality text-danger mt-2"></div>
                         </div>
 
-                        <div class="intro-y col-span-12 sm:col-span-6 py-1">
+                        <div class="intro-y col-span-12 sm:col-span-6 pt-4">
                             <label for="vertical-form-12" class="form-label inline-flex">Ethnic Origin <span class="text-danger"> *</span></label>
-                            <select id="vertical-form-12" name="ethnicity" class="form-control w-full">
+                            <select id="vertical-form-12" name="ethnicity" class="lcc-tom-select w-full  lccTom">
                                 <option value="">Please Select</option>
                                 @foreach($ethnicity as $ethnicities)
                                     <option  value="{{ $ethnicities->id }}">{{ $ethnicities->name }}</option>              
@@ -223,20 +220,6 @@
                             <input id="vertical-form-14" type="text" name="drive_license_number" class="form-control rounded-none form-control-lg"  aria-label="default input example">
         
                         </div>
-                        {{-- <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                            <input  id="vertical-form-13" type="text" name="city" value="" class="w-full text-sm"  />
-                        </div>
-
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                            <input id="vertical-form-14" type="text" name="state" value="" class="w-full text-sm" />
-                        </div>
-
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                            <input id="vertical-form-15" type="text" name="country" value="" class="w-full text-sm" />
-                        </div> --}}
                     </div>
                 </div>
                 <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
@@ -289,7 +272,7 @@
    
                     <div class="intro-y col-span-12 sm:col-span-6"> <!-- Type selection based with work number available('employee') -->
                         <label for="employee_work_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
-                        <select id="employee_work_type" name="employee_work_type" class=" w-full lccTom lcc-tom-select">
+                        <select id="employee_work_type" name="employee_work_type" class="lcc-tom-select w-full lccTom">
                             <option value="">Please Select</option>
                             @foreach($workTypes as $type)
                                 <option  value="{{ $type->id }}">{{ $type->name }}</option>              
@@ -354,10 +337,7 @@
                     <div class="intro-y col-span-12">
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-4">
-                                <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span>
-                                    
-                                </label>
-                                <label class="form-label" >Employee must give</label>
+                                <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span> <span class="form-help m-0 ml-2">Employee must give</span></label>
                                 <select id="notice-period" name="notice_period" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($noticePeriods as $noticePeriod)
@@ -369,8 +349,7 @@
                             </div> 
 
                             <div class="intro-y col-span-12 sm:col-span-4">
-                                <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span></label>
-                                <label class="form-label" >This employment is</label>
+                                <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span> <span class="form-help m-0 ml-2">This employment is</span></label>
                                 <select id="employment-period" name="employment_period" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($employmentPeriods as $employmentPeriod)
@@ -382,8 +361,7 @@
                             </div>
 
                             <div class="intro-y col-span-12 sm:col-span-4">
-                                <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span></label>
-                                <label class="form-label" >Employee receives</label>
+                                <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span> <span class="form-help m-0 ml-2" >Employee receives</span></label>
                                 <select id="ssp-term" name="ssp_term" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($sspTerms as $sspterm)
@@ -483,7 +461,7 @@
     
                             <div class="intro-y col-span-12 sm:col-span-6 py-1">
                                 <label for="vertical-form-6" class="form-label inline-flex">Document Issue Country <span class="text-danger"> *</span></label>
-                                <select id="vertical-form-6" name="doc_issue_country" class="form-control w-full">
+                                <select id="vertical-form-6" name="doc_issue_country" class="lcc-tom-select w-full  lccTom">
                                     <option value="">Please Select</option>
                                     @foreach($country as $countries)
                                         <option  value="{{ $countries->id }}">{{ $countries->name }}</option>              
@@ -523,12 +501,13 @@
                 <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="emergency_contact_name" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
-                        <input id="emergency_contact_name" type="text" class="form-control rounded-none form-control-lg"  name="emergency_contact_name" aria-label="default input example">
+                        <input id="emergency_contact_name" type="text" class="form-control rounded-none form-control-lg inputUppercase"  name="emergency_contact_name" aria-label="default input example">
                         <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                     </div>              
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="relationship" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
                         <select id="relationship" name="relationship" class="form-control lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
                             @foreach($relation as $kins)
                                 <option  value="{{ $kins->id }}">{{ $kins->name }}</option>              
                             @endforeach
@@ -550,36 +529,36 @@
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                <input id="vertical-form-13" type="text" name="emergency_contact_address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                <input id="vertical-form-13" type="text" name="emergency_contact_address_line_1" class="form-control inputUppercase rounded-none form-control-lg"  aria-label="default input example">
                                 
                                 <div class="acc__input-error error-emergency_contact_address_line_1 text-danger mt-2"></div>
                             </div>
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                                <input id="vertical-form-14" type="text" name="emergency_contact_address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                <input id="vertical-form-14" type="text" name="emergency_contact_address_line_2" class="form-control inputUppercase rounded-none form-control-lg"  aria-label="default input example">
                                 
                             </div>
                             
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="vertical-form-14" class="form-label inline-flex">Post Code</label>
-                                <input id="vertical-form-14" type="text" name="emergency_contact_post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
+                                <input id="vertical-form-14" type="text" name="emergency_contact_post_code" class="form-control inputUppercase rounded-none form-control-lg"  aria-label="default input example">
                                 <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
                             </div>
                              <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                <input  id="vertical-form-13" type="text" name="emergency_contact_city" value="" class="w-full text-sm"  />
+                                <input  id="vertical-form-13" type="text" name="emergency_contact_city" value="" class="w-full text-sm inputUppercase"  />
                                 <div class="acc__input-error error-emergency_contact_city text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                <input id="vertical-form-14" type="text" name="emergency_contact_state" value="" class="w-full text-sm" />
+                                <input id="vertical-form-14" type="text" name="emergency_contact_state" value="" class="w-full text-sm inputUppercase" />
                                 <div class="acc__input-error error-emergency_contact_state text-danger mt-2"></div>
                             </div>
     
                             <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                 <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                <input id="vertical-form-15" type="text" name="emergency_contact_country" value="" class="w-full text-sm" />
+                                <input id="vertical-form-15" type="text" name="emergency_contact_country" value="" class="w-full text-sm inputUppercase" />
                                 <div class="acc__input-error error-emergency_contact_country text-danger mt-2"></div>
                             </div>
                         </div>
@@ -607,7 +586,7 @@
                         Back
                     </button>
                     <button id="form4SaveButton" type="button" class="btn btn-primary w-auto  form-wizard-next-btn">
-                        Finished and Create 
+                        Create 
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2 svg_2">
                             <g fill="none" fill-rule="evenodd">
