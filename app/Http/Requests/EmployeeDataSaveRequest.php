@@ -31,7 +31,7 @@ class EmployeeDataSaveRequest extends FormRequest
             'email' => "required",
             'sex' => "required",
             'date_of_birth' => "required",
-            'ni_number' => "required",
+            //'ni_number' => "required",
             'nationality' => "required",
             'ethnicity' => "required",
             'address_line_1' => "required",
