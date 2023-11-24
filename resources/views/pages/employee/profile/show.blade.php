@@ -312,7 +312,6 @@
                 </div>
                 <div class="col-span-6">
                     <div class="col-span-12">
-                        <div class="grid grid-cols-12 gap-0">
                             <div class="flex flex-col justify-center items-center lg:items-start">
                                 <div class="truncate sm:whitespace-normal flex items-start">
                                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
@@ -342,7 +341,7 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
