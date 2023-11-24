@@ -226,12 +226,12 @@ import IMask from 'imask';
         let tthis = $(this)
 
         let typeText = $('option:selected',tthis).text();
-        console.log(typeText.match(/Employee/gi));
+        
         if(typeText.match(/Employee/gi)!=null) {
             $('input[name="works_number"]').parent().removeClass('invisible')
             
         }  else {
-            $('input[name="works_number"]').parent().addClass('visible')
+            $('input[name="works_number"]').parent().addClass('invisible')
         }
         
 

@@ -153,7 +153,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Works number</div>
-                        <div class="col-span-8 font-medium">{{ (isset($employment->works_number) && !empty($employee->works_number) ? date('jS M, Y', strtotime($employee->works_number)) : '') }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employment->works_number) && !empty($employment->works_number) ? date('jS M, Y', strtotime($employment->works_number)) : '') }}</div>
                     </div>
                 </div>
                 @else
@@ -341,7 +341,6 @@
                 </div>
                 <div class="col-span-6">
                     <div class="col-span-12">
-                        <div class="grid grid-cols-12 gap-0">
                             <div class="flex flex-col justify-center items-center lg:items-start">
                                 <div class="truncate sm:whitespace-normal flex items-start">
                                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
@@ -371,7 +370,6 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
