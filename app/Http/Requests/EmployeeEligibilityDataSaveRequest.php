@@ -25,8 +25,8 @@ class EmployeeEligibilityDataSaveRequest extends FormRequest
     {
         return [          
             'workpermit_type' => 'required_if:eligible_to_work_status,==,"Yes"',
-            'workpermit_number' => 'required_if:workpermit_type,3,4,5',
-            'workpermit_expire' => 'required_if:workpermit_type,3,4,5',
+            'workpermit_number' => 'required_if:workpermit_type,>=,3',
+            'workpermit_expire' => 'required_if:workpermit_type,>=,3',
             'document_type' => "required",
             'doc_number' => "required",
             'doc_expire' => "required",

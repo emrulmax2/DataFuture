@@ -150,12 +150,12 @@
                     </div>
                 </div>
                 @if($employment->employeeWorkType->name == "Employee")
-                    <div class="col-span-12 sm:col-span-3">
-                        <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Works number</div>
-                            <div class="col-span-8 font-medium">{{ (isset($employment->works_number) && !empty($employment->works_number) ? $employment->works_number : '') }}</div>
-                        </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Works number</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employment->works_number) && !empty($employee->works_number) ? date('jS M, Y', strtotime($employee->works_number)) : '') }}</div>
                     </div>
+                </div>
                 @else
                     <div class="col-span-12 sm:col-span-3"></div>
                 @endif
@@ -312,33 +312,35 @@
                 </div>
                 <div class="col-span-6">
                     <div class="col-span-12">
-                        <div class="flex flex-col justify-center items-center lg:items-start">
-                            <div class="truncate sm:whitespace-normal flex items-start">
-                                <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                                <span class="uppercase">
-                                    @if(isset($emergencyContacts->address->address_line_1) && $emergencyContacts->address->address_line_1 > 0)
-                                        @if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1))
-                                            <span class="font-medium">{{ $emergencyContacts->address->address_line_1 }}</span><br/>
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="flex flex-col justify-center items-center lg:items-start">
+                                <div class="truncate sm:whitespace-normal flex items-start">
+                                    <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
+                                    <span>
+                                        @if(isset($emergencyContacts->address->address_line_1) && $emergencyContacts->address->address_line_1 > 0)
+                                            @if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1))
+                                                <span class="font-medium">{{ $emergencyContacts->address->address_line_1 }}</span><br/>
+                                            @endif
+                                            @if(isset($emergencyContacts->address->address_line_2) && !empty($emergencyContacts->address->address_line_2))
+                                                <span class="font-medium">{{ $emergencyContacts->address->address_line_2 }}</span><br/>
+                                            @endif
+                                            @if(isset($emergencyContacts->address->city) && !empty($emergencyContacts->address->city))
+                                                <span class="font-medium">{{ $emergencyContacts->address->city }}</span>,
+                                            @endif
+                                            @if(isset($emergencyContacts->address->state) && !empty($emergencyContacts->address->state))
+                                                <span class="font-medium">{{ $emergencyContacts->address->state }}</span>, <br/>
+                                            @endif
+                                            @if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code))
+                                                <span class="font-medium">{{ $emergencyContacts->address->post_code }}</span>,
+                                            @endif
+                                            @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
+                                                <span class="font-medium">{{ $emergencyContacts->address->country }}</span><br/>
+                                            @endif
+                                        @else 
+                                            <span class="font-medium text-warning">Not Set Yet!</span><br/>
                                         @endif
-                                        @if(isset($emergencyContacts->address->address_line_2) && !empty($emergencyContacts->address->address_line_2))
-                                            <span class="font-medium">{{ $emergencyContacts->address->address_line_2 }}</span><br/>
-                                        @endif
-                                        @if(isset($emergencyContacts->address->city) && !empty($emergencyContacts->address->city))
-                                            <span class="font-medium">{{ $emergencyContacts->address->city }}</span>,
-                                        @endif
-                                        @if(isset($emergencyContacts->address->state) && !empty($emergencyContacts->address->state))
-                                            <span class="font-medium">{{ $emergencyContacts->address->state }}</span>, <br/>
-                                        @endif
-                                        @if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code))
-                                            <span class="font-medium">{{ $emergencyContacts->address->post_code }}</span>,
-                                        @endif
-                                        @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
-                                            <span class="font-medium">{{ $emergencyContacts->address->country }}</span><br/>
-                                        @endif
-                                    @else 
-                                        <span class="font-medium text-warning">Not Set Yet!</span><br/>
-                                    @endif
-                                </span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

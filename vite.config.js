@@ -152,6 +152,7 @@ export default defineConfig({
                 "resources/js/plan-tasks.js",
                 "resources/js/create-module-activity.js",
                 "resources/js/employee-global.js",
+                "resources/js/employee-banks.js",
                 
             ],
             refresh: true,
