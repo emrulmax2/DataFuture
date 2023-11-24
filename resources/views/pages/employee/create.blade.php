@@ -354,7 +354,10 @@
                     <div class="intro-y col-span-12">
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-4">
-                                <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span></label>
+                                <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span>
+                                    
+                                </label>
+                                <label class="form-label" >Employee must give</label>
                                 <select id="notice-period" name="notice_period" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($noticePeriods as $noticePeriod)
@@ -367,6 +370,7 @@
 
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span></label>
+                                <label class="form-label" >This employment is</label>
                                 <select id="employment-period" name="employment_period" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($employmentPeriods as $employmentPeriod)
@@ -379,6 +383,7 @@
 
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span></label>
+                                <label class="form-label" >Employee receives</label>
                                 <select id="ssp-term" name="ssp_term" class="form-control lccTom lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($sspTerms as $sspterm)

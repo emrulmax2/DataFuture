@@ -47,7 +47,7 @@ import IMask from 'imask';
 
     $(".ni-number").each(function () {
         var maskOptions = {
-            mask: 'AA-000000-A'
+            mask: 'aa-000000-a'
         };
         var mask = IMask(this, maskOptions);
     });
@@ -226,7 +226,7 @@ import IMask from 'imask';
         let tthis = $(this)
 
         let typeText = $('option:selected',tthis).text();
-        if(typeText.match(/employee/gi)!=null) {
+        if(typeText.match(/Employee/gi)!=null) {
             $('input[name="works_number"]').parent().removeClass('invisible')
             
         }  else {
