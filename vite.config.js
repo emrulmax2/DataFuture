@@ -146,6 +146,7 @@ export default defineConfig({
                 "resources/js/tutor-attendance-feed.js",
                 "resources/js/plan-tasks.js",
                 "resources/js/create-module-activity.js",
+                "resources/js/employee-global.js",
                 
             ],
             refresh: true,
