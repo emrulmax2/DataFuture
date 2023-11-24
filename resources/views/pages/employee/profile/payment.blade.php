@@ -219,7 +219,7 @@
                                 </div>
                             </div>
                             <button data-tw-toggle="modal" data-tw-target="#addEmpPenssionModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add New
+                                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add New Pension
                             </button>
                         </div>
                     </div>
