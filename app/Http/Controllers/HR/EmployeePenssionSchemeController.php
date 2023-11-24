@@ -50,7 +50,7 @@ class EmployeePenssionSchemeController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'penssion' => (isset($list->penssion->name) ? $list->penssion->name : ''),
-                    'joining_date' => (isset($list->joining_date) && !empty($list->joining_date) ? date('d-m-Y', strtotime($list->joining_date)) : ''),
+                    'joining_date' => (isset($list->joining_date) && !empty($list->joining_date) ? date('jS M, Y', strtotime($list->joining_date)) : ''),
                     'date_left' => (isset($list->date_left) && !empty($list->date_left) ? date('d-m-Y', strtotime($list->date_left)) : ''),
                     'deleted_at' => $list->deleted_at
                 ];

@@ -97,8 +97,8 @@ var upcomingAppraisalListTable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
                     width: "220",
                     download:false,
                     formatter(cell, formatterParams) {                        

@@ -12,6 +12,7 @@ use App\Models\EmployeeHourAuthorisedBy;
 use App\Models\EmployeeInfoPenssionScheme;
 use App\Models\EmployeePaymentSetting;
 use App\Models\EmployeePenssionScheme;
+use App\Models\EmployeeWorkingPattern;
 use App\Models\Employment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,7 +33,8 @@ class EmployeePaymentSettingsController extends Controller
             'schemes' => EmployeeInfoPenssionScheme::all(),
             'users' => User::all(),
             'hourAuthIds' => EmployeeHourAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
-            'holidayAuthIds' => EmployeeHolidayAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray()
+            'holidayAuthIds' => EmployeeHolidayAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
+            'numOfActivePattern' => EmployeeWorkingPattern::where('employee_id', $id)->whereNull('end_to')->get()->count()
         ]);
     }
 

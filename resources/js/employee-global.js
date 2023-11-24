@@ -1,5 +1,7 @@
 import TomSelect from "tom-select";
 import IMask from 'imask';
+import { createIcons, icons } from "lucide";
+import Dropzone from "dropzone";
 
 ("use strict");
 (function(){
@@ -58,7 +60,7 @@ if($("#addStudentPhotoModal").length > 0){
             drzn1.removeAllFiles();
 
             $('#addStudentPhotoModal .modal-content .uploadError').remove();
-            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Student photo successfully uploaded.</div>');
+            $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> WOW! Employee photo successfully uploaded.</div>');
             createIcons({
                 icons,
                 "stroke-width": 1.5,

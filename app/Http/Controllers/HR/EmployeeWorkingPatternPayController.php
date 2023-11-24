@@ -66,8 +66,8 @@ class EmployeeWorkingPatternPayController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'effective_from' => (isset($list->effective_from) && !empty($list->effective_from) ? date('d-m-Y', strtotime($list->effective_from)) : ''),
-                    'end_to' => (isset($list->end_to) && !empty($list->end_to) ? date('d-m-Y', strtotime($list->end_to)) : ''),
+                    'effective_from' => (isset($list->effective_from) && !empty($list->effective_from) ? date('jS M, Y', strtotime($list->effective_from)) : ''),
+                    'end_to' => (isset($list->end_to) && !empty($list->end_to) ? date('jS M, Y', strtotime($list->end_to)) : ''),
                     'salary' => $list->salary,
                     'hourly_rate' => $list->hourly_rate,
                     'active' => $list->active,
