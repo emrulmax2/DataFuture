@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('plans', function (Blueprint $table) {
-            $table->unsignedBigInteger('academic_year_id')->nullable();
-            $table->unsignedBigInteger('course_creation_id')->nullable();
-            $table->unsignedBigInteger('instance_term_id')->nullable();
+            $table->unsignedBigInteger('academic_year_id')->nullable()->after('id');
+            $table->unsignedBigInteger('course_creation_id')->nullable()->after('academic_year_id');;
+            $table->unsignedBigInteger('instance_term_id')->nullable()->after('course_creation_id');;
 
             $table->foreign('academic_year_id')->references('id')->on('academic_years')->onDelete('set null')->onUpdate('set null');
             $table->foreign('course_creation_id')->references('id')->on('course_creations')->onDelete('set null')->onUpdate('set null');
