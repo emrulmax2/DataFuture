@@ -78,6 +78,7 @@ export default defineConfig({
                 "resources/js/venues.js",
                 "resources/js/rooms.js",
                 "resources/js/documentsettings.js",
+                "resources/js/termtype.js",
                 
                 "resources/js/student-option.js",
                 "resources/js/title.js",

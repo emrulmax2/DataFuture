@@ -52,6 +52,12 @@ class TopMenu
                                     'params' => [],
                                     'title' => 'Semesters'
                                 ],
+                                'term-declaration' => [
+                                    'icon' => '',
+                                    'route_name' => 'term-declaration.index',
+                                    'params' => [],
+                                    'title' => 'Term Declaration'
+                                ],
                                 'courses' => [
                                     'icon' => '',
                                     'route_name' => 'courses',

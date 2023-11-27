@@ -61,6 +61,7 @@ import "./dark-mode-switcher";
 import "./form";                              // Added on 05.12.22
 import "./courses";                           // Added on 12.12.22
 import "./semester";          
+import "./term-declaration";          
 import "./groups";  
 import "./modulelevels";
 import "./course-module";

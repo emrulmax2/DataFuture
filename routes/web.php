@@ -154,7 +154,9 @@ use App\Http\Controllers\Settings\HolidayYearController;
 use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
+use App\Http\Controllers\Settings\TermTypeController;
 use App\Http\Controllers\Student\StudentAssignController;
+use App\Http\Controllers\TermDeclarationController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
@@ -1188,7 +1190,13 @@ Route::middleware('auth')->group(function() {
         Route::delete('site-settings/awardingbody/delete/{id}', 'destroy')->name('awardingbody.destory');
         Route::post('site-settings/awardingbody/restore/{id}', 'restore')->name('awardingbody.restore');
     });
+    Route::group(['prefix'=>'site-settings'], function(){
+        Route::resource('term-type', TermTypeController::class);
 
+        Route::controller(TermTypeController::class)->group(function() {
+            Route::get('term-type-list', 'list')->name('term-type.list');        
+        });
+    });
     Route::controller(AcademicYearController::class)->group(function() {
         Route::get('site-settings/academicyears', 'index')->name('academicyears'); 
         Route::get('site-settings/academicyears/list', 'list')->name('academicyears.list');    
@@ -1753,6 +1761,14 @@ Route::middleware('auth')->group(function() {
     Route::controller(StudentAssignController::class)->group(function() {
 
         Route::get('student-assign-list', 'list')->name('student-assign.list'); 
+        
+    });
+
+    Route::resource('term-declaration',TermDeclarationController::class);
+
+    Route::controller(TermDeclarationController::class)->group(function() {
+
+        Route::get('term-declaration-list', 'list')->name('term-declaration.list'); 
         
     });
     
