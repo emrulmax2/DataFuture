@@ -38,6 +38,11 @@
                         </a>
                     </li>
                     <li>
+                        <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'term-type.index' ? 'active text-primary' : '' }}" href="{{ route('term-type.index') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Term Type
+                        </a>
+                    </li>
+                    <li>
                         <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'academicyears' || Route::currentRouteName() == 'academicyears.show' ? 'active text-primary' : '' }}" href="{{ route('academicyears') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Academic Years
                         </a>
