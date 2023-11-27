@@ -18,8 +18,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('code');
             $table->enum('is_active',[0,1])->default(1);
-            $table->softDeletes();
+            $table->bigInteger('created_by');
+            $table->bigInteger('updated_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
