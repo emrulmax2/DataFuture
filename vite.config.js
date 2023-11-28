@@ -154,6 +154,9 @@ export default defineConfig({
                 "resources/js/create-module-activity.js",
                 "resources/js/employee-global.js",
                 "resources/js/employee-banks.js",
+
+                "resources/js/hr-absent-today.js",
+                "resources/js/hr-live-attendance.js",
                 
             ],
             refresh: true,

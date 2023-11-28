@@ -28,11 +28,11 @@ class EmployeeVisaExpiryController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = EmployeeEligibilites::where('document_type', 2)->whereDate('doc_expire', '<=', $expireDate)
-                 ->whereHas('employee', function($q){
+        $query = EmployeeEligibilites::where('eligible_to_work', 'Yes')->where('employee_work_permit_type_id', 3)
+                ->whereDate('workpermit_expire', '<=', $expireDate)
+                ->whereHas('employee', function($q){
                     $q->where('status', 1);
-                 })
-                 ->orderBy('doc_expire', 'DESC');
+                })->orderBy('workpermit_expire', 'DESC');
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -51,7 +51,7 @@ class EmployeeVisaExpiryController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $expiryDate = date('Y-m-d', strtotime($list->doc_expire));
+                $expiryDate = date('Y-m-d', strtotime($list->workpermit_expire));
                 $days = '';
                 $class = '';
                 if(date('Y-m-d') > $expiryDate){
@@ -76,8 +76,8 @@ class EmployeeVisaExpiryController extends Controller
                     'name' => $list->employee->first_name.' '.$list->employee->last_name,
                     'designation' => (isset($list->employee->employment->employeeJobTitle->name) ? $list->employee->employment->employeeJobTitle->name : ''),
                     
-                    'doc_number' => $list->doc_number,
-                    'doc_expire' => date('D jS M, Y', strtotime($list->doc_expire)),
+                    'workpermit_number' => $list->workpermit_number,
+                    'workpermit_expire' => date('D jS M, Y', strtotime($list->workpermit_expire)),
                     'days' => $days,
                     'class' => $class,
 

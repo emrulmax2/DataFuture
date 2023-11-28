@@ -272,7 +272,7 @@
    
                     <div class="intro-y col-span-12 sm:col-span-6"> <!-- Type selection based with work number available('employee') -->
                         <label for="employee_work_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
-                        <select id="employee_work_type" name="employee_work_type" class="lcc-tom-select w-full lccTom">
+                        <select id="employee_work_type" name="employee_work_type" class="lcc-tom-select w-full">
                             <option value="">Please Select</option>
                             @foreach($workTypes as $type)
                                 <option  value="{{ $type->id }}">{{ $type->name }}</option>              
@@ -281,7 +281,7 @@
                         <div class="acc__input-error error-employee_work_type text-danger mt-2"></div>
                     </div>
                     
-                    <div class="intro-y col-span-12 sm:col-span-6 invisible">
+                    <div class="employeeWorkTypeFields intro-y col-span-12 sm:col-span-6" style="display: none;">
                         <label for="vertical-form-5" class="form-label inline-flex">Works Number <span class="text-danger">*</span></label>
                         <input id="vertical-form-5" type="text" class="form-control rounded-none form-control-lg"  name="works_number" aria-label="default input example">
                         <div class="acc__input-error error-works_number text-danger mt-2"></div>  
@@ -413,9 +413,9 @@
                         </div>
                     </div>
 
-                    <div id="workpermit_type" class="intro-y col-span-12 sm:col-span-3 invisible">
+                    <div class="workPermitTypeFields intro-y col-span-12 sm:col-span-3" style="display: none;">
                         <label for="workpermit_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
-                        <select id="workpermit_type" name="workpermit_type" class=" w-full lccTom lcc-tom-select">
+                        <select id="workpermit_type" name="workpermit_type" class=" w-full lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($workPermitTypes as $workPermitType)
                                 <option  value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>              
@@ -423,12 +423,12 @@
                         </select> 
                         <div class="acc__input-error error-workpermit_type text-danger mt-2"></div>
                     </div>
-                    <div id="workpermit-number" class="intro-y col-span-12 sm:col-span-3 invisible">
+                    <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="display: none;">
                         <label for="workpermit_number" class="form-label inline-flex">Work Permit Number </label>
                         <input id="workpermit_number" type="text" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
                         <div class="acc__input-error error-workpermit_number text-danger mt-2"></div>
                     </div>              
-                    <div id="workpermit-expire" class="intro-y col-span-12 sm:col-span-3 invisible">
+                    <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="display: none;">
                         <label for="workpermit_expire" class="form-label inline-flex">Work Permit Expiry Date </label>
                         <input id="workpermit_expire" type="text" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
                         <div class="acc__input-error error-workpermit_expire text-danger mt-2"></div>

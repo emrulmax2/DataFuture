@@ -59,7 +59,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
-                        <div class="col-span-8 font-medium">{{ $employee->nationality->name }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employee->nationality->name) ? $employee->nationality->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
@@ -140,7 +140,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Employee type</div>
-                        <div class="col-span-8 font-medium">{{ $employment->employeeWorkType->name }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employment->employeeWorkType->name) ? $employment->employeeWorkType->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
@@ -369,7 +369,7 @@
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Employement SSP terms</div>
-                        <div class="col-span-8 font-medium">Employee receives {{ $employeeTerms->SSP->name }}</div>
+                        <div class="col-span-8 font-medium">Employee receives {{ (isset($employeeTerms->SSP->name) ? $employeeTerms->SSP->name : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">

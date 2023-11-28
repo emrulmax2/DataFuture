@@ -40,20 +40,20 @@ var visaExpiryListTable = (function () {
                     }
                 },
                 {
-                    title: "Work Permit",
-                    field: "doc_number",
+                    title: "Work Permit Number",
+                    field: "workpermit_number",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Work Permit Exp. Date",
-                    field: "doc_expire",
+                    field: "workpermit_expire",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Status",
                     field: "days",
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    hozAlign: "left",
+                    headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return '<span class="btn inline-flex '+cell.getData().class+' w-auto px-1 text-white py-0 rounded-0">'+cell.getData().days+(cell.getData().days == 1 ? ' Day' : ' Days')+'</span>';
                     }

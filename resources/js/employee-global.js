@@ -110,6 +110,9 @@ if($("#addStudentPhotoModal").length > 0){
     };
     //var employment_status = new TomSelect('#employment_status', tomOptions);
 
+    var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
+    var employee_work_type_id_tom = new TomSelect('#employee_work_type_id', tomOptions);
+
     $('.lccTom').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
@@ -141,27 +144,22 @@ if($("#addStudentPhotoModal").length > 0){
         var mask = IMask(this, maskOptions);
     });
 
-    $('#employee_work_type').on('change', function() {
-        let tthis = $(this)
-
-        let typeText = $('option:selected',tthis).text();
-        if(typeText.match(/employee/gi)!=null) {
-            $('input[name="works_number"]').parent().removeClass('invisible')
-            
-        }  else {
-            $('input[name="works_number"]').parent().addClass('visible')
-        }
-    });
-
+    
     $('#employee_work_type_id').on('change', function() {
-        let tthis = $(this)
-
-        let typeText = $('option:selected',tthis).text();
-        if(typeText.match(/employee/gi)!=null) {
-            $('.worksNumberWrap').show()
-        }  else {
-            $('.worksNumberWrap').hide()
+        let $this = $(this)
+        var employee_work_type_id = $this.val();
+        
+        if(employee_work_type_id == 1) {
+            $('.employeeWorkTypeFields').fadeIn('fast', function(){
+                $('input', this).val('');
+            });
+        }else{
+            $('.employeeWorkTypeFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            });
         }
+        
+
     });
 
     
@@ -169,36 +167,37 @@ if($("#addStudentPhotoModal").length > 0){
 		$(this).val($(this).val().toUpperCase());
 	});
     
+    
     $('#eligible_to_work_status').on('change', function() {
-        let tthis = $(this)
+        let $eligible_to_work_status = $(this);
 
-        if(tthis.prop('checked')){
+        if($eligible_to_work_status.prop('checked')){
+            workpermit_type_tom.clear(true);
+            $('.workPermitTypeFields').fadeIn();
+        }else{
+            workpermit_type_tom.clear(true);
+            $('.workPermitTypeFields').fadeOut();
 
-            $('select[name="workpermit_type"]').parent().removeClass('invisible')
-            
-        }  else {
-
-            $('select[name="workpermit_type"]').parent().addClass('invisible')
-            $('input[name="workpermit_number"]').parent().addClass('invisible')
-            $('input[name="workpermit_expire"]').parent().addClass('invisible')
+            $('.workPermitFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            })
         }
         
 
     });
     $('select[name="workpermit_type"]').on('change', function() {
-        let tthis = $(this)
+        let $workpermit_type = $(this);
+        var workpermit_type_id = $workpermit_type.val();
 
-        let typeText = $('option:selected',tthis).text();
-        
-        if(typeText.match(/Student Visa/gi)==null) {
-            $('input[name="workpermit_number"]').parent().addClass('invisible')
-            $('input[name="workpermit_expire"]').parent().addClass('invisible')
+        if(workpermit_type_id == 3) {
+            $('.workPermitFields').fadeIn('fast', function(){
+                $('input', this).val('');
+            })
         } else {
-
-            $('input[name="workpermit_number"]').parent().removeClass('invisible')
-            $('input[name="workpermit_expire"]').parent().removeClass('invisible')
+            $('.workPermitFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            })
         }
-
     });
 
     $('#disability_status').on('change', function() {

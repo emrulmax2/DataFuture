@@ -153,7 +153,7 @@
                                 <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not absent attendance found for today.
                             </div>
                         @endif
-                        <a href="" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
+                        <a href="{{ route('hr.portal.absent.employee', strtotime(date('Y-m-d'))) }}" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
                             View More
                         </a>
                     </div>
