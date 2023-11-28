@@ -24,20 +24,15 @@ var employeeListTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
-                    field: "id",
-                    width: "120",
-                },
-                {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        var html = '<div class="flex justify-start items-center">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5">';
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
                                 html += '</div>';
-                                html += '<div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
                                     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
                                     html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().jobtitle != '' ? cell.getData().jobtitle : 'Unknown')+'</div>';
                                 html += '</div>';

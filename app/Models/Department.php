@@ -17,4 +17,8 @@ class Department extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function employment(){
+        return $this->hasMany(Employment::class, 'department_id', 'id');
+    }
 }

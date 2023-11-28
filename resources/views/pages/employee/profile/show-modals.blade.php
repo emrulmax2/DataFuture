@@ -191,7 +191,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="employee_work_type_id" class="form-label">Employee type <span class="text-danger">*</span></label>
-                            <select id="employee_work_type_id" class="lccTom lcc-tom-select w-full" name="employee_work_type_id">
+                            <select id="employee_work_type_id" class="lcc-tom-select w-full" name="employee_work_type_id">
                                 <option value="" selected>Please Select</option>
                                 @if($employeeWorkTypes->count() > 0)
                                     @foreach($employeeWorkTypes as $si)
@@ -201,7 +201,7 @@
                             </select>
                             <div class="acc__input-error error-first_name text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4 worksNumberWrap" style="display: none;">
+                        <div class="col-span-12 sm:col-span-4 employeeWorkTypeFields" style="{{ (isset($employment->employee_work_type_id) && $employment->employee_work_type_id == 1 ? '' : 'display: none;') }}">
                             <label for="works_number" class="form-label">Works Number<span class="text-danger">*</span></label>
                             <input type="text" value="{{ isset($employment->works_number) ? $employment->works_number : '' }}" placeholder="" id="works_number" class="form-control" name="works_number">
                             <div class="acc__input-error error-works_number text-danger mt-2"></div>
@@ -315,9 +315,9 @@
                             </div>
                         </div>
     
-                        <div id="workpermit_type" class="intro-y col-span-12 sm:col-span-3 {{ ($employeeEligibilites->eligible_to_work == "Yes") ? "visible" : "invisible" }} ">
+                        <div class="workPermitTypeFields intro-y col-span-12 sm:col-span-3" style="{{ ($employeeEligibilites->eligible_to_work == 'Yes') ? '' : 'display: none;' }}">
                             <label for="workpermit_type" class="form-label inline-flex">Type <span class="text-danger">*</span></label>
-                            <select id="workpermit_type" name="workpermit_type" class=" w-full lccTom lcc-tom-select">
+                            <select id="workpermit_type" name="workpermit_type" class=" w-full lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @foreach($workPermitTypes as $workPermitType)
                                     <option {{ ($employeeEligibilites->employee_work_permit_type_id == $workPermitType->id) ? "selected" : "" }} value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>       
@@ -325,12 +325,12 @@
                             </select> 
                             <div class="acc__input-error error-workpermit_type text-danger mt-2"></div>
                         </div>
-                        <div id="workpermit-number" class="intro-y col-span-12 sm:col-span-3 {{ ($employeeEligibilites->employee_work_permit_type_id > 1) ? "visible" : "invisible" }} ">
+                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ ($employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
                             <label for="workpermit_number" class="form-label inline-flex">Work Permit Number </label>
                             <input id="workpermit_number" type="text" value="{{ $employeeEligibilites->workpermit_number }}" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
                             <div class="acc__input-error error-workpermit_number text-danger mt-2"></div>
                         </div>              
-                        <div id="workpermit-expire" class="intro-y col-span-12 sm:col-span-3  {{ ($employeeEligibilites->employee_work_permit_type_id > 1) ? "visible" : "invisible" }} ">
+                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ ($employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
                             <label for="workpermit_expire" class="form-label inline-flex">Work Permit Expiry Date </label>
                             <input id="workpermit_expire" type="text" value="{{ $employeeEligibilites->workpermit_expire }}" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
                             <div class="acc__input-error error-workpermit_expire text-danger mt-2"></div>

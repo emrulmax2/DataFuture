@@ -22,4 +22,8 @@ class EmployeeAttendanceLive extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function machine(){
+        return $this->belongsTo(EmployeeAttendanceMachine::class, 'employee_attendance_machine_id');
+    }
 }

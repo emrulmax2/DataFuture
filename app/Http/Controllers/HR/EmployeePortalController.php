@@ -42,10 +42,11 @@ class EmployeePortalController extends Controller
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
                             })->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
-            'visaExpiry' => EmployeeEligibilites::where('document_type', 2)->whereDate('doc_expire', '<=', $expireDate)
+            'visaExpiry' => EmployeeEligibilites::where('eligible_to_work', 'Yes')->where('employee_work_permit_type_id', 3)
+                            ->whereDate('workpermit_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                            })->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
+                            })->orderBy('workpermit_expire', 'DESC')->skip(0)->limit(5)->get(),
             'appraisal' => EmployeeAppraisal::where('due_on', '<=', $expireDate)->whereNull('completed_on')
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
@@ -69,7 +70,12 @@ class EmployeePortalController extends Controller
 
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
                 $employee_id = $employee->id;
-                $employeeLeaveDay = EmployeeLeaveDay::where('status', 'Active')->where('leave_date', $theDate)->get()->first();
+                $employeeLeaveDay = EmployeeLeaveDay::where('status', 'Active')
+                                    ->where('leave_date', $theDate)
+                                    ->whereHas('leave', function($q) use($employee_id){
+                                        $q->where('employee_id', $employee_id)->where('status', 'Approved');
+                                    })
+                                    ->get()->first();
                 $leave_status = (isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0 && isset($employeeLeaveDay->leave->status) && $employeeLeaveDay->leave->status == 'Approved' ? true : false);
 
                 $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)

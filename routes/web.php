@@ -84,6 +84,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
 use App\Http\Controllers\HR\EmployeePaymentSettingsController;
@@ -93,6 +94,7 @@ use App\Http\Controllers\HR\EmployeeAddressController;
 use App\Http\Controllers\HR\EmployeeAppraisalController;
 use App\Http\Controllers\HR\EmployeeAppraisalDocumentController;
 use App\Http\Controllers\HR\EmployeeAttendanceController;
+use App\Http\Controllers\HR\EmployeeAttendanceLiveController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeDocumentsController;
 use App\Http\Controllers\HR\EmployeeEligibilityController;
@@ -161,9 +163,6 @@ use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
-use App\Models\BankHoliday;
-use App\Models\PlanContentUpload;
-use App\Models\PlanTask;
 
 /*
 |--------------------------------------------------------------------------
@@ -943,6 +942,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeePassportExpiryController::class)->group(function(){
         Route::get('hr/portal/passport-expiry', 'index')->name('hr.portal.passport.expiry');
         Route::get('hr/portal/passport-expiry/list', 'list')->name('hr.portal.passport.expiry.list');
+    });
+
+    Route::controller(EmployeeAbsentTodayController::class)->group(function(){
+        Route::get('hr/portal/absent-employee/{date}', 'index')->name('hr.portal.absent.employee');
+    });
+
+    Route::controller(EmployeeAttendanceLiveController::class)->group(function(){
+        Route::get('hr/portal/live', 'index')->name('hr.portal.live.attedance');
+        Route::get('hr/portal/live/list', 'list')->name('hr.portal.live.attedance.list');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
