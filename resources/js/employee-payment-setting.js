@@ -82,12 +82,19 @@ import IMask from 'imask';
     $('#editEmployeePaymentSettingForm [name="subject_to_clockin"]').on('change', function(e){
         var $input = $(this);
 
-        if($input.prop('checked')){
+        if($input.prop('checked')) {
+            
             $('#editEmployeePaymentSettingForm .hourAuthorisedByArea').fadeIn('fast', function(){
+                $('input:not([type="checkbox"])', this).val('');
+                $('input[type="checkbox"]', this).prop('checked', false);
                 edit_hour_authorised_by.clear(true);
             })
         }else{
+
             $('#editEmployeePaymentSettingForm .hourAuthorisedByArea').fadeOut('fast', function(){
+                
+                $('input:not([type="checkbox"])', this).val('');
+                $('input[type="checkbox"]', this).prop('checked', false);
                 edit_hour_authorised_by.clear(true);
             })
         }
@@ -97,12 +104,16 @@ import IMask from 'imask';
         var $input = $(this);
 
         if($input.prop('checked')){
+
             $('#addEmployeePaymentSettingForm .holidayEntitlementArea').fadeIn('fast', function(){
+
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
+
                 holiday_authorised_by.clear(true);
             });
         }else{
+
             $('#addEmployeePaymentSettingForm .holidayEntitlementArea').fadeOut('fast', function(){
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
