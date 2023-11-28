@@ -21,7 +21,14 @@ class EmployeeEligibilites extends Model
         'doc_expire',
         'doc_issue_country',
     ];
+    
 
+    public function setWorkpermitExpireAttribute($value) {  
+        $this->attributes['workpermit_expire'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+    public function getWorkpermitExpireAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
 
     public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
