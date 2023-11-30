@@ -70,9 +70,9 @@ class EmployeeAppraisalDocumentController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->document->current_file_name) && !empty($list->document->current_file_name) && Storage::disk('google')->exists('public/employee/'.$employee_id.'/appraisal/'.$list->document->current_file_name)):
+                if(isset($list->document->current_file_name) && !empty($list->document->current_file_name) && Storage::disk('google')->exists('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name)):
                     $disk = Storage::disk('google');
-                    $url = $disk->url('public/employee/'.$employee_id.'/appraisal/'.$list->document->current_file_name);
+                    $url = $disk->url('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name);
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -98,7 +98,7 @@ class EmployeeAppraisalDocumentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employee/'.$employee_id.'/appraisal', $imageName, 'google');
+        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 'google');
         $data = [];
         $data['employee_id'] = $employee_id;
         $data['document_setting_id'] = null;

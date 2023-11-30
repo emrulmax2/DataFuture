@@ -67,9 +67,9 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->employee_id.'/'.$list->current_file_name)):
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
                     $disk = Storage::disk('google');
-                    $url = $disk->url('public/employees/'.$list->employee_id.'/'.$list->current_file_name);
+                    $url = $disk->url('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name);
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -95,7 +95,7 @@ class EmployeeDocumentsController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employee/'.$employee_id, $imageName, 'google');
+        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 'google');
         
         $data = [];
         $data['employee_id'] = $employee_id;
