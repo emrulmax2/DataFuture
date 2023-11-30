@@ -120,6 +120,15 @@ var employeeListTable = (function () {
             employeeListTable.init();
         }
 
+        $("#tabulatorFilterForm #query").on('keypress', function(e){
+            var key = e.keyCode || e.which;
+            if(key === 13){
+                e.preventDefault(); // Ensure it is only this code that runs
+    
+                filterTitleHTMLForm();
+            }
+        })
+
         // On click go button
         $("#tabulator-html-filter-go").on("click", function (event) {
             filterTitleHTMLForm();
