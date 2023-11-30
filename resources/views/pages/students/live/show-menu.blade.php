@@ -74,5 +74,10 @@
             Task & Process
         </a>
     </li>
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('student.slc.history', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.slc.history' ? 'active' : '' }}">
+            SLC History
+        </a>
+    </li>
     
 </ul>

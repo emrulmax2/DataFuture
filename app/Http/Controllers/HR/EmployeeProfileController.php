@@ -20,6 +20,7 @@ use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
 use App\Models\Ethnicity;
 use App\Models\KinsRelation;
+use App\Models\Option;
 use App\Models\SexIdentifier;
 use App\Models\Title;
 use App\Models\User;
@@ -45,6 +46,7 @@ class EmployeeProfileController extends Controller
         $emergencyContacts = EmployeeEmergencyContact::where("employee_id",$id)->get()->first();
         $employeeTerms = EmployeeTerm::where("employee_id",$id)->get()->first();
         $i = 0;
+        $employmentVenue = [];
         foreach($employee->venues as $venue) {
             $employmentVenue[$i++] = $venue->id;
         }
@@ -65,6 +67,7 @@ class EmployeeProfileController extends Controller
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
         $employeeDisablities = DB::table('employee_disability')->where('employee_id', $id)->pluck('disability_id')->toArray();
+        $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
 
         return view('pages.employee.profile.show',[
             'title' => 'Welcome - LCC Data Future Managment',
@@ -93,6 +96,7 @@ class EmployeeProfileController extends Controller
             "venues" => $venues,
             "employmentVenue" => $employmentVenue,
             "empDisIds" => $employeeDisablities,
+            "postcodeApi" => $PostCodeAPI,
         ]);
     }
     

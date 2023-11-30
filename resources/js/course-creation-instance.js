@@ -201,6 +201,16 @@ var courseCreationINListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Fees",
+                    field: "fees",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Reg. Fees",
+                    field: "reg_fees",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -458,10 +468,16 @@ var courseCreationINListTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
+                    var cf = $('#editCourseCreationInstForm input[name="fees"]').attr('data-cf');
+                    var fees = (dataset.fees ? dataset.fees : (cf != 'undefined' && cf != '' ? cf : ''));
+                    var crf = $('#editCourseCreationInstForm input[name="reg_fees"]').attr('data-crf');
+                    var reg_fees = (dataset.reg_fees ? dataset.reg_fees : (crf != 'undefined' && crf != '' ? crf : ''));
                     $('#editCourseCreationInstForm select[name="academic_year_id"]').val(dataset.academic_year_id ? dataset.academic_year_id : '');
                     $('#editCourseCreationInstForm input[name="start_date"]').val(dataset.start_date ? dataset.start_date : '');
                     $('#editCourseCreationInstForm input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '');
                     $('#editCourseCreationInstForm input[name="total_teaching_week"]').val(dataset.total_teaching_week ? dataset.total_teaching_week : '');
+                    $('#editCourseCreationInstForm input[name="fees"]').val(fees);
+                    $('#editCourseCreationInstForm input[name="reg_fees"]').val(reg_fees);
                     
 
                     $('#editCourseCreationInstForm input[name="id"]').val(editId);

@@ -26,12 +26,18 @@ class EmployeeEmergencyContactDataSaveRequest extends FormRequest
         return [
             'emergency_contact_name' => "required",
             'relationship' => "required",
-            'emergency_contact_address_line_1' => "required",
-            'emergency_contact_post_code' => "required",
-            'emergency_contact_state' => "required",
-            'emergency_contact_city' => "required",
-            'emergency_contact_country' => "required",
+            'emc_address_line_1' => "required",
             'emergency_contact_mobile' => "required",
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'emergency_contact_name.required' => "This field is required.",
+            'relationship.required' => "This field is required.",
+            'emc_address_line_1.required' => "Address can not be empty.",
+            'emergency_contact_mobile.required' => "This field is required.",
         ];
     }
 }

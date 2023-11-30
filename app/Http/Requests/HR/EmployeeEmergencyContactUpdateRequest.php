@@ -27,11 +27,6 @@ class EmployeeEmergencyContactUpdateRequest extends FormRequest
 
             'emergency_contact_name' => "required",
             'kins_relation_id' => "required",
-            'address_line_1' => "required",
-            'post_code' => "required",
-            'state' => "required",
-            'city' => "required",
-            'country' => "required",
             'emergency_contact_mobile' => "required",
 
         ];

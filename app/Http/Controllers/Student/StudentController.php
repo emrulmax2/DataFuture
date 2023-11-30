@@ -35,6 +35,7 @@ use App\Models\Semester;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Signatory;
+use App\Models\SlcRegistrationStatus;
 use App\Models\SmsTemplate;
 use App\Models\Status;
 use App\Models\Student;
@@ -390,5 +391,18 @@ class StudentController extends Controller
         endif;
 
         return response()->json(['htm' => $html], 200);
+    }
+
+    public function slcHistory($studentId){
+        return view('pages.students.live.slc-history', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student SLC History', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+            'ac_years' => AcademicYear::orderBy('from_date', 'ASC')->get(),
+            'reg_status' => SlcRegistrationStatus::where('active', 1)->get()
+        ]);
     }
 }

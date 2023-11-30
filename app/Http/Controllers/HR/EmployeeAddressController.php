@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\HR\EmployeeAddressUpdateRequest;
 use App\Models\Address;
 use App\Models\Employee;
+use App\Models\EmployeeEmergencyContact;
 use Illuminate\Http\Request;
 
 class EmployeeAddressController extends Controller
@@ -58,9 +59,10 @@ class EmployeeAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        //
+        $address = Address::find($request->address_id);
+        return response()->json(['res' => $address], 200);
     }
 
     /**
@@ -70,27 +72,35 @@ class EmployeeAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(EmployeeAddressUpdateRequest $request, Employee $employee)
+    public function update(EmployeeAddressUpdateRequest $request)
     {   
-        
-        $address = new Address();
-        $address->fill($request->all());
-        $address->save();
+        $address_id = $request->address_id;
+        $employee_id = $request->employee_id;
+        $type = $request->type;
 
-        // $request->merge(['address_id' => $address->id]);
-        // $input = $request->all();
+        $deleteAddress = Address::find($address_id)->delete();
+        $address = Address::create([
+            'address_line_1' => $request->address_line_1,
+            'address_line_2' => $request->address_line_2,
+            'post_code' => $request->post_code,
+            'city' => $request->city,
+            'country' => $request->country,
+            'created_by' => auth()->user()->id,
+        ]);
         
-        $employee->fill(['address_id' => $address->id]);
-        $changes = $employee->getDirty();
-        $employee->save();
+        if($type == 'emc'):
+            $employeeContact = EmployeeEmergencyContact::where('employee_id', $employee_id)->get()->first();
+            $employeeContact->fill(['address_id' => $address->id]);
+            $changes = $employeeContact->getDirty();
+            $employeeContact->save();
+        else:
+            $employee = Employee::find($employee_id);
+            $employee->fill(['address_id' => $address->id]);
+            $changes = $employee->getDirty();
+            $employee->save();
+        endif;
 
-        $employee->disability()->sync($request->disability_id);
-
-        
-        if($employee->wasChanged())
-            return response()->json(["message"=>"updated","data"=>$changes]);
-        else
-            return response()->json(["no update"]);
+        return response()->json(['id' => $address->id], 200);
         
     }
 

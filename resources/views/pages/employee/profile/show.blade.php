@@ -315,7 +315,7 @@
                             <div class="flex flex-col justify-center items-center lg:items-start">
                                 <div class="truncate sm:whitespace-normal flex items-start">
                                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                                    <span>
+                                    <span class="uppercase">
                                         @if(isset($emergencyContacts->address->address_line_1) && $emergencyContacts->address->address_line_1 > 0)
                                             @if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1))
                                                 <span class="font-medium">{{ $emergencyContacts->address->address_line_1 }}</span><br/>
@@ -365,11 +365,10 @@
             
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Employement SSP terms</div>
-                        <div class="col-span-8 font-medium">Employee receives {{ (isset($employeeTerms->SSP->name) ? $employeeTerms->SSP->name : '') }}</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Employement Notice Period: </div>
+                        <div class="col-span-8 font-medium">{{ (isset($employeeTerms->notice->name) ? 'Employee must give '.$employeeTerms->notice->name.' notice' : '') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-4">
@@ -380,12 +379,10 @@
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Employement Notice Period: </div>
-                        <div class="col-span-8 font-medium">{{ (isset($employeeTerms->notice->name) ? 'Employee must give '.$employeeTerms->notice->name.' notice' : '') }}</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Employement SSP terms</div>
+                        <div class="col-span-8 font-medium">Employee receives {{ (isset($employeeTerms->SSP->name) ? $employeeTerms->SSP->name : '') }}</div>
                     </div>
                 </div>
-                
-                
             </div>
         </div>
     </div>
@@ -396,4 +393,5 @@
 
 @section('script')
     @vite('resources/js/employee-global.js')
+    @vite('resources/js/employee-profile.js')
 @endsection

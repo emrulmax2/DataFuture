@@ -451,43 +451,42 @@
                             </div>
                             <!-- END: Custom Tooltip Content -->
                         </div> 
-                        <div class="intro-y col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                    <input id="vertical-form-13" type="text" value="{{ (isset($emergencyContacts->address->address_line_1) ? $emergencyContacts->address->address_line_1 : '') }}" name="address_line_1" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                    <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
-                                </div>
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                                    <input id="vertical-form-14" type="text" value="{{ (isset($emergencyContacts->address->address_line_2) ? $emergencyContacts->address->address_line_2 : '') }}" name="address_line_2" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                </div>
-                                
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="vertical-form-14" class="form-label inline-flex">Post Code</label>
-                                    <input id="vertical-form-14" type="text" value="{{ (isset($emergencyContacts->address->post_code) ? $emergencyContacts->address->post_code : '') }}" name="post_code" class="form-control rounded-none form-control-lg"  aria-label="default input example">
-                                       
-                                    <div class="acc__input-error error-post_code text-danger mt-2"></div>
-                                </div>
-                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                    <input  id="vertical-form-13" type="text" value="{{ (isset($emergencyContacts->address->city) ? $emergencyContacts->address->city : '') }}" name="city" class="w-full text-sm"  />
-                                    <div class="acc__input-error error-city text-danger mt-2"></div>
-                                </div>
-        
-                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                    <input id="vertical-form-14" type="text" name="state" value="{{ (isset($emergencyContacts->address->state) ?  $emergencyContacts->address->state : '') }}" class="w-full text-sm" />
-                                    <div class="acc__input-error error-state text-danger mt-2"></div>
-                                </div>
-        
-                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                    <input id="vertical-form-15" type="text" name="country" value="{{ (isset($emergencyContacts->address->country) ? $emergencyContacts->address->country : '') }}" class="w-full text-sm" />
-                                    <div class="acc__input-error error-country text-danger mt-2"></div>
-                                </div>
+
+                        @php
+                            $emc_address_id = (isset($emergencyContacts->address_id) && $emergencyContacts->address_id > 0 ? $emergencyContacts->address_id : 0);
+                            $address3 = '';
+                            if(isset($emergencyContacts->address->address_line_1) && !empty($emergencyContacts->address->address_line_1)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->address_line_1.'</span><br/>';
+                            endif;
+                            if(isset($emergencyContacts->address->address_line_2) && !empty($emergencyContacts->address->address_line_2)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->address_line_2.'</span><br/>';
+                            endif;
+                            if(isset($emergencyContacts->address->city) && !empty($emergencyContacts->address->city)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->city.'</span>, ';
+                            endif;
+                            if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->post_code.'</span>,<br/>';
+                            endif;
+                            if(isset($emergencyContacts->address->country) && !empty($emergencyContacts->address->country)):
+                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->country.'</span><br/>';
+                            endif;
+                        @endphp
+                        <div class="col-span-12 sm:col-span-6 addressWrap" id="emcAddressWrap">
+                            <div class="addresses mb-2">
+                                @if($emc_address_id > 0)
+                                    {!! $address3 !!}
+                                @else 
+                                    <span class="text-warning font-medium">Not set yet!</span>
+                                @endif
                             </div>
-                        </div>            
+                            <div>
+                                <button  data-id="{{ $emc_address_id }}" data-type="emc" type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ $emc_address_id > 0 ? 'Update Address' : 'Add Address' }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6"></div>
+
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="emergency_contact_telephone" class="form-label inline-flex">Telephone </label>
                             <input id="emergency_contact_telephone" type="text" value="{{ $emergencyContacts->emergency_contact_telephone }}" class="form-control rounded-none form-control-lg" name="emergency_contact_telephone" aria-label="default input example">
@@ -552,7 +551,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if($noticePeriods->count() > 0)
                                     @foreach($noticePeriods as $noticePeriod)
-                                        <option {{ isset($employeeTerms->SSP->id) && $employeeTerms->SSP->id == $noticePeriod->id ? 'Selected' : '' }} value="{{ $noticePeriod->id }}">{{ $noticePeriod->name }}</option>
+                                        <option {{ isset($employeeTerms->employee_notice_period_id) && $employeeTerms->employee_notice_period_id == $noticePeriod->id ? 'Selected' : '' }} value="{{ $noticePeriod->id }}">{{ $noticePeriod->name }}</option>
                                         {{-- <option  value="{{ $noticePeriod->id }}">{{ $noticePeriod->name }}</option>               --}}
                                     @endforeach
                                 @endif
@@ -567,7 +566,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if($employmentPeriods->count() > 0)
                                     @foreach($employmentPeriods as $employmentPeriod)
-                                        <option {{ isset($employeeTerms->period->id) && $employeeTerms->period->id == $employmentPeriod->id ? 'Selected' : '' }} value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>
+                                        <option {{ isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == $employmentPeriod->id ? 'Selected' : '' }} value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>
                                         {{-- <option  value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>               --}}
                                     @endforeach
                                 @endif
@@ -580,7 +579,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if($sspTerms->count() > 0)
                                     @foreach($sspTerms as $sspterm)
-                                        <option {{ isset($employeeTerms->notice->id) && $employeeTerms->notice->id == $sspterm->id ? 'Selected' : '' }} value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>
+                                        <option {{ isset($employeeTerms->employment_ssp_term_id) && $employeeTerms->employment_ssp_term_id == $sspterm->id ? 'Selected' : '' }} value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>
                                         
                                     @endforeach
                                 @endif
@@ -613,65 +612,51 @@
 </div>
 <!-- END: Edit Terms Details Modal -->
 
-<!-- BEGIN: Edit editAddressUpdateModal Details Modal -->
-<div id="editAddressUpdateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <form method="POST" action="#" id="editAddressUpdateForm" enctype="multipart/form-data">
-            
-            <input type="hidden" name="url" value="{{ route('employee.address.update',$employee->id) }}" />
-            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
+<!-- BEGIN: Address Modal -->
+<div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Edit Address Details</h2>
+                    <h2 class="font-medium text-base mr-auto">Add Address</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
                 </div>
                 <div class="modal-body">
-                    <div class="grid grid-cols-12 gap-4 gap-y-5">
-                        <div class="intro-y col-span-12">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="vertical-form-13" class="form-label inline-flex">Address Line 1</label>
-                                    <input id="vertical-form-13" type="text" value="{{ (isset($employee->address->address_line_1) ? $employee->address->address_line_1 : '') }}" name="address_line_1" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
-                                    <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
-                                </div>
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                    <input id="address_line_2" type="text" value="{{ (isset($employee->address->address_line_2) ? $employee->address->address_line_2 : '') }}" name="address_line_2" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
-                                </div>
-                                
-                                <div class="intro-y col-span-12 sm:col-span-4">
-                                    <label for="post_code" class="form-label inline-flex">Post Code</label>
-                                    <input id="post_code" type="text" value="{{ (isset($employee->address->post_code) ? $employee->address->post_code : '') }}" name="post_code" class="form-control inputUppercase rounded-none form-control-lg"  aria-label="default input example">
-                                    <div class="acc__input-error error-emergency_contact_post_code text-danger mt-2"></div>
-                                </div>
-                                 <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="city" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                                    <input  id="city" type="text" value="{{ (isset($employee->address->city) ? $employee->address->city : '') }}" name="city" class="w-full inputUppercase text-sm"  />
-                                    <div class="acc__input-error error-city text-danger mt-2"></div>
-                                </div>
-        
-                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="state" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                                    <input id="state" type="text" name="state" value="{{ (isset($employee->address->state) ? $employee->address->state : '') }}" class="w-full inputUppercase text-sm" />
-                                    <div class="acc__input-error error-state text-danger mt-2"></div>
-                                </div>
-        
-                                <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                    <label for="country" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                                    <input id="country" type="text" name="country" value="{{ (isset($employee->address->country) ? $employee->address->country : '') }}" class="w-full inputUppercase text-sm" />
-                                    <div class="acc__input-error error-country text-danger mt-2"></div>
-                                </div>
-
-                            </div>
-                        </div>          
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12">
+                            <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full uppercase inputUppercase" name="address_line_1">
+                            <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
+                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full uppercase inputUppercase" name="address_line_2">
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full uppercase inputUppercase" name="city">
+                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full uppercase inputUppercase" name="post_code">
+                            <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full uppercase inputUppercase" name="country">
+                            <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
+                        </div>
+                        <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key={{ $postcodeApi }}" />
+                        <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key={{ $postcodeApi }}"></script>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
-                        Update                      
+                    <button type="submit" id="insertAddress" class="btn btn-primary w-auto">     
+                        Add Address                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
@@ -685,12 +670,16 @@
                             </g>
                         </svg>
                     </button>
+                    <input type="hidden" name="place" value=""/>
+                    <input type="hidden" name="address_id" value="0"/>
+                    <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                    <input type="hidden" name="type" value=""/>
                 </div>
             </div>
         </form>
     </div>
 </div>
-<!-- END: Edit Emergency Contact Details Modal -->
+<!-- END: Address Modal -->
 
 <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">

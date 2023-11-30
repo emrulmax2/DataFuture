@@ -16,6 +16,8 @@ class CourseCreationInstance extends Model
         'start_date',
         'end_date',
         'total_teaching_week',
+        'fees',
+        'reg_fees',
         'created_by',
         'updated_by',
     ];

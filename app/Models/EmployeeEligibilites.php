@@ -24,7 +24,7 @@ class EmployeeEligibilites extends Model
     
 
     public function setWorkpermitExpireAttribute($value) {  
-        $this->attributes['workpermit_expire'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['workpermit_expire'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     public function getWorkpermitExpireAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');

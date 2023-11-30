@@ -18,6 +18,9 @@ class CourseCreation extends Model
         'duration',
         'unit_length',
         'slc_code',
+        'venue_id',
+        'fees',
+        'reg_fees',
         'created_by',
         'updated_by',
     ];
@@ -55,5 +58,9 @@ class CourseCreation extends Model
 
     public function screl(){
         return $this->hasMany(StudentCourseRelation::class, 'course_creation_id', 'id');
+    }
+
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
     }
 }
