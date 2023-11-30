@@ -265,11 +265,11 @@
                                         <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
                                             <div class="flex items-center">
                                                 <div class="font-medium uppercase">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
-                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->doc_expire))}}</div>
+                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->workpermit_expire))}}</div>
                                             </div>
                                             <div class="text-slate-500 mt-1">
                                                 @php 
-                                                    $expiryDate = date('Y-m-d', strtotime($pass->doc_expire));
+                                                    $expiryDate = date('Y-m-d', strtotime($pass->workpermit_expire));
                                                     if(date('Y-m-d') > $expiryDate){
                                                         $date = \Carbon\Carbon::parse($expiryDate);
                                                         $now = \Carbon\Carbon::now();
