@@ -36,7 +36,15 @@
                             <label for="total_teaching_week" class="form-label">Total Teaching Week <span class="text-danger">*</span></label>
                             <input id="total_teaching_week" type="number" name="total_teaching_week" class="form-control w-full">
                             <div class="acc__input-error error-total_teaching_week text-danger mt-2"></div>
-                        </div>    
+                        </div>  
+                        <div class="mt-3">
+                            <label for="fees" class="form-label">Fees(UK)</label>
+                            <input id="fees" value="{{ $creation->fees }}" type="number" step="any" name="fees" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
+                            <input id="reg_fees" value="{{ $creation->reg_fees }}" type="number" step="any" name="reg_fees" class="form-control w-full">
+                        </div>  
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -101,7 +109,15 @@
                             <label for="edit_total_teaching_week" class="form-label">Total Teaching Week <span class="text-danger">*</span></label>
                             <input id="edit_total_teaching_week" type="number" name="total_teaching_week" class="form-control w-full">
                             <div class="acc__input-error error-total_teaching_week text-danger mt-2"></div>
-                        </div>     
+                        </div>  
+                        <div class="mt-3">
+                            <label for="edit_fees" class="form-label">Fees(UK)</label>
+                            <input id="edit_fees" data-cf="{{ $creation->fees }}" value="" type="number" step="any" name="fees" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="edit_reg_fees" class="form-label">Reg. Fees(UK)</label>
+                            <input id="edit_reg_fees" data-crf="{{ $creation->reg_fees }}" value="" type="number" step="any" name="reg_fees" class="form-control w-full">
+                        </div>    
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

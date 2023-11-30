@@ -524,6 +524,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
         Route::post('student/id-filter', 'StudentIDFilter')->name('student.filter.id');
+
+        Route::get('student/slc-history/{id}', 'slcHistory')->name('student.slc.history');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -784,7 +786,8 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(EmployeeAddressController::class)->group(function() {
-        Route::post('employee-address/update/{employee}','update')->name('employee.address.update');
+        Route::post('employee-address/get','edit')->name('employee.get.address');
+        Route::post('employee-address/update','update')->name('employee.address.update');
     });
     Route::controller(EmploymentController::class)->group(function() {
         Route::post('employment/update/{employment}','update')->name('employee.employment.update');

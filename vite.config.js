@@ -128,6 +128,7 @@ export default defineConfig({
                 "resources/js/employee-holiday.js",
                 "resources/js/employee-upload.js",      
                 "resources/js/employee-note.js",
+                "resources/js/employee-profile.js",
 
                 "resources/js/attendance.js",
 
@@ -157,6 +158,8 @@ export default defineConfig({
 
                 "resources/js/hr-absent-today.js",
                 "resources/js/hr-live-attendance.js",
+
+                "resources/js/student-slc-history.js",
                 
             ],
             refresh: true,

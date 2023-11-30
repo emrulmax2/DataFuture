@@ -26,7 +26,6 @@ class EmployeeAddressUpdateRequest extends FormRequest
         return [
             'address_line_1' => "required",
             'city' => "required",
-            'state' => "required",
             'post_code' => "required",
             'country' => "required",
         ];

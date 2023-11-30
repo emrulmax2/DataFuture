@@ -42,7 +42,7 @@ class EmployeePaymentSettingsController extends Controller
         $employee_id = $request->employee_id;
         $employee_payment_setting_id = $request->employee_payment_setting_id;
         $payment_method = (isset($request->payment_method) ? $request->payment_method : null);
-        $subject_to_clockin = (isset($request->subject_to_clockin) ? $request->subject_to_clockin : 0);
+        $subject_to_clockin = (isset($request->subject_to_clockin) && $request->subject_to_clockin > 0 ? $request->subject_to_clockin : 0);
         $holiday_entitled = (isset($request->holiday_entitled) ? $request->holiday_entitled : 0);
         $pension_enrolled = (isset($request->pension_enrolled) ? $request->pension_enrolled : 0);
 

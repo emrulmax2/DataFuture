@@ -60,7 +60,7 @@ var employeeListTable = (function () {
                     field: "status",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return (cell.getData().status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">In Active</span>');
+                        return (cell.getData().status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>');
                     }
                 },
                 {

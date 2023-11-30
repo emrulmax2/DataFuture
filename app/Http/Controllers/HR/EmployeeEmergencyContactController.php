@@ -72,11 +72,6 @@ class EmployeeEmergencyContactController extends Controller
      */
     public function update(EmployeeEmergencyContactUpdateRequest $request, EmployeeEmergencyContact $contact)
     {
-        $address = new Address();
-        $address->fill($request->all());
-        $address->save();
-
-        $request->merge(['address_id' => $address->id]);
         $input = $request->all();
         
         $contact->fill($input);

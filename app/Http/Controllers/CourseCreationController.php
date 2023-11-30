@@ -8,6 +8,7 @@ use App\Models\Semester;
 use App\Models\CourseCreation;
 use App\Http\Requests\CourseCreationsRequest;
 use App\Models\AcademicYear;
+use App\Models\Venue;
 
 class CourseCreationController extends Controller
 {
@@ -17,6 +18,7 @@ class CourseCreationController extends Controller
             'breadcrumbs' => [['label' => 'Course Creations', 'href' => 'javascript:void(0);']],
             'courses' => Course::all(),
             'semesters' => Semester::all(),
+            'venues' => Venue::all(),
         ]);
     }
 
@@ -83,6 +85,9 @@ class CourseCreationController extends Controller
                     'duration' => $list->duration,
                     'unit_length' => $list->unit_length,
                     'slc_code'=> $list->slc_code,
+                    'venue_id' => isset($list->venu->name) && !empty($list->venu->name) ? $list->venu->name : '',
+                    'fees' => isset($list->fees) && !empty($list->fees) ? '£'.number_format($list->fees, 2) : '',
+                    'reg_fees' => isset($list->reg_fees) && !empty($list->reg_fees) ? '£'.number_format($list->reg_fees, 2) : '',
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -128,6 +133,9 @@ class CourseCreationController extends Controller
             'duration'=> $request->duration,
             'unit_length'=> $request->unit_length,
             'slc_code'=> $request->slc_code,
+            'venue_id'=> (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : null),
+            'fees'=> (isset($request->fees) && $request->fees > 0 ? $request->fees : null),
+            'reg_fees'=> (isset($request->reg_fees) && $request->reg_fees > 0 ? $request->reg_fees : null),
             'updated_by' => auth()->user()->id
         ]);
 

@@ -58,6 +58,8 @@ class CourseCreationInstanceController extends Controller
                     'start_date' => $list->start_date,
                     'end_date' => $list->end_date,
                     'total_teaching_week' => $list->total_teaching_week,
+                    'fees' => isset($list->fees) && !empty($list->fees) ? '£'.number_format($list->fees, 2) : '',
+                    'reg_fees' => isset($list->reg_fees) && !empty($list->reg_fees) ? '£'.number_format($list->reg_fees, 2) : '',
                     'deleted_at' => $list->deleted_at,
                     'has_terms' => $list->terms->count()
                 ];

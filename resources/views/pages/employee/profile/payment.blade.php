@@ -66,7 +66,7 @@
                                 <select id="status-BNK" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="3">All</option>
                                     <option value="1">Active</option>
-                                    <option value="0">In Active</option>
+                                    <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
                             </div>
@@ -111,7 +111,7 @@
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Subject To Clockin</div>
-                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->subject_to_clockin) ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
+                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes' ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
                     </div>
                 </div>
                 <div class="col-span-6 sm:col-span-8">
@@ -257,7 +257,7 @@
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status-EWP" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="1">Active</option>
-                                    <option value="0">In Active</option>
+                                    <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
                             </div>

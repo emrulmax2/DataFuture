@@ -280,5 +280,89 @@ import IMask from 'imask';
     });
     
 
+    /*Address Modal*/
+    if($('#addressModal').length > 0){
+        const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
+
+        const addressModalEl = document.getElementById('addressModal')
+        addressModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addressModal .acc__input-error').html('');
+            $('#addressModal .modal-body input').val('');
+            $('#addressModal input[name="prfix"]').val('');
+            $('#addressModal input[name="place"]').val('');
+        });
+
+        $('.addressPopupToggler').on('click', function(e){
+            e.preventDefault();
+
+            var $btn = $(this);
+            var $wrap = $btn.parents('.addressWrap');
+            var $addressFieldPrefix = $btn.siblings('.address_prfix_field').val();
+
+            var wrap_id = '#'+$wrap.attr('id');
+            $('#addressModal input[name="place"]').val(wrap_id);
+            $('#addressModal .modal-body input').val('');
+            $('#addressModal input[name="prfix"]').val($addressFieldPrefix);
+        });
+
+        $('#addressForm').on('submit', function(e){
+            e.preventDefault();
+            const form = document.getElementById('addressForm');
+            var $form = $(this);
+            var wrapid = $('input[name="place"]', $form).val();
+            var prfix = $('input[name="prfix"]', $form).val();
+
+            document.querySelector('#insertAddress').setAttribute('disabled', 'disabled');
+            document.querySelector('#insertAddress svg').style.cssText = 'display: inline-block;';
+
+            var err = 0;
+            $('input', $form).each(function(){
+                var $input = $(this);
+                var name = $input.attr('name');
+                if(name != 'address_line_2' && $input.val() == ''){
+                    err += 1;
+                }
+            })
+            
+            if(err > 0){
+                document.querySelector('#insertAddress').removeAttribute('disabled');
+                document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
+
+                $form.find('.mod-error').remove();
+                $form.find('.modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Please fill out all required fields.</div>');
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                setTimeout(function(){
+                    $form.find('.mod-error').remove();
+                }, 5000);
+            }else{
+                var htmls = '';
+                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_1', $form).val()+'</span><br/>';
+                htmls += '<input type="hidden" name="'+prfix+'address_line_1" value="'+$('#student_address_address_line_1', $form).val()+'"/>';
+                if($('#student_address_address_line_2', $form).val() != ''){
+                    htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_2', $form).val()+'</span><br/>';
+                    htmls += '<input type="hidden" name="'+prfix+'address_line_2" value="'+$('#student_address_address_line_2', $form).val()+'"/>';
+                }
+                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_city', $form).val()+'</span>, ';
+                htmls += '<input type="hidden" name="'+prfix+'city" value="'+$('#student_address_city', $form).val()+'"/>';
+                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_postal_zip_code', $form).val()+'</span>,<br/>';
+                htmls += '<input type="hidden" name="'+prfix+'post_code" value="'+$('#student_address_postal_zip_code', $form).val()+'"/>';
+                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_country', $form).val()+'</span><br/>';
+                htmls += '<input type="hidden" name="'+prfix+'country" value="'+$('#student_address_country', $form).val()+'"/>';
+
+                document.querySelector('#insertAddress').removeAttribute('disabled');
+                document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
+
+                addressModal.hide();
+                $(wrapid+' .addresses').fadeIn().addClass('active').html(htmls);
+                $(wrapid +' button.addressPopupToggler span').html('Update Address');
+            }
+        });
+    }
+
 })();
 

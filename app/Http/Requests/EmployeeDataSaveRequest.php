@@ -34,11 +34,24 @@ class EmployeeDataSaveRequest extends FormRequest
             //'ni_number' => "required",
             'nationality' => "required",
             'ethnicity' => "required",
-            'address_line_1' => "required",
-            'city' => "required",
-            'state' => "required",
-            'post_code' => "required",
-            'country' => "required",
+            'emp_address_line_1' => "required",
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'title.required' => "This field is required.",
+            'first_name.required' => "This field is required.",
+            'last_name.required' => "This field is required.",
+            'mobile.required' => "This field is required.",
+            'email.required' => "This field is required.",
+            'sex.required' => "This field is required.",
+            'date_of_birth.required' => "This field is required.",
+            //'ni_number' => "required",
+            'nationality.required' => "This field is required.",
+            'ethnicity.required' => "This field is required.",
+            'emp_address_line_1.required' => "Address can not be empty.",
         ];
     }
 }

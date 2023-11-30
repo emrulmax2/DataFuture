@@ -30,7 +30,7 @@ class StudentAwardingBodyDetails extends Model
     protected $dates = ['deleted_at'];
 
     public function setRegistrationDateAttribute($value) {  
-        $this->attributes['registration_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['registration_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getRegistrationDateAttribute($value) {
@@ -38,7 +38,7 @@ class StudentAwardingBodyDetails extends Model
     }
 
     public function setRegistrationExpireDateAttribute($value) {  
-        $this->attributes['registration_expire_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['registration_expire_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getRegistrationExpireDateAttribute($value) {

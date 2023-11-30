@@ -61,6 +61,21 @@ var courseCreationListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Venue",
+                    field: "venue_id",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Fees",
+                    field: "fees",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Reg. Fees",
+                    field: "reg_fees",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -281,6 +296,10 @@ var courseCreationListTable = (function () {
                     $('#editCourseCreationModal select[name="course_id"]').val(dataset.course_id ? dataset.course_id : '');
                     $('#editCourseCreationModal select[name="unit_length"]').val(dataset.unit_length ? dataset.unit_length : '');
                     $('#editCourseCreationModal input[name="slc_code"]').val(dataset.slc_code ? dataset.slc_code : '');
+
+                    $('#editCourseCreationModal select[name="venue_id"]').val(dataset.venue_id ? dataset.venue_id : '');
+                    $('#editCourseCreationModal input[name="fees"]').val(dataset.fees ? dataset.fees : '');
+                    $('#editCourseCreationModal input[name="reg_fees"]').val(dataset.reg_fees ? dataset.reg_fees : '');
                     
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);

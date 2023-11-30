@@ -161,6 +161,25 @@
                         <div class="mt-3">
                             <label for="slc_code" class="form-label">SLC Code</label>
                             <input id="slc_code" type="text" name="slc_code" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="venue_id" class="form-label">Venue</label>
+                            <select id="venue_id" name="venue_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($venues))
+                                    @foreach($venues as $vn)
+                                        <option value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div> 
+                        <div class="mt-3">
+                            <label for="fees" class="form-label">Fees(UK)</label>
+                            <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
+                            <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
                         </div>       
                     </div>
                     <div class="modal-footer">
@@ -255,6 +274,25 @@
                             <label for="edit_slc_code" class="form-label">SLC Code</label>
                             <input id="edit_slc_code" type="text" name="slc_code" class="form-control w-full">
                         </div> 
+                        <div class="mt-3">
+                            <label for="venue_id" class="form-label">Venue</label>
+                            <select id="venue_id" name="venue_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($venues))
+                                    @foreach($venues as $vn)
+                                        <option value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div> 
+                        <div class="mt-3">
+                            <label for="fees" class="form-label">Fees(UK)</label>
+                            <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
+                            <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
