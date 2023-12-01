@@ -291,7 +291,7 @@
                 <div class="col-span-6">
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                        <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_name }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($emergencyContacts->emergency_contact_name) ? $emergencyContacts->emergency_contact_name : '') }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Relation</div>
@@ -299,7 +299,7 @@
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Telephone</div>
-                        <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_telephone }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($emergencyContacts->emergency_contact_telephone) ? $emergencyContacts->emergency_contact_telephone : '') }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
