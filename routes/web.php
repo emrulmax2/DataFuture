@@ -157,6 +157,7 @@ use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\Settings\TermTypeController;
+use App\Http\Controllers\Student\SlcHistoryController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\TermDeclarationController;
 use App\Http\Controllers\User\UserHolidayController;
@@ -646,6 +647,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(AwardingBodyDetailController::class)->group(function() {
         Route::post('student/update-awarding-body-details', 'update')->name('student.update.awarding.body.details');
         Route::post('student/update-awarding-body-status', 'updateStatus')->name('student.update.awarding.body.status');
+    });
+
+    Route::controller(SlcHistoryController::class)->group(function() {
+        Route::post('student/get-reg-confirmation-details', 'getRegistrationConfirmationDetails')->name('student.get.registration.confirmation.details');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
