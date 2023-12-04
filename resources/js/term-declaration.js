@@ -33,6 +33,11 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Term Type",
+                    field: "type",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -221,6 +226,7 @@ var table = (function () {
                     if (response.status == 200) {
                         let dataset = response.data;
                         $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                        $('#editModal select[name="term_type_id"]').val(dataset.term_type_id ? dataset.term_type_id : '');
 
                         $('#editModal input[name="id"]').val(editId);
                     }

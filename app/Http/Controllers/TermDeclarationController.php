@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTermDeclarationRequest;
 use App\Http\Requests\UpdateTermDeclarationRequest;
 use App\Models\TermDeclaration;
+use App\Models\TermType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,7 +21,9 @@ class TermDeclarationController extends Controller
     {
         return view('pages/term-declaration/index', [
             'title' => 'Semester - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Semesters', 'href' => 'javascript:void(0);']]
+            'breadcrumbs' => [['label' => 'Semesters', 'href' => 'javascript:void(0);']],
+            
+            'termTypes' => TermType::all(),
         ]);
     }
 
@@ -64,6 +67,7 @@ class TermDeclarationController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'type' => $list->termType->name,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -91,6 +95,7 @@ class TermDeclarationController extends Controller
     {
         $data = TermDeclaration::create([
             'name'=> $request->name,
+            'term_type_id'=> $request->term_type_id,
             'created_by' => auth()->user()->id
         ]);
 
@@ -117,11 +122,11 @@ class TermDeclarationController extends Controller
      * @param  \App\Models\Term  $term
      * @return \Illuminate\Http\Response
      */
-    public function edit(TermDeclaration $term)
+    public function edit(TermDeclaration $term_declaration)
     {
         
-        if($term){
-            return response()->json($term);
+        if($term_declaration){
+            return response()->json($term_declaration);
         }else{
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         }
@@ -138,6 +143,7 @@ class TermDeclarationController extends Controller
     {
         $data = TermDeclaration::where('id', $term->id)->update([
             'name'=> $request->name,
+            'term_type_id'=> $request->term_type_id,
             'updated_by' => auth()->user()->id
         ]);
 
