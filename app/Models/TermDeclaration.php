@@ -22,4 +22,14 @@ class TermDeclaration extends Model
     {
         return $this->hasOne(User::class);
     }
+    
+    public function termType(){
+        return $this->belongsTo(TermType::class, 'term_type_id');
+    }
+
+    public function academicYear() {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+
 }

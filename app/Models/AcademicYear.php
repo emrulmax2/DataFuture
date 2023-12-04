@@ -56,4 +56,10 @@ class AcademicYear extends Model
             'id'
         );
     }
+
+    
+
+    public function termDeclarations() {
+        return $this->hasMany(TermDeclaration::class,'academic_year_id', 'id');
+    }
 }

@@ -61,6 +61,7 @@ class TermTypeController extends Controller
                     'name' => $list->name,
                     'code' => $list->code,
                     'is_active' => $list->is_active,
+                    'deleted_at' => $list->deleted_at
                 ];
                 $i++;
             endforeach;
