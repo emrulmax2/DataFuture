@@ -86,7 +86,18 @@
                             <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>       
+                        </div>      
+                        <div class="mt-3">       
+                            <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
+                            
+                            <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
+                                <option value="">Please Select</option>
+                                @foreach($termTypes as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach    
+                            </select>
+                            <div id="error-interview_result" class="term_type_id__input-error error-user text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal"
@@ -128,6 +139,17 @@
                             <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>                           
+                        </div>
+                        <div class="mt-3">       
+                            <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
+                            
+                            <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
+                                <option value="">Please Select</option>
+                                @foreach($termTypes as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach    
+                            </select>
+                            <div id="error-interview_result" class="term_type_id__input-error error-user text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
