@@ -147,6 +147,7 @@ export default defineConfig({
                 "resources/js/employee-appraisal-documents.js",
                 "resources/js/hr-upcoming-appraisal.js",
                 "resources/js/hr-visa-expiry.js",
+                "resources/js/hr-passport-expiry.js",
                 
                 "resources/js/tutor-dashboard.js",
                 "resources/js/attendance-feed.js",

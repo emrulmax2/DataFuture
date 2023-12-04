@@ -13,6 +13,9 @@ class Plan extends Model
     protected $fillable = [
         'course_id',
         'module_creation_id',
+        'instance_term_id',
+        'academic_year_id',
+        'course_creation_id',
         'venue_id',
         'rooms_id',
         'group_id',

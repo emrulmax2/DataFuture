@@ -38,7 +38,7 @@
                                     <th class="whitespace-nowrap w-20">#</th>
                                     <th class="whitespace-nowrap">NAME</th>
                                     <th class="text-center whitespace-nowrap">UPLOADS</th>
-                                    <th class="text-center whitespace-nowrap">UPDATED AT</th>
+                                    <th class="text-center whitespace-nowrap">CREATED BY</th>
                                     <th class="text-center whitespace-nowrap">ACTIONS</th>
                                 </tr>
                             </thead>
@@ -51,7 +51,11 @@
                                 } else {
                                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                 }
-                                
+
+                                dd($task->task->user);
+
+                                $FullName = $task->task->user->employee->full_name;
+                                $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
                                 $rand = rand(0,1);
                                 @endphp
                                     <tr class="intro-x">
@@ -73,11 +77,15 @@
                                                         <a target="_blank" href="{{ Storage::disk('google')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
                                                             
                                                             @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
-                                                                <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('google')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
+                                                                <img alt="{{ display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('google')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
                                                             @else
                                                                 <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">             
                                                             @endif   
                                                         </a>
+                                                        @php
+                                                            $FullName = $upload->createdBy->employee->full_name;
+                                                            $lastUpdate = $upload->created_at;
+                                                        @endphp
                                                     @endForeach
                                                 @else
                                                     <div class="font-medium text-slate-400">
@@ -87,20 +95,30 @@
                                             </div>
                                         </td>
                                         
-                                        <td class="w-100">
-                                            <div class="flex items-center justify-center">
-                                                @if($task->task->updated_at)
-                                                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>{{ date("F jS, Y",strtotime($task->task->updated_at)) }}
-                                                @endif
+                                        <td>
+                                            <div class="flex items-center px-5 py-5">
+                                                <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
+                                                    <img src="https://enigma-laravel.left4code.com/build/assets/profile-3-614e7dcb.jpg" alt="Midone Tailwind HTML Admin Template">
+                                                </div>
+                                                <div class="ml-4 mr-auto">
+                                                    <div class="font-medium">{{ $FullName }}</div>
+                                                    <div class="mt-0.5 text-xs text-slate-500">
+                                                        {{ date("F jS, Y",strtotime($lastUpdate)) }}
+                                                    </div>
+                                                </div>
+                                                <div class="text-success">
+                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="table-report__action w-56">
                                             <div class="flex justify-center items-center">
                                                 <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" data-plantaskid="{{ $task->task->id }}" class="flex items-center mr-3 task-upload__Button" href="">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i> upload
+                                                    <i data-lucide="upload-cloud" class="w-4 h-4 mr-1"></i> upload
                                                 </button>
                                             </div>
                                         </td>
+
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -112,20 +130,6 @@
             </div>
         </div>
     </div>
-    {{-- <div data-tw-merge class="accordion-item bg-slate-200 py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
-        <div class="accordion-header" id="faq-accordion-6">
-            <button data-tw-merge data-tw-toggle="collapse" data-tw-target="#faq-accordion-6-collapse" type="button" aria-expanded="true" aria-controls="faq-accordion-6-collapse" class="accordion-button outline-none inline-flex justify-between py-4 -my-4 font-medium w-full text-left dark:text-slate-400 [&amp;:not(.collapsed)]:text-primary [&amp;:not(.collapsed)]:dark:text-slate-300 collapsed"><div class="flex-none">Introduction</div> <div class="accordian-lucide flex-none"><i data-lucide="plus" class="w-4 h-4"></i></div></button>
-        </div>
-        <div id="faq-accordion-6-collapse" aria-labelledby="faq-accordion-6" class="accordion-collapse collapse mt-3 text-slate-700 leading-relaxed dark:text-slate-400 [&.collapse:not(.show)]:hidden [&.collapse.show]:visible">
-            <div data-tw-merge class="accordion-body leading-relaxed text-slate-600 dark:text-slate-500 leading-relaxed text-slate-600 dark:text-slate-500">
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
-                standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make
-                a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
-                remaining essentially unchanged.
-            
-            </div>
-        </div>
-    </div> --}}
     @foreach($planDateList as $dateList)
     <div data-tw-merge class="accordion-item bg-slate-200 py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
         <div class="accordion-header" id="faq-accordion-7">

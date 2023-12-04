@@ -483,10 +483,12 @@ Route::middleware('auth')->group(function() {
 
         Route::post('plans/get-modules', 'getModulesByCourseTerms')->name('class.plan.get.modules.by.course.terms');
         Route::post('plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
+        Route::post('plans/get-courselist', 'getCourseListByAcademicYear')->name('course.list.by.academic.instance');
     });
 
     Route::controller(PlanTreeController::class)->group(function() {
         Route::get('plans/tree', 'index')->name('plans.tree');
+        Route::post('plans/tree/get-semesters', 'getIntakSemester')->name('plans.tree.get.semester');
         Route::post('plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
         Route::post('plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
         Route::post('plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
@@ -1205,7 +1207,8 @@ Route::middleware('auth')->group(function() {
         Route::resource('term-type', TermTypeController::class);
 
         Route::controller(TermTypeController::class)->group(function() {
-            Route::get('term-type-list', 'list')->name('term-type.list');        
+            Route::get('term-type-list', 'list')->name('term-type.list');     
+            Route::post('term-type/{id}/restore', 'restore')->name('term-type.restore');
         });
     });
     Route::controller(AcademicYearController::class)->group(function() {

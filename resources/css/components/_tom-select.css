@@ -44,8 +44,10 @@
     @apply z-50 text-sm shadow-sm border-slate-200 rounded;
     .optgroup-header {
       padding: 9px 10px;
+      background: #f1f5f9;
       @apply font-medium;
     }
+    
     .option {
       padding: 9px 13px;
       .highlight {
@@ -118,6 +120,7 @@
     @apply z-50 text-sm shadow-sm border-slate-200 rounded;
     .optgroup-header {
       padding: 9px 10px;
+      background: #f1f5f9;
       @apply font-medium;
     }
     .option {
