@@ -54,6 +54,7 @@ class CourseCreationInstanceController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'academic_year_id' => $list->academic_year_id,
                     'academic_year' => $list->year->name,
                     'start_date' => $list->start_date,
                     'end_date' => $list->end_date,

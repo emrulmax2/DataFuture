@@ -11,19 +11,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="name" class="form-label">Term Name <span class="text-danger">*</span></label>
-                            <input id="name" name="name" type="text" class="form-control" placeholder="Term Name">    
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-6">
-                            <label for="term" class="form-label">Term <span class="text-danger">*</span></label>
-                            <select id="term" name="term" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="Autumn Term">Autumn Term</option>
-                                <option value="Spring Term">Spring Term</option>
-                                <option value="Summer Term">Summer Term</option>
-                                <option value="Winter Term">Winter Term</option>
+                        
+                        <div class="col-span-12">
+                            <label for="term_declaration_id" class="form-label">Term Name <span class="text-danger">*</span></label>
+                            <select id="term_declaration_id" name="term_declaration_id" class="lccTom lcc-tom-select w-full">
+                                    <option value="">Please Select</option>
+                                @foreach($termDeclarations as $termDeclaration)
+                                    <option value="{{ $termDeclaration->id }}">{{ $termDeclaration->name }} - {{ $termDeclaration->termType->name }}</option>
+                                @endforeach
                             </select>
                             <div class="acc__input-error error-term text-danger mt-2"></div>
                         </div>
@@ -112,19 +107,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="name" class="form-label">Term Name <span class="text-danger">*</span></label>
-                            <input id="name" name="name" type="text" class="form-control" placeholder="Term Name">    
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-6">
-                            <label for="term" class="form-label">Term <span class="text-danger">*</span></label>
-                            <select id="term" name="term" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="Autumn Term">Autumn Term</option>
-                                <option value="Spring Term">Spring Term</option>
-                                <option value="Summer Term">Summer Term</option>
-                                <option value="Winter Term">Winter Term</option>
+                        
+                        <div class="col-span-12">
+                            <label for="edit_term_declaration_id" class="form-label">Term Name <span class="text-danger">*</span></label>
+                            <select id="edit_term_declaration_id" name="term_declaration_id" class=" lccTom lcc-tom-select w-full">
+                                    <option value="">Please Select</option>
+                                @foreach($termDeclarations as $termDeclaration)
+                                    <option value="{{ $termDeclaration->id }}">{{ $termDeclaration->name }} - {{ $termDeclaration->termType->name }}</option>
+                                @endforeach
                             </select>
                             <div class="acc__input-error error-term text-danger mt-2"></div>
                         </div>

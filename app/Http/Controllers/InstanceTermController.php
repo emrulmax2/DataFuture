@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InstanceTerm;
 use Illuminate\Http\Request;
 use App\Http\Requests\InstanceTermRequest;
+use App\Models\TermDeclaration;
 use App\Models\User;
 
 class InstanceTermController extends Controller
@@ -56,8 +57,8 @@ class InstanceTermController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'name' => $list->name,
-                    'term' => $list->term,
+                    'name' =>$list->termDeclaration->name,
+                    'term' => $list->termDeclaration->termType->name,
                     'session_term' => 'Term '.$list->session_term,
                     'start_date' => $list->start_date,
                     'end_date' => $list->end_date,

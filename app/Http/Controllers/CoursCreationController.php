@@ -9,6 +9,7 @@ use App\Models\CourseCreation;
 use App\Http\Requests\CourseCreationsRequest;
 use App\Models\AcademicYear;
 use App\Models\CourseQualification;
+use App\Models\TermDeclaration;
 use App\Models\Venue;
 
 class CoursCreationController extends Controller
@@ -117,12 +118,13 @@ class CoursCreationController extends Controller
             ],
             'creation' => CourseCreation::find($id),
             'academic' => AcademicYear::all(),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
         ]);
     }
 
-    public function edit($id){
-        $data = CourseCreation::find($id);
+    public function edit($id) {
 
+        $data = CourseCreation::find($id);
         if($data){
             return response()->json($data);
         }else{
