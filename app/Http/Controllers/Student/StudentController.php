@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 use App\Models\Applicant;
 use App\Models\ApplicantTemporaryEmail;
+use App\Models\AttendanceCode;
 use App\Models\AwardingBody;
 use App\Models\ComonSmtp;
 use App\Models\ConsentPolicy;
@@ -394,15 +395,22 @@ class StudentController extends Controller
     }
 
     public function slcHistory($studentId){
+        $student = Student::find($studentId);
+        $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
+        $firstCreationInstance = CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('id', 'ASC')->get()->first();
+
         return view('pages.students.live.slc-history', [
             'title' => 'Live Students - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student SLC History', 'href' => 'javascript:void(0);'],
             ],
-            'student' => Student::find($studentId),
+            'student' => $student,
             'ac_years' => AcademicYear::orderBy('from_date', 'ASC')->get(),
-            'reg_status' => SlcRegistrationStatus::where('active', 1)->get()
+            'active_ac_year' => (isset($firstCreationInstance->academic_year_id) && $firstCreationInstance->academic_year_id > 0 ? $firstCreationInstance->academic_year_id : 0),
+            'reg_status' => SlcRegistrationStatus::where('active', 1)->get(),
+            'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
+            'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get()
         ]);
     }
 }

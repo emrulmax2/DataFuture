@@ -167,7 +167,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($ac_years) && $ac_years->count() > 0)
                                         @foreach($ac_years as $year)
-                                            <option value="{{ $year->id }}">{{ $year->name }}</option>
+                                            <option {{ ($active_ac_year == $year->id ? 'Selected' : '') }} value="{{ $year->id }}">{{ $year->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -183,10 +183,14 @@
                                 <div class="acc__input-error error-registration_year text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6">
-                                {{ $student->crel->creation->instance }}
-                                <label for="instance_year" class="form-label">Instance Year <span class="text-danger">*</span></label>
-                                <select id="instance_year" class="form-control w-full" name="instance_year">
+                                <label for="course_creation_instance_id" class="form-label">Instance Year <span class="text-danger">*</span></label>
+                                <select id="course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
                                     <option value="">Please Select</option>
+                                    @if(!empty($instances) && $instances->count())
+                                        @foreach($instances as $inst)
+                                            <option value="{{ $inst->id }}">{{ $inst->year->name }}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <div class="acc__input-error error-instance_year text-danger mt-2"></div>
                             </div>
@@ -199,9 +203,6 @@
                                             <option value="{{ $rst->id }}">{{ $rst->name }}</option>
                                         @endforeach
                                     @endif
-                                    <option value="No">No</option>
-                                    <option value="RCNR">RCNR</option>
-                                    <option value="NA">NA</option>
                                 </select>
                                 <div class="acc__input-error error-slc_registration_status_id text-danger mt-2"></div>
                             </div>
@@ -213,6 +214,55 @@
                                 <label for="note" class="form-label">Do you want to confirm Attendance Now?</label>
                                 <div class="form-check form-switch">
                                     <input id="confirm_attendance" name="confirm_attendance" value="1" class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="col-span-12 confirmAttendanceArea" style="display: none;">
+                                <div class="grid grid-cols-12 gap-3">
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="note" class="form-label">Self Funded?</label>
+                                        <div class="form-check form-switch">
+                                            <input id="is_self_funded" name="is_self_funded" value="1" class="form-check-input" type="checkbox">
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="self_funded_year" class="form-label">Year</label>
+                                        <select id="self_funded_year" class="form-control w-full" name="self_funded_year">
+                                            <option value="">Please Select</option>
+                                            @if(!empty($ac_years) && $ac_years->count() > 0)
+                                                @foreach($ac_years as $year)
+                                                    <option value="{{ $year->id }}">{{ $year->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="instance_fees" class="form-label">Instance Fees</label>
+                                        <input id="instance_fees" readonly class="form-control w-full" name="instance_fees" type="number" step="any">
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="attendance_term" class="form-label">Selected Attendance Terms</label>
+                                        <select id="attendance_term" class="form-control w-full" name="attendance_term">
+                                            <option value="">Please Select</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="session_term" class="form-label">Attendance Session Term</label>
+                                        <select id="session_term" readonly class="form-control w-full" name="session_term">
+                                            <option value="">Please Select</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-12"></div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="attendance_code_id" class="form-label">Attendance Code</label>
+                                        <select id="attendance_code_id" readonly class="form-control w-full" name="attendance_code_id">
+                                            <option value="">Please Select</option>
+                                            @if(!empty($attendanceCodes) && $attendanceCodes->count() > 0)
+                                                @foreach($attendanceCodes as $ac)
+                                                    <option data-coc-required="{{ $ac->coc_required }}" value="{{ $ac->id }}">{{ $ac->code }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -234,7 +284,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="studen_idt" value="{{ $student->id }}"/>
+                        <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
                     </div>
                 </div>
             </form>

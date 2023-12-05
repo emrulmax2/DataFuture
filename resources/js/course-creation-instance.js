@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import IMask from 'imask';
+import TomSelect from "tom-select";
 
 
 
@@ -221,7 +222,7 @@ var courseCreationINListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal"  data-tw-target="#instancetermAddModal" class="addInstanceTermBtn btn btn-linkedin text-white btn-rounded ml-1 p-0 px-4 w-auto h-9"><i data-lucide="plus" class="w-4 h-4"></i> Add Term</button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-academic_year_id="' +cell.getData().academic_year_id +'" data-tw-toggle="modal"  data-tw-target="#instancetermAddModal" class="addInstanceTermBtn btn btn-linkedin text-white btn-rounded ml-1 p-0 px-4 w-auto h-9"><i data-lucide="plus" class="w-4 h-4"></i> Add Term</button>';
                             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCourseCreationInstModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             if(cell.getData().has_terms < 1){
                                 btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
@@ -304,6 +305,7 @@ var courseCreationINListTable = (function () {
 
 
 (function () {
+
     if ($("#courseCreationInstTable").length) {
         // Init Table
         courseCreationINListTable.init();
@@ -590,6 +592,39 @@ var courseCreationINListTable = (function () {
 })();
 
 (function () {
+
+    var tomSelectArray = [];
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        persist: false,
+        create: true,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    
+    //var employment_status = new TomSelect('#employment_status', tomOptions);
+
+    $('.lccTom').each(function(){
+        if ($(this).attr("multiple") !== undefined) {
+            tomOptions = {
+                ...tomOptions,
+                plugins: {
+                    ...tomOptions.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                }
+            };
+        }
+        tomSelectArray.push(new TomSelect(this, tomOptions));
+    })
+
     if($('#courseCreationInstTable').length > 0){
         $(".datepicker.itdp").each(function () {
             var maskOptions = {
@@ -601,7 +636,14 @@ var courseCreationINListTable = (function () {
         $('#courseCreationInstTable').on('click', '.addInstanceTermBtn', function(){
             var $this = $(this);
             var dataID = $this.attr('data-id');
+            var academicYearId = $this.attr('data-academic_year_id');
             $('#instancetermAddModal input[name="course_creation_instance_id"]').val(dataID);
+
+            $.each(tomSelectArray,(i) =>{
+                
+                    tomSelectArray[i].setValue("")
+                
+            });
         });
     
         const instanceSuccModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -684,7 +726,7 @@ var courseCreationINListTable = (function () {
         $("#courseCreationInstTable").on("click", ".editTermBtn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
-
+            
             axios({
                 method: "get",
                 url: route("instance.term.edit", editId),
@@ -692,8 +734,18 @@ var courseCreationINListTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
-                    $('#instancetermEditModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                    $('#instancetermEditModal select[name="term"]').val(dataset.term ? dataset.term : '');
+                    console.log(tomSelectArray);
+                    document.querySelector('select[name="term_declaration_id"]').tomselect.setValue(dataset.term_declaration_id)
+                    //$('#instancetermEditModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                    $.each(tomSelectArray,(i) =>{
+                        if(tomSelectArray[i].inputId == "edit_term_declaration_id") {
+                            tomSelectArray[i].setValue(dataset.term_declaration_id);
+                        } else {
+                            tomSelectArray[i].clear()
+                        }
+                    });
+                    
+                    $('#instancetermEditModal select[name="term_declaration_id"]').val(dataset.term_declaration_id ? dataset.term_declaration_id : '');
                     $('#instancetermEditModal select[name="session_term"]').val(dataset.session_term ? dataset.session_term : '');
                     $('#instancetermEditModal input[name="start_date"]').val(dataset.start_date ? dataset.start_date : '');
                     $('#instancetermEditModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '');

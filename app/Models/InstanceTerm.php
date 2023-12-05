@@ -12,8 +12,7 @@ class InstanceTerm extends Model
 
     protected $fillable = [
         'course_creation_instance_id',
-        'term',
-        'name',
+        'term_declaration_id',
         'session_term',
         'start_date',
         'end_date',
@@ -78,4 +77,9 @@ class InstanceTerm extends Model
     public function getRevisionEndDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
+
+    public function termDeclaration(){
+        return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
+
 }

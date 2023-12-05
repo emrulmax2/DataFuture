@@ -24,8 +24,7 @@ class InstanceTermRequest extends FormRequest
     public function rules()
     {
         return [
-            'term' => 'required',
-            'name' => 'required',
+            'term_declaration_id' => 'required',
             'session_term' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
