@@ -28,7 +28,7 @@ var upcomingAppraisalListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '<a href="'+cell.getData().url+'" class="flex justify-start items-center">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
                                 html += '</div>';
                                 html += '<div>';
@@ -104,13 +104,17 @@ var upcomingAppraisalListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
+                            
                             if(cell.getData().notes != null){
                                 btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#viewAppraisalNoteModal" type="button" class="view_note btn-rounded btn btn-twitter text-white p-0 w-9 h-9 ml-1"><i data-lucide="sticky-note" class="w-4 h-4"></i></button>';
                             }
+
                             btns +='<a href="'+route('employee.appraisal.documents', [cell.getData().employee_id, cell.getData().id])+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="folder-up" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editAppraisalModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                        
                         }  else if (cell.getData().deleted_at != null) {
+
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
