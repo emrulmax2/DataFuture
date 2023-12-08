@@ -175,6 +175,13 @@ class DahsboardController extends Controller
         ]);
     }
 
+    public function showNew(){
+        return view('pages.tutor.dashboard.index-new', [
+            'title' => 'Tutor Dashboard New - LCC Data Future Managment',
+            'breadcrumbs' => []
+        ]);
+    }
+
     public function attendanceFeedShow(User $tutor,PlansDateList $plandate)
     {
         $attendanceInformation = AttendanceInformation::where("plans_date_list_id",$plandate->id)->get()->first();

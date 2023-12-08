@@ -158,7 +158,9 @@ use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\Settings\TermTypeController;
+use App\Http\Controllers\Student\SlcAgreementController;
 use App\Http\Controllers\Student\SlcAttendanceController;
+use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\TermDeclarationController;
@@ -664,6 +666,16 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-attendance', 'update')->name('student.update.slc.attendance');
         Route::post('student/populate-slc-attendance', 'populateAttendanceForm')->name('student.slc.attendance.populate');
         Route::post('student/store-slc-attendance', 'store')->name('student.store.slc.attendance');
+    });
+
+    Route::controller(SlcAgreementController::class)->group(function() {
+        Route::post('student/edit-slc-agreement', 'edit')->name('student.edit.slc.agreement');
+        Route::post('student/update-slc-agreement', 'update')->name('student.update.slc.agreement');
+    });
+
+    Route::controller(SlcInstallmentController::class)->group(function() {
+        Route::post('student/edit-slc-installment', 'edit')->name('student.edit.slc.intallment');
+        Route::post('student/update-slc-installment', 'update')->name('student.update.slc.intallment');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
@@ -1713,6 +1725,8 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
+        
+        Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
     });
 
     // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  
