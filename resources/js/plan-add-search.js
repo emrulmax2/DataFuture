@@ -202,7 +202,7 @@ var classPlanListTable = (function () {
         },
     };
     var tomSelectList = []
-    $('.lccTom').each(function(){
+    $('.lccTom2').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
                 ...tomOptions,
@@ -216,13 +216,7 @@ var classPlanListTable = (function () {
         }
         tomSelectList.push(new TomSelect(this, tomOptions));
     })
-    // function mySort(obj, key) {
-    //     obj.sort(function(a, b) {
-    //       return (b[key] > a[key]) ? 1 : ((b[key] < a[key]) ? -1 : 0);
-    //     });
-    //     console.log(data);
-    // }
-    // mySort(des.optionsGroups, 'class');
+
     if($('#academic-year').length > 0) {
         // On reset filter form
         $("#academic-year").on("change", function (event) {
@@ -245,30 +239,13 @@ var classPlanListTable = (function () {
 
                     tomSelectList[0].enable();
                     document.querySelector("svg#academic-loading").style.cssText = "display: none;";
-                    //colsole.log(response.data);
+            
                     if(response.status == 200){
                         tomSelectList[0].enable();
                         tomSelectList[1].clearOptions();    
-                        // tomSelectList[1].addOption({
-                            
-                        //      text : "Please Select",
-                        //      value:0,
-                            
-                        //  });
-                        // tomSelectList[1].addOptionGroup(1, {
-                        //     label: "MURGI",
-                        // });
-                        // tomSelectList[1].addOption({
-                        //     value: 2,
-                        //     text: "KALA MURGI",
-                        //     optgroup: 1,
-                        // });
-                        
-                        
+
                         $.each(response.data, function(index, des) {
                             let optionGroupList = des.semesters;
-                            
-                            //let optionLength = Object.keys(optionGroupList).length;
                             
                             $.each(optionGroupList, function(index, group) {
                                
@@ -278,12 +255,8 @@ var classPlanListTable = (function () {
                                 });
                             }); 
                             
-                            // let arrayObject = des.optionsGroups
-                            // jsonObject.arrayObject.sort(sortObjects);
-                            // console.log(arrayObject);
-                            
                             $.each(des.optionsGroups, function(index, optionList) {
-                                //console.log(optionList.name);
+                            
                                     
                                     tomSelectList[1].addOption({
                                         value: optionList.id,

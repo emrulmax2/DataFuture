@@ -18,6 +18,11 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\PlansUpdateRequest;
+use App\Models\AcademicYear;
+use App\Models\CourseCreation;
+use App\Models\CourseCreationInstance;
+use App\Models\TermDeclaration;
+use App\Models\TermType;
 
 class PlanController extends Controller
 {
@@ -284,6 +289,7 @@ class PlanController extends Controller
 
     public function add()
     {
+        
         return view('pages/plan/add', [
             'title' => 'Add Class Plans - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -291,6 +297,9 @@ class PlanController extends Controller
                 ['label' => 'Add Plan', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::all(),
+            'academic_years' =>AcademicYear::orderBy('to_date','desc')->get(),
+            'termDeclaration' => TermDeclaration::all(),
+            'termType' => TermType::all(),
             'terms' => InstanceTerm::all(),
         ]);
     }
@@ -315,6 +324,11 @@ class PlanController extends Controller
         $module_creation_id = $request->module_creation_id;
         $instance_term_id = $request->instance_term_id;
         $course_id = $request->course_id;
+        $instanceTerm = InstanceTerm::find($instance_term_id);
+        $term_declaration_id = $instanceTerm->term_declaration_id;
+        $courseCreationInstanceId = $instanceTerm->course_creation_instance_id;
+        $courseCreationInstance = CourseCreationInstance::find($courseCreationInstanceId);
+
 
         $days = [ 1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
         $insertCount = 0;
@@ -334,6 +348,10 @@ class PlanController extends Controller
                             $data = [];
                             $data['course_id'] = (isset($box['course']) ? $box['course'] : $course_id);
                             $data['module_creation_id'] = $module_creation_id;
+                            $data['module_creation_id'] = $module_creation_id;
+                            $data['term_declaration_id'] = $term_declaration_id;
+                            $data['academic_year_id'] = $courseCreationInstance->academic_year_id;
+                            $data['course_creation_id'] = $courseCreationInstance->course_creation_id;
                             $data['venue_id'] = $venue;
                             $data['rooms_id'] = $room;
                             $data['group_id'] = (isset($box['group']) ? $box['group'] : null);
@@ -821,4 +839,70 @@ class PlanController extends Controller
             return response()->json(['Message' => 'Something went wrong. Please try latter.'], 422);
         }
     }
+
+
+    public function getCourseListByAcademicYear(Request $request) {
+        
+        $academicYear = $request->academicYear;
+        $data = [];
+        
+        $courseCreationId = isset($request->course) ? $request->course : null;
+        $termDeclarationId = isset($request->termDeclarationId) ? $request->termDeclarationId : null;
+        $termTypeID = isset($request->termTypeID) ? $request->termTypeID : null;
+        if(!$courseCreationId) {
+            $academicYear = AcademicYear::find($request->academicYear);
+            $crcInstances = $academicYear->crc_instance()->orderBy('end_date','desc')->get();
+            foreach($crcInstances as $courseData):
+                $courseCreationFind = CourseCreation::find($courseData->course_creation_id);
+                // $data["courses"][$courseCreationFind->course->id] = ["id"=>$courseCreationFind->course->id, "name"=> $courseCreationFind->course->name ];
+                $data["semesters"][$courseCreationFind->semester->id] = ["id"=>$courseCreationFind->semester->id, "name"=> $courseCreationFind->semester->name ];
+            
+                $data["optionsGroups"][$courseData->course_creation_id] = ["id"=>$courseData->course_creation_id, "name"=> $courseCreationFind->course->name,"class"=>$courseCreationFind->semester->id, ];
+
+            endforeach;
+            
+        } else {
+            
+            $query = DB::table('instance_terms as termlist')
+            ->select('termlist.*')
+            ->leftJoin('course_creation_instances as ci', 'ci.id', '=', 'termlist.course_creation_instance_id')
+            ->leftJoin('course_creations as cc', 'cc.id', '=', 'ci.course_creation_id')
+            ->leftJoin('academic_years as ay', 'ay.id', '=', 'ci.academic_year_id')
+            ->leftJoin('courses as course', 'course.id', '=', 'cc.course_id')
+            ->where('ay.id', '=', $academicYear)
+            ->where('cc.id', '=', $courseCreationId);
+
+            if($termDeclarationId) {
+                $query = $query->where('termlist.term_declaration_id', '=', $termDeclarationId);
+                //  
+            }
+            
+            $Query = $query->get();
+
+            if($termDeclarationId) {
+                foreach($Query as $list):
+                    $courseId =CourseCreation::find($courseCreationId)->course->id;
+                    $data = ["instancetermId" => $list->id,"courseId"=>$courseId];
+                endforeach;
+
+            } else {
+
+                foreach($Query as $list):
+                    if(!isset($data[$list->term_declaration_id])) {
+                        $declaredTerm = TermDeclaration::find($list->term_declaration_id);
+                        
+                        $data[$declaredTerm->id] = ["id"=>$declaredTerm->id, "name"=> $declaredTerm->name . " - " .$declaredTerm->termType->name  ];
+                    }
+                endforeach;
+
+            }
+                
+        }
+
+        
+
+        return response()->json([$data]);
+    }
+
+    
 }

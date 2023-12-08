@@ -12,10 +12,11 @@ var classPlanTreeListTable = (function () {
         let instance_term = $("#classPlanTreeListTable").attr('data-term');
         let group = $("#classPlanTreeListTable").attr('data-group');
         let year = $("#classPlanTreeListTable").attr('data-year');
+        let attendanceSemester = $("#classPlanTreeListTable").attr('data-attendanceSemester');
 
         let tableContent = new Tabulator("#classPlanTreeListTable", {
             ajaxURL: route("plans.tree.list"),
-            ajaxParams: { courses: courses, instance_term: instance_term, group: group, year: year},
+            ajaxParams: { courses: courses, instance_term: instance_term, group: group, year: year, attendanceSemester: attendanceSemester},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -39,6 +40,11 @@ var classPlanTreeListTable = (function () {
                     cellClick:function(e, cell){
                         cell.getRow().toggleSelect();
                     }
+                },
+                {
+                    title: "ID",
+                    field: "id",
+                    headerHozAlign: "left",
                 },
                 {
                     title: "Module",
@@ -217,7 +223,7 @@ var classPlanTreeListTable = (function () {
             var academicyear = $link.attr('data-yearid');
             axios({
                 method: "post",
-                url: route('plans.tree.get.terms'),
+                url: route('plans.tree.get.semester'),
                 data: {academicyear : academicyear},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -267,11 +273,11 @@ var classPlanTreeListTable = (function () {
         }else{
             $('svg', $link).fadeIn();
             var academicYearId = $link.attr('data-yearid');
-            var instanceTermId = $link.attr('data-termid');
+            var attendanceSemester = $link.attr('data-attendanceSemester');
             axios({
                 method: "post",
                 url: route('plans.tree.get.courses'),
-                data: {academicYearId : academicYearId, instanceTermId : instanceTermId},
+                data: {academicYearId : academicYearId, attendanceSemester : attendanceSemester},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $('svg', $link).fadeOut();
@@ -320,12 +326,13 @@ var classPlanTreeListTable = (function () {
         }else{
             $('svg', $link).fadeIn();
             var courseId = $link.attr('data-courseid');
-            var termId = $link.attr('data-termid');
+            //var termId = $link.attr('data-termid');
+            var attendanceSemester = $link.attr('data-attendanceSemester');
             var academicYearId = $link.attr('data-yearid');
             axios({
                 method: "post",
                 url: route('plans.tree.get.groups'),
-                data: {courseId : courseId, termId : termId, academicYearId : academicYearId},
+                data: {courseId : courseId, attendanceSemester : attendanceSemester, academicYearId : academicYearId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -374,11 +381,15 @@ var classPlanTreeListTable = (function () {
             var courseId = $link.attr('data-courseid');
             var termId = $link.attr('data-termid');
             var academicYearId = $link.attr('data-yearid');
+            var attendancesemester = $link.attr('data-attendancesemester');
             var groupId = $link.attr('data-groupid');
+            var groupId = $link.attr('data-groupid');
+
+
             axios({
                 method: "post",
                 url: route('plans.tree.get.module'),
-                data: {courseId : courseId, termId : termId, academicYearId : academicYearId, groupId : groupId},
+                data: {courseId : courseId, termId : termId, attendancesemester: attendancesemester, academicYearId : academicYearId, groupId : groupId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
