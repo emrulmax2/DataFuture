@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DahsboardController extends Controller
+class DashboardController extends Controller
 {
     
     public function list(Request $request) {
