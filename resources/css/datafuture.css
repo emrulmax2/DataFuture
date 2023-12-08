@@ -1111,3 +1111,20 @@
 .pendingDay{
     background-image: repeating-linear-gradient(180deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 6px );
 }
+
+@media (min-width: 1200px){
+    .modal .modal-dialog.modal-xl.modal-xl-extended {
+        width: 65%;
+        min-width: 900px;
+    }
+}
+
+.bg-danger-soft{
+    background-color: rgb(var(--color-danger) / .1) !important;
+}
+.bg-warning-soft{
+    background-color: rgb(var(--color-warning) / .2) !important;
+}
+.bg-success-soft{
+    background-color: rgb(var(--color-success) / .2) !important;
+}

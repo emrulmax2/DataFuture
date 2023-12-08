@@ -111,6 +111,7 @@ use App\Http\Controllers\HR\EmployeePortalController;
 use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
+use App\Http\Controllers\Personal_Tutor\DashboardController;
 use App\Http\Controllers\PlanContentUploadController;
 use App\Http\Controllers\PlanParticipantController;
 use App\Http\Controllers\PlanTaskController;
@@ -157,7 +158,8 @@ use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\Settings\TermTypeController;
-use App\Http\Controllers\Student\SlcHistoryController;
+use App\Http\Controllers\Student\SlcAttendanceController;
+use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\TermDeclarationController;
 use App\Http\Controllers\User\UserHolidayController;
@@ -529,6 +531,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/id-filter', 'StudentIDFilter')->name('student.filter.id');
 
         Route::get('student/slc-history/{id}', 'slcHistory')->name('student.slc.history');
+        Route::get('student/accounts/{id}', 'accounts')->name('student.accounts');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -649,8 +652,18 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-awarding-body-status', 'updateStatus')->name('student.update.awarding.body.status');
     });
 
-    Route::controller(SlcHistoryController::class)->group(function() {
+    Route::controller(SlcRegistrationController::class)->group(function() {
         Route::post('student/get-reg-confirmation-details', 'getRegistrationConfirmationDetails')->name('student.get.registration.confirmation.details');
+        Route::post('student/store-slc-registration', 'store')->name('student.store.registration');
+        Route::post('student/edit-slc-registration', 'edit')->name('student.edit.registration');
+        Route::post('student/update-slc-registration', 'update')->name('student.update.registration');
+    });
+
+    Route::controller(SlcAttendanceController::class)->group(function() {
+        Route::post('student/edit-slc-attendance', 'edit')->name('student.edit.slc.attendance');
+        Route::post('student/update-slc-attendance', 'update')->name('student.update.slc.attendance');
+        Route::post('student/populate-slc-attendance', 'populateAttendanceForm')->name('student.slc.attendance.populate');
+        Route::post('student/store-slc-attendance', 'store')->name('student.store.slc.attendance');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
@@ -1695,7 +1708,6 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(TutorDashboard::class)->group(function() {
-
         Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
         Route::get('tutor-dashboard/term/list', 'tutorTermShowsList')->name('tutor-dashboard.term.list'); 
         Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
@@ -1790,6 +1802,11 @@ Route::middleware('auth')->group(function() {
 
         Route::get('term-declaration-list', 'list')->name('term-declaration.list'); 
         
+    });
+
+
+    Route::controller(DashboardController::class)->group(function() {
+        Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
     });
     
 });

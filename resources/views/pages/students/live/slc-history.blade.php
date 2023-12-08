@@ -19,62 +19,125 @@
                 <div class="font-medium text-base">SLC History</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button>
-            </div>
-        </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-AN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-AN" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-AN" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-AN" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentSlcRetistrationTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button>
             </div>
         </div>
     </div>
 
-    <!-- BEGIN: Add Modal -->
+    @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
+        @foreach($slcRegistrations as $regs)
+            <div class="intro-y box p-5 mt-5">
+                <div class="grid grid-cols-12 gap-0 items-center">
+                    <div class="col-span-6">
+                        <div class="font-medium text-base">Registration Information for <u class="text-success">Year {{ $regs->registration_year }}</u></div>
+                    </div>
+                    <div class="col-span-6 text-right relative">
+                        <button data-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#editRegistrationModal" type="button" class="edit_registration_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
+                        <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                    </div>
+                </div>
+                <div class="intro-y mt-5">
+                    <div class="grid grid-cols-12 gap-2">
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-4 text-slate-500 font-medium">Confirmation Date</div>
+                                <div class="col-span-8 font-medium">
+                                    {{ (!empty($regs->confirmation_date) ? date('jS M, Y', strtotime($regs->confirmation_date)) : '---') }}
+                                    {!! (isset($regs->user->employee->full_name) && !empty($regs->user->employee->full_name) ? 'by '.$regs->user->employee->full_name : '') !!}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-6 text-slate-500 font-medium">Registration Confirmation</div>
+                                <div class="col-span-6 font-medium">
+                                    {{ (!empty($regs->regStatus->name) ? $regs->regStatus->name : '---') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-4 text-slate-500 font-medium">Academic Year</div>
+                                <div class="col-span-8 font-medium">
+                                    {{ (isset($regs->year->name) && !empty($regs->year->name) ? $regs->year->name : '---') }}
+                                </div>
+                            </div>
+                        </div>
+                        @if(!empty($regs->note))
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-4 text-slate-500 font-medium">Note</div>
+                                <div class="col-span-8 font-medium">
+                                    {!! (!empty($regs->note) ? $regs->note : '---') !!}
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="attendanceWrap mt-7">
+                        @if(!empty($regs->attendances) && $regs->attendances->count() > 0)
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="whitespace-nowrap">ID</th>
+                                        <th class="whitespace-nowrap">Confirmation Date</th>
+                                        <th class="whitespace-nowrap">Attendance Semester</th>
+                                        <th class="whitespace-nowrap">Session Term</th>
+                                        <th class="whitespace-nowrap">Code</th>
+                                        <th class="whitespace-nowrap">Note</th>
+                                        <th class="whitespace-nowrap">COC ID</th>
+                                        <th class="whitespace-nowrap">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($regs->attendances as $atn)
+                                        <tr>
+                                            <td>{{ $atn->id }}</td>
+                                            <td>
+                                                <span class="font-medium">
+                                                    {{ (!empty($atn->confirmation_date) ? date('jS M, Y', strtotime($atn->confirmation_date)) : '') }}
+                                                    {!! (isset($atn->user->employee->full_name) && !empty($atn->user->employee->full_name) ? 'by '.$atn->user->employee->full_name : '') !!}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                ---
+                                            </td>
+                                            <td>{{ !empty($atn->session_term) ? 'Term '.$atn->session_term : '' }}</td>
+                                            <td><span class="font-medium">{{ isset($atn->code->code) && !empty($atn->code->code) ? $atn->code->code : '' }}</span></td>
+                                            <td>{{ !empty($atn->note) ? $atn->note : '' }}</td>
+                                            <td>
+                                                @if(isset($atn->coc->id) && $atn->coc->id > 0)
+                                                    <a href="#" class="font-medium text-success underline">
+                                                        {{ $atn->coc->id }}
+                                                        @if(isset($atn->coc_type) && !empty($atn->coc_type))
+                                                            <br/>{{ $atn->coc_type }}
+                                                        @endif
+                                                    </a>
+                                                @elseif(isset($atn->code->id) && $atn->code->id > 0 && $atn->code->coc_required == 1)
+                                                    <a href="#" class="font-medium text-success underline">Add COC</a>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <button data-id="{{ $atn->id }}" data-tw-toggle="modal" data-tw-target="#editAttendanceModal" type="button" class="edit_attendance_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else 
+                            <div class="alert alert-danger-soft show flex items-center" role="alert">
+                                <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> SLC Attendance not found!
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+
+    <!-- BEGIN: Add Registration Modal -->
     <div id="addRegistrationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-xl-extended">
             <form method="POST" action="#" id="addRegistrationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -141,7 +204,7 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
-                                    <div class="col-span-4 text-slate-500 font-medium">Fees</div>
+                                    <div class="col-span-4 text-slate-500 font-medium">Course Fees</div>
                                     <div class="col-span-8 font-medium">
                                         {{ (isset($student->crel->creation->fees) && $student->crel->creation->fees > 0 ? '£'.number_format($student->crel->creation->fees, 2) : '') }}
                                     </div>
@@ -156,12 +219,12 @@
                         </div>
                         <div class="mt-0 mb-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                         <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-3">
                                 <label for="confirmation_date" class="form-label">Date of Confirmation <span class="text-danger">*</span></label>
-                                <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="confirmation_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
                                 <div class="acc__input-error error-confirmation_date text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-3">
                                 <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
                                 <select id="academic_year_id" class="form-control w-full" name="academic_year_id">
                                     <option value="">Please Select</option>
@@ -173,16 +236,16 @@
                                 </select>
                                 <div class="acc__input-error error-academic_year_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-3">
                                 <label for="registration_year" class="form-label">Registration Year <span class="text-danger">*</span></label>
                                 <select id="registration_year" class="form-control w-full" name="registration_year">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3">Year 3</option>
                                 </select>
                                 <div class="acc__input-error error-registration_year text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-6 sm:col-span-3">
                                 <label for="course_creation_instance_id" class="form-label">Instance Year <span class="text-danger">*</span></label>
                                 <select id="course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
                                     <option value="">Please Select</option>
@@ -194,7 +257,17 @@
                                 </select>
                                 <div class="acc__input-error error-instance_year text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-12 sm:col-span-3">
+                                <label for="instance_fees" class="form-label">Instance Fees <span class="text-danger">*</span></label>
+                                <input id="instance_fees" class="form-control w-full" name="instance_fees" type="number" step="any">
+                            </div>
+                            <div class="col-span-12 sm:col-span-3">
+                                <label for="note" class="form-label">Self Funded?</label>
+                                <div class="form-check form-switch">
+                                    <input id="is_self_funded" name="is_self_funded" value="1" class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-3">
                                 <label for="slc_registration_status_id" class="form-label">Registration Status <span class="text-danger">*</span></label>
                                 <select id="status" class="form-control w-full" name="slc_registration_status_id">
                                     <option value="">Please Select</option>
@@ -208,7 +281,7 @@
                             </div>
                             <div class="col-span-12">
                                 <label for="note" class="form-label">Note</label>
-                                <textarea id="note" rows="3" class="form-control w-full" name="note"></textarea>
+                                <textarea id="note" rows="2" class="form-control w-full" name="note"></textarea>
                             </div>
                             <div class="col-span-12">
                                 <label for="note" class="form-label">Do you want to confirm Attendance Now?</label>
@@ -218,43 +291,24 @@
                             </div>
                             <div class="col-span-12 confirmAttendanceArea" style="display: none;">
                                 <div class="grid grid-cols-12 gap-3">
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="note" class="form-label">Self Funded?</label>
-                                        <div class="form-check form-switch">
-                                            <input id="is_self_funded" name="is_self_funded" value="1" class="form-check-input" type="checkbox">
-                                        </div>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="self_funded_year" class="form-label">Year</label>
-                                        <select id="self_funded_year" class="form-control w-full" name="self_funded_year">
-                                            <option value="">Please Select</option>
-                                            @if(!empty($ac_years) && $ac_years->count() > 0)
-                                                @foreach($ac_years as $year)
-                                                    <option value="{{ $year->id }}">{{ $year->name }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="instance_fees" class="form-label">Instance Fees</label>
-                                        <input id="instance_fees" readonly class="form-control w-full" name="instance_fees" type="number" step="any">
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="attendance_term" class="form-label">Selected Attendance Terms</label>
+                                    <div class="col-span-12 sm:col-span-3">
+                                        <label for="attendance_term" class="form-label">Selected Attendance Terms <span class="text-danger">*</span></label>
                                         <select id="attendance_term" class="form-control w-full" name="attendance_term">
-                                            <option value="">Please Select</option>
+                                            <option value="0">Please Select</option>
                                         </select>
+                                        <div class="acc__input-error error-attendance_term text-danger mt-2"></div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="session_term" class="form-label">Attendance Session Term</label>
+                                    <div class="col-span-12 sm:col-span-3">
+                                        <label for="session_term" class="form-label">Attendance Session Term <span class="text-danger">*</span></label>
                                         <select id="session_term" readonly class="form-control w-full" name="session_term">
                                             <option value="">Please Select</option>
                                         </select>
+                                        <div class="acc__input-error error-session_term text-danger mt-2"></div>
                                     </div>
                                     <div class="col-span-12"></div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label for="attendance_code_id" class="form-label">Attendance Code</label>
-                                        <select id="attendance_code_id" readonly class="form-control w-full" name="attendance_code_id">
+                                    <div class="col-span-12 sm:col-span-3">
+                                        <label for="attendance_code_id" class="form-label">Attendance Code <span class="text-danger">*</span></label>
+                                        <select id="attendance_code_id" class="form-control w-full" name="attendance_code_id">
                                             <option value="">Please Select</option>
                                             @if(!empty($attendanceCodes) && $attendanceCodes->count() > 0)
                                                 @foreach($attendanceCodes as $ac)
@@ -262,6 +316,16 @@
                                                 @endforeach
                                             @endif
                                         </select>
+                                        <div class="acc__input-error error-attendance_code_id text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-3 installmentAmountWrap" style="display: none;">
+                                        <label for="installment_amount" class="form-label">Installment Amount <span class="text-danger">*</span></label>
+                                        <input id="installment_amount" class="form-control w-full" name="installment_amount" type="number" step="any">
+                                        <div class="acc__input-error error-installment_amount text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12">
+                                        <label for="note" class="form-label">Attendance Note</label>
+                                        <textarea id="attendance_note" rows="2" class="form-control w-full" name="attendance_note"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -285,12 +349,297 @@
                             </svg>
                         </button>
                         <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="studen_ssn" value="{{ $student->ssn_no }}"/>
+                        <input type="hidden" name="slc_course_code" value="{{ (isset($student->crel->creation->slc_code) ? $student->crel->creation->slc_code : '') }}"/>
+                        <input type="hidden" name="student_course_relation_id" value="{{ $student->crel->id }}"/>
+                        <input type="hidden" name="course_creation_id" value="{{ (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0) }}"/>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Add Modal -->
+    <!-- END: Add Registration Modal -->
+
+    <!-- BEGIN: Edit Registration Modal -->
+    <div id="editRegistrationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editRegistrationForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit Registration</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_ssn" class="form-label">SSN Number <span class="text-danger">*</span></label>
+                                <input type="text" value="" readonly id="reg_ssn" class="form-control" name="ssn">
+                                <div class="acc__input-error error-ssn text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_confirmation_date" class="form-label">Date of Confirmation <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reg_confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-confirmation_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                                <select id="reg_academic_year_id" class="form-control w-full" name="academic_year_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($ac_years) && $ac_years->count() > 0)
+                                        @foreach($ac_years as $year)
+                                            <option value="{{ $year->id }}">{{ $year->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_registration_year" class="form-label">Registration Year <span class="text-danger">*</span></label>
+                                <select id="reg_registration_year" class="form-control w-full" name="registration_year">
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3">Year 3</option>
+                                </select>
+                                <div class="acc__input-error error-registration_year text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_course_creation_instance_id" class="form-label">Instance Year <span class="text-danger">*</span></label>
+                                <select id="reg_course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($instances) && $instances->count())
+                                        @foreach($instances as $inst)
+                                            <option value="{{ $inst->id }}">{{ $inst->year->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-instance_year text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="reg_slc_registration_status_id" class="form-label">Registration Status <span class="text-danger">*</span></label>
+                                <select id="reg_slc_registration_status_id" class="form-control w-full" name="slc_registration_status_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($reg_status) && $reg_status->count() > 0)
+                                        @foreach($reg_status as $rst)
+                                            <option value="{{ $rst->id }}">{{ $rst->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-slc_registration_status_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="note" class="form-label">Note</label>
+                                <textarea id="note" rows="3" class="form-control w-full" name="note"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateReg" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="slc_registration_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit Registration Modal -->
+
+    <!-- BEGIN: Add Attendance Modal -->
+    <div id="addAttendanceModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="addAttendanceForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Add Attendance</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="add_atn_confirmation_date" class="form-label">Date of Confirmation <span class="text-danger">*</span></label>
+                                <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="add_atn_confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-confirmation_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="add_attendance_year" class="form-label">Attendance Year <span class="text-danger">*</span></label>
+                                <select id="add_attendance_year" class="form-control w-full" name="attendance_year">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3">Year 3</option>
+                                </select>
+                                <div class="acc__input-error error-attendance_year text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="add_atn_attendance_term" class="form-label">Selected Attendance Terms <span class="text-danger">*</span></label>
+                                <select id="add_atn_attendance_term" class="form-control w-full" name="attendance_term">
+                                    <option value="0">Please Select</option>
+                                </select>
+                                <div class="acc__input-error error-attendance_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="add_atn_session_term" class="form-label">Attendance Session Term <span class="text-danger">*</span></label>
+                                <select id="add_atn_session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
+                                </select>
+                                <div class="acc__input-error error-session_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="add_atn_attendance_code_id" class="form-label">Attendance Code <span class="text-danger">*</span></label>
+                                <select id="add_atn_attendance_code_id" class="form-control w-full" name="attendance_code_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($attendanceCodes) && $attendanceCodes->count() > 0)
+                                        @foreach($attendanceCodes as $ac)
+                                            <option data-coc-required="{{ $ac->coc_required }}" value="{{ $ac->id }}">{{ $ac->code }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-attendance_code_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4 addAttenInstallmentAmountWrap" style="display: none;">
+                                <label for="add_atn_installment_amount" class="form-label">Installment Amount <span class="text-danger">*</span></label>
+                                <input id="add_atn_installment_amount" class="form-control w-full" name="installment_amount" type="number" step="any">
+                                <div class="acc__input-error error-installment_amount text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="add_atn_attendance_note" class="form-label">Attendance Note</label>
+                                <textarea id="add_atn_attendance_note" rows="2" class="form-control w-full" name="attendance_note"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="addAtten" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="slc_registration_id" value="0"/>
+                        <input type="hidden" name="instance_fees" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Attendance Modal -->
+
+    <!-- BEGIN: Edit Attendance Modal -->
+    <div id="editAttendanceModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editAttendanceForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit Attendance</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="atn_confirmation_date" class="form-label">Date of Confirmation <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="atn_confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-confirmation_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="attendance_year" class="form-label">Attendance Year <span class="text-danger">*</span></label>
+                                <select id="attendance_year" class="form-control w-full" name="attendance_year">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3">Year 3</option>
+                                </select>
+                                <div class="acc__input-error error-attendance_year text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="atn_attendance_term" class="form-label">Selected Attendance Terms <span class="text-danger">*</span></label>
+                                <select id="atn_attendance_term" class="form-control w-full" name="attendance_term">
+                                    <option value="0">Please Select</option>
+                                </select>
+                                <div class="acc__input-error error-attendance_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="atn_session_term" class="form-label">Attendance Session Term <span class="text-danger">*</span></label>
+                                <select id="atn_session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Term 01</option>
+                                    <option value="2">Term 02</option>
+                                    <option value="3">Term 03</option>
+                                </select>
+                                <div class="acc__input-error error-session_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="atn_attendance_code_id" class="form-label">Attendance Code <span class="text-danger">*</span></label>
+                                <select id="atn_attendance_code_id" class="form-control w-full" name="attendance_code_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($attendanceCodes) && $attendanceCodes->count() > 0)
+                                        @foreach($attendanceCodes as $ac)
+                                            <option data-coc-required="{{ $ac->coc_required }}" value="{{ $ac->id }}">{{ $ac->code }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-attendance_code_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="atn_attendance_note" class="form-label">Attendance Note</label>
+                                <textarea id="atn_attendance_note" rows="2" class="form-control w-full" name="attendance_note"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateAtten" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="slc_attendance_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit Attendance Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -353,5 +702,6 @@
 
 @section('script')
     @vite('resources/js/student-global.js')
-    @vite('resources/js/student-slc-history.js')
+    @vite('resources/js/student-slc-registration.js')
+    @vite('resources/js/student-slc-attedance.js')
 @endsection

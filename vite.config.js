@@ -160,7 +160,10 @@ export default defineConfig({
                 "resources/js/hr-absent-today.js",
                 "resources/js/hr-live-attendance.js",
 
-                "resources/js/student-slc-history.js",
+                "resources/js/student-slc-registration.js",
+                "resources/js/student-slc-attedance.js",
+                "resources/js/student-slc-agreement.js",
+                "resources/js/student-slc-installment.js",
                 
             ],
             refresh: true,

@@ -36,6 +36,8 @@ use App\Models\Semester;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Signatory;
+use App\Models\SlcAgreement;
+use App\Models\SlcRegistration;
 use App\Models\SlcRegistrationStatus;
 use App\Models\SmsTemplate;
 use App\Models\Status;
@@ -396,6 +398,7 @@ class StudentController extends Controller
 
     public function slcHistory($studentId){
         $student = Student::find($studentId);
+        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
         $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
         $firstCreationInstance = CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('id', 'ASC')->get()->first();
 
@@ -410,7 +413,23 @@ class StudentController extends Controller
             'active_ac_year' => (isset($firstCreationInstance->academic_year_id) && $firstCreationInstance->academic_year_id > 0 ? $firstCreationInstance->academic_year_id : 0),
             'reg_status' => SlcRegistrationStatus::where('active', 1)->get(),
             'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
-            'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get()
+            'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get(),
+            'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get()
+        ]);
+    }
+
+    public function accounts($student_id){
+        $student = Student::find($student_id);
+        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+
+        return view('pages.students.live.accounts', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'agreements' => SlcAgreement::where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->orderBy('id', 'ASC')->get(),
         ]);
     }
 }
