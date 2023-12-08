@@ -39,4 +39,20 @@ class SlcAgreement extends Model
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function setDateAttribute($value) {  
+        $this->attributes['date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function installments(){
+        return $this->hasMany(SlcInstallment::class, 'slc_agreement_id', 'id');
+    }
+
+    public function registration(){
+        return $this->belongsTo(SlcRegistration::class, 'slc_registration_id');
+    }
 }
