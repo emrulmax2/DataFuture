@@ -423,9 +423,9 @@ class EmployeeController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employees/'.$data->id, $imageName, 'google');
+        $path = $document->storeAs('public/employees/'.$data->id, $imageName, 'local');
         if(!empty($oldPhoto)):
-            if (Storage::disk('google')->exists('public/employees/'.$data->id.'/'.$oldPhoto)):
+            if (Storage::disk('local')->exists('public/employees/'.$data->id.'/'.$oldPhoto)):
                 Storage::delete('public/employees/'.$data->id.'/'.$oldPhoto);
             endif;
         endif;

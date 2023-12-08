@@ -41,22 +41,40 @@
                         </div> 
                         
                         <a href="{{ route('tutor-dashboard.show',8) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                        <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex">
-                                        <i data-lucide="monitor" class="report-box__icon text-warning"></i>
-                                        <div class="ml-auto">
-                                            <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
-                                                % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
+                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                                <div class="report-box zoom-in">
+                                    <div class="box p-5">
+                                        <div class="flex">
+                                            <i data-lucide="monitor" class="report-box__icon text-warning"></i>
+                                            <div class="ml-auto">
+                                                <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
+                                                    % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
+                                                </div>
                                             </div>
                                         </div>
+                                        <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
+                                        <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
                                     </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                    <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
+                        <a href="{{ route('pt.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                                <div class="report-box zoom-in">
+                                    <div class="box p-5">
+                                        <div class="flex">
+                                            <i data-lucide="monitor" class="report-box__icon text-warning"></i>
+                                            <div class="ml-auto">
+                                                <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
+                                                    % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
+                                        <div class="text-base text-slate-500 mt-1">Personal Tutor Dashboard</div>
+                                    </div>
+                                </div>
+                            </div>
                         </a>
                         <a href="{{ route('interviewlist') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                         {{-- <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">--}}                            
