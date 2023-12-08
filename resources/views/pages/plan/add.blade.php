@@ -32,7 +32,7 @@
                             </circle>
                         </svg>
                     </span></label>
-                    <select id="academic-year" name="academic_year_id" class="form-control w-full lccTom lcc-tom-select">
+                    <select id="academic-year" name="academic_year_id" class="form-control w-full lccTom2 lcc-tom-select">
                         <option value="">Please Select</option>
                         @if(!empty($academic_years))
                             @foreach($academic_years as $year)
@@ -60,7 +60,7 @@
                             </circle>
                         </svg>
                     </span></label>
-                    <select id="courseCrationId" name="course_cration_id" class="form-control w-full lccTom lcc-tom-select">
+                    <select id="courseCrationId" name="course_cration_id" class="form-control w-full lccTom2 lcc-tom-select">
                         <option value="">Please Select</option>
                     </select>
                     <div class="acc__input-error error-course text-danger mt-2" style="display: none;"></div>
@@ -82,7 +82,7 @@
                             </circle>
                         </svg>
                     </span></label>
-                    <select id="termDeclarationId" name="term_declaration_id" class="form-control w-full lccTom lcc-tom-select">
+                    <select id="termDeclarationId" name="term_declaration_id" class="form-control w-full lccTom2 lcc-tom-select">
                         <option value="">Please Select</option>
                     </select>
                     <div class="acc__input-error error-termDeclarationId text-danger mt-2" style="display: none;"></div>

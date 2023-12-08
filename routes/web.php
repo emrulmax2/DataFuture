@@ -491,7 +491,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(PlanTreeController::class)->group(function() {
         Route::get('plans/tree', 'index')->name('plans.tree');
-        Route::post('plans/tree/get-semesters', 'getIntakSemester')->name('plans.tree.get.semester');
+        Route::post('plans/tree/get-semesters', 'getAttenDanceSemester')->name('plans.tree.get.semester');
         Route::post('plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
         Route::post('plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
         Route::post('plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
@@ -1795,6 +1795,8 @@ Route::middleware('auth')->group(function() {
         
     });
 
+    Route::resource('term-declaration',TermDeclarationController::class);
+    
     Route::resource('term-declaration', TermDeclarationController::class,[
         'except' => ['create']
     ]);

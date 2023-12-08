@@ -16,6 +16,7 @@ class Plan extends Model
         'instance_term_id',
         'academic_year_id',
         'course_creation_id',
+        'term_declaration_id',
         'venue_id',
         'rooms_id',
         'group_id',
