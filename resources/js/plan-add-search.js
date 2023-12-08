@@ -202,19 +202,12 @@ var classPlanListTable = (function () {
         },
     };
     var tomSelectList = []
-    $('.lccTom2').each(function(){
-        if ($(this).attr("multiple") !== undefined) {
-            tomOptions = {
-                ...tomOptions,
-                plugins: {
-                    ...tomOptions.plugins,
-                    remove_button: {
-                        title: "Remove this item",
-                    },
-                }
-            };
+    $('.lccTom').each(function(){
+        let select = document.getElementById(this.id);
+        if(select!=null) {
+            let control = select.tomselect;
+            tomSelectList.push(control)
         }
-        tomSelectList.push(new TomSelect(this, tomOptions));
     })
 
     if($('#academic-year').length > 0) {

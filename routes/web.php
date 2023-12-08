@@ -166,7 +166,7 @@ use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\TermDeclarationController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
-use App\Http\Controllers\Tutor\DahsboardController as TutorDashboard;
+use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 
 /*
