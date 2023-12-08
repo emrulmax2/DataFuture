@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DahsboardController extends Controller
+class DashboardController extends Controller
 {
     
     public function list(Request $request) {
@@ -172,6 +172,13 @@ class DahsboardController extends Controller
             "termList" =>$termData,
             "data" => $data,
             "date" => date("d-m-Y"),
+        ]);
+    }
+
+    public function showNew(){
+        return view('pages.tutor.dashboard.index-new', [
+            'title' => 'Tutor Dashboard New - LCC Data Future Managment',
+            'breadcrumbs' => []
         ]);
     }
 

@@ -32,4 +32,24 @@ class SlcInstallment extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function user(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function agreement(){
+        return $this->belongsTo(SlcAgreement::class, 'slc_agreement_id');
+    }
+
+    public function attendance(){
+        return $this->belongsTo(SlcAttendance::class, 'slc_attendance_id');
+    }
+
+    public function setInstallmentDateAttribute($value) {  
+        $this->attributes['installment_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getInstallmentDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
 }

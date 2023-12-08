@@ -156,7 +156,7 @@ export default defineConfig({
                 "resources/js/create-module-activity.js",
                 "resources/js/employee-global.js",
                 "resources/js/employee-banks.js",
-
+                
                 "resources/js/hr-absent-today.js",
                 "resources/js/hr-live-attendance.js",
 
@@ -164,6 +164,11 @@ export default defineConfig({
                 "resources/js/student-slc-attedance.js",
                 "resources/js/student-slc-agreement.js",
                 "resources/js/student-slc-installment.js",
+                "resources/js/student-slc-installment.js",
+                "resources/js/student-slc-installment.js",
+
+                "resources/js/plan-add-search.js",
+                
                 
             ],
             refresh: true,

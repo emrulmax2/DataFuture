@@ -1122,9 +1122,15 @@
 .bg-danger-soft{
     background-color: rgb(var(--color-danger) / .1) !important;
 }
+.bg-danger-soft-2{
+    background-color: rgb(var(--color-danger) / .06) !important;
+}
 .bg-warning-soft{
     background-color: rgb(var(--color-warning) / .2) !important;
 }
 .bg-success-soft{
     background-color: rgb(var(--color-success) / .2) !important;
+}
+.bg-success-soft-2{
+    background-color: rgb(var(--color-success) / .06) !important;
 }
