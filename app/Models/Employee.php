@@ -44,8 +44,8 @@ class Employee extends Model
      */
     public function getPhotoUrlAttribute()
     {
-        if ($this->photo !== null && Storage::disk('google')->exists('public/employees/'.$this->id.'/'.$this->photo)) {
-            return Storage::disk('google')->url('public/employees/'.$this->id.'/'.$this->photo);
+        if ($this->photo !== null && Storage::disk('local')->exists('public/employees/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('local')->url('public/employees/'.$this->id.'/'.$this->photo);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }
