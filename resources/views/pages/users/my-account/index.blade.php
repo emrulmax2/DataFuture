@@ -169,10 +169,10 @@
                                                 <span class="font-medium">{{ $emergencyContacts->address->city }}</span>,
                                             @endif
                                             @if(isset($emergencyContacts->address->state) && !empty($emergencyContacts->address->state))
-                                                <span class="font-medium">{{ $emergencyContacts->address->state }}</span>, <br/>
+                                                <span class="font-medium">{{ $emergencyContacts->address->state }}</span>, 
                                             @endif
                                             @if(isset($emergencyContacts->address->post_code) && !empty($emergencyContacts->address->post_code))
-                                                <span class="font-medium">{{ $emergencyContacts->address->post_code }}</span>,
+                                                <span class="font-medium">{{ $emergencyContacts->address->post_code }}</span>,<br/>
                                             @endif
                                             @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
                                                 <span class="font-medium">{{ $emergencyContacts->address->country }}</span><br/>
