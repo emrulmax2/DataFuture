@@ -21,6 +21,7 @@
                 </div>
             </div>
             <!-- END: Login Info -->
+            @if($env != "production") 
             <!-- BEGIN: Login Form -->
             <div class="h-screen xl:h-auto flex py-5 xl:py-0 my-10 xl:my-0">
                 <div class="my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto">
@@ -59,6 +60,7 @@
                     </div>
                 </div>
             </div>
+            @endif
             <!-- END: Login Form -->
         </div>
     </div>
