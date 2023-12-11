@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Option;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
@@ -74,6 +75,7 @@ class SettingController extends Controller
                 $site_logo_name = $imageName;
             endif;
             $allFields['site_logo'] = $site_logo_name;
+            Cache::forever('site_logo', $site_logo_name);
         endif;
 
         if(isset($request->site_favicon)):
@@ -93,6 +95,7 @@ class SettingController extends Controller
                 $site_favicon_name = $imageName;
             endif;
             $allFields['site_favicon'] = $site_favicon_name;
+            Cache::forever('site_favicon', $site_favicon_name);
         endif;
 
         foreach($allFields as $name => $value):
