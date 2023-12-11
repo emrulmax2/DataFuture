@@ -468,7 +468,7 @@
                                 $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->post_code.'</span>,<br/>';
                             endif;
                             if(isset($emergencyContacts->address->country) && !empty($emergencyContacts->address->country)):
-                                $address3 .= '<span class="text-slate-600 font-medium">'.$emergencyContacts->address->country.'</span><br/>';
+                                $address3 .= '<span class="text-slate-600 font-medium">'.strtoupper($emergencyContacts->address->country).'</span><br/>';
                             endif;
                         @endphp
                         <div class="col-span-12 sm:col-span-6 addressWrap" id="emcAddressWrap">
