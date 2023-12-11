@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('head')
-    <title>Error Page - Midone - Tailwind HTML Admin Template</title>
+    <title>Error Page - London Churchill College</title>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
         <!-- BEGIN: Error Page -->
         <div class="error-page flex flex-col lg:flex-row items-center justify-center h-screen text-center lg:text-left">
             <div class="-intro-x lg:mr-20">
-                <img alt="Midone - HTML Admin Template" class="h-48 lg:h-auto" src="{{ asset('build/assets/images/error-illustration.svg') }}">
+                <img alt="London Churchill College" class="h-48 lg:h-auto" src="{{ asset('build/assets/images/error-illustration.svg') }}">
             </div>
             <div class="text-white mt-10 lg:mt-0">
                 <div class="intro-x text-8xl font-medium">404</div>

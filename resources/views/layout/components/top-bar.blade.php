@@ -7,7 +7,7 @@ $employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee');
     <div class="h-full flex items-center">
         <!-- BEGIN: Logo -->
         <a href="" class="logo -intro-x hidden md:flex xl:w-[180px] block">
-            <img alt="Midone - HTML Admin Template" class="logo__image w-6" src="{{ asset('build/assets/images/logo.svg') }}">
+            <img alt="London Churchill College" class="logo__image w-6" src="{{ asset('build/assets/images/logo.svg') }}">
             <span class="logo__text text-white text-lg ml-3">
                 Enigma
             </span>
@@ -69,7 +69,7 @@ $employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee');
                         @foreach (array_slice($fakers, 0, 4) as $faker)
                             <a href="" class="flex items-center mt-2">
                                 <div class="w-8 h-8 image-fit">
-                                    <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                    <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                 </div>
                                 <div class="ml-3">{{ $faker['users'][0]['name'] }}</div>
                                 <div class="ml-auto w-48 truncate text-slate-500 text-xs text-right">{{ $faker['users'][0]['email'] }}</div>
@@ -80,7 +80,7 @@ $employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee');
                     @foreach (array_slice($fakers, 0, 4) as $faker)
                         <a href="" class="flex items-center mt-2">
                             <div class="w-8 h-8 image-fit">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                             </div>
                             <div class="ml-3">{{ $faker['products'][0]['name'] }}</div>
                             <div class="ml-auto w-48 truncate text-slate-500 text-xs text-right">{{ $faker['products'][0]['category'] }}</div>
@@ -101,7 +101,7 @@ $employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee');
                     @foreach (array_slice($fakers, 0, 5) as $key => $faker)
                         <div class="cursor-pointer relative flex items-center {{ $key ? 'mt-5' : '' }}">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">

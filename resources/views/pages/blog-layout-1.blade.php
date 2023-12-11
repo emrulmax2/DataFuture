@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Blog - Midone - Tailwind HTML Admin Template</title>
+    <title>Blog - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -38,7 +38,7 @@
             <div class="intro-y col-span-12 md:col-span-6 xl:col-span-4 box">
                 <div class="flex items-center border-b border-slate-200/60 dark:border-darkmode-400 px-5 py-4">
                     <div class="w-10 h-10 flex-none image-fit">
-                        <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                        <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                     </div>
                     <div class="ml-3 mr-auto">
                         <a href="" class="font-medium">{{ $faker['users'][0]['name'] }}</a>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="p-5">
                     <div class="h-40 2xl:h-56 image-fit">
-                        <img alt="Midone - HTML Admin Template" class="rounded-md" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                        <img alt="London Churchill College" class="rounded-md" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                     </div>
                     <a href="" class="block font-medium text-base mt-5">{{ $faker['news'][0]['title'] }}</a>
                     <div class="text-slate-600 dark:text-slate-500 mt-2">{{ $faker['news'][0]['short_content'] }}</div>
@@ -79,13 +79,13 @@
                     </a>
                     <div class="intro-x flex mr-2">
                         <div class="intro-x w-8 h-8 image-fit">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}" title="{{ $faker['users'][0]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}" title="{{ $faker['users'][0]['name'] }}">
                         </div>
                         <div class="intro-x w-8 h-8 image-fit -ml-4">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][1]) }}" title="{{ $faker['users'][1]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][1]) }}" title="{{ $faker['users'][1]['name'] }}">
                         </div>
                         <div class="intro-x w-8 h-8 image-fit -ml-4">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][2]) }}" title="{{ $faker['users'][2]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][2]) }}" title="{{ $faker['users'][2]['name'] }}">
                         </div>
                     </div>
                     <a href="" class="intro-x w-8 h-8 flex items-center justify-center rounded-full text-primary bg-primary/10 dark:bg-darkmode-300 dark:text-slate-300 ml-auto tooltip" title="Share">
@@ -109,7 +109,7 @@
                     </div>
                     <div class="w-full flex items-center mt-3">
                         <div class="w-8 h-8 flex-none image-fit mr-3">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                            <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                         </div>
                         <div class="flex-1 relative text-slate-600">
                             <input type="text" class="form-control form-control-rounded border-transparent bg-slate-100 pr-10" placeholder="Post a comment...">

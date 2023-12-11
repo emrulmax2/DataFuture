@@ -62,7 +62,7 @@
                                         <td class="w-20">
                                             <div class="flex">
                                                 <div class="w-10 h-10 image-fit zoom-in">
-                                                    <img alt="Midone - HTML Admin Template" class="tooltip rounded-full" src="{{ $logoUrl }}" title="Uploaded at {{ date("Y m d") }}">
+                                                    <img alt="London Churchill College" class="tooltip rounded-full" src="{{ $logoUrl }}" title="Uploaded at {{ date("Y m d") }}">
                                                 </div>
                                             </div>
                                         </td>
@@ -191,7 +191,7 @@
                                             <td class="w-20">
                                                 <div class="flex">
                                                     <div class="w-10 h-10 image-fit zoom-in">
-                                                        <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ $logoUrl }}">
+                                                        <img alt="London Churchill College" class="rounded-full" src="{{ $logoUrl }}">
                                                     </div>
                                                 </div>
                                             </td>

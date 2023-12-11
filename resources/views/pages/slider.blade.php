@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Slider - Midone - Tailwind HTML Admin Template</title>
+    <title>Slider - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -461,17 +461,17 @@
                             <div class="fade-mode">
                                 <div class="h-64 px-2">
                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['images'][0]) }}" />
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['images'][0]) }}" />
                                     </div>
                                 </div>
                                 <div class="h-64 px-2">
                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[1]['images'][1]) }}" />
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[1]['images'][1]) }}" />
                                     </div>
                                 </div>
                                 <div class="h-64 px-2">
                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[2]['images'][2]) }}" />
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[2]['images'][2]) }}" />
                                     </div>
                                 </div>
                             </div>
@@ -489,17 +489,17 @@
                                             <div class="fade-mode">
                                                 <div class="h-64 px-2">
                                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                                        <img alt="Midone - HTML Admin Template" src="' . asset('build/assets/images/' . $fakers[0]['images'][0]) . '" />
+                                                        <img alt="London Churchill College" src="' . asset('build/assets/images/' . $fakers[0]['images'][0]) . '" />
                                                     </div>
                                                 </div>
                                                 <div class="h-64 px-2">
                                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                                        <img alt="Midone - HTML Admin Template" src="' . asset('build/assets/images/' . $fakers[1]['images'][1]) . '" />
+                                                        <img alt="London Churchill College" src="' . asset('build/assets/images/' . $fakers[1]['images'][1]) . '" />
                                                     </div>
                                                 </div>
                                                 <div class="h-64 px-2">
                                                     <div class="h-full image-fit rounded-md overflow-hidden">
-                                                        <img alt="Midone - HTML Admin Template" src="' . asset('build/assets/images/' . $fakers[2]['images'][2]) . '" />
+                                                        <img alt="London Churchill College" src="' . asset('build/assets/images/' . $fakers[2]['images'][2]) . '" />
                                                     </div>
                                                 </div>
                                             </div>

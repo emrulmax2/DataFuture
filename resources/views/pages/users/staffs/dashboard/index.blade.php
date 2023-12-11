@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Dashboard - Midone - Tailwind HTML Admin Template</title>
+    <title>Dashboard - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -139,7 +139,7 @@
                             <div class="intro-x relative flex items-center mb-3">
                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                     <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[9]['photos'][0]) }}">
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[9]['photos'][0]) }}">
                                     </div>
                                 </div>
                                 <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
@@ -153,7 +153,7 @@
                             <div class="intro-x relative flex items-center mb-3">
                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                     <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[8]['photos'][0]) }}">
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[8]['photos'][0]) }}">
                                     </div>
                                 </div>
                                 <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
@@ -165,13 +165,13 @@
                                         <div class="mt-1">Added 3 new photos</div>
                                         <div class="flex mt-2">
                                             <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[0]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][0]) }}">
+                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][0]) }}">
                                             </div>
                                             <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[1]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][1]) }}">
+                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][1]) }}">
                                             </div>
                                             <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[2]['products'][0]['name'] }}">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][2]) }}">
+                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][2]) }}">
                                             </div>
                                         </div>
                                     </div>
@@ -181,7 +181,7 @@
                             <div class="intro-x relative flex items-center mb-3">
                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                     <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[7]['photos'][0]) }}">
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[7]['photos'][0]) }}">
                                     </div>
                                 </div>
                                 <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
@@ -195,7 +195,7 @@
                             <div class="intro-x relative flex items-center mb-3">
                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                     <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[6]['photos'][0]) }}">
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[6]['photos'][0]) }}">
                                     </div>
                                 </div>
                                 <div class="box px-5 py-3 ml-4 flex-1 zoom-in">

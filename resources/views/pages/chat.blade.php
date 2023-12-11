@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Chat - Midone - Tailwind HTML Admin Template</title>
+    <title>Chat - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -93,7 +93,7 @@
                                     @foreach (array_slice($fakers, 0, 10) as $faker)
                                         <a href="" class="w-10 mr-4 cursor-pointer">
                                             <div class="w-10 h-10 flex-none image-fit rounded-full">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                                             </div>
                                             <div class="text-xs text-slate-500 truncate text-center mt-2">{{ $faker['users'][0]['name'] }}</div>
@@ -107,7 +107,7 @@
                         @foreach (array_slice($fakers, 0, 10) as $key => $faker)
                             <div class="intro-x cursor-pointer box relative flex items-center p-5 {{ $key ? 'mt-5' : '' }}">
                                 <div class="w-12 h-12 flex-none image-fit mr-1">
-                                    <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                    <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                     <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                                 </div>
                                 <div class="ml-2 overflow-hidden">
@@ -138,7 +138,7 @@
                         <div class="mt-4 text-slate-500">A</div>
                         <div class="cursor-pointer box relative flex items-center p-5 mt-5">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">
@@ -169,7 +169,7 @@
                         </div>
                         <div class="cursor-pointer box relative flex items-center p-5 mt-5">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">
@@ -201,7 +201,7 @@
                         <div class="mt-4 text-slate-500">B</div>
                         <div class="cursor-pointer box relative flex items-center p-5 mt-5">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[2]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[2]['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">
@@ -232,7 +232,7 @@
                         </div>
                         <div class="cursor-pointer box relative flex items-center p-5 mt-5">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[3]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[3]['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">
@@ -263,7 +263,7 @@
                         </div>
                         <div class="cursor-pointer box relative flex items-center p-5 mt-5">
                             <div class="w-12 h-12 flex-none image-fit mr-1">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[4]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[4]['photos'][0]) }}">
                                 <div class="w-3 h-3 bg-success absolute right-0 bottom-0 rounded-full border-2 border-white dark:border-darkmode-600"></div>
                             </div>
                             <div class="ml-2 overflow-hidden">
@@ -298,7 +298,7 @@
                     <div class="pr-1">
                         <div class="box px-5 py-10 mt-5">
                             <div class="w-20 h-20 flex-none image-fit rounded-full overflow-hidden mx-auto">
-                                <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="text-center mt-3">
                                 <div class="font-medium text-lg">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -348,7 +348,7 @@
                     <div class="flex flex-col sm:flex-row border-b border-slate-200/60 dark:border-darkmode-400 px-5 py-4">
                         <div class="flex items-center">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 flex-none image-fit relative">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="ml-3 mr-auto">
                                 <div class="font-medium text-base">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -386,7 +386,7 @@
                     <div class="overflow-y-scroll scrollbar-hidden px-5 pt-5 flex-1">
                         <div class="chat__box__text-box flex items-end float-left mb-4">
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative mr-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="bg-slate-100 dark:bg-darkmode-400 px-4 py-3 text-slate-500 rounded-r-md rounded-t-md">
                                 Lorem ipsum sit amen dolor, lorem ipsum sit amen dolor
@@ -438,7 +438,7 @@
                                 <div class="mt-1 text-xs text-white text-opacity-80">1 mins ago</div>
                             </div>
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative ml-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
                             </div>
                         </div>
                         <div class="clear-both"></div>
@@ -467,14 +467,14 @@
                                 <div class="mt-1 text-xs text-white text-opacity-80">59 secs ago</div>
                             </div>
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative ml-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
                             </div>
                         </div>
                         <div class="clear-both"></div>
                         <div class="text-slate-400 dark:text-slate-500 text-xs text-center mb-10 mt-5">12 June 2020</div>
                         <div class="chat__box__text-box flex items-end float-left mb-4">
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative mr-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="bg-slate-100 dark:bg-darkmode-400 px-4 py-3 text-slate-500 rounded-r-md rounded-t-md">
                                 Lorem ipsum sit amen dolor, lorem ipsum sit amen dolor
@@ -526,13 +526,13 @@
                                 <div class="mt-1 text-xs text-white text-opacity-80">1 secs ago</div>
                             </div>
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative ml-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
                             </div>
                         </div>
                         <div class="clear-both"></div>
                         <div class="chat__box__text-box flex items-end float-left mb-4">
                             <div class="w-10 h-10 hidden sm:block flex-none image-fit relative mr-5">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="bg-slate-100 dark:bg-darkmode-400 px-4 py-3 text-slate-500 rounded-r-md rounded-t-md">
                                 {{ $fakers[0]['users'][0]['name'] }} is typing
@@ -1978,7 +1978,7 @@
                 <div class="h-full flex items-center">
                     <div class="mx-auto text-center">
                         <div class="w-16 h-16 flex-none image-fit rounded-full overflow-hidden mx-auto">
-                            <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                            <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                         </div>
                         <div class="mt-3">
                             <div class="font-medium">Hey, {{ $fakers[0]['users'][0]['name'] }}!</div>

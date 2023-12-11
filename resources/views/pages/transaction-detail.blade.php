@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Transaction Detail - Midone - Tailwind HTML Admin Template</title>
+    <title>Transaction Detail - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -131,7 +131,7 @@
                                     <td class="!py-4">
                                         <div class="flex items-center">
                                             <div class="w-10 h-10 image-fit zoom-in">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-lg border-2 border-white shadow-md tooltip" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}" title="Uploaded at {{ $faker['dates'][0] }}">
+                                                <img alt="London Churchill College" class="rounded-lg border-2 border-white shadow-md tooltip" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}" title="Uploaded at {{ $faker['dates'][0] }}">
                                             </div>
                                             <a href="" class="font-medium whitespace-nowrap ml-4">{{ $faker['products'][0]['name'] }}</a>
                                         </div>

@@ -20,20 +20,7 @@ import { createIcons, icons } from "lucide";
     var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
     var employee_work_type_id_tom = new TomSelect('#employee_work_type_id', tomOptions);
 
-    $('.lccTom').each(function(){
-        if ($(this).attr("multiple") !== undefined) {
-            tomOptions = {
-                ...tomOptions,
-                plugins: {
-                    ...tomOptions.plugins,
-                    remove_button: {
-                        title: "Remove this item",
-                    },
-                }
-            };
-        }
-        new TomSelect(this, tomOptions);
-    })
+
 
     $(".date-picker").each(function () {
         var maskOptions = {

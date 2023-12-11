@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Inbox - Midone - Tailwind HTML Admin Template</title>
+    <title>Inbox - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -194,7 +194,7 @@
                                             <i class="w-4 h-4" data-lucide="bookmark"></i>
                                         </a>
                                         <div class="w-6 h-6 flex-none image-fit relative ml-5">
-                                            <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                            <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                         </div>
                                         <div class="inbox__item--sender truncate ml-3">{{ $faker['users'][0]['name'] }}</div>
                                     </div>

@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Blog - Midone - Tailwind HTML Admin Template</title>
+    <title>Blog - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -37,10 +37,10 @@
         @foreach (array_slice($fakers, 0, 6) as $faker)
             <div class="intro-y col-span-12 md:col-span-6 box">
                 <div class="h-[320px] before:block before:absolute before:w-full before:h-full before:top-0 before:left-0 before:z-10 before:bg-gradient-to-t before:from-black/90 before:to-black/10 image-fit">
-                    <img alt="Midone - HTML Admin Template" class="rounded-t-md" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                    <img alt="London Churchill College" class="rounded-t-md" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                     <div class="absolute w-full flex items-center px-5 pt-6 z-10">
                         <div class="w-10 h-10 flex-none image-fit">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                            <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                         </div>
                         <div class="ml-3 text-white mr-auto">
                             <a href="" class="font-medium">{{ $faker['users'][0]['name'] }}</a>
@@ -78,13 +78,13 @@
                     </a>
                     <div class="intro-x flex mr-2">
                         <div class="intro-x w-8 h-8 image-fit">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}" title="{{ $faker['users'][0]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}" title="{{ $faker['users'][0]['name'] }}">
                         </div>
                         <div class="intro-x w-8 h-8 image-fit -ml-4">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][1]) }}" title="{{ $faker['users'][1]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][1]) }}" title="{{ $faker['users'][1]['name'] }}">
                         </div>
                         <div class="intro-x w-8 h-8 image-fit -ml-4">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][2]) }}" title="{{ $faker['users'][2]['name'] }}">
+                            <img alt="London Churchill College" class="rounded-full border border-white zoom-in tooltip" src="{{ asset('build/assets/images/' . $faker['photos'][2]) }}" title="{{ $faker['users'][2]['name'] }}">
                         </div>
                     </div>
                     <a href="" class="intro-x w-8 h-8 flex items-center justify-center rounded-full text-primary bg-primary/10 dark:bg-darkmode-300 dark:text-slate-300 ml-auto tooltip" title="Share">
@@ -108,7 +108,7 @@
                     </div>
                     <div class="w-full flex items-center mt-3">
                         <div class="w-8 h-8 flex-none image-fit mr-3">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                            <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                         </div>
                         <div class="flex-1 relative text-slate-600 dark:text-slate-200">
                             <input type="text" class="form-control form-control-rounded border-transparent bg-slate-100 pr-10" placeholder="Post a comment...">

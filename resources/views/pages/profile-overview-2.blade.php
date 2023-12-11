@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Profile - Midone - Tailwind HTML Admin Template</title>
+    <title>Profile - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -13,7 +13,7 @@
         <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
             <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
                 <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
-                    <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                    <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                 </div>
                 <div class="ml-5">
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -321,7 +321,7 @@
                     <div class="p-5">
                         <div class="relative flex items-center">
                             <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="ml-4 mr-auto">
                                 <a href="" class="font-medium">{{ $fakers[0]['users'][0]['name'] }}</a>
@@ -331,7 +331,7 @@
                         </div>
                         <div class="relative flex items-center mt-5">
                             <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
                             </div>
                             <div class="ml-4 mr-auto">
                                 <a href="" class="font-medium">{{ $fakers[1]['users'][0]['name'] }}</a>
@@ -341,7 +341,7 @@
                         </div>
                         <div class="relative flex items-center mt-5">
                             <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[2]['photos'][0]) }}">
+                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[2]['photos'][0]) }}">
                             </div>
                             <div class="ml-4 mr-auto">
                                 <a href="" class="font-medium">{{ $fakers[2]['users'][0]['name'] }}</a>
@@ -453,7 +453,7 @@
                                     <div class="flex flex-col sm:flex-row items-center pr-5 lg:border-r border-slate-200/60 dark:border-darkmode-400">
                                         <div class="sm:mr-5">
                                             <div class="w-20 h-20 image-fit">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                                             </div>
                                         </div>
                                         <div class="mr-auto text-center sm:text-left mt-3 sm:mt-0">
@@ -509,7 +509,7 @@
                                     <div class="flex-1 flex flex-col sm:flex-row items-center pr-5 lg:border-r border-slate-200/60 dark:border-darkmode-400">
                                         <div class="sm:mr-5">
                                             <div class="w-20 h-20 image-fit">
-                                                <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                             </div>
                                         </div>
                                         <div class="mr-auto text-center sm:text-left mt-3 sm:mt-0">

@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Users Layout - Midone - Tailwind HTML Admin Template</title>
+    <title>Users Layout - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -44,7 +44,7 @@
                 <div class="box">
                     <div class="flex flex-col lg:flex-row items-center p-5">
                         <div class="w-24 h-24 lg:w-12 lg:h-12 image-fit lg:mr-1">
-                            <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                            <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                         </div>
                         <div class="lg:ml-2 lg:mr-auto text-center lg:text-left mt-3 lg:mt-0">
                             <a href="" class="font-medium">{{ $faker['users'][0]['name'] }}</a>

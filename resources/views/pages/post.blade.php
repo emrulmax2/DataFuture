@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Add New Post - Midone - Tailwind HTML Admin Template</title>
+    <title>Add New Post - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -112,7 +112,7 @@
                                         <div class="flex flex-wrap px-4">
                                             @foreach (array_slice($fakers, 0, 4) as $faker)
                                                 <div class="w-24 h-24 relative image-fit mb-5 mr-5 cursor-pointer zoom-in">
-                                                    <img class="rounded-md" alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                                                    <img class="rounded-md" alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                                                     <div title="Remove this image?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
                                                         <i data-lucide="x" class="w-4 h-4"></i>
                                                     </div>
@@ -140,7 +140,7 @@
                     <div class="dropdown">
                         <div class="dropdown-toggle btn w-full btn-outline-secondary dark:bg-darkmode-800 dark:border-darkmode-800 flex items-center justify-start" role="button" aria-expanded="false" data-tw-toggle="dropdown">
                             <div class="w-6 h-6 image-fit mr-3">
-                                <img class="rounded" alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                <img class="rounded" alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                             </div>
                             <div class="truncate">{{ $fakers[0]['users'][0]['name'] }}</div>
                             <i class="w-4 h-4 ml-auto" data-lucide="chevron-down"></i>
@@ -151,7 +151,7 @@
                                     <li>
                                         <a href="javascript:;" class="dropdown-item">
                                             <div class="w-6 h-6 absolute image-fit mr-3">
-                                                <img class="rounded" alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                                <img class="rounded" alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
                                             </div>
                                             <div class="ml-8 pl-1">{{ $faker['users'][0]['name'] }}</div>
                                         </a>

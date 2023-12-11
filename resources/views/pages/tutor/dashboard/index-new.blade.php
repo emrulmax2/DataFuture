@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Dashboard - Midone - Tailwind HTML Admin Template</title>
+    <title>Dashboard - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -17,7 +17,7 @@
                         <div class="box sm:flex">
                             <div class="px-8 py-12 flex flex-col justify-center flex-1">
                                 <div class="w-30 h-30 flex-none image-fit rounded-full overflow-hidden">
-                                    <img alt="Midone - HTML Admin Template" src="http://127.0.0.1:8000/build/assets/images/profile-14.jpg">
+                                    <img alt="London Churchill College" src="http://127.0.0.1:8000/build/assets/images/profile-14.jpg">
                                 </div>
                                 <div class="relative text-3xl font-medium mt-5">
                                     Mr Nazmus Sakib

@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Tooltip - Midone - Tailwind HTML Admin Template</title>
+    <title>Tooltip - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -134,7 +134,7 @@
                         <div class="tooltip-content">
                             <div id="custom-content-tooltip" class="relative flex items-center py-1">
                                 <div class="w-12 h-12 image-fit">
-                                    <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                    <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                                 </div>
                                 <div class="ml-4 mr-auto">
                                     <div class="font-medium dark:text-slate-200 leading-relaxed">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -161,7 +161,7 @@
                                         <div class="tooltip-content">
                                             <div id="custom-content-tooltip" class="relative flex items-center py-1">
                                                 <div class="w-12 h-12 image-fit">
-                                                    <img alt="Midone - HTML Admin Template" class="rounded-full" src="' . asset('build/assets/images/' . $fakers[0]['photos'][0]) . '">
+                                                    <img alt="London Churchill College" class="rounded-full" src="' . asset('build/assets/images/' . $fakers[0]['photos'][0]) . '">
                                                 </div>
                                                 <div class="ml-4 mr-auto">
                                                     <div class="font-medium dark:text-slate-200 leading-relaxed">' . $fakers[0]['users'][0]['name'] . '</div>
