@@ -671,11 +671,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(SlcAgreementController::class)->group(function() {
         Route::post('student/edit-slc-agreement', 'edit')->name('student.edit.slc.agreement');
         Route::post('student/update-slc-agreement', 'update')->name('student.update.slc.agreement');
+        Route::post('student/get-instance-fees', 'getInstanceFees')->name('student.get.slc.agreement.instance.fees');
+        Route::post('student/store-agreement', 'store')->name('student.store.slc.agreement');
     });
 
     Route::controller(SlcInstallmentController::class)->group(function() {
         Route::post('student/edit-slc-installment', 'edit')->name('student.edit.slc.intallment');
         Route::post('student/update-slc-installment', 'update')->name('student.update.slc.intallment');
+        Route::post('student/get-slc-installment-details', 'getDetails')->name('student.get.slc.intallment.details');
+        Route::post('student/store-slc-installment', 'store')->name('student.store.slc.intallment');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
