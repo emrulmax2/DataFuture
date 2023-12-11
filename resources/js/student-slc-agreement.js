@@ -7,6 +7,7 @@ import Tabulator from "tabulator-tables";
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
+    const addAgreementModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addAgreementModal"));
     const editAgreementModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAgreementModal"));
     const editInstallmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editInstallmentModal"));
     
@@ -17,6 +18,14 @@ import Tabulator from "tabulator-tables";
         $('#editAgreementModal .modal-body input:not([type="checkbox"])').val('');
         $('#editAgreementModal .modal-body input[type="checkbox"]').prop('checked', false);
         $('#editAgreementModal .modal-body input[name="slc_agreement_id"]').val('0');
+    });
+
+    const addAgreementModalEl = document.getElementById('addAgreementModal')
+    addAgreementModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editAgreementModal .acc__input-error').html('');
+        $('#editAgreementModal .modal-body select').val('');
+        $('#editAgreementModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editAgreementModal .modal-body input[type="checkbox"]').prop('checked', false);
     });
 
     const editInstallmentModalEl = document.getElementById('editInstallmentModal')
@@ -38,6 +47,79 @@ import Tabulator from "tabulator-tables";
             successModal.hide();
         }
     })
+
+    $('#addAgreementForm [name="course_creation_instance_id"]').on('change', function(){
+        var $select = $(this);
+        var course_creation_instance_id = $select.val();
+        var studen_id = $('#addAgreementForm input[name="studen_id"]').val();
+
+        if(course_creation_instance_id > 0 && course_creation_instance_id != ''){
+            axios({
+                method: "post",
+                url: route('student.get.slc.agreement.instance.fees'),
+                data: {studen_id : studen_id, course_creation_instance_id : course_creation_instance_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                var fees = response.data.fees;
+
+                $('#addAgreementForm input[name="fees"]').val(fees);
+            }).catch(error => {
+                if (error.response.status == 422) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $('#addAgreementForm input[name="fees"]').val('');
+        }
+    });
+
+    $('#addAgreementForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addAgreementForm');
+    
+        document.querySelector('#addAgre').setAttribute('disabled', 'disabled');
+        document.querySelector("#addAgre svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.store.slc.agreement'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#addAgre').removeAttribute('disabled');
+            document.querySelector("#addAgre svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                addAgreementModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student SLC Agreement successfully added.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 5000);
+            }
+        }).catch(error => {
+            document.querySelector('#addAgre').removeAttribute('disabled');
+            document.querySelector("#addAgre svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addAgreementForm .${key}`).addClass('border-danger');
+                        $(`#addAgreementForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
 
     $('.edit_agreement_btn').on('click', function(){
         var $theBtn = $(this);

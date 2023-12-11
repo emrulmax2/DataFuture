@@ -421,6 +421,7 @@ class StudentController extends Controller
     public function accounts($student_id){
         $student = Student::find($student_id);
         $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+        $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
 
         return view('pages.students.live.accounts', [
             'title' => 'Live Students - LCC Data Future Managment',
@@ -430,6 +431,7 @@ class StudentController extends Controller
             ],
             'student' => $student,
             'agreements' => SlcAgreement::where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->orderBy('id', 'ASC')->get(),
+            'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
         ]);
     }
 }
