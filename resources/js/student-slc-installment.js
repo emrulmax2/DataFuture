@@ -7,6 +7,7 @@ import Tabulator from "tabulator-tables";
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
+    const addInstallmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addInstallmentModal"));
     const editInstallmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editInstallmentModal"));
 
     const editInstallmentModalEl = document.getElementById('editInstallmentModal')
@@ -22,6 +23,21 @@ import Tabulator from "tabulator-tables";
 
         $('#editInstallmentModal .modal-body .totalAmount').html('');
         $('#editInstallmentModal .modal-body .remainingAmount').html('');
+    });
+
+    const addInstallmentModalEl = document.getElementById('addInstallmentModal')
+    addInstallmentModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addInstallmentModal .acc__input-error').html('');
+        $('#addInstallmentModal .modal-body select').val('');
+        $('#addInstallmentModal .modal-body input:not([type="checkbox"])').val('');
+
+        $('#addInstallmentModal .modal-body input[name="slc_agreement_id"]').val('0');
+        $('#addInstallmentModal .modal-body input[name="total_amount"]').val('0');
+        $('#addInstallmentModal .modal-body input[name="remaining_amount"]').val('0');
+        $('#addInstallmentModal .modal-body input[name="amount_org"]').val('0');
+
+        $('#addInstallmentModal .modal-body .totalAmount').html('');
+        $('#addInstallmentModal .modal-body .remainingAmount').html('');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -125,6 +141,91 @@ import Tabulator from "tabulator-tables";
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
                         $(`#editInstallmentForm .${key}`).addClass('border-danger');
                         $(`#editInstallmentForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+
+    $('.add_installment_btn').on('click', function(e){
+        var $theRow = $(this);
+        var agreement_id = $theRow.attr('data-agr-id');
+
+        axios({
+            method: "post",
+            url: route('student.get.slc.intallment.details'),
+            data: {agreement_id : agreement_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            var res = response.data.res;
+            
+            $('#addInstallmentModal [name="slc_agreement_id"]').val(agreement_id);
+            $('#addInstallmentModal [name="total_amount"]').val(res.total_amount);
+            $('#addInstallmentModal [name="remaining_amount"]').val(res.remaining_amount);
+            $('#addInstallmentModal .totalAmount').html(res.total_amount_html);
+            $('#addInstallmentModal .remainingAmount').html(res.remaining_amount_html);
+
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+    
+    $('#addInstallmentForm [name="amount"]').on('keyup', function(){
+        var $theInput = $(this);
+        var newAmount = $theInput.val();
+        var totalAmount = parseInt($('#addInstallmentForm [name="total_amount"]').val(), 10);
+        var remainingAmount = parseInt($('#addInstallmentForm [name="remaining_amount"]').val(), 10);
+
+        var newRemainingAmount = remainingAmount - newAmount;
+
+        $('#addInstallmentForm .remainingAmount').html('£'+newRemainingAmount.toFixed(2))
+    });
+
+    $('#addInstallmentForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addInstallmentForm');
+    
+        document.querySelector('#addInst').setAttribute('disabled', 'disabled');
+        document.querySelector("#addInst svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.store.slc.intallment'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#addInst').removeAttribute('disabled');
+            document.querySelector("#addInst svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                addInstallmentModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student SLC Installment successfully added.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 5000);
+            }
+        }).catch(error => {
+            document.querySelector('#addInst').removeAttribute('disabled');
+            document.querySelector("#addInst svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addInstallmentForm .${key}`).addClass('border-danger');
+                        $(`#addInstallmentForm  .error-${key}`).html(val);
                     }
                 } else {
                     console.log('error');
