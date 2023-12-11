@@ -22,16 +22,13 @@
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $employee->mobile }}
                 </div>
-                
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="tent-tree" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Expected Retirement :</span> {{ $employee->retire }}
-                </div>
+               
             </div>
         </div>
         <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
             <div class="font-medium text-center lg:text-left">Address <button data-tw-toggle="modal" data-tw-target="#editAddressUpdateModal" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1 ml-2"><i data-lucide="Pencil" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
             </div>
-            <div class="flex flex-col justify-center items-center lg:items-start mt-4">
+            <div class="flex flex-col justify-center items-center lg:items-start mt-4 col-span-12">
                 <div class="truncate sm:whitespace-normal flex items-start">
                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
                     <span>
@@ -52,7 +49,7 @@
                                 <span class="font-medium">{{ $employee->address->post_code }}</span>, <br/>
                             @endif
                             @if(isset($employee->address->country) && !empty($employee->address->country))
-                                <span class="font-medium">{{ $employee->address->country }}</span><br/>
+                                <span class="font-medium">{{ strtoupper($employee->address->country) }}</span><br/>
                             @endif
                         @else 
                             <span class="font-medium text-warning">Not Set Yet!</span><br/>
