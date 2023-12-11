@@ -46,10 +46,10 @@
                                 <span class="font-medium">{{ $employee->address->city }}</span>,
                             @endif
                             @if(isset($employee->address->state) && !empty($employee->address->state))
-                                <span class="font-medium">{{ $employee->address->state }}</span>, <br/>
+                                <span class="font-medium">{{ $employee->address->state }}</span>,
                             @endif
                             @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
-                                <span class="font-medium">{{ $employee->address->post_code }}</span>,
+                                <span class="font-medium">{{ $employee->address->post_code }}</span>, <br/>
                             @endif
                             @if(isset($employee->address->country) && !empty($employee->address->country))
                                 <span class="font-medium">{{ $employee->address->country }}</span><br/>
