@@ -154,7 +154,7 @@
                 <div class="col-span-6">
                     <div class="col-span-12">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="flex flex-col justify-center items-center lg:items-start">
+                            <div class="flex flex-col justify-center items-center lg:items-start col-span-12">
                                 <div class="truncate sm:whitespace-normal flex items-start">
                                     <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
                                     <span>
@@ -175,7 +175,7 @@
                                                 <span class="font-medium">{{ $emergencyContacts->address->post_code }}</span>,<br/>
                                             @endif
                                             @if(isset($employee->address->country) && !empty($emergencyContacts->address->country))
-                                                <span class="font-medium">{{ $emergencyContacts->address->country }}</span><br/>
+                                                <span class="font-medium">{{ strtoupper($emergencyContacts->address->country) }}</span><br/>
                                             @endif
                                         @else 
                                             <span class="font-medium text-warning">Not Set Yet!</span><br/>
