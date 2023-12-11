@@ -16,8 +16,10 @@ class AuthController extends Controller
      */
     public function loginView()
     {
+        $env= env('APP_ENV');
         return view('login.main', [
-            'layout' => 'login'
+            'layout' => 'login',
+            'env' => $env,
         ]);
     }
 
