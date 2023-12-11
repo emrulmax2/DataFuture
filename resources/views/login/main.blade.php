@@ -117,7 +117,7 @@
             <!-- BEGIN: Login Info -->
             <div class="hidden xl:flex flex-col min-h-screen">
                 <a href="" class="-intro-x flex items-center pt-5">
-                    <img alt="LCC Admin Panel" class="w-32" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg">
+                    <img alt="LCC Admin Panel" class="w-60" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg">
                     
                 </a>
                 <div class="my-auto">
