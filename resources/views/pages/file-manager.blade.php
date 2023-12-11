@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>File Manager - Midone - Tailwind HTML Admin Template</title>
+    <title>File Manager - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -132,7 +132,7 @@
                             @elseif ($faker['files'][0]['type'] == 'Image')
                                 <a href="" class="w-3/5 file__icon file__icon--image mx-auto">
                                     <div class="file__icon--image__preview image-fit">
-                                        <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . strtolower($faker['files'][0]['file_name'])) }}">
+                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . strtolower($faker['files'][0]['file_name'])) }}">
                                     </div>
                                 </a>
                             @else

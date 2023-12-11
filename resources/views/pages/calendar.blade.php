@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Calendar - Midone - Tailwind HTML Admin Template</title>
+    <title>Calendar - London Churchill College</title>
 @endsection
 
 @section('subcontent')

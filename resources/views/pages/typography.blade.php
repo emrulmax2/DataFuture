@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Typography - Midone - Tailwind HTML Admin Template</title>
+    <title>Typography - London Churchill College</title>
 @endsection
 
 @section('subcontent')

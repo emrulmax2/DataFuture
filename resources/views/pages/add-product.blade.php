@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>CRUD Form - Midone - Tailwind HTML Admin Template</title>
+    <title>CRUD Form - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -50,7 +50,7 @@
                                 <div class="grid grid-cols-10 gap-5 pl-4 pr-5">
                                     @foreach (array_slice($fakers, 0, 5) as $faker)
                                         <div class="col-span-5 md:col-span-2 h-28 relative image-fit cursor-pointer zoom-in">
-                                            <img class="rounded-md" alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
+                                            <img class="rounded-md" alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}">
                                             <div title="Remove this image?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
                                                 <i data-lucide="x" class="w-4 h-4"></i>
                                             </div>

@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Update Profile - Midone - Tailwind HTML Admin Template</title>
+    <title>Update Profile - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -14,7 +14,7 @@
             <div class="intro-y box mt-5">
                 <div class="relative flex items-center p-5">
                     <div class="w-12 h-12 image-fit">
-                        <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                        <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                     </div>
                     <div class="ml-4 mr-auto">
                         <div class="font-medium text-base">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -156,7 +156,7 @@
                         <div class="w-52 mx-auto xl:mr-0 xl:ml-6">
                             <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5">
                                 <div class="h-40 relative image-fit cursor-pointer zoom-in mx-auto">
-                                    <img class="rounded-md" alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                    <img class="rounded-md" alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                                     <div title="Remove this profile photo?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
                                         <i data-lucide="x" class="w-4 h-4"></i>
                                     </div>

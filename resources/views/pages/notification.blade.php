@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Notification - Midone - Tailwind HTML Admin Template</title>
+    <title>Notification - London Churchill College</title>
 @endsection
 
 @section('subcontent')
@@ -285,7 +285,7 @@
                             <!-- BEGIN: Notification Content -->
                             <div id="notification-with-avatar-content" class="toastify-content hidden flex">
                                 <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                    <img alt="Midone - HTML Admin Template" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
+                                    <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[0]['photos'][0]) }}">
                                 </div>
                                 <div class="ml-4 sm:mr-28">
                                     <div class="font-medium">{{ $fakers[0]['users'][0]['name'] }}</div>
@@ -310,7 +310,7 @@
                                         <!-- BEGIN: Notification Content -->
                                         <div id="notification-with-avatar-content" class="toastify-content hidden flex">
                                             <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                                <img alt="Midone - HTML Admin Template" src="' . asset('build/assets/images/' . $fakers[0]['photos'][0]) . '">
+                                                <img alt="London Churchill College" src="' . asset('build/assets/images/' . $fakers[0]['photos'][0]) . '">
                                             </div>
                                             <div class="ml-4 sm:mr-28">
                                                 <div class="font-medium">' . $fakers[0]['users'][0]['name'] . '</div>
