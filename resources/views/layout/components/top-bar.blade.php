@@ -8,7 +8,7 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
     <div class="h-full flex items-center">
         <!-- BEGIN: Logo -->
         <a href="" class="logo -intro-x hidden md:flex xl:w-[180px] block">
-            <img alt="London Churchill College" class="logo__image w-24 h-10" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+            <img alt="London Churchill College" class="logo__image w-36 h-14" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
             {{-- <span class="logo__text text-white text-lg ml-3">
                 Enigma
             </span> --}}
