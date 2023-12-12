@@ -32,7 +32,7 @@ class EmployeePassportExpiryController extends Controller
                  ->whereHas('employee', function($q){
                     $q->where('status', 1);
                  })
-                 ->orderBy('doc_expire', 'DESC');
+                 ->orderBy('doc_expire', 'ASC');
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
