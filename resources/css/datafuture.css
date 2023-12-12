@@ -1134,3 +1134,23 @@
 .bg-success-soft-2{
     background-color: rgb(var(--color-success) / .06) !important;
 }
+
+#leaveCalendar .litepicker{
+    width: 100%;
+}
+#leaveCalendar .litepicker .container__main {
+    width: 100%;
+}
+#leaveCalendar .litepicker .container__months {
+    width: 100%;
+}
+#leaveCalendar .litepicker .container__months .month-item {
+    padding: 5px;
+    width: var(--litepicker-month-width);
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+    width: 100%;
+}
+#leaveCalendar .litepicker .container__days>div, #leaveCalendar .litepicker .container__days>a {
+    width: calc(100% / 7);
+}

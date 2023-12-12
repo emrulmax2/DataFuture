@@ -195,7 +195,7 @@ import IMask from 'imask';
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000)
+                }, 2000)
             }
         }).catch(error => {
             document.querySelector('#savePBS').removeAttribute('disabled');
@@ -243,7 +243,7 @@ import IMask from 'imask';
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000)
+                }, 2000)
             }
         }).catch(error => {
             document.querySelector('#updatePBS').removeAttribute('disabled');

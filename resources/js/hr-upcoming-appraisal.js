@@ -303,7 +303,7 @@ var upcomingAppraisalListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                })
+                }, 2000)
             }
             upcomingAppraisalListTable.init();
         }).catch(error => {

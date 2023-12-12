@@ -345,7 +345,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
@@ -361,7 +361,7 @@ var studentInterviewLogTable = (function () {
                         setTimeout(function(){
                             warningModal.hide();
                             window.location.reload();
-                        }, 5000);
+                        }, 2000);
                     } else {
                         console.log('error');
                     }
@@ -380,7 +380,7 @@ var studentInterviewLogTable = (function () {
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
         
     });
@@ -444,7 +444,7 @@ var studentInterviewLogTable = (function () {
             drzn.removeFile(file);
             setTimeout(function(){
                 $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn.on("error", function(file, response){
@@ -476,7 +476,7 @@ var studentInterviewLogTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }else{
                 $('#uploadProcessDoc').removeAttr('disabled');
                 document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
@@ -490,7 +490,7 @@ var studentInterviewLogTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         })
 
@@ -511,7 +511,7 @@ var studentInterviewLogTable = (function () {
                 
                 setTimeout(function(){
                     warningModal.hide();
-                }, 5000);
+                }, 2000);
             }
         })
     }
@@ -606,7 +606,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -632,7 +632,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -658,7 +658,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -684,7 +684,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -758,7 +758,7 @@ var studentInterviewLogTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
@@ -774,7 +774,7 @@ var studentInterviewLogTable = (function () {
                         setTimeout(function(){
                             warningModal.hide();
                             window.location.reload();
-                        }, 5000);
+                        }, 2000);
                     } else {
                         console.log('error');
                     }
@@ -793,7 +793,7 @@ var studentInterviewLogTable = (function () {
             });
             setTimeout(function(){
                 $('#updateTaskOutcomeModal .taskUoutComeAlert').remove();
-            }, 5000);
+            }, 2000);
         }
     });
 

@@ -255,7 +255,7 @@ var employeeAppraisalListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                })
+                }, 2000)
             }
             employeeAppraisalListTable.init();
         }).catch(error => {
@@ -343,7 +343,7 @@ var employeeAppraisalListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                })
+                }, 2000)
             }
             employeeAppraisalListTable.init();
         }).catch(error => {

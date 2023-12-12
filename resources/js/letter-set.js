@@ -221,7 +221,7 @@ var letterSettingsListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             letterSettingsListTable.init();
         }).catch(error => {
@@ -293,7 +293,7 @@ var letterSettingsListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             letterSettingsListTable.init();
         }).catch(error => {

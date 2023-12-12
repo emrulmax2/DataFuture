@@ -168,6 +168,7 @@ var employeeDocumentListTable = (function () {
 
     const uploadEmployeeDocumentModalEl = document.getElementById('uploadEmployeeDocumentModal')
     uploadEmployeeDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#uploadEmployeeDocumentModal input[name="display_file_name"]').val('');
         $('#uploadEmployeeDocumentModal input[name="document_setting_id"]').val('0');
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val('0');
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
@@ -213,6 +214,10 @@ var employeeDocumentListTable = (function () {
         }
     });
 
+    $('#uploadEmployeeDocumentModal [name="doc_name"]').on('keyup', function(){
+        $('#uploadEmployeeDocumentModal [name="display_file_name"]').val($(this).val());
+    })
+
     /* Start Dropzone */
     if($("#uploadDocumentForm").length > 0){
         let dzError = false;
@@ -244,7 +249,7 @@ var employeeDocumentListTable = (function () {
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -276,7 +281,7 @@ var employeeDocumentListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -287,7 +292,7 @@ var employeeDocumentListTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     //window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         })
 
@@ -314,7 +319,7 @@ var employeeDocumentListTable = (function () {
                     $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
                     document.querySelector('#uploadEmpDocBtn').removeAttribute('disabled', 'disabled');
                     document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
-                }, 5000)
+                }, 2000)
             }
             
         });
@@ -338,7 +343,7 @@ var employeeDocumentListTable = (function () {
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
     });
 
@@ -400,7 +405,7 @@ var employeeDocumentListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -426,7 +431,7 @@ var employeeDocumentListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

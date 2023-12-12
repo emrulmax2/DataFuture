@@ -89,9 +89,12 @@ class EmployeeHolidayController extends Controller
                             || 
                             ($end_to == '' && $effective_from < $yearEnd)
                         ):
-                            $psd = ($yearStart < $pattern->effective_from ? $pattern->effective_from : $yearStart);
-                            $ped = (($pattern->end_to != '' && $pattern->end_to != '0000-00-00') && $pattern->end_to < $yearEnd ? $pattern->end_to : $yearEnd);
+                            $psd = ($yearStart < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $yearStart);
+                            $ped = (($end_to != '' && $end_to != '0000-00-00') && $end_to < $yearEnd ? $end_to : $yearEnd);
+                            $pattern['pattern_start'] = $psd;
+                            $pattern['pattern_end'] = $ped;
                             
+
                             $holidayEntitlement = $this->employeeHolidayEntitlement($employee_id, $year->id, $pattern->id, $psd, $ped);
                             $pattern['holidayEntitlement'] = $this->calculateHourMinute($holidayEntitlement);
 
@@ -281,15 +284,15 @@ class EmployeeHolidayController extends Controller
             $holidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
         endif;
         $year_id = (isset($holidayYear->id) && $holidayYear->id > 0 ? $holidayYear->id : $year_id);
-        $year_start = (isset($holidayYear->start_date) && !empty($holidayYear->start_date) ? $holidayYear->start_date : '');
-        $year_end = (isset($holidayYear->end_date) && !empty($holidayYear->end_date) ? $holidayYear->end_date : '');
+        $year_start = (isset($holidayYear->start_date) && !empty($holidayYear->start_date) ? date('Y-m-d', strtotime($holidayYear->start_date)) : '');
+        $year_end = (isset($holidayYear->end_date) && !empty($holidayYear->end_date) ? date('Y-m-d', strtotime($holidayYear->end_date)) : '');
 
         if($pattern_id == 0):
             $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
             if(!empty($patternRes) && $patternRes->count() > 0):
                 foreach($patternRes as $ptr):
-                    $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? $ptr->effective_from : '');
-                    $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? $ptr->end_to : '');
+                    $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
+                    $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? date('Y-m-d', strtotime($ptr->end_to)) : '');
                     if(
                         (($end_to != '' && $end_to > $year_start && $end_to < $year_end) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
                         || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
@@ -303,9 +306,11 @@ class EmployeeHolidayController extends Controller
 
         if($pattern_id > 0):
             $pattern = EmployeeWorkingPattern::find($pattern_id);
+            $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
+            $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
-            $sd = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') && $year_start < $pattern->effective_from ? $pattern->effective_from : $year_start);
-            $ed = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') && $pattern->end_to < $year_end ? $pattern->end_to : $year_end);
+            $sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
+            $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
 
             $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
             $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
@@ -381,37 +386,25 @@ class EmployeeHolidayController extends Controller
 
     public function employeePossibleActivePattern($employee_id, $year_id = 0){
         $today = date('Y-m-d');
-        $activeHolidayYearId = 0;
-        if($year_id > 0):
-            $activeHolidayYearId = $year_id;
-        else:
-            $HrHolidayYears = HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get();
-
-            if(!empty($HrHolidayYears)):
-                foreach($HrHolidayYears as $hy):
-                    if($today >= $hy->start_date && $today <= $hy->end_date):
-                        $activeHolidayYearId = $hy->id;
-                    endif;
-                endforeach;
-            endif;
-        endif;
+        $activeHolidayYearId = $year_id;
 
         if($activeHolidayYearId > 0):
             $hrHolidayYear = HrHolidayYear::find($activeHolidayYearId);
         else:
-            $hrHolidayYear = HrHolidayYear::where('start_date <=', $today)->where('end_date >=', $today)->where('active', 1)->get()->first();
+            $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
         endif;
-
-        $start = (isset($hrHolidayYear->start_date) && $hrHolidayYear->start_date != '' ? $hrHolidayYear->start_date : '');
-        $end = (isset($hrHolidayYear->end_date) && $hrHolidayYear->end_date != '' ? $hrHolidayYear->end_date : '');
+        
+        $start = (isset($hrHolidayYear->start_date) && $hrHolidayYear->start_date != '' ? date('Y-m-d', strtotime($hrHolidayYear->start_date)) : '');
+        $end = (isset($hrHolidayYear->end_date) && $hrHolidayYear->end_date != '' ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : '');
 
         $pattern = 0;
         $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
+        
         if(!empty($patternRes) && $patternRes->count() > 0):
             foreach($patternRes as $r):
-                $effective_from = (isset($r->effective_from) && $r->effective_from != '' & $r->effective_from != '0000-00-00' ? $r->effective_from : '');
-                $end_to = (isset($r->end_to) && $r->end_to != '' & $r->end_to != '0000-00-00' ? $r->end_to : '');
-
+                $effective_from = (isset($r->effective_from) && $r->effective_from != '' & $r->effective_from != '0000-00-00' ? date('Y-m-d', strtotime($r->effective_from)) : '');
+                $end_to = (isset($r->end_to) && $r->end_to != '' & $r->end_to != '0000-00-00' ? date('Y-m-d', strtotime($r->end_to)) : '');
+                
                 if(
                     ($end_to != '' && $end_to > $start && $end_to < $end) && ($effective_from < $start || ($effective_from > $start && $effective_from < $end)) 
                     || 
@@ -510,9 +503,11 @@ class EmployeeHolidayController extends Controller
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
+        $effective_from = (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->effective_from)) : '');
+        $end_to = (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->end_to)) : '');
 
-        $psd = (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') && $year_start < $workingPattern->effective_from ? $workingPattern->effective_from : $year_start);
-        $ped = (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') && $workingPattern->end_to < $year_end ? $workingPattern->end_to : $year_end);
+        $psd = (!empty($effective_from) && $year_start < $effective_from ? $effective_from : $year_start);
+        $ped = (!empty($end_to) && $end_to < $year_end ? $end_to : $year_end);
 
         $leaveDates = [];
         $empLeaves = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year_id)
@@ -546,14 +541,16 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $year_id = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $year_start = $hrHolidayYear->start_date;
-        $year_end = $hrHolidayYear->end_date;
+        $year_start = date('Y-m-d', strtotime($hrHolidayYear->start_date));
+        $year_end = date('Y-m-d', strtotime($hrHolidayYear->end_date));
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
+        $effective_from = (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->effective_from)) : '');
+        $end_to = (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->end_to)) : '');
 
-        $psd = (!empty($psd) ? $psd : (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') && $year_start < $workingPattern->effective_from ? $workingPattern->effective_from : $year_start));
-        $ped = (!empty($ped) ? $ped : (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') && $workingPattern->end_to < $year_end ? $workingPattern->end_to : $year_end));
+        $psd = (!empty($psd) ? $psd : (!empty($effective_from) && $year_start < $effective_from ? $effective_from : $year_start));
+        $ped = (!empty($ped) ? $ped : (!empty($end_to) && $end_to < $year_end ? $end_to : $year_end));
 
         $leaveTaken = 0;
         $leaveBooked = 0;
@@ -635,14 +632,16 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $year_id = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $year_start = $hrHolidayYear->start_date;
-        $year_end = $hrHolidayYear->end_date;
+        $year_start = date('Y-m-d', strtotime($hrHolidayYear->start_date));
+        $year_end = date('Y-m-d', strtotime($hrHolidayYear->end_date));
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
+        $effective_from = (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->effective_from)) : '');
+        $end_to = (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($workingPattern->end_to)) : '');
 
-        $psd = (isset($workingPattern->effective_from) && ($workingPattern->effective_from != '' && $workingPattern->effective_from != '0000-00-00') && $year_start < $workingPattern->effective_from ? $workingPattern->effective_from : $year_start);
-        $ped = (isset($workingPattern->end_to) && ($workingPattern->end_to != '' && $workingPattern->end_to != '0000-00-00') && $workingPattern->end_to < $year_end ? $workingPattern->end_to : $year_end);
+        $psd = (!empty($effective_from) && $year_start < $effective_from ? $effective_from : $year_start);
+        $ped = (!empty($end_to) && $end_to < $year_end ? $end_to : $year_end);
 
         $bankHolidayAutoBook = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $psd, $ped);
         $bankHolidays = (isset($bankHolidayAutoBook['bank_holidays']) && !empty($bankHolidayAutoBook['bank_holidays']) ? $bankHolidayAutoBook['bank_holidays'] : []);
@@ -722,12 +721,15 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $HrHolidayYear = HrHolidayYear::find($year_id);
-        $year_start = (isset($HrHolidayYear->start_date) && !empty($HrHolidayYear->start_date) ? $HrHolidayYear->start_date : '');
-        $year_end = (isset($HrHolidayYear->end_date) && !empty($HrHolidayYear->end_date) ? $HrHolidayYear->end_date : '');
+        $year_start = (isset($HrHolidayYear->start_date) && !empty($HrHolidayYear->start_date) ? date('Y-m-d', strtotime($HrHolidayYear->start_date)) : '');
+        $year_end = (isset($HrHolidayYear->end_date) && !empty($HrHolidayYear->end_date) ? date('Y-m-d', strtotime($HrHolidayYear->end_date)) : '');
 
         $empWorkingPattern = EmployeeWorkingPattern::find($pattern_id);
-        $psd = (isset($empWorkingPattern->effective_from) && ($empWorkingPattern->effective_from != '' && $empWorkingPattern->effective_from != '0000-00-00') && $year_start < $empWorkingPattern->effective_from ? $empWorkingPattern->effective_from : $year_start);
-        $ped = (isset($empWorkingPattern->end_to) && ($empWorkingPattern->end_to != '' && $empWorkingPattern->end_to != '0000-00-00') && $empWorkingPattern->end_to < $year_end ? $empWorkingPattern->end_to : $year_end);
+        $effective_from = (isset($empWorkingPattern->effective_from) && ($empWorkingPattern->effective_from != '' && $empWorkingPattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($empWorkingPattern->effective_from)) : '');
+        $end_to = (isset($empWorkingPattern->end_to) && ($empWorkingPattern->end_to != '' && $empWorkingPattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($empWorkingPattern->end_to)) : '');
+
+        $psd = (!empty($effective_from) && $year_start < $effective_from ? $effective_from : $year_start);
+        $ped = (!empty($end_to) && $end_to < $year_end ? $end_to : $year_end);
 
 
         $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $psd, $ped);

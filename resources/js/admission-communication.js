@@ -647,7 +647,7 @@ var applicantCommSMSListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             applicantCommEmailListTable.init();
         }).catch(error => {
@@ -789,7 +789,7 @@ var applicantCommSMSListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             applicantCommSMSListTable.init();
         }).catch(error => {
@@ -893,7 +893,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -919,7 +919,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -945,7 +945,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -971,7 +971,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -997,7 +997,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -1023,7 +1023,7 @@ var applicantCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -1089,7 +1089,7 @@ var applicantCommSMSListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             applicantCommLetterListTable.init();
         }).catch(error => {

@@ -209,7 +209,7 @@ var emailTemplateListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             emailTemplateListTable.init();
         }).catch(error => {
@@ -280,7 +280,7 @@ var emailTemplateListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             emailTemplateListTable.init();
         }).catch(error => {

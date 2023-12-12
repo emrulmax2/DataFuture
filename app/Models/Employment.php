@@ -14,6 +14,7 @@ class Employment extends Model
     protected $fillable = [
         'employee_id',
         'started_on',
+        'ended_on',
         'punch_number',
         'employee_work_type_id',
         'works_number',

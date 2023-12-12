@@ -523,7 +523,7 @@ var apelcredListTable = (function () {
             apelCreditImportModal.hide();
 
             succModal.show();   
-            setTimeout(function() { succModal.hide(); }, 3000);          
+            setTimeout(function() { succModal.hide(); }, 2000);          
         });
     }
 })();

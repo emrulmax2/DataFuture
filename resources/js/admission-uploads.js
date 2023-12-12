@@ -246,7 +246,7 @@ var applicantUploadListTable = (function () {
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#uploadDocumentModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -278,7 +278,7 @@ var applicantUploadListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -289,7 +289,7 @@ var applicantUploadListTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     //window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         })
 
@@ -316,7 +316,7 @@ var applicantUploadListTable = (function () {
                     $('#uploadDocumentModal .modal-content .uploadError').remove();
                     document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
                     document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-                }, 5000)
+                }, 2000)
             }
             
         });
@@ -340,7 +340,7 @@ var applicantUploadListTable = (function () {
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
     });
 
@@ -402,7 +402,7 @@ var applicantUploadListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -428,7 +428,7 @@ var applicantUploadListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

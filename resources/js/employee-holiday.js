@@ -451,7 +451,7 @@ import 'litepicker/dist/plugins/multiselect';
                     
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000)
+                        }, 2000)
                         console.log('error');
                     }
                 }
@@ -521,7 +521,7 @@ import 'litepicker/dist/plugins/multiselect';
             
             setTimeout(function(){
                 $('#empNewLeaveRequestForm .validationWarning').remove()
-            }, 4000);
+            }, 2000);
         }else{
             let form_data = new FormData(form);
             axios({
@@ -546,7 +546,7 @@ import 'litepicker/dist/plugins/multiselect';
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 } 
             }).catch(error => {
                 document.querySelector('#updateNLR').removeAttribute('disabled');
@@ -609,7 +609,7 @@ import 'litepicker/dist/plugins/multiselect';
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -635,7 +635,7 @@ import 'litepicker/dist/plugins/multiselect';
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -705,7 +705,7 @@ import 'litepicker/dist/plugins/multiselect';
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             } 
         }).catch(error => {
             document.querySelector('#updateADJ').removeAttribute('disabled');

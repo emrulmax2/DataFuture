@@ -582,7 +582,7 @@ var employeePatternListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000)
+                }, 2000)
             }
             employeePatternListTable.init();
         }).catch(error => {
@@ -674,7 +674,7 @@ var employeePatternListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000)
+                }, 2000)
             }
             employeePatternListTable.init();
         }).catch(error => {
@@ -788,7 +788,7 @@ var employeePatternListTable = (function () {
     $('#addCalendarModal .weekDayStat').on('change', function(){
         var $theInput = $(this);
         var dayId = $theInput.val();
-        var days = {'1' : 'Mon', '2' : 'Tue', '3' : 'Wed', '4' : 'Thu', '5' : 'Fir', '6' : 'Sat', '7' : 'Sun'};
+        var days = {'1' : 'Mon', '2' : 'Tue', '3' : 'Wed', '4' : 'Thu', '5' : 'Fri', '6' : 'Sat', '7' : 'Sun'};
 
         if($theInput.prop('checked')){
             var rowHtml = '';
@@ -887,7 +887,7 @@ var employeePatternListTable = (function () {
 
                 setTimeout(function(){
                     $(modalId+' form .overAlert').remove();
-                }, 5000)
+                }, 2000)
             }else{
                 $(modalId+' tfoot .weekTotal').val(hour_minute_formate(weekTotal));
             }
@@ -967,7 +967,7 @@ var employeePatternListTable = (function () {
 
             setTimeout(function(){
                 $('#addCalendarForm .overAlert').remove();
-            }, 5000);
+            }, 2000);
         }else{
             let form_data = new FormData(form);
             axios({
@@ -991,7 +991,7 @@ var employeePatternListTable = (function () {
                     
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000)
+                    }, 2000)
                 }
                 employeePatternListTable.init();
             }).catch(error => {
@@ -1007,7 +1007,7 @@ var employeePatternListTable = (function () {
                     
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000)
+                        }, 2000)
                         console.log('error');
                     }
                 }
@@ -1071,7 +1071,7 @@ var employeePatternListTable = (function () {
     $('#editCalendarModal .weekDayStat').on('change', function(){
         var $theInput = $(this);
         var dayId = $theInput.val();
-        var days = {'1' : 'Mon', '2' : 'Tue', '3' : 'Wed', '4' : 'Thu', '5' : 'Fir', '6' : 'Sat', '7' : 'Sun'};
+        var days = {'1' : 'Mon', '2' : 'Tue', '3' : 'Wed', '4' : 'Thu', '5' : 'Fri', '6' : 'Sat', '7' : 'Sun'};
 
         if($theInput.prop('checked')){
             var rowHtml = '';
@@ -1175,7 +1175,7 @@ var employeePatternListTable = (function () {
 
             setTimeout(function(){
                 $('#editCalendarForm .overAlert').remove();
-            }, 5000);
+            }, 2000);
         }else{
             let form_data = new FormData(form);
             axios({
@@ -1199,7 +1199,7 @@ var employeePatternListTable = (function () {
                     
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000)
+                    }, 2000)
                 }
                 employeePatternListTable.init();
             }).catch(error => {
@@ -1215,7 +1215,7 @@ var employeePatternListTable = (function () {
                     
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000)
+                        }, 2000)
                         console.log('error');
                     }
                 }
@@ -1382,7 +1382,7 @@ var employeePatternListTable = (function () {
                     
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000)
+                    }, 2000)
                 }
             }
             employeeWorkingPatternPaysListTable.init(employee_working_pattern_id)
@@ -1478,7 +1478,7 @@ var employeePatternListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000)
+                }, 2000)
             }
             employeeWorkingPatternPaysListTable.init(employee_working_pattern_id)
         }).catch(error => {

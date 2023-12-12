@@ -231,7 +231,7 @@ var employeeBankListTable = (function () {
                     
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             employeeBankListTable.init();
         }).catch(error => {
@@ -311,7 +311,7 @@ var employeeBankListTable = (function () {
                     
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             employeeBankListTable.init();
         }).catch(error => {

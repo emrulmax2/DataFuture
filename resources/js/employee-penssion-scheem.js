@@ -218,7 +218,7 @@ var employeePenssionListTable = (function () {
                     
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             employeePenssionListTable.init();
         }).catch(error => {
@@ -292,7 +292,7 @@ var employeePenssionListTable = (function () {
                     
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             employeePenssionListTable.init();
         }).catch(error => {

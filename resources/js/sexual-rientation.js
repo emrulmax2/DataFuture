@@ -520,7 +520,7 @@ var sexoListTable = (function () {
             sexorientationImportModal.hide();
 
             succModal.show();   
-            setTimeout(function() { succModal.hide(); }, 3000);          
+            setTimeout(function() { succModal.hide(); }, 2000);          
         });
     }
 })();

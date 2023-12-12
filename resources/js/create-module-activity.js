@@ -46,7 +46,7 @@ import Dropzone from "dropzone";
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#uploadDocumentModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){

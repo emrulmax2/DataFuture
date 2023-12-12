@@ -243,7 +243,7 @@ import Tabulator from "tabulator-tables";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#saveReg').removeAttribute('disabled');
@@ -319,7 +319,7 @@ import Tabulator from "tabulator-tables";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#updateReg').removeAttribute('disabled');

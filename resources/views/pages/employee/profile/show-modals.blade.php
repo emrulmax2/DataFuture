@@ -237,7 +237,7 @@
                         </div>
                         
                         <div class="col-span-12 sm:col-span-4">
-                            <label for="office_telephone" class="form-label">Office Telephone <span class="text-danger">*</span></label>
+                            <label for="office_telephone" class="form-label">Office Telephone</label>
                             <input type="text" value="{{ isset($employment->office_telephone) ? $employment->office_telephone : '' }}" id="office_telephone" class="form-control" name="office_telephone"  >
                             <div class="acc__input-error error-office_telephone text-danger mt-2"></div>
                         </div>

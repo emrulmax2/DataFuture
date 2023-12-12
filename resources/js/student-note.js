@@ -318,7 +318,7 @@ var studentNotesListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             studentNotesListTable.init();
         }).catch(error => {
@@ -392,7 +392,7 @@ var studentNotesListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             studentNotesListTable.init();
         }).catch(error => {
@@ -470,7 +470,7 @@ var studentNotesListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -496,7 +496,7 @@ var studentNotesListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

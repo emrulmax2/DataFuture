@@ -525,7 +525,7 @@ var titleListTable = (function () {
             titleImportModal.hide();
 
             succModal.show();   
-            setTimeout(function() { succModal.hide(); }, 3000);          
+            setTimeout(function() { succModal.hide(); }, 2000);          
         });
     }
 })();

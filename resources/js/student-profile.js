@@ -206,7 +206,7 @@ import TomSelect from "tom-select";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#savePD').removeAttribute('disabled');
@@ -289,7 +289,7 @@ import TomSelect from "tom-select";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#saveSOI').removeAttribute('disabled');
@@ -342,7 +342,7 @@ import TomSelect from "tom-select";
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#saveCD').removeAttribute('disabled');
@@ -406,7 +406,7 @@ import TomSelect from "tom-select";
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#saveNOK').removeAttribute('disabled');
@@ -458,7 +458,7 @@ import TomSelect from "tom-select";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#updateSOID').removeAttribute('disabled');
