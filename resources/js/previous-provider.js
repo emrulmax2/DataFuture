@@ -522,7 +522,7 @@ var PreviousproviderListTable = (function () {
             previousproviderImportModal.hide();
 
             succModal.show();   
-            setTimeout(function() { succModal.hide(); }, 3000);           
+            setTimeout(function() { succModal.hide(); }, 2000);           
         });
     }
 })();

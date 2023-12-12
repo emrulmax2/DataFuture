@@ -290,7 +290,7 @@ var hrBankHolidayList = (function () {
 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             hrBankHolidayList.init(); 
         }).catch(error => {

@@ -214,7 +214,7 @@ var studentProofOfIdCheckTable = (function () {
                 
                 setTimeout(function(){
                     successModal.show();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#addPIC').removeAttribute('disabled');
@@ -289,7 +289,7 @@ var studentProofOfIdCheckTable = (function () {
                 
                 setTimeout(function(){
                     successModal.show();
-                }, 5000);
+                }, 2000);
             }
             studentProofOfIdCheckTable.init();
         }).catch((error) => {
@@ -313,7 +313,7 @@ var studentProofOfIdCheckTable = (function () {
                 
                     setTimeout(function(){
                         successModal.show();
-                    }, 5000);
+                    }, 2000);
                 } else {
                     console.log("error");
                 }

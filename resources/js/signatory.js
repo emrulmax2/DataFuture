@@ -261,7 +261,7 @@ var signatoryListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             signatoryListTable.init();
         }).catch(error => {
@@ -333,7 +333,7 @@ var signatoryListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             signatoryListTable.init();
         }).catch(error => {
@@ -410,7 +410,7 @@ var signatoryListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -436,7 +436,7 @@ var signatoryListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

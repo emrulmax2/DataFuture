@@ -39,7 +39,7 @@ import Tabulator from "tabulator-tables";
 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000)
+                }, 2000)
             }
             
         }).catch(error => {

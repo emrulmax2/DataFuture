@@ -244,7 +244,7 @@ var studentUploadListTable = (function () {
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#uploadDocumentModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -276,7 +276,7 @@ var studentUploadListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -287,7 +287,7 @@ var studentUploadListTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     //window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         })
 
@@ -314,7 +314,7 @@ var studentUploadListTable = (function () {
                     $('#uploadDocumentModal .modal-content .uploadError').remove();
                     document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
                     document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
-                }, 5000)
+                }, 2000)
             }
             
         });
@@ -338,7 +338,7 @@ var studentUploadListTable = (function () {
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
     });
 
@@ -400,7 +400,7 @@ var studentUploadListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -426,7 +426,7 @@ var studentUploadListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

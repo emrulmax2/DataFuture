@@ -822,7 +822,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.show();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 $btn.removeAttr('disabled');
@@ -1258,7 +1258,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#savePD').removeAttribute('disabled');
@@ -1323,7 +1323,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.show();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#saveCD').removeAttribute('disabled');
@@ -1389,7 +1389,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.show();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#saveNOK').removeAttribute('disabled');
@@ -1513,7 +1513,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.show();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#savePCP').removeAttribute('disabled');
@@ -1605,7 +1605,7 @@ var employmentHistoryTable = (function () {
                     setTimeout(function(){
                         successModal.show();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 $btn.removeAttr('disabled');

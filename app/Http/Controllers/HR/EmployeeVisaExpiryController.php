@@ -32,7 +32,7 @@ class EmployeeVisaExpiryController extends Controller
                 ->whereDate('workpermit_expire', '<=', $expireDate)
                 ->whereHas('employee', function($q){
                     $q->where('status', 1);
-                })->orderBy('workpermit_expire', 'DESC');
+                })->orderBy('workpermit_expire', 'ASC');
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);

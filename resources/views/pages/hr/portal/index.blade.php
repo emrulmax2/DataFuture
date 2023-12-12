@@ -295,7 +295,7 @@
                     </div>
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Upcoming Apprisal in 60 Days</h2>
+                            <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days</h2>
                             <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
                         <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">

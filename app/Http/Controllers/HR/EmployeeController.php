@@ -33,6 +33,7 @@ use App\Models\StudentArchive;
 use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -63,21 +64,36 @@ class EmployeeController extends Controller
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $fields = explode('_', $sort['field']);
+            $tableAlise = (isset($fields[0]) && empty($fields[0]) && count($fields) > 1 && $sort['field'] != 'first_name' ? $fields[0].'.' : '');
+            $sorts[] = $tableAlise.$sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Employee::orderByRaw(implode(',', $sorts));
+        $query = DB::table('employees as emp')
+                 ->select(
+                    'emp.id', 'emp.first_name', 'emp.last_name', 'emp.mobile', 'emp.email', 'emp.deleted_at', 'emp.status', 'emp.photo',
+                    'ttl.name as emp_title',
+                    'empt.works_number as empt_works_number', 
+                    'ejt.name as ejt_name',
+                    'dpt.name as dpt_name', 'ewt.name as ewt_name'
+                 )
+                 ->leftJoin('titles as ttl', 'emp.title_id', '=', 'ttl.id')
+                 ->leftJoin('employments as empt', 'emp.id', '=', 'empt.employee_id')
+                 ->leftJoin('employee_job_titles as ejt', 'empt.employee_job_title_id', '=', 'ejt.id')
+                 ->leftJoin('departments as dpt', 'empt.department_id', '=', 'dpt.id')
+                 ->leftJoin('employee_work_types as ewt', 'empt.employee_work_type_id', '=', 'ewt.id');
         if(!empty($queryStr)):
-            $query->where('first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('mobile','LIKE','%'.$queryStr.'%');
-            $query->orWhere('email','LIKE','%'.$queryStr.'%');
+            $query->where('emp.first_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('emp.last_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('emp.mobile','LIKE','%'.$queryStr.'%');
+            $query->orWhere('emp.email','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
         else:
-            $query->where('status', $status);
+            $query->where('emp.status', $status);
         endif;
+        $query->orderByRaw(implode(',', $sorts));
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -96,15 +112,22 @@ class EmployeeController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                if ($list->photo !== null && Storage::disk('local')->exists('public/employees/'.$list->id.'/'.$list->photo)) {
+                    $photo_url = Storage::disk('local')->url('public/employees/'.$list->id.'/'.$list->photo);
+                } else {
+                    $photo_url = asset('build/assets/images/placeholders/200x200.jpg');
+                }
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'name' => (isset($list->title->name) ? $list->title->name.' ' : '').$list->first_name.' '.$list->last_name,
-                    'jobtitle' => (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : ''),
-                    'photourl' => $list->photo_url,
-                    'work_type' => (isset($list->employment->employeeWorkType->name) ? $list->employment->employeeWorkType->name : ''),
-                    'department' => (isset($list->employment->department->name) ? $list->employment->department->name : ''),
-                    'works_number' => (isset($list->employment->works_number) ? $list->employment->works_number : ''),
+                    'first_name' => (isset($list->emp_title) ? $list->emp_title.' ' : '').$list->first_name.' '.$list->last_name,
+                    'full_name' => (isset($list->emp_title) ? $list->emp_title.' ' : '').$list->first_name.' '.$list->last_name,
+                    'ejt_name' => (isset($list->ejt_name) ? $list->ejt_name : ''),
+                    'photourl' => $photo_url,
+                    'ewt_name' => (isset($list->ewt_name) ? $list->ewt_name : ''),
+                    'dpt_name' => (isset($list->dpt_name) ? $list->dpt_name : ''),
+                    'empt_works_number' => (isset($list->empt_works_number) ? $list->empt_works_number : ''),
                     'status' => $list->status,
                     'deleted_at' => $list->deleted_at,
                     'url' => route('profile.employee.view', $list->id)
@@ -386,6 +409,7 @@ class EmployeeController extends Controller
      */
     public function update(EmployeeDataUpdateRequest $request, Employee $employee)
     {
+        $status = (isset($request->status) && $request->status > 0 ? 1 : 0);
         $request->merge([
             'disability_status' => ($request->disability_status)? "Yes":"No",
             'status' => (isset($request->status) && $request->status > 0 ? 1 : 0)
@@ -396,6 +420,14 @@ class EmployeeController extends Controller
         $employee->save();
 
         $employee->disability()->sync($request->disability_id);
+
+        if($status == 0){
+            $emptData['ended_on'] = date('Y-m-d');
+            Employment::where('employee_id', $employee->id)->update($emptData);
+        }else{
+            $emptData['ended_on'] = null;
+            Employment::where('employee_id', $employee->id)->update($emptData);
+        }
 
         
         if($employee->wasChanged())

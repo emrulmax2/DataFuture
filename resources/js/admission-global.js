@@ -44,7 +44,7 @@ import Dropzone from "dropzone";
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -78,7 +78,7 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#addApplicantPhotoModal .modal-content .uploadError').remove();
                     window.location.reload();
-                }, 3000);
+                }, 2000);
             }else{
                 $('#addApplicantPhotoModal .modal-content .uploadError').remove();
                 $('#addApplicantPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
@@ -90,7 +90,7 @@ import Dropzone from "dropzone";
                 
                 setTimeout(function(){
                     $('#addApplicantPhotoModal .modal-content .uploadError').remove();
-                }, 5000);
+                }, 2000);
             }
         })
 
@@ -242,7 +242,7 @@ import Dropzone from "dropzone";
 
                 setTimeout(function(){
                     $('#statusConfirmModal .modal-content .validationErrors').remove();
-                }, 5000);
+                }, 2000);
             }else if(statusidID == 7 && (proof_type == '' || proof_id == '' || proof_expiredate == '' || fee_eligibility_id == '') && $('#statusConfirmModal .offerAcceptedErrorArea').is(':visible')){
                 $('#statusConfirmModal button').removeAttr('disabled');
                 $('#statusConfirmModal .modal-content .validationErrors').remove();
@@ -256,7 +256,7 @@ import Dropzone from "dropzone";
 
                 setTimeout(function(){
                     $('#statusConfirmModal .modal-content .validationErrors').remove();
-                }, 5000);
+                }, 2000);
             }else{
                 axios({
                     method: "post",
@@ -289,7 +289,7 @@ import Dropzone from "dropzone";
 
                             setTimeout(function(){
                                 $('#statusConfirmModal .modal-content .validationErrors').remove();
-                            }, 10000);
+                            }, 2000);
                         } else {
                             console.log('error');
                         }

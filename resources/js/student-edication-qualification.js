@@ -218,7 +218,7 @@ var studentEducationQualTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#updateSQS').removeAttribute('disabled');
@@ -405,7 +405,7 @@ var studentEducationQualTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 3000)
+                    }, 2000)
                 }
                 studentEducationQualTable.init();
             }).catch(error =>{
@@ -430,7 +430,7 @@ var studentEducationQualTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 3000)
+                    }, 2000)
                 }
                 studentEducationQualTable.init();
             }).catch(error =>{

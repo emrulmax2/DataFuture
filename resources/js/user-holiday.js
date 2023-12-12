@@ -425,7 +425,7 @@ import 'litepicker/dist/plugins/multiselect';
                     
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000)
+                        }, 2000)
                         console.log('error');
                     }
                 }

@@ -229,7 +229,7 @@ var letterHeaderListTable = (function () {
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#uploadLetterHeadForm .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -257,7 +257,7 @@ var letterHeaderListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -268,7 +268,7 @@ var letterHeaderListTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         });
 
@@ -326,7 +326,7 @@ var letterHeaderListTable = (function () {
 
                 setTimeout(function(){
                     $('#uploadLetterHeaderModal .modal-content .uploadError').remove();
-                }, 5000);
+                }, 2000);
 
                 document.querySelector('#uploadHeaderBtn').removeAttribute('disabled', 'disabled');
                 document.querySelector("#uploadHeaderBtn svg").style.cssText ="display: none;";
@@ -393,7 +393,7 @@ var letterHeaderListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -419,7 +419,7 @@ var letterHeaderListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

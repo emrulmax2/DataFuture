@@ -57,7 +57,7 @@ import { createIcons, icons } from "lucide";
                 setTimeout(function(){
                     successModal.show();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#saveSABD').removeAttribute('disabled');
@@ -138,7 +138,7 @@ import { createIcons, icons } from "lucide";
                 setTimeout(function(){
                     successModal.show();
                     //window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             $('#confirmRDVModal button').removeAttr('disabled');

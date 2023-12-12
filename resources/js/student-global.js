@@ -37,7 +37,7 @@ import Dropzone from "dropzone";
             drzn1.removeFile(file);
             setTimeout(function(){
                 $('#addStudentPhotoModal .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drzn1.on("error", function(file, response){
@@ -71,7 +71,7 @@ import Dropzone from "dropzone";
                 setTimeout(function(){
                     $('#addStudentPhotoModal .modal-content .uploadError').remove();
                     window.location.reload();
-                }, 3000);
+                }, 2000);
             }else{
                 $('#addStudentPhotoModal .modal-content .uploadError').remove();
                 $('#addStudentPhotoModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try later.</div>');
@@ -83,7 +83,7 @@ import Dropzone from "dropzone";
                 
                 setTimeout(function(){
                     $('#addStudentPhotoModal .modal-content .uploadError').remove();
-                }, 5000);
+                }, 2000);
             }
         })
 

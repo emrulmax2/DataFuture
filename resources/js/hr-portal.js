@@ -25,16 +25,16 @@ var employeeListTable = (function () {
             columns: [
                 {
                     title: "Name",
-                    field: "name",
+                    field: "first_name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
+                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
                                 html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().jobtitle != '' ? cell.getData().jobtitle : 'Unknown')+'</div>';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().first_name+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -42,23 +42,24 @@ var employeeListTable = (function () {
                 },
                 {
                     title: "Department",
-                    field: "department",
+                    field: "dpt_name",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Work Type",
-                    field: "work_type",
+                    field: "ewt_name",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Work Number",
-                    field: "works_number",
+                    field: "empt_works_number",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         return (cell.getData().status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>');
                     }

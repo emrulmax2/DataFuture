@@ -126,7 +126,7 @@ class TopMenu
                         ]
                     ]
                 ],
-                'management' => [
+                /*'management' => [
                     'icon' => 'layers',
                     'title' => 'Management',
                     'sub_menu' => [
@@ -161,7 +161,7 @@ class TopMenu
                             ]
                         ],
                     ]
-                ],
+                ],*/
                 'site.setting' => [
                     'icon' => 'settings',
                     'title' => 'Settings',

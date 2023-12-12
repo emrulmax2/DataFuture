@@ -23,7 +23,7 @@ class EmployeeUpcomingAppraisalController extends Controller
         $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
         $status = (isset($request->status) ? $request->status : 1);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'due_on', 'dir' => 'ASC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];

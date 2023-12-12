@@ -319,7 +319,7 @@ import IMask from 'imask';
 
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000);
+                        }, 2000);
                         console.log('error');
                     }
                 }
@@ -337,7 +337,7 @@ import IMask from 'imask';
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
     })
 
@@ -413,7 +413,7 @@ import IMask from 'imask';
 
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000);
+                        }, 2000);
                         console.log('error');
                     }
                 }
@@ -528,7 +528,7 @@ import IMask from 'imask';
             
             setTimeout(function(){
                 $form.find('.modError').remove();
-            }, 5000);
+            }, 2000);
         }else{
             $('#viewBreakModal').find('.return_list li').removeClass('has_error');
             $('#viewBreakModal').find('.return_list li .edit_this').remove();

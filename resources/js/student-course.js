@@ -77,7 +77,7 @@ import TomSelect from "tom-select";
                 setTimeout(function(){
                     successModal.show();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#savePCP').removeAttribute('disabled');

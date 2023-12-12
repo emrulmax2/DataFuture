@@ -228,7 +228,7 @@ var letterFooterListTable = (function () {
             drznfooter.removeFile(file);
             setTimeout(function(){
                 $('#uploadLetterFootForm .modal-content .uploadError').remove();
-            }, 4000)
+            }, 2000)
         });
 
         drznfooter.on("error", function(file, response){
@@ -258,7 +258,7 @@ var letterFooterListTable = (function () {
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             } else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -269,7 +269,7 @@ var letterFooterListTable = (function () {
                 setTimeout(function(){
                     warningModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         });
 
@@ -326,7 +326,7 @@ var letterFooterListTable = (function () {
 
                 setTimeout(function(){
                     $('#uploadLetterFooterModal .modal-content .uploadError').remove();
-                }, 5000)
+                }, 2000)
             }
             
         });
@@ -390,7 +390,7 @@ var letterFooterListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -416,7 +416,7 @@ var letterFooterListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

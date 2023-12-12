@@ -61,11 +61,11 @@
                                                                     <div class="grid grid-cols-12 gap-4">
                                                                         <div class="col-span-6 sm:col-span-3">
                                                                             <div class="text-slate-500 font-medium">Start</div>
-                                                                            <div class="font-medium">{{ $pattern->effective_from }}</div>
+                                                                            <div class="font-medium">{{ date('jS M, Y', strtotime($pattern->pattern_start)) }}</div>
                                                                         </div>
                                                                         <div class="col-span-6 sm:col-span-3">
                                                                             <div class="text-slate-500 font-medium">End</div>
-                                                                            <div class="font-medium">{{ $pattern->end_to }}</div>
+                                                                            <div class="font-medium">{{ date('jS M, Y', strtotime($pattern->pattern_end)) }}</div>
                                                                         </div>
                                                                         <div class="col-span-6 sm:col-span-3">
                                                                             <div class="text-slate-500 font-medium">Entitlement</div>

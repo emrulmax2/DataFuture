@@ -9,8 +9,8 @@
             </div>
             <div class="ml-5">
                 <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg"></div>
-                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->title->name.' '.$employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
-                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium {{ $employee->status == 1 ? 'text-success' : 'text-danger' }}">{{ ($employee->status == 1 ? 'Active' : 'Inactive') }}</span></div>
+                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->title->name.' '.$employee->first_name }} <br/><span class="font-black">{{ $employee->last_name }}</span></div>
+                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium {{ $employee->status == 1 ? 'text-success' : 'text-danger' }}">{{ ($employee->status == 1 ? 'Active' : 'Inactive') }}</span></div>
                 
             </div>
         </div>

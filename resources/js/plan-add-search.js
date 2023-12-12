@@ -635,7 +635,7 @@ var classPlanListTable = (function () {
 
                         setTimeout(function(){
                             successModalCP.hide();
-                        }, 3000);
+                        }, 2000);
 
                         filterHTMLForm();
                     }
@@ -651,7 +651,7 @@ var classPlanListTable = (function () {
 
                         setTimeout(function(){
                             warningModalCP.hide();
-                        }, 3000);
+                        }, 2000);
 
                         filterHTMLForm();
                     } else {
@@ -963,7 +963,7 @@ var classPlanListTable = (function () {
 
                 setTimeout(function(){
                     warningModalCPB.hide();
-                }, 3000);
+                }, 2000);
 
                 document.querySelector('.addPlanBox').removeAttribute('disabled');
                 document.querySelector('#saveUpdatePlans').removeAttribute('disabled');
@@ -1021,7 +1021,7 @@ var classPlanListTable = (function () {
                     setTimeout(function(){
                         successModalCPB.hide();
                         window.location.href = response.data.red;
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('.addPlanBox').removeAttribute('disabled');
@@ -1037,7 +1037,7 @@ var classPlanListTable = (function () {
 
                         setTimeout(function(){
                             warningModalCPB.hide();
-                        }, 3000);
+                        }, 2000);
                     } else {
                         console.log('error');
                     }

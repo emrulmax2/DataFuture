@@ -58,7 +58,7 @@ class EmployeeWorkingPatternDetailController extends Controller
     public function store(Request $request){
         $employee_id = $request->employee_id;
         $employee_working_pattern_id = $request->employee_working_pattern_id;
-        $dayNames = ['1' => 'Mon', '2' => 'Tue', '3' => 'Wed', '4' => 'Thu', '5' => 'Fir', '6' => 'Sat', '7' => 'Sun'];
+        $dayNames = ['1' => 'Mon', '2' => 'Tue', '3' => 'Wed', '4' => 'Thu', '5' => 'Fri', '6' => 'Sat', '7' => 'Sun'];
 
         $weekDays = $request->weekDays;
         $weekTotal = $request->weekTotal;
@@ -151,7 +151,7 @@ class EmployeeWorkingPatternDetailController extends Controller
     public function update(Request $request){
         $employee_id = $request->employee_id;
         $employee_working_pattern_id = $request->employee_working_pattern_id;
-        $dayNames = ['1' => 'Mon', '2' => 'Tue', '3' => 'Wed', '4' => 'Thu', '5' => 'Fir', '6' => 'Sat', '7' => 'Sun'];
+        $dayNames = ['1' => 'Mon', '2' => 'Tue', '3' => 'Wed', '4' => 'Thu', '5' => 'Fri', '6' => 'Sat', '7' => 'Sun'];
 
         $weekDays = $request->weekDays;
         $weekTotal = $request->weekTotal;

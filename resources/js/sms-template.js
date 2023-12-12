@@ -270,7 +270,7 @@ var smsTempalteListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             smsTempalteListTable.init();
         }).catch(error => {
@@ -361,7 +361,7 @@ var smsTempalteListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 3000);
+                }, 2000);
             }
             smsTempalteListTable.init();
         }).catch(error => {

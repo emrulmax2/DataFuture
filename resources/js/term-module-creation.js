@@ -392,7 +392,7 @@ var termModuleListTable = (function () {
 
                         setTimeout(function(){
                             successModalMCAS.hide();
-                        }, 5000)
+                        }, 2000)
                     }
                     
                 }).catch(error => {
@@ -411,7 +411,7 @@ var termModuleListTable = (function () {
         
                             setTimeout(function(){
                                 $('.df_alert', $form).remove();
-                            }, 5000);
+                            }, 2000);
                         } else {
                             console.log('error');
                         }
@@ -429,7 +429,7 @@ var termModuleListTable = (function () {
     
                 setTimeout(function(){
                     $('.df_alert', $form).remove();
-                }, 5000);
+                }, 2000);
             }
         });
         
@@ -490,7 +490,7 @@ var termModuleListTable = (function () {
 
                         setTimeout(function(){
                             successModalMCAS.hide();
-                        }, 5000)
+                        }, 2000)
                     }
                     
                 }).catch(error => {
@@ -509,7 +509,7 @@ var termModuleListTable = (function () {
         
                             setTimeout(function(){
                                 $('.df_alert', $form).remove();
-                            }, 5000);
+                            }, 2000);
                         } else {
                             console.log('error');
                         }
@@ -527,7 +527,7 @@ var termModuleListTable = (function () {
     
                 setTimeout(function(){
                     $('.df_alert', $form).remove();
-                }, 5000);
+                }, 2000);
             }
         });
 
@@ -667,7 +667,7 @@ var termModuleListTable = (function () {
 
                             setTimeout(function(){
                                 warningModalMCRD.hide();
-                            }, 5000);
+                            }, 2000);
                         } else {
                             console.log('error');
                         }
@@ -685,7 +685,7 @@ var termModuleListTable = (function () {
 
                         setTimeout(function(){
                             window.location.href = route('term.module.creation');
-                        }, 3000);
+                        }, 2000);
                     }else{
                         next.parents('.wizard-fieldset').removeClass("show");
                         next.parents('.wizard-fieldset').next('.wizard-fieldset').addClass("show");
@@ -798,7 +798,7 @@ var termModuleListTable = (function () {
 
                     setTimeout(function(){
                         window.location.href = response.data.red;
-                    }, 5000);
+                    }, 2000);
                 }
                 
             }).catch(error => {
@@ -814,7 +814,7 @@ var termModuleListTable = (function () {
 
                         setTimeout(function(){
                             warningModalMCR.hide();
-                        }, 5000)
+                        }, 2000)
                     } else {
                         console.log('error');
                     }

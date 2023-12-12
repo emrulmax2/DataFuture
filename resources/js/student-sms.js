@@ -286,7 +286,7 @@ var studentCommSMSListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                }, 5000);
+                }, 2000);
             }
             studentCommSMSListTable.init();
         }).catch(error => {
@@ -390,7 +390,7 @@ var studentCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -416,7 +416,7 @@ var studentCommSMSListTable = (function () {
 
                     setTimeout(function(){
                         successModal.hide();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)

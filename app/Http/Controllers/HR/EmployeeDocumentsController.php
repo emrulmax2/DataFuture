@@ -25,7 +25,7 @@ class EmployeeDocumentsController extends Controller
             'breadcrumbs' => [],
             "employee" => $employee,
             "employment" => $employment,
-            'docSettings' => DocumentSettings::where('live', '1')->get(),
+            'docSettings' => DocumentSettings::where('staff', '1')->get(),
         ]);
     }
 
@@ -92,10 +92,12 @@ class EmployeeDocumentsController extends Controller
         $document_setting_id = $request->document_setting_id;
         $documentSetting = DocumentSettings::find($document_setting_id);
         $hard_copy_check = $request->hard_copy_check;
+        $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
         $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 'google');
+        $displayName = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name.(!empty($display_file_name) ? ' - '.$display_file_name : '') : (!empty($display_file_name) ? $display_file_name : $imageName));
         
         $data = [];
         $data['employee_id'] = $employee_id;
@@ -104,7 +106,7 @@ class EmployeeDocumentsController extends Controller
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('google')->url($path);
         
-        $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
+        $data['display_file_name'] = $displayName;
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
         $employeeDoc = EmployeeDocuments::create($data);

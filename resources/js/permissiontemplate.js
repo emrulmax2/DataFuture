@@ -79,7 +79,7 @@ import Tabulator from "tabulator-tables";
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error => {
                 document.querySelector('#addPermissionCat').removeAttribute('disabled');
@@ -93,7 +93,7 @@ import Tabulator from "tabulator-tables";
                         });
                         setTimeout(function(){
                             warningModal.hide();
-                        }, 5000);
+                        }, 2000);
                     } else {
                         console.log('error');
                     }
@@ -111,7 +111,7 @@ import Tabulator from "tabulator-tables";
 
             setTimeout(function(){
                 warningModal.hide();
-            }, 5000);
+            }, 2000);
         }
         
     });
@@ -172,7 +172,7 @@ import Tabulator from "tabulator-tables";
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
-                    }, 5000);
+                    }, 2000);
                 }
             }).catch(error =>{
                 console.log(error)
@@ -221,7 +221,7 @@ import Tabulator from "tabulator-tables";
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
-                }, 5000);
+                }, 2000);
             }
         }).catch(error => {
             document.querySelector('#savePermissionGroup').removeAttribute('disabled');

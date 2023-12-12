@@ -275,7 +275,7 @@ var smtpSettingsListTable = (function () {
                 
                 setTimeout(function(){
                     succModal.hide();
-                }, 3000);
+                }, 2000);
             }
             smtpSettingsListTable.init();
         }).catch(error => {
@@ -333,7 +333,7 @@ var smtpSettingsListTable = (function () {
                 
                 setTimeout(function(){
                     succModal.hide();
-                }, 3000);
+                }, 2000);
             }
             smtpSettingsListTable.init();
         }).catch(error => {

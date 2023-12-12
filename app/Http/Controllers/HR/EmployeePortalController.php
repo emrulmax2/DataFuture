@@ -41,16 +41,16 @@ class EmployeePortalController extends Controller
             'passExpiry' => EmployeeEligibilites::where('document_type', 1)->where('doc_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                            })->orderBy('doc_expire', 'DESC')->skip(0)->limit(5)->get(),
+                            })->orderBy('doc_expire', 'ASC')->skip(0)->limit(5)->get(),
             'visaExpiry' => EmployeeEligibilites::where('eligible_to_work', 'Yes')->where('employee_work_permit_type_id', 3)
                             ->whereDate('workpermit_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                            })->orderBy('workpermit_expire', 'DESC')->skip(0)->limit(5)->get(),
+                            })->orderBy('workpermit_expire', 'ASC')->skip(0)->limit(5)->get(),
             'appraisal' => EmployeeAppraisal::where('due_on', '<=', $expireDate)->whereNull('completed_on')
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                           })->skip(0)->limit(5)->get()
+                           })->orderBy('due_on', 'ASC')->skip(0)->limit(5)->get()
         ]);
     }
 

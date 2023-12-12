@@ -338,7 +338,7 @@ import IMask from 'imask';
 
                 setTimeout(function(){
                     $form.find('.mod-error').remove();
-                }, 5000);
+                }, 2000);
             }else{
                 var htmls = '';
                 htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_1', $form).val()+'</span><br/>';
