@@ -88,7 +88,7 @@
                 <div> 
                     @php
 
-                    $employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee'); 
+                    $employeeUser = cache()->get('employeeCache'.Auth::user()->id)  ?? Auth::user()->load('employee'); 
 
                     @endphp
                     <label class="form-label">Created By</label>
