@@ -37,7 +37,7 @@ class AuthController extends Controller
         ])) {
             throw new \Exception('Wrong email or password.');
         } else {
-            Cache::forever('employeeCache', \Auth::user()->load('employee'));
+            Cache::forever('employeeCache'.\Auth::user()->id, \Auth::user()->load('employee'));
         }
     }
 

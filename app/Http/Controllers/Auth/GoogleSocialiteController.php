@@ -31,7 +31,7 @@ class GoogleSocialiteController extends Controller
             if($finduser){
       
                 Auth::login($finduser);
-                Cache::forever('employeeCashe', Auth::user()->load('employee'));
+                Cache::forever('employeeCashe'.$finduser->id, Auth::user()->load('employee'));
                 return redirect('/');
       
             }else{
@@ -45,7 +45,7 @@ class GoogleSocialiteController extends Controller
                 $finduser->save();
                 
                 Auth::login($finduser);
-                Cache::forever('employeeCache', Auth::user()->load('employee'));
+                Cache::forever('employeeCache'.$finduser->id, Auth::user()->load('employee'));
                 return redirect('/');
             }
      
