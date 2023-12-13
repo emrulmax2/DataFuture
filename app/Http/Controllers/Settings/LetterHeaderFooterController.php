@@ -73,7 +73,7 @@ class LetterHeaderFooterController extends Controller
                     'for_email'=> (isset($list->for_email) && !empty($list->for_email) ? $list->for_email : 'No'),
                     'for_staff'=> (isset($list->for_staff) && !empty($list->for_staff) ? $list->for_staff : 'No'),
                     'current_file_name' => $list->current_file_name,
-                    'url' => Storage::disk('google')->url('public/letterheaderfooter/header/'.$list->current_file_name),
+                    'url' => Storage::disk('local')->url('public/letterheaderfooter/header/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -128,7 +128,7 @@ class LetterHeaderFooterController extends Controller
                     'for_email'=> (isset($list->for_email) && !empty($list->for_email) ? $list->for_email : 'No'),
                     'for_staff'=> (isset($list->for_staff) && !empty($list->for_staff) ? $list->for_staff : 'No'),
                     'current_file_name' => $list->current_file_name,
-                    'url' => Storage::disk('google')->url('public/letterheaderfooter/footer/'.$list->current_file_name),
+                    'url' => Storage::disk('local')->url('public/letterheaderfooter/footer/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -142,11 +142,11 @@ class LetterHeaderFooterController extends Controller
     public function uploadLetterHeader(Request $request){
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/letterheaderfooter/header', $imageName, 'google');
+        $path = $document->storeAs('public/letterheaderfooter/header', $imageName, 'local');
 
         $data = [];
         $data['name'] = $request->name;
-        $data['path'] = Storage::disk('google')->url($path);
+        $data['path'] = Storage::disk('local')->url($path);
         $data['current_file_name'] = $imageName;
         $data['type'] = $request->type;
         $data['for_letter'] = (isset($request->for_letter) && !empty($request->for_letter) ? $request->for_letter : 'No');
@@ -162,7 +162,7 @@ class LetterHeaderFooterController extends Controller
     public function uploadLetterFooter(Request $request){
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/letterheaderfooter/footer', $imageName, 'google');
+        $path = $document->storeAs('public/letterheaderfooter/footer', $imageName, 'local');
 
         $data = [];
         $data['name'] = $request->name;
@@ -170,7 +170,7 @@ class LetterHeaderFooterController extends Controller
         $data['for_letter'] = (isset($request->for_letter) && !empty($request->for_letter) ? $request->for_letter : 'No');
         $data['for_email'] = (isset($request->for_email) && !empty($request->for_email) ? $request->for_email : 'No');
         $data['for_staff'] = (isset($request->for_staff) && !empty($request->for_staff) ? $request->for_staff : 'No');
-        $data['path'] = Storage::disk('google')->url($path);
+        $data['path'] = Storage::disk('local')->url($path);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
         

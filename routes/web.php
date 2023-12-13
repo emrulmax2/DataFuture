@@ -84,6 +84,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\Cronjobs\EmployeeDocumentExpiryNoticeController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
@@ -1834,4 +1835,10 @@ Route::middleware('auth')->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
     });
     
+});
+
+Route::controller(EmployeeDocumentExpiryNoticeController::class)->group(function() {
+    Route::get('passport-expiry-notice', 'passportExpiryNotice')->name('passport.expiry');
+
+    Route::get('visa-expiry-notice', 'visaExpiryNotice')->name('visa.expiry');
 });

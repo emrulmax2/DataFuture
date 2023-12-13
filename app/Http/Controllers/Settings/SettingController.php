@@ -108,7 +108,6 @@ class SettingController extends Controller
             ]);
         endforeach;
 
-
         return response()->json(['msg' => 'Option value successfully updated'], 200);
     }
 }

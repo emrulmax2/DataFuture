@@ -147,7 +147,7 @@
                             <td class="text-left text-success">DR. K Razi</td>
                             <td class="text-left">BH. 101</td>
                             <td class="text-left">
-                                <div class="rounded-full text-lg bg-pending text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">A</div>
+                                <div class="rounded-full text-lg bg-pending text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">AA</div>
                             </td>
                         </tr>
                         <tr class="intro-x">
@@ -243,7 +243,7 @@
                             <td class="text-left text-success">DR. K Razi</td>
                             <td class="text-left">BH. 101</td>
                             <td class="text-left">
-                                <div class="rounded-full text-lg bg-pending text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">A</div>
+                                <div class="rounded-full text-lg bg-pending text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">AA</div>
                             </td>
                         </tr>
                         <tr class="intro-x">
@@ -299,12 +299,50 @@
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-5">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-auto">Attendance</h2>
+                            <h2 class="text-lg font-medium truncate mr-5">Student Attendance</h2>
+                            <a href="#" class="ml-auto text-primary truncate">Show More</a>
                         </div>
                         <div class="mt-5 intro-x">
-                            <div class="box zoom-in">
-
+                            <div class="report-box-2 before:hidden xl:before:block intro-y mt-5">
+                                <div class="box p-5">
+                                    <div class="mt-3">
+                                        <div class="h-[196px]">
+                                            <canvas id="report-donut-chart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="w-52 sm:w-auto mx-auto mt-8">
+                                        <div class="flex items-center">
+                                            <div class="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                                            <span class="truncate">May 2023 HND</span>
+                                            <span class="font-medium ml-auto">62%</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
+                        <div class="intro-x flex items-center h-10">
+                            <h2 class="text-lg font-medium truncate mr-5">Staff Absence Today</h2>
+                            <a href="#" class="ml-auto text-primary truncate">Show More</a>
+                        </div>
+                        <div class="mt-5">
+                            @foreach (array_slice($fakers, 0, 5) as $faker)
+                                <div class="intro-x">
+                                    <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
+                                        <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                                            <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                                        </div>
+                                        <div class="ml-4 mr-auto">
+                                            <div class="font-medium">{{ $faker['users'][0]['name'] }}</div>
+                                            <div class="text-slate-500 text-xs mt-0.5">{{ $faker['dates'][0] }}</div>
+                                        </div>
+                                        <div class="{{ $faker['true_false'][0] ? 'text-success' : 'text-danger' }}">{{ $faker['true_false'][0] ? '+' : '-' }}${{ $faker['totals'][0] }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <a href="" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
                         </div>
                     </div>
                 </div>

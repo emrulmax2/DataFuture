@@ -207,6 +207,7 @@
                             <input type="hidden" name="name" value=""/>
                             <input type="hidden" name="for_letter" value="No"/>
                             <input type="hidden" name="for_email" value="No"/>
+                            <input type="hidden" name="for_staff" value="No"/>
                         </div>
                     </form>
                 </div>
@@ -282,6 +283,7 @@
                             <input type="hidden" name="name" value=""/>
                             <input type="hidden" name="for_letter" value="No"/>
                             <input type="hidden" name="for_email" value="No"/>
+                            <input type="hidden" name="for_staff" value="No"/>
                         </div>
                     </form>
                 </div>
