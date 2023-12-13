@@ -17,6 +17,7 @@ class LetterHeaderFooter extends Model
         'type',
         'for_letter',
         'for_email',
+        'for_staff',
         'created_by',
         'updated_by',
     ];

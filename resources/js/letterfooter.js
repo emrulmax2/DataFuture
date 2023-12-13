@@ -49,6 +49,11 @@ var letterFooterListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Staff",
+                    field: "for_staff",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "File",
                     field: "url",
                     headerHozAlign: "left",
@@ -280,6 +285,7 @@ var letterFooterListTable = (function () {
             $('#uploadLetterFooterModal input[name="name"]').val('');
             $('#uploadLetterFooterModal input[name="for_letter"]').val('No');
             $('#uploadLetterFooterModal input[name="for_email"]').val('No');
+            $('#uploadLetterFooterModal input[name="for_staff"]').val('No');
             $('#uploadLetterFooterModal input.letter_for_options').prop('checked', false);
             drznfooter.removeAllFiles();
         });

@@ -48,6 +48,11 @@ var letterHeaderListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Staff",
+                    field: "for_staff",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "File",
                     field: "url",
                     headerHozAlign: "left",
@@ -279,6 +284,7 @@ var letterHeaderListTable = (function () {
             $('#uploadLetterHeaderModal input[name="name"]').val('');
             $('#uploadLetterHeaderModal input[name="for_letter"]').val('No');
             $('#uploadLetterHeaderModal input[name="for_email"]').val('No');
+            $('#uploadLetterHeaderModal input[name="for_staff"]').val('No');
             $('#uploadLetterHeaderModal input.letter_for_options').prop('checked', false);
             drzn1.removeAllFiles();
         });
@@ -308,8 +314,6 @@ var letterHeaderListTable = (function () {
             document.querySelector("#uploadHeaderBtn svg").style.cssText ="display: inline-block;";
 
             var header_for = $('#uploadLetterHeaderModal .letter_for_options:checked').length;
-            alert(header_for);
-            return false;
        
             if($('#uploadLetterHeaderModal [name="name"]').val() != "" && header_for > 0){
                 $('#uploadLetterHeaderModal .modal-content .uploadError').remove();

@@ -71,6 +71,7 @@ class LetterHeaderFooterController extends Controller
                     'name'=> $list->name,
                     'for_letter'=> (isset($list->for_letter) && !empty($list->for_letter) ? $list->for_letter : 'No'),
                     'for_email'=> (isset($list->for_email) && !empty($list->for_email) ? $list->for_email : 'No'),
+                    'for_staff'=> (isset($list->for_staff) && !empty($list->for_staff) ? $list->for_staff : 'No'),
                     'current_file_name' => $list->current_file_name,
                     'url' => Storage::disk('google')->url('public/letterheaderfooter/header/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
@@ -125,6 +126,7 @@ class LetterHeaderFooterController extends Controller
                     'name'=> $list->name,
                     'for_letter'=> (isset($list->for_letter) && !empty($list->for_letter) ? $list->for_letter : 'No'),
                     'for_email'=> (isset($list->for_email) && !empty($list->for_email) ? $list->for_email : 'No'),
+                    'for_staff'=> (isset($list->for_staff) && !empty($list->for_staff) ? $list->for_staff : 'No'),
                     'current_file_name' => $list->current_file_name,
                     'url' => Storage::disk('google')->url('public/letterheaderfooter/footer/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
@@ -149,6 +151,7 @@ class LetterHeaderFooterController extends Controller
         $data['type'] = $request->type;
         $data['for_letter'] = (isset($request->for_letter) && !empty($request->for_letter) ? $request->for_letter : 'No');
         $data['for_email'] = (isset($request->for_email) && !empty($request->for_email) ? $request->for_email : 'No');
+        $data['for_staff'] = (isset($request->for_staff) && !empty($request->for_staff) ? $request->for_staff : 'No');
         $data['created_by'] = auth()->user()->id;
         
         $applicantDoc = LetterHeaderFooter::create($data);
@@ -166,6 +169,7 @@ class LetterHeaderFooterController extends Controller
         $data['type'] = $request->type;
         $data['for_letter'] = (isset($request->for_letter) && !empty($request->for_letter) ? $request->for_letter : 'No');
         $data['for_email'] = (isset($request->for_email) && !empty($request->for_email) ? $request->for_email : 'No');
+        $data['for_staff'] = (isset($request->for_staff) && !empty($request->for_staff) ? $request->for_staff : 'No');
         $data['path'] = Storage::disk('google')->url($path);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -173,51 +177,6 @@ class LetterHeaderFooterController extends Controller
         $applicantDoc = LetterHeaderFooter::create($data);
 
         return response()->json(['message' => ' Upload Successfull.'], 200);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\LetterHeaderFooter  $letterHeaderFooter
-     * @return \Illuminate\Http\Response
-     */
-    public function show(LetterHeaderFooter $letterHeaderFooter)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\LetterHeaderFooter  $letterHeaderFooter
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(LetterHeaderFooter $letterHeaderFooter)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\LetterHeaderFooter  $letterHeaderFooter
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, LetterHeaderFooter $letterHeaderFooter)
-    {
-        //
     }
 
     /**

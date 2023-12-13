@@ -25,20 +25,21 @@ use Mail;
 
 class UserHolidayController extends Controller
 {
-    public function index($id){
+    public function index(){
         $today = date('Y-m-d');
-        $employee = Employee::find($id)->get()->first();
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $employeeId = $employee->id;
         $userData = User::find($employee->user_id);
-        $employment = Employment::where("employee_id",$id)->get()->first();
+        $employment = Employment::where("employee_id", $employeeId)->get()->first();
         $hrHolidayYear = HrHolidayYear::where('active', 1)->where('start_date', '<=', $today)->where('end_date', '>=', $today)->orderBy('start_date', 'ASC')->get()->first();
         
-        $empExistingLeaveDates = $this->employeeExistingLeaveDates($id);
-        $empBankHolidayDates = $this->employeeBankHolidayDates($id);
+        $empExistingLeaveDates = $this->employeeExistingLeaveDates($employeeId);
+        $empBankHolidayDates = $this->employeeBankHolidayDates($employeeId);
         $empLeaveDisableDates = array_merge($empBankHolidayDates, $empExistingLeaveDates);
         $empLeaveDisableDates = (!empty($empLeaveDisableDates) ? implode(',', $empLeaveDisableDates) : '');
 
-        $activePattern = $this->employeePossibleActivePattern($id);
-        $empLeaveDisableDays = $this->employeeNonWorkingDays($id, $activePattern);
+        $activePattern = $this->employeePossibleActivePattern($employeeId);
+        $empLeaveDisableDays = $this->employeeNonWorkingDays($employeeId, $activePattern);
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
         return view('pages.users.my-account.holiday',[
@@ -47,17 +48,17 @@ class UserHolidayController extends Controller
             "user" => $userData,
             "employee" => $employee,
             "employment" => $employment,
-            'holidayDetails' => $this->employeeHolidayDetails($id),
-            'holidayStatistics' => $this->employeeLeaveStatistics($id),
+            'holidayDetails' => $this->employeeHolidayDetails($employeeId),
+            'holidayStatistics' => $this->employeeLeaveStatistics($employeeId),
             'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get(),
             'empPatterns' => EmployeeWorkingPattern::where('active', 1)->where(
                     function($query) use ($today){
                         $query->whereNull('end_to')->orWhere('end_to', '>=', $today);
                     })->where('effective_from', '<=', $today)->where('active', 1)->orderBy('effective_from', 'ASC')->get(),
-            'activePattern' => $this->employeePossibleActivePattern($id),
-            'leaveOptionTypes' => $this->employeeLeaveOptionTypes($id),
+            'activePattern' => $this->employeePossibleActivePattern($employeeId),
+            'leaveOptionTypes' => $this->employeeLeaveOptionTypes($employeeId),
             'calendarOptions' => [
-                'startDate' => $this->employeeLeaveStartDate($id, 0, 1),
+                'startDate' => $this->employeeLeaveStartDate($employeeId, 0, 1),
                 'endDate' => (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown'),
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
