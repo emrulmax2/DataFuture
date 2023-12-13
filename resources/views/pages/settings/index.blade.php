@@ -64,6 +64,10 @@
                                         <input id="company_hcuci" type="text" name="company_hcuci" class="form-control" placeholder="Unique Code Identifier" value="{{ (isset($opt['company_hcuci']) ? $opt['company_hcuci'] : '' ) }}">
                                     </div>
                                     <div class="col-span-12 sm:col-span-12">
+                                        <label for="company_registration" class="form-label">Company Registration Details</label>
+                                        <textarea rows="3" id="company_registration" name="company_registration" class="form-control" placeholder="Company Reg. No. 5995926, Companies House, England and Wales">{{ (isset($opt['company_registration']) ? $opt['company_registration'] : '' ) }}</textarea>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-12">
                                         <label for="company_right" class="form-label">Copyright Info</label>
                                         <textarea rows="3" id="company_right" name="company_right" class="form-control" placeholder="Right reserved by LCC @ 2023">{{ (isset($opt['company_right']) ? $opt['company_right'] : '' ) }}</textarea>
                                     </div>

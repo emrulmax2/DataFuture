@@ -65,8 +65,7 @@ class LetterController extends Controller
         $attachmentFiles = [];
         if($letter):
             /* Generate PDF Start */
-            $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
-            $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+            $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
             $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
             $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
             $PDFHTML = '';
@@ -91,7 +90,7 @@ class LetterController extends Controller
                 $PDFHTML .= '<body>';
                     if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
                         $PDFHTML .= '<header>';
-                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
                         $PDFHTML .= '</header>';
                     endif;
 
@@ -105,7 +104,7 @@ class LetterController extends Controller
                                         $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
 
                                         foreach($LetterFooters as $lf):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
                                         endforeach;
                                     $PDFHTML .= '</td>';
                                 $PDFHTML .= '</tr>';
@@ -119,11 +118,10 @@ class LetterController extends Controller
                                 $PDFHTML .= '</td>';
                             $PDFHTML .= '</tr>';
 
-                            if(!empty($regNo) || !empty($regAt)):
+                            if(!empty($companyReg) && isset($companyReg->value) && !empty($companyReg->value)):
                             $PDFHTML .= '<tr class="regInfoRow">';
                                 $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
-                                    $PDFHTML .= (!empty($regNo) ? 'Company Reg. No. '.$regNo->value : '');
-                                    $PDFHTML .= (!empty($regAt) ? (!empty($regNo) ? ', ' : '').$regAt->value : '');
+                                    $PDFHTML .= $companyReg->value;
                                 $PDFHTML .= '</td>';
                             $PDFHTML .= '</tr>';
                             endif;
@@ -135,8 +133,8 @@ class LetterController extends Controller
                         $signatory = Signatory::find($signatory_id);
                         $PDFHTML .= '<p>';
                             $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
-                                $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature); 
+                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
+                                $signatureImage = Storage::disk('local')->url('public/signatories/'.$signatory->signature); 
                                 $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
                             endif;
                             $PDFHTML .= $signatory->signatory_name.'<br/>';

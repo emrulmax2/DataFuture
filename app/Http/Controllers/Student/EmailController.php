@@ -52,25 +52,20 @@ class EmailController extends Controller
 
         if($studentEmail):
             $emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get()->first();
 
             $MAILHTML = '';
-            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('google')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
+            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
                 $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
-                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('google')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
+                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
                 $MAILHTML .= '</div>';
             endif;
             $MAILHTML .= $request->body;
-            if($emailFooters->count() > 0):
+            if(isset($emailFooters->current_file_name) && !empty($emailFooters->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$emailFooters->current_file_name)):
                 $MAILHTML .= '<div style="text-align: center; vertical-align: middle; margin: 20px 0 0 0;">';
-                    $numberOfPartners = $emailFooters->count();
-                    $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
-
-                    foreach($emailFooters as $lf):
-                        if(Storage::disk('google')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
-                            $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('google')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
-                        endif;
-                    endforeach;
+                    if(Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$emailFooters->current_file_name)):
+                        $MAILHTML .= '<img style=" max-width: 100%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$emailFooters->current_file_name).'" alt="'.$emailFooters->name.'"/>';
+                    endif;
                 $MAILHTML .= '</div>';
             endif;
 

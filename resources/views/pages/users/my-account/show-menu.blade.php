@@ -5,7 +5,7 @@
         </a>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="{{ route('user.account.holiday', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.holiday' ? 'active' : '' }}">
+        <a href="{{ route('user.account.holiday') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.holiday' ? 'active' : '' }}">
             Holidays
         </a>
     </li>

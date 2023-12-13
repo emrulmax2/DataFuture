@@ -84,6 +84,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\Cronjobs\EmployeeDocumentExpiryNoticeController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
@@ -117,6 +118,7 @@ use App\Http\Controllers\PlanParticipantController;
 use App\Http\Controllers\PlanTaskController;
 use App\Http\Controllers\PlanTaskUploadController;
 use App\Http\Controllers\PlanTreeController;
+use App\Http\Controllers\Programme\DashboardController as ProgrammeDashboardController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
 use App\Http\Controllers\Settings\SettingController;
@@ -795,7 +797,7 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(UserHolidayController::class)->group(function(){
-        Route::get('my-account/holidays/{id}', 'index')->name('user.account.holiday'); 
+        Route::get('my-account/holidays', 'index')->name('user.account.holiday'); 
         Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('user.account.holiday.ajax.statistics'); 
         Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('user.account.holiday.ajax.limit'); 
         Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('user.account.holiday.leave.submission'); 
@@ -1828,5 +1830,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(DashboardController::class)->group(function() {
         Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
     });
+
+    Route::controller(ProgrammeDashboardController::class)->group(function() {
+        Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
+    });
     
+});
+
+Route::controller(EmployeeDocumentExpiryNoticeController::class)->group(function() {
+    Route::get('passport-expiry-notice', 'passportExpiryNotice')->name('passport.expiry');
+
+    Route::get('visa-expiry-notice', 'visaExpiryNotice')->name('visa.expiry');
 });

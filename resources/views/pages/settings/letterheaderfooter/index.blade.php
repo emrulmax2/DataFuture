@@ -183,6 +183,10 @@
                                 <input id="letter_for_2" class="form-check-input letter_for_options" type="checkbox" value="for_email">
                                 <label class="form-check-label" for="letter_for_2">Email</label>
                             </div>
+                            <div class="form-check mt-2">
+                                <input id="letter_for_3" class="form-check-input letter_for_options" type="checkbox" value="for_staff">
+                                <label class="form-check-label" for="letter_for_3">Staff</label>
+                            </div>
                         </div>
                         <div class="acc__input-error error-for text-danger mt-2"></div>
                     </div>            
@@ -203,6 +207,7 @@
                             <input type="hidden" name="name" value=""/>
                             <input type="hidden" name="for_letter" value="No"/>
                             <input type="hidden" name="for_email" value="No"/>
+                            <input type="hidden" name="for_staff" value="No"/>
                         </div>
                     </form>
                 </div>
@@ -248,12 +253,16 @@
                         <label for="footer_dispaly_for" class="form-label">Type <span class="text-danger">*</span></label>
                         <div>
                             <div class="form-check">
-                                <input id="letter_for_3" class="form-check-input letter_for_options" type="checkbox" value="for_letter">
-                                <label class="form-check-label" for="letter_for_3">Letter</label>
+                                <input id="letter_for_4" class="form-check-input letter_for_options" type="checkbox" value="for_letter">
+                                <label class="form-check-label" for="letter_for_4">Letter</label>
                             </div>
                             <div class="form-check mt-2">
-                                <input id="letter_for_4" class="form-check-input letter_for_options" type="checkbox" value="for_email">
-                                <label class="form-check-label" for="letter_for_4">Email</label>
+                                <input id="letter_for_5" class="form-check-input letter_for_options" type="checkbox" value="for_email">
+                                <label class="form-check-label" for="letter_for_5">Email</label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input id="letter_for_6" class="form-check-input letter_for_options" type="checkbox" value="for_staff">
+                                <label class="form-check-label" for="letter_for_6">Staff</label>
                             </div>
                         </div>
                         <div class="acc__input-error error-footer_dispaly_for text-danger mt-2"></div>
@@ -274,6 +283,7 @@
                             <input type="hidden" name="name" value=""/>
                             <input type="hidden" name="for_letter" value="No"/>
                             <input type="hidden" name="for_email" value="No"/>
+                            <input type="hidden" name="for_staff" value="No"/>
                         </div>
                     </form>
                 </div>
