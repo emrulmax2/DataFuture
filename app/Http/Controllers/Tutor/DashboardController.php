@@ -188,7 +188,7 @@ class DashboardController extends Controller
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
         $Query = DB::table('plans as plan')
-        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
         ->leftJoin('courses as course', 'plan.course_id', 'course.id')
         ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
         ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
