@@ -183,43 +183,11 @@
 		}
 
 		table{
+			border-spacing: 0;
+    		border-collapse: collapse;
+			border: none;
 		}
-		/*LOGO*/
-
-		.logo h1{
-			margin: 0;
-		}
-		.logo h1 a{
-			color: #30e3ca;
-			font-size: 24px;
-			font-weight: 700;
-			font-family: 'Lato', sans-serif;
-		}
-
-		/*HERO*/
-		.hero{
-			position: relative;
-			z-index: 0;
-		}
-
-		.hero .text{
-			color: rgba(0,0,0,.3);
-		}
-		.hero .text h2{
-			color: #000;
-			font-size: 40px;
-			margin-bottom: 0;
-			font-weight: 400;
-			line-height: 1.4;
-		}
-		.hero .text h3{
-			font-size: 24px;
-			font-weight: 300;
-		}
-		.hero .text h2 span{
-			font-weight: 600;
-			color: #30e3ca;
-		}
+		
 
 		/*HEADING SECTION*/
 		.heading-section{
@@ -304,103 +272,64 @@
 
 		@media screen and (max-width: 500px) {
 		}
+
+
+		/* New CSS */
+		.logoText{
+			color: #FFF;
+			font-size: 32px;
+			font-weight: 700;
+			font-family: 'Lato', sans-serif;
+			text-decoration: none;
+		}
+		.logoText:hover{
+			color: #FFF;
+		}
 	</style>
 </head>
-
-<body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;">
-	<center style="width: 100%; background-color: #f1f1f1;">
-    <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
-      &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
-    </div>
-    <div style="max-width: 600px; margin: 0 auto;" class="email-container">
-    	<!-- BEGIN BODY -->
-      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
-      	<tr>
-          <td valign="top" class="bg_white" style="padding: 1em 2.5em 0 2.5em;">
-          	<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-          		<tr>
-          			<td class="logo" style="text-align: center;">
-			            <a href="#"><img width="190px" src="https://lcc.ac.uk/signature/images/L1_logo.svg" /></a>
-			          </td>
-          		</tr>
-          	</table>
-          </td>
-	      </tr><!-- end tr -->
-	      <tr>
-          <td valign="middle" class="hero bg_white" style="padding: 3em 0 2em 0;">
-            <img src="images/email.png" alt="" style="width: 300px; max-width: 600px; height: auto; margin: auto; display: block;">
-          </td>
-	      </tr><!-- end tr -->
+	@php
+		$opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray();
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : '');
+	@endphp
+	<body width="100%" style="margin: 0; padding: 15px 0 !important; background-color: #f1f1f1;">
+		<div style="max-width: 600px; margin: 0 auto; background: #FFF; border-radius: 5px;" class="email-container">
+			<!-- BEGIN BODY -->
+			<table role="presentation" width="100%" style="margin: auto; border-radius: 5px 5px 5px 5px;">
 				<tr>
-          <td valign="middle" class="hero bg_white" style="padding: 2em 0 4em 0;">
-            <table>
-            	<tr>
-            		<td>
-            			<div class="text" style="padding: 0 2.5em; text-align: center;">
-                            {!! $content !!}
-            			</div>
-            		</td>
-            	</tr>
-            </table>
-          </td>
-	      </tr><!-- end tr -->
-      <!-- 1 Column Text + Button : END -->
-      </table>
-      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
-      	<tr>
-          <td valign="middle" class="bg_light footer email-section">
-            <table>
-            	<tr>
-                <td valign="top" width="33.333%" style="padding-top: 20px;">
-                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                    <tr>
-                      <td style="text-align: left; padding-right: 10px;">
-                      	<h3 class="heading">About</h3>
-                      	<p>London Churchill College is a medium sized College situated in East London.</p>
-						
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td valign="top" width="33.333%" style="padding-top: 20px;">
-                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                    <tr>
-                      <td style="text-align: left; padding-left: 5px; padding-right: 5px;">
-                      	<h3 class="heading">Contact Info</h3>
-                      	<ul>
-							<li><span class="text">Barclay Hall, 156 Green Street, London, E78JQ</span></li>
-							<li><span class="text">+44 (0) 0207 377 1077</span></a></li>
-						</ul>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td valign="top" width="33.333%" style="padding-top: 20px;">
-                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                    <tr>
-                      <td style="text-align: left; padding-left: 10px;">
-                      	<h3 class="heading">Useful Links</h3>
-                      	<ul>
-					                <li><a href="https://lcc.ac.uk/">Home</a></li>
-					                <li><a href="https://lcc.ac.uk/about-us/">About</a></li>
-					                <li><a href="https://lcc.ac.uk/why-us/">Why Us</a></li>
-					              </ul>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr><!-- end: tr -->
-        <tr>
-          <td class="bg_light" style="text-align: center;">
-          	<p>No longer want to receive these email? You can <a href="#" style="color: rgba(0,0,0,.8);">Unsubscribe here</a></p>
-          </td>
-        </tr>
-      </table>
-
-    </div>
-  </center>
-</body>
+					<td style="text-align: center; background: rgb(22, 78, 99); padding: 40px 0; border-radius: 5px 5px 0 0;">
+						@if(!empty($logoUrl))
+							<a href="https://lcc.ac.uk"><img style="max-width: 150px; height: auto;" src="{{ $logoUrl }}" /></a>
+						@else 
+							<a href="https://lcc.ac.uk"  style="color: #FFF; font-size: 22px; font-weight: bold; text-decoration: none; font-family: 'Lato', sans-serif;">London Churchill College</a>
+						@endif
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 30px 30px; text-align: justify;">
+						{!! $content !!}
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 20px 30px; border-top: 1px dotted #ddd; border-bottom: 1px dotted #ddd;">
+						<p style="text-align: justify; color: #888; font-size: 12px; line-height: normal; margin: 0;">
+							This e-mail and its attachments are intended for the above named only and may be confidential. If they have
+							come to you in error you must take no action based on them, nor must you copy or show them to anyone; please
+							reply to this e-mail and highlight the error. Although this email and any attachments are believed to be free of any
+							virus or another defect which might affect any computer or IT system onto which it is received and opened, it is
+							the responsibility of the recipient to ensure that it is virus free, and no responsibility is accepted by London
+							Churchill College for any loss or damage arising from its use.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: center;">
+						<p style="margin: 0; font-size: 13px; line-height: 20px; color: #777; padding: 10px 0;">
+							<span class="text">Barclay Hall, 156 Green Street, London, E78JQ</span><br/>
+						    <span class="text">+44 (0) 207 377 1077</span>
+						</p>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
 </html>

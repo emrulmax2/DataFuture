@@ -7,6 +7,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
+
     /**
      * Define the application's command schedule.
      *
@@ -15,7 +16,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('passportexpiry:cron')->weeklyOn(6, '10:00');
+        $schedule->command('visaexpiry:cron')->weeklyOn(6, '10:10');
+        $schedule->command('visaexpired:cron')->weeklyOn(6, '10:20');
+        $schedule->command('passportexpired:cron')->weeklyOn(6, '10:30');
+        $schedule->command('employeeappraisal:cron')->weeklyOn(6, '10:40');
+        
     }
 
     /**
