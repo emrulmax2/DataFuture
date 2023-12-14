@@ -290,8 +290,6 @@
 </div>
 <!-- END: Edit Employment Details Modal -->
 
-
-
 <!-- BEGIN: Edit Eligibilites  Details Modal -->
 <div id="editEligibilitesDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -405,9 +403,6 @@
     </div>
 </div>
 <!-- END: Edit Eligibilites Details Modal -->
-
-
-
 
 <!-- BEGIN: Edit Emergency Contact Details Modal -->
 <div id="editEmergencyContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

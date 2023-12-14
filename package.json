@@ -28,6 +28,7 @@
         "js-beautify": "^1.14.9",
         "litepicker": "^2.0.12",
         "lucide": "^0.284.0",
+        "moment": "^2.29.4",
         "pristinejs": "^0.1.9",
         "simplebar": "^5.3.9",
         "tabulator-tables": "^4.9.3",

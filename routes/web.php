@@ -1732,7 +1732,7 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
-        Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
+        Route::get('tutor-dashboard/show-new/{tutor}', 'showNew')->name('tutor-dashboard.show.new'); 
     });
 
     // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  

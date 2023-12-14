@@ -1,6 +1,6 @@
 @php
 
-$employeeUser = cache()->get('employeeCache') ?? Auth::user()->load('employee'); 
+$employeeUser = cache()->get('employeeCache'.Auth::id()) ?? Auth::user()->load('employee'); 
 $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
 @endphp
 <!-- BEGIN: Top Bar -->
