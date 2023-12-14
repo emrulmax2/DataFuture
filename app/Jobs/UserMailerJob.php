@@ -22,7 +22,7 @@ class UserMailerJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(array $configuration, string $to, Mailable $mailable)
+    public function __construct(array $configuration, array $to, Mailable $mailable)
     {
         $this->configuration = $configuration;
         $this->to = $to;

@@ -23,7 +23,7 @@ import IMask from 'imask';
     var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
     var employee_work_type_tom = new TomSelect('#employee_work_type', tomOptions);
 
-    $('.lccTom').each(function(){
+    $('.lccToms').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
                 ...tomOptions,
