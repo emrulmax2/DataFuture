@@ -10,7 +10,7 @@ class DashboardController extends Controller
 {
 
     public function index($id){
-        $plans = Plan::where("personal_tutor_id", $id)->groupBy("term_declartion_id")->get();
+        //$plans = Plan::where("personal_tutor_id", $id)->groupBy("term_declartion_id")->get();
         return view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - LCC Data Future Managment',
             'breadcrumbs' => []
