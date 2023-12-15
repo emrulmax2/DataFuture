@@ -299,18 +299,19 @@ class PlanTreeController extends Controller
 
         $query = DB::table('plans')
         
-        ->select('group_id')
-        ->groupBy('group_id')
-        ->where('academic_year_id', '=', $academicYearId)
-        ->where('term_declaration_id', '=', $termDeclaredId)
-        ->where('course_id', '=', $courseId);
-        $Query = $query->get();
+        ->select('plans.group_id')
+        ->leftJoin('groups', 'plans.group_id', '=', 'groups.id')
+        ->groupBy('plans.group_id')
+        ->where('plans.academic_year_id', '=', $academicYearId)
+        ->where('plans.term_declaration_id', '=', $termDeclaredId)
+        ->where('plans.course_id', '=', $courseId);
+        $Query = $query->orderBy('groups.name','ASC')->get();
 
         $html = '';
        // if(isset($course->groups) && $course->groups->count() > 0):
         
         if(!$Query->isEmpty()):
-            $html .= '<ul class="theChild">';
+            $html .= '<ul class="theChild" data-total-group="'.count($Query).'">';
                 foreach($Query as $list):
                         
                         $query = DB::table('plans')
