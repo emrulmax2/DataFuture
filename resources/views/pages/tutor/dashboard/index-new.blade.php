@@ -128,15 +128,15 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-8">
                         <div class="intro-y flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
-                            <div class="dropdown w-1/2 sm:w-auto ml-auto">
-                                <button class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> {{ $termList[$currenTerm]->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
+                                <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
                                     <ul class="dropdown-content">
                                         @foreach($termList as $term)
                                         <li>
-                                            <a  id="term-{{ $term->id }}"  data-instance_term_id="{{ $term->id }}" data-instance_term="{{ $term->name }}" href="javascript:;" class="dropdown-item term-select">
+                                            <a  id="term-{{ $term->id }}" data-tutor_id="{{ $employee->user_id }}"  data-instance_term_id="{{ $term->id }}" data-instance_term="{{ $term->name }}" href="javascript:;" class="dropdown-item term-select {{ ($termList[$currenTerm]->name==$term->name) ? " dropdown-active " : ""}}">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> {{ $term->name }}
                                             </a>
                                         </li>
@@ -146,31 +146,37 @@
                                 </div>
                             </div>
                         </div>
-                        @foreach($termList as $term)
-                            <div id="totalmodule-{{ $term->id }}" class="report-box-2 intro-y mt-5 mb-7 @php if($termList[$currenTerm]->id != $term->id) echo "hidden " @endphp">
-                                <div class="box p-5">
-                                    <div class="flex items-center">
-                                        Total No of Modules
-                                    </div>
-                                    <div class="text-2xl font-medium mt-2">{{ $term->total_modules }}</div>
-                                </div>
-                            </div>
-                        @endforeach
-                        @foreach($data as $termId => $termModuleList)
-                            @foreach($termModuleList as $termData)
-                                <a href="{{ route('tutor-dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
-                                <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
-                                    <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                        <div class="ml-4 mr-auto">
-                                            <div class="font-medium">{{ $termData->module }}</div>
-                                            <div class="text-slate-500 text-xs mt-0.5">{{ $termData->course }}</div>
+                        <div id="TermBox">
+                            @foreach($termList as $term)
+                                @if($termList[$currenTerm]->id == $term->id)
+                                    <div id="totalmodule-{{ $term->id }}" class="report-box-2 intro-y mt-5 mb-7 @php if($termList[$currenTerm]->id != $term->id) echo "hidden " @endphp">
+                                        <div class="box p-5">
+                                            <div class="flex items-center">
+                                                Total No of Modules
+                                            </div>
+                                            <div class="text-2xl font-medium mt-2">{{ $term->total_modules }}</div>
                                         </div>
-                                        <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>
                                     </div>
-                                </div>
-                                </a>
+                                @endif
                             @endforeach
-                        @endforeach
+                            @foreach($data as $termId => $termModuleList)
+                                @if($termList[$currenTerm]->id == $termId)
+                                    @foreach($termModuleList as $termData)
+                                        <a href="{{ route('tutor-dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
+                                            <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
+                                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
+                                                    <div class="ml-4 mr-auto">
+                                                        <div class="font-medium">{{ $termData->module }}</div>
+                                                        <div class="text-slate-500 text-xs mt-0.5">{{ $termData->course }}</div>
+                                                    </div>
+                                                    <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
                     <!-- END: Visitors -->
                 </div>
