@@ -35,7 +35,7 @@
                 <div class="classPlanTreeResultWrap" style="display: none;"></div>
                 <div class="classPlanTreeResultNotice">
                     <div class="alert alert-success-soft show flex items-center mb-2" role="alert">
-                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a gropup to view the details.
+                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a group to view the details.
                     </div>
                 </div>
             </div>
