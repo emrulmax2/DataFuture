@@ -181,7 +181,7 @@ class DashboardController extends Controller
             "date" => date("d-m-Y"),
         ]);
     }
-
+    
     public function showNew($id){
 
         $userData = User::find($id);
@@ -513,6 +513,72 @@ class DashboardController extends Controller
             'studentCount' => $studentListCount,
         ]);
     }
+
+    public function tutorTermlistShowByInstance($instance_term, $tutor) {
+
+
+        $Query = DB::table('plans as plan')
+        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->leftJoin('courses as course', 'plan.course_id', 'course.id')
+        ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
+        ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
+        ->leftJoin('term_declarations', 'term_declarations.id', 'terms.term_declaration_id')
+        ->leftJoin('course_creation_instances as course_relation_instances', 'terms.course_creation_instance_id','course_relation_instances.id')
+        ->leftJoin('course_creations as course_relation', 'course_relation_instances.course_creation_id','course_relation.id')
+        ->leftJoin('academic_years', 'course_relation_instances.academic_year_id','academic_years.id')
+        ->leftJoin('venues as venue', 'plan.venue_id', 'venue.id')
+        ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
+        ->leftJoin('groups as group', 'plan.group_id', 'group.id')
+        ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
+        ->where('plan.tutor_id', $tutor)
+        ->where('terms.id', $instance_term);
+
+        
+
+        $Query = $Query
+                 ->orderBy('plan.term_declaration_id','DESC')
+                 ->get();
+
+        $data = array();
+        $currentTerm = 0;
+        if(!empty($Query)):
+            $i = 1;
+            
+            foreach($Query as $list):
+                    
+                    if($currentTerm==0)
+                        $currentTerm = $list->term_id;
+
+                    $termData[$list->term_id] = (object) [ 
+                        'id' =>$list->term_id,
+                        'name' => $list->term_name,   
+                        "total_modules" => !isset($termData[$list->term_id]) ? 1 : $termData[$list->term_id]->total_modules,
+                        
+                    ];
+
+                    $data[$list->term_id][] = (object) [
+                        'id' => $list->id,
+                        'sl' => $i,
+                        'course' => $list->course_name,
+                        'module' => $list->module_name,
+                        'group'=> $list->group_name,           
+                    ];
+
+                    if(isset($termData[$list->term_id]))  
+                        $termData[$list->term_id]->total_modules = count($data[$list->term_id]);
+                    else 
+                        $termData[$list->term_id] = 1;
+                    $i++;
+        
+            endforeach;
+            return response()->json(["current_term" =>$termData,
+            "module_data" => $data],200);
+        endif;
+
+        return response()->json(["current_term" =>"",
+            "module_data" =>""],422);
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
