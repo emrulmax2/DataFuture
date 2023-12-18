@@ -6,9 +6,14 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Live Attendance of <u>{{ date('jS M, Y') }}</u></h2>
+        <h2 class="text-lg font-medium mr-auto">Live Attendance</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Portal</a>
+            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
+                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
+                <input type="text" name="class_date" class="w-full form-control border-0 liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}" style="max-width: 110px;"/>
+            </div>
+            <a href="{{ route('hr.portal.leave.calendar') }}" class="add_btn btn btn-success text-white shadow-md mr-2">Planner</a>
+            <a href="{{ route('hr.portal') }}" class="add_btn btn btn-primary shadow-md mr-0">Back To Portal</a>
         </div>
     </div>
 

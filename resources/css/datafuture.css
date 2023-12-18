@@ -1053,7 +1053,7 @@
 .leaveTableLoader.active{
     opacity: 1;
     visibility: visible;
-    z-index: 9;
+    z-index: 999;
 }
 .leaveCalendarTable thead tr th:not(:first-child){
     font-size: 12px;

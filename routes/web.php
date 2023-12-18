@@ -1833,6 +1833,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
+        Route::post('programme-dashboard/get-class-info', 'getClassInformations')->name('programme.dashboard.class.info'); 
     });
     
 });

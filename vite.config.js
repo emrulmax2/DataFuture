@@ -169,7 +169,8 @@ export default defineConfig({
                 "resources/js/student-slc-installment.js",
 
                 "resources/js/plan-add-search.js",
-                
+
+                "resources/js/programme-dashboard.js",
                 
             ],
             refresh: true,

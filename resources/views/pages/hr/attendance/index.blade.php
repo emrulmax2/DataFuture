@@ -6,9 +6,10 @@
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Monthly Attendance</h2>
-        {{--<div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add Manual Attendance</button>
-        </div>--}}
+        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-success text-white shadow-md mr-2">Planner</a>
+            <a href="{{ route('hr.portal.live.attedance') }}" class="btn btn-primary shadow-md mr-0">Live Attendance</a>
+        </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
