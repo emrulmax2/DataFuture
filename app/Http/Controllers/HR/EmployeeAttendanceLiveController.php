@@ -31,8 +31,9 @@ class EmployeeAttendanceLiveController extends Controller
 
     public function list(Request $request){
         $department = (isset($request->department) && $request->department > 0 ? $request->department : 0);
+        $theDate = (isset($request->liveAttendanceDate) && !empty($request->liveAttendanceDate) ? date('Y-m-d', strtotime($request->liveAttendanceDate)) : date('Y-m-d'));
 
-        $theDate = date('Y-m-d');
+        //$theDate = date('Y-m-d');
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
         $time = date('H:i');
@@ -75,6 +76,7 @@ class EmployeeAttendanceLiveController extends Controller
                     'name' => $list->first_name.' '.$list->last_name,
                     'designation' => isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '',
                     'photo_url' => $list->photo_url,
+                    'ext' => (isset($list->employment->office_telephone) ? $list->employment->office_telephone : ''),
                     'works_number' => isset($list->employment->works_number) ? $list->employment->works_number : '',
                     'where' => (isset($dayDetails['where']) && !empty($dayDetails['where']) ? $dayDetails['where'] : ''),
                     'schedule' => (isset($dayDetails['schedule']) && !empty($dayDetails['schedule']) ? $dayDetails['schedule'] : ''),

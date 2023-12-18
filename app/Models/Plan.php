@@ -86,4 +86,8 @@ class Plan extends Model
     public function getSubmissionDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
+
+    public function attenTerm(){
+        return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
 }
