@@ -30,7 +30,7 @@ class TopMenu
                     'route_name' => 'students.dashboard'
                 ],
             ];
-        elseif(!is_null(\Auth::user())):
+        else:
             $priv = auth()->user()->priv();
             $menu = [
                 'dashboard' => [
