@@ -129,9 +129,9 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
         <div class="intro-x dropdown w-8 h-8">
             <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in scale-110" role="button" aria-expanded="false" data-tw-toggle="dropdown">
                 @if(Auth::guard('applicant')->check())
-                    <img alt="{{ asset('build/assets/images/avater.png')) }}">
+                    <img alt="{{ asset('build/assets/images/avater.png') }}">
                 @elseif(Auth::guard('student')->check())
-                    <img alt="{{ asset('build/assets/images/avater.png')) }}">
+                    <img alt="{{ asset('build/assets/images/avater.png') }}">
                 @else
                     <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
                 @endif
