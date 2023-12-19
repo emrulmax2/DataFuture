@@ -51,6 +51,7 @@ class VerifyEmailForApplicant extends BaseVerifyEmail  implements ShouldQueue
                             'hash' => sha1($this->user->getEmailForVerification()),
         ]);
         return (new MailMessage)
+        ->from($address = 'no-reply@lcc.ac.uk', $name = 'London Churcill College Verification Mail')
         ->subject('Verification for London Churchill College applicant account')
         ->view('emails.verify', ['user' => $this->user,'url'=>$veficationUrl]);
     }
