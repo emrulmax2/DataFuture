@@ -171,6 +171,7 @@ export default defineConfig({
                 "resources/js/plan-add-search.js",
 
                 "resources/js/programme-dashboard.js",
+                "resources/js/employee-privilege.js",
                 
             ],
             refresh: true,

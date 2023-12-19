@@ -108,6 +108,7 @@ use App\Http\Controllers\HR\EmployeeTermController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\HR\EmployeePortalController;
+use App\Http\Controllers\HR\EmployeePrivilegeController;
 use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
@@ -944,6 +945,11 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/appraisal-document-list', 'list')->name('employee.appraisal.documents.list'); 
         Route::delete('employee-profile/appraisal-document-destroy', 'destroy')->name('employee.appraisal.document.destory');
         Route::post('employee-profile/appraisal-document-restore', 'restore')->name('employee.appraisal.document.restore');
+    });
+
+    Route::controller(EmployeePrivilegeController::class)->group(function(){
+        Route::get('employee-profile/privilege/{id}', 'index')->name('employee.privilege'); 
+        Route::post('employee-profile/store-privilege', 'store')->name('employee.privilege.store');
     });
 
     Route::controller(EmployeeAttendanceController::class)->group(function(){

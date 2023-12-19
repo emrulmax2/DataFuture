@@ -44,7 +44,7 @@ import { createIcons, icons } from "lucide";
         let $this = $(this)
         var employee_work_type_id = $this.val();
         
-        if(employee_work_type_id == 1) {
+        if(employee_work_type_id == 3) {
             $('.employeeWorkTypeFields').fadeIn('fast', function(){
                 $('input', this).val('');
             });

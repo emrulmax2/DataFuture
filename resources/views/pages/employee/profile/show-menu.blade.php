@@ -34,5 +34,11 @@
             Appraisals
         </a>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.privilege', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.privilege' ? 'active' : '' }}">
+            Privilege
+        </a>
+    </li>
     
 </ul>
