@@ -201,7 +201,7 @@
                             </select>
                             <div class="acc__input-error error-first_name text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4 employeeWorkTypeFields" style="{{ (isset($employment->employee_work_type_id) && $employment->employee_work_type_id == 1 ? '' : 'display: none;') }}">
+                        <div class="col-span-12 sm:col-span-4 employeeWorkTypeFields" style="{{ (isset($employment->employee_work_type_id) && $employment->employee_work_type_id == 3 ? '' : 'display: none;') }}">
                             <label for="works_number" class="form-label">Works Number<span class="text-danger">*</span></label>
                             <input type="text" value="{{ isset($employment->works_number) ? $employment->works_number : '' }}" placeholder="" id="works_number" class="form-control" name="works_number">
                             <div class="acc__input-error error-works_number text-danger mt-2"></div>
