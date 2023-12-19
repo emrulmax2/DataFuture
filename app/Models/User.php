@@ -93,4 +93,9 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class, 'user_id', 'id')->latestOfMany();
     }
     
+    public function priv(){
+        return $this->hasMany(UserPrivilege::class, 'user_id', 'id')
+            ->select('access', 'name')->pluck('access', 'name')->toArray();
+    }
+    
 }

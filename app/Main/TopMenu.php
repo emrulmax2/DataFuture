@@ -31,14 +31,17 @@ class TopMenu
                 ],
             ];
         else:
-            return [
+            $priv = auth()->user()->priv();
+            $menu = [
                 'dashboard' => [
                     'icon' => 'home',
                     'title' => 'Dashboard',
                     'route_name' => 'dashboard',
                     'params' => []
                 ],
-                'coursemanagement' => [
+            ];
+            if(isset($priv['course_manage']) && $priv['course_manage'] == 1):
+                $menu['coursemanagement'] = [
                     'icon' => 'book-open',
                     'title' => 'Courses Management',
                     'sub_menu' => [
@@ -109,8 +112,10 @@ class TopMenu
                             ]
                         ],
                     ]
-                ],
-                'students' => [
+                ];
+            endif;
+            if(isset($priv['student_manage']) && $priv['student_manage'] == 1):
+                $menu['students'] = [
                     'icon' => 'users',
                     'title' => 'Student Management',
                     'sub_menu' => [
@@ -125,8 +130,20 @@ class TopMenu
                             'title' => 'Live'
                         ]
                     ]
-                ],
-                /*'management' => [
+                ];
+            endif;
+            if(isset($priv['settings']) && $priv['settings'] == 1):
+                $menu['site.setting'] = [
+                    'icon' => 'settings',
+                    'title' => 'Settings',
+                    'route_name' => 'site.setting',
+                    'params' => []
+                ];
+            endif;
+
+            return $menu;
+            /*return [
+                'management' => [
                     'icon' => 'layers',
                     'title' => 'Management',
                     'sub_menu' => [
@@ -161,14 +178,8 @@ class TopMenu
                             ]
                         ],
                     ]
-                ],*/
-                'site.setting' => [
-                    'icon' => 'settings',
-                    'title' => 'Settings',
-                    'route_name' => 'site.setting',
-                    'params' => []
                 ],
-                /*'apps' => [ 
+                'apps' => [ 
                     'icon' => 'activity',
                     'title' => 'Apps',
                     'sub_menu' => [
@@ -561,268 +572,268 @@ class TopMenu
                             'title' => 'Change Password'
                         ]
                     ]
-                ],*/
-                // 'components' => [
-                //     'icon' => 'inbox',
-                //     'title' => 'Components',
-                //     'sub_menu' => [
-                //         'grid' => [
-                //             'icon' => '',
-                //             'title' => 'Grid',
-                //             'sub_menu' => [
-                //                 'regular-table' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'regular-table',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Regular Table'
-                //                 ],
-                //                 'tabulator' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'tabulator',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Tabulator'
-                //                 ]
-                //             ]
-                //         ],
-                //         'overlay' => [
-                //             'icon' => '',
-                //             'title' => 'Overlay',
-                //             'sub_menu' => [
-                //                 'modal' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'modal',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Modal'
-                //                 ],
-                //                 'slide-over' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'slide-over',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Slide Over'
-                //                 ],
-                //                 'notification' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'notification',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Notification'
-                //                 ],
-                //             ]
-                //         ],
-                //         'tab' => [
-                //             'icon' => '',
-                //             'route_name' => 'tab',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Tab'
-                //         ],
-                //         'accordion' => [
-                //             'icon' => '',
-                //             'route_name' => 'accordion',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Accordion'
-                //         ],
-                //         'button' => [
-                //             'icon' => '',
-                //             'route_name' => 'button',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Button'
-                //         ],
-                //         'alert' => [
-                //             'icon' => '',
-                //             'route_name' => 'alert',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Alert'
-                //         ],
-                //         'progress-bar' => [
-                //             'icon' => '',
-                //             'route_name' => 'progress-bar',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Progress Bar'
-                //         ],
-                //         'tooltip' => [
-                //             'icon' => '',
-                //             'route_name' => 'tooltip',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Tooltip'
-                //         ],
-                //         'dropdown' => [
-                //             'icon' => '',
-                //             'route_name' => 'dropdown',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Dropdown'
-                //         ],
-                //         'typography' => [
-                //             'icon' => '',
-                //             'route_name' => 'typography',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Typography'
-                //         ],
-                //         'icon' => [
-                //             'icon' => '',
-                //             'route_name' => 'icon',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Icon'
-                //         ],
-                //         'loading-icon' => [
-                //             'icon' => '',
-                //             'route_name' => 'loading-icon',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Loading Icon'
-                //         ]
-                //     ]
-                // ],
-                // 'forms' => [
-                //     'icon' => 'sidebar',
-                //     'title' => 'Forms',
-                //     'sub_menu' => [
-                //         'regular-form' => [
-                //             'icon' => '',
-                //             'route_name' => 'regular-form',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Regular Form'
-                //         ],
-                //         'datepicker' => [
-                //             'icon' => '',
-                //             'route_name' => 'datepicker',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Datepicker'
-                //         ],
-                //         'tom-select' => [
-                //             'icon' => '',
-                //             'route_name' => 'tom-select',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Tom Select'
-                //         ],
-                //         'file-upload' => [
-                //             'icon' => '',
-                //             'route_name' => 'file-upload',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'File Upload'
-                //         ],
-                //         'wysiwyg-editor' => [
-                //             'icon' => '',
-                //             'title' => 'Wysiwyg Editor',
-                //             'sub_menu' => [
-                //                 'wysiwyg-editor-classic' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'wysiwyg-editor-classic',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Classic'
-                //                 ],
-                //                 'wysiwyg-editor-inline' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'wysiwyg-editor-inline',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Inline'
-                //                 ],
-                //                 'wysiwyg-editor-balloon' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'wysiwyg-editor-balloon',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Balloon'
-                //                 ],
-                //                 'wysiwyg-editor-balloon-block' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'wysiwyg-editor-balloon-block',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Balloon Block'
-                //                 ],
-                //                 'wysiwyg-editor-document' => [
-                //                     'icon' => '',
-                //                     'route_name' => 'wysiwyg-editor-document',
-                //                     'params' => [
-                //                         'layout' => 'top-menu'
-                //                     ],
-                //                     'title' => 'Document'
-                //                 ],
-                //             ]
-                //         ],
-                //         'validation' => [
-                //             'icon' => '',
-                //             'route_name' => 'validation',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Validation'
-                //         ]
-                //     ]
-                // ],
-                // 'widgets' => [
-                //     'icon' => 'hard-drive',
-                //     'title' => 'Widgets',
-                //     'sub_menu' => [
-                //         'chart' => [
-                //             'icon' => '',
-                //             'route_name' => 'chart',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Chart'
-                //         ],
-                //         'slider' => [
-                //             'icon' => '',
-                //             'route_name' => 'slider',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Slider'
-                //         ],
-                //         'image-zoom' => [
-                //             'icon' => '',
-                //             'route_name' => 'image-zoom',
-                //             'params' => [
-                //                 'layout' => 'top-menu'
-                //             ],
-                //             'title' => 'Image Zoom'
-                //         ]
-                //     ]
-                // ]
-            ];
+                ],
+                'components' => [
+                    'icon' => 'inbox',
+                    'title' => 'Components',
+                    'sub_menu' => [
+                        'grid' => [
+                            'icon' => '',
+                            'title' => 'Grid',
+                            'sub_menu' => [
+                                'regular-table' => [
+                                    'icon' => '',
+                                    'route_name' => 'regular-table',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Regular Table'
+                                ],
+                                'tabulator' => [
+                                    'icon' => '',
+                                    'route_name' => 'tabulator',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Tabulator'
+                                ]
+                            ]
+                        ],
+                        'overlay' => [
+                            'icon' => '',
+                            'title' => 'Overlay',
+                            'sub_menu' => [
+                                'modal' => [
+                                    'icon' => '',
+                                    'route_name' => 'modal',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Modal'
+                                ],
+                                'slide-over' => [
+                                    'icon' => '',
+                                    'route_name' => 'slide-over',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Slide Over'
+                                ],
+                                'notification' => [
+                                    'icon' => '',
+                                    'route_name' => 'notification',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Notification'
+                                ],
+                            ]
+                        ],
+                        'tab' => [
+                            'icon' => '',
+                            'route_name' => 'tab',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Tab'
+                        ],
+                        'accordion' => [
+                            'icon' => '',
+                            'route_name' => 'accordion',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Accordion'
+                        ],
+                        'button' => [
+                            'icon' => '',
+                            'route_name' => 'button',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Button'
+                        ],
+                        'alert' => [
+                            'icon' => '',
+                            'route_name' => 'alert',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Alert'
+                        ],
+                        'progress-bar' => [
+                            'icon' => '',
+                            'route_name' => 'progress-bar',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Progress Bar'
+                        ],
+                        'tooltip' => [
+                            'icon' => '',
+                            'route_name' => 'tooltip',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Tooltip'
+                        ],
+                        'dropdown' => [
+                            'icon' => '',
+                            'route_name' => 'dropdown',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Dropdown'
+                        ],
+                        'typography' => [
+                            'icon' => '',
+                            'route_name' => 'typography',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Typography'
+                        ],
+                        'icon' => [
+                            'icon' => '',
+                            'route_name' => 'icon',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Icon'
+                        ],
+                        'loading-icon' => [
+                            'icon' => '',
+                            'route_name' => 'loading-icon',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Loading Icon'
+                        ]
+                    ]
+                ],
+                'forms' => [
+                    'icon' => 'sidebar',
+                    'title' => 'Forms',
+                    'sub_menu' => [
+                        'regular-form' => [
+                            'icon' => '',
+                            'route_name' => 'regular-form',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Regular Form'
+                        ],
+                        'datepicker' => [
+                            'icon' => '',
+                            'route_name' => 'datepicker',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Datepicker'
+                        ],
+                        'tom-select' => [
+                            'icon' => '',
+                            'route_name' => 'tom-select',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Tom Select'
+                        ],
+                        'file-upload' => [
+                            'icon' => '',
+                            'route_name' => 'file-upload',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'File Upload'
+                        ],
+                        'wysiwyg-editor' => [
+                            'icon' => '',
+                            'title' => 'Wysiwyg Editor',
+                            'sub_menu' => [
+                                'wysiwyg-editor-classic' => [
+                                    'icon' => '',
+                                    'route_name' => 'wysiwyg-editor-classic',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Classic'
+                                ],
+                                'wysiwyg-editor-inline' => [
+                                    'icon' => '',
+                                    'route_name' => 'wysiwyg-editor-inline',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Inline'
+                                ],
+                                'wysiwyg-editor-balloon' => [
+                                    'icon' => '',
+                                    'route_name' => 'wysiwyg-editor-balloon',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Balloon'
+                                ],
+                                'wysiwyg-editor-balloon-block' => [
+                                    'icon' => '',
+                                    'route_name' => 'wysiwyg-editor-balloon-block',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Balloon Block'
+                                ],
+                                'wysiwyg-editor-document' => [
+                                    'icon' => '',
+                                    'route_name' => 'wysiwyg-editor-document',
+                                    'params' => [
+                                        'layout' => 'top-menu'
+                                    ],
+                                    'title' => 'Document'
+                                ],
+                            ]
+                        ],
+                        'validation' => [
+                            'icon' => '',
+                            'route_name' => 'validation',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Validation'
+                        ]
+                    ]
+                ],
+                'widgets' => [
+                    'icon' => 'hard-drive',
+                    'title' => 'Widgets',
+                    'sub_menu' => [
+                        'chart' => [
+                            'icon' => '',
+                            'route_name' => 'chart',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Chart'
+                        ],
+                        'slider' => [
+                            'icon' => '',
+                            'route_name' => 'slider',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Slider'
+                        ],
+                        'image-zoom' => [
+                            'icon' => '',
+                            'route_name' => 'image-zoom',
+                            'params' => [
+                                'layout' => 'top-menu'
+                            ],
+                            'title' => 'Image Zoom'
+                        ]
+                    ]
+                ]
+            ];*/
         endif;
     }
 }
