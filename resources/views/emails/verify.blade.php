@@ -350,7 +350,7 @@ ul.social li{
             		<td>
             			<div class="text" style="padding: 0 2.5em; text-align: center;">
             				<h2>Please verify your email</h2>
-            				<h3>All applicant need to verify email in order to apply</h3>
+            				<h3>All applicant needs to verify email in order to apply</h3>
             				<p><a href="{{ $url }}" class="btn btn-primary">Click Here to Verify</a></p>
             			</div>
             		</td>
