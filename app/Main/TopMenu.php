@@ -142,6 +142,15 @@ class TopMenu
             endif;
 
             return $menu;
+        else:
+            $menu = [
+                'dashboard' => [
+                    'icon' => 'home',
+                    'title' => 'Dashboard',
+                    'route_name' => 'dashboard',
+                    'params' => []
+                ],
+            ];
             /*return [
                 'management' => [
                     'icon' => 'layers',
