@@ -1,8 +1,15 @@
 @php
-
-$employeeUser = cache()->get('employeeCache'.Auth::id()) ?? Auth::user()->load('employee'); 
 $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
 @endphp
+
+@if(Auth::guard('applicant')->check())
+  
+@elseif(Auth::guard('student')->check())
+
+@else
+    @php $employeeUser = cache()->get('employeeCache'.Auth::id()) ?? Auth::user()->load('employee'); @endphp
+@endif
+
 <!-- BEGIN: Top Bar -->
 <div class="top-bar-boxed {{ isset($class) ? $class : '' }} h-[70px] md:h-[65px] z-[51] border-b border-white/[0.08] mt-12 md:mt-0 -mx-3 sm:-mx-8 md:-mx-0 px-3 md:border-b-0 relative md:fixed md:inset-x-0 md:top-0 sm:px-8 md:px-10 md:pt-10 md:bg-gradient-to-b md:from-slate-100 md:to-transparent dark:md:from-darkmode-700">
     <div class="h-full flex items-center">
@@ -121,13 +128,29 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
         <!-- BEGIN: Account Menu -->
         <div class="intro-x dropdown w-8 h-8">
             <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in scale-110" role="button" aria-expanded="false" data-tw-toggle="dropdown">
-                <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
+                @if(Auth::guard('applicant')->check())
+                    <img alt="{{ asset('build/assets/images/avater.png')) }}">
+                @elseif(Auth::guard('student')->check())
+                    <img alt="{{ asset('build/assets/images/avater.png')) }}">
+                @else
+                    <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
+                @endif
+                
             </div>
             <div class="dropdown-menu w-56">
                 <ul class="dropdown-content bg-primary/80 before:block before:absolute before:bg-black before:inset-0 before:rounded-md before:z-[-1] text-white">
                     <li class="p-2">
-                        <div class="font-medium">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
-                        <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth()->user()->email }}</div>
+                        @if(Auth::guard('applicant')->check())
+                        <div class="font-medium">{{ auth('applicant')->user()->email }}</div>
+                        <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('applicant')->user()->email }}</div>
+                        @elseif(Auth::guard('student')->check())
+                            <div class="font-medium">{{ auth('student')->user()->email }}</div>
+                            <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('student')->user()->email }}</div>
+                        @else
+                            <div class="font-medium">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
+                            <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth()->user()->email }}</div>
+                        @endif
+                        
                     </li>
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
