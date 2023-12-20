@@ -728,7 +728,12 @@
                         </div>
                         <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
                         <input type="hidden" name="applicant_task_id" value="0"/>
+                        <input type="hidden" name="display_file_name" value=""/>
                     </form>
+                    <div class="mt-3">
+                        <label for="process_doc_name" class="form-label">Document Name</label>
+                        <input type="text" id="process_doc_name" class="form-control w-full" name="process_doc_name">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
