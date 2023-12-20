@@ -47,7 +47,7 @@ class VerificationController extends Controller
             return redirect('/applicant/dashboard')->with('verifymessage', 'Your Email Address Verified');
         else:
             $request->autofill();
-            return redirect($this->redirectPath('/applicant/login'))->with('verifymessage', 'Your email address has been verified');
+            return redirect('/applicant/login')->with('verifymessage', 'Your email address has been verified');
         endif;
     }
 
