@@ -12,17 +12,17 @@
                 <a href="" class="-intro-x flex items-center pt-5">
                     <img alt="London Churchill College" class="w-48" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg" />
                 </a>
-                <div class="-intro-x items-center mt-10">
+                <div class="-intro-x my-auto mx-auto  w-full">
                     <div class="-intro-x text-white font-medium text-4xl leading-tight mt-2">
-                        Do You want to apply  <br> for a course?</div>
-                    <div class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">To apply and track your application you'll need to take a minute to create  <br>a new account for yourself on this web site. Here are the steps:</div>
-                    <ul class="list-disc mt-5 ml-4 text-md text-white text-opacity-70 dark:text-slate-400 ">
+                        Let's get you set up</div>
+                    <div class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">It’s just few quick steps...</div>
+                    {{-- <ul class="list-disc mt-5 ml-4 text-md text-white text-opacity-70 dark:text-slate-400 ">
                         <li class="py-1">Fill out the New Account form with your details</li>
                         <li class="py-1">An email will be immediately sent to your email address.</li>
                         <li class="py-1">Read your email, and click on the web link it contains.</li>
                         <li class="py-1">Your account will be confirmed and you will be logged in.</li>
                         <li class="py-1">Now, Apply for a course at London Churchill College.</li>
-                    </ul>
+                    </ul> --}}
                 </div>
             </div>
             <!-- END: Register Info -->
