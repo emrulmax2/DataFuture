@@ -13,7 +13,7 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="col-span-12 sm:col-span-4">
                             <label for="title_id" class="form-label">Title <span class="text-danger">*</span></label>
-                            <select id="title_id" class="lccTom lcc-tom-select w-full" name="title_id">
+                            <select id="title_id" class="addmissionLccTom lcc-tom-select w-full" name="title_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($titles))
                                     @foreach($titles as $t)
@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="sex_identifier_id" class="form-label">Sex Identifier/Gender <span class="text-danger">*</span></label>
-                            <select id="sex_identifier_id" class="lccTom lcc-tom-select w-full" name="sex_identifier_id">
+                            <select id="sex_identifier_id" class="addmissionLccTom lcc-tom-select w-full" name="sex_identifier_id">
                                 <option value="" selected>Please Select</option>
                                 @if($sexid->count() > 0)
                                     @foreach($sexid as $si)
@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="nationality_id" class="form-label">Nationality <span class="text-danger">*</span></label>
-                            <select id="nationality_id" class="lccTom lcc-tom-select w-full" name="nationality_id">
+                            <select id="nationality_id" class="addmissionLccTom lcc-tom-select w-full" name="nationality_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($country))
                                     @foreach($country as $n)
@@ -64,7 +64,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="country_id" class="form-label">Country of Birth <span class="text-danger">*</span></label>
-                            <select id="country_id" class="lccTom lcc-tom-select w-full" name="country_id">
+                            <select id="country_id" class="addmissionLccTom lcc-tom-select w-full" name="country_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($country))
                                     @foreach($country as $n)
@@ -76,7 +76,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="ethnicity_id" class="form-label">Ethnicity <span class="text-danger">*</span></label>
-                            <select id="ethnicity_id" class="lccTom lcc-tom-select w-full" name="ethnicity_id">
+                            <select id="ethnicity_id" class="addmissionLccTom lcc-tom-select w-full" name="ethnicity_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($ethnicity))
                                     @foreach($ethnicity as $n)
@@ -120,7 +120,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="proof_type" class="form-label">Proof of Id Type</label>
-                            <select id="proof_type" class="lccTom lcc-tom-select w-full" name="proof_type">
+                            <select id="proof_type" class="addmissionLccTom lcc-tom-select w-full" name="proof_type">
                                 <option value="">Please Select</option>
                                 <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'passport' ? 'Selected' : '' }} value="passport">Passport</option>
                                 <option {{ isset($applicant->proof->proof_type) && $applicant->proof->proof_type == 'birth' ? 'Selected' : '' }} value="birth">Birth Certificate</option>
@@ -288,7 +288,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="kins_relation_id" class="form-label">Relation <span class="text-danger">*</span></label>
-                            <select id="kins_relation_id" class="lccTom lcc-tom-select w-full" name="kins_relation_id">
+                            <select id="kins_relation_id" class="addmissionLccTom lcc-tom-select w-full" name="kins_relation_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($relations))
                                     @foreach($relations as $r)
@@ -418,7 +418,7 @@
                                 <div class="col-span-12 sm:col-span-6">
                                     <select id="student_loan" class="lcc-tom-select w-full" name="student_loan">
                                         <option value="">Please Select</option>
-                                        <option {{ isset($applicant->course->student_loan) && $applicant->course->student_loan == 'Private' ? 'selected' : ''}} value="Private">Independently/Private</option>
+                                        <option {{ isset($applicant->course->student_loan) && $applicant->course->student_loan == 'Independently/Private' ? 'selected' : ''}} value="Independently/Private">Independently/Private</option>
                                         <option {{ isset($applicant->course->student_loan) && $applicant->course->student_loan == 'Funding Body' ? 'selected' : ''}} value="Funding Body">Funding Body</option>
                                         <option {{ isset($applicant->course->student_loan) && $applicant->course->student_loan == 'Sponsor' ? 'selected' : ''}} value="Sponsor">Sponsor</option>
                                         <option {{ isset($applicant->course->student_loan) && $applicant->course->student_loan == 'Student Loan' ? 'selected' : ''}} value="Student Loan">Student Loan</option>
@@ -489,7 +489,7 @@
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="fee_eligibility_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Fee Eligibility</label>
                                 <div class="col-span-12 sm:col-span-6">
-                                    <select id="fee_eligibility_id" class="lcc-tom-select w-full" name="fee_eligibility_id">
+                                    <select id="fee_eligibility_id" class="form-control w-full" name="fee_eligibility_id">
                                         <option value="">Please Select</option>
                                         @if($feeelegibility->count() > 0)
                                             @foreach($feeelegibility as $fl)
