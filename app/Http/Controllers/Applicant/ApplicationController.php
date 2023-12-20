@@ -235,7 +235,7 @@ class ApplicationController extends Controller
                             $html .= '<div class="col-span-12 sm:col-span-3">';
                                 $html .= '<div class="grid grid-cols-12 gap-0">';
                                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Gender</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->gender.'</div>';
+                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->sexid->name.'</div>';
                                 $html .= '</div>';
                             $html .= '</div>';
                             $html .= '<div class="col-span-12 sm:col-span-3">';
