@@ -147,6 +147,10 @@ img.g-img + div {
 	background: rgb(13,148,136);
 	color: #ffffff;
 }
+.btn.btn-primary a{
+	
+	color: #ffffff;
+}
 .btn.btn-white{
 	border-radius: 5px;
 	background: #ffffff;
@@ -332,18 +336,16 @@ ul.social li{
           	<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
           		<tr>
           			<td class="logo" style="text-align: center;">
-			            <a href="#"><img width="190px" src="https://lcc.ac.uk/signature/images/L1_logo.svg" /></a>
+			            <a style="display: block; width:190px; margin:0 auto;" href="https://lcc.ac.uk">
+							@include("emails.logo")
+						</a>
 			          </td>
           		</tr>
           	</table>
           </td>
 	      </tr><!-- end tr -->
-	      <tr>
-          <td valign="middle" class="hero bg_white" style="padding: 3em 0 2em 0;">
-            <img src="images/email.png" alt="" style="width: 300px; max-width: 600px; height: auto; margin: auto; display: block;">
-          </td>
-	      </tr><!-- end tr -->
-				<tr>
+	      
+			<tr>
           <td valign="middle" class="hero bg_white" style="padding: 2em 0 4em 0;">
             <table>
             	<tr>
@@ -351,7 +353,7 @@ ul.social li{
             			<div class="text" style="padding: 0 2.5em; text-align: center;">
             				<h2>Please verify your email</h2>
             				<h3>All applicant needs to verify email in order to apply</h3>
-            				<p><a href="{{ $url }}" class="btn btn-primary">Click Here to Verify</a></p>
+            				<div class="btn btn-primary"><a href="{{ $url }}" >Click Here to Verify</a></div>
             			</div>
             		</td>
             	</tr>
