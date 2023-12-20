@@ -35,7 +35,6 @@ class ApplicationPersonalDetailsRequest extends FormRequest
             'disability_status' => 'sometimes',
             'disability_id' => 'required_if:disability_status,1',
             
-            'phone' => 'required',
             'mobile' => 'required',
             'applicant_address' => 'required',
 
@@ -57,7 +56,7 @@ class ApplicationPersonalDetailsRequest extends FormRequest
             'nationality_id.required' => 'The Nationality field is required.',
             'country_id.required' => 'The Country of Birth field is required.',
             'ethnicity_id.required' => 'The Ethnicity field is required.',
-            'phone.required' => 'The Home Phone field is required.',
+            //'phone.required' => 'The Home Phone field is required.',
             'mobile.required' => 'The Mobile Phone field is required.',
             'applicant_address.required' => 'The Applicant Address is required.',
             'name.required' => 'The Kin Name field is required.',

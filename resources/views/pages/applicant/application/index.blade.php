@@ -27,7 +27,7 @@
                     </li>
                     <li class="intro-x lg:text-center flex items-center mt-5 lg:mt-0 lg:block flex-1 z-10 form-wizard-step-item">
                         <button class="w-10 h-10 rounded-full btn text-slate-500 bg-slate-100 dark:bg-darkmode-400 dark:border-darkmode-400">3</button>
-                        <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Review & Exit</div>
+                        <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Review & Apply</div>
                     </li>
                 </ul>
             </div>
@@ -148,7 +148,7 @@
                     <div class="font-medium text-base">Contact Details</div>
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                         <div class="col-span-12 sm:col-span-3">
-                            <label for="phone" class="form-label">Home Phone <span class="text-danger">*</span></label>
+                            <label for="phone" class="form-label">Home Phone</label>
                             <input value="{{ isset($apply->contact->home) ? $apply->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control" name="phone">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>

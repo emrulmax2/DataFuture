@@ -46,6 +46,18 @@
     <div class="intro-y box p-5 mt-5">
         <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                    
+                <div class="sm:flex items-center sm:mr-4">
+                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">A verification email has been sent to your inbox. Kindly go to your email address and click the verify button to confirm your email.
+
+                        <br/>In case you don't see the email in your inbox, please check your Junk/Spam folder. Thank you.</label>
+                </div>
+        </div>
+
+    </div>
+    
+    <div class="intro-y box p-5 mt-5">
+        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                   
             <form id="resendverification" method="post" action="{{ route('verification.send') }}" class="xl:flex sm:mr-auto" >
                 @csrf
                 <div class="sm:flex items-center sm:mr-4">
