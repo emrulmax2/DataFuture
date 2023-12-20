@@ -216,7 +216,7 @@ table{
 	line-height: 1.4;
 }
 .hero .text h3{
-	font-size: 24px;
+	font-size: 18px;
 	font-weight: 300;
 }
 .hero .text h2 span{
@@ -360,7 +360,7 @@ ul.social li{
 	      </tr><!-- end tr -->
       <!-- 1 Column Text + Button : END -->
       </table>
-      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+      {{-- <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
       	<tr>
           <td valign="middle" class="bg_light footer email-section">
             <table>
@@ -412,8 +412,124 @@ ul.social li{
           	<p>No longer want to receive these email? You can <a href="#" style="color: rgba(0,0,0,.8);">Unsubscribe here</a></p>
           </td>
         </tr>
-      </table>
-
+      </table> --}}
+	  <table cellpadding="0" class="hero bg_white" cellspacing="0" style="width: 100%; margin: auto; vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif;">
+		<tbody>
+		   <tr>
+			  <td>
+				 <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif; width: 100%;">
+					<tbody>
+					   <tr>
+						  <td height="30">&nbsp;</td>
+					   </tr>
+					   <tr>
+						  <td color="#f2547d" direction="horizontal" height="1" style="width: 100%; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(201, 12, 16); border-left-style: none; display: block;"></td>
+					   </tr>
+					   <tr>
+						  <td height="30">&nbsp;</td>
+					   </tr>
+					</tbody>
+				 </table>
+			  </td>
+		   </tr>
+		   <tr>
+			  <td>
+				 <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif; width: 95%;">
+					<tbody>
+					   <tr>
+						  <td style="vertical-align: top;">
+							<table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif; width: 100%;">
+								<tr height="25" style="vertical-align: middle;">
+									<td width="30" style="vertical-align: middle;">
+									   <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif;">
+										  <tbody>
+											 <tr>
+												<td style="vertical-align: bottom;"> <span color="#f2547d" width="11" style="display: block; background-color: rgb(201, 12, 16);"> <img src="http://churchill.ac/img/i1.png" color="#f2547d" width="13" class="sc-iRbamj blSEcj" style="display: block; background-color: rgb(201, 12, 16);"> </span> </td>
+											 </tr>
+										  </tbody>
+									   </table>
+									</td>
+									<td style="padding: 0px; color: rgb(0, 0, 0);" class="extension"> <a href="tel:02073771077" style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;"> <span>02073771077</span> </a><span style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;"></span> </td>
+								 </tr>
+								 <tr height="25" style="vertical-align: middle;" class="emailAddress">
+									<td width="30" style="vertical-align: middle;">
+									   <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif;">
+										  <tbody>
+											 <tr>
+												<td style="vertical-align: bottom;"> <span color="#f2547d" width="11" style="display: block; background-color: rgb(201, 12, 16);"> <img src="http://churchill.ac/img/i3.png" color="#f2547d" width="13" style="display: block; background-color: rgb(201, 12, 16);"> </span> </td>
+											 </tr>
+										  </tbody>
+									   </table>
+									</td>
+									<td style="padding: 0px;" class="emailAddressHtml"><span style="color: rgb(0, 0, 0); font-size: 12px;">info@lcc.ac.uk</span></td>
+								 </tr>
+								 <tr height="25" style="vertical-align: middle;">
+									<td width="30" style="vertical-align: top; padding-top:10px">
+									   <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif;">
+										  <tbody>
+											 <tr>
+												<td style="vertical-align: bottom;"> <span color="#f2547d" width="11" style="display: block; background-color: rgb(201, 12, 16);"> <img src="http://churchill.ac/img/address.png" color="#f2547d" width="13" style="display: block; background-color: rgb(201, 12, 16);"> </span> </td>
+											 </tr>
+										  </tbody>
+									   </table>
+									</td>
+									<td style="padding: 0px; line-height:13px; padding-top:5px;"> <span style="font-size: 12px; color: rgb(0, 0, 0);"> <span>Barclay Hall, 156B Green Street,<br>London, E7 8JQ</span> </span> </td>
+								 </tr>
+							</table>
+						  </td>
+						  <td style="text-align: right; vertical-align: top;">
+							 <table cellpadding="0" cellspacing="0" style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: sans-serif; display: inline-block;">
+								<tbody>
+								   <tr style="text-align: right;">
+									   
+									  <td> <a href="https://www.facebook.com/londonchurchillcollege" color="#6a78d1" style="display: inline-block; padding: 0px;"> <img src="http://churchill.ac/img/facebook_new.png" alt="facebook" color="#6a78d1" height="30" style="max-width: 135px; display: block;"> </a> </td>
+									  <td width="5">
+										 <div></div>
+									  </td>
+										
+									  <td> <a href="https://instagram.com/londonchurchillcollege" color="#6a78d1" style="display: inline-block; padding: 0px;"> <img src="http://churchill.ac/img/instagram.png" alt="facebook" color="#6a78d1" height="30" style="max-width: 135px; display: block;"> </a> </td>
+									  <td width="5">
+										 <div></div>
+									  </td>
+										
+									  <td> <a href="https://www.linkedin.com/company/london-churchill-college-ltd" color="#6a78d1" style="display: inline-block; padding: 0px;"> <img src="http://churchill.ac/img/linkedin_new.png" alt="linkedin" color="#6a78d1" height="30" style="max-width: 135px; display: block;"> </a> </td>
+									  <td width="5">
+										 <div></div>
+									  </td>
+										
+									  <td> <a href="https://www.youtube.com/user/LCCUK1" color="#6a78d1" style="display: inline-block; padding: 0px;"> <img src="http://churchill.ac/img/youtube.png" alt="instagram" color="#6a78d1" height="30" style="max-width: 135px; display: block;"> </a> </td>
+									  <td width="5">
+										 <div></div>
+									  </td>
+										
+									  <td> <a href="https://twitter.com/LCC_Welfare" color="#6a78d1" style="display: inline-block; padding: 0px;"> <img src="http://churchill.ac/img/twitter_new.png" alt="twitter" color="#6a78d1" height="30" style="max-width: 135px; display: block;"> </a> </td>
+									  <td width="5">
+										 <div></div>
+									  </td>
+																							</tr>
+								</tbody>
+							 </table>
+						  </td>
+					   </tr>
+					</tbody>
+				 </table>
+			  </td>
+		   </tr>
+			
+		   <tr>
+			  <td height="30">&nbsp;</td>
+		   </tr>
+		   <tr>
+			  <td>
+				 <p style=" color: rgb(191,191,191); font-size: 10px; font-family: sans-serif; width:95%; margin-left:15px"> <strong>Disclaimer:</strong><br> This electronic message contains information which may be privileged or confidential. The information is intended to be for the use of the individual or entity named above. If you are not the intended recipient be aware that any disclosure, copying, distribution or use of the contents of this information is prohibited. If you have received this electronic message in error, please notify us by telephone or email immediately and delete it from your system. Internet e-mails are not necessarily secure. You are advised to scan this message for viruses and cannot accept liability for any loss or damage which may be caused as a result of any computer virus. </p>
+			  </td>
+		   </tr>
+		   <tr>
+			  <td height="30">&nbsp;</td>
+		   </tr>
+			
+		</tbody>
+	 </table>
     </div>
   </center>
 </body>
