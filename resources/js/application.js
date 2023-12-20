@@ -416,9 +416,9 @@ var employmentHistoryTable = (function () {
     var employment_status = new TomSelect('#employment_status', tomOptions);
     var student_loan = new TomSelect('#student_loan', tomOptions);
 
-    $('.lccTom').each(function(){
-        new TomSelect(this, tomOptions);
-    })
+    // $('.lccTom').each(function(){
+    //     new TomSelect(this, tomOptions);
+    // })
 
     // click on next button
     $('.form-wizard-next-btn').on('click', function () {
