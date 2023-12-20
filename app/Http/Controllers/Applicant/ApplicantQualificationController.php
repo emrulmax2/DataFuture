@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\ApplicantQualification;
 use App\Http\Requests\ApplicantQualificationRequest;
 
-class ApplicantQualificationCongroller extends Controller
+class ApplicantQualificationController extends Controller
 {
     public function list(Request $request){
         $applicantId = (isset($request->applicantId) && $request->applicantId > 0 ? $request->applicantId : '0');

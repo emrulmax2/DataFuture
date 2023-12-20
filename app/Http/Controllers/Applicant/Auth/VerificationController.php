@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Applicant\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Request\EmailVerificationRequest;
+use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Auth;
 
 class VerificationController extends Controller
 {
@@ -38,8 +42,13 @@ class VerificationController extends Controller
     }
 
     public function verify(EmailVerificationRequest $request) {
-        $request->fulfill();
-        return redirect('/applicant/dashboard')->with('verifymessage', 'Your Email Address Verified');
+        if(!is_null(Auth::guard('applicant')->user())):
+            $request->fulfill();
+            return redirect('/applicant/dashboard')->with('verifymessage', 'Your Email Address Verified');
+        else:
+            $request->autofill();
+            return redirect($this->redirectPath('/applicant/login'))->with('verifymessage', 'Your email address has been verified');
+        endif;
     }
 
 }
