@@ -685,6 +685,8 @@ class AdmissionController extends Controller
         $applicant_task_id = $request->applicant_task_id;
         $applicantTask = ApplicantTask::find($applicant_task_id);
         $taskName = (isset($applicantTask->task->name) && !empty($applicantTask->task->name) ? $applicantTask->task->name : '');
+        $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
+        $taskName = (!empty($display_file_name) ? (!empty($taskName) ? $taskName.' - '.$display_file_name : $display_file_name) : $taskName);
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();

@@ -416,9 +416,9 @@ var employmentHistoryTable = (function () {
     var employment_status = new TomSelect('#employment_status', tomOptions);
     var student_loan = new TomSelect('#student_loan', tomOptions);
 
-    // $('.lccTom').each(function(){
-    //     new TomSelect(this, tomOptions);
-    // })
+    $('.applicationLccTom').each(function(){
+        new TomSelect(this, tomOptions);
+    })
 
     // click on next button
     $('.form-wizard-next-btn').on('click', function () {
@@ -464,7 +464,7 @@ var employmentHistoryTable = (function () {
                 $('.form-wizard-next-btn svg', parentForm).fadeOut(); 
                 if(xhr.status == 200){
                     if(parentFieldset.index() == 1){
-                        $(document).find('innput[name="applicant_id"]').val(res.applicant_id);
+                        $(document.body).find('input[name="applicant_id"]').val(res.applicant_id);
                         $('#educationQualTable, #employmentHistoryTable').attr('data-applicant', res.applicant_id);
                         $('#varifiedReferral').attr('data-applicant-id', res.applicant_id);
                     } else if(parentFieldset.index() == 2){

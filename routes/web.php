@@ -73,7 +73,7 @@ use App\Http\Controllers\Applicant\Auth\VerificationController;
 
 use App\Models\ApplicantUser;
 use App\Http\Controllers\Applicant\ApplicationController;
-use App\Http\Controllers\Applicant\ApplicantQualificationCongroller;
+use App\Http\Controllers\Applicant\ApplicantQualificationController;
 use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
 use App\Http\Controllers\Settings\CommonSmtpController;
 use App\Http\Controllers\Settings\LetterSetController;
@@ -225,6 +225,16 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::post('register', 'store')->name('store.register');
     });
 
+    /**
+    * Verification Routes
+    */
+    Route::controller(VerificationController::class)->group(function() {
+        
+        //Route::get('email/verify', 'show')->name('verification.notice');
+        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    });
+
     Route::middleware('auth.applicant')->group(function() {
 
         Route::get('logout', [LoginController::class, 'logout'])->name('logout');
@@ -245,7 +255,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
         });
 
-        Route::controller(ApplicantQualificationCongroller::class)->group(function() {
+        Route::controller(ApplicantQualificationController::class)->group(function() {
             Route::get('qualification/list', 'list')->name('qualification.list');
             Route::post('qualification/store', 'store')->name('qualification.store');
             Route::get('qualification/edit/{id}', 'edit')->name('qualification.edit');
@@ -264,16 +274,6 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         });
 
     });
-    /**
-    * Verification Routes
-    */
-    Route::controller(VerificationController::class)->group(function() {
-        
-        Route::get('email/verify', 'show')->name('verification.notice');
-        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
-        
-    });
-
 });
 
 // all student have a prefix route name student.* value
@@ -761,7 +761,7 @@ Route::middleware('auth')->group(function() {
         
     });
 
-    Route::controller(ApplicantQualificationCongroller::class)->group(function() {
+    Route::controller(ApplicantQualificationController::class)->group(function() {
         Route::get('qualification/list', 'list')->name('qualification.list');
         Route::post('qualification/store', 'store')->name('qualification.store');
         Route::get('qualification/edit/{id}', 'edit')->name('qualification.edit');
@@ -1834,7 +1834,7 @@ Route::middleware('auth')->group(function() {
 
 
     Route::controller(DashboardController::class)->group(function() {
-        Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
+        Route::get('personal-tutor-dashboard/{id}', 'index')->name('pt.dashboard'); 
     });
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {

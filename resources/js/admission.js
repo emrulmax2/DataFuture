@@ -416,7 +416,7 @@ var employmentHistoryTable = (function () {
     
     //var employment_status = new TomSelect('#employment_status', tomOptions);
 
-    $('.lccTom').each(function(){
+    $('.addmissionLccTom').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
                 ...tomOptions,

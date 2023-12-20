@@ -514,12 +514,17 @@ var applicantInterviewLogTable = (function () {
                     warningModal.hide();
                 }, 2000);
             }
+        });
+
+        $('#uploadTaskDocumentModal [name="process_doc_name"]').on('keyup', function(){
+            $('#uploadTaskDocumentModal [name="display_file_name"]').val($(this).val());
         })
     }
 
     const uploadTaskDocumentModalEl = document.getElementById('uploadTaskDocumentModal')
     uploadTaskDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadTaskDocumentModal input[type="applicant_task_id"]').val('0');
+        $('#uploadTaskDocumentModal input[type="display_file_name"]').val('');
         //drzn.removeAllFiles();
     });
 
