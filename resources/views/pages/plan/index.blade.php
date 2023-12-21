@@ -30,10 +30,10 @@
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Terms</div>
-                        <select data-placeholder="Select Term" id="instance_term-CPL" name="instance_term[]" class="w-full tom-selects" multiple>
+                        <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id[]" class="w-full tom-selects" multiple>
                             @if(!empty($terms))
                                 @foreach($terms as $trm)
-                                    <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->term }}</option>
+                                    <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name }}</option>
                                 @endforeach
                             @endif
                         </select>
@@ -116,7 +116,7 @@
                         <select id="view-CPL" name="view" class="w-full">
                             <option value="1" selected>List View</option>
                             <option value="2">Grid View</option>
-                            <option value="3">Term View</option>
+                            <option value="3">Tree View</option>
                         </select>
                     </div>
                 </div>

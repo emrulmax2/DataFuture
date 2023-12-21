@@ -7,9 +7,6 @@ import moment from 'moment';
 var attendanceListTable = (function () {
     var _tableGen = function (form) {
  
-         //let form_data = new FormData(form);
-         
-         
         $.ajax({
             method: 'GET',
             url: route("tutor-dashboard.list"),

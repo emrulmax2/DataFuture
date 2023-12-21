@@ -19,7 +19,7 @@ var classPlanListTable = (function () {
 
         let tableContent = new Tabulator("#classPlansListTable", {
             ajaxURL: route("class.plan.list"),
-            ajaxParams: { courses: courses, instance_term: instance_term, room: room, group: group, tutor: tutor, ptutor: ptutor, days: days, status: status},
+            ajaxParams: { courses: courses, term_declarations: instance_term, room: room, group: group, tutor: tutor, ptutor: ptutor, days: days, status: status},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,

@@ -250,7 +250,7 @@ class DashboardController extends Controller
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
    
-        return view('pages.tutor.dashboard.index-new', [
+        return view('pages.tutor.dashboard.indexnew', [
             'title' => 'Tutor Dashboard New - LCC Data Future Managment',
             'breadcrumbs' => [],
             "user" => $userData,

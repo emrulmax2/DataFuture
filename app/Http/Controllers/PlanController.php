@@ -34,8 +34,8 @@ class PlanController extends Controller
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::all(),
-            'terms' => InstanceTerm::all(),
-            'room' => Room::all(),
+            'terms' => TermDeclaration::with('termType')->orderBy('name','desc')->get(),
+            'room' => Room::with('venue')->get(),
             'group' => Group::all(),
             'tutor' => User::all(),
             'ptutor' => User::all(),
@@ -44,13 +44,13 @@ class PlanController extends Controller
 
     public function list(Request $request){
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
-        $instance_term = (isset($request->instance_term) && !empty($request->instance_term) ? $request->instance_term : []);
-        $moduleCreationIds = [];
-        if(!empty($instance_term)):
-            $moduleCreations = ModuleCreation::whereIn('instance_term_id', $instance_term)->get();
-            if(!empty($moduleCreations)):
-                foreach($moduleCreations as $mc):
-                    $moduleCreationIds[] = $mc->id;
+        $term_declarations = (isset($request->term_declarations) && !empty($request->term_declarations) ? $request->term_declarations : []);
+        $termDeclarationIds = [];
+        if(!empty($term_declarations)):
+            $termDeclarationId = TermDeclaration::whereIn('id', $term_declarations)->get();
+            if(!empty($termDeclarationId)):
+                foreach($termDeclarationId as $mc):
+                    $termDeclarationIds[] = $mc->id;
                 endforeach;
             endif;
         endif;
@@ -69,7 +69,8 @@ class PlanController extends Controller
 
         $query = Plan::orderByRaw(implode(',', $sorts));
         if(!empty($courses)): $query->whereIn('course_id', $courses); endif;
-        if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+        if(!empty($termDeclarationIds)): $query->whereIn('term_declaration_id', $termDeclarationIds); endif;
+        
         if(!empty($room)): $query->whereIn('rooms_id', $room); endif;
         if(!empty($group)): $query->whereIn('group_id', $group); endif;
         if(!empty($tutor)): $query->whereIn('tutor_id', $tutor); endif;
