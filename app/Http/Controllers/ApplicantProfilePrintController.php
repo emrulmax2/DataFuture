@@ -82,7 +82,7 @@ class ApplicantProfilePrintController extends Controller
                         $PDFHTML .= '<td>';
                             $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
                         $PDFHTML .= '</td>';
-                        $PDFHTML .= '<td class="text-right">';
+                        $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
                             $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'" src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo) ? Storage::disk('local')->url('public/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                             $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : 'Unknown').'</span>';
                         $PDFHTML .= '</td>';
@@ -226,7 +226,7 @@ class ApplicantProfilePrintController extends Controller
 
                 /* Proposed Course */
                 $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Proposed Course & Programme</td>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Proposed Course</td>';
                 $PDFHTML .= '</tr>';
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
                 $PDFHTML .= '<tr>';
@@ -271,9 +271,9 @@ class ApplicantProfilePrintController extends Controller
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---').'</td>';
                 $PDFHTML .= '</tr>';
 
-                /* Education qualifications */
+                /* Educational Qualification */
                 $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Education Qualifications</td>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Educational Qualification</td>';
                 $PDFHTML .= '</tr>';
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
                 $PDFHTML .= '<tr>';
@@ -313,9 +313,9 @@ class ApplicantProfilePrintController extends Controller
                     $PDFHTML .= '</tr>';
                 endif;
 
-                /* Empoyment History */
+                /* Employment History */
                 $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Empoyment History</td>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Employment History</td>';
                 $PDFHTML .= '</tr>';
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
                 $PDFHTML .= '<tr>';
@@ -329,36 +329,74 @@ class ApplicantProfilePrintController extends Controller
                 endif;
                 if($emptStatus):
                     $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td colspan="4" style="padding: 3px 0 0;">';
-                            $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
-                                $PDFHTML .= '<thead>';
-                                    $PDFHTML .= '<tr>';
-                                        $PDFHTML .= '<th>Company</th>';
-                                        $PDFHTML .= '<th>Phone</th>';
-                                        $PDFHTML .= '<th>Position</th>';
-                                        $PDFHTML .= '<th>Start</th>';
-                                        $PDFHTML .= '<th>End</th>';
-                                    $PDFHTML .= '</tr>';
-                                $PDFHTML .= '</thead>';
-                                $PDFHTML .= '<tbody>';
-                                    if(isset($applicant->employment) && $applicant->employment->count() > 0):
-                                        foreach($applicant->employment as $empt):
+                        $PDFHTML .= '<td colspan="4" style="padding: 3px 0 5px;">';
+                            if(isset($applicant->employment) && $applicant->employment->count() > 0):
+                                foreach($applicant->employment as $empt):
+                                    $address = '';
+                                    $address .= $empt->address_line_1.'<br/>';
+                                    $address .= ($empt->address_line_2 != '' ? $empt->address_line_2.'<br/>' : '');
+                                    $address .= ($empt->city != '' ? $empt->city.', ' : '');
+                                    $address .= ($empt->state != '' ? $empt->state.', ' : '');
+                                    $address .= ($empt->post_code != '' ? $empt->post_code.', ' : '');
+                                    $address .= ($empt->country != '' ? '<br/>'.$empt->country : '');
+
+                                    $PDFHTML .= '<div style="border: 1px solid rgb(226, 232, 240); padding: 15px 0 0; display: block;" class="mb-10">';
+                                        $PDFHTML .= '<table>';
                                             $PDFHTML .= '<tr>';
-                                                $PDFHTML .= '<td>'.$empt->company_name.'</td>';
-                                                $PDFHTML .= '<td>'.$empt->company_phone.'</td>';
-                                                $PDFHTML .= '<td>'.$empt->position.'</td>';
-                                                $PDFHTML .= '<td>'.date('jS F, Y', strtotime($empt->start_date)).'</td>';
-                                                $PDFHTML .= '<td>'.date('jS F, Y', strtotime($empt->end_date)).'</td>';
+                                                $PDFHTML .= '<td class="theLabel">Organization</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->company_name.'</td>';
+                                                $PDFHTML .= '<td class="theLabel">Phone</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->company_phone.'</td>';
                                             $PDFHTML .= '</tr>';
-                                        endforeach;
-                                    else:
-                                        $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
-                                    endif;
-                                $PDFHTML .= '</tbody>';
-                            $PDFHTML .= '</table>';
+                                            $PDFHTML .= '<tr>';
+                                                $PDFHTML .= '<td class="theLabel">Position</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->position.'</td>';
+                                                $PDFHTML .= '<td class="theLabel">Start</td>';
+                                                $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($empt->start_date)).'</td>';
+                                            $PDFHTML .= '</tr>';
+                                            $PDFHTML .= '<tr>';
+                                                $PDFHTML .= '<td class="theLabel">End</td>';
+                                                $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($empt->end_date)).'</td>';
+                                                $PDFHTML .= '<td class="theLabel">Address</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$address.'</td>';
+                                            $PDFHTML .= '</tr>';
+                                            $PDFHTML .= '<tr>';
+                                                $PDFHTML .= '<td class="theLabel">Contact Person</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->name.'</td>';
+                                                $PDFHTML .= '<td class="theLabel">Position</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->position.'</td>';
+                                            $PDFHTML .= '</tr>';
+                                            $PDFHTML .= '<tr>';
+                                                $PDFHTML .= '<td class="theLabel">Phone</td>';
+                                                $PDFHTML .= '<td class="theValue">'.$empt->reference[0]->phone.'</td>';
+                                                $PDFHTML .= '<td class="theLabel"></td>';
+                                                $PDFHTML .= '<td class="theValue"></td>';
+                                            $PDFHTML .= '</tr>';
+                                        $PDFHTML .= '</table>';
+                                    $PDFHTML .= '</div>';
+                                endforeach;
+                            endif;
                         $PDFHTML .= '</td>';
                     $PDFHTML .= '</tr>';
                 endif;
+
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Others</td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel" style="width: 20%;">Declaration:</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
+                        $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
+                            $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: rgb(22, 78, 99); font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"><i style="position: relative; top: -8px;">&check;</i></span>';
+                            $PDFHTML .= 'I hereby verify the accuracy and truthfulness of the information provided in this form to the best 
+                                        of my knowledge. It is my responsibility to stay informed about the terms and conditions as well as 
+                                        the policies of the college, and I commit to comply with them. I have thoroughly reviewed the 
+                                        college\'s terms and conditions and student privacy policy and pledge to adhere to them throughout 
+                                        my entire course of study.';
+                        $PDFHTML .= '</div>';
+                    $PDFHTML .= '</td>';
+                $PDFHTML .= '</tr>';
 
                 /* Signature Area */
                 $PDFHTML .= '<tr><td style="width: 100%; padding: 30px 0 0;" colspan="4"></td></tr>';

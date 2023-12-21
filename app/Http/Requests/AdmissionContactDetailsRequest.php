@@ -25,7 +25,6 @@ class AdmissionContactDetailsRequest extends FormRequest
     {
         return [
             'email' => 'required',
-            'phone' => 'required',
             'mobile' => 'required',
             'applicant_address' => 'required',
         ];
@@ -35,7 +34,6 @@ class AdmissionContactDetailsRequest extends FormRequest
     {
         return [
             'email.required' => 'The Email field is required.',
-            'phone.required' => 'The Home Phone field is required.',
             'mobile.required' => 'The Mobile Phone field is required.',
             'applicant_address.required' => 'The Applicant Address is required.'
         ];
