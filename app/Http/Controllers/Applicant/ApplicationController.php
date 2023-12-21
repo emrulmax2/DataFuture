@@ -76,7 +76,7 @@ class ApplicationController extends Controller
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
         if($applicant){
-            if(isset($applicant->application_no) && empty($applicant->application_no)):
+            if(!isset($applicant->application_no) || is_null($applicant->application_no)):
                 $theApplicantId = $applicant->id;
                 $appNo = '100'.sprintf('%05d', $theApplicantId);
                 Applicant::where('id', $theApplicantId)->update(['application_no' => $appNo]);
