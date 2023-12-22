@@ -11,8 +11,10 @@ use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -20,7 +22,7 @@ class DashboardController extends Controller
         $theDate = '2023-11-24'; //Date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
         $usedCourses = Plan::pluck('course_id')->unique()->toArray();
-        
+
         return view('pages.programme.dashboard.index', [
             'title' => 'Programme Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
@@ -42,8 +44,6 @@ class DashboardController extends Controller
 
         $res = [];
         $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId);
-        $res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
-        $res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
 
         return response()->json(['res' => $res], 200);
     }
@@ -100,20 +100,20 @@ class DashboardController extends Controller
         return $html;
     }
 
-    public function getClassTutorsHtml($theDate = null, $course_id = 0){
+    public function getClassTutorsHtml($theDate = null){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $query = Plan::whereIn('id', $classPlanIds);
-        if($course_id > 0):
-            $query->where('course_id', $course_id);
-        endif;
+        $termDecs = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
+        $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
+        
+        $query = Plan::where('term_declaration_id', $termDecId);
         $classTutors = $query->pluck('tutor_id')->unique()->toArray();
-
+        
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('tutor_id', $tut->id)->whereIn('id', $classPlanIds)->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->pluck('module_creation_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
@@ -135,20 +135,20 @@ class DashboardController extends Controller
         return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
     }
 
-    public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0){
+    public function getClassPersonalTutorsHtml($theDate = null){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $query = Plan::whereIn('id', $classPlanIds);
-        if($course_id > 0):
-            $query->where('course_id', $course_id);
-        endif;
+        $termDecs = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
+        $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
+
+        $query = Plan::where('term_declaration_id', $termDecId);
         $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
 
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->whereIn('id', $classPlanIds)->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->pluck('module_creation_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
@@ -240,5 +240,62 @@ class DashboardController extends Controller
         $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
         
         return $hourMins;
+    }
+
+
+    public function tutors($term_declaration_id){
+        $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('tutor_id')->unique()->toArray();
+
+        $res = [];
+        $tutors = User::whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
+        if(!empty($tutors)):
+            foreach($tutors as $tut):
+                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
+                $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
+                $res[$tut->id] = $tut;
+            endforeach;
+        endif;
+
+        return view('pages.programme.dashboard.tutors', [
+            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'breadcrumbs' => [],
+
+            'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'tutors' => $res
+        ]);
+    }
+
+
+    public function personalTutors($term_declaration_id){
+        $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('personal_tutor_id')->unique()->toArray();
+
+        $res = [];
+        $tutors = User::whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
+        if(!empty($tutors)):
+            foreach($tutors as $tut):
+                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
+                $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
+                $res[$tut->id] = $tut;
+            endforeach;
+        endif;
+
+        return view('pages.programme.dashboard.personal-tutors', [
+            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'breadcrumbs' => [],
+
+            'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'tutors' => $res
+        ]);
+    }
+
+
+    public function personalTutorDetails($term_declaration_id, $tutorid){
+        return view('pages.programme.dashboard.personal-tutors-details', [
+            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'breadcrumbs' => [],
+
+            'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'tutor' => User::find($tutorid),
+        ]);
     }
 }

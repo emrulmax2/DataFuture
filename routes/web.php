@@ -1840,6 +1840,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(ProgrammeDashboardController::class)->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
         Route::post('programme-dashboard/get-class-info', 'getClassInformations')->name('programme.dashboard.class.info'); 
+        Route::get('programme-dashboard/tutors/{id}', 'tutors')->name('programme.dashboard.tutors'); 
+
+        Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
+        Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
     });
     
 });
