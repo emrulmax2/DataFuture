@@ -301,7 +301,7 @@ class ApplicantProfilePrintController extends Controller
                                                 $PDFHTML .= '<td>'.$qual->highest_academic.'</td>';
                                                 $PDFHTML .= '<td>'.$qual->subjects.'</td>';
                                                 $PDFHTML .= '<td>'.$qual->result.'</td>';
-                                                $PDFHTML .= '<td>'.date('jS F, Y', strtotime($qual->degree_award_date)).'</td>';
+                                                $PDFHTML .= '<td>'.date('F, Y', strtotime($qual->degree_award_date)).'</td>';
                                             $PDFHTML .= '</tr>';
                                         endforeach;
                                     else:
@@ -352,11 +352,11 @@ class ApplicantProfilePrintController extends Controller
                                                 $PDFHTML .= '<td class="theLabel">Position</td>';
                                                 $PDFHTML .= '<td class="theValue">'.$empt->position.'</td>';
                                                 $PDFHTML .= '<td class="theLabel">Start</td>';
-                                                $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($empt->start_date)).'</td>';
+                                                $PDFHTML .= '<td class="theValue">'.date('F, Y', strtotime($empt->start_date)).'</td>';
                                             $PDFHTML .= '</tr>';
                                             $PDFHTML .= '<tr>';
                                                 $PDFHTML .= '<td class="theLabel">End</td>';
-                                                $PDFHTML .= '<td class="theValue">'.date('jS F, Y', strtotime($empt->end_date)).'</td>';
+                                                $PDFHTML .= '<td class="theValue">'.date('F, Y', strtotime($empt->end_date)).'</td>';
                                                 $PDFHTML .= '<td class="theLabel">Address</td>';
                                                 $PDFHTML .= '<td class="theValue">'.$address.'</td>';
                                             $PDFHTML .= '</tr>';
