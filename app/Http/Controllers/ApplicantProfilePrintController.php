@@ -21,7 +21,7 @@ class ApplicantProfilePrintController extends Controller
 {
     public function generatePDF($applicantId)
     {
-        $applicant = Applicant::find($applicantId)->first();
+        $applicant = Applicant::find($applicantId);
         $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
         $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
         $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms']);
@@ -352,11 +352,11 @@ class ApplicantProfilePrintController extends Controller
                                                 $PDFHTML .= '<td class="theLabel">Position</td>';
                                                 $PDFHTML .= '<td class="theValue">'.$empt->position.'</td>';
                                                 $PDFHTML .= '<td class="theLabel">Start</td>';
-                                                $PDFHTML .= '<td class="theValue">'.date('F, Y', strtotime($empt->start_date)).'</td>';
+                                                $PDFHTML .= '<td class="theValue">'.(!empty($empt->start_date) ? date('F, Y', strtotime('01-'.$empt->start_date)) : '').'</td>';
                                             $PDFHTML .= '</tr>';
                                             $PDFHTML .= '<tr>';
                                                 $PDFHTML .= '<td class="theLabel">End</td>';
-                                                $PDFHTML .= '<td class="theValue">'.date('F, Y', strtotime($empt->end_date)).'</td>';
+                                                $PDFHTML .= '<td class="theValue">'.(!empty($empt->end_date) ? date('F, Y', strtotime('01-'.$empt->end_date)) : '').'</td>';
                                                 $PDFHTML .= '<td class="theLabel">Address</td>';
                                                 $PDFHTML .= '<td class="theValue">'.$address.'</td>';
                                             $PDFHTML .= '</tr>';
@@ -380,10 +380,17 @@ class ApplicantProfilePrintController extends Controller
                     $PDFHTML .= '</tr>';
                 endif;
 
+
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Others</td>';
                 $PDFHTML .= '</tr>';
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+                if(isset($applicant->referral_code) && $applicant->referral_code != ''):
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If you referred by Somone/ Agent, Please enter the Referral Code.</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->referral_code) && $applicant->referral_code != '' ? $applicant->referral_code : '').'</td>';
+                    $PDFHTML .= '</tr>';
+                endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 20%;">Declaration:</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
