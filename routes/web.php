@@ -53,8 +53,15 @@ use App\Http\Controllers\InterviewListController;
 use App\Http\Controllers\ApplicantInterviewListController;
 use App\Http\Controllers\InterviewAssignedController;
 
+use App\Http\Controllers\Agent\Auth\LoginController as AgentLoginController;
+use App\Http\Controllers\Agent\Auth\RegisterController as AgentRegisterController;
+use App\Http\Controllers\Agent\Frontend\ApplicationCheckController;
+use App\Http\Controllers\Agent\Frontend\DashboardController as AgentDashboardController;
+use App\Http\Controllers\Applicant\Auth\VerificationController as AgentVerificationController;
+
 use App\Http\Controllers\Applicant\Auth\LoginController;
 use App\Http\Controllers\Applicant\Auth\RegisterController;
+
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
 
@@ -228,7 +235,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     /**
     * Verification Routes
     */
-    Route::controller(VerificationController::class)->group(function() {
+    Route::controller(AgentVerificationController::class)->group(function() {
         
         //Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
@@ -273,6 +280,51 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('employment/restore/{id}', 'restore')->name('employment.restore');
         });
 
+    });
+});
+// all Agent have a prefix route name agent.* value
+Route::prefix('/agent')->name('agent.')->group(function() {
+
+    Route::controller(AgentLoginController::class)->middleware('agent.loggedin')->group(function() {
+
+        Route::get('login', 'loginView')->name('login');
+        Route::post('login', 'login')->name('check');
+    });
+    
+    Route::controller(AgentRegisterController::class)->middleware('agent.loggedin')->group(function() {
+        Route::get('register', 'index')->name('register');
+        Route::post('register', 'store')->name('store.register');
+    });
+
+    /**
+    * Verification Routes
+    */
+    Route::controller(VerificationController::class)->group(function() {
+        
+        //Route::get('email/verify', 'show')->name('verification.notice');
+        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    });
+
+    Route::middleware('auth.agent')->group(function() {
+
+        Route::get('logout', [AgentLoginController::class, 'logout'])->name('logout');
+
+        Route::controller(AgentDashboardController::class)->group(function() {
+            Route::get('/dashboard', 'index')->name('dashboard');
+            Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
+        });
+        
+        Route::controller(AgentDashboardController::class)->group(function() {
+            Route::get('/dashboard', 'index')->name('dashboard');
+            Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
+        });
+        Route::controller(ApplicationCheckController::class)->group(function() {
+            Route::post('/store', 'store')->name('apply.check');
+            Route::post('/verify/mobile', 'verifyMobile')->name('apply.verify');
+            Route::post('/verify/email', 'verifyEmail')->name('apply.email.verify');
+        });
+     
     });
 });
 

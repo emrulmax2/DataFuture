@@ -34,6 +34,7 @@ export default defineConfig({
                 "resources/js/application.js",
 
                 "resources/js/applicant-dahsboard.js",
+                "resources/js/agent-dahsboard.js",
                 "resources/js/bankholiday.js",
                 "resources/js/permissioncategory.js",
                 "resources/js/department.js",

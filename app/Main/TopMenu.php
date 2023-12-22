@@ -30,6 +30,15 @@ class TopMenu
                     'route_name' => 'students.dashboard'
                 ],
             ];
+        elseif(!is_null(\Auth::guard('agent')->user())):
+            return [
+                'dashboard' => [
+                    'icon' => 'home',
+                    'title' => 'Dashboard',
+                    'params' => [],
+                    'route_name' => 'agent.dashboard'
+                ],
+            ];
         elseif(!is_null(\Auth::user())):
             $priv = auth()->user()->priv();
             $menu = [

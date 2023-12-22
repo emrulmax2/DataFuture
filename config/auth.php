@@ -49,6 +49,10 @@ return [
             'driver' => 'session',
             'provider' => 'students',
         ],
+        'agent' => [
+            'driver' => 'session',
+            'provider' => 'agents',
+        ],
 
         'machine' => [
             'driver' => 'session',
@@ -87,6 +91,11 @@ return [
         'students' => [
             'driver' => 'eloquent',
             'model' => App\Models\StudentUser::class,
+        ],
+        
+        'agents' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AgentUser::class,
         ],
         
         'machines' => [
@@ -131,6 +140,12 @@ return [
             'throttle' => 60,
         ],
 
+        'agents' => [
+            'provider' => 'agents',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
         
         'students' => [
             'provider' => 'students',

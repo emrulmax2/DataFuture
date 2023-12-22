@@ -97,6 +97,7 @@ class CourseCreationController extends Controller
     }
 
     public function store(CourseCreationsRequest $request){
+        
         $request->request->add(['created_by' => auth()->user()->id]);
         $courseCreation = CourseCreation::create($request->all());
         
