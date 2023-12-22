@@ -4,6 +4,8 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import {createApp} from 'vue'
 
+import IMask from 'imask';
+
 ("use strict");
 var admissionListTable = (function () {
     var _tableGen = function () {
@@ -278,7 +280,7 @@ var employmentHistoryTable = (function () {
                     width: "80",
                 },
                 {
-                    title: "Company",
+                    title: "Organization",
                     field: "company_name",
                     headerHozAlign: "left",
                 },
@@ -400,6 +402,29 @@ var employmentHistoryTable = (function () {
 })();
 
 (function(){
+    let admissionDatepickerOpt = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: true,
+        format: "DD-MM-YYYY",
+        maxDate: new Date(),
+        dropdowns: {
+            minYear: 1900,
+            maxYear: null,
+            months: true,
+            years: true,
+        },
+    };
+
+    $('.admissionDatepicker').each(function(){
+        new Litepicker({
+            element: this,
+            ...admissionDatepickerOpt,
+        });
+    })
+
     let tomOptions = {
         plugins: {
             dropdown_input: {}
@@ -413,6 +438,15 @@ var employmentHistoryTable = (function () {
         },
     };
 
+    if($('.phoneMask').length > 0){
+        $('.phoneMask').each(function(){
+            IMask(
+                this, {
+                  mask: '00000000000'
+                }
+            )
+        })
+    }
     
     //var employment_status = new TomSelect('#employment_status', tomOptions);
 

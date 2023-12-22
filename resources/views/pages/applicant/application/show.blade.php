@@ -223,7 +223,7 @@
             <div class="accordion-item mb-1">
                 <div id="applicantReviewAccordion-c-4" class="accordion-header">
                     <button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-4" aria-expanded="false" aria-controls="applicantReviewAccordion-col-4">
-                        Proposed Course & Programme
+                        Proposed Course
                         <span class="accordionCollaps"></span>
                     </button>
                 </div>
@@ -287,7 +287,7 @@
             <div class="accordion-item mb-1">
                 <div id="applicantReviewAccordion-c-5" class="accordion-header">
                     <button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-5" aria-expanded="false" aria-controls="applicantReviewAccordion-col-5">
-                        Education Qualifications
+                        Educational Qualification
                         <span class="accordionCollaps"></span>
                     </button>
                 </div>
@@ -366,7 +366,7 @@
                                         <thead>
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
-                                                <th class="whitespace-nowrap">Company</th>
+                                                <th class="whitespace-nowrap">Organization</th>
                                                 <th class="whitespace-nowrap">Phone</th>
                                                 <th class="whitespace-nowrap">Position</th>
                                                 <th class="whitespace-nowrap">Start</th>
@@ -455,6 +455,18 @@
                 </div>
             </div>
 
+            <div class="relative pt-5">
+                <label class="block text-lg font-semibold mb-2">Declaration</label>
+                <div class="form-check items-start">
+                    <input disabled {{ (isset($applicant->is_agree) && $applicant->is_agree == 1 ? 'checked' : '') }} id="is_applicant_agree_1" class="form-check-input border-primary mr-2" style="border-color: rgb(22 78 99); position: relative; top: 4px;" type="checkbox" name="is_agree" value="1">
+                    <label class="form-check-label" for="is_applicant_agree_1" style="font-size: 16px; line-height: 24px;">
+                        I hereby verify the accuracy and truthfulness of the information provided in this form to the best of my 
+                        knowledge. It is my responsibility to stay informed about the terms and conditions as well as the policies 
+                        of the college, and I commit to comply with them. I have thoroughly reviewed the college's terms and 
+                        conditions and student privacy policy and pledge to adhere to them throughout my entire course of study.
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

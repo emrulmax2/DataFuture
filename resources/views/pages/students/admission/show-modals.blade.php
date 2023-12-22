@@ -35,7 +35,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($applicant->date_of_birth) ? $applicant->date_of_birth : '' }}" placeholder="DD-MM-YYYY" id="date_of_birth" class="form-control datepicker" name="date_of_birth" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" value="{{ isset($applicant->date_of_birth) ? $applicant->date_of_birth : '' }}" placeholder="DD-MM-YYYY" id="date_of_birth" class="form-control admissionDatepicker" name="date_of_birth" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
@@ -184,13 +184,13 @@
                             <div class="acc__input-error error-email text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="phone" class="form-label">Home Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->contact->home) ? $applicant->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control" name="phone">
+                            <label for="phone" class="form-label">Home Phone</label>
+                            <input value="{{ isset($applicant->contact->home) ? $applicant->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control phoneMask" name="phone">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
+                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control phoneMask" name="mobile">
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
                         @php 
@@ -300,7 +300,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="kins_mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->kin->mobile) ? $applicant->kin->mobile : '' }}" type="text" placeholder="Mobile" id="kins_mobile" class="form-control" name="kins_mobile">
+                            <input value="{{ isset($applicant->kin->mobile) ? $applicant->kin->mobile : '' }}" type="text" placeholder="Mobile" id="kins_mobile" class="form-control phoneMask" name="kins_mobile">
                             <div class="acc__input-error error-kins_mobile text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -637,7 +637,7 @@
                     </div>
                     <div>
                         <label for="degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
-                        <input type="text" placeholder="DD-MM-YYYY" id="degree_award_date" class="form-control datepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                        <input type="text" placeholder="DD-MM-YYYY" id="degree_award_date" class="form-control admissionDatepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                         <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                     </div>
                 </div>
@@ -701,7 +701,7 @@
                     </div>
                     <div>
                         <label for="edit_degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
-                        <input type="text" placeholder="DD-MM-YYYY" id="edit_degree_award_date" class="form-control datepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                        <input type="text" placeholder="DD-MM-YYYY" id="edit_degree_award_date" class="form-control admissionDatepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                         <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                     </div>
                 </div>
@@ -745,13 +745,13 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12">
-                            <label for="company_name" class="form-label">Company Name <span class="text-danger">*</span></label>
+                            <label for="company_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
                             <input type="text" placeholder="Company Name" id="company_name" class="form-control w-full" name="company_name">
                             <div class="acc__input-error error-company_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="company_phone" class="form-label">Company Phone <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Company Phone" id="company_phone" class="form-control w-full" name="company_phone">
+                            <label for="company_phone" class="form-label">Organization Phone <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Company Phone" id="company_phone" class="form-control w-full phoneMask" name="company_phone">
                             <div class="acc__input-error error-company_phone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -761,7 +761,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="start_date" class="form-control admissionDatepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-start_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-2 text-center">
@@ -773,11 +773,11 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control admissionDatepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Company Address <span class="text-danger">*</span></label>
+                            <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
                             <div class="addressWrap mb-2" id="empHistoryAddress" style="display: none;"></div>
                             <div>
                                 <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#empHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
@@ -803,7 +803,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="contact_phone" class="form-label">Contact Phone <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Contact Phone" id="contact_phone" class="form-control w-full" name="contact_phone">
+                            <input type="text" placeholder="Contact Phone" id="contact_phone" class="form-control w-full phoneMask" name="contact_phone">
                             <div class="acc__input-error error-contact_phone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -851,13 +851,13 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12">
-                            <label for="edit_company_name" class="form-label">Company Name <span class="text-danger">*</span></label>
+                            <label for="edit_company_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
                             <input type="text" placeholder="Company Name" id="edit_company_name" class="form-control w-full" name="company_name">
                             <div class="acc__input-error error-company_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="edit_company_phone" class="form-label">Company Phone <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Company Phone" id="edit_company_phone" class="form-control w-full" name="company_phone">
+                            <label for="edit_company_phone" class="form-label">Organization Phone <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Company Phone" id="edit_company_phone" class="form-control w-full phoneMask" name="company_phone">
                             <div class="acc__input-error error-company_phone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -867,7 +867,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="edit_start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="edit_start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="edit_start_date" class="form-control admissionDatepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-start_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-2 text-center">
@@ -879,11 +879,11 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="edit_end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control admissionDatepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Company Address <span class="text-danger">*</span></label>
+                            <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
                             <div class="addressWrap mb-2" id="editEmpHistoryAddress" style="display: none;"></div>
                             <div>
                                 <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#editEmpHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
@@ -909,7 +909,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="edit_contact_phone" class="form-label">Contact Phone <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Contact Phone" id="edit_contact_phone" class="form-control w-full" name="contact_phone">
+                            <input type="text" placeholder="Contact Phone" id="edit_contact_phone" class="form-control w-full phoneMask" name="contact_phone">
                             <div class="acc__input-error error-contact_phone text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">

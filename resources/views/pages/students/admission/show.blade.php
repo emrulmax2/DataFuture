@@ -273,7 +273,7 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Proposed Course & Programme</div>
+                    <div class="font-medium text-base">Proposed Course</div>
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editAdmissionCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
@@ -342,7 +342,7 @@
         <div class="intro-y box p-5 mt-5" id="applicantQualification">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Education Qualification</div>
+                    <div class="font-medium text-base">Educational Qualification</div>
                 </div>
                 <div class="col-span-6 text-right">
                     <div class="form-check form-switch justify-end">
@@ -422,7 +422,7 @@
                 </div>
                 <div class="col-span-12 educationQualificationTableNoWrap" style="display: {{ !isset($applicant->other->is_edication_qualification) || $applicant->other->is_edication_qualification != 1 ? 'block' : 'none' }};">
                     <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                        <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Education Qualification status are disabled.
+                        <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Educational Qualification status are disabled.
                     </div>
                 </div>
             </div>
@@ -438,7 +438,7 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Empoyment History</div>
+                    <div class="font-medium text-base">Employment History</div>
                 </div>
                 <div class="col-span-6">
                     <div class="flex justify-end items-center">

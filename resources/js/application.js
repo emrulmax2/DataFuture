@@ -4,6 +4,12 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
+import dayjs from "dayjs";
+import Litepicker from "litepicker";
+
+import IMask from 'imask';
+
+
 ("use strict");
 var educationQualTable = (function () {
     var _tableGen = function () {
@@ -155,7 +161,7 @@ var employmentHistoryTable = (function () {
                     width: "80",
                 },
                 {
-                    title: "Company",
+                    title: "Organization",
                     field: "company_name",
                     headerHozAlign: "left",
                 },
@@ -399,6 +405,29 @@ var employmentHistoryTable = (function () {
         $('#addressModal input').val('');
     });
 
+    let applicationDatepickerOpt = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: true,
+        format: "DD-MM-YYYY",
+        maxDate: new Date(),
+        dropdowns: {
+            minYear: 1900,
+            maxYear: null,
+            months: true,
+            years: true,
+        },
+    };
+
+    $('.applicationDatepicker').each(function(){
+        new Litepicker({
+            element: this,
+            ...applicationDatepickerOpt,
+        });
+    })
+
     let tomOptions = {
         plugins: {
             dropdown_input: {},
@@ -420,7 +449,24 @@ var employmentHistoryTable = (function () {
         new TomSelect(this, tomOptions);
     })
 
+    if($('.applicationPhoneMask').length > 0){
+        $('.applicationPhoneMask').each(function(){
+            IMask(
+                this, {
+                  mask: '00000000000'
+                }
+            )
+        })
+    }
+
     // click on next button
+    $('#is_applicant_agree').on('change', function(e){
+        if($(this).prop('checked')){
+            $('.form-wizard .wizard-fieldset.wizard-last-step .form-wizard-next-btn').removeAttr('disabled');
+        }else{
+            $('.form-wizard .wizard-fieldset.wizard-last-step .form-wizard-next-btn').attr('disabled', 'disabled');
+        }
+    })
     $('.form-wizard-next-btn').on('click', function () {
         var parentFieldset = $(this).parents('.wizard-fieldset');
         var parentForm = $(this).parents('.wizard-step-form');
