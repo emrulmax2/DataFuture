@@ -117,6 +117,16 @@ use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\HR\EmployeePortalController;
 use App\Http\Controllers\HR\EmployeePrivilegeController;
 use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
+use App\Http\Controllers\HR\Reports\BirthdayReportController;
+use App\Http\Controllers\HR\Reports\DiversityReportController;
+use App\Http\Controllers\HR\Reports\EligibilityReportController;
+use App\Http\Controllers\HR\Reports\EmployeeContactDetailController;
+use App\Http\Controllers\HR\Reports\EmploymentReportController;
+use App\Http\Controllers\HR\Reports\StarterReportController;
+use App\Http\Controllers\HR\Reports\LengthServiceController;
+use App\Http\Controllers\HR\Reports\RecordCardController;
+use App\Http\Controllers\HR\Reports\TelephoneDirectoryController;
+
 use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
 use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\Personal_Tutor\DashboardController;
@@ -1025,6 +1035,82 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/portal/filter-leave-calendar', 'filterLeaveCalendar')->name('hr.portal.filter.leave.calendar'); 
         Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
         
+        Route::get('hr/portal/reports', 'employmentReportShow')->name('hr.portal.employment.reports.show');
+        
+    });     
+
+    Route::controller(EmploymentReportController::class)->group(function(){
+        Route::get('hr/portal/reports/list', 'employmentReportlist')->name('hr.portal.employment.reports.list');
+        //Route::get('hr/portal/employment-reports/birthdaylist', 'show')->name('hr.portal.employment.reports.birthdaylist'); 
+    });
+
+    Route::controller(BirthdayReportController::class)->group(function(){
+        Route::get('hr/portal/reports/birthdaylist', 'index')->name('hr.portal.reports.birthdaylist');
+        Route::get('hr/portal/reports/birthdaylist/list', 'searchlist')->name('hr.portal.reports.birthdaylist.list'); 
+        Route::get('hr/portal/reports/birthdaylist/birthdaylistpdf', 'generatePDF')->name('hr.portal.reports.birthdaylist.pdf');
+        
+        Route::get('hr/portal/reports/birthdaylist/birthdaylistexcel', 'generateBirthdayExcel')->name('hr.portal.reports.birthdaylist.excel');
+        Route::get('hr/portal/reports/birthdaylist/birthdaylistbysearchexcel', 'generateBirthdayListbySearchExcel')->name('hr.portal.reports.birthdaylistbysearch.excel');
+        Route::get('hr/portal/reports/birthdaylist/birthdaylistbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.birthdaylistbysearch.pdf');
+    });
+
+    Route::controller(DiversityReportController::class)->group(function(){
+        Route::get('hr/portal/reports/diversityreport', 'index')->name('hr.portal.reports.diversityreport');
+        Route::get('hr/portal/reports/diversityreport/list', 'list')->name('hr.portal.reports.diversityreport.list'); 
+        Route::get('hr/portal/reports/diversityreport/diversitypdf', 'generatePDF')->name('hr.portal.reports.diversityreport.pdf');
+        Route::get('hr/portal/reports/diversityreport/diversitybysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.diversitybysearch.pdf');
+    });         
+
+    Route::controller(EmployeeContactDetailController::class)->group(function(){
+        Route::get('hr/portal/reports/contactdetail', 'index')->name('hr.portal.reports.contactdetail');
+        Route::get('hr/portal/reports/contactdetail/list', 'searchlist')->name('hr.portal.reports.contactdetail.list'); 
+        Route::get('hr/portal/reports/contactdetail/contactpdf', 'generatePDF')->name('hr.portal.reports.contactdetail.pdf');
+        Route::get('hr/portal/reports/contactdetail/contactexcel', 'generateContactExcel')->name('hr.portal.reports.contactdetail.excel');
+        Route::get('hr/portal/reports/contactdetail/contactbysearchexcel', 'generateSearchExcel')->name('hr.portal.reports.contactbysearch.excel');
+        Route::get('hr/portal/reports/contactdetail/contactbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.contactbysearch.pdf');
+    }); 
+    
+    Route::controller(LengthServiceController::class)->group(function(){
+        Route::get('hr/portal/reports/lengthservice', 'index')->name('hr.portal.reports.lengthservice');
+        Route::get('hr/portal/reports/lengthservice/list', 'searchlist')->name('hr.portal.reports.lengthservice.list'); 
+        Route::get('hr/portal/reports/lengthservice/lengthservicepdf', 'generatePDF')->name('hr.portal.reports.lengthservice.pdf');
+        
+        Route::get('hr/portal/reports/lengthservice/lengthserviceexcel', 'generateBirthdayExcel')->name('hr.portal.reports.lengthservice.excel');
+        Route::get('hr/portal/reports/lengthservice/lengthservicebysearchexcel', 'generateLengthServicebySearchExcel')->name('hr.portal.reports.lengthservicebysearch.excel');
+        Route::get('hr/portal/reports/lengthservice/lengthservicebysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.lengthservicebysearch.pdf');
+    });
+
+    Route::controller(StarterReportController::class)->group(function(){
+        Route::get('hr/portal/reports/starterreport', 'index')->name('hr.portal.reports.starterreport');
+        Route::get('hr/portal/reports/starterreport/list', 'list')->name('hr.portal.reports.starterreport.list'); 
+        Route::get('hr/portal/reports/starterreport/starterpdf', 'generatePDF')->name('hr.portal.reports.starterreport.pdf');
+        Route::get('hr/portal/reports/starterreport/starterreportbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.starterreportbysearch.pdf');
+    });            
+    
+    Route::controller(RecordCardController::class)->group(function(){
+        Route::get('hr/portal/reports/recordcard', 'index')->name('hr.portal.reports.recordcard');
+        Route::get('hr/portal/reports/recordcard/list', 'searchlist')->name('hr.portal.reports.recordcard.list'); 
+        Route::get('hr/portal/reports/recordcard/recordcardpdf', 'generatePDF')->name('hr.portal.reports.recordcard.pdf');
+        Route::get('hr/portal/reports/recordcard/recordcardexcel', 'generateRecordCardExcel')->name('hr.portal.reports.recordcard.excel');
+        Route::get('hr/portal/reports/recordcard/recordcardbysearchexcel', 'generateSearchExcel')->name('hr.portal.reports.recordcardbysearch.excel');
+        Route::get('hr/portal/reports/recordcard/recordcardbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.recordcardbysearch.pdf');
+    });     
+
+    Route::controller(TelephoneDirectoryController::class)->group(function(){
+        Route::get('hr/portal/reports/telephonedirectory', 'index')->name('hr.portal.reports.telephonedirectory');
+        Route::get('hr/portal/reports/telephonedirectory/list', 'searchlist')->name('hr.portal.reports.telephonedirectory.list'); 
+        Route::get('hr/portal/reports/telephonedirectory/telephonedirectorypdf', 'generatePDF')->name('hr.portal.reports.telephonedirectory.pdf');
+        
+        Route::get('hr/portal/reports/telephonedirectory/telephonedirectoryexcel', 'generateTelephoneDirectoryExcel')->name('hr.portal.reports.telephonedirectory.excel');
+        Route::get('hr/portal/reports/telephonedirectory/telephonedirectorybysearchexcel', 'generateTelephoneDirectorybySearchExcel')->name('hr.portal.reports.telephonedirectorybysearch.excel');
+        Route::get('hr/portal/reports/telephonedirectory/telephonedirectorybysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.telephonedirectorybysearch.pdf');
+    });
+
+    Route::controller(EligibilityReportController::class)->group(function(){
+        Route::get('hr/portal/reports/eligibilityreport', 'index')->name('hr.portal.reports.eligibilityreport');
+        Route::get('hr/portal/reports/eligibilityreport/visaexpiry-list', 'visaList')->name('hr.portal.reports.eligibilityreport.visaexpirylist'); 
+        Route::get('hr/portal/reports/eligibilityreport/passportexpiry-list', 'passportList')->name('hr.portal.reports.eligibilityreport.passportexpirylist'); 
+        Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf', 'generatePDF')->name('hr.portal.reports.eligibilityreport.pdf');
     });
 
     Route::controller(EmployeeUpcomingAppraisalController::class)->group(function(){
@@ -1892,7 +1978,9 @@ Route::middleware('auth')->group(function() {
     Route::controller(ProgrammeDashboardController::class)->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
         Route::post('programme-dashboard/get-class-info', 'getClassInformations')->name('programme.dashboard.class.info'); 
+
         Route::get('programme-dashboard/tutors/{id}', 'tutors')->name('programme.dashboard.tutors'); 
+        Route::get('programme-dashboard/tutors/details/{id}/{tutorid}', 'tutorsDetails')->name('programme.dashboard.tutors.details'); 
 
         Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 

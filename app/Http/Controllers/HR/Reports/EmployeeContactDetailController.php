@@ -1,0 +1,226 @@
+<?php
+
+namespace App\Http\Controllers\HR\Reports;
+
+use App\Http\Controllers\Controller;
+use App\Models\Address;
+use Illuminate\Http\Request;
+use App\Models\Employee;
+use App\Models\Country;
+use App\Models\Ethnicity;
+use App\Models\Department;
+use App\Models\EmployeeWorkType;
+use App\Models\SexIdentifier;
+use App\Models\EmployeeEmergencyContact;
+use App\Exports\ContactDetailExport;
+use App\Exports\ContactDetailBySearchExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+use PDF;
+
+class EmployeeContactDetailController extends Controller
+{
+    public function index(){
+        $employee = Employee::where('status', '=', 1)->get();
+        $i = 0;
+        $dataList =[];
+        foreach($employee as $data) {
+            $address = Address::find($data->address_id);
+            $emergencyContact= EmployeeEmergencyContact::find($data->id);
+            //dd($emergencyContact);
+            $dataList[$i++] = [
+                'name' => $data->first_name.' '.$data->last_name,
+                'address' => $address->address_line_1.','.$address->address_line_2,
+                'post_code' => $data->post_code,
+                'telephone' => isset($data->telephone) ? $data->telephone : '',
+                'mobile' => isset($data->mobile) ? $data->mobile : '',
+                'email' => isset($data->email) ? $data->email : '',
+                'emergency_telephone' => isset($emergencyContact->emergency_contact_telephone) ? $emergencyContact->emergency_contact_telephone : '',
+                'emergency_mobile' => isset($emergencyContact->emergency_contact_mobile) ? $emergencyContact->emergency_contact_mobile : '',
+                'emergency_email' => isset($emergencyContact->emergency_contact_email) ? $emergencyContact->emergency_contact_email : ''
+            ];
+        }
+        
+        return view('pages.hr.portal.reports.contactdetail', [
+            'title' => 'Employee Contact Details - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Employee Contact Details', 'href' => 'javascript:void(0);']
+            ],
+           'dataList' => $dataList,
+           'country' => Country::all(),
+           'ethnicity' => Ethnicity::all(),
+           'employeeWorkType' => EmployeeWorkType::all(),
+           'departments' => Department::all(),
+           'gender' => SexIdentifier::all()
+        ]);
+    }
+
+    public function list(Request $request){
+        $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
+        $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
+        $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
+        $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
+        $ethnicity = (isset($request->ethnicity) && !empty($request->ethnicity) ? $request->ethnicity : '');
+        $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
+        $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
+        $status = $request->status;
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Employee::orderByRaw(implode(',', $sorts));
+        if(!empty($ethnicity)): $query->where('ethnicity_id', 'LIKE', '%'.$ethnicity.'%'); endif;
+        if(!empty($nationality)): $query->where('nationality_id', 'LIKE', '%'.$nationality.'%'); endif;
+        if(!empty($gender)): $query->where('sex_identifier_id', 'LIKE', '%'.$gender.'%'); endif;
+        if(($status)==0): $query->where('status', $status); else: $query->where('status', '>', 0); endif;
+
+        if(!empty($type) || !empty($department) || !empty($startdate) || !empty($enddate)):
+            $query->whereHas('employment', function($qs) use($type, $department, $startdate, $enddate){
+                if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
+                if(!empty($department)): $qs->where('department_id', $department); endif;
+                if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
+                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+            });
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'name' => $list->first_name.' '.$list->last_name,
+                    'address' => $list->address->address_line_1.','.$list->address->address_line_2,
+                    'post_code' => $list->post_code,
+                    'telephone' => isset($list->telephone) ? $list->telephone : '',
+                    'mobile' => isset($list->mobile) ? $list->mobile : '',
+                    'email' => isset($list->email) ? $list->email : '',
+                    'emergency_telephone' => isset($list->emergencyContact->emergency_contact_telephone) ? $list->emergencyContact->emergency_contact_telephone : '',
+                    'emergency_mobile' => isset($list->emergencyContact->emergency_contact_mobile) ? $list->emergencyContact->emergency_contact_mobile : '',
+                    'emergency_email' => isset($list->emergencyContact->emergency_contact_email) ? $list->emergencyContact->emergency_contact_email : ''
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function generatePDF(Request $request)
+    {
+        $items = Employee::where('status', '=', 1)->get();
+        $items->load(['address','emergencyContact']);
+
+        $i = 0;
+        $dataList =[];
+
+        foreach($items as $item) {
+            $emergencyContact = $item->emergencyContact;
+            $address = $item->address;
+            $dataList[$i++] = [
+                'name' => $item->first_name.' '.$item->last_name,
+                'address' => $address->address_line_1.','.$address->address_line_2,
+                'post_code' => $item->post_code,
+                'telephone' => isset($item->telephone) ? $item->telephone : '',
+                'mobile' => isset($item->mobile) ? $item->mobile : '',
+                'email' => isset($item->email) ? $item->email : '',
+                'emergency_telephone' => isset($emergencyContact->emergency_contact_telephone) ? $emergencyContact->emergency_contact_telephone : '',
+                'emergency_mobile' => isset($emergencyContact->emergency_contact_mobile) ? $emergencyContact->emergency_contact_mobile : '',
+                'emergency_email' => isset($emergencyContact->emergency_contact_email) ? $emergencyContact->emergency_contact_email : ''
+            ];
+        } 
+
+        $pdf = PDF::loadView('pages.hr.portal.reports.pdf.contactpdf',compact('dataList'));
+        return $pdf->download('Employee Contact Details.pdf');
+
+        //return view('pages.hr.portal.reports.pdf.contactpdf', compact('dataList'));
+    }
+
+    public function generateContactExcel(Request $request)
+    {   
+        return Excel::download(new ContactDetailExport(), 'Contact_Detail.xlsx');
+    }
+
+    public function generateSearchExcel(Request $request)
+    {          
+        $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
+        $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
+        $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
+        $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
+        $ethnicity = (isset($request->ethnicity) && !empty($request->ethnicity) ? $request->ethnicity : '');
+        $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
+        $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
+        $status = $request->status;
+        
+        $data = $this->list($request);
+        
+        $returnData = json_decode($data->getContent(), true);
+                
+        return Excel::download(new ContactDetailBySearchExport($returnData), 'Contact_Details.xlsx');
+    }
+
+    public function generateSearchPDF(Request $request){
+        $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
+        $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
+        $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
+        $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
+        $ethnicity = (isset($request->ethnicity) && !empty($request->ethnicity) ? $request->ethnicity : '');
+        $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
+        $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
+        $status = $request->status;
+        
+        $data = $this->list($request);
+        
+        $returnData = json_decode($data->getContent(), true);
+        
+        $pdf = PDF::loadView('pages.hr.portal.reports.pdf.contactbysearchpdf',compact('returnData'));
+        return $pdf->download('Contact Details.pdf');
+    }
+
+    public function searchlist(Request $request){
+        $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
+        $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
+        $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
+        $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
+        $ethnicity = (isset($request->ethnicity) && !empty($request->ethnicity) ? $request->ethnicity : '');
+        $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
+        $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
+        $status = $request->status;
+
+        $data = $this->list($request);
+        $returnData = json_decode($data->getContent(), true);
+        
+        $i = 0;
+        $dataList =[];
+        foreach($returnData['data'] as $data){
+            
+            $dataList[$i++] = [
+                'Name' => $data['name'],
+                'Address' => $data['address'],
+                'Post Code' => $data['post_code'],
+                'Telephone' => isset($data['telephone']) ? $data['telephone'] : '',
+                'Mobile' => isset($data['mobile'] ) ? $data['mobile'] : '',
+                'Email' => isset($data['email']) ? $data['email']  : '',
+                'Emergency Telephone' =>  isset($data['emergency_telephone']) ? $data['emergency_telephone'] : '',
+                'Emergency Mobile' => isset($data['emergency_mobile']) ? $data['emergency_mobile'] : '',
+                'Emergency Email' => isset($data['emergency_email']) ? $data['emergency_email'] : ''
+            ];
+        }
+        //dd($dataList);
+        return response()->json(['res' => $dataList], 200);
+    }
+}

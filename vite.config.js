@@ -173,6 +173,16 @@ export default defineConfig({
 
                 "resources/js/programme-dashboard.js",
                 "resources/js/employee-privilege.js",
+
+                'resources/js/hr-portal-employmentreport.js',
+                'resources/js/hr-portal-birthdayreport.js',
+                'resources/js/hr-portal-diversityreport.js',
+                'resources/js/hr-portal-starterreport.js',
+                'resources/js/hr-portal-eligibilityreport.js',
+                'resources/js/hr-portal-contactdetail.js',
+                'resources/js/hr-portal-lengthservice.js',
+                'resources/js/hr-portal-telephonedirectory.js',
+                'resources/js/hr-portal-recordcard.js',
                 
             ],
             refresh: true,

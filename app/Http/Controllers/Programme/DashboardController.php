@@ -122,7 +122,7 @@ class DashboardController extends Controller
                         $html .= '<div class="ml-4 mr-auto">';
                             $html .= '<div class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</div>';
                         $html .= '</div>';
-                        $html .= '<div class="text-success">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
+                        $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
                     $html .= '</div>';
                 $html .= '</div>';
             endforeach;
@@ -157,7 +157,7 @@ class DashboardController extends Controller
                         $html .= '<div class="ml-4 mr-auto">';
                             $html .= '<div class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</div>';
                         $html .= '</div>';
-                        $html .= '<div class="text-success">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
+                        $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
                     $html .= '</div>';
                 $html .= '</div>';
             endforeach;
@@ -265,6 +265,19 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function tutorsDetails($term_declaration_id, $tutorid){
+        return view('pages.programme.dashboard.tutors-details', [
+            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'breadcrumbs' => [],
+
+            'p_tutor_id' => $tutorid,
+            'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
+            'tutor' => User::find($tutorid),
+            'plans' => Plan::where('term_declaration_id', $term_declaration_id)->where('tutor_id', $tutorid)->get()
+        ]);
+    }
+
 
     public function personalTutors($term_declaration_id){
         $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('personal_tutor_id')->unique()->toArray();
@@ -294,8 +307,11 @@ class DashboardController extends Controller
             'title' => 'Programme Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
 
+            'p_tutor_id' => $tutorid,
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'tutor' => User::find($tutorid),
+            'plans' => Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->get()
         ]);
     }
 }

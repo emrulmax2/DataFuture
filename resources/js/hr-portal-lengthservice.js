@@ -1,0 +1,230 @@
+import { createIcons, icons } from "lucide";
+import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
+
+("use strict");
+
+var lengthserviceTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let startdate = $("#startdate-lengthservice").val() != "" ? $("#startdate-lengthservice").val() : "";
+        let enddate = $("#enddate-lengthservice").val() != "" ? $("#enddate-lengthservice").val() : "";
+        let worktype = $("#employee_work_type_id-lengthservice").val() != "" ? $("#employee_work_type_id-lengthservice").val() : "";
+        let department = $("#department_id-lengthservice").val() != "" ? $("#department_id-lengthservice").val() : "";
+        let ethnicity = $("#ethnicity-lengthservice").val() != "" ? $("#ethnicity-lengthservice").val() : "";
+        let nationality = $("#nationality-lengthservice").val() != "" ? $("#nationality-lengthservice").val() : "";
+        let gender = $("#gender-lengthservice").val() != "" ? $("#gender-lengthservice").val() : "";
+        let status = $("#status_id-lengthservice").val() != "" ? $("#status_id-lengthservice").val() : "";
+
+        let tableContent = new Tabulator("#lengthserviceTable", {
+            ajaxURL: route("hr.portal.reports.lengthservice.list"),
+            ajaxParams: { ethnicity:ethnicity, nationality:nationality, startdate:startdate, worktype:worktype, department:department, gender:gender, enddate:enddate, status:status },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            
+            columns:[
+                {
+                    title:"", field:"year",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        return '<div class="font-bold whitespace-normal text-sm">'+cell.getData().year+' Years</div>';
+                    }
+                },
+            ],
+            rowFormatter:function(row){
+                //create and style holder elements
+                var holderEl = document.createElement("div");
+                var tableEl  = document.createElement("div");
+        
+                holderEl.appendChild(tableEl);
+        
+                row.getElement().appendChild(holderEl);
+
+                tableEl.setAttribute("id","tableEl");
+        
+                var subTable = new Tabulator(tableEl, {
+                    layout:"fitColumns",
+                    data:row.getData().dataArray,
+                    columns:[
+                        {title:"Name", field:"name", headerHozAlign: "left"},
+                        {title:"Started On", field:"started_on", headerHozAlign: "left"},
+                        {title:"Ended On", field:"ended_on", headerHozAlign: "left"},
+                        {title:"Length of Service", field:"length", headerHozAlign: "left"},
+                    ],
+                    renderComplete() {
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    },
+                })
+            },
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
+(function(){
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        persist: false,
+        create: true,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    $("#tabulator-html-filter-go-LS").on("click", function (event) {
+        $("div .lengthserviceAllData").hide();
+        lengthserviceTable.init();         
+        document.getElementById("lengthservicebySearchExcelBtn").style.display="block";
+        document.getElementById("lengthservicebySearchPdfBtn").style.display="block";
+        document.getElementById("allLengthServiceExcelBtn").style.display="none";
+        document.getElementById("allLengthServicePdfBtn").style.display="none";
+        // Filter function
+        function filterHTMLFormLS() {
+            lengthserviceTable.init();
+        }
+
+        // On submit filter form
+        $("#tabulatorFilterForm-LS")[0].addEventListener(
+            "keypress",
+            function (event) {
+                let keycode = event.keyCode ? event.keyCode : event.which;
+                if (keycode == "13") {
+                    event.preventDefault();
+                    filterHTMLFormLS();
+                }
+            }
+        );
+
+        // On click go button
+        $("#tabulator-html-filter-go-LS").on("click", function (event) {
+            filterHTMLFormLS();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-reset-LS").on("click", function (event) {
+            document.getElementById("lengthserviceTable").style.display = "none";
+            $("div .lengthserviceAllData").show();
+            $("#employee_work_type_id-lengthservice").val('');
+            $("#department_id-lengthservice").val('');
+            $("#ethnicity-lengthservice").val('');
+            $("#nationality-lengthservice").val('');
+            $("#gender-lengthservice").val('');
+            $("#startdate-lengthservice").val('');
+            $("#enddate-lengthservice").val('');
+            $("#status_id-lengthservice").val('1');
+            document.getElementById("allLengthServiceExcelBtn").style.display="block";
+            document.getElementById("allLengthServicePdfBtn").style.display="block";
+            document.getElementById("lengthservicebySearchExcelBtn").style.display="none";
+            document.getElementById("lengthservicebySearchPdfBtn").style.display="none";
+        });
+    });
+
+    $("#lengthservicebySearchExcelBtn").on("click", function (e) {      
+        e.preventDefault();
+        let startdate = $("#startdate-lengthservice").val() != "" ? $("#startdate-lengthservice").val() : "";
+        let enddate = $("#enddate-lengthservice").val() != "" ? $("#enddate-lengthservice").val() : "";
+        let worktype = $("#employee_work_type_id-lengthservice").val() != "" ? $("#employee_work_type_id-lengthservice").val() : "";
+        let department = $("#department_id-lengthservice").val() != "" ? $("#department_id-lengthservice").val() : "";
+        let ethnicity = $("#ethnicity-lengthservice").val() != "" ? $("#ethnicity-lengthservice").val() : "";
+        let nationality = $("#nationality-lengthservice").val() != "" ? $("#nationality-lengthservice").val() : "";
+        let gender = $("#gender-lengthservice").val() != "" ? $("#gender-lengthservice").val() : "";
+        let status = $("#status_id-lengthservice").val() != "" ? $("#status_id-lengthservice").val() : "";
+        
+        axios({
+            method: "get",
+            url: route("hr.portal.reports.lengthservicebysearch.excel"),
+            params: {
+                startdate: startdate, worktype:worktype, department:department, ethnicity:ethnicity, nationality:nationality, gender:gender, enddate:enddate, status:status
+            },
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            responseType: 'blob',
+        })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Employee_Service_Lengths.xlsx'); 
+            document.body.appendChild(link);
+            link.click();              
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $("#lengthservicebySearchPdfBtn").on("click", function (e) {      
+        e.preventDefault();
+        let startdate = $("#startdate-lengthservice").val() != "" ? $("#startdate-lengthservice").val() : "";
+        let enddate = $("#enddate-lengthservice").val() != "" ? $("#enddate-lengthservice").val() : "";
+        let worktype = $("#employee_work_type_id-lengthservice").val() != "" ? $("#employee_work_type_id-lengthservice").val() : "";
+        let department = $("#department_id-lengthservice").val() != "" ? $("#department_id-lengthservice").val() : "";
+        let ethnicity = $("#ethnicity-lengthservice").val() != "" ? $("#ethnicity-lengthservice").val() : "";
+        let nationality = $("#nationality-lengthservice").val() != "" ? $("#nationality-lengthservice").val() : "";
+        let gender = $("#gender-lengthservice").val() != "" ? $("#gender-lengthservice").val() : "";
+        let status = $("#status_id-lengthservice").val() != "" ? $("#status_id-lengthservice").val() : "";
+        
+        axios({
+            method: "get",
+            url: route("hr.portal.reports.lengthservicebysearch.pdf"),
+            params: {
+                startdate: startdate, worktype:worktype, department:department, ethnicity:ethnicity, nationality:nationality, gender:gender, enddate:enddate, status:status
+            },
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            responseType: 'blob',
+        })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Employee_Service_Lengths.pdf');
+            document.body.appendChild(link);
+            link.click();              
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    });
+})();

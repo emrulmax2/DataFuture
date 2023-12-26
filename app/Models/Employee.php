@@ -126,12 +126,24 @@ class Employee extends Model
     }
 
     public function activePatterns(){
-        $patterns = $this->hasMany(EmployeeWorkingPattern::class, 'employee_id');
+        $patterns = $this->hasMany(EmployeeWorkingPattern::class, 'employee_id', 'id');
         $patterns->getQuery()->where('end_to', '=', '')->orWhereNull('end_to');
         return $patterns;
     }
 
     public function employment(){
         return $this->hasOne(Employment::class, 'employee_id', 'id')->latestOfMany();
+    }
+
+    public function workingPattern(){
+        return $this->hasOne(EmployeeWorkingPattern::class, 'employee_id', 'id')->latestOfMany();
+    }
+    
+    public function eligibilities(){
+        return $this->hasOne(EmployeeEligibilites::class, 'employee_id', 'id')->latestOfMany();
+    }
+
+    public function emergencyContact(){
+        return $this->hasOne(EmployeeEmergencyContact::class, 'employee_id', 'id')->latestOfMany();
     }
 }
