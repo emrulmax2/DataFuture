@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Applicant\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Request\ApplicantForgetPasswordRequest;
+use App\Http\Request\AgentForgetPasswordRequest;
 use App\Http\Request\ApplicantForgetPasswordUpdateRequest;
-use App\Models\ApplicantUser;
 use App\Mail\ResetPasswordLink;
+use App\Models\AgentUser;
 use Illuminate\Http\Response;
 use DB; 
 use Carbon\Carbon; 
@@ -24,7 +24,7 @@ class ForgetPasswordController extends Controller
      */
     public function showForgetPasswordForm()
     {
-        return view('login.forgetpassword', [
+        return view('login.forgetpassword.index', [
             'layout' => 'login'
         ]);
     }
@@ -36,11 +36,11 @@ class ForgetPasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function submitForgetPasswordForm(ApplicantForgetPasswordRequest $request)
+    public function submitForgetPasswordForm(AgentForgetPasswordRequest $request)
     {
        
 
-        $applicantUser = ApplicantUser::where('email',$request->email)->get()->first();
+        $applicantUser = AgentUser::where('email',$request->email)->get()->first();
         $token = base64_encode($request->email);
         if($applicantUser) {
 
@@ -89,11 +89,10 @@ class ForgetPasswordController extends Controller
                               ->first();
   
           if(!$updatePassword){
-            //return response()->json(['message'=>'Applicant could not created','errors'=>["title"=>"somthing went wrong. Please try again"]],422);
             return back()->withInput()->with('error', 'Invalid token!');
           }
   
-          ApplicantUser::where('email', $updatePassword->email)
+          AgentUser::where('email', $updatePassword->email)
                       ->update(['password' => Hash::make($request->password)]);
  
           DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();

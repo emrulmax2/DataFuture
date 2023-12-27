@@ -54,6 +54,18 @@
                 <i data-lucide="users" class="w-4 h-4 mr-2"></i> Participants
             </a>
         </li>
+
+
+        <li id="assessment-tab" class="nav-item mr-5" role="presentation">
+            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
+                <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
+            </a>
+        </li>
+        <li id="analytics-tab" class="nav-item mr-5" role="presentation">
+            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#analytics" aria-controls="analytics" aria-selected="true" role="tab" >
+                <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
+            </a>
+        </li>
     </ul>
 </div>
 <div class="intro-y tab-content mt-5">
@@ -81,6 +93,21 @@
         <!-- BEGIN: HTML Table Data -->
         <div class="intro-y box p-5 mt-5">
             @include('pages.tutor.module.includes.studentlist')
+        </div>
+        <!-- END: HTML Table Data -->
+    </div>
+
+    <div id="assessment" class="tab-pane " role="tabpanel"  aria-labelledby="assessment-tab">
+        <!-- BEGIN: HTML Table Data -->
+        <div class="intro-y box p-5 mt-5">
+            <h2>Upcoming....</h2>
+        </div>
+        <!-- END: HTML Table Data -->
+    </div>
+    <div id="analytics" class="tab-pane " role="tabpanel"  aria-labelledby="analytics-tab">
+        <!-- BEGIN: HTML Table Data -->
+        <div class="intro-y box p-5 mt-5">
+            <h2>Upcoming....</h2>
         </div>
         <!-- END: HTML Table Data -->
     </div>

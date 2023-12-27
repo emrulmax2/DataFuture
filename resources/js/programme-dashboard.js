@@ -35,7 +35,7 @@ import { createIcons, icons } from "lucide";
         var planClassStatus = $('#planClassStatus').val();
         var planCourseId = $('#planCourseId').val();
         
-        $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').addClass('active');
+        $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
         axios({
             method: 'post',
             url: route('programme.dashboard.class.info'),
@@ -43,18 +43,12 @@ import { createIcons, icons } from "lucide";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').removeClass('active');
+                $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
                 var res = response.data.res;
                 $('#dailyClassInfoTable tbody').html(res.planTable);
-
-                $('.tutorCount').html(res.tutors.count);
-                $('.tutorWrap .theHolder').html(res.tutors.html);
-                
-                $('.personalTutorCount').html(res.ptutors.count);
-                $('.personalTutorWrap .theHolder').html(res.ptutors.html);
             }
         }).catch(error =>{
-            $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').removeClass('active');
+            $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
             console.log(error)
         });
     });
@@ -65,7 +59,7 @@ import { createIcons, icons } from "lucide";
         var planCourseId = $('#planCourseId').val();
         var theClassDate = $('#theClassDate').val();
 
-        $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').addClass('active');
+        $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
         axios({
             method: 'post',
             url: route('programme.dashboard.class.info'),
@@ -73,7 +67,7 @@ import { createIcons, icons } from "lucide";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').removeClass('active');
+                $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
                 var res = response.data.res;
                 $('#dailyClassInfoTable tbody').html(res.planTable);
 
@@ -84,7 +78,7 @@ import { createIcons, icons } from "lucide";
                 $('.personalTutorWrap .theHolder').html(res.ptutors.html);
             }
         }).catch(error =>{
-            $('.dailyClassInfoTableWrap .leaveTableLoader, .tutorWrap .leaveTableLoader, .personalTutorWrap .leaveTableLoader').removeClass('active');
+            $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
             console.log(error)
         });
     })

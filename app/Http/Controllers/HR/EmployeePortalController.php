@@ -259,6 +259,17 @@ class EmployeePortalController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    public function employmentReportShow()
+    {
+        return view('pages.hr.portal.reports.showreport', [
+            'title' => 'Employment Reports - LCC Data Future Managment',
+            'subtitle' => 'Employment Reports',
+            'breadcrumbs' => [
+                ['label' => 'HR Portal', 'href' => route('hr.portal')],
+                ['label' => 'Employment Reports', 'href' => 'javascript:void(0);']
+            ]
+        ]);
+    }
 
     public function convertStringToMinute($string){
         $min = 0;

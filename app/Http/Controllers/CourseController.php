@@ -8,6 +8,7 @@ use App\Http\Requests\CourseUpdateRequests;
 use App\Models\Course;
 use App\Models\User;
 use App\Models\AwardingBody;
+use App\Models\DatafutureField;
 use App\Models\ModuleLevel;
 use App\Models\SourceTuitionFee;
 use Illuminate\Support\Facades\Cache;
@@ -128,7 +129,8 @@ class CourseController extends Controller
                 ['label' => 'Course Details', 'href' => 'javascript:void(0);']
             ],
             'course' => Course::find($id),
-            'levels' => ModuleLevel::all()
+            'levels' => ModuleLevel::all(),
+            'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [1,2])->orderBy('name', 'ASC')->get()
         ]);
     }
 

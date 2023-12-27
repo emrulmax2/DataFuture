@@ -6,6 +6,8 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
   
 @elseif(Auth::guard('student')->check())
 
+@elseif(Auth::guard('agent')->check())
+
 @else
     @php $employeeUser = cache()->get('employeeCache'.Auth::id()) ?? Auth::user()->load('employee'); @endphp
 @endif
@@ -132,6 +134,8 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                     <img src="{{ asset('build/assets/images/avater.png') }}">
                 @elseif(Auth::guard('student')->check())
                     <img src="{{ asset('build/assets/images/avater.png') }}">
+                @elseif(Auth::guard('agent')->check())
+                    <img src="{{ asset('build/assets/images/avater.png') }}">
                 @else
                     <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
                 @endif
@@ -146,6 +150,11 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                         @elseif(Auth::guard('student')->check())
                             <div class="font-medium">{{ auth('student')->user()->email }}</div>
                             <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('student')->user()->email }}</div>
+                        
+                        @elseif(Auth::guard('agent')->check())
+                            <div class="font-medium">{{ auth('agent')->user()->email }}</div>
+                            <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('agent')->user()->email }}</div>
+                        
                         @else
                             <div class="font-medium">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
                             <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth()->user()->email }}</div>
@@ -181,6 +190,11 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                             </a>
                         @elseif(Auth::guard('student')->check())
                             <a href="{{ route('students.logout') }}" class="dropdown-item hover:bg-white/5">
+                                <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
+                            </a>
+                        
+                        @elseif(Auth::guard('agent')->check())
+                            <a href="{{ route('agent.logout') }}" class="dropdown-item hover:bg-white/5">
                                 <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
                             </a>
                         @else

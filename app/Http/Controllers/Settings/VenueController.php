@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\VenueRequest;
 use App\Http\Requests\VenueUpdateRequest;
+use App\Models\DatafutureField;
 use App\Models\Venue;
 use App\Models\User;
 use App\Models\VenueIpAddress;
@@ -148,6 +149,7 @@ class VenueController extends Controller
                 ['label' => 'Venues Details', 'href' => 'javascript:void(0);']
             ],
             'venue' => Venue::find($id),
+            'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [3])->orderBy('name', 'ASC')->get()
         ]);
     }
 

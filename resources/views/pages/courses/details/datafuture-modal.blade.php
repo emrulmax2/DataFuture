@@ -1,5 +1,5 @@
-<!-- BEGIN: Add Base Data Future Modal -->
-<div id="courseDataFutureAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <!-- BEGIN: Add Base Data Future Modal -->
+    <div id="courseDataFutureAddModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="courseDataFutureAddForm" enctype="multipart/form-data">
                 <div class="modal-content">
@@ -11,29 +11,22 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="field_name" class="form-label">Field Name <span class="text-danger">*</span></label>
-                            <input id="field_name" type="text" name="field_name" class="form-control w-full">
-                            <div class="acc__input-error error-field_name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="field_type" class="form-label">Field Type <span class="text-danger">*</span></label>
-                            <select id="field_type" name="field_type" class="form-control w-full">
+                            <label for="datafuture_field_id" class="form-label">Field <span class="text-danger">*</span></label>
+                            <select id="datafuture_field_id" name="datafuture_field_id" class="lcc-tom-select w-full">
                                 <option value="">Please Select</option>
-                                <option value="date">Date</option>
-                                <option value="text">Text</option>
-                                <option value="number">Number</option>
+                                @if(!empty($df_fields) && $df_fields->count() > 0)
+                                    @foreach($df_fields as $fld)
+                                        <option value="{{ $fld->id }}">{{ $fld->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <div class="acc__input-error error-field_type text-danger mt-2"></div>
+                            <div class="acc__input-error error-datafuture_field_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <label for="field_value" class="form-label">Field Value <span class="text-danger">*</span></label>
                             <input id="field_value" type="text" name="field_value" class="form-control w-full">
                             <div class="acc__input-error error-field_value text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="field_desc" class="form-label">Field Description</label>
-                            <textarea id="field_desc" name="field_desc" class="form-control w-full"></textarea>
-                        </div>     
+                        </div>    
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -73,29 +66,22 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="edit_field_name" class="form-label">Field Name <span class="text-danger">*</span></label>
-                            <input id="edit_field_name" type="text" name="field_name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_field_type" class="form-label">Field Type <span class="text-danger">*</span></label>
-                            <select id="edit_field_type" name="field_type" class="form-control w-full">
+                            <label for="edit_datafuture_field_id" class="form-label">Field <span class="text-danger">*</span></label>
+                            <select id="edit_datafuture_field_id" name="datafuture_field_id" class="lcc-tom-select w-full">
                                 <option value="">Please Select</option>
-                                <option value="date">Date</option>
-                                <option value="text">Text</option>
-                                <option value="number">Number</option>
+                                @if(!empty($df_fields) && $df_fields->count() > 0)
+                                    @foreach($df_fields as $fld)
+                                        <option value="{{ $fld->id }}">{{ $fld->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <div class="acc__input-error error-field_type text-danger mt-2"></div>
+                            <div class="acc__input-error error-datafuture_field_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <label for="edit_field_value" class="form-label">Field Value <span class="text-danger">*</span></label>
                             <input id="edit_field_value" type="text" name="field_value" class="form-control w-full">
                             <div class="acc__input-error error-field_value text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_field_desc" class="form-label">Credit Value</label>
-                            <textarea id="edit_field_desc" name="field_desc" class="form-control w-full"></textarea>
-                        </div>     
+                        </div>   
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

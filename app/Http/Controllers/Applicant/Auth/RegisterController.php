@@ -13,7 +13,7 @@ class RegisterController extends Controller
     public function index()
     {
         
-        return view('login.register', [
+        return view('login.register.index', [
             'layout' => 'login'
         ]);
     }

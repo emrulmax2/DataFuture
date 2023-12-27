@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var courseDFListTable = (function () {
@@ -30,13 +31,20 @@ var courseDFListTable = (function () {
                     width: "180",
                 },
                 {
+                    title: "Category",
+                    field: "category",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Field Name",
-                    field: "field_name",
+                    field: "datafuture_field_id",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Field Type",
                     field: "field_type",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
@@ -47,6 +55,7 @@ var courseDFListTable = (function () {
                 {
                     title: "Description",
                     field: "field_desc",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
@@ -148,6 +157,20 @@ var courseDFListTable = (function () {
             filterHTMLForm();
         });
 
+        let tomOptionsCBDF = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            persist: false,
+            create: true,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+        var datafuture_field_id = new TomSelect('#datafuture_field_id', tomOptionsCBDF);
+        var edit_datafuture_field_id = new TomSelect('#edit_datafuture_field_id', tomOptionsCBDF);
 
         const courseDataFutureAddModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#courseDataFutureAddModal"));
         const courseDataFutureEditModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#courseDataFutureEditModal"));
@@ -162,8 +185,9 @@ var courseDFListTable = (function () {
         courseDataFutureAddModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#courseDataFutureAddModal .acc__input-error').html('');
             $('#courseDataFutureAddModal input[type="text"]').val('');
-            $('#courseDataFutureAddModal textarea').val('');
             $('#courseDataFutureAddModal select').val('');
+
+            datafuture_field_id.clear(true);
         });
         
         const courseDataFutureEditModalEl = document.getElementById('courseDataFutureEditModal')
@@ -171,8 +195,9 @@ var courseDFListTable = (function () {
             $('#courseDataFutureEditModal .acc__input-error').html('');
             $('#courseDataFutureEditModal input[type="text"]').val('');
             $('#courseDataFutureEditModal select').val('');
-            $('#courseDataFutureEditModal textarea').val('');
             $('#courseDataFutureEditModal input[name="id"]').val('0');
+
+            edit_datafuture_field_id.clear(true);
         });
 
         const confModalDFEL = document.getElementById('confirmModalDF');
@@ -269,10 +294,12 @@ var courseDFListTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
-                    $('#courseDataFutureEditModal input[name="field_name"]').val(dataset.field_name ? dataset.field_name : '');
-                    $('#courseDataFutureEditModal select[name="field_type"]').val(dataset.field_type ? dataset.field_type : '');
+                    let datafuture_field_id = dataset.datafuture_field_id ? dataset.datafuture_field_id : '';
                     $('#courseDataFutureEditModal input[name="field_value"]').val(dataset.field_value ? dataset.field_value : '');
-                    $('#courseDataFutureEditModal textarea[name="field_desc"]').val(dataset.field_desc ? dataset.field_desc : '');
+
+                    if(datafuture_field_id != ''){
+                        edit_datafuture_field_id.setValue(datafuture_field_id);
+                    }
                     
 
                     $('#courseDataFutureEditModal input[name="id"]').val(editId);

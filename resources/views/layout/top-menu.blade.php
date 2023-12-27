@@ -11,6 +11,7 @@
     <nav class="top-nav">
         <ul>
             @foreach ($top_menu as $menuKey => $menu)
+            
                 <li>
                     <a href="{{ isset($menu['route_name']) ? route($menu['route_name'], $menu['params']) : 'javascript:;' }}" class="{{ $first_level_active_index == $menuKey ? 'top-menu top-menu--active' : 'top-menu' }}">
                         <div class="top-menu__icon">

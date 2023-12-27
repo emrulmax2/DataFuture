@@ -34,6 +34,7 @@ export default defineConfig({
                 "resources/js/application.js",
 
                 "resources/js/applicant-dahsboard.js",
+                "resources/js/agent-dahsboard.js",
                 "resources/js/bankholiday.js",
                 "resources/js/permissioncategory.js",
                 "resources/js/department.js",
@@ -172,6 +173,21 @@ export default defineConfig({
 
                 "resources/js/programme-dashboard.js",
                 "resources/js/employee-privilege.js",
+
+                'resources/js/hr-portal-employmentreport.js',
+                'resources/js/hr-portal-birthdayreport.js',
+                'resources/js/hr-portal-diversityreport.js',
+                'resources/js/hr-portal-starterreport.js',
+                'resources/js/hr-portal-eligibilityreport.js',
+                'resources/js/hr-portal-contactdetail.js',
+                'resources/js/hr-portal-lengthservice.js',
+                'resources/js/hr-portal-telephonedirectory.js',
+                'resources/js/hr-portal-recordcard.js',
+
+                'resources/js/df-field-category.js',
+                'resources/js/df-field.js',
+
+                'resources/js/venue-datafuture.js',
                 
             ],
             refresh: true,

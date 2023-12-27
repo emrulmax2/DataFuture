@@ -36,10 +36,7 @@ class CourseBaseDatafutureCntroller extends Controller
 
         $query = CourseBaseDatafutures::where('course_id', $course)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('field_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('field_type','LIKE','%'.$queryStr.'%');
             $query->orWhere('field_value','LIKE','%'.$queryStr.'%');
-            $query->orWhere('field_desc','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -55,10 +52,11 @@ class CourseBaseDatafutureCntroller extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'field_name' => $list->field_name,
-                    'field_type' => $list->field_type,
+                    'category' => (isset($list->field->category->name) ? $list->field->category->name : ''),
+                    'datafuture_field_id' => (isset($list->field->name) ? $list->field->name : ''),
+                    'field_type' => (isset($list->field->type) ? $list->field->type : ''),
                     'field_value' => $list->field_value,
-                    'field_desc' => $list->field_desc,
+                    'field_desc' => (isset($list->field->description) ? $list->field->description : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -91,10 +89,8 @@ class CourseBaseDatafutureCntroller extends Controller
         $dfID = $request->id;
         $course_id = $request->course_id;
         $courseDF = CourseBaseDatafutures::where('id', $dfID)->where('course_id', $course_id)->update([
-            'field_name'=> $request->field_name,
-            'field_type'=> $request->field_type,
+            'datafuture_field_id'=> $request->datafuture_field_id,
             'field_value'=> $request->field_value,
-            'field_desc'=> $request->field_desc,
             'updated_by' => auth()->user()->id
         ]);
 
