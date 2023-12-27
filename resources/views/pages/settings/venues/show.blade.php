@@ -52,14 +52,23 @@
                             <i data-lucide="tablet" class="w-4 h-4 mr-2"></i> Rooms
                         </a>
                     </li>
+                    <li id="baseDataFuture-tab" class="nav-item mr-5" role="presentation">
+                        <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0" data-tw-target="#baseDataFuture" aria-controls="baseDataFuture" aria-selected="true" role="tab" >
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Datafuture
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="intro-y tab-content mt-5">
                 <div id="room" class="tab-pane active" role="tabpanel" aria-labelledby="room-tab">
                     @include('pages.settings.venues.details.room')
                 </div>
+                <div id="baseDataFuture" class="tab-pane active" role="tabpanel" aria-labelledby="baseDataFuture-tab">
+                    @include('pages.settings.venues.details.datafuture')
+                </div>
             </div>
             @include('pages.settings.venues.details.room-modal')
+            @include('pages.settings.venues.details.datafuture-modal')
         </div>
     </div>
     <!-- END: Settings Page Content -->
@@ -89,4 +98,5 @@
     @vite('resources/js/settings.js')
     @vite('resources/js/venues.js')
     @vite('resources/js/rooms.js')
+    @vite('resources/js/venue-datafuture.js')
 @endsection

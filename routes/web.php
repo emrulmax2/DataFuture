@@ -140,6 +140,8 @@ use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
 use App\Http\Controllers\Settings\SettingController;
 use App\Http\Controllers\Settings\AwardingBodyController;
+use App\Http\Controllers\Settings\DatafutureFieldCategoryController;
+use App\Http\Controllers\Settings\DatafutureFieldController;
 use App\Http\Controllers\Student\AwardingBodyDetailController;
 use App\Http\Middleware\EnsureExpiredDateIsValid;
 
@@ -177,6 +179,7 @@ use App\Http\Controllers\Settings\HrBankHolidayController;
 use App\Http\Controllers\Settings\HrConditionController;
 use App\Http\Controllers\Settings\PermissionTemplateGroupController;
 use App\Http\Controllers\Settings\TermTypeController;
+use App\Http\Controllers\Settings\VenueBaseDatafutureController;
 use App\Http\Controllers\Student\SlcAgreementController;
 use App\Http\Controllers\Student\SlcAttendanceController;
 use App\Http\Controllers\Student\SlcInstallmentController;
@@ -1453,6 +1456,16 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/venues/room/restore/{id}', 'restore')->name('room.restore');        
     });
 
+    Route::controller(VenueBaseDatafutureController::class)->group(function() {
+        Route::post('site-settings/venues/datafuture/store', 'store')->name('venue.datafuture.store');
+        Route::get('site-settings/venues/datafuture/list', 'list')->name('venue.datafuture.list'); 
+        Route::get('site-settings/venues/datafuture/edit/{id}', 'edit')->name('venue.datafuture.edit');
+        Route::post('site-settings/venues/datafuture/update', 'update')->name('venue.datafuture.update');
+        Route::delete('site-settings/venues/datafuture/delete/{id}', 'destroy')->name('venue.datafuture.destory');
+        Route::post('site-settings/venues/datafuture/restore/{id}', 'restore')->name('venue.datafuture.restore');
+        
+    });
+
     Route::controller(StatusController::class)->group(function() {
         Route::get('site-settings/statuses', 'index')->name('statuses'); 
         Route::get('site-settings/statuses/list', 'list')->name('statuses.list'); 
@@ -1984,6 +1997,26 @@ Route::middleware('auth')->group(function() {
 
         Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
+    });
+
+    Route::controller(DatafutureFieldCategoryController::class)->group(function() {
+        Route::get('site-settings/df-field-categories', 'index')->name('df.field.categories'); 
+        Route::get('site-settings/df-field-categories/list', 'list')->name('df.field.categories.list'); 
+        Route::post('site-settings/df-field-categories/store', 'store')->name('df.field.categories.store'); 
+        Route::get('site-settings/df-field-categories/edit/{id}', 'edit')->name('df.field.categories.edit');
+        Route::post('site-settings/df-field-categories/update', 'update')->name('df.field.categories.update');
+        Route::delete('site-settings/df-field-categories/delete/{id}', 'destroy')->name('df.field.categories.destory');
+        Route::post('site-settings/df-field-categories/restore', 'restore')->name('df.field.categories.restore');
+    });
+
+    Route::controller(DatafutureFieldController::class)->group(function() {
+        Route::get('site-settings/df-fields', 'index')->name('df.fields'); 
+        Route::get('site-settings/df-fields/list', 'list')->name('df.fields.list'); 
+        Route::post('site-settings/df-fields/store', 'store')->name('df.fields.store'); 
+        Route::get('site-settings/df-fields/edit/{id}', 'edit')->name('df.fields.edit');
+        Route::post('site-settings/df-fields/update', 'update')->name('df.fields.update');
+        Route::delete('site-settings/df-fields/delete/{id}', 'destroy')->name('df.fields.destory');
+        Route::post('site-settings/df-fields/restore', 'restore')->name('df.fields.restore');
     });
     
 });
