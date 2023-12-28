@@ -30,6 +30,7 @@ class LoginController extends Controller
      */
     public function login(AgentLoginRequest $request)
     {
+        Auth::guard('applicant')->logout();
         if (!Auth::guard('agent')->attempt([
             'email' => $request->email,
             'password' => $request->password
@@ -47,6 +48,7 @@ class LoginController extends Controller
     public function logout()
     {
         Auth::guard('agent')->logout();
+        Auth::guard('applicant')->logout();
         return redirect()->route('agent.logout');
     }
 

@@ -29,6 +29,7 @@ class Applicant extends Model
         'proof_type',
         'proof_id',
         'proof_expiredate',
+        'agent_user_id',
         'created_by',
         'updated_by',
     ];
@@ -165,5 +166,9 @@ class Applicant extends Model
 
     public function sexid(){
         return $this->belongsTo(SexIdentifier::class, 'sex_identifier_id');
+    }
+
+    public function agent(){
+        return $this->belongsTo(AgentUser::class, 'agent_user_id');
     }
 }

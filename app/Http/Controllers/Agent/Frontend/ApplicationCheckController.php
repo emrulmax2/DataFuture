@@ -52,18 +52,19 @@ class ApplicationCheckController extends Controller
 
     public function verifyMobile(Request $request)
     {
-
-        $applicantEmail = $this->verifyEmail($request);
+        
+        if($request->email_verify_code)
+            $applicantEmail = $this->verifyEmail($request);
         
         
 
-        $ApplicantFound = AgentApplicationCheck::where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
+        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
 
         if($ApplicantFound) {
-
-            $ApplicantFound->fill(["mobile_verified_at",date("Y-m-d H:i:s")]);
+            $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
+            $ApplicantFound->fill($request->all());
             $ApplicantFound->save();
-
+            
             return response()->json($ApplicantFound);
 
         }
@@ -81,10 +82,11 @@ class ApplicationCheckController extends Controller
     {
         
 
-        $ApplicantFound = AgentApplicationCheck::where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("email_verify_code",$request->email_verify_code)->where("active",0)->get();
-
+        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("email_verify_code",$request->email_verify_code)->where("active",0)->get();
+        
         if($ApplicantFound) {
-            $ApplicantFound->fill(["email_verified_at",date("Y-m-d H:i:s")]);
+            $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
+            $ApplicantFound->fill($request->all());
             $ApplicantFound->save();
 
             return response()->json($ApplicantFound);
