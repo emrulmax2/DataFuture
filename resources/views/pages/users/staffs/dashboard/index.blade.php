@@ -43,26 +43,6 @@
                             </a>
                         </div> 
                         @endif
-                        @if(isset(auth()->user()->priv()['tutor']) && auth()->user()->priv()['tutor'] == 1)
-                        <a href="{{ route('tutor-dashboard.show',8) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                                <div class="report-box zoom-in">
-                                    <div class="box p-5">
-                                        <div class="flex">
-                                            <i data-lucide="monitor" class="report-box__icon text-warning"></i>
-                                            <div class="ml-auto">
-                                                <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
-                                                    % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                        <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        @endif
                         @if(isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
                         <a href="{{ route('tutor-dashboard.show.new',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
@@ -84,7 +64,7 @@
                         </a>
                         @endif
                         @if(isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
-                        <a href="{{ route('pt.dashboard',auth()->user()->id) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                        <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                                 <div class="report-box zoom-in">
                                     <div class="box p-5">
