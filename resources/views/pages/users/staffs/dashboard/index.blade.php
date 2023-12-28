@@ -57,7 +57,7 @@
                                             </div>
                                         </div>
                                         <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                        <div class="text-base text-slate-500 mt-1">Tutor Dashboard 2</div>
+                                        <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
                                     </div>
                                 </div>
                             </div>
