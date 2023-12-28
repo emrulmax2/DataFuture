@@ -151,6 +151,7 @@ export default defineConfig({
                 "resources/js/hr-passport-expiry.js",
                 
                 "resources/js/tutor-dashboard.js",
+                "resources/js/tutor-personal.js",
                 "resources/js/tutor-dashboard-new.js",
                 "resources/js/attendance-feed.js",
                 "resources/js/tutor-attendance-feed.js",
