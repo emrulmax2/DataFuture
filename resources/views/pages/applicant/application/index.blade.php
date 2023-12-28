@@ -6,10 +6,15 @@
 
 
 @section('subcontent')
+
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Application Form</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            @if(auth('agent')->user()->id)
+            <a href="{{ route('agent.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
+            @else
             <a href="{{ route('applicant.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
+            @endif
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
@@ -33,6 +38,9 @@
             </div>
             <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400 show">
                 <form method="post" action="#" id="appicantFormStep_1" class="wizard-step-form">
+                    @if(auth('agent')->user()->id)
+                        <input type="hidden" name="agent_user_id" value=" {{ auth('agent')->user()->id }}" />
+                    @endif
                     <div class="font-medium text-base">Personal Details</div>
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                         <div class="col-span-12 sm:col-span-3">
@@ -47,14 +55,24 @@
                             </select>
                             <div class="acc__input-error error-title_id text-danger mt-2"></div>
                         </div>
+                        
                         <div class="col-span-12 sm:col-span-3">
                             <label for="first_name" class="form-label">First Name(s) <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($apply->first_name) ? $apply->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name">
+                            @if(auth('agent')->user()->id)
+                                <input type="text" value="{{ isset($agentApplicant->first_name) ? $agentApplicant->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name" readonly="readonly">
+                            @else
+                                <input type="text" value="{{ isset($apply->first_name) ? $apply->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name">
+                            @endif
                             <div class="acc__input-error error-first_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($apply->last_name) ? $apply->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name">
+                            @if(auth('agent')->user()->id)
+                                <input type="text" value="{{ isset($agentApplicant->last_name) ? $agentApplicant->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name" readonly="readonly">
+                            
+                            @else
+                                <input type="text" value="{{ isset($apply->last_name) ? $apply->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name">
+                            @endif
                             <div class="acc__input-error error-last_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
@@ -154,7 +172,12 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($apply->contact->mobile) ? $apply->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control applicationPhoneMask" name="mobile">
+                            @if(auth('agent')->user()->id)
+                                <input value="{{ isset($agentApplicant->mobile) ? $agentApplicant->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control applicationPhoneMask" name="mobile" readonly="readonly">
+                            
+                            @else
+                                <input value="{{ isset($apply->contact->mobile) ? $apply->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control applicationPhoneMask" name="mobile">
+                            @endif
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
                         @php 
@@ -583,36 +606,36 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="font-medium text-base">Others</div>
-                    <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                        <div class="col-span-12 sm:col-span-8">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by Somone/ Agent, Please enter the Referral Code.</label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="validationGroup">
-                                        <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
-                                        <button id="varifiedReferral" 
-                                            data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" 
-                                            class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
-                                            style="display: {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'inline-flex' : 'none' }};" 
-                                            {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'readonly' : '' }}
-                                            >
-                                            @if(isset($apply->is_referral_varified) && $apply->is_referral_varified == 1)
-                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified
-                                            @else
-                                                <i data-lucide="link" class="w-4 h-4 mr-2"></i> Verify Code
-                                            @endif 
-                                        </button>
-                                        <input type="hidden" class="is_referral_varified" name="is_referral_varified" value="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" data-org="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" />
+                    @if(!auth('agent')->user()->id)
+                        <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                        <div class="font-medium text-base">Others</div>
+                        <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
+                            <div class="col-span-12 sm:col-span-8">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by Somone/ Agent, Please enter the Referral Code.</label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div class="validationGroup">
+                                            <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
+                                            <button id="varifiedReferral" 
+                                                data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" 
+                                                class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
+                                                style="display: {{ isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'inline-flex' : 'none' }};" 
+                                                {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'readonly' : '' }}
+                                                >
+                                                @if(isset($apply->is_referral_varified) && $apply->is_referral_varified == 1)
+                                                    <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Verified
+                                                @else
+                                                    <i data-lucide="link" class="w-4 h-4 mr-2"></i> Verify Code
+                                                @endif 
+                                            </button>
+                                            <input type="hidden" class="is_referral_varified" name="is_referral_varified" value="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" data-org="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" />
+                                        </div>
+                                        <div class="acc__input-error error-verificationError text-danger mt-2"></div>
                                     </div>
-                                    <div class="acc__input-error error-verificationError text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
+                    @endif
                     <div class="col-span-12 flex items-center justify-between sm:justify-between mt-5">
                         <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn">
                             Back
@@ -695,7 +718,11 @@
                             </svg>
                         </button>
                         <input type="hidden" name="applicant_id" value="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}"/>
-                        <input type="hidden" name="url" value="{{ route('applicant.dashboard') }}"/>
+                        @if(auth('agent')->user()->id)
+                            <input type="hidden" name="url" value="{{ route('agent.dashboard') }}"/>
+                        @else
+                            <input type="hidden" name="url" value="{{ route('applicant.dashboard') }}"/>
+                        @endif
                     </div>
                 </form>
             </fieldset>

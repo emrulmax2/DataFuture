@@ -16,6 +16,7 @@ use App\Models\Semester;
 use App\Models\User;
 use App\Http\Requests\ApplicationPersonalDetailsRequest;
 use App\Models\Address;
+use App\Models\AgentApplicationCheck;
 use App\Models\Applicant;
 use App\Models\ApplicantContact;
 use App\Models\ApplicantDisability;
@@ -30,6 +31,7 @@ use App\Models\EmploymentReference;
 use App\Models\ReferralCode;
 use App\Models\SexIdentifier;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
@@ -69,6 +71,7 @@ class ApplicationController extends Controller
             'last_name' => $request->last_name,
             'date_of_birth' => $request->date_of_birth,
             'sex_identifier_id' => $request->sex_identifier_id,
+            'agent_user_id' => (isset($request->agent_user_id) && !empty($request->agent_user_id) ? $request->agent_user_id : null),
             'status_id' => 1,
             'nationality_id' => $request->nationality_id,
             'country_id' => $request->country_id,
@@ -200,6 +203,14 @@ class ApplicationController extends Controller
             'submission_date' => date('Y-m-d'),
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
+
+        if(auth('agent')->user()) {
+            $application = AgentApplicationCheck::where("email",$applicant->users()->email)->where("mobile",$applicant->users()->phone)->get()->first();
+            $application->applicant_id = $applicant_id;
+            $application->updated_by = auth('agent')->user()->id;
+            $application->save();
+            Auth::guard('applicant')->logout();
+        }
         session(['applicantSubmission' => 'Application successfully submitted.']);
         return response()->json(['message' => 'Application successfully submitted.'], 200);
     }

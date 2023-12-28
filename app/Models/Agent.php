@@ -17,4 +17,8 @@ class Agent extends Model
     public function getFullNameAttribute() {
         return $this->first_name . ' ' . $this->last_name.'';
     }
+
+    public function AgentUser() {
+        return $this->belongsTo(AgentUser::class, 'agent_user_id');
+    }
 }

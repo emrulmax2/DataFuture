@@ -56,6 +56,7 @@ use App\Http\Controllers\InterviewAssignedController;
 use App\Http\Controllers\Agent\Auth\LoginController as AgentLoginController;
 use App\Http\Controllers\Agent\Auth\RegisterController as AgentRegisterController;
 use App\Http\Controllers\Agent\Frontend\ApplicationCheckController;
+use App\Http\Controllers\Agent\Frontend\ApplicationController as FrontendApplicationController;
 use App\Http\Controllers\Agent\Frontend\DashboardController as AgentDashboardController;
 use App\Http\Controllers\Applicant\Auth\VerificationController as AgentVerificationController;
 
@@ -336,6 +337,11 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::post('/store', 'store')->name('apply.check');
             Route::post('/verify/mobile', 'verifyMobile')->name('apply.verify');
             Route::post('/verify/email', 'verifyEmail')->name('apply.email.verify');
+        });
+
+        Route::controller(FrontendApplicationController::class)->group(function() {
+            Route::get('application/{checkedApplication}', 'index')->name('application');
+            Route::get('application/show/{id}', 'show')->name('application.show');
         });
      
     });

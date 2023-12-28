@@ -101,7 +101,7 @@
                 <!-- END: Important Notes -->
             </div>
         </div> --}}
-        <div class="col-span-12 2xl:col-span-9 box p-10 my-10">
+        <div class="col-span-12 xl:col-span-9 2xl:col-span-9 box p-10 my-10">
             <div class="col-span-12 w-full flex">
                 <h2 class="text-lg font-medium mr-auto">My Applicants</h2>
                 @if ($user->email_verified_at != NULL)
@@ -135,7 +135,7 @@
                 <div id="applicantApplicantionList" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
-        <div class="col-span-12 2xl:col-span-3">
+        <div class="col-span-12 xl:col-span-3 2xl:col-span-3">
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <!-- BEGIN: Visitors -->
@@ -143,7 +143,7 @@
                         <div class="intro-y flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">New Student List  </h2>
                             <div class=" sm:w-auto mt-4 sm:mt-0 ml-auto">
-                                <a id="currentTermId" data-tw-toggle="modal" data-id="" data-tw-target="#addDeteilsModal" href="#" class="star-verification btn btn-primary shadow-md mr-2">Create Student Account</a>
+                                <a id="currentTermId" data-tw-toggle="modal" data-id="" data-tw-target="#addDeteilsModal" href="#" class="star-verification btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Account</a>
                             </div>
                         </div>
                         <div id="TermBox">
@@ -160,9 +160,9 @@
                             <div id="applicant-list">
                                 @foreach ($recentData as $recentapplicant)
                                     @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                        <a href="{{ route("agent.dashboard") }}" style="inline-block">
+                                        <a href="{{ route("agent.application",$recentapplicant->id) }}" style="inline-block">
                                     @else
-                                        <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-tw-target="#confirmModal" style="inline-block">
+                                        <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">
                                     @endif
                                             <div  class="intro-y module-details_1 ">
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">

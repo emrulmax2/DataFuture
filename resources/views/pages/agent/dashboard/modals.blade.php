@@ -72,18 +72,18 @@
                     <div class="text-slate-500 mt-2 mb-2 confModDesc">Please verify codes in order to apply</div>
                     
                     <div class="form-inline">
-                        <label for="horizontal-form-1" class="form-label sm:w-20 text-left">Email </label>
-                        <label for="horizontal-email" class="form-label w-40 text-left">emrulmax2@gmail.com</label>
+                        <label for="horizontal-form-1" class="form-label sm:w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
+                        <label id="horizontal-email" for="horizontal-email" class="form-label w-40 text-left">emrulmax2@gmail.com</label>
                         <input id="horizontal-form-1" name="email_verify_code" type="text" class="form-control w-20" placeholder="1234">
                     </div>
                     <div class="form-inline mt-5">
-                        <label for="horizontal-form-2" class="form-label sm:w-20 text-left">Mobile</label>
-                        <label for="horizontal-phone" class="form-label w-40 text-left">+8801817718335</label>
+                        <label for="horizontal-form-2" class="form-label sm:w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
+                        <label id="horizontal-mobile" for="horizontal-phone" class="form-label w-40 text-left">+8801817718335</label>
                         <input id="horizontal-form-2" name="verify_code" type="text" class="form-control w-20" placeholder="1234">
                     </div>
                 </div>
                 <div class="px-5 pb-8 text-center">
-                    <input class="application_process_id" type="hidden" name="application_process_id" value="">
+                    <input class="id" type="hidden" name="id" value="">
                     
                     <input type="hidden" name="url" value="{{ route('agent.apply.verify') }}" />
                     <input type="hidden" name="user_id" value="{{ $user->id }}" />
