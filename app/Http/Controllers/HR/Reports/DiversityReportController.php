@@ -30,7 +30,7 @@ class DiversityReportController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request, $paginationOn=false){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -57,7 +57,7 @@ class DiversityReportController extends Controller
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
                 if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
-                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+                if(!empty($enddate)): $qs->whereDate('ended_on', '>=', $enddate); endif;
             });
         endif;
 
@@ -69,22 +69,27 @@ class DiversityReportController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query = $query->skip($offset)
-               ->take($limit)
-               ->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else
+            $Query = $query->get();
 
         $data = array();
 
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $firstName = isset($list->first_name) ? $list->first_name : '';
+                $lastName = isset($list->last_name) ? $list->last_name : '';
                 $data[] = [
-                    'name' => $list->first_name.' '.$list->last_name,
-                    'works_no' => $list->employment->works_number,
-                    'gender' => $list->sex->name,
-                    'ethnicity' => $list->ethnicity->name,
-                    'nationality' => $list->nationality->name,
-                    'status' => $list->disability_status
+                    'name' => $firstName.' '.$lastName,
+                    'works_no' => isset($list->employment->works_number) ? $list->employment->works_number : '',
+                    'gender' => isset($list->sex->name) ? $list->sex->name : '',
+                    'ethnicity' => isset($list->ethnicity->name) ? $list->ethnicity->name : '',
+                    'nationality' => isset($list->nationality->name) ? $list->nationality->name : '',
+                    'status' => isset($list->disability_status) ? $list->disability_status : ''
                 ];
                 $i++;
             endforeach;
@@ -105,14 +110,16 @@ class DiversityReportController extends Controller
             $ethnicity = $item->ethnicity;
             $nationality = $item->nationality;
             $employment = $item->employment;
-            //dd($item->first_name);
+            $firstName = isset($item->first_name) ? $item->first_name : '';
+            $lastName = isset($item->last_name) ? $item->last_name : '';
+          
             $dataList[$i++] = [
-                'name' => $item->first_name.' '.$item->last_name,
-                'works_no' => $employment->works_number,
-                'gender' => $sex->name,
-                'ethnicity' => $ethnicity->name,
-                'nationality' => $nationality->name,
-                'status' => $item->disability_status
+                'name' => $firstName.' '.$lastName,
+                'works_no' => isset($item->employment->works_number) ? $item->employment->works_number : '',
+                'gender' => isset($item->sex->name) ? $item->sex->name : '',
+                'ethnicity' => isset($item->ethnicity->name) ? $item->ethnicity->name : '',
+                'nationality' => isset($item->nationality->name) ? $item->nationality->name : '',
+                'status' => isset($item->disability_status) ? $item->disability_status : ''
             ];
         } 
         
@@ -134,7 +141,7 @@ class DiversityReportController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
         

@@ -19,53 +19,11 @@ use Maatwebsite\Excel\Facades\Excel;
 class TelephoneDirectoryController extends Controller
 {
     public function index(){
-        $query = Employee::where('status', '=', 1)->get();
-
-        $data = array();
-
-        $i = 0;
-            
-        $alphabetArray = ["","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-        
-        for($j=1;$j<=count($alphabetArray);$j++) {
-            
-            $dataArray = [];
-            foreach($query as $list):
-                $string = strtoupper(($list->first_name)[0]);
-                $length = strlen($string);
-                $number = 0;
-                $level = 1;
-                while ($length >= $level ) {
-                    $char = $string[$length - $level];
-                    $c = ord($char) - 64;        
-                    $number += $c * (26 ** ($level-1));
-                    $level++;
-                }
-                //dd($number);
-                if($number==$j):
-                    
-                    $dataArray[$j][] = [
-                        'name' => $list->first_name.' '.$list->last_name,
-                        'telephone' => isset($list->telephone) ? $list->telephone : '',
-                        'mobile' => isset($list->mobile) ? $list->mobile : '',
-                        'email' => isset($list->email) ? $list->email : '',
-                    ];
-                    
-                endif;
-            endforeach;
-            
-            if(isset($dataArray[$j]) && count($dataArray[$j])>0) {
-                $data[$i] = ["id"=>$j, "firstcha" =>$alphabetArray[$j], "dataArray" => $dataArray[$j]];
-                $i++;
-            }
-        }
-
         return view('pages.hr.portal.reports.telephonedirectory', [
             'title' => 'Telephone Directory - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Telephone Directory', 'href' => 'javascript:void(0);']
             ],
-            'dataList' => $data,
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
             'employeeWorkType' => EmployeeWorkType::all(),
@@ -74,7 +32,7 @@ class TelephoneDirectoryController extends Controller
         ]);
     }
 
-    public function searchlist(Request $request){
+    public function searchlist(Request $request, $paginationOn=true){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -102,7 +60,7 @@ class TelephoneDirectoryController extends Controller
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
                 if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
-                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+                if(!empty($enddate)): $qs->whereDate('ended_on', '>=', $enddate); endif;
             });
         endif;
 
@@ -114,9 +72,12 @@ class TelephoneDirectoryController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query = $query->skip($offset)
-            ->take($limit)
-            ->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else
+            $Query = $query->get();
 
         $data = array();
 
@@ -139,11 +100,13 @@ class TelephoneDirectoryController extends Controller
                         $number += $c * (26 ** ($level-1));
                         $level++;
                     }
+                    $firstName = isset($list->first_name) ? $list->first_name : '';
+                    $lastName = isset($list->last_name) ? $list->last_name : '';
         
                     if($number==$j):
                         
                         $dataArray[$j][] = [
-                            'name' => $list->first_name.' '.$list->last_name,
+                            'name' => $firstName.' '.$lastName,
                             'telephone' => isset($list->telephone) ? $list->telephone : '',
                             'mobile' => isset($list->mobile) ? $list->mobile : '',
                             'email' => isset($list->email) ? $list->email : '',
@@ -185,10 +148,12 @@ class TelephoneDirectoryController extends Controller
                     $number += $c * (26 ** ($level-1));
                     $level++;
                 }
+                $firstName = isset($list->first_name) ? $list->first_name : '';
+                $lastName = isset($list->last_name) ? $list->last_name : '';
        
                 if($number==$j):
                     $dataArray[$j][] = [
-                        'name' => $list->first_name.' '.$list->last_name,
+                        'name' => $firstName.' '.$lastName,
                         'telephone' => isset($list->telephone) ? $list->telephone : '',
                         'mobile' => isset($list->mobile) ? $list->mobile : '',
                         'email' => isset($list->email) ? $list->email : '',
@@ -224,7 +189,7 @@ class TelephoneDirectoryController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->searchlist($request);
+        $data = $this->searchlist($request,false);
         
         $returnData = json_decode($data->getContent(), true);
                 
@@ -241,7 +206,7 @@ class TelephoneDirectoryController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->searchlist($request);
+        $data = $this->searchlist($request,false);
         
         $returnData = json_decode($data->getContent(), true);
         

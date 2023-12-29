@@ -40,5 +40,11 @@
             Privilege
         </a>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.time.keeper', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.time.keeper' ? 'active' : '' }}">
+            Time Recored
+        </a>
+    </li>
     
 </ul>

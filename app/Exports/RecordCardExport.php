@@ -23,12 +23,16 @@ class RecordCardExport implements FromView
 
         foreach($query as $item) {
             $address = Address::find($item->address_id);
+            $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
+            $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
+            $firstName = isset($item->first_name) ? $item->first_name : '';
+            $lastName = isset($item->last_name) ? $item->last_name : '';
             $emergencyContact= EmployeeEmergencyContact::find($item->id);
             $dataList[$i++] = [
                 'title' => $item->title->name,
-                'first_name' => isset($item->first_name) ? $item->first_name : '',
+                'first_name' => $firstName,
                 'last_name' => isset($item->last_name) ? $item->last_name : '',
-                'full_name' => $item->first_name.' '.$item->last_name,
+                'full_name' => $lastName,
                 'dob' => isset($item->date_of_birth) ? $item->date_of_birth : '',
                 'ethnicity' => isset($item->ethnicity_id) ? $item->ethnicity->name : '',
                 'nationality' => isset($item->nationality_id) ? $item->nationality->name : '',
@@ -36,12 +40,12 @@ class RecordCardExport implements FromView
                 'gender' => isset($item->sex_identifier_id) ? $item->sex->name : '',
 
                 'started_on' => isset($item->employment->started_on) ? $item->employment->started_on : '',
-                'works_number' => $item->employment->works_number,
+                'works_number' => isset($item->employment->works_number) ? $item->employment->works_number : '',
                 'end_to' => isset($item->workingPattern->end_to) ? $item->workingPattern->end_to : '',
                 'job_title' => isset($item->employment->employee_job_title_id) ? $item->employment->employeeJobTitle->name : '',
                 'job_status' => ($item->status== 1) ? 'Active' : 'Inactive',
-                'address' => $address->address_line_1.','.$address->address_line_2,
-                'post_code' => $item->post_code,
+                'address' => $addressOne.','.$addressTwo,
+                'post_code' => isset($item->post_code) ? $item->post_code : '',
                 'telephone' => isset($item->telephone) ? $item->telephone : '',
                 'mobile' => isset($item->mobile) ? $item->mobile : '',
                 'email' => isset($item->email) ? $item->email : '',

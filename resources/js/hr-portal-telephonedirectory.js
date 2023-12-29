@@ -110,13 +110,32 @@ var telephonedirectoryTable = (function () {
         },
     };
 
-    $("#tabulator-html-filter-go-TD").on("click", function (event) {
-        $("div .telephonedirectoryAllData").hide();
-        telephonedirectoryTable.init();         
-        document.getElementById("telephonedirectorybySearchExcelBtn").style.display="block";
-        document.getElementById("telephonedirectorybySearchPdfBtn").style.display="block";
-        document.getElementById("allTelephoneDirectoryExcelBtn").style.display="none";
-        document.getElementById("allTelephoneDirectoryPdfBtn").style.display="none";
+    $("#tabulator-html-filter-go-TD").on("click", function (event) { 
+        event.preventDefault();
+
+        var startdateTD = document.getElementById("startdate-telephonedirectory").value;
+        var worktypeTD = document.getElementById("employee_work_type_id-telephonedirectory").value;
+        var departmentTD = document.getElementById("department_id-telephonedirectory").value;
+        var ethnicityTD = document.getElementById("ethnicity-telephonedirectory").value;
+        var nationalityTD = document.getElementById("nationality-telephonedirectory").value;
+        var genderTD = document.getElementById("gender-telephonedirectory").value;
+        var enddateTD = document.getElementById("enddate-telephonedirectory").value;
+        var statusTD = document.getElementById("status_id-telephonedirectory").value;
+
+        if(startdateTD !="" || worktypeTD !="" || departmentTD !="" || ethnicityTD !="" || nationalityTD !="" || genderTD !="" || enddateTD !="" || statusTD !=1) {           
+            telephonedirectoryTable.init();
+            document.getElementById("telephonedirectorybySearchExcelBtn").style.display="block";
+            document.getElementById("telephonedirectorybySearchPdfBtn").style.display="block";
+            document.getElementById("allTelephoneDirectoryExcelBtn").style.display="none";
+            document.getElementById("allTelephoneDirectoryPdfBtn").style.display="none";
+        } else {
+            telephonedirectoryTable.init();
+            document.getElementById("telephonedirectorybySearchExcelBtn").style.display="none";
+            document.getElementById("telephonedirectorybySearchPdfBtn").style.display="none";
+            document.getElementById("allTelephoneDirectoryExcelBtn").style.display="block";
+            document.getElementById("allTelephoneDirectoryPdfBtn").style.display="block";
+        }
+
         // Filter function
         function filterHTMLFormTD() {
             telephonedirectoryTable.init();
@@ -133,29 +152,23 @@ var telephonedirectoryTable = (function () {
                 }
             }
         );
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go-TD").on("click", function (event) {
-            filterHTMLFormTD();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-TD").on("click", function (event) {
-            document.getElementById("telephonedirectoryTable").style.display = "none";
-            $("div .telephonedirectoryAllData").show();
-            $("#employee_work_type_id-telephonedirectory").val('');
-            $("#department_id-telephonedirectory").val('');
-            $("#ethnicity-telephonedirectory").val('');
-            $("#nationality-telephonedirectory").val('');
-            $("#gender-telephonedirectory").val('');
-            $("#startdate-telephonedirectory").val('');
-            $("#enddate-telephonedirectory").val('');
-            $("#status_id-telephonedirectory").val('1');
-            document.getElementById("allTelephoneDirectoryExcelBtn").style.display="block";
-            document.getElementById("allTelephoneDirectoryPdfBtn").style.display="block";
-            document.getElementById("telephonedirectorybySearchExcelBtn").style.display="none";
-            document.getElementById("telephonedirectorybySearchPdfBtn").style.display="none";
-        });
+    // On reset filter form
+    $("#tabulator-html-filter-reset-TD").on("click", function (event) {
+        $("#employee_work_type_id-telephonedirectory").val('');
+        $("#department_id-telephonedirectory").val('');
+        $("#ethnicity-telephonedirectory").val('');
+        $("#nationality-telephonedirectory").val('');
+        $("#gender-telephonedirectory").val('');
+        $("#startdate-telephonedirectory").val('');
+        $("#enddate-telephonedirectory").val('');
+        $("#status_id-telephonedirectory").val('1');
+        telephonedirectoryTable.init();
+        document.getElementById("allTelephoneDirectoryExcelBtn").style.display="block";
+        document.getElementById("allTelephoneDirectoryPdfBtn").style.display="block";
+        document.getElementById("telephonedirectorybySearchExcelBtn").style.display="none";
+        document.getElementById("telephonedirectorybySearchPdfBtn").style.display="none";
     });
 
     $("#telephonedirectorybySearchExcelBtn").on("click", function (e) {      

@@ -24,7 +24,7 @@ var contactListTable = (function () {
             printCopyStyle: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
+            paginationSize: 100,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
@@ -145,8 +145,6 @@ var contactListTable = (function () {
 
     // On reset filter form
     $("#tabulator-html-filter-reset-ECD").on("click", function (event) {
-        $("div .contactAllData").show();
-        $("div .contactBySearchData").hide();
         $("#employee_work_type_id-contact").val('');
         $("#department_id-contact").val('');
         $("#ethnicity-contact").val('');
@@ -160,6 +158,8 @@ var contactListTable = (function () {
 
         document.getElementById("contactbySearchExcelBtn").style.display="none";
         document.getElementById("contactbySearchPdfBtn").style.display="none";
+        $("div .contactBySearchData").hide();
+        document.getElementById("tabulator-html-filter-go-ECD").click();
     });
 
     $("#contactbySearchExcelBtn").on("click", function (e) {      

@@ -21,8 +21,6 @@ import TomSelect from "tom-select";
 
     // On reset filter form
     $("#tabulator-html-filter-reset-RCD").on("click", function (event) {
-        $("div .recordcardAllData").show();
-        $("div .recordcardBySearchData").hide();
         $("#employee_work_type_id-recordcard").val('');
         $("#department_id-recordcard").val('');
         $("#ethnicity-recordcard").val('');
@@ -36,6 +34,8 @@ import TomSelect from "tom-select";
 
         document.getElementById("recordcardbySearchExcelBtn").style.display="none";
         document.getElementById("recordcardbySearchPdfBtn").style.display="none";
+        $("div .recordcardBySearchData").hide();
+        document.getElementById("tabulator-html-filter-go-RCD").click();
     });
 
     $("#tabulator-html-filter-go-RCD").on("click", function (e) {      

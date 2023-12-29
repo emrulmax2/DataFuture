@@ -110,13 +110,31 @@ var lengthserviceTable = (function () {
         },
     };
 
-    $("#tabulator-html-filter-go-LS").on("click", function (event) {
-        $("div .lengthserviceAllData").hide();
-        lengthserviceTable.init();         
-        document.getElementById("lengthservicebySearchExcelBtn").style.display="block";
-        document.getElementById("lengthservicebySearchPdfBtn").style.display="block";
-        document.getElementById("allLengthServiceExcelBtn").style.display="none";
-        document.getElementById("allLengthServicePdfBtn").style.display="none";
+    $("#tabulator-html-filter-go-LS").on("click", function (event) { 
+        event.preventDefault();
+
+        var startdateLS = document.getElementById("startdate-lengthservice").value;
+        var worktypeLS = document.getElementById("employee_work_type_id-lengthservice").value;
+        var departmentLS = document.getElementById("department_id-lengthservice").value;
+        var ethnicityLS = document.getElementById("ethnicity-lengthservice").value;
+        var nationalityLS = document.getElementById("nationality-lengthservice").value;
+        var genderLS = document.getElementById("gender-lengthservice").value;
+        var enddateLS = document.getElementById("enddate-lengthservice").value;
+        var statusLS = document.getElementById("status_id-lengthservice").value;
+
+        if(startdateLS !="" || worktypeLS !="" || departmentLS !="" || ethnicityLS !="" || nationalityLS !="" || genderLS !="" || enddateLS !="" || statusLS !=1) {
+            lengthserviceTable.init();         
+            document.getElementById("lengthservicebySearchExcelBtn").style.display="block";
+            document.getElementById("lengthservicebySearchPdfBtn").style.display="block";
+            document.getElementById("allLengthServiceExcelBtn").style.display="none";
+            document.getElementById("allLengthServicePdfBtn").style.display="none";
+        } else {
+            lengthserviceTable.init();         
+            document.getElementById("lengthservicebySearchExcelBtn").style.display="none";
+            document.getElementById("lengthservicebySearchPdfBtn").style.display="none";
+            document.getElementById("allLengthServiceExcelBtn").style.display="block";
+            document.getElementById("allLengthServicePdfBtn").style.display="block";
+        }
         // Filter function
         function filterHTMLFormLS() {
             lengthserviceTable.init();
@@ -133,29 +151,23 @@ var lengthserviceTable = (function () {
                 }
             }
         );
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go-LS").on("click", function (event) {
-            filterHTMLFormLS();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-LS").on("click", function (event) {
-            document.getElementById("lengthserviceTable").style.display = "none";
-            $("div .lengthserviceAllData").show();
-            $("#employee_work_type_id-lengthservice").val('');
-            $("#department_id-lengthservice").val('');
-            $("#ethnicity-lengthservice").val('');
-            $("#nationality-lengthservice").val('');
-            $("#gender-lengthservice").val('');
-            $("#startdate-lengthservice").val('');
-            $("#enddate-lengthservice").val('');
-            $("#status_id-lengthservice").val('1');
-            document.getElementById("allLengthServiceExcelBtn").style.display="block";
-            document.getElementById("allLengthServicePdfBtn").style.display="block";
-            document.getElementById("lengthservicebySearchExcelBtn").style.display="none";
-            document.getElementById("lengthservicebySearchPdfBtn").style.display="none";
-        });
+    // On reset filter form
+    $("#tabulator-html-filter-reset-LS").on("click", function (event) {
+        $("#employee_work_type_id-lengthservice").val('');
+        $("#department_id-lengthservice").val('');
+        $("#ethnicity-lengthservice").val('');
+        $("#nationality-lengthservice").val('');
+        $("#gender-lengthservice").val('');
+        $("#startdate-lengthservice").val('');
+        $("#enddate-lengthservice").val('');
+        $("#status_id-lengthservice").val('1');
+        lengthserviceTable.init();
+        document.getElementById("allLengthServiceExcelBtn").style.display="block";
+        document.getElementById("allLengthServicePdfBtn").style.display="block";
+        document.getElementById("lengthservicebySearchExcelBtn").style.display="none";
+        document.getElementById("lengthservicebySearchPdfBtn").style.display="none";
     });
 
     $("#lengthservicebySearchExcelBtn").on("click", function (e) {      
