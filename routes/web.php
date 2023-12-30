@@ -117,6 +117,7 @@ use App\Http\Controllers\HR\EmployeeWorkingPatternPayController;
 use App\Http\Controllers\HR\EmploymentController;
 use App\Http\Controllers\HR\EmployeePortalController;
 use App\Http\Controllers\HR\EmployeePrivilegeController;
+use App\Http\Controllers\HR\EmployeeTimeKeepingController;
 use App\Http\Controllers\HR\EmployeeUpcomingAppraisalController;
 use App\Http\Controllers\HR\Reports\BirthdayReportController;
 use App\Http\Controllers\HR\Reports\DiversityReportController;
@@ -1119,7 +1120,8 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/eligibilityreport', 'index')->name('hr.portal.reports.eligibilityreport');
         Route::get('hr/portal/reports/eligibilityreport/visaexpiry-list', 'visaList')->name('hr.portal.reports.eligibilityreport.visaexpirylist'); 
         Route::get('hr/portal/reports/eligibilityreport/passportexpiry-list', 'passportList')->name('hr.portal.reports.eligibilityreport.passportexpirylist'); 
-        Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf', 'generatePDF')->name('hr.portal.reports.eligibilityreport.pdf');
+        Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf/visa', 'generateVisaPDF')->name('hr.portal.reports.eligibilityreport.visa.pdf');
+        Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf/passport', 'generatePassportPDF')->name('hr.portal.reports.eligibilityreport.passport.pdf');
     });
 
     Route::controller(EmployeeUpcomingAppraisalController::class)->group(function(){
@@ -2023,6 +2025,10 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/df-fields/update', 'update')->name('df.fields.update');
         Route::delete('site-settings/df-fields/delete/{id}', 'destroy')->name('df.fields.destory');
         Route::post('site-settings/df-fields/restore', 'restore')->name('df.fields.restore');
+    });
+
+    Route::controller(EmployeeTimeKeepingController::class)->group(function(){
+        Route::get('employee-profile/time-keeper/{id}', 'index')->name('employee.time.keeper'); 
     });
     
 });

@@ -8,15 +8,12 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Eligibility Expiry Report</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button id="tabulator-export-xlsx-VEXR" href="javascript:;" class="btn btn-outline-secondary w-1/2 w-auto mr-2">
-                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-            </button>
-            <a style="float: right;" type="button" href="{{ route('hr.portal.reports.eligibilityreport.pdf') }}" class="btn btn-success text-white w-1/2 w-auto mr-2">Download Pdf</a>
             <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Employment Reports</a>
         </div>
     </div>
     <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-4">
+        <h2 class="text-lg font-medium mr-auto">Visa Expiry Report</h2>
+        <div class="grid grid-cols-12 gap-4 p-5">
             <div class="col-span-12">
                 <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form id="tabulatorFilterForm-SR" class="xl:flex sm:mr-auto" >
@@ -29,6 +26,12 @@
                             <button id="tabulator-html-filter-reset-VEXR" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                         </div>
                     </form>
+                    <div class="flex mt-5 sm:mt-0">
+                        <button id="tabulator-export-xlsx-VEXR" href="javascript:;" class="btn btn-outline-secondary w-1/2 w-auto mr-2">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                        </button>
+                        <a style="float: right;" type="button" href="{{ route('hr.portal.reports.eligibilityreport.visa.pdf') }}" class="btn btn-success text-white w-1/2 w-auto mr-2">Download Pdf</a>
+                    </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-hidden">
                     <div id="visaExpiryListTable" class="mt-5 table-report table-report--tabulator"></div>
@@ -37,7 +40,8 @@
         </div>
     </div>
     <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-4">
+        <h2 class="text-lg font-medium mr-auto">Passport Expiry Report</h2>
+        <div class="grid grid-cols-12 gap-4 p-5">
             <div class="col-span-12">
                 <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form id="tabulatorFilterForm-SR" class="xl:flex sm:mr-auto" >
@@ -54,6 +58,7 @@
                         <button id="tabulator-export-xlsx-PEXR" href="javascript:;" class="btn btn-outline-secondary w-1/2 w-auto mr-2">
                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                         </button>
+                        <a style="float: right;" type="button" href="{{ route('hr.portal.reports.eligibilityreport.passport.pdf') }}" class="btn btn-success text-white w-1/2 w-auto mr-2">Download Pdf</a>
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-hidden">

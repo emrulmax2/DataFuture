@@ -27,8 +27,8 @@ class LengthServiceExport implements WithColumnWidths, FromView
             
             $dataArray = [];
             foreach($query as $list):
-                $startedOn = strtotime($list->employment->started_on);
                 $today = strtotime(date('Y-m-d'));
+                $startedOn = isset($list->employment->started_on) ? strtotime($list->employment->started_on) : $today;
                 if(isset($list->workingPattern->end_to) && $list->workingPattern->end_to != ''){
                     $endedOn = strtotime($list->workingPattern->end_to);
                     $secs = $endedOn - $startedOn;                    
@@ -45,9 +45,9 @@ class LengthServiceExport implements WithColumnWidths, FromView
                 if($yearLength==$j):
                     $dataArray[$j][] = [
                         'name' => $list->first_name.' '.$list->last_name,
-                        'started_on' => $list->employment->started_on,
+                        'started_on' => isset($list->employment->started_on) ? $list->employment->started_on : '',
                         'ended_on' => isset($list->workingPattern->end_to) ? $list->workingPattern->end_to : '',
-                        'length' => $length,
+                        'length' => isset($list->employment->started_on) ? $length : '',
                     ];
                     
                 endif;

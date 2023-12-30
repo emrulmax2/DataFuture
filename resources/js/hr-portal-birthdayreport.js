@@ -105,13 +105,28 @@ var birthdayListSearchTable = (function () {
         },
     };
 
-    $("#tabulator-html-filter-go-BR").on("click", function (event) {
-        birthdayListSearchTable.init();         
-        document.getElementById("bdayListbySearchExcelBtn").style.display="block";
-        document.getElementById("bdayListbySearchPdfBtn").style.display="block";
-        $("div .birthdayListAllData").hide();
-        document.getElementById("allBdayListExcelBtn").style.display="none";
-        document.getElementById("allBdayListPdfBtn").style.display="none";
+    $("#tabulator-html-filter-go-BR").on("click", function (event) {  
+        event.preventDefault();
+        var dobBR = document.getElementById("dob-BR").value;
+        var worktypeBR = document.getElementById("employee_work_type_id-birtdaylist").value;
+        var departmentBR = document.getElementById("department_id-birtdaylist").value;
+        var statusBR = document.getElementById("status_id-birtdaylist").value;
+
+        if(dobBR !="" || worktypeBR !="" || departmentBR !="" || statusBR!=1) {
+            birthdayListSearchTable.init();
+            document.getElementById("bdayListbySearchExcelBtn").style.display="block";
+            document.getElementById("bdayListbySearchPdfBtn").style.display="block";
+        
+            document.getElementById("allBdayListExcelBtn").style.display="none";
+            document.getElementById("allBdayListPdfBtn").style.display="none";
+        } else {
+            birthdayListSearchTable.init();
+            document.getElementById("bdayListbySearchExcelBtn").style.display="none";
+            document.getElementById("bdayListbySearchPdfBtn").style.display="none";
+           
+            document.getElementById("allBdayListExcelBtn").style.display="block";
+            document.getElementById("allBdayListPdfBtn").style.display="block";
+        }
         // Filter function
         function filterHTMLFormBR() {
             birthdayListSearchTable.init();
@@ -128,26 +143,18 @@ var birthdayListSearchTable = (function () {
                 }
             }
         );
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go-BR").on("click", function (event) {
-            filterHTMLFormBR();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-BR").on("click", function (event) {
-            $("#employee_work_type_id-birtdaylist").val('');
-            $("#department_id-birtdaylist").val('');
-            $("#dob-BR").val('');
-            $("#status_id-birtdaylist").val('1');
-            document.getElementById("birthdayListSearchTable").style.display = "none";
-            $("div .birthdayListSearchDiv").hide();
-            $("div .birthdayListAllData").show();
-            document.getElementById("allBdayListExcelBtn").style.display="block";
-            document.getElementById("allBdayListPdfBtn").style.display="block";
-            document.getElementById("bdayListbySearchExcelBtn").style.display="none";
-            document.getElementById("bdayListbySearchPdfBtn").style.display="none";
-        });
+    $("#tabulator-html-filter-reset-BR").on("click", function (event) {
+        $("#employee_work_type_id-birtdaylist").val('');
+        $("#department_id-birtdaylist").val('');
+        $("#dob-BR").val('');
+        $("#status_id-birtdaylist").val('1');
+        birthdayListSearchTable.init();
+        document.getElementById("allBdayListExcelBtn").style.display="block";
+        document.getElementById("allBdayListPdfBtn").style.display="block";
+        document.getElementById("bdayListbySearchExcelBtn").style.display="none";
+        document.getElementById("bdayListbySearchPdfBtn").style.display="none";
     });
 
     $("#bdayListbySearchExcelBtn").on("click", function (e) {      

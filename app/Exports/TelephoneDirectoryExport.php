@@ -36,10 +36,12 @@ class TelephoneDirectoryExport implements WithColumnWidths, FromView
                     $number += $c * (26 ** ($level-1));
                     $level++;
                 }
+                $firstName = isset($list->first_name) ? $list->first_name : '';
+                $lastName = isset($list->last_name) ? $list->last_name : '';
        
                 if($number==$j):
                     $dataArray[$j][] = [
-                        'name' => $list->first_name.' '.$list->last_name,
+                        'name' => $firstName.' '.$lastName,
                         'telephone' => isset($list->telephone) ? $list->telephone : '',
                         'mobile' => isset($list->mobile) ? $list->mobile : '',
                         'email' => isset($list->email) ? $list->email : '',

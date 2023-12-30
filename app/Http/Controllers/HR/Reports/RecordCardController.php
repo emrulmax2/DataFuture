@@ -21,49 +21,11 @@ use PDF;
 class RecordCardController extends Controller
 {
     public function index(){
-        $employee = Employee::where('status', '=', 1)->get();
-        $i = 0;
-        $dataList =[];
-        foreach($employee as $data) {
-            $address = Address::find($data->address_id);
-            $emergencyContact= EmployeeEmergencyContact::find($data->id);
-            //dd($emergencyContact);
-            $dataList[$i++] = [
-                'title' => $data->title->name,
-                'first_name' => $data->first_name,
-                'last_name' => $data->last_name,
-                'full_name' => $data->first_name.' '.$data->last_name,
-                'dob' => $data->date_of_birth,
-                'ethnicity' => $data->ethnicity->name,
-                'nationality' => $data->nationality->name,
-                'ni_number' => $data->ni_number,
-                'gender' => $data->sex->name,
-
-                'started_on' => isset($data->employment->started_on) ? $data->employment->started_on : '',
-                'works_number' => $data->employment->works_number,
-                'end_to' => isset($data->workingPattern->end_to) ? $data->workingPattern->end_to : '',
-                'job_title' => isset($data->employment->employee_job_title_id) ? $data->employment->employeeJobTitle->name : '',
-                'job_status' => ($data->status== 1) ? 'Active' : 'Inactive',
-
-                'address' => $address->address_line_1.','.$address->address_line_2,
-                'telephone' => isset($data->telephone) ? $data->telephone : '',
-                'mobile' => isset($data->mobile) ? $data->mobile : '',
-                'email' => isset($data->email) ? $data->email : '',
-                'emergency_telephone' => isset($emergencyContact->emergency_contact_telephone) ? $emergencyContact->emergency_contact_telephone : '',
-                'emergency_mobile' => isset($emergencyContact->emergency_contact_mobile) ? $emergencyContact->emergency_contact_mobile : '',
-                'emergency_email' => isset($emergencyContact->emergency_contact_email) ? $emergencyContact->emergency_contact_email : '',
-                           
-                'disability' => $data->disability_status,
-                'car_reg' => isset($data->car_reg_number) ? $data->car_reg_number : '',
-            ];
-        }
-        
         return view('pages.hr.portal.reports.recordcard', [
             'title' => 'Employee Record Card - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Employee Record Card', 'href' => 'javascript:void(0);']
             ],
-           'dataList' => $dataList,
            'country' => Country::all(),
            'ethnicity' => Ethnicity::all(),
            'employeeWorkType' => EmployeeWorkType::all(),
@@ -72,7 +34,7 @@ class RecordCardController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request, $paginationOn=true){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -99,7 +61,7 @@ class RecordCardController extends Controller
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
                 if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
-                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+                if(!empty($enddate)): $qs->whereDate('ended_on', '>=', $enddate); endif;
             });
         endif;
 
@@ -111,20 +73,27 @@ class RecordCardController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query= $query->skip($offset)
-               ->take($limit)
-               ->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else
+            $Query = $query->get();
 
         $data = array();
 
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $addressOne = isset($list->address->address_line_1) ? $list->address->address_line_1 : '';
+                $addressTwo = isset($list->address->address_line_2) ? $list->address->address_line_2 : '';
+                $firstName = isset($list->first_name) ? $list->first_name : '';
+                $lastName = isset($list->last_name) ? $list->last_name : '';
                 $data[] = [
-                    'title' => $list->title->name,
-                    'first_name' => isset($list->first_name) ? $list->first_name : '',
-                    'last_name' => isset($list->last_name) ? $list->last_name : '',
-                    'full_name' => $list->first_name.' '.$list->last_name,
+                    'title' => isset($list->title->name) ? $list->title->name : '',
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'full_name' => $firstName.' '.$lastName,
                     'dob' => isset($list->date_of_birth) ? $list->date_of_birth : '',
                     'ethnicity' => isset($list->ethnicity_id) ? $list->ethnicity->name : '',
                     'nationality' => isset($list->nationality_id) ? $list->nationality->name : '',
@@ -132,12 +101,12 @@ class RecordCardController extends Controller
                     'gender' => isset($list->sex_identifier_id) ? $list->sex->name : '',
 
                     'started_on' => isset($list->employment->started_on) ? $list->employment->started_on : '',
-                    'works_number' => $list->employment->works_number,
+                    'works_number' => isset($list->employment->works_number) ? $list->employment->works_number : '',
                     'end_to' => isset($list->workingPattern->end_to) ? $list->workingPattern->end_to : '',
                     'job_title' => isset($list->employment->employee_job_title_id) ? $list->employment->employeeJobTitle->name : '',
                     'job_status' => ($list->status== 1) ? 'Active' : 'Inactive',
 
-                    'address' => $list->address->address_line_1.','.$list->address->address_line_2,
+                    'address' => $addressOne.','.$addressTwo,
                     'telephone' => isset($list->telephone) ? $list->telephone : '',
                     'mobile' => isset($list->mobile) ? $list->mobile : '',
                     'email' => isset($list->email) ? $list->email : '',
@@ -164,7 +133,7 @@ class RecordCardController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
 
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         $returnData = json_decode($data->getContent(), true);
         
         $i = 0;
@@ -221,11 +190,15 @@ class RecordCardController extends Controller
         foreach($items as $item) {
             $emergencyContact = $item->emergencyContact;
             $address = $item->address;
+            $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
+            $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
+            $firstName = isset($item->first_name) ? $item->first_name : '';
+            $lastName = isset($item->last_name) ? $item->last_name : '';
             $dataList[$i++] = [
-                'title' => $item->title->name,
-                'first_name' => isset($item->first_name) ? $item->first_name : '',
-                'last_name' => isset($item->last_name) ? $item->last_name : '',
-                'full_name' => $item->first_name.' '.$item->last_name,
+                'title' => isset($item->title->name) ? $item->title->name : '',
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'full_name' => $firstName.' '.$lastName,
                 'dob' => isset($item->date_of_birth) ? $item->date_of_birth : '',
                 'ethnicity' => isset($item->ethnicity_id) ? $item->ethnicity->name : '',
                 'nationality' => isset($item->nationality_id) ? $item->nationality->name : '',
@@ -233,12 +206,12 @@ class RecordCardController extends Controller
                 'gender' => isset($item->sex_identifier_id) ? $item->sex->name : '',
 
                 'started_on' => isset($item->employment->started_on) ? $item->employment->started_on : '',
-                'works_number' => $item->employment->works_number,
+                'works_number' => isset($item->employment->works_number) ? $item->employment->works_number : '',
                 'end_to' => isset($item->workingPattern->end_to) ? $item->workingPattern->end_to : '',
                 'job_title' => isset($item->employment->employee_job_title_id) ? $item->employment->employeeJobTitle->name : '',
                 'job_status' => ($item->status== 1) ? 'Active' : 'Inactive',
-                'address' => $address->address_line_1.','.$address->address_line_2,
-                'post_code' => $item->post_code,
+                'address' => $addressOne.','.$addressTwo,
+                'post_code' => isset($item->post_code) ? $item->post_code : '',
                 'telephone' => isset($item->telephone) ? $item->telephone : '',
                 'mobile' => isset($item->mobile) ? $item->mobile : '',
                 'email' => isset($item->email) ? $item->email : '',
@@ -266,7 +239,7 @@ class RecordCardController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
         
@@ -290,7 +263,7 @@ class RecordCardController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
                 

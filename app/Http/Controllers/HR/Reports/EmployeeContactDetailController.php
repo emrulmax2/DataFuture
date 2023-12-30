@@ -27,11 +27,13 @@ class EmployeeContactDetailController extends Controller
         foreach($employee as $data) {
             $address = Address::find($data->address_id);
             $emergencyContact= EmployeeEmergencyContact::find($data->id);
-            //dd($emergencyContact);
+     
+            $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
+            $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
             $dataList[$i++] = [
                 'name' => $data->first_name.' '.$data->last_name,
-                'address' => $address->address_line_1.','.$address->address_line_2,
-                'post_code' => $data->post_code,
+                'address' => $addressOne.','.$addressTwo,
+                'post_code' => isset($data->post_code) ? $data->post_code : '',
                 'telephone' => isset($data->telephone) ? $data->telephone : '',
                 'mobile' => isset($data->mobile) ? $data->mobile : '',
                 'email' => isset($data->email) ? $data->email : '',
@@ -55,7 +57,7 @@ class EmployeeContactDetailController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request, $paginationOn=true){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -82,7 +84,7 @@ class EmployeeContactDetailController extends Controller
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
                 if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
-                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+                if(!empty($enddate)): $qs->whereDate('ended_on', '>=', $enddate); endif;
             });
         endif;
 
@@ -94,19 +96,24 @@ class EmployeeContactDetailController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query= $query->skip($offset)
-               ->take($limit)
-               ->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else
+            $Query = $query->get();
 
         $data = array();
 
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $addressOne = isset($list->address->address_line_1) ? $list->address->address_line_1 : '';
+                $addressTwo = isset($list->address->address_line_2) ? $list->address->address_line_2 : '';
                 $data[] = [
                     'name' => $list->first_name.' '.$list->last_name,
-                    'address' => $list->address->address_line_1.','.$list->address->address_line_2,
-                    'post_code' => $list->post_code,
+                    'address' => $addressOne.','.$addressTwo,
+                    'post_code' => isset($list->post_code) ? $list->post_code : '',
                     'telephone' => isset($list->telephone) ? $list->telephone : '',
                     'mobile' => isset($list->mobile) ? $list->mobile : '',
                     'email' => isset($list->email) ? $list->email : '',
@@ -131,10 +138,12 @@ class EmployeeContactDetailController extends Controller
         foreach($items as $item) {
             $emergencyContact = $item->emergencyContact;
             $address = $item->address;
+            $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
+            $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
             $dataList[$i++] = [
                 'name' => $item->first_name.' '.$item->last_name,
-                'address' => $address->address_line_1.','.$address->address_line_2,
-                'post_code' => $item->post_code,
+                'address' => $addressOne.','.$addressTwo,
+                'post_code' => isset($item->post_code) ? $item->post_code : '',
                 'telephone' => isset($item->telephone) ? $item->telephone : '',
                 'mobile' => isset($item->mobile) ? $item->mobile : '',
                 'email' => isset($item->email) ? $item->email : '',
@@ -166,7 +175,7 @@ class EmployeeContactDetailController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
                 
@@ -183,7 +192,7 @@ class EmployeeContactDetailController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
         
@@ -201,7 +210,7 @@ class EmployeeContactDetailController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
 
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         $returnData = json_decode($data->getContent(), true);
         
         $i = 0;

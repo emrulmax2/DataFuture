@@ -29,7 +29,7 @@ class StarterReportController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request, $paginationOn=false){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -56,7 +56,7 @@ class StarterReportController extends Controller
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
                 if(!empty($startdate)): $qs->whereDate('started_on', '<=', $startdate); endif;
-                if(!empty($enddate)): $qs->whereDate('started_on', '>=', $enddate); endif;
+                if(!empty($enddate)): $qs->whereDate('ended_on', '>=', $enddate); endif;
             });
         endif;
 
@@ -68,9 +68,12 @@ class StarterReportController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query= $query->skip($offset)
-               ->take($limit)
-               ->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else
+            $Query = $query->get();
 
         $data = array();
 
@@ -78,10 +81,10 @@ class StarterReportController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $data[] = [
-                    'last_name' => $list->last_name,
-                    'first_name' => $list->first_name,
-                    'works_number' => $list->employment->works_number,
-                    'started_on' => date('F d, Y',strtotime($list->employment->started_on)),
+                    'last_name' => isset($list->last_name) ? $list->last_name : '',
+                    'first_name' => isset($list->first_name) ? $list->first_name : '',
+                    'works_number' => isset($list->employment->works_number) ? $list->employment->works_number : '',
+                    'started_on' => isset($list->employment->started_on) ? date('F d, Y',strtotime($list->employment->started_on)) : '',
                 ];
                 $i++;
             endforeach;
@@ -100,10 +103,10 @@ class StarterReportController extends Controller
         foreach($items as $item) {
             $employment = $item->employment;
             $dataList[$i++] = [
-                'last_name' => $item->last_name,
-                'first_name' => $item->first_name,
-                'works_number' => $employment->works_number,
-                'started_on' => date('F d, Y',strtotime($employment->started_on)),
+                'last_name' => isset($item->last_name) ? $item->last_name : '',
+                'first_name' => isset($item->first_name) ? $item->first_name : '',
+                'works_number' => isset($employment->works_number) ? $employment->works_number : '',
+                'started_on' => isset($employment->started_on) ? date('F d, Y',strtotime($employment->started_on)) : '',
             ];
         } 
 
@@ -123,7 +126,7 @@ class StarterReportController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request);
+        $data = $this->list($request,false);
         
         $returnData = json_decode($data->getContent(), true);
         

@@ -158,7 +158,7 @@
                     </button>
                     <input type="hidden" value="{{ $employee->id }}" name="id"/>
                     
-                    <input type="hidden" name="url" value="{{ route("employee.update",$employee->id) }}" />
+                    <input type="hidden" name="url" value="{{ route("employee.update", $employee->id) }}" />
                     <input type="hidden" name="user_id" value="{{ $employee->user_id }}" />
                 </div>
             </div>
@@ -282,7 +282,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" value="{{ $employment->id }}" name="id"/>
+                    <input type="hidden" value="{{ isset($employment->id) ? $employment->id : 0 }}" name="id"/>
                 </div>
             </div>
         </form>
@@ -308,7 +308,7 @@
                         <div class="col-span-12 sm:col-span-3">
                             <label for="eligible_to_work_status" class="form-label">Do this person is eligible to work in UK?</label>
                             <div class="form-check form-switch">
-                                <input {{ ($employeeEligibilites->eligible_to_work == "Yes") ? "checked" : '' }} id="eligible_to_work_status" class="form-check-input" name="eligible_to_work_status" value="Yes" type="checkbox">
+                                <input {{ (isset($employeeEligibilites->eligible_to_work) && $employeeEligibilites->eligible_to_work == "Yes") ? "checked" : '' }} id="eligible_to_work_status" class="form-check-input" name="eligible_to_work_status" value="Yes" type="checkbox">
                                 <label class="form-check-label" for="eligible_to_work">&nbsp;</label>
                             </div>
                         </div>
@@ -318,19 +318,19 @@
                             <select id="workpermit_type" name="workpermit_type" class=" w-full lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @foreach($workPermitTypes as $workPermitType)
-                                    <option {{ ($employeeEligibilites->employee_work_permit_type_id == $workPermitType->id) ? "selected" : "" }} value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>       
+                                    <option {{ (isset($employeeEligibilites->employee_work_permit_type_id) && $employeeEligibilites->employee_work_permit_type_id == $workPermitType->id) ? "selected" : "" }} value="{{ $workPermitType->id }}">{{ $workPermitType->name }}</option>       
                                 @endforeach
                             </select> 
                             <div class="acc__input-error error-workpermit_type text-danger mt-2"></div>
                         </div>
-                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ ($employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
+                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ (isset($employeeEligibilites->employee_work_permit_type_id) && $employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
                             <label for="workpermit_number" class="form-label inline-flex">Work Permit Number </label>
-                            <input id="workpermit_number" type="text" value="{{ $employeeEligibilites->workpermit_number }}" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
+                            <input id="workpermit_number" type="text" value="{{ isset($employeeEligibilites->workpermit_number) ? $employeeEligibilites->workpermit_number : '' }}" class="form-control rounded-none form-control-lg"  name="workpermit_number" aria-label="default input example">
                             <div class="acc__input-error error-workpermit_number text-danger mt-2"></div>
                         </div>              
-                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ ($employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
+                        <div class="workPermitFields intro-y col-span-12 sm:col-span-3" style="{{ (isset($employeeEligibilites->employee_work_permit_type_id) && $employeeEligibilites->employee_work_permit_type_id == 3) ? '' : 'display: none;' }}">
                             <label for="workpermit_expire" class="form-label inline-flex">Work Permit Expiry Date </label>
-                            <input id="workpermit_expire" type="text" value="{{ $employeeEligibilites->workpermit_expire }}" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
+                            <input id="workpermit_expire" type="text" value="{{ isset($employeeEligibilites->workpermit_expire) ? $employeeEligibilites->workpermit_expire : '' }}" placeholder="DD-MM-YYYY" class="form-control form-control-lg datepicker rounded-none" name="workpermit_expire" data-format="DD-MM-YYYY" data-single-mode="true">                   
                             <div class="acc__input-error error-workpermit_expire text-danger mt-2"></div>
                         </div>   
                         
@@ -422,7 +422,7 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="intro-y col-span-12 sm:col-span-6">
                             <label for="emergency_contact_name" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
-                            <input id="emergency_contact_name" type="text" value="{{ $emergencyContacts->emergency_contact_name }}" class="form-control rounded-none form-control-lg inputUppercase"  name="emergency_contact_name" aria-label="default input example">
+                            <input id="emergency_contact_name" type="text" value="{{ isset($emergencyContacts->emergency_contact_name) ? $emergencyContacts->emergency_contact_name : '' }}" class="form-control rounded-none form-control-lg inputUppercase"  name="emergency_contact_name" aria-label="default input example">
                             <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                         </div>              
                         <div class="intro-y col-span-12 sm:col-span-6">
@@ -484,12 +484,12 @@
 
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="emergency_contact_telephone" class="form-label inline-flex">Telephone </label>
-                            <input id="emergency_contact_telephone" type="text" value="{{ $emergencyContacts->emergency_contact_telephone }}" class="form-control rounded-none form-control-lg" name="emergency_contact_telephone" aria-label="default input example">
+                            <input id="emergency_contact_telephone" type="text" value="{{ isset($emergencyContacts->emergency_contact_telephone) ? $emergencyContacts->emergency_contact_telephone : '' }}" class="form-control rounded-none form-control-lg" name="emergency_contact_telephone" aria-label="default input example">
                                             
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="emergency_contact_mobile" class="form-label inline-flex">Mobile <span class="text-danger"> *</span></label>
-                            <input id="emergency_contact_mobile" type="text" value="{{ $emergencyContacts->emergency_contact_mobile }}" class="form-control rounded-none form-control-lg" name="emergency_contact_mobile" aria-label="default input example">
+                            <input id="emergency_contact_mobile" type="text" value="{{ isset($emergencyContacts->emergency_contact_mobile) ? $emergencyContacts->emergency_contact_mobile : '' }}" class="form-control rounded-none form-control-lg" name="emergency_contact_mobile" aria-label="default input example">
                             <div class="acc__input-error error-emergency_contact_mobile text-danger mt-2"></div>
                         </div>
         

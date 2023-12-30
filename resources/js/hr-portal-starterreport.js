@@ -24,9 +24,11 @@ var starterListTable = (function () {
             printAsHtml: true,
             printCopyStyle: true,
             printStyled: true,
+            pagination:false,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            //paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector:false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -72,6 +74,7 @@ var starterListTable = (function () {
         });
 
         $("#tabulator-export-xlsx-SR").on("click", function (event) {
+            event.preventDefault();
             window.XLSX = xlsx;
             tableContent.download("xlsx", "Employee_Starter.xlsx", {
                 sheetName: "Employee Starter Report",
@@ -99,42 +102,48 @@ var starterListTable = (function () {
         },
     };
 
-    if ($("#starterListTable").length > 0) {
-        var worktypeSR = new TomSelect('#employee_work_type_id-starter', tomOptions);
-        var departmentSR = new TomSelect('#department_id-starter', tomOptions);
-        var ethnicitySR = new TomSelect('#ethnicity-starter', tomOptions);
-        var nationalitySR = new TomSelect('#nationality-starter', tomOptions);
-        var genderSR = new TomSelect('#gender-starter', tomOptions);
+    $("#tabulator-html-filter-go-SR").on("click", function (event) {      
+        event.preventDefault();
 
-        starterListTable.init();
+        var startdateSR = document.getElementById("startdate-starter").value;
+        var worktypeSR = document.getElementById("employee_work_type_id-starter").value;
+        var departmentSR = document.getElementById("department_id-starter").value;
+        var ethnicitySR = document.getElementById("ethnicity-starter").value;
+        var nationalitySR = document.getElementById("nationality-starter").value;
+        var genderSR = document.getElementById("gender-starter").value;
+        var enddateSR = document.getElementById("enddate-starter").value;
+        var statusSR = document.getElementById("status_id-starter").value;
+
+        if(startdateSR !="" || worktypeSR !="" || departmentSR !="" || ethnicitySR !="" || nationalitySR !="" || genderSR !="" || enddateSR !="" || statusSR !=1) {           
+            starterListTable.init();
+            document.getElementById("starterreportPdfBtn").style.display="none";
+            document.getElementById("starterreportbySearchPdfBtn").style.display="block";
+        } else {
+            starterListTable.init();
+            document.getElementById("starterreportPdfBtn").style.display="block";
+            document.getElementById("starterreportbySearchPdfBtn").style.display="none";
+        }
         
         // Filter function
         function filterTitleHTMLFormSR() {
             starterListTable.init();
         }
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go-SR").on("click", function (event) {
-            document.getElementById("starterreportPdfBtn").style.display="none";
-            document.getElementById("starterreportbySearchPdfBtn").style.display="block";
-            filterTitleHTMLFormSR();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-SR").on("click", function (event) {
-            worktypeSR.clear(true);
-            departmentSR.clear(true);
-            ethnicitySR.clear(true);
-            nationalitySR.clear(true);
-            genderSR.clear(true);
-            $("#startdate-starter").val('');
-            $("#enddate-starter").val('');
-            $("#status_id-starter").val('1');
-            document.getElementById("starterreportPdfBtn").style.display="block";
-            document.getElementById("starterreportbySearchPdfBtn").style.display="none";
-            filterTitleHTMLFormSR();
-        });
-    }
+    // On reset filter form
+    $("#tabulator-html-filter-reset-SR").on("click", function (event) {
+        $("#employee_work_type_id-starter").val('');
+        $("#department_id-starter").val('');
+        $("#ethnicity-starter").val('');
+        $("#nationality-starter").val('');
+        $("#gender-starter").val('');
+        $("#startdate-starter").val('');
+        $("#enddate-starter").val('');
+        $("#status_id-starter").val('1');
+        document.getElementById("starterreportPdfBtn").style.display="block";
+        document.getElementById("starterreportbySearchPdfBtn").style.display="none";
+        starterListTable.init();
+    });
 
     $("#starterreportbySearchPdfBtn").on("click", function (e) {      
         e.preventDefault();

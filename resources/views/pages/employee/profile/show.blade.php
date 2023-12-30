@@ -146,7 +146,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Punch number</div>
-                        <div class="col-span-8 font-medium">{{ $employment->punch_number }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($employment->punch_number) ? $employment->punch_number : '' }}</div>
                     </div>
                 </div>
                 @if($employment->employeeWorkType->name == "Employee")
@@ -230,7 +230,7 @@
                 <div class="col-span-6">
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Eligible To Work</div>
-                        <div class="col-span-8 font-medium">{{ $employeeEligibilites->eligible_to_work }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($employeeEligibilites->eligible_to_work) ? $employeeEligibilites->eligible_to_work : '' }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Employee Work Permit: </div>
@@ -303,7 +303,7 @@
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_mobile }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($emergencyContacts->emergency_contact_mobile) ? $emergencyContacts->emergency_contact_mobile : '' }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Email </div>

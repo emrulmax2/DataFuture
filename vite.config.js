@@ -189,6 +189,7 @@ export default defineConfig({
                 'resources/js/df-field.js',
 
                 'resources/js/venue-datafuture.js',
+                'resources/js/employee-time-keeping.js',
                 
             ],
             refresh: true,

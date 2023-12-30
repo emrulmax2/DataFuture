@@ -361,7 +361,7 @@ class EmployeePortalController extends Controller
         $html = '';
         $html .= '<th class="whitespace-nowrap text-left">Employee</th>';
 
-        $start_date = date('Y-m-01', strtotime($date));
+        $start_date = date('Y-m', strtotime($date)).'-01';
         $end_date = date('Y-m-t', strtotime($date));
         $today = date('Y-m-d');
 
@@ -378,16 +378,17 @@ class EmployeePortalController extends Controller
     }
 
     public function getCalendarBody($theDate, $department = 0, $employee = []){
-         $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
-         if($department > 0):
+        $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
+        if($department > 0):
             $query->whereHas('employment', function($q) use ($department){
                 $q->where('department_id', $department);
             });
-         endif;
-         if(!empty($employee)):
+        endif;
+        if(!empty($employee)):
             $query->whereIn('id', $employee);
-         endif;
-         $employees = $query->get();
+        endif;
+        //$query->where('id', 41);
+        $employees = $query->get();
         
         $today = date('Y-m-d');
 
@@ -395,7 +396,7 @@ class EmployeePortalController extends Controller
         if(!empty($employees) && $employees->count() > 0):
             foreach($employees as $emp):
                 $employee_id = $emp->id;
-                $start_date = date('Y-m-01', strtotime($theDate));
+                $start_date = date('Y-m', strtotime($theDate)).'-01';
                 $end_date = date('Y-m-t', strtotime($theDate));
 
                 $html .= '<tr>';
@@ -423,74 +424,79 @@ class EmployeePortalController extends Controller
                                          ->where(function($query) use($date){
                                             $query->whereNull('end_to')->orWhere('end_to', '>=', $date);
                                          })->get()->first();
-                        $activePatternId = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
-                        $patternDay = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $activePatternId)->where('day', $n)->get()->first();
-                        $day_Status = (isset($patternDay->id) && $patternDay->id > 0 ? 1 : 0);
+                        if(isset($activePattern->id) && $activePattern->id > 0):
+                            $activePatternId = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+                            $patternDay = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $activePatternId)->where('day', $n)->get()->first();
+                            $day_Status = (isset($patternDay->id) && $patternDay->id > 0 ? 1 : 0);
 
-                        $class .= ($day_Status == 1) ? '' : ' NonWorkingDay';
-                        $label = ($day_Status == 0) ? 'x' : '';
-                        /* Check if None working day / Weekend */
+                            $class .= ($day_Status == 1) ? '' : ' NonWorkingDay';
+                            $label = ($day_Status == 0) ? 'x' : '';
+                            /* Check if None working day / Weekend */
 
-                        /* Check if Leave day */
-                        $leaveday = DB::table('employee_leave_days as eld')->select('eld.leave_date', 'eld.id as eld_id', 'el.*')
-                                 ->leftJoin('employee_leaves as el', 'eld.employee_leave_id', 'el.id')
-                                 ->where('eld.leave_date', $date)
-                                 ->where('eld.status', 'Active')
-                                 ->where('el.status', '!=', 'Canceled')
-                                 ->where('el.employee_id', $employee_id)
-                                 ->get()->first();
-                        if(!empty($leaveday) && (isset($leaveday->id) && $leaveday->id > 0) > 0 && $day_Status > 0):
-                            $dataAttr .= ' data-leaveday-id="'.$leaveday->id.'" data-employee="'.$employee_id.'" data-date="'.$date.'"';
-                            $class .= ' view_leave';
-                        endif;
-
-                        if(isset($leaveday->status) && $leaveday->status == 'Approved' && $day_Status > 0):
-                            $class .= ' approvedDay approved_'.$leaveday->leave_type;
-                        elseif(isset($leaveday->status) && $leaveday->status == 'Pending' && $day_Status > 0):
-                            $class .= ' pendingDay pending_'.$leaveday->leave_type;
-                        endif;
-                        if(isset($leaveday->leave_type) && $leaveday->leave_type > 0 && $day_Status > 0):
-                            switch ($leaveday->leave_type):
-                                case 1:
-                                    $label = 'H';
-                                    $title = 'Holiday / Vacation';
-                                    $class .= ' holidayVacationBG';
-                                    break;
-                                case 2:
-                                    $label = 'M';
-                                    $title = 'Meeting / Training';
-                                    $class .= ' meetingTrainingBG';
-                                    break;
-                                case 3:
-                                    $label = 'S';
-                                    $title = 'Sick Leave';
-                                    $class .= ' sickLeaveBG';
-                                    break;
-                                case 4:
-                                    $label = 'U';
-                                    $title = 'Authorised Unpaid';
-                                    $class .= ' authoriseUnpaidBG';
-                                    break;
-                                case 5:
-                                    $label = 'P';
-                                    $title = 'Authorised Paid';
-                                    $class .= ' authorisedPaidBG';
-                                    break;
-                            endswitch;
-                        endif;
-                        /* Check if Leave day */
-
-                        /* Check if Bank Holiday day */
-                        if((isset($emp->payment->bank_holiday_auto_book) && $emp->payment->bank_holiday_auto_book == 'Yes') && $day_Status > 0):
-                            $hrBankHoliday = HrBankHoliday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->get()->first();
-                            if(isset($hrBankHoliday->id) && $hrBankHoliday->id > 0):
-                                $label = 'BH';
-                                $title = 'Bank Holiday';
-                                $style = '';
-                                $class .= 'bankHolidayBG';
+                            /* Check if Leave day */
+                            $leaveday = DB::table('employee_leave_days as eld')->select('eld.leave_date', 'eld.id as eld_id', 'el.*')
+                                    ->leftJoin('employee_leaves as el', 'eld.employee_leave_id', 'el.id')
+                                    ->where('eld.leave_date', $date)
+                                    ->where('eld.status', 'Active')
+                                    ->where('el.status', '!=', 'Canceled')
+                                    ->where('el.employee_id', $employee_id)
+                                    ->get()->first();
+                            if(!empty($leaveday) && (isset($leaveday->id) && $leaveday->id > 0) > 0 && $day_Status > 0):
+                                $dataAttr .= ' data-leaveday-id="'.$leaveday->id.'" data-employee="'.$employee_id.'" data-date="'.$date.'"';
+                                $class .= ' view_leave';
                             endif;
+
+                            if(isset($leaveday->status) && $leaveday->status == 'Approved' && $day_Status > 0):
+                                $class .= ' approvedDay approved_'.$leaveday->leave_type;
+                            elseif(isset($leaveday->status) && $leaveday->status == 'Pending' && $day_Status > 0):
+                                $class .= ' pendingDay pending_'.$leaveday->leave_type;
+                            endif;
+                            if(isset($leaveday->leave_type) && $leaveday->leave_type > 0 && $day_Status > 0):
+                                switch ($leaveday->leave_type):
+                                    case 1:
+                                        $label = 'H';
+                                        $title = 'Holiday / Vacation';
+                                        $class .= ' holidayVacationBG';
+                                        break;
+                                    case 2:
+                                        $label = 'M';
+                                        $title = 'Meeting / Training';
+                                        $class .= ' meetingTrainingBG';
+                                        break;
+                                    case 3:
+                                        $label = 'S';
+                                        $title = 'Sick Leave';
+                                        $class .= ' sickLeaveBG';
+                                        break;
+                                    case 4:
+                                        $label = 'U';
+                                        $title = 'Authorised Unpaid';
+                                        $class .= ' authoriseUnpaidBG';
+                                        break;
+                                    case 5:
+                                        $label = 'P';
+                                        $title = 'Authorised Paid';
+                                        $class .= ' authorisedPaidBG';
+                                        break;
+                                endswitch;
+                            endif;
+                            /* Check if Leave day */
+
+                            /* Check if Bank Holiday day */
+                            if((isset($emp->payment->bank_holiday_auto_book) && $emp->payment->bank_holiday_auto_book == 'Yes') && $day_Status > 0):
+                                $hrBankHoliday = HrBankHoliday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->get()->first();
+                                if(isset($hrBankHoliday->id) && $hrBankHoliday->id > 0):
+                                    $label = 'BH';
+                                    $title = 'Bank Holiday';
+                                    $style = '';
+                                    $class .= 'bankHolidayBG';
+                                endif;
+                            endif;
+                            /* Check if Bank Holiday day */
+                        else:
+                            $class .= ' NonWorkingDay';
+                            $label = 'x';
                         endif;
-                        /* Check if Bank Holiday day */
 
                         $theTitle = ($title != '') ? 'title="'.$title.'" ' : '' ;
                         $html .= '<td '.$theTitle.' class="'.$class.' text-center" style="'.$style.'" '.$dataAttr.'>';

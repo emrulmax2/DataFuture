@@ -40,14 +40,16 @@ class BirthdayListExport implements WithColumnFormatting, WithColumnWidths, From
                 $age = $ageDiff->format('%y Years, %m months and %d days');
                 
                 $foundMonth = date('m', strtotime($list->date_of_birth));
+                $firstName = isset($list->first_name) ? $list->first_name : '';
+                $lastName = isset($list->last_name) ? $list->last_name : '';
 
                 if($foundMonth==$j):
                     $dataArray[$j][] = [
-                        'name' => $list->first_name.' '.$list->last_name,
-                        'works_no' => $list->employment->works_number,
-                        'gender' => $list->sex->name,
-                        'date_of_birth' => date('F m Y', strtotime($list->date_of_birth)),
-                        'age' => $age
+                        'name' => $firstName.' '.$lastName,
+                        'works_no' => isset($list->employment->works_number) ? $list->employment->works_number : '',
+                        'gender' => isset($list->sex->name) ? $list->sex->name : '',
+                        'date_of_birth' => isset($list->date_of_birth) ? date('F m Y', strtotime($list->date_of_birth)) : '',
+                        'age' => isset($list->date_of_birth) ? $age : ''
                     ];
                     
                 endif;
