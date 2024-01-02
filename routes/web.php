@@ -2029,6 +2029,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeTimeKeepingController::class)->group(function(){
         Route::get('employee-profile/time-keeper/{id}', 'index')->name('employee.time.keeper'); 
+        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
     });
     
 });

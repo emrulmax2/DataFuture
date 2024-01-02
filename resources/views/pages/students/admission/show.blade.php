@@ -7,7 +7,7 @@
 @section('subcontent')
 
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
+        <h2 class="text-lg font-medium mr-auto">Application Ref No. <u><strong>{{ (isset($applicant->application_no) && !empty($applicant->application_no) ? $applicant->application_no : '---') }}</strong></u></h2>
         
         <div class="ml-auto flex justify-end">
             <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2">Progress Bar</button>

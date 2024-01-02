@@ -23,12 +23,6 @@
             </div>
         </div>
         <div class="intro-y mt-5">
-            {{--<pre>
-            @php 
-                print_r($empAttendances);
-            @endphp
-            </pre>--}}
-
             @if(!empty($empAttendances))
                 <div id="employeeTKYear" class="lcc_custom_accordion">
                     @foreach($empAttendances as $year_id => $year)
@@ -48,6 +42,11 @@
                                                 </button>
                                                 <div id="employeeTKMonth_{{ $year_id }}_{{ $key }}" class="lcc_month_accordion_body text-slate-600 dark:text-slate-500 leading-relaxed p-5" style="display: none;">
                                                     @if(!empty($month['attendances']) && $month['attendances']->count() > 0)
+                                                        <div class="grid grid-cols-12 gap-0">
+                                                            <div class="col-span-12 text-right mb-5">
+                                                                <a href="{{ route('employee.time.keeper.download.pdf', [$employee->id, $month['start_date']]) }}" class="btn btn-success text-white"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                                            </div>
+                                                        </div>
                                                         <div class="overflow-x-auto">
                                                             <table class="table table-bordered table-sm">
                                                                 <thead>

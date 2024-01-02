@@ -118,24 +118,24 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-3 mt-5">
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <div class="truncate sm:whitespace-normal flex items-center">
+                                    <div class="col-span-12 sm:col-span-6 text-left">
+                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
                                             <i data-lucide="mail" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->email) ? $tutor->employee->email : '---') }}
                                         </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <div class="truncate sm:whitespace-normal flex items-center">
+                                    <div class="col-span-12 sm:col-span-6 text-left">
+                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
                                             <i data-lucide="mail" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->email) ? $tutor->email : '---') }}
                                         </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <div class="truncate sm:whitespace-normal flex items-center">
+                                    <div class="col-span-12 sm:col-span-6 text-left">
+                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
                                             <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->mobile) ? $tutor->employee->mobile : '---') }}
                                         </div>
                                     </div>
                                     @if(isset($tutor->employee->employment->office_telephone) && !empty($tutor->employee->employment->office_telephone))
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <div class="truncate sm:whitespace-normal flex items-center">
+                                    <div class="col-span-12 sm:col-span-6 text-left">
+                                        <div class="truncate sm:whitespace-normal break-all inline-flex items-start">
                                             <i data-lucide="tablet-smartphone" class="w-4 h-4 mr-2"></i> {{ (isset($tutor->employee->employment->office_telephone) ? $tutor->employee->employment->office_telephone : '---') }}
                                         </div>
                                     </div>
