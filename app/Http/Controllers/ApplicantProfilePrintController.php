@@ -84,7 +84,7 @@ class ApplicantProfilePrintController extends Controller
                         $PDFHTML .= '</td>';
                         $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
                             $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'" src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo) ? Storage::disk('local')->url('public/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
-                            $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : 'Unknown').'</span>';
+                            $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : '').'</span>';
                         $PDFHTML .= '</td>';
                     $PDFHTML .= '</tr>';
                 $PDFHTML .= '</table>';
