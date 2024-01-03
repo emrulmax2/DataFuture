@@ -318,7 +318,9 @@ var applicantionCustonList = (function () {
         let parentForm = tthis.parents('form');
         let formID = parentForm.attr('id');
         const form = document.getElementById(formID);
-        let rurl = route("agent.apply.update") ;
+        let id = $('input[name="id"]').val()
+        console.log(id)
+        let rurl = route("agent.apply.update",id) ;
 
         tthis.attr('disabled', 'disabled');
         $("svg",tthis).css("display", "inline-block");
@@ -340,18 +342,16 @@ var applicantionCustonList = (function () {
                 tthis.removeAttr('disabled');
                 $("svg",tthis).css("display", "none");
 
-                confirmModal.hide();
                 succModal.show();
                 applicantionCustonList.init(response.data);
 
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Success!");
-                    $("#successModal .successModalDesc").html('Valid applicantion');
+                    $("#successModal .successModalTitle").html("OTP SEND!");
+                    $("#successModal .successModalDesc").html('new otp sent to your mobile.');
                 });
                 setTimeout(function(){
                     succModal.hide();
-                    confirmModal.show();
-                }, 300);        
+                }, 1200);        
 
             }
             applicantApplicantionList.init();
@@ -380,13 +380,16 @@ var applicantionCustonList = (function () {
         let parentForm = tthis.parents('form');
         let formID = parentForm.attr('id');
         const form = document.getElementById(formID);
-        let rurl = route("agent.apply.update") ;
+        let id = $('input[name="id"]').val()
+        
+        let rurl = route("agent.apply.update",id) ;
 
         tthis.attr('disabled', 'disabled');
         $("svg",tthis).css("display", "inline-block");
 
 
         let form_data = new FormData(form);
+        console.log(form_data)
         axios({
             method: "post",
             url: rurl,
@@ -402,18 +405,16 @@ var applicantionCustonList = (function () {
                 tthis.removeAttr('disabled');
                 $("svg",tthis).css("display", "none");
 
-                confirmModal.hide();
                 succModal.show();
                 applicantionCustonList.init(response.data);
 
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Success!");
-                    $("#successModal .successModalDesc").html('Valid applicantion');
+                    $("#successModal .successModalTitle").html("Email Sent!");
+                    $("#successModal .successModalDesc").html('Successful Email Verification Code Send');
                 });
                 setTimeout(function(){
                     succModal.hide();
-                    confirmModal.show();
-                }, 300);        
+                }, 1200);        
 
             }
             applicantApplicantionList.init();

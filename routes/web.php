@@ -338,7 +338,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         });
         Route::controller(ApplicationCheckController::class)->group(function() {
             Route::post('/store', 'store')->name('apply.check');
-            Route::post('/update', 'update')->name('apply.update');
+            Route::post('/update/{id}', 'update')->name('apply.update');
             Route::post('/verify/mobile', 'verifyMobile')->name('apply.verify');
             Route::post('/verify/email', 'verifyEmail')->name('apply.email.verify');
         });
