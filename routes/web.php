@@ -14,6 +14,7 @@ use App\Http\Controllers\Settings\SourceTutionFeeController;
 use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\Agent\AgentController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Settings\VenueController;
@@ -193,6 +194,7 @@ use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -336,6 +338,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         });
         Route::controller(ApplicationCheckController::class)->group(function() {
             Route::post('/store', 'store')->name('apply.check');
+            Route::post('/update', 'update')->name('apply.update');
             Route::post('/verify/mobile', 'verifyMobile')->name('apply.verify');
             Route::post('/verify/email', 'verifyEmail')->name('apply.email.verify');
         });
@@ -830,6 +833,9 @@ Route::middleware('auth')->group(function() {
         Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
 
         //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
+
+        Route::post('admission/send-mobile-verification-code','sendMobileVerificationCode')->name('admission.send.mobile.verification.code');
+        Route::post('admission/send-mobile-verify-code','verifyMobileVerificationCode')->name('admission.mobile.verify.code');
         
     });
 
@@ -2029,6 +2035,21 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeTimeKeepingController::class)->group(function(){
         Route::get('employee-profile/time-keeper/{id}', 'index')->name('employee.time.keeper'); 
+        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
+    });
+
+    // GET|HEAD        agent-declaration ...................................................................................................................... agent-user.index › AgentController@index  
+    // POST            agent-declaration ...................................................................................................................... agent-user.store › AgentController@store  
+    // GET|HEAD        agent-declaration/create ............................................................................................................. agent-user.create › AgentController@create  
+    // GET|HEAD        agent-declaration-list ................................................................................................................... agent-user.list › AgentController@list  
+    // GET|HEAD        agent-declaration/{agent-user} ..................................................................................................... agent-user.show › AgentController@show  
+    // PUT|PATCH       agent-declaration/{agent-user} ................................................................................................. agent-user.update › AgentController@update  
+    // DELETE          agent-declaration/{agent-user} ............................................................................................... agent-user.destroy › AgentController@destroy  
+    // GET|HEAD        agent-declaration/{agent-user}/edit 
+    Route::resource('agent-declaration', AgentController::class);
+    
+    Route::controller(AgentController::class)->group(function() {
+        Route::post('agent-declaration-list', 'list')->name('agent.list'); 
     });
     
 });

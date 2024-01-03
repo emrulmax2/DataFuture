@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $userData = Auth::guard('agent')->user();
         $data = AgentApplicationCheck::where('agent_user_id',$userData->id)->whereNull("applicant_id")->get();
-        return view('pages.agent.index', [
+        return view('pages.agent.dashboard.index', [
             'title' => 'Agent Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
             'user' => $userData,

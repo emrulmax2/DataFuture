@@ -27,6 +27,7 @@ class AdmissionContactDetailsRequest extends FormRequest
             'email' => 'required',
             'mobile' => 'required',
             'applicant_address' => 'required',
+            'mobile_verification' => 'required|in:1',
         ];
     }
 
@@ -35,7 +36,9 @@ class AdmissionContactDetailsRequest extends FormRequest
         return [
             'email.required' => 'The Email field is required.',
             'mobile.required' => 'The Mobile Phone field is required.',
-            'applicant_address.required' => 'The Applicant Address is required.'
+            'applicant_address.required' => 'The Applicant Address is required.',
+            'mobile_verification.required' => 'Please verified mobile number',
+            'mobile_verification.in' => 'Please verified mobile number',
         ];
     }
 }

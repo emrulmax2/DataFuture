@@ -69,7 +69,11 @@ class DashboardController extends Controller
                     $html .= '<td>';
                         $html .= '<div class="flex items-center">';
                             if(isset($pln->group->name) && !empty($pln->group->name)):
-                                $html .= '<div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->group->name.'</div>';
+                                if(strlen($pln->group->name) > 2):
+                                    $html .= '<div class="mr-4 rounded text-lg bg-success text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->group->name.'</div>';
+                                else:
+                                    $html .= '<div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->group->name.'</div>';
+                                endif;
                             endif;
                             $html .= '<div>';
                                 $html .= '<a href="" class="font-medium whitespace-nowrap">'.(isset($pln->creations->module->name) && !empty($pln->creations->module->name) ? $pln->creations->module->name : 'Unknown').'</a>';
@@ -253,9 +257,10 @@ class DashboardController extends Controller
                 $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $res[$tut->id] = $tut;
+                $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1);
             endforeach;
         endif;
-
+        
         return view('pages.programme.dashboard.tutors', [
             'title' => 'Programme Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
@@ -289,6 +294,7 @@ class DashboardController extends Controller
                 $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $res[$tut->id] = $tut;
+                $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
             endforeach;
         endif;
 
@@ -313,5 +319,26 @@ class DashboardController extends Controller
             'tutor' => User::find($tutorid),
             'plans' => Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->get()
         ]);
+    }
+
+    public function getTermAttendanceRate($term_declaration_id, $tutor_id, $type = 1){
+        $tutor_field = ($type == 2 ? 'personal_tutor_id' : 'tutor_id');
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where($tutor_field, $tutor_id)->pluck('id')->unique()->toArray();
+        $attendance = DB::table('attendance_2 as atn')
+                          ->select(
+                              DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
+                              DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
+                              DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
+                              DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                          )
+                          ->whereIn('class_plan_id', $plan_ids)
+                          ->get()->first();
+
+        return $attendance;
     }
 }

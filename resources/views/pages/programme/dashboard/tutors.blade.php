@@ -43,7 +43,26 @@
                                             {{ (isset($tut->no_of_module) && $tut->no_of_module > 0 ? $tut->no_of_module : '0') }}
                                         </span>
                                     </td>
-                                    <td class="text-left"></td>
+                                    <td class="text-left">
+                                        @php
+                                            $attendances = $tut->attendances;
+
+                                            $attendance = 0;
+                                            $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+                                            $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+                                            $attendance += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+                                            $attendance += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+                                            $attendance += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+                                            $attendance += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+
+                                            $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
+                                            if($attendance > 0 && $attendanceTotal > 0):
+                                                echo number_format($attendance / $attendanceTotal * 100, 2).'%';
+                                            else:
+                                                echo '0.00%';
+                                            endif;
+                                        @endphp
+                                    </td>
                                     <td class="text-left"></td>
                                 </tr>
                             @endforeach

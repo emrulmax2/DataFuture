@@ -98,6 +98,7 @@ use App\Models\LetterSet;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\JobBatch;
+use App\Models\MobileVerificationCode;
 use App\Models\SexIdentifier;
 use App\Models\Student;
 use App\Models\StudentCourseRelation;
@@ -107,6 +108,7 @@ use App\Models\StudentUser;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class AdmissionController extends Controller
 {
@@ -260,6 +262,11 @@ class AdmissionController extends Controller
         $request->request->remove('proof_id');
         $request->request->remove('proof_expiredate');
         $request->request->remove('applicant_proof_of_id');
+
+        if(!isset($applicantOldRow->application_no) || is_null($applicantOldRow->application_no)):
+            $appNo = '2000'.sprintf('%05d', $applicant_id);
+            $request->merge(['application_no' => $appNo]);
+        endif;
 
         $applicant = Applicant::find($applicant_id);
         $applicant->fill($request->input());
@@ -2243,6 +2250,65 @@ class AdmissionController extends Controller
 
         // endforeach;
     
+    }
+
+    public function sendMobileVerificationCode(Request $request){
+        $applicant_id = $request->applicant_id;
+        $mobileNo = $request->mobileNo;
+
+        $verificationCode = rand(100000, 999999);
+        $mobileVerification = MobileVerificationCode::create([
+            'applicant_id' => $applicant_id,
+            'mobile' => $mobileNo,
+            'code' => $verificationCode,
+            'status' => 0,
+            'created_by' => auth()->user()->id,
+        ]);
+        if($mobileVerification):
+            $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
+            $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
+            $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+
+            if($active_api == 1 && !empty($textlocal_api)):
+                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                    'apikey' => $textlocal_api, 
+                    'message' => 'Your verification code: '.$verificationCode, 
+                    'sender' => 'London Churchill College', 
+                    'numbers' => $mobileNo
+                ]);
+            elseif($active_api == 2 && !empty($smseagle_api)):
+                $response = Http::withHeaders([
+                        'access-token' => $smseagle_api,
+                        'Content-Type' => 'application/json',
+                    ])->withoutVerifying()->withOptions([
+                        "verify" => false
+                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                        'to' => [$mobileNo],
+                        'text' => 'Your verification code: '.$verificationCode
+                    ]);
+                //return response()->json(['Message' => $response->json()], 200);
+            endif;
+            return response()->json(['Message' => 'Verification code successfully send to the mobile nuber.'], 200);
+        else:
+            return response()->json(['Message' => 'Something went wrong. Please try later'], 422);
+        endif;
+    }
+
+    public function verifyMobileVerificationCode(Request $request){
+        $applicant_id = $request->applicant_id;
+        $code = $request->code;
+        $mobile = $request->mobile;
+
+        $applicantCodes = MobileVerificationCode::where('applicant_id', $applicant_id)->where('mobile', $mobile)
+                            ->where('code', $code)->where('status', '!=', 1)->orderBy('id', 'DESC')->get()->first();
+        if(isset($applicantCodes->id) && $applicantCodes->id > 0):
+            MobileVerificationCode::where('id', $applicantCodes->id)->update(['status' => 1]);
+            ApplicantContact::where('applicant_id', $applicant_id)->update(['mobile_verification' => 1]);
+
+            return response()->json(['suc' => 1], 200);
+        else:
+            return response()->json(['suc' => 2], 200);
+        endif;
     }
 
 }
