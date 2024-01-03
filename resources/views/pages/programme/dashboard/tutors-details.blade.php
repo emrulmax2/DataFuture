@@ -45,12 +45,15 @@
                                 <tr class="intro-x">
                                     <td class="font-medium">Overall</td>
                                     <td class="font-medium"></td>
-                                    <td class="font-medium"></td>
+                                    <td class="font-medium overAllAttendanceRate"></td>
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
                                 </tr>
-                                @if(!empty($plans) && $plans->count() > 0)
+                                @php 
+                                    $P = $O = $L = $E = $M = $H = $OVERALLTOTAL = 0;
+                                @endphp
+                                @if(!empty($plans))
                                     @foreach($plans as $pln)
                                         <tr class="intro-x">
                                             <td class="font-medium">
@@ -68,7 +71,33 @@
                                                     </div>
                                                 @endif
                                             </td>
-                                            <td></td>
+                                            <td>
+                                                @php
+                                                    $attendances = $pln->attendances;
+
+                                                    $attendance = 0;
+                                                    $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+                                                    $P += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+                                                    $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+                                                    $O += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+                                                    $attendance += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+                                                    $L += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+                                                    $attendance += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+                                                    $E += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+                                                    $attendance += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+                                                    $M += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+                                                    $attendance += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+                                                    $H += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+
+                                                    $OVERALLTOTAL += (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
+                                                    $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
+                                                    if($attendance > 0 && $attendanceTotal > 0):
+                                                        echo number_format($attendance / $attendanceTotal * 100, 2).'%';
+                                                    else:
+                                                        echo '0.00%';
+                                                    endif;
+                                                @endphp
+                                            </td>
                                             <td></td>
                                             <td></td>
                                             <td>
@@ -77,6 +106,14 @@
                                         </tr>
                                     @endforeach
                                 @endif
+                                @php 
+                                    $overAllAttendance = $P + $O + $L + $E + $M + $H;
+                                    if($overAllAttendance > 0 && $OVERALLTOTAL > 0):
+                                        $overallRate = number_format($overAllAttendance / $OVERALLTOTAL * 100, 2).'%';
+                                    else:
+                                        $overallRate = '0.00%';
+                                    endif;
+                                @endphp
                             </tbody>
                         </table>
                     </div>
@@ -148,4 +185,11 @@
             </div>
         </div>
     </div>
+@endsection
+@section('script')
+    <script type="module">
+        (function(){
+            $('.overAllAttendanceRate').html('<?php echo $overallRate; ?>');
+        })();
+    </script>
 @endsection
