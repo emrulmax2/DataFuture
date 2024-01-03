@@ -188,10 +188,41 @@
                             <input value="{{ isset($applicant->contact->home) ? $applicant->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control phoneMask" name="phone">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
+                        {{-- <div class="col-span-12 sm:col-span-6">
+                            <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
+                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-varified="{{ isset($applicant->contact->mobile_verification) ? $applicant->contact->mobile_verification : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control phoneMask" name="mobile">
+                            <div class="acc__input-error error-mobile text-danger mt-2"></div>
+                        </div> --}}
                         <div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-original="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control phoneMask" name="mobile">
+                            <div class="validationGroup">
+                                <input value="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" data-org="{{ isset($applicant->contact->mobile) ? $applicant->contact->mobile : '' }}" id="mobile" name="mobile" type="text" class="form-control w-full phoneMask"  placeholder="Mobile Phone">
+                                <button id="sendMobileVerifiCode" 
+                                    data-applicant-id="{{ isset($applicant->id) && $applicant->id > 0 ? $applicant->id : 0 }}" 
+                                    class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($applicant->contact->mobile_verification) && !empty($applicant->contact->mobile_verification) && $applicant->contact->mobile_verification == 1 ? 'btn-primary verified' : 'btn-danger' }}"
+                                    
+                                    {{ isset($applicant->contact->mobile_verification) && $applicant->contact->mobile_verification == 1 ? 'readonly' : '' }}
+                                    >
+                                    @if(isset($applicant->contact->mobile_verification) && $applicant->contact->mobile_verification == 1)
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified
+                                    @else
+                                        <i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code
+                                    @endif 
+                                </button>
+                                <input type="hidden" class="mobile_verification" name="mobile_verification" value="{{ isset($applicant->contact->mobile_verification) && $applicant->contact->mobile_verification > 0 ? $applicant->contact->mobile_verification : 0 }}" data-org="{{ isset($applicant->contact->mobile_verification) && $applicant->contact->mobile_verification > 0 ? $applicant->contact->mobile_verification : 0 }}" />
+                            </div>
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
+                            <div class="acc__input-error error-mobile_verification text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6 verifyCodeGroup" style="display: none;">
+                            <label for="mobile" class="form-label">Verification Code <span class="text-danger">*</span></label>
+                            <div class="validationGroup">
+                                <input value="" id="verification_code" name="verification_code" type="text" class="form-control w-full"  placeholder="Verification Code">
+                                <button id="verifyMobile" data-applicant-id="{{ isset($applicant->id) && $applicant->id > 0 ? $applicant->id : 0 }}" class="btn w-auto mr-0 mb-0 absolute h-full  btn-primary" >
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verify
+                                </button>
+                            </div>
+                            <div class="acc__input-error error-mobile_verification_error text-danger mt-2"></div>
                         </div>
                         @php 
                             $address = $address_line_1 = $address_line_2 = $city = $state = $post_code = $country = '';

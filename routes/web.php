@@ -830,6 +830,9 @@ Route::middleware('auth')->group(function() {
         Route::get('admission/progress/data/{id?}','progressForStudentStoreProcess')->name('admission.progress.data');
 
         //Route::get('admission/convertstudent','convertStudentDemo')->name('admission.convertstudent');
+
+        Route::post('admission/send-mobile-verification-code','sendMobileVerificationCode')->name('admission.send.mobile.verification.code');
+        Route::post('admission/send-mobile-verify-code','verifyMobileVerificationCode')->name('admission.mobile.verify.code');
         
     });
 
