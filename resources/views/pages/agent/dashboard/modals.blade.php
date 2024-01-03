@@ -4,7 +4,7 @@
         <form method="POST" action="#" id="addStudentDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Application Process</h2>
+                    <h2 class="font-medium text-base mr-auto">Application Information</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -72,14 +72,44 @@
                     <div class="text-slate-500 mt-2 mb-2 confModDesc">Please verify codes in order to apply</div>
                     
                     <div class="form-inline">
-                        <label for="horizontal-form-1" class="form-label sm:w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
+                        <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
                         <label id="horizontal-email" for="horizontal-email" class="form-label w-40 text-left">emrulmax2@gmail.com</label>
-                        <input id="horizontal-form-1" name="email_verify_code" type="text" class="form-control w-20" placeholder="1234">
+                        <input id="horizontal-form-1" name="email_verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
+                        <button id="resend-email" type="button" data-id="0" data-action="none" class="resend-email btn btn-primary w-auto ml-auto">
+                            Resend
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
                     </div>
                     <div class="form-inline mt-5">
-                        <label for="horizontal-form-2" class="form-label sm:w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
+                        <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
                         <label id="horizontal-mobile" for="horizontal-phone" class="form-label w-40 text-left">+8801817718335</label>
-                        <input id="horizontal-form-2" name="verify_code" type="text" class="form-control w-20" placeholder="1234">
+                        <input id="horizontal-form-2" name="verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
+                        <button id="resend-mobile" type="button" data-id="0" data-action="none" class="resend-mobile btn btn-primary  w-auto ml-auto">
+                            Resend
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 <div class="px-5 pb-8 text-center">

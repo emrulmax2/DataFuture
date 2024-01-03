@@ -310,6 +310,130 @@ var applicantionCustonList = (function () {
             }
         });
     });
+
+    $('.resend-mobile').on('click', function(e){
+        e.preventDefault();
+
+        let tthis = $(this);
+        let parentForm = tthis.parents('form');
+        let formID = parentForm.attr('id');
+        const form = document.getElementById(formID);
+        let rurl = route("agent.apply.update") ;
+
+        tthis.attr('disabled', 'disabled');
+        $("svg",tthis).css("display", "inline-block");
+
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: rurl,
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+
+            tthis.removeAttr('disabled');
+            $("svg",tthis).css("display", "none");
+
+            if (response.status == 200) {
+
+                tthis.removeAttr('disabled');
+                $("svg",tthis).css("display", "none");
+
+                confirmModal.hide();
+                succModal.show();
+                applicantionCustonList.init(response.data);
+
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Success!");
+                    $("#successModal .successModalDesc").html('Valid applicantion');
+                });
+                setTimeout(function(){
+                    succModal.hide();
+                    confirmModal.show();
+                }, 300);        
+
+            }
+            applicantApplicantionList.init();
+        }).catch(error => {
+            
+            tthis.removeAttr('disabled');
+            $("svg",tthis).css("display", "none");
+
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#${formID} .${key}`).addClass('border-danger')
+                        $(`#${formID}  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('.resend-email').on('click', function(e){
+        e.preventDefault();
+
+        let tthis = $(this);
+        let parentForm = tthis.parents('form');
+        let formID = parentForm.attr('id');
+        const form = document.getElementById(formID);
+        let rurl = route("agent.apply.update") ;
+
+        tthis.attr('disabled', 'disabled');
+        $("svg",tthis).css("display", "inline-block");
+
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: rurl,
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+
+            tthis.removeAttr('disabled');
+            $("svg",tthis).css("display", "none");
+
+            if (response.status == 200) {
+
+                tthis.removeAttr('disabled');
+                $("svg",tthis).css("display", "none");
+
+                confirmModal.hide();
+                succModal.show();
+                applicantionCustonList.init(response.data);
+
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Success!");
+                    $("#successModal .successModalDesc").html('Valid applicantion');
+                });
+                setTimeout(function(){
+                    succModal.hide();
+                    confirmModal.show();
+                }, 300);        
+
+            }
+            applicantApplicantionList.init();
+        }).catch(error => {
+            
+            tthis.removeAttr('disabled');
+            $("svg",tthis).css("display", "none");
+
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#${formID} .${key}`).addClass('border-danger')
+                        $(`#${formID}  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
     $(".newapplicant-modal").on('click',function(e){ 
         let tthis = $(this)
         $('#confirmModal #horizontal-email').html(tthis.data('email'));

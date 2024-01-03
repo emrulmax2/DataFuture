@@ -24,7 +24,9 @@ class StoreAgentRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'agent_user_id' => 'required'
         ];
     }
 }
