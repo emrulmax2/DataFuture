@@ -133,7 +133,7 @@ class EmployeeTimeKeepingController extends Controller
             $PDFHTML .= '<body>';
                 if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
                     $PDFHTML .= '<header>';
-                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
                     $PDFHTML .= '</header>';
                 endif;
 
@@ -160,6 +160,12 @@ class EmployeeTimeKeepingController extends Controller
 
                 /*PDF BODY START*/
                 $PDFHTML .= '<div class="bodyContainer">';
+                    $PDFHTML .= '<table class="table mb-10">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>'.$employee->full_name.'</td>';
+                            $PDFHTML .= '<td class="text-right">'.date('F Y', strtotime($theMonthStart)).'</td>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</table>';
                     $PDFHTML .= '<table class="table table-sm table-bordered">';
                         $PDFHTML .= '<thead>';
                             $PDFHTML .= '<tr>';
@@ -192,6 +198,8 @@ class EmployeeTimeKeepingController extends Controller
                                         if($clockout_punch < $earlyLeave):
                                             $note[] = 'Leave Early';
                                         endif;
+                                    elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                                        $note[] = 'Clock Out Not Found';
                                     endif;
                                     if(empty($attn->total_break) || $attn->total_break == 0):
                                         $note[] = 'Break Not Found';
@@ -208,6 +216,8 @@ class EmployeeTimeKeepingController extends Controller
                                         if($clockout_punch < $earlyLeave):
                                             $note[] = 'Leave Early';
                                         endif;
+                                    elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                                        $note[] = 'Clock Out Not Found';
                                     endif;
                                     if(empty($attn->total_break) || $attn->total_break == 0):
                                         $note[] = 'Break Not Found';
@@ -229,7 +239,8 @@ class EmployeeTimeKeepingController extends Controller
 
                                 $PDFHTML .= '<tr class="timeKeepingRow timeKeepingRow_'.($attn->leave_status > 0 ? $attn->leave_status : ($attn->overtime_status == 1 ? 'ov' : 0)).'" data-id="'.$attn->id.'">';
                                     $PDFHTML .= '<td>';
-                                        $PDFHTML .= '<strong>'.date('l jS F, Y', strtotime($attn->date)).'</strong>';
+                                        $PDFHTML .= '<strong>'.date('jS F, Y, l', strtotime($attn->date)).'</strong><br/>';
+                                        $PDFHTML .= '<strong>'.$attn->clockin_contract.' - '.$attn->clockout_contract.'</strong>';
                                     $PDFHTML .= '</td>';
                                     $PDFHTML .= '<td>';
                                         if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status))):
@@ -252,7 +263,8 @@ class EmployeeTimeKeepingController extends Controller
                                     $PDFHTML .= '</td>';
                                     $PDFHTML .= '<td>';
                                         if($attn->total_work_hour > 0 && ($attn->clockin_punch != '' && $attn->clockin_punch != '00:00')):
-                                            $PDFHTML .= $attn->clockin_punch.' - '.$attn->clockout_punch;
+                                            $PDFHTML .= 'A: '.$attn->clockin_punch.' - '.$attn->clockout_punch.'<br/>';
+                                            $PDFHTML .= 'S: '.$attn->clockin_system.' - '.$attn->clockout_system;
                                         endif;
                                     $PDFHTML .= '</td>';
                                     $PDFHTML .= '<td>';

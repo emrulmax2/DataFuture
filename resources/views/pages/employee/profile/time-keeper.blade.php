@@ -81,6 +81,8 @@
                                                                                     if($clockout_punch < $earlyLeave):
                                                                                         $note[] = 'Leave Early';
                                                                                     endif;
+                                                                                elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                                                                                    $note[] = 'Clock Out Not Found';
                                                                                 endif;
                                                                                 if(empty($attn->total_break) || $attn->total_break == 0):
                                                                                     $note[] = 'Break Not Found';
@@ -97,6 +99,8 @@
                                                                                     if($clockout_punch < $earlyLeave):
                                                                                         $note[] = 'Leave Early';
                                                                                     endif;
+                                                                                elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                                                                                    $note[] = 'Clock Out Not Found';
                                                                                 endif;
                                                                                 if(empty($attn->total_break) || $attn->total_break == 0):
                                                                                     $note[] = 'Break Not Found';
@@ -118,7 +122,8 @@
                                                                         @endphp
                                                                         <tr class="timeKeepingRow timeKeepingRow_{{ ($attn->leave_status > 0 ? $attn->leave_status : ($attn->overtime_status == 1 ? 'ov' : 0)) }}" data-id="{{ $attn->id }}">
                                                                             <td class="font-medium w-72">
-                                                                                {{ date('l jS F, Y', strtotime($attn->date)) }}
+                                                                                {{ date('jS F, Y, l', strtotime($attn->date)) }}<br/>
+                                                                                {{ $attn->clockin_contract.' - '.$attn->clockout_contract }}
                                                                             </td>
                                                                             <td>
                                                                                 @if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status)))
@@ -141,7 +146,8 @@
                                                                             </td>
                                                                             <td>
                                                                                 @if($attn->total_work_hour > 0 && ($attn->clockin_punch != '' && $attn->clockin_punch != '00:00'))
-                                                                                    {{ $attn->clockin_punch.' - '.$attn->clockout_punch }}
+                                                                                    {{ 'A: '.$attn->clockin_punch.' - '.$attn->clockout_punch }}<br/>
+                                                                                    {{ 'S: '.$attn->clockin_system.' - '.$attn->clockout_system }}
                                                                                 @endif
                                                                             </td>
                                                                             <td>
