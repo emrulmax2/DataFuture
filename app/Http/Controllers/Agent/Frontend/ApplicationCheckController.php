@@ -61,9 +61,11 @@ class ApplicationCheckController extends Controller
                 'numbers' => $data->mobile
             ]);
         elseif($active_api == 2 && !empty($smseagle_api)):
-            $response = Http::timeout(-1)->withHeaders([
+            $response = Http::withHeaders([
                 'access-token' => $smseagle_api,
                 'Content-Type' => 'application/json',
+            ])->withoutVerifying()->withOptions([
+                "verify" => false
             ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
                 'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
