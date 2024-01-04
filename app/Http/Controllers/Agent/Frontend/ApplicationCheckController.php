@@ -158,12 +158,12 @@ class ApplicationCheckController extends Controller
      */
     public function update(UpdateAgenApplicationChecktRequest $request, $id)
     {
-        $request->request->add(['updated_by' => auth('agent')->user()->id]);
-        $request->request->add(['verify_code' => rand(1111,9999)]);
-        $request->request->add(['email_verify_code' => rand(1111,9999)]);
+
         $AgentApplicationCheck = AgentApplicationCheck::find($id);
  
-        $AgentApplicationCheck->fill($request->all());
+        $AgentApplicationCheck->updated_by= auth('agent')->user()->id;
+        $AgentApplicationCheck->verify_code= rand(1111,9999);
+        $AgentApplicationCheck->email_verify_code= rand(1111,9999);
         
         $AgentApplicationCheck->save();
         $data = $AgentApplicationCheck;
