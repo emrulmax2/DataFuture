@@ -62,16 +62,18 @@
 <!-- END: Edit Punch Modal -->
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" action="#" id="confirmModalForm" enctype="multipart/form-data">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content w-full">
             <div class="modal-body p-0">
                 <div class="p-5 text-center">
                     <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Verify Mobile & Email</div>
                     <div class="text-slate-500 mt-2 mb-2 confModDesc">Please verify codes in order to apply</div>
-                    
-                    <div class="form-inline">
+                    <div id="modal-emailverified" class="form-inline">
+                        <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data">
+                        <input class="id" type="hidden" name="id" value="">
+                        <input type="hidden" name="url" value="{{ route('agent.apply.email.verify') }}" />
+                        <input type="hidden" name="user_id" value="{{ $user->id }}" />
                         <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
                         <label id="horizontal-email" for="horizontal-email" class="form-label w-40 text-left">emrulmax2@gmail.com</label>
                         <input id="horizontal-form-1" name="email_verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
@@ -90,8 +92,31 @@
                                 </g>
                             </svg>
                         </button>
+                        <button type="submit" data-id="0" data-action="none" class="save btn btn-danger w-auto">
+                            Verify
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        
+                        <div class="acc__input-error error-email_verify_code text-danger mt-2 w-full text-right"></div>
+                        </form>
                     </div>
-                    <div class="form-inline mt-5">
+                    <div  id="modal-mobileverified" class="form-inline mt-5">
+                        
+                        <form method="POST" action="#" id="confirmModalForm2" enctype="multipart/form-data">
+                        <input class="id" type="hidden" name="id" value="">
+                        <input type="hidden" name="url" value="{{ route('agent.apply.verify') }}" />
+                        <input type="hidden" name="user_id" value="{{ $user->id }}" />
                         <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
                         <label id="horizontal-mobile" for="horizontal-phone" class="form-label w-40 text-left">+8801817718335</label>
                         <input id="horizontal-form-2" name="verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
@@ -110,34 +135,31 @@
                                 </g>
                             </svg>
                         </button>
+                        <button type="submit" data-id="0" data-action="none" class="save btn btn-danger w-auto">
+                            Verify
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <div class="acc__input-error error-verify_code text-danger mt-2 w-full text-right"></div>
+                        </form>
                     </div>
                 </div>
                 <div class="px-5 pb-8 text-center">
-                    <input class="id" type="hidden" name="id" value="">
-                    
-                    <input type="hidden" name="url" value="{{ route('agent.apply.verify') }}" />
-                    <input type="hidden" name="user_id" value="{{ $user->id }}" />
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-
-                    <button type="submit" data-id="0" data-action="none" class="save btn btn-danger w-auto">
-                        Verify Now
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
                 </div>
             </div>
         </div>
-        </form>
+        
     </div>
 </div>
 <!-- END: Delete Confirm Modal Content -->

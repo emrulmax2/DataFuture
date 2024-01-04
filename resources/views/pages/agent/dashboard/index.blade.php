@@ -162,7 +162,7 @@
                                     @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
                                         <a href="{{ route("agent.application",$recentapplicant->id) }}" style="inline-block">
                                     @else
-                                        <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">
+                                        <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">
                                     @endif
                                             <div  class="intro-y module-details_1 ">
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">

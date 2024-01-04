@@ -107,7 +107,7 @@ var applicantionCustonList = (function () {
 
         let dataset = responseData
         let totalApplicant = dataset.length
-
+        
         let html = `<div class="report-box-2 intro-y mt-5 mb-7">
                             <div class="box p-5">
                                 <div class="flex items-center">
@@ -122,10 +122,12 @@ var applicantionCustonList = (function () {
         let htmlRecents = "";
 
         $(dataset).each(function(index,data) { 
-            if(data.mobile_verified_at && data.email_verified_at) {
+            
+            if( data.mobile_verified_at && data.email_verified_at ) {
                 htmlRecents +=`<a href="${ route("agent.dashboard") }" style="inline-block">`
             } else {
-                htmlRecents +=` <div data-tw-toggle="modal" data-applicationid="${data.id}" data-email="${data.email}" data-mobile="${data.mobile}" data-tw-target="#confirmModal">`
+                
+                htmlRecents +=` <div data-tw-toggle="modal" data-applicationid="${data.id}" data-email-verified="${data.email_verified_at ? 1:0}" data-email="${data.email}" data-mobile="${data.mobile}" data-mobile-verified="${data.mobile_verified_at ? 1:0}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">`
             }
             htmlRecents +=`<div  class="intro-y module-details_1 ">
                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
@@ -217,6 +219,7 @@ var applicantionCustonList = (function () {
 
                 addModal.hide();
                 succModal.show();
+                confirmModal.hide();
                 applicantionCustonList.init(response.data);
                 // let dataset = response.data
                 // let totalApplicant = dataset.length
@@ -283,6 +286,14 @@ var applicantionCustonList = (function () {
                 //     "stroke-width": 1.5,
                 //     nameAttr: "data-lucide",
                 // })
+                if(response.data.email_verified_at) {
+                    
+                    $("#modal-emailverified").hide()
+                    
+                }
+                if(response.data.mobile_verified_at) {
+                    $("#modal-mobileverified").hide()
+                }
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Success!");
                     $("#successModal .successModalDesc").html('Valid applicantion');
@@ -319,7 +330,7 @@ var applicantionCustonList = (function () {
         let formID = parentForm.attr('id');
         const form = document.getElementById(formID);
         let id = $('input[name="id"]').val()
-        console.log(id)
+     
         let rurl = route("agent.apply.update",id) ;
 
         tthis.attr('disabled', 'disabled');
@@ -389,7 +400,7 @@ var applicantionCustonList = (function () {
 
 
         let form_data = new FormData(form);
-        console.log(form_data)
+  
         axios({
             method: "post",
             url: rurl,
@@ -437,10 +448,30 @@ var applicantionCustonList = (function () {
     });
     $(".newapplicant-modal").on('click',function(e){ 
         let tthis = $(this)
+        var eVerified = tthis.data('email-verified');
+        var mVerified = tthis.data('mobile-verified')
+        // if(eVerified) {
+        //     $("#modal-emailverified").hide()
+        // }
+        // if(mVerified) {
+        //     $("#modal-mobileverified").hide()
+        // }
         $('#confirmModal #horizontal-email').html(tthis.data('email'));
         $('#confirmModal #horizontal-mobile').html(tthis.data('mobile'));
 
         $("input[name='id']").val(tthis.data('applicationid'))
+        $("input.id").val(tthis.data('applicationid'))
+
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            if(mVerified) {
+                $("#confirmModal #modal-mobileverified").hide()
+            }
+            if(eVerified) {
+                $("#confirmModal #modal-emailverified").hide()
+            }
+            eVerified =undefined
+            mVerified =undefined
+        });
 
     })
 
