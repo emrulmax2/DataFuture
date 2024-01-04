@@ -55,7 +55,8 @@ class ApplicationCheckController extends Controller
         if($active_api == 1 && !empty($textlocal_api)):
             $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                 'apikey' => $textlocal_api, 
-                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
                 'sender' => 'London Churchill College', 
                 'numbers' => $data->mobile
             ]);
@@ -65,7 +66,8 @@ class ApplicationCheckController extends Controller
                 'Content-Type' => 'application/json',
             ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
-                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours",
+                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                            ".Use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
         endif;
 
@@ -87,44 +89,62 @@ class ApplicationCheckController extends Controller
         if($request->email_verify_code)
             $applicantEmail = $this->verifyEmail($request);
         
-        
         if($request->verify_code)
         {
-            $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
+            $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)
+                                ->whereNull("applicant_id")
+                                ->where("verify_code",$request->verify_code)
+                                ->where("active",0)
+                                ->get()
+                                ->first();
 
             if($ApplicantFound) {
                 
                 $ApplicantFound->mobile_verified_at = date("Y-m-d H:i:s");
                 $ApplicantFound->save();
                 
-                return response()->json($ApplicantFound);
+                $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
+    
+                return response()->json($data);
+
+            } else {
 
             }
         }
         if($applicantEmail) {
-
-            return response()->json($applicantEmail);
+            $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
+            
+            return response()->json($data);
 
         }
         
-        return response()->json(["message"=>"invalid code"],422);
+        return response()->json(["errors"=>["verify_code"=>"invalid mobile otp"],"message"=>"invalid code"],422);
     }
     
     public function verifyEmail(Request $request)
     {
         
 
-        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("email_verify_code",$request->email_verify_code)->where("active",0)->get()->first();
+        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)
+                            ->where('agent_user_id',$request->user_id)
+                            ->whereNull("applicant_id")
+                            ->where("email_verify_code",$request->email_verify_code)
+                            ->where("active",0)
+                            ->get()
+                            ->first();
         
         if($ApplicantFound) {
 
             $ApplicantFound->email_verified_at = date("Y-m-d H:i:s");
             $ApplicantFound->save();
 
-            return response()->json($ApplicantFound);
+
+            $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
+    
+            return response()->json($data);
         }
-        
-        return response()->json(["message"=>"invalid code"],422);
+
+        return response()->json(["errors"=>["email_verify_code"=>"invalid email code"],"message"=>"invalid code"],422);
     }
 
     /**
@@ -175,7 +195,8 @@ class ApplicationCheckController extends Controller
         if($active_api == 1 && !empty($textlocal_api)):
             $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                 'apikey' => $textlocal_api, 
-                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                ".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
                 'sender' => 'London Churchill College', 
                 'numbers' => $data->mobile
             ]);
@@ -188,18 +209,13 @@ class ApplicationCheckController extends Controller
                 "verify" => false
             ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
-                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                            ".Use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
 
         endif;
 
         Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));
-
-        if($data) {
-            $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
-
-        }
-
                 
         return response()->json($data);
     }
