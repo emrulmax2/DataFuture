@@ -93,8 +93,8 @@ class ApplicationCheckController extends Controller
             $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
 
             if($ApplicantFound) {
-                $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
-                $ApplicantFound->fill($request->all());
+                
+                $ApplicantFound->mobile_verified_at = date("Y-m-d H:i:s");
                 $ApplicantFound->save();
                 
                 return response()->json($ApplicantFound);
@@ -180,13 +180,7 @@ class ApplicationCheckController extends Controller
                 'numbers' => $data->mobile
             ]);
         elseif($active_api == 2 && !empty($smseagle_api)):
-            // $response = Http::timeout(-1)->withHeaders([
-            //     'access-token' => $smseagle_api,
-            //     'Content-Type' => 'application/json',
-            // ])->post('https://79.171.153.104/api/v2/messages/sms', [
-            //     'to' => [$data->mobile],
-            //     'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours",
-            // ]);
+
             $response = Http::withHeaders([
                 'access-token' => $smseagle_api,
                 'Content-Type' => 'application/json',
@@ -196,6 +190,7 @@ class ApplicationCheckController extends Controller
                 'to' => [$data->mobile],
                 'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
+
         endif;
 
         Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));
@@ -217,6 +212,7 @@ class ApplicationCheckController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $data = AgentApplicationCheck::find($id)->forceDelete();
+        return response()->json($data);
     }
 }
