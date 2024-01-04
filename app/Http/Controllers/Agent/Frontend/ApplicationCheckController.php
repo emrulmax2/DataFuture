@@ -88,18 +88,19 @@ class ApplicationCheckController extends Controller
             $applicantEmail = $this->verifyEmail($request);
         
         
+        if($request->verify_code)
+        {
+            $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
 
-        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("verify_code",$request->verify_code)->where("active",0)->get();
+            if($ApplicantFound) {
+                $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
+                $ApplicantFound->fill($request->all());
+                $ApplicantFound->save();
+                
+                return response()->json($ApplicantFound);
 
-        if($ApplicantFound) {
-            $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
-            $ApplicantFound->fill($request->all());
-            $ApplicantFound->save();
-            
-            return response()->json($ApplicantFound);
-
+            }
         }
-
         if($applicantEmail) {
 
             return response()->json($applicantEmail);
@@ -113,11 +114,11 @@ class ApplicationCheckController extends Controller
     {
         
 
-        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("email_verify_code",$request->email_verify_code)->where("active",0)->get();
+        $ApplicantFound = AgentApplicationCheck::where('id',$request->id)->where('agent_user_id',$request->user_id)->whereNull("applicant_id")->where("email_verify_code",$request->email_verify_code)->where("active",0)->get()->first();
         
         if($ApplicantFound) {
-            $request->merge(["email_verified_at",date("Y-m-d H:i:s")]);
-            $ApplicantFound->fill($request->all());
+
+            $ApplicantFound->email_verified_at = date("Y-m-d H:i:s");
             $ApplicantFound->save();
 
             return response()->json($ApplicantFound);

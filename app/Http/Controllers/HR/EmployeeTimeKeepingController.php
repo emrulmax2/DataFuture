@@ -160,10 +160,10 @@ class EmployeeTimeKeepingController extends Controller
 
                 /*PDF BODY START*/
                 $PDFHTML .= '<div class="bodyContainer">';
-                    $PDFHTML .= '<table class="table mb-10">';
+                    $PDFHTML .= '<table class="mb-15" style="width: 100%;">';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td>'.$employee->full_name.'</td>';
-                            $PDFHTML .= '<td class="text-right">'.date('F Y', strtotime($theMonthStart)).'</td>';
+                            $PDFHTML .= '<td><span class="tableTitle">'.$employee->full_name.'</span></td>';
+                            $PDFHTML .= '<td class="text-right"><span class="tableTitle">'.date('F Y', strtotime($theMonthStart)).'</span></td>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</table>';
                     $PDFHTML .= '<table class="table table-sm table-bordered">';
