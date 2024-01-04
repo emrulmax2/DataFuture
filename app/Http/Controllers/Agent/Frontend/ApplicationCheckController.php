@@ -63,7 +63,7 @@ class ApplicationCheckController extends Controller
             $response = Http::timeout(-1)->withHeaders([
                 'access-token' => $smseagle_api,
                 'Content-Type' => 'application/json',
-            ])->post('http://79.171.153.104/api/v2/messages/sms', [
+            ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
                 'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
@@ -171,6 +171,7 @@ class ApplicationCheckController extends Controller
         $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+
         if($active_api == 1 && !empty($textlocal_api)):
             $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                 'apikey' => $textlocal_api, 
