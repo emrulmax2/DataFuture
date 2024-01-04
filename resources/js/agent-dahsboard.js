@@ -130,8 +130,14 @@ var applicantionCustonList = (function () {
                 htmlRecents +=` <div data-tw-toggle="modal" data-applicationid="${data.id}" data-email-verified="${data.email_verified_at ? 1:0}" data-email="${data.email}" data-mobile="${data.mobile}" data-mobile-verified="${data.mobile_verified_at ? 1:0}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">`
             }
             htmlRecents +=`<div  class="intro-y module-details_1 ">
-                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                    <div class="ml-4 mr-auto">
+                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">`;
+                                if( !data.mobile_verified_at && !data.email_verified_at ) {
+                                    htmlRecents +=`<div id="confirmDelete" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
+                                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                                        </div>`
+                                }
+                                
+                                htmlRecents +=`<div class="ml-4 mr-auto">
                                         <div class="font-medium">${data.first_name} ${data.last_name}</div>
                                          
                                         <div class="text-slate-500 text-xs mt-0.5 ">`
@@ -475,8 +481,33 @@ var applicantionCustonList = (function () {
 
     })
 
-    // confirmModal.addEventListener('show.tw.modal', function(event){
+    // Confirm Modal Action
+    $('#deleteData').on('click', function(){
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+
+        axios({
+            method: 'delete',
+            url: route('agent.apply.destory', recordID),
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#confirmModal button').removeAttr('disabled');
+                confModal.hide();
+
+                succModal.show();
+                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                    $('#successModal .successModalTitle').html('Done!');
+                    $('#successModal .successModalDesc').html('Academic year successfully deleted!');
+                });
+            }
+            table.init();
+        }).catch(error =>{
+            console.log(error)
+        });
         
-        
-    // });
+    })
 })();

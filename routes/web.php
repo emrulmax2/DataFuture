@@ -341,6 +341,8 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::post('/update/{id}', 'update')->name('apply.update');
             Route::post('/verify/mobile', 'verifyMobile')->name('apply.verify');
             Route::post('/verify/email', 'verifyEmail')->name('apply.email.verify');
+            Route::delete('/delete/{id}', 'destroy')->name('apply.destory');
+            
         });
 
         Route::controller(FrontendApplicationController::class)->group(function() {

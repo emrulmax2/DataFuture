@@ -165,7 +165,11 @@
                                         <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">
                                     @endif
                                             <div  class="intro-y module-details_1 ">
+                                                
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
+                                                    <div id="confirmDelete" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
+                                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                                    </div>
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $recentapplicant->full_name }}</div>
                                                         <div class="text-slate-500 text-xs mt-0.5 ">
