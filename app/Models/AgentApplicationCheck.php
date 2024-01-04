@@ -14,6 +14,21 @@ class AgentApplicationCheck extends Model
 
     protected $appends = ['full_name'];
 
+    protected $fillable = [
+        'agent_user_id',
+        'applicant_id',
+        'first_name',
+        'last_name',
+        'mobile',
+        'email',
+        'verify_code',
+        'email_verify_code',
+        'email_verified_at',
+        'mobile_verified_at',
+        'active',
+        'created_by',
+        'updated_by',
+    ];
     /**
      * The attributes that should be cast.
      *
