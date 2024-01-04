@@ -175,17 +175,26 @@ class ApplicationCheckController extends Controller
         if($active_api == 1 && !empty($textlocal_api)):
             $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                 'apikey' => $textlocal_api, 
-                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
                 'sender' => 'London Churchill College', 
                 'numbers' => $data->mobile
             ]);
         elseif($active_api == 2 && !empty($smseagle_api)):
-            $response = Http::timeout(-1)->withHeaders([
+            // $response = Http::timeout(-1)->withHeaders([
+            //     'access-token' => $smseagle_api,
+            //     'Content-Type' => 'application/json',
+            // ])->post('https://79.171.153.104/api/v2/messages/sms', [
+            //     'to' => [$data->mobile],
+            //     'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours",
+            // ]);
+            $response = Http::withHeaders([
                 'access-token' => $smseagle_api,
                 'Content-Type' => 'application/json',
+            ])->withoutVerifying()->withOptions([
+                "verify" => false
             ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
-                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours",
+                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".Use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
         endif;
 
