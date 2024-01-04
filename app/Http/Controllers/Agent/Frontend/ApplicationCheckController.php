@@ -182,7 +182,7 @@ class ApplicationCheckController extends Controller
             $response = Http::timeout(-1)->withHeaders([
                 'access-token' => $smseagle_api,
                 'Content-Type' => 'application/json',
-            ])->post('http://79.171.153.104/api/v2/messages/sms', [
+            ])->post('https://79.171.153.104/api/v2/messages/sms', [
                 'to' => [$data->mobile],
                 'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.".use this OTP to complete the application. OTP will valid for next 24 hours",
             ]);
