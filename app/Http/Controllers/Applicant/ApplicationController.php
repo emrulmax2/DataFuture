@@ -205,7 +205,7 @@ class ApplicationController extends Controller
         ]);
 
         if(auth('agent')->user()) {
-            $application = AgentApplicationCheck::where("email",$applicant->users()->email)->where("mobile",$applicant->users()->phone)->get()->first();
+            $application = AgentApplicationCheck::where("email",$applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
             $application->applicant_id = $applicant_id;
             $application->updated_by = auth('agent')->user()->id;
             $application->save();
