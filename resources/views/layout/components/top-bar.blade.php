@@ -160,12 +160,14 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                         @endif
                         
                     </li>
+                    @if(!Auth::guard('agent')->check())
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
                         <a href="{{ route('user.account') }}" class="dropdown-item hover:bg-white/5">
                             <i data-lucide="user" class="w-4 h-4 mr-2"></i> Profile
                         </a>
                     </li>
+                    @endif
                     {{--<li>
                         <a href="" class="dropdown-item hover:bg-white/5">
                             <i data-lucide="edit" class="w-4 h-4 mr-2"></i> Add Account

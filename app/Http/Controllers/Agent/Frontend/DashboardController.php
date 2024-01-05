@@ -54,6 +54,7 @@ class DashboardController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'application_no' => $list->application_no,
                     'name' => $list->title->name.' '.$list->first_name.' '.$list->last_name,
                     'dob' => $list->date_of_birth,
                     'applicationCheck' => isset($agentCheck->id) && !empty($agentCheck->id) ? $agentCheck->id : '',

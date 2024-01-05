@@ -12,7 +12,16 @@ class TopMenu
      */
     public static function menu()
     {
-        if(!is_null(\Auth::guard('applicant')->user())):
+        if(!is_null(\Auth::guard('agent')->user())):
+            return [
+                'dashboard' => [
+                    'icon' => 'home',
+                    'title' => 'Dashboard',
+                    'params' => [],
+                    'route_name' => 'agent.dashboard'
+                ],
+            ];
+        elseif(!is_null(\Auth::guard('applicant')->user())):
             return [
                 'dashboard' => [
                     'icon' => 'home',
@@ -28,15 +37,6 @@ class TopMenu
                     'title' => 'Dashboard',
                     'params' => [],
                     'route_name' => 'students.dashboard'
-                ],
-            ];
-        elseif(!is_null(\Auth::guard('agent')->user())):
-            return [
-                'dashboard' => [
-                    'icon' => 'home',
-                    'title' => 'Dashboard',
-                    'params' => [],
-                    'route_name' => 'agent.dashboard'
                 ],
             ];
         elseif(!is_null(\Auth::user())):

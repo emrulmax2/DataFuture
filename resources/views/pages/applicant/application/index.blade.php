@@ -77,7 +77,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ isset($apply->date_of_birth) ? $apply->date_of_birth : '' }}" placeholder="DD-MM-YYYY" id="date_of_birth" class="form-control applicationDatepicker" name="date_of_birth" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" value="{{ isset($apply->date_of_birth) ? $apply->date_of_birth : '' }}" placeholder="DD-MM-YYYY" id="date_of_birth" class="form-control applicationDatepicker dateMask" name="date_of_birth" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-date_of_birth text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
@@ -765,7 +765,7 @@
                         </div>
                         <div>
                             <label for="degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
-                            <input type="text" placeholder="DD-MM-YYYY" id="degree_award_date" class="form-control applicationDatepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="DD-MM-YYYY" id="degree_award_date" class="form-control applicationDatepicker dateMask" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                         </div>
                     </div>
@@ -829,7 +829,7 @@
                         </div>
                         <div>
                             <label for="edit_degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
-                            <input type="text" placeholder="DD-MM-YYYY" id="edit_degree_award_date" class="form-control applicationDatepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="DD-MM-YYYY" id="edit_degree_award_date" class="form-control applicationDatepicker dateMask" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                         </div>
                     </div>
