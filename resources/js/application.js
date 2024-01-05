@@ -1352,13 +1352,4 @@ var employmentHistoryTable = (function () {
         }
     })
 
-    $(".date-picker").each(function () {
-        var maskOptions = {
-            mask: Date,
-            min: new Date(1900, 0, 1),
-            max: new Date(2050, 0, 1),
-            lazy: false
-        };
-        var mask = IMask(this, maskOptions);
-    });
 })();
