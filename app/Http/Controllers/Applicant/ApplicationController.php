@@ -197,14 +197,15 @@ class ApplicationController extends Controller
 
     public function storeApplicantSubmission(Request $request){
         $applicant_id = $request->applicant_id;
-        $applicant = Applicant::where('id', $applicant_id)->update([
+        Applicant::where('id', $applicant_id)->update([
             'status_id' => 2,
             'is_agree' => 1,
             'submission_date' => date('Y-m-d'),
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
-
         if(auth('agent')->user()) {
+            
+            $applicant = Applicant::find($applicant_id);
             $application = AgentApplicationCheck::where("email",$applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
             $application->applicant_id = $applicant_id;
             $application->updated_by = auth('agent')->user()->id;

@@ -47,6 +47,7 @@ class DashboardController extends Controller
             foreach($Query as $list):
                 $data[] = [
                     'id' => $list->id,
+                    'application_no' => $list->application_no,
                     'sl' => $i,
                     'name' => $list->title->name.' '.$list->first_name.' '.$list->last_name,
                     'dob' => $list->date_of_birth,

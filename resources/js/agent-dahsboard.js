@@ -23,8 +23,8 @@ var applicantApplicantionList = (function () {
             columns: [
                 {
                     title: "#ID",
-                    field: "sl",
-                    width: "110",
+                    field: "application_no",
+                    width: "180",
                 },
                 {
                     title: "Name",
@@ -39,7 +39,9 @@ var applicantApplicantionList = (function () {
                 {
                     title: "Gender",
                     field: "gender",
+                    headerSort:false,
                     headerHozAlign: "left",
+                    width: "100"
                 },
                 {
                     title: "Course",
