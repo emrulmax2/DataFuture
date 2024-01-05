@@ -113,7 +113,7 @@ class ApplicationCheckController extends Controller
 
             }
         }
-        if($applicantEmail) {
+        if(isset($applicantEmail) && $applicantEmail) {
             $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
             
             return response()->json($data);
@@ -184,7 +184,9 @@ class ApplicationCheckController extends Controller
         $AgentApplicationCheck = AgentApplicationCheck::find($id);
  
         $AgentApplicationCheck->updated_by= auth('agent')->user()->id;
+        if($request->type=="mobile")
         $AgentApplicationCheck->verify_code= rand(1111,9999);
+        if($request->type=="email")
         $AgentApplicationCheck->email_verify_code= rand(1111,9999);
         
         $AgentApplicationCheck->save();
@@ -193,33 +195,40 @@ class ApplicationCheckController extends Controller
         $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+        if($request->type=="mobile") {
+            if($active_api == 1 && !empty($textlocal_api)):
+                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                    'apikey' => $textlocal_api, 
+                    'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                    ".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                    'sender' => 'London Churchill College', 
+                    'numbers' => $data->mobile
+                ]);
+            elseif($active_api == 2 && !empty($smseagle_api)):
 
-        if($active_api == 1 && !empty($textlocal_api)):
-            $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                'apikey' => $textlocal_api, 
-                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                                ".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
-                'sender' => 'London Churchill College', 
-                'numbers' => $data->mobile
-            ]);
-        elseif($active_api == 2 && !empty($smseagle_api)):
+                $response = Http::withHeaders([
+                    'access-token' => $smseagle_api,
+                    'Content-Type' => 'application/json',
+                ])->withoutVerifying()->withOptions([
+                    "verify" => false
+                ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                    'to' => [$data->mobile],
+                    'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                ".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                ]);
 
-            $response = Http::withHeaders([
-                'access-token' => $smseagle_api,
-                'Content-Type' => 'application/json',
-            ])->withoutVerifying()->withOptions([
-                "verify" => false
-            ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                'to' => [$data->mobile],
-                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                            ".Use this OTP to complete the application. OTP will valid for next 24 hours",
-            ]);
+            endif;
+        }
+        if($request->type=="email")
+            Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));
+        
+        if($data) {
+            $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
 
-        endif;
+        }
 
-        Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));
                 
-        return response()->json($data);
+        return response()->json($data);     
     }
 
     /**
@@ -231,6 +240,11 @@ class ApplicationCheckController extends Controller
     public function destroy($id)
     {
         $data = AgentApplicationCheck::find($id)->forceDelete();
+
+        if($data) {
+            $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
+
+        }
         return response()->json($data);
     }
 }
