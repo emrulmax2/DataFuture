@@ -4,7 +4,7 @@
         <form method="POST" action="#" id="addStudentDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Application Information</h2>
+                    <h2 class="font-medium text-base mr-auto">Applicant Information</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
