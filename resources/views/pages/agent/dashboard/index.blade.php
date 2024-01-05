@@ -160,18 +160,26 @@
                             <div id="applicant-list">
                                 @foreach ($recentData as $recentapplicant)
                                     @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                        <a href="{{ route("agent.application",$recentapplicant->id) }}" style="inline-block">
+                                        <div data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}"  class="newapplicant-modal" style="inline-block">
                                     @else
-                                        <div data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">
+                                        <div data-tw-target="#confirmModal" data-tw-toggle="modal" data-applicationid="{{ $recentapplicant->id }}" data-email-verified="{{($recentapplicant->email_verified_at ? 1:0)}}" data-email="{{ $recentapplicant->email }}" data-mobile="{{ $recentapplicant->mobile }}" data-mobile-verified="{{ ($recentapplicant->mobile_verified_at ? 1:0) }}"  class="newapplicant-modal" style="inline-block">
                                     @endif
                                             <div  class="intro-y module-details_1 ">
                                                 
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                                    <div id="confirmDelete" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
+                                                    @if(!$recentapplicant->mobile_verified_at && !$recentapplicant->email_verified_at )
+                                                    <div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 delete_btn">
                                                         <i data-lucide="x" class="w-3 h-3"></i>
                                                     </div>
+                                                    @endif
                                                     <div class="ml-4 mr-auto">
-                                                        <div class="font-medium">{{ $recentapplicant->full_name }}</div>
+                                                        <div class="font-medium">
+                                                            @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
+                                                            <a href="{{ route("agent.application",$recentapplicant->id) }}" style="inline-block">{{ $recentapplicant->full_name }}</a>
+                                                            @else
+                                                            {{ $recentapplicant->full_name }}
+                                                            @endif
+                                                        </div>
                                                         <div class="text-slate-500 text-xs mt-0.5 ">
                                                             @if($recentapplicant->email_verified_at)
                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Email verified
@@ -190,24 +198,18 @@
                                                         </div>
                                                     </div>
                                                     @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-
-                                                    <button class="btn btn-sm btn-success w-28 mr-2 mb-2 text-white">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
-                                                    </button>
+                                                        <a href="{{ route("agent.application",$recentapplicant->id) }}" class="btn btn-sm btn-success w-28 mr-2 mb-2 text-white">
+                                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
+                                                        </a>
                                                     @else
-                                                    <div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                                                        <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
-                                                    </div>
+                                                        <div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                                            <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
+                                                        </div>
                                                     @endif
                                                     
                                                 </div>
                                             </div>
-                                    @if($recentapplicant->mobile_verified_at && $recentapplicant->email_verified_at )
-                                        </a>
-                                    @else
                                         </div>
-                                    @endif
-                            
                                 @endforeach
                             </div>
                         </div>

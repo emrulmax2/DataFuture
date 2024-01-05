@@ -77,6 +77,7 @@
                         <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
                         <label id="horizontal-email" for="horizontal-email" class="form-label w-40 text-left">emrulmax2@gmail.com</label>
                         <input id="horizontal-form-1" name="email_verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
+                        <input name="type" value="email" type="hidden">
                         <button id="resend-email" type="button" data-id="0" data-action="none" class="resend-email btn btn-primary w-auto ml-auto">
                             Resend
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -120,6 +121,7 @@
                         <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
                         <label id="horizontal-mobile" for="horizontal-phone" class="form-label w-40 text-left">+8801817718335</label>
                         <input id="horizontal-form-2" name="verify_code" type="text" class="form-control w-20 mr-1" placeholder="XXXX">
+                        <input name="type" value="mobile" type="hidden">
                         <button id="resend-mobile" type="button" data-id="0" data-action="none" class="resend-mobile btn btn-primary  w-auto ml-auto">
                             Resend
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -164,6 +166,36 @@
 </div>
 <!-- END: Delete Confirm Modal Content -->
 
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="confirmDeleteModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="delete" class="agreeWith btn btn-danger w-auto">Yes, I agree <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
 
 <!-- BEGIN: Error Modal Content -->
     <div id="errorModal" class="modal" tabindex="-1" aria-hidden="true">

@@ -122,54 +122,71 @@ var applicantionCustonList = (function () {
         let htmlRecents = "";
 
         $(dataset).each(function(index,data) { 
-            
-            if( data.mobile_verified_at && data.email_verified_at ) {
-                htmlRecents +=`<a href="${ route("agent.dashboard") }" style="inline-block">`
-            } else {
-                
-                htmlRecents +=` <div data-tw-toggle="modal" data-applicationid="${data.id}" data-email-verified="${data.email_verified_at ? 1:0}" data-email="${data.email}" data-mobile="${data.mobile}" data-mobile-verified="${data.mobile_verified_at ? 1:0}" data-tw-target="#confirmModal" class="newapplicant-modal" style="inline-block">`
-            }
-            htmlRecents +=`<div  class="intro-y module-details_1 ">
-                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">`;
-                                if( !data.mobile_verified_at && !data.email_verified_at ) {
-                                    htmlRecents +=`<div id="confirmDelete" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2">
-                                                            <i data-lucide="x" class="w-3 h-3"></i>
-                                                        </div>`
-                                }
-                                
-                                htmlRecents +=`<div class="ml-4 mr-auto">
-                                        <div class="font-medium">${data.first_name} ${data.last_name}</div>
-                                         
-                                        <div class="text-slate-500 text-xs mt-0.5 ">`
-                                            if(data.email_verified_at)
-                                            htmlRecents +=`<i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Email verified`
-                                            else
-                                            htmlRecents +=`<i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Email not verified`
-                                            
-                                        htmlRecents +=`</div>
-                                        <div class="text-slate-500 text-xs mt-0.5 ">`
+                if( data.mobile_verified_at && data.email_verified_at ) {
+                    htmlRecents +=`<div data-applicationid="${ data.id }" 
+                                    data-email-verified="${(data.email_verified_at ? 1:0)}" 
+                                    data-email="${ data.email }" 
+                                    data-mobile="${ data.mobile }" 
+                                    data-mobile-verified="${ (data.mobile_verified_at ? 1:0) }"  
+                                    class="newapplicant-modal" style="inline-block">`
+                } else {
+                    htmlRecents +=`<div data-tw-target="#confirmModal" data-tw-toggle="modal" 
+                                    data-applicationid="${ data.id }" 
+                                    data-email-verified="${(data.email_verified_at ? 1:0)}" 
+                                    data-email="${data.email}" 
+                                    data-mobile="${data.mobile}" 
+                                    data-mobile-verified="${ (data.mobile_verified_at ? 1:0)}"  
+                                    class="newapplicant-modal" style="inline-block">`
+                }
+                htmlRecents +=`<div  class="intro-y module-details_1 ">
+                            
+                            <div class="box px-4 py-4 mb-3 flex items-center zoom-in">`;
+                            if( !data.mobile_verified_at && !data.email_verified_at ) {
+                                htmlRecents +=`<div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" 
+                                                data-id="${ $recentapplicant.id }" 
+                                                title="Do you want to remove this item?" 
+                                                class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 delete_btn">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </div>`
+                            }
+                            htmlRecents +=`<div class="ml-4 mr-auto">
+                                    <div class="font-medium">`
 
-                                            if(data.mobile_verified_at)
+                                        if( !data.mobile_verified_at && !data.email_verified_at ) {
+                                        htmlRecents +=`<a href="${ route("agent.application",data.id) }" style="inline-block">${data.first_name} ${data.last_name}</a>`
+                                        } else {
+                                            htmlRecents +=`${data.first_name} ${data.last_name}`
+                                        }
+                                    htmlRecents +=`</div>
+                                    <div class="text-slate-500 text-xs mt-0.5 ">`
+                                        if(data.email_verified_at) {
+                                            htmlRecents +=`<i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Email verified`
+                                            } else {
+                                            htmlRecents +=`<i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Email not verified`
+                                        }
+                                    htmlRecents +=`</div>
+                                    <div class="text-slate-500 text-xs mt-0.5 ">`
+
+                                        if(data.mobile_verified_at) {
                                             htmlRecents +=`<i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Mobile verified`
-                                            else
+                                        } else {
                                             htmlRecents +=`<i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Mobile not verified`
-                                            
-                                        htmlRecents +=`</div>
-                                        
-                                    </div>`
-                                    if(data.mobile_verified_at && data.email_verified_at) {
-                                        htmlRecents += `<button class="btn btn-sm btn-success w-28 mr-2 mb-2 ml-auto text-white">
-                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
-                                    </button>`
-                                    } else {
-                                        htmlRecents += `<div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                                            <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
-                                        </div>`
-                                    }
-                                    
+                                        }
+
                                 htmlRecents +=`</div>
-                            </div>
-                        </div>`;
+                            </div>`;
+                            if(data.mobile_verified_at && data.email_verified_at ) {
+                                htmlRecents +=`<a href="${ route("agent.application",data.id) }" class="btn btn-sm btn-success w-28 mr-2 mb-2 text-white">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
+                                    </a>`
+                            } else {
+                                htmlRecents +=`<div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
+                                    </div>`;
+                            }
+                            htmlRecents +=`</div>
+                        </div>
+                    </div>`;
         })
         
         $("#applicant-list").html(htmlRecents)
@@ -193,7 +210,7 @@ var applicantionCustonList = (function () {
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addDeteilsModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    
+    const confirmDeleteModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmDeleteModal"));
     $('.save').on('click', function(e){
         e.preventDefault();
 
@@ -227,71 +244,6 @@ var applicantionCustonList = (function () {
                 succModal.show();
                 confirmModal.hide();
                 applicantionCustonList.init(response.data);
-                // let dataset = response.data
-                // let totalApplicant = dataset.length
-
-                // let html = `<div class="report-box-2 intro-y mt-5 mb-7">
-                //                     <div class="box p-5">
-                //                         <div class="flex items-center">
-                //                             Total Active Application
-                //                         </div>
-                //                         <div class="text-2xl font-medium mt-2">${totalApplicant}</div>
-                //                     </div>
-                //                 </div>`;
-
-                // $("#total-application").html(html)
-
-                // let htmlRecents = "";
-
-                // $(dataset).each(function(index,data) { 
-                //     if(data.mobile_verified_at && data.email_verified_at) {
-                //         htmlRecents +=`<a href="${ route("agent.dashboard") }" style="inline-block">`
-                //     } else {
-                //         htmlRecents +=` <div data-tw-toggle="modal" data-applicationid="${data.id}" data-email="${data.email}" data-mobile="${data.mobile}" data-tw-target="#confirmModal">`
-                //     }
-                //     htmlRecents +=`<div  class="intro-y module-details_1 ">
-                //                         <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                //                             <div class="ml-4 mr-auto">
-                //                                 <div class="font-medium">${data.first_name} ${data.last_name}</div>
-                                                 
-                //                                 <div class="text-slate-500 text-xs mt-0.5 ">`
-                //                                     if(data.email_verified_at)
-                //                                     htmlRecents +=`<i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Email verified`
-                //                                     else
-                //                                     htmlRecents +=`<i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Email not verified`
-                                                    
-                //                                 htmlRecents +=`</div>
-                //                                 <div class="text-slate-500 text-xs mt-0.5 ">`
-
-                //                                     if(data.mobile_verified_at)
-                //                                     htmlRecents +=`<i data-lucide="check-circle" class="w-4 h-4 mr-1 text-success inline-flex"></i> Mobile verified`
-                //                                     else
-                //                                     htmlRecents +=`<i data-lucide="x-circle" class="w-4 h-4 mr-1 text-danger inline-flex"></i> Mobile not verified
-                                                    
-                //                                 </div>
-                                                
-                //                             </div>`
-                //                             if(data.mobile_verified_at && data.email_verified_at) {
-                //                                 htmlRecents += `<button class="btn btn-sm btn-success w-28 mr-2 mb-2 ml-auto text-white">
-                //                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Apply Now
-                //                             </button>`
-                //                             } else {
-                //                                 htmlRecents += `<div class="rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                //                                     <i data-lucide="alert-circle" class="w-4 h-4 m-auto text-white"></i>
-                //                                 </div>`
-                //                             }
-                                            
-                //                         htmlRecents +=`</div>
-                //                     </div>
-                //                 </div>`;
-                // })
-                
-                // $("#applicant-list").html(htmlRecents)
-                // createIcons({
-                //     icons,
-                //     "stroke-width": 1.5,
-                //     nameAttr: "data-lucide",
-                // })
                 if(response.data.email_verified_at) {
                     
                     $("#modal-emailverified").hide()
@@ -307,7 +259,7 @@ var applicantionCustonList = (function () {
                 setTimeout(function(){
                     succModal.hide();
                 }, 1000);        
-
+                location.reload();
             }
             applicantApplicantionList.init();
         }).catch(error => {
@@ -328,7 +280,8 @@ var applicantionCustonList = (function () {
         });
     });
 
-    $('.resend-mobile').on('click', function(e){
+    $('.resend-mobile').on('click', function(e) {
+
         e.preventDefault();
 
         let tthis = $(this);
@@ -360,18 +313,17 @@ var applicantionCustonList = (function () {
                 $("svg",tthis).css("display", "none");
 
                 succModal.show();
-                applicantionCustonList.init(response.data);
-
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("OTP SEND!");
                     $("#successModal .successModalDesc").html('new otp sent to your mobile.');
                 });
-                setTimeout(function(){
+                setTimeout(function() {
                     succModal.hide();
                 }, 1200);        
 
+                applicantionCustonList.init(response.data);
             }
-            applicantApplicantionList.init();
+
         }).catch(error => {
             
             tthis.removeAttr('disabled');
@@ -390,7 +342,8 @@ var applicantionCustonList = (function () {
         });
     });
 
-    $('.resend-email').on('click', function(e){
+    $('.resend-email').on('click', function(e) {
+
         e.preventDefault();
 
         let tthis = $(this);
@@ -421,20 +374,19 @@ var applicantionCustonList = (function () {
 
                 tthis.removeAttr('disabled');
                 $("svg",tthis).css("display", "none");
-
                 succModal.show();
-                applicantionCustonList.init(response.data);
-
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Email Sent!");
                     $("#successModal .successModalDesc").html('Successful Email Verification Code Send');
                 });
+                
                 setTimeout(function(){
                     succModal.hide();
-                }, 1200);        
+                }, 1200); 
 
+                applicantionCustonList.init(response.data);
+                       
             }
-            applicantApplicantionList.init();
         }).catch(error => {
             
             tthis.removeAttr('disabled');
@@ -452,16 +404,12 @@ var applicantionCustonList = (function () {
             }
         });
     });
+
     $(".newapplicant-modal").on('click',function(e){ 
         let tthis = $(this)
         var eVerified = tthis.data('email-verified');
         var mVerified = tthis.data('mobile-verified')
-        // if(eVerified) {
-        //     $("#modal-emailverified").hide()
-        // }
-        // if(mVerified) {
-        //     $("#modal-mobileverified").hide()
-        // }
+
         $('#confirmModal #horizontal-email').html(tthis.data('email'));
         $('#confirmModal #horizontal-mobile').html(tthis.data('mobile'));
 
@@ -471,23 +419,28 @@ var applicantionCustonList = (function () {
         document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
             if(mVerified) {
                 $("#confirmModal #modal-mobileverified").hide()
+            } else {
+                $("#confirmModal #modal-mobileverified").show()
             }
             if(eVerified) {
                 $("#confirmModal #modal-emailverified").hide()
+            } else {
+                $("#confirmModal #modal-emailverified").show()
             }
             eVerified =undefined
             mVerified =undefined
         });
-
+        
     })
 
     // Confirm Modal Action
-    $('#deleteData').on('click', function(){
-        let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
+    $('#confirmDeleteModal .agreeWith').on('click', function(){
 
-        $('#confirmModal button').attr('disabled', 'disabled');
+        let tthis= $(this);
+        let recordID = tthis.attr('data-id');
+        let action = tthis.attr('data-action');
+        $("svg",tthis).css("display", "inline-block");
+        $('#confirmDeleteModal button').attr('disabled', 'disabled');
 
         axios({
             method: 'delete',
@@ -495,19 +448,41 @@ var applicantionCustonList = (function () {
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                $('#confirmModal button').removeAttr('disabled');
-                confModal.hide();
+                $('#confirmDeleteModal button').removeAttr('disabled');
+                $("svg",tthis).css("display", "none");
+                confirmDeleteModal.hide();
 
                 succModal.show();
                 document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                     $('#successModal .successModalTitle').html('Done!');
-                    $('#successModal .successModalDesc').html('Academic year successfully deleted!');
+                    $('#successModal .successModalDesc').html('Applicant successfully deleted!');
                 });
             }
-            table.init();
+            
+            setTimeout(function() {
+                succModal.hide();
+            }, 1200);    
+            applicantionCustonList.init(response.data);
+
         }).catch(error =>{
             console.log(error)
         });
         
     })
+
+    // Delete Course
+    $('#applicant-list .delete_btn').on('click', function(){
+        
+        let tthis = $(this);
+        let rowID = tthis.attr('data-id');
+        let confModalDelTitle = "Delete Applicant?"
+        
+        confirmDeleteModal.show();
+        document.getElementById('confirmDeleteModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmDeleteModal .confModTitle').html(confModalDelTitle);
+            $('#confirmDeleteModal .confModDesc').html('Do you really want to delete these record? If yes, then please click on agree btn.');
+            $('#confirmDeleteModal .agreeWith').attr('data-id', rowID);
+            $('#confirmDeleteModal .agreeWith').attr('data-action', 'DELETE');
+        });
+    });
 })();
