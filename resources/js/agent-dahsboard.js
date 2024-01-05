@@ -142,7 +142,7 @@ var applicantionCustonList = (function () {
                 htmlRecents +=`<div  class="intro-y module-details_1 ">
                             
                             <div class="box px-4 py-4 mb-3 flex items-center zoom-in">`;
-                            if( !data.mobile_verified_at && !data.email_verified_at ) {
+                            if( !data.mobile_verified_at || !data.email_verified_at ) {
                                 htmlRecents +=`<div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" 
                                                 data-id="${ data.id }" 
                                                 title="Do you want to remove this item?" 

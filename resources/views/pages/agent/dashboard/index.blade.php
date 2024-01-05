@@ -167,7 +167,7 @@
                                             <div  class="intro-y module-details_1 ">
                                                 
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                                    @if(!$recentapplicant->mobile_verified_at && !$recentapplicant->email_verified_at )
+                                                    @if(!$recentapplicant->mobile_verified_at || !$recentapplicant->email_verified_at )
                                                     <div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" data-id="{{ $recentapplicant->id }}" title="Do you want to remove this item?" class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 delete_btn">
                                                         <i data-lucide="x" class="w-3 h-3"></i>
                                                     </div>
