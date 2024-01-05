@@ -1843,13 +1843,15 @@ class AdmissionController extends Controller
                         'numbers' => $applicantContact->mobile
                     ]);
                 elseif($active_api == 2 && !empty($smseagle_api)):
-                    $response = Http::timeout(-1)->withHeaders([
-                        'access-token' => $smseagle_api,
-                        'Content-Type' => 'application/json',
-                    ])->post('http://79.171.153.104/api/v2/messages/sms', [
-                        'to' => [$applicantContact->mobile],
-                        'text' => $request->sms
-                    ]);
+                    $response = Http::withHeaders([
+                            'access-token' => $smseagle_api,
+                            'Content-Type' => 'application/json',
+                        ])->withoutVerifying()->withOptions([
+                            "verify" => false
+                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                            'to' => [$applicantContact->mobile],
+                            'text' => $request->sms
+                        ]);
                 endif;
                 $message = 'SMS successfully stored and sent to the student.';
             else:
