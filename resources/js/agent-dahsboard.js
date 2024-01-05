@@ -243,7 +243,6 @@ var applicantionCustonList = (function () {
                 addModal.hide();
                 succModal.show();
                 confirmModal.hide();
-                applicantionCustonList.init(response.data);
                 if(response.data.email_verified_at) {
                     
                     $("#modal-emailverified").hide()
@@ -258,10 +257,10 @@ var applicantionCustonList = (function () {
                 });
                 setTimeout(function(){
                     succModal.hide();
-                }, 1000);        
-                location.reload();
+                }, 1200);        
+                
+                applicantionCustonList.init(response.data);
             }
-            applicantApplicantionList.init();
         }).catch(error => {
             
             tthis.removeAttr('disabled');
