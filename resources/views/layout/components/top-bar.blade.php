@@ -144,17 +144,16 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
             <div class="dropdown-menu w-56">
                 <ul class="dropdown-content bg-primary/80 before:block before:absolute before:bg-black before:inset-0 before:rounded-md before:z-[-1] text-white">
                     <li class="p-2">
-                        @if(Auth::guard('applicant')->check())
+                        @if(Auth::guard('agent')->check())
+                            <div class="font-medium">{{ auth('agent')->user()->email }}</div>
+                            <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('agent')->user()->email }}</div>
+                        
+                        @elseif(Auth::guard('applicant')->check())
                         <div class="font-medium">{{ auth('applicant')->user()->email }}</div>
                         <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('applicant')->user()->email }}</div>
                         @elseif(Auth::guard('student')->check())
                             <div class="font-medium">{{ auth('student')->user()->email }}</div>
                             <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('student')->user()->email }}</div>
-                        
-                        @elseif(Auth::guard('agent')->check())
-                            <div class="font-medium">{{ auth('agent')->user()->email }}</div>
-                            <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth('agent')->user()->email }}</div>
-                        
                         @else
                             <div class="font-medium">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
                             <div class="text-xs text-white/60 mt-0.5 dark:text-slate-500">{{ auth()->user()->email }}</div>
@@ -184,17 +183,16 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                     </li>--}}
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
-                        @if(Auth::guard('applicant')->check())
+                        @if(Auth::guard('agent')->check())
+                            <a href="{{ route('agent.logout') }}" class="dropdown-item hover:bg-white/5">
+                                <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
+                            </a>
+                        @elseif(Auth::guard('applicant')->check())
                             <a href="{{ route('applicant.logout') }}" class="dropdown-item hover:bg-white/5">
                                 <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
                             </a>
                         @elseif(Auth::guard('student')->check())
                             <a href="{{ route('students.logout') }}" class="dropdown-item hover:bg-white/5">
-                                <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
-                            </a>
-                        
-                        @elseif(Auth::guard('agent')->check())
-                            <a href="{{ route('agent.logout') }}" class="dropdown-item hover:bg-white/5">
                                 <i data-lucide="toggle-right" class="w-4 h-4 mr-2"></i> Logout
                             </a>
                         @else

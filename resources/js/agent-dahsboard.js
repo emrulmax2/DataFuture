@@ -120,7 +120,8 @@ var applicantionCustonList = (function () {
         $("#total-application").html(html)
 
         let htmlRecents = "";
-
+        
+        $("#applicant-list").html(htmlRecents)
         $(dataset).each(function(index,data) { 
                 if( data.mobile_verified_at && data.email_verified_at ) {
                     htmlRecents +=`<div data-applicationid="${ data.id }" 
@@ -143,9 +144,9 @@ var applicantionCustonList = (function () {
                             <div class="box px-4 py-4 mb-3 flex items-center zoom-in">`;
                             if( !data.mobile_verified_at && !data.email_verified_at ) {
                                 htmlRecents +=`<div data-tw-target="#confirmDeleteModal" data-tw-toggle="modal" 
-                                                data-id="${ $recentapplicant.id }" 
+                                                data-id="${ data.id }" 
                                                 title="Do you want to remove this item?" 
-                                                class="tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 delete_btn">
+                                                class="delete_btn tooltip w-5 h-5 flex items-center justify-center absolute rounded-full text-white bg-danger right-0 top-0 -mr-2 -mt-2 ">
                                     <i data-lucide="x" class="w-3 h-3"></i>
                                 </div>`
                             }
@@ -195,6 +196,53 @@ var applicantionCustonList = (function () {
             "stroke-width": 1.5,
             nameAttr: "data-lucide",
         })
+        $('#applicant-list .delete_btn').on('click', function(){
+        
+            let tthis = $(this);
+            let rowID = tthis.attr('data-id');
+            let confModalDelTitle = "Delete Applicant?"
+            const confirmDeleteModalSet  = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmDeleteModal"));
+            confirmDeleteModalSet.show();
+            document.getElementById('confirmDeleteModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmDeleteModal .confModTitle').html(confModalDelTitle);
+                $('#confirmDeleteModal .confModDesc').html('Do you really want to delete these record? If yes, then please click on agree btn.');
+                $('#confirmDeleteModal .agreeWith').attr('data-id', rowID);
+                $('#confirmDeleteModal .agreeWith').attr('data-action', 'DELETE');
+            });
+        });
+
+        $(".newapplicant-modal").on('click',function(e){ 
+            let tthis = $(this)
+            var eVerified = tthis.data('email-verified');
+            var mVerified = tthis.data('mobile-verified')
+    
+            $('#confirmModal #horizontal-email').html(tthis.data('email'));
+            $('#confirmModal #horizontal-mobile').html(tthis.data('mobile'));
+    
+            $("input[name='id']").val(tthis.data('applicationid'))
+            $("input.id").val(tthis.data('applicationid'))
+    
+            document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                if(mVerified) {
+                    $("#confirmModal #modal-mobileverified").hide()
+                    $("input[name=verify_code]").val("");
+                } else {
+                    $("#confirmModal #modal-mobileverified").show()
+                    $("input[name=verify_code]").val("");
+                }
+                if(eVerified) {
+                    $("#confirmModal #modal-emailverified").hide()
+                    $("input[name=email_verify_code]").val("");
+                } else {
+                    $("#confirmModal #modal-emailverified").show()
+                    $("input[name=email_verify_code]").val("");
+                }
+                eVerified =undefined
+                mVerified =undefined
+            });
+            
+        })
+  
     };
     return {
         init: function (responseData) {
@@ -243,23 +291,22 @@ var applicantionCustonList = (function () {
                 addModal.hide();
                 succModal.show();
                 confirmModal.hide();
-                applicantionCustonList.init(response.data);
-                if(response.data.email_verified_at) {
-                    
-                    $("#modal-emailverified").hide()
-                    
-                }
-                if(response.data.mobile_verified_at) {
-                    $("#modal-mobileverified").hide()
-                }
+
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Success!");
                     $("#successModal .successModalDesc").html('Valid applicantion');
                 });
+                
                 setTimeout(function(){
                     succModal.hide();
-                }, 1000);        
-                location.reload();
+                }, 1200);        
+                //location.reload();
+                if(response.data) {
+                    $("#modal-emailverified").hide()
+                    $("#modal-mobileverified").hide()
+                    //$("#"+formID+" input").reset()
+                }
+                applicantionCustonList.init(response.data);
             }
             applicantApplicantionList.init();
         }).catch(error => {
@@ -323,7 +370,7 @@ var applicantionCustonList = (function () {
 
                 applicantionCustonList.init(response.data);
             }
-
+            applicantApplicantionList.init();
         }).catch(error => {
             
             tthis.removeAttr('disabled');
@@ -387,6 +434,7 @@ var applicantionCustonList = (function () {
                 applicantionCustonList.init(response.data);
                        
             }
+            applicantApplicantionList.init();
         }).catch(error => {
             
             tthis.removeAttr('disabled');
@@ -457,12 +505,14 @@ var applicantionCustonList = (function () {
                     $('#successModal .successModalTitle').html('Done!');
                     $('#successModal .successModalDesc').html('Applicant successfully deleted!');
                 });
+
+                            
+                setTimeout(function() {
+                    succModal.hide();
+                }, 1200);    
+                applicantionCustonList.init(response.data);
             }
-            
-            setTimeout(function() {
-                succModal.hide();
-            }, 1200);    
-            applicantionCustonList.init(response.data);
+            applicantApplicantionList.init();
 
         }).catch(error =>{
             console.log(error)
@@ -485,4 +535,36 @@ var applicantionCustonList = (function () {
             $('#confirmDeleteModal .agreeWith').attr('data-action', 'DELETE');
         });
     });
+
+    $(".newapplicant-modal").on('click',function(e){ 
+        let tthis = $(this)
+        var eVerified = tthis.data('email-verified');
+        var mVerified = tthis.data('mobile-verified')
+
+        $('#confirmModal #horizontal-email').html(tthis.data('email'));
+        $('#confirmModal #horizontal-mobile').html(tthis.data('mobile'));
+
+        $("input[name='id']").val(tthis.data('applicationid'))
+        $("input.id").val(tthis.data('applicationid'))
+
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            if(mVerified) {
+                $("#confirmModal #modal-mobileverified").hide()
+                $("input[name=verify_code]").val("");
+            } else {
+                $("#confirmModal #modal-mobileverified").show()
+                $("input[name=verify_code]").val("");
+            }
+            if(eVerified) {
+                $("#confirmModal #modal-emailverified").hide()
+                $("input[name=email_verify_code]").val("");
+            } else {
+                $("#confirmModal #modal-emailverified").show()
+                $("input[name=email_verify_code]").val("");
+            }
+            eVerified =undefined
+            mVerified =undefined
+        });
+        
+    })
 })();

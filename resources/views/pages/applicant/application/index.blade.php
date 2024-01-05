@@ -59,7 +59,7 @@
                         <div class="col-span-12 sm:col-span-3">
                             <label for="first_name" class="form-label">First Name(s) <span class="text-danger">*</span></label>
                             @if(auth('agent')->user()->id)
-                                <input type="text" value="{{ isset($agentApplicant->first_name) ? $agentApplicant->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name" readonly="readonly">
+                                <input type="text" value="{{ isset($agentApplicant->first_name) ? $agentApplicant->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name" >
                             @else
                                 <input type="text" value="{{ isset($apply->first_name) ? $apply->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name">
                             @endif
@@ -68,7 +68,7 @@
                         <div class="col-span-12 sm:col-span-3">
                             <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
                             @if(auth('agent')->user()->id)
-                                <input type="text" value="{{ isset($agentApplicant->last_name) ? $agentApplicant->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name" readonly="readonly">
+                                <input type="text" value="{{ isset($agentApplicant->last_name) ? $agentApplicant->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name" >
                             
                             @else
                                 <input type="text" value="{{ isset($apply->last_name) ? $apply->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name">
