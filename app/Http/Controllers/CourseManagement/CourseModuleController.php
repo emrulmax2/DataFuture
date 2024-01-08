@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\ModuleLevels;
@@ -84,10 +85,13 @@ class CourseModuleController extends Controller
 
     public function show($id){
         $modules = CourseModule::find($id);
-        return view('pages/modules/show', [
-            'title' => 'Courses Module - LCC Data Future Managment',
+        return view('pages.course-management.modules.show', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Courses Module Details',
             'breadcrumbs' => [
-                ['label' => 'Course Modules', 'href' => route('course.module.show', $modules->course_id)],
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Courses', 'href' => route('courses')],
+                ['label' => 'Course Details', 'href' => route('courses.show', $modules->course_id)],
                 ['label' => 'Module Details', 'href' => 'javascript:void(0);']
             ],
             'module' => $modules

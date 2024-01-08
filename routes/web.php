@@ -7,8 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\DarkModeController;
 use App\Http\Controllers\ColorSchemeController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\CourseManagement\CourseController;
+use App\Http\Controllers\CourseManagement\SemesterController;
 use App\Http\Controllers\Settings\CourseQualificationController;
 use App\Http\Controllers\Settings\SourceTutionFeeController;
 use App\Http\Controllers\Settings\AcademicYearController;
@@ -16,19 +16,19 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Agent\AgentController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
-use App\Http\Controllers\GroupController;
+use App\Http\Controllers\CourseManagement\GroupController;
 use App\Http\Controllers\Settings\VenueController;
-use App\Http\Controllers\CoursCreationController;
-use App\Http\Controllers\ModuleLevelController;
-use App\Http\Controllers\CourseModuleController;
-use App\Http\Controllers\CourseBaseDatafutureCntroller;
-use App\Http\Controllers\CourseModuleBaseAssesmentController;
-use App\Http\Controllers\ModuleDatafutureController;
-use App\Http\Controllers\CourseCreationAvailabilityController;
-use App\Http\Controllers\CourseCreationDatafutureController;
-use App\Http\Controllers\CourseCreationInstanceController;
-use App\Http\Controllers\InstanceTermController;
-use App\Http\Controllers\TermModuleCreationController;
+use App\Http\Controllers\CourseManagement\CoursCreationController;
+use App\Http\Controllers\CourseManagement\ModuleLevelController;
+use App\Http\Controllers\CourseManagement\CourseModuleController;
+use App\Http\Controllers\CourseManagement\CourseBaseDatafutureCntroller;
+use App\Http\Controllers\CourseManagement\CourseModuleBaseAssesmentController;
+use App\Http\Controllers\CourseManagement\ModuleDatafutureController;
+use App\Http\Controllers\CourseManagement\CourseCreationAvailabilityController;
+use App\Http\Controllers\CourseManagement\CourseCreationDatafutureController;
+use App\Http\Controllers\CourseManagement\CourseCreationInstanceController;
+use App\Http\Controllers\CourseManagement\InstanceTermController;
+use App\Http\Controllers\CourseManagement\TermModuleCreationController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Settings\RoomController;
 use App\Http\Controllers\PlanController;
@@ -188,7 +188,7 @@ use App\Http\Controllers\Student\SlcAttendanceController;
 use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
-use App\Http\Controllers\TermDeclarationController;
+use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -442,108 +442,108 @@ Route::middleware('auth')->group(function() {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::controller(CoursCreationController::class)->group(function() {
-        Route::get('course-creation', 'index')->name('course.creation'); 
-        Route::get('course-creation/list', 'list')->name('course.creation.list'); 
-        Route::post('course-creation/store', 'store')->name('course.creation.store');
-        Route::get('course-creation/show/{id}', 'show')->name('course.creation.show');
-        Route::get('course-creation/edit/{id}', 'edit')->name('course.creation.edit');
-        Route::post('course-creation/update', 'update')->name('course.creation.update');
-        Route::delete('course-creation/delete/{id}', 'destroy')->name('course.creation.destory');
-        Route::post('course-creation/restore/{id}', 'restore')->name('course.creation.restore');
+        Route::get('course-management/course-creation', 'index')->name('course.creation'); 
+        Route::get('course-management/course-creation/list', 'list')->name('course.creation.list'); 
+        Route::post('course-management/course-creation/store', 'store')->name('course.creation.store');
+        Route::get('course-management/course-creation/show/{id}', 'show')->name('course.creation.show');
+        Route::get('course-management/course-creation/edit/{id}', 'edit')->name('course.creation.edit');
+        Route::post('course-management/course-creation/update', 'update')->name('course.creation.update');
+        Route::delete('course-management/course-creation/delete/{id}', 'destroy')->name('course.creation.destory');
+        Route::post('course-management/course-creation/restore/{id}', 'restore')->name('course.creation.restore');
     });
     
     Route::controller(CourseCreationAvailabilityController::class)->group(function() {
-        Route::post('course-creation-availability/store', 'store')->name('course.creation.availability.store');
-        Route::get('course-creation-availability/list', 'list')->name('course.creation.availability.list'); 
-        Route::get('course-creation-availability/edit/{id}', 'edit')->name('course.creation.availability.edit');
-        Route::post('course-creation-availability/update', 'update')->name('course.creation.availability.update');
+        Route::post('course-management/course-creation-availability/store', 'store')->name('course.creation.availability.store');
+        Route::get('course-management/course-creation-availability/list', 'list')->name('course.creation.availability.list'); 
+        Route::get('course-management/course-creation-availability/edit/{id}', 'edit')->name('course.creation.availability.edit');
+        Route::post('course-management/course-creation-availability/update', 'update')->name('course.creation.availability.update');
     });
 
     Route::controller(CourseCreationDatafutureController::class)->group(function() {
-        Route::post('course-creation-datafuture/store', 'store')->name('course.creation.datafuture.store');
-        Route::get('course-creation-datafuture/list', 'list')->name('course.creation.datafuture.list'); 
-        Route::get('course-creation-datafuture/edit/{id}', 'edit')->name('course.creation.datafuture.edit');
-        Route::post('course-creation-datafuture/update', 'update')->name('course.creation.datafuture.update');
-        Route::delete('course-creation-datafuture/delete/{id}', 'destroy')->name('course.creation.datafuture.destory');
-        Route::post('course-creation-datafuture/restore/{id}', 'restore')->name('course.creation.datafuture.restore');
+        Route::post('course-management/course-creation-datafuture/store', 'store')->name('course.creation.datafuture.store');
+        Route::get('course-management/course-creation-datafuture/list', 'list')->name('course.creation.datafuture.list'); 
+        Route::get('course-management/course-creation-datafuture/edit/{id}', 'edit')->name('course.creation.datafuture.edit');
+        Route::post('course-management/course-creation-datafuture/update', 'update')->name('course.creation.datafuture.update');
+        Route::delete('course-management/course-creation-datafuture/delete/{id}', 'destroy')->name('course.creation.datafuture.destory');
+        Route::post('course-management/course-creation-datafuture/restore/{id}', 'restore')->name('course.creation.datafuture.restore');
         
     });
 
     Route::controller(CourseCreationInstanceController::class)->group(function() {
-        Route::post('course-creation-instance/store', 'store')->name('course.creation.instance.store');
-        Route::get('course-creation-instance/list', 'list')->name('course.creation.instance.list'); 
-        Route::get('course-creation-instance/edit/{id}', 'edit')->name('course.creation.instance.edit');
-        Route::post('course-creation-instance/update', 'update')->name('course.creation.instance.update');
-        Route::delete('course-creation-instance/delete/{id}', 'destroy')->name('course.creation.instance.destory');
-        Route::post('course-creation-instance/restore/{id}', 'restore')->name('course.creation.instance.restore');
+        Route::post('course-management/course-creation-instance/store', 'store')->name('course.creation.instance.store');
+        Route::get('course-management/course-creation-instance/list', 'list')->name('course.creation.instance.list'); 
+        Route::get('course-management/course-creation-instance/edit/{id}', 'edit')->name('course.creation.instance.edit');
+        Route::post('course-management/course-creation-instance/update', 'update')->name('course.creation.instance.update');
+        Route::delete('course-management/course-creation-instance/delete/{id}', 'destroy')->name('course.creation.instance.destory');
+        Route::post('course-management/course-creation-instance/restore/{id}', 'restore')->name('course.creation.instance.restore');
     });
 
     Route::controller(InstanceTermController::class)->group(function() {
-        Route::post('instance-term/store', 'store')->name('instance.term.store');
-        Route::get('instance-term/list', 'list')->name('instance.term.list'); 
-        Route::get('instance-term/show/{id}', 'show')->name('instance.term.show'); 
-        Route::get('instance-term/edit/{id}', 'edit')->name('instance.term.edit');
-        Route::post('instance-term/update', 'update')->name('instance.term.update');
-        Route::delete('instance-term/delete/{id}', 'destroy')->name('instance.term.destory');
-        Route::post('instance-term/restore/{id}', 'restore')->name('instance.term.restore');        
+        Route::post('course-management/instance-term/store', 'store')->name('instance.term.store');
+        Route::get('course-management/instance-term/list', 'list')->name('instance.term.list'); 
+        Route::get('course-management/instance-term/show/{id}', 'show')->name('instance.term.show'); 
+        Route::get('course-management/instance-term/edit/{id}', 'edit')->name('instance.term.edit');
+        Route::post('course-management/instance-term/update', 'update')->name('instance.term.update');
+        Route::delete('course-management/instance-term/delete/{id}', 'destroy')->name('instance.term.destory');
+        Route::post('course-management/instance-term/restore/{id}', 'restore')->name('instance.term.restore');        
     });
     
     Route::controller(CourseModuleController::class)->group(function() {
-        Route::post('course-module/store', 'store')->name('course.module.store');
-        Route::get('course-module/list', 'list')->name('course.module.list'); 
-        Route::get('course-module/show/{id}', 'show')->name('course.module.show'); 
-        Route::post('course-module/update-status', 'updateStatus')->name('course.module.status.update'); 
-        Route::get('course-module/edit/{id}', 'edit')->name('course.module.edit');
-        Route::post('course-module/update', 'update')->name('course.module.update');
-        Route::delete('course-module/delete/{id}', 'destroy')->name('course.module.destory');
-        Route::post('course-module/restore/{id}', 'restore')->name('course.module.restore');
+        Route::post('course-management/course-module/store', 'store')->name('course.module.store');
+        Route::get('course-management/course-module/list', 'list')->name('course.module.list'); 
+        Route::get('course-management/course-module/show/{id}', 'show')->name('course.module.show'); 
+        Route::post('course-management/course-module/update-status', 'updateStatus')->name('course.module.status.update'); 
+        Route::get('course-management/course-module/edit/{id}', 'edit')->name('course.module.edit');
+        Route::post('course-management/course-module/update', 'update')->name('course.module.update');
+        Route::delete('course-management/course-module/delete/{id}', 'destroy')->name('course.module.destory');
+        Route::post('course-management/course-module/restore/{id}', 'restore')->name('course.module.restore');
         
     });
 
     Route::controller(CourseBaseDatafutureCntroller::class)->group(function() {
-        Route::post('course-datafuture/store', 'store')->name('course.datafuture.store');
-        Route::get('course-datafuture/list', 'list')->name('course.datafuture.list'); 
-        Route::get('course-datafuture/edit/{id}', 'edit')->name('course.datafuture.edit');
-        Route::post('course-datafuture/update', 'update')->name('course.datafuture.update');
-        Route::delete('course-datafuture/delete/{id}', 'destroy')->name('course.datafuture.destory');
-        Route::post('course-datafuture/restore/{id}', 'restore')->name('course.datafuture.restore');
+        Route::post('course-management/course-datafuture/store', 'store')->name('course.datafuture.store');
+        Route::get('course-management/course-datafuture/list', 'list')->name('course.datafuture.list'); 
+        Route::get('course-management/course-datafuture/edit/{id}', 'edit')->name('course.datafuture.edit');
+        Route::post('course-management/course-datafuture/update', 'update')->name('course.datafuture.update');
+        Route::delete('course-management/course-datafuture/delete/{id}', 'destroy')->name('course.datafuture.destory');
+        Route::post('course-management/course-datafuture/restore/{id}', 'restore')->name('course.datafuture.restore');
         
     });
 
     Route::controller(CourseModuleBaseAssesmentController::class)->group(function() {
-        Route::post('course-module-assesment/store', 'store')->name('course.module.assesment.store');
-        Route::get('course-module-assesment/list', 'list')->name('course.module.assesment.list'); 
-        Route::get('course-module-assesment/edit/{id}', 'edit')->name('course.module.assesment.edit');
-        Route::post('course-module-assesment/update', 'update')->name('course.module.assesment.update');
+        Route::post('course-management/course-module-assesment/store', 'store')->name('course.module.assesment.store');
+        Route::get('course-management/course-module-assesment/list', 'list')->name('course.module.assesment.list'); 
+        Route::get('course-management/course-module-assesment/edit/{id}', 'edit')->name('course.module.assesment.edit');
+        Route::post('course-management/course-module-assesment/update', 'update')->name('course.module.assesment.update');
 
-        Route::delete('course-module-assesment/delete/{id}', 'destroy')->name('course.module.assesment.destory');
-        Route::post('course-module-assesment/restore/{id}', 'restore')->name('course.module.assesment.restore');
+        Route::delete('course-management/course-module-assesment/delete/{id}', 'destroy')->name('course.module.assesment.destory');
+        Route::post('course-management/course-module-assesment/restore/{id}', 'restore')->name('course.module.assesment.restore');
     });
 
     Route::controller(ModuleDatafutureController::class)->group(function() {
-        Route::post('module-datafuture/store', 'store')->name('module.datafuture.store');
-        Route::get('module-datafuture/list', 'list')->name('module.datafuture.list'); 
-        Route::get('module-datafuture/edit/{id}', 'edit')->name('module.datafuture.edit');
-        Route::post('module-datafuture/update', 'update')->name('module.datafuture.update');
-        Route::delete('module-datafuture/delete/{id}', 'destroy')->name('module.datafuture.destory');
-        Route::post('module-datafuture/restore/{id}', 'restore')->name('module.datafuture.restore');
+        Route::post('course-management/module-datafuture/store', 'store')->name('module.datafuture.store');
+        Route::get('course-management/module-datafuture/list', 'list')->name('module.datafuture.list'); 
+        Route::get('course-management/module-datafuture/edit/{id}', 'edit')->name('module.datafuture.edit');
+        Route::post('course-management/module-datafuture/update', 'update')->name('module.datafuture.update');
+        Route::delete('course-management/module-datafuture/delete/{id}', 'destroy')->name('module.datafuture.destory');
+        Route::post('course-management/module-datafuture/restore/{id}', 'restore')->name('module.datafuture.restore');
         
     });
 
     Route::controller(TermModuleCreationController::class)->group(function() {
-        Route::get('term-module-creation', 'index')->name('term.module.creation');
-        Route::get('term-module-creation/list', 'list')->name('term.module.creation.list'); 
-        Route::get('term-module-creation/show/{instanceTermId}', 'show')->name('term.module.creation.show'); 
-        Route::get('term-module-creation/add/{instanceTermId}/{courseId}', 'add')->name('term.module.creation.add');
-        Route::post('term-module-creation/store', 'store')->name('term.module.creation.store');
-        Route::get('term-module-creation/module-details/{instanceTermId}', 'moduleDetails')->name('term.module.creation.module.details');
+        Route::get('course-management/term-module-creation', 'index')->name('term.module.creation');
+        Route::get('course-management/term-module-creation/list', 'list')->name('term.module.creation.list'); 
+        Route::get('course-management/term-module-creation/show/{instanceTermId}', 'show')->name('term.module.creation.show'); 
+        Route::get('course-management/term-module-creation/add/{instanceTermId}/{courseId}', 'add')->name('term.module.creation.add');
+        Route::post('course-management/term-module-creation/store', 'store')->name('term.module.creation.store');
+        Route::get('course-management/term-module-creation/module-details/{instanceTermId}', 'moduleDetails')->name('term.module.creation.module.details');
 
-        Route::get('term-module-creation/module-list/', 'moduleList')->name('term.module.creation.module.list');
-        Route::post('term-module-creation/module-view-assessments/', 'moduleViewAssessments')->name('term.module.creation.module.view.assessments');
-        Route::post('term-module-creation/module-add-assessments/', 'moduleAddAssessments')->name('term.module.creation.module.add.assessments');
+        Route::get('course-management/term-module-creation/module-list/', 'moduleList')->name('term.module.creation.module.list');
+        Route::post('course-management/term-module-creation/module-view-assessments/', 'moduleViewAssessments')->name('term.module.creation.module.view.assessments');
+        Route::post('course-management/term-module-creation/module-add-assessments/', 'moduleAddAssessments')->name('term.module.creation.module.add.assessments');
 
-        Route::get('module-creation/edit/{id}', 'edit')->name('term.module.creation.edit');
-        Route::post('module-creation/update', 'update')->name('term.module.creation.update');
+        Route::get('course-management/module-creation/edit/{id}', 'edit')->name('term.module.creation.edit');
+        Route::post('course-management/module-creation/update', 'update')->name('term.module.creation.update');
         
     });
 
@@ -1251,46 +1251,46 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(CourseController::class)->group(function() {
-        Route::get('courses', 'index')->name('courses'); 
-        Route::get('courses/list', 'list')->name('courses.list');        
-        Route::post('courses/store', 'store')->name('courses.store');
-        Route::get('courses/edit/{id}', 'edit')->name('courses.edit');
-        Route::post('courses/update/{id}', 'update')->name('courses.update');
+        Route::get('course-management/courses', 'index')->name('courses'); 
+        Route::get('course-management/courses/list', 'list')->name('courses.list');        
+        Route::post('course-management/courses/store', 'store')->name('courses.store');
+        Route::get('course-management/courses/edit/{id}', 'edit')->name('courses.edit');
+        Route::post('course-management/courses/update/{id}', 'update')->name('courses.update');
         
-        Route::get('courses/show/{id}', 'show')->name('courses.show');
+        Route::get('course-management/courses/show/{id}', 'show')->name('courses.show');
 
-        Route::delete('courses/delete/{id}', 'destroy')->name('courses.destory');
-        Route::post('courses/restore/{id}', 'restore')->name('courses.restore');
+        Route::delete('course-management/courses/delete/{id}', 'destroy')->name('courses.destory');
+        Route::post('course-management/courses/restore/{id}', 'restore')->name('courses.restore');
     });
    
     Route::controller(SemesterController::class)->group(function() {
-        Route::get('semester', 'index')->name('semester');
-        Route::get('semester/list', 'list')->name('semester.list');     
-        Route::post('semester/store', 'store')->name('semester.store');
-        Route::get('semester/edit/{id}', 'edit')->name('semester.edit');
-        Route::post('semester/update/{id}', 'update')->name('semester.update');
-        Route::delete('semester/delete/{id}', 'destroy')->name('semester.destory');
-        Route::post('semester/restore/{id}', 'restore')->name('semester.restore');
+        Route::get('course-management/semester', 'index')->name('semester');
+        Route::get('course-management/semester/list', 'list')->name('semester.list');     
+        Route::post('course-management/semester/store', 'store')->name('semester.store');
+        Route::get('course-management/semester/edit/{id}', 'edit')->name('semester.edit');
+        Route::post('course-management/semester/update/{id}', 'update')->name('semester.update');
+        Route::delete('course-management/semester/delete/{id}', 'destroy')->name('semester.destory');
+        Route::post('course-management/semester/restore/{id}', 'restore')->name('semester.restore');
     });
 
     Route::controller(GroupController::class)->group(function() {
-        Route::get('groups', 'index')->name('groups'); 
-        Route::get('groups/list', 'list')->name('groups.list');        
-        Route::post('groups/store', 'store')->name('groups.store');
-        Route::get('groups/edit/{id}', 'edit')->name('groups.edit');
-        Route::post('groups/update/{id}', 'update')->name('groups.update');
-        Route::delete('groups/delete/{id}', 'destroy')->name('groups.destory');
-        Route::post('groups/restore/{id}', 'restore')->name('groups.restore');
+        Route::get('course-management/groups', 'index')->name('groups'); 
+        Route::get('course-management/groups/list', 'list')->name('groups.list');        
+        Route::post('course-management/groups/store', 'store')->name('groups.store');
+        Route::get('course-management/groups/edit/{id}', 'edit')->name('groups.edit');
+        Route::post('course-management/groups/update/{id}', 'update')->name('groups.update');
+        Route::delete('course-management/groups/delete/{id}', 'destroy')->name('groups.destory');
+        Route::post('course-management/groups/restore/{id}', 'restore')->name('groups.restore');
     });
 
     Route::controller(ModuleLevelController::class)->group(function() {
-        Route::get('modulelevels', 'index')->name('modulelevels'); 
-        Route::get('modulelevels/list', 'list')->name('modulelevels.list');        
-        Route::post('modulelevels/store', 'store')->name('modulelevels.store');
-        Route::get('modulelevels/edit/{id}', 'edit')->name('modulelevels.edit');
-        Route::post('modulelevels/update/{id}', 'update')->name('modulelevels.update');
-        Route::delete('modulelevels/delete/{id}', 'destroy')->name('modulelevels.destory');
-        Route::post('modulelevels/restore/{id}', 'restore')->name('modulelevels.restore');
+        Route::get('course-management/modulelevels', 'index')->name('modulelevels'); 
+        Route::get('course-management/modulelevels/list', 'list')->name('modulelevels.list');        
+        Route::post('course-management/modulelevels/store', 'store')->name('modulelevels.store');
+        Route::get('course-management/modulelevels/edit/{id}', 'edit')->name('modulelevels.edit');
+        Route::post('course-management/modulelevels/update/{id}', 'update')->name('modulelevels.update');
+        Route::delete('course-management/modulelevels/delete/{id}', 'destroy')->name('modulelevels.destory');
+        Route::post('course-management/modulelevels/restore/{id}', 'restore')->name('modulelevels.restore');
     });
 
     Route::controller(BankHolidayController::class)->group(function() {      

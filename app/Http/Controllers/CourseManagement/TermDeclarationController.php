@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
-
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTermDeclarationRequest;
 use App\Http\Requests\UpdateTermDeclarationRequest;
 use App\Models\TermDeclaration;
@@ -19,9 +19,13 @@ class TermDeclarationController extends Controller
      */
     public function index()
     {
-        return view('pages/term-declaration/index', [
-            'title' => 'Semester - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Semesters', 'href' => 'javascript:void(0);']],
+        return view('pages.course-management.term-declaration.index', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Term Declarations',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Term Declaration', 'href' => 'javascript:void(0);']
+            ],
             
             'termTypes' => TermType::all(),
         ]);

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\SemesterRequests;
 use App\Http\Requests\SemesterUpdateRequests;
@@ -13,9 +14,13 @@ class SemesterController extends Controller
 {
     public function index()
     {
-        return view('pages/semester/index', [
-            'title' => 'Semester - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Semesters', 'href' => 'javascript:void(0);']]
+        return view('pages.course-management.semester.index', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Semesters',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Semesters', 'href' => 'javascript:void(0);']
+            ]
         ]);
     }
 

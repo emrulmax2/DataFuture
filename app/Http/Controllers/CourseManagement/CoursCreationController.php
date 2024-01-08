@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Semester;
@@ -15,9 +16,13 @@ use App\Models\Venue;
 class CoursCreationController extends Controller
 {
     public function index(){
-        return view('pages/course-creation/index', [
-            'title' => 'Course Creations - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Course Creations', 'href' => 'javascript:void(0);']],
+        return view('pages.course-management.course-creation.index', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Course Creations',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Creations', 'href' => 'javascript:void(0);']
+            ],
             'courses' => Course::all(),
             'semesters' => Semester::all(),
             'qualifications' => CourseQualification::all(),
@@ -110,9 +115,11 @@ class CoursCreationController extends Controller
 
     public function show($id) {
 
-        return view('pages/course-creation/show', [
-            'title' => 'Course Creations - LCC Data Future Managment',
+        return view('pages.course-management.course-creation.show', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Course Creation Details',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Course Creations', 'href' => route('course.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']
             ],

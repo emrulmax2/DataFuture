@@ -191,6 +191,23 @@ export default defineConfig({
 
                 'resources/js/venue-datafuture.js',
                 'resources/js/employee-time-keeping.js',
+
+                'resources/js/course-management.js',
+                'resources/js/semester.js',
+                'resources/js/term-declaration.js',
+                'resources/js/courses.js',
+                'resources/js/course-module.js',
+                'resources/js/course-datafuture.js',
+                'resources/js/course-module-assesment.js',
+                'resources/js/module-datafuture.js',
+                'resources/js/course-creation.js',
+                'resources/js/course-creation-availability.js',
+                'resources/js/course-creation-datafuture.js',
+                'resources/js/course-creation-instance.js',
+                'resources/js/instance-term.js',
+                'resources/js/term-module-creation.js',
+                'resources/js/modulelevels.js',
+                'resources/js/groups.js',
                 
             ],
             refresh: true,

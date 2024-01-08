@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\CourseRequests;
 use App\Http\Requests\CourseUpdateRequests;
@@ -17,11 +18,13 @@ class CourseController extends Controller
 {
     public function index()
     {
-        return view('pages/courses/index', [
-            'title' => 'Courses - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Courses', 'href' => 'javascript:void(0);']],
-            'bodies' => AwardingBody::all(),
-            'fees' => SourceTuitionFee::all(),
+        return view('pages.course-management.courses.index', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Courses',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Courses', 'href' => 'javascript:void(0);']
+            ]
         ]);
     }
 
@@ -122,9 +125,11 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        return view('pages/courses/show', [
-            'title' => 'Courses - LCC Data Future Managment',
+        return view('pages.course-management.courses.show', [
+            'title' => 'Course & Semester - LCC Data Future Managment',
+            'subtitle' => 'Courses Details',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Courses', 'href' => route('courses')],
                 ['label' => 'Course Details', 'href' => 'javascript:void(0);']
             ],

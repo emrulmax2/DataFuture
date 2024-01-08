@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ModuleCreation;
 use App\Models\InstanceTerm;
@@ -17,9 +18,13 @@ class TermModuleCreationController extends Controller
 {
     public function index()
     {
-        return view('pages/module-creations/index', [
-            'title' => 'Term Module Creation - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Term Modules List', 'href' => 'javascript:void(0);']],
+        return view('pages.course-management.module-creations.index', [
+            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'subtitle' => 'Term Module Creations',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Term Modules', 'href' => 'javascript:void(0);']
+            ],
             'terms' => InstanceTerm::all(),
             'courses' => Course::all(),
             'semesters' => Semester::all()
@@ -83,10 +88,12 @@ class TermModuleCreationController extends Controller
     }
 
     public function add($instanceTermId, $courseId){
-        return view('pages/module-creations/add', [
-            'title' => 'Add Term Module Creation - LCC Data Future Managment',
+        return view('pages.course-management.module-creations.add', [
+            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'subtitle' => 'Add Term Module Creations',
             'breadcrumbs' => [
-                ['label' => 'Term Module Creation', 'href' => route('term.module.creation')],
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Add', 'href' => 'javascript:void(0);']
             ],
             'instanceTerm' => InstanceTerm::find($instanceTermId),
@@ -124,10 +131,12 @@ class TermModuleCreationController extends Controller
     }
 
     public function moduleDetails($instanceTermId){
-        return view('pages/module-creations/add-details', [
-            'title' => 'Add Term Module Details - LCC Data Future Managment',
+        return view('pages.course-management.module-creations.add-details', [
+            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'subtitle' => 'Term Module Details',
             'breadcrumbs' => [
-                ['label' => 'Term Module Creation', 'href' => route('term.module.creation')],
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Module Details', 'href' => 'javascript:void(0);']
             ],
             'instanceTerm' => InstanceTerm::find($instanceTermId),
@@ -144,10 +153,12 @@ class TermModuleCreationController extends Controller
                     ->leftJoin('semesters as s', 'cc.semester_id', '=', 's.id')
                     ->where('it.id', $instanceTermId)
                     ->first();
-        return view('pages/module-creations/show', [
-            'title' => 'Module Creation Details - LCC Data Future Managment',
+        return view('pages.course-management.module-creations.show', [
+            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'subtitle' => 'Module Creation Details',
             'breadcrumbs' => [
-                ['label' => 'Term Module', 'href' => route('term.module.creation')],
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']
             ],
             'term' => $termRow

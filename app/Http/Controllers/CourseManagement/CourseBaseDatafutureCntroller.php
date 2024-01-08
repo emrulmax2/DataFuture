@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\ModuleDatafutureRequest;
-use App\Models\ModuleDatafuture;
+use App\Http\Requests\CourseBaseDatafutureRequests;
+use App\Models\CourseBaseDatafutures;
 
-class ModuleDatafutureController extends Controller
+class CourseBaseDatafutureCntroller extends Controller
 {
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
-        $module = (isset($request->module) && $request->module > 0 ? $request->module : 0);
+        $course = (isset($request->course) && $request->course > 0 ? $request->course : 0);
 
-        $query = ModuleDatafuture::where('course_module_id', $module);
+        $query = CourseBaseDatafutures::where('course_id', $course);
         if(!empty($queryStr)):
             $query->where('field_name','LIKE','%'.$queryStr.'%');
             $query->orWhere('field_type','LIKE','%'.$queryStr.'%');
@@ -34,12 +35,9 @@ class ModuleDatafutureController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $query = ModuleDatafuture::where('course_module_id', $module)->orderByRaw(implode(',', $sorts));
+        $query = CourseBaseDatafutures::where('course_id', $course)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('field_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('field_type','LIKE','%'.$queryStr.'%');
             $query->orWhere('field_value','LIKE','%'.$queryStr.'%');
-            $query->orWhere('field_desc','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -55,10 +53,11 @@ class ModuleDatafutureController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'field_name' => $list->field_name,
-                    'field_type' => $list->field_type,
+                    'category' => (isset($list->field->category->name) ? $list->field->category->name : ''),
+                    'datafuture_field_id' => (isset($list->field->name) ? $list->field->name : ''),
+                    'field_type' => (isset($list->field->type) ? $list->field->type : ''),
                     'field_value' => $list->field_value,
-                    'field_desc' => $list->field_desc,
+                    'field_desc' => (isset($list->field->description) ? $list->field->description : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -67,19 +66,18 @@ class ModuleDatafutureController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-
-    public function store(ModuleDatafutureRequest $request){
+    public function store(CourseBaseDatafutureRequests $request){
         $request->merge([
             'created_by' => auth()->user()->id
         ]);
         
-        $moduleDatafuture = ModuleDatafuture::create($request->all());
+        $courseDF = CourseBaseDatafutures::create($request->all());
         
-        return response()->json($moduleDatafuture);
+        return response()->json($courseDF);
     }
 
     public function edit($id){
-        $data = ModuleDatafuture::find($id);
+        $data = CourseBaseDatafutures::find($id);
 
         if($data){
             return response()->json($data);
@@ -88,14 +86,12 @@ class ModuleDatafutureController extends Controller
         }
     }
 
-    public function update(ModuleDatafutureRequest $request){
+    public function update(CourseBaseDatafutureRequests $request){
         $dfID = $request->id;
-        $course_module_id = $request->course_module_id;
-        $courseDF = ModuleDatafuture::where('id', $dfID)->where('course_module_id', $course_module_id)->update([
-            'field_name'=> $request->field_name,
-            'field_type'=> $request->field_type,
+        $course_id = $request->course_id;
+        $courseDF = CourseBaseDatafutures::where('id', $dfID)->where('course_id', $course_id)->update([
+            'datafuture_field_id'=> $request->datafuture_field_id,
             'field_value'=> $request->field_value,
-            'field_desc'=> $request->field_desc,
             'updated_by' => auth()->user()->id
         ]);
 
@@ -108,13 +104,14 @@ class ModuleDatafutureController extends Controller
     }
 
     public function destroy($id){
-        $data = ModuleDatafuture::find($id)->delete();
+        $data = CourseBaseDatafutures::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = ModuleDatafuture::where('id', $id)->withTrashed()->restore();
+        $data = CourseBaseDatafutures::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
+
 }
