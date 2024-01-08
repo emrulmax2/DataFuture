@@ -606,7 +606,7 @@
                             </div>
                         </div>
                     </div>
-                    @if(!auth('agent')->user()->id)
+                    @if(!auth('agent')->user())
                         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                         <div class="font-medium text-base">Others</div>
                         <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
