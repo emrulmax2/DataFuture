@@ -10,7 +10,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Application Form</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            @if(auth('agent')->user()->id)
+            @if(isset(auth('agent')->user()->id))
             <a href="{{ route('agent.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
             @else
             <a href="{{ route('applicant.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
@@ -38,7 +38,7 @@
             </div>
             <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400 show">
                 <form method="post" action="#" id="appicantFormStep_1" class="wizard-step-form">
-                    @if(auth('agent')->user()->id)
+                    @if(isset(auth('agent')->user()->id))
                         <input type="hidden" name="agent_user_id" value=" {{ auth('agent')->user()->id }}" />
                     @endif
                     <div class="font-medium text-base">Personal Details</div>
@@ -58,7 +58,7 @@
                         
                         <div class="col-span-12 sm:col-span-3">
                             <label for="first_name" class="form-label">First Name(s) <span class="text-danger">*</span></label>
-                            @if(auth('agent')->user()->id)
+                            @if(isset(auth('agent')->user()->id))
                                 <input type="text" value="{{ isset($agentApplicant->first_name) ? $agentApplicant->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name" >
                             @else
                                 <input type="text" value="{{ isset($apply->first_name) ? $apply->first_name : '' }}" placeholder="First Name" id="first_name" class="form-control" name="first_name">
@@ -67,7 +67,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                            @if(auth('agent')->user()->id)
+                            @if(isset(auth('agent')->user()->id))
                                 <input type="text" value="{{ isset($agentApplicant->last_name) ? $agentApplicant->last_name : '' }}" placeholder="Last Name" id="last_name" class="form-control" name="last_name" >
                             
                             @else
@@ -172,7 +172,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            @if(auth('agent')->user()->id)
+                            @if(isset(auth('agent')->user()->id))
                                 <input value="{{ isset($agentApplicant->mobile) ? $agentApplicant->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control applicationPhoneMask" name="mobile" readonly="readonly">
                             
                             @else
@@ -606,7 +606,7 @@
                             </div>
                         </div>
                     </div>
-                    @if(!auth('agent')->user()->id)
+                    @if(!isset(auth('agent')->user()->id) && !auth('agent')->user()->id)
                         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                         <div class="font-medium text-base">Others</div>
                         <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
