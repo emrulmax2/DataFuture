@@ -172,6 +172,8 @@ var applicantUploadListTable = (function () {
     uploadDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadDocumentModal input[name="document_setting_id"]').val('0');
         $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
+        $('#uploadDocumentModal input[name="display_file_name"]').val('');
+        $('#uploadDocumentModal input[name="display_name"]').val('');
         $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
         document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
         document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
@@ -291,6 +293,10 @@ var applicantUploadListTable = (function () {
                     //window.location.reload();
                 }, 2000);
             }
+        });
+
+        $('#uploadDocumentModal [name="display_name"]').on('keyup', function(){
+            $('#uploadDocumentModal [name="display_file_name"]').val($(this).val());
         })
 
         $('#uploadDocBtn').on('click', function(e){
