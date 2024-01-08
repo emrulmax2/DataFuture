@@ -1024,7 +1024,11 @@ class AdmissionController extends Controller
         $applicant_id = $request->applicant_id;
         $document_setting_id = $request->document_setting_id;
         $documentSetting = DocumentSettings::find($document_setting_id);
+        $document_settings_name = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : '');
         $hard_copy_check = $request->hard_copy_check;
+        $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
+        $display_file_name .= ($display_file_name != '' ? ($document_settings_name != '' ? ' - '.$document_settings_name : '') : $document_settings_name);
+        
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
@@ -1035,7 +1039,7 @@ class AdmissionController extends Controller
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('google')->url($path);
-        $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
+        $data['display_file_name'] = (!empty($display_file_name) ? $display_file_name : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
         $applicantDoc = ApplicantDocument::create($data);

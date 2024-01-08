@@ -718,7 +718,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="applicant_id" value="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}"/>
-                        @if(auth('agent')->user()->id)
+                        @if(isset(auth('agent')->user()->id))
                             <input type="hidden" name="url" value="{{ route('agent.dashboard') }}"/>
                         @else
                             <input type="hidden" name="url" value="{{ route('applicant.dashboard') }}"/>

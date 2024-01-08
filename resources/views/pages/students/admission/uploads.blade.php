@@ -84,21 +84,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-UP" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-UP" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-UP" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -136,9 +126,14 @@
                         <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
                         <input type="hidden" name="document_setting_id" value="0"/>
                         <input type="hidden" name="hard_copy_check" value="0"/>
+                        <input type="hidden" name="display_file_name" value=""/>
                     </form>
                     <div class="mt-3">
-                        <label>Hard Copy Checked?</label>
+                        <label class="form-label">Document Name</label>
+                        <input type="text" name="display_name" value="" class="form-control w-full"/>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Hard Copy Checked?</label>
                         <div class="form-check mt-2">
                             <input id="hard_copy_check-1" class="form-check-input" type="radio" value="1" name="hard_copy_check_status" value="vertical-radio-chris-evans">
                             <label class="form-check-label" for="hard_copy_check-1">Yes</label>
