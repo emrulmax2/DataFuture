@@ -1,48 +1,54 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\ModuleLevelsRequests;
-use App\Http\Requests\ModuleLevelsUpdateRequests;
-use App\Models\ModuleLevel;
+use App\Http\Requests\GroupsRequests;
+use App\Http\Requests\GroupsUpdateRequests;
+use App\Models\Course;
+use App\Models\Group;
 use App\Models\User;
 
-class ModuleLevelController extends Controller
+class GroupController extends Controller
 {
     public function index()
     {
-        return view('pages/modulelevels/index', [
-            'title' => 'Module Levels - LCC Data Future Managment',
-            'breadcrumbs' => [['label' => 'Module Levels', 'href' => 'javascript:void(0);']]
+        return view('pages.course-management.groups.index', [
+            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'subtitle' => 'Groups',
+            'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Groups', 'href' => 'javascript:void(0);']
+            ],
+            'courses' => Course::all()
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
-    
-        $total_rows = $count = ModuleLevel::count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $query = ModuleLevel::orderByRaw(implode(',', $sorts));
+        $query = Group::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
         endif;
+
+        $total_rows = $count = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $Query= $query->skip($offset)
                ->take($limit)
@@ -56,7 +62,9 @@ class ModuleLevelController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'course' => (isset($list->course->name) && !empty($list->course->name) ? $list->course->name : ''),
                     'name' => $list->name,
+                    'evening_and_weekend' => (isset($list->evening_and_weekend) && $list->evening_and_weekend == '1' ? 'Yes' : 'No'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -65,16 +73,18 @@ class ModuleLevelController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function store(ModuleLevelsRequests $request){
-        $data = ModuleLevel::create([
+    public function store(GroupsRequests $request){
+        $data = Group::create([
+            'course_id'=> $request->course_id,
             'name'=> $request->name,
+            'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
     }
 
     public function edit($id){
-        $data = ModuleLevel::find($id);
+        $data = Group::find($id);
 
         if($data){
             return response()->json($data);
@@ -83,9 +93,11 @@ class ModuleLevelController extends Controller
         }
     }
 
-    public function update(ModuleLevelsUpdateRequests $request, ModuleLevel $dataId){
-        $data = ModuleLevel::where('id', $request->id)->update([
+    public function update(GroupsUpdateRequests $request, Group $group){
+        $data = Group::where('id', $request->id)->update([
+            'course_id'=> $request->course_id,
             'name'=> $request->name,
+            'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
             'updated_by' => auth()->user()->id
         ]);
 
@@ -100,12 +112,12 @@ class ModuleLevelController extends Controller
     }
 
     public function destroy($id){
-        $data = ModuleLevel::find($id)->delete();
+        $data = Group::find($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = ModuleLevel::where('id', $id)->withTrashed()->restore();
+        $data = Group::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
     }
