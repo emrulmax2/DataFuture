@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Agent\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Request\ApplicantForgetPasswordRequest;
-use App\Http\Request\ApplicantForgetPasswordUpdateRequest;
-use App\Models\ApplicantUser;
-use App\Mail\ResetPasswordLink;
+use App\Http\Request\AgentForgetPasswordRequest;
+use App\Http\Request\AgentForgetPasswordUpdateRequest;
+use App\Mail\ResetAgentPasswordLink;
+use App\Models\AgentUser;
 use Illuminate\Http\Response;
 use DB; 
 use Carbon\Carbon; 
@@ -36,11 +36,11 @@ class ForgetPasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function submitForgetPasswordForm(ApplicantForgetPasswordRequest $request)
+    public function submitForgetPasswordForm(AgentForgetPasswordRequest $request)
     {
        
 
-        $applicantUser = ApplicantUser::where('email',$request->email)->get()->first();
+        $applicantUser = AgentUser::where('email',$request->email)->get()->first();
         $token = base64_encode($request->email);
         if($applicantUser) {
 
@@ -50,7 +50,7 @@ class ForgetPasswordController extends Controller
                     'created_at' => Carbon::now()
                 ]);
 
-                Mail::to($request->email)->send(new ResetPasswordLink($token));
+                Mail::to($request->email)->send(new ResetAgentPasswordLink($token));
 
                 return response()->json(['message'=>'A mail has been sent'],200);
         }else    
@@ -78,7 +78,7 @@ class ForgetPasswordController extends Controller
        *
        * @return response()
        */
-      public function submitResetPasswordForm(ApplicantForgetPasswordUpdateRequest $request)
+      public function submitResetPasswordForm(AgentForgetPasswordUpdateRequest $request)
       {
   
           $updatePassword = DB::table('password_resets')
@@ -93,7 +93,7 @@ class ForgetPasswordController extends Controller
             return back()->withInput()->with('error', 'Invalid token!');
           }
   
-          ApplicantUser::where('email', $updatePassword->email)
+          AgentUser::where('email', $updatePassword->email)
                       ->update(['password' => Hash::make($request->password)]);
  
           DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();

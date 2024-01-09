@@ -112,12 +112,12 @@
                 tailwind.svgLoader()
                 await helper.delay(500)
 
-                axios.post(route('agent.reset.password'), formData).then(res => {
+                axios.post(route('agent.reset.password.post'), formData).then(res => {
                     
                     $("#success-notification-toggle").trigger('click')
                     $('#btn-login').html('Update Passwored')
                     setInterval(function(){
-                        location.href = '/applicant/login'
+                        location.href = '/agent/login'
                     }, 2000);
                     
 
