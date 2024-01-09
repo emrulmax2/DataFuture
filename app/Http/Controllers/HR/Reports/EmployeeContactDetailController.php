@@ -21,34 +21,11 @@ use PDF;
 class EmployeeContactDetailController extends Controller
 {
     public function index(){
-        $employee = Employee::where('status', '=', 1)->get();
-        $i = 0;
-        $dataList =[];
-        foreach($employee as $data) {
-            $address = Address::find($data->address_id);
-            $emergencyContact= EmployeeEmergencyContact::find($data->id);
-     
-            $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
-            $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
-            $dataList[$i++] = [
-                'name' => $data->first_name.' '.$data->last_name,
-                'address' => $addressOne.','.$addressTwo,
-                'post_code' => isset($data->post_code) ? $data->post_code : '',
-                'telephone' => isset($data->telephone) ? $data->telephone : '',
-                'mobile' => isset($data->mobile) ? $data->mobile : '',
-                'email' => isset($data->email) ? $data->email : '',
-                'emergency_telephone' => isset($emergencyContact->emergency_contact_telephone) ? $emergencyContact->emergency_contact_telephone : '',
-                'emergency_mobile' => isset($emergencyContact->emergency_contact_mobile) ? $emergencyContact->emergency_contact_mobile : '',
-                'emergency_email' => isset($emergencyContact->emergency_contact_email) ? $emergencyContact->emergency_contact_email : ''
-            ];
-        }
-        
         return view('pages.hr.portal.reports.contactdetail', [
             'title' => 'Employee Contact Details - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Employee Contact Details', 'href' => 'javascript:void(0);']
             ],
-           'dataList' => $dataList,
            'country' => Country::all(),
            'ethnicity' => Ethnicity::all(),
            'employeeWorkType' => EmployeeWorkType::all(),
@@ -66,7 +43,6 @@ class EmployeeContactDetailController extends Controller
         $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
         $sorts = [];
         foreach($sorters as $sort):
@@ -74,12 +50,19 @@ class EmployeeContactDetailController extends Controller
         endforeach;
 
         $query = Employee::orderByRaw(implode(',', $sorts));
-        if(!empty($ethnicity)): $query->where('ethnicity_id', 'LIKE', '%'.$ethnicity.'%'); endif;
-        if(!empty($nationality)): $query->where('nationality_id', 'LIKE', '%'.$nationality.'%'); endif;
-        if(!empty($gender)): $query->where('sex_identifier_id', 'LIKE', '%'.$gender.'%'); endif;
-        if(($status)==0): $query->where('status', $status); else: $query->where('status', '>', 0); endif;
+        if(!empty($ethnicity)): $query->where('ethnicity_id', $ethnicity); endif;
+        if(!empty($nationality)): $query->where('nationality_id', $nationality); endif;
+        if(!empty($gender)): $query->where('sex_identifier_id',$gender); endif;
 
+        if(($status)==0): 
+            $query->where('status', $status); 
+        elseif(($status)==1):  
+            $query->where('status', $status); 
+        else:
+            $query->whereIn('status', [0,1]);  
+        endif;
         if(!empty($type) || !empty($department) || !empty($startdate) || !empty($enddate)):
+
             $query->whereHas('employment', function($qs) use($type, $department, $startdate, $enddate){
                 if(!empty($type)): $qs->where('employee_work_type_id', $type); endif;
                 if(!empty($department)): $qs->where('department_id', $department); endif;
@@ -104,7 +87,6 @@ class EmployeeContactDetailController extends Controller
             $Query = $query->get();
 
         $data = array();
-
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
@@ -129,6 +111,7 @@ class EmployeeContactDetailController extends Controller
 
     public function generatePDF(Request $request)
     {
+        set_time_limit(300);
         $items = Employee::where('status', '=', 1)->get();
         $items->load(['address','emergencyContact']);
 
@@ -183,6 +166,7 @@ class EmployeeContactDetailController extends Controller
     }
 
     public function generateSearchPDF(Request $request){
+        set_time_limit(300);
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -201,15 +185,6 @@ class EmployeeContactDetailController extends Controller
     }
 
     public function searchlist(Request $request){
-        $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
-        $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
-        $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
-        $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
-        $ethnicity = (isset($request->ethnicity) && !empty($request->ethnicity) ? $request->ethnicity : '');
-        $nationality = (isset($request->nationality) && !empty($request->nationality) ? $request->nationality : '');
-        $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
-        $status = $request->status;
-
         $data = $this->list($request,false);
         $returnData = json_decode($data->getContent(), true);
         

@@ -6,29 +6,30 @@ import TomSelect from "tom-select";
 ("use strict");
 
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " item?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
 
     // On reset filter form
     $("#tabulator-html-filter-reset-RCD").on("click", function (event) {
-        $("#employee_work_type_id-recordcard").val('');
-        $("#department_id-recordcard").val('');
-        $("#ethnicity-recordcard").val('');
-        $("#nationality-recordcard").val('');
-        $("#gender-recordcard").val('');
         $("#startdate-recordcard").val('');
         $("#enddate-recordcard").val('');
-        $("#status_id-recordcard").val('1');
+        
+        let employeeWork = document.getElementById('employee_work_type_id-recordcard');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-recordcard');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-recordcard');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-recordcard');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-recordcard');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status_id-recordcard');
+        statusIdContact.tomselect.setValue("1");
+
         document.getElementById("allRecordCardExcelBtn").style.display="block";
         document.getElementById("allRecordCardPdfBtn").style.display="block";
 
@@ -48,7 +49,13 @@ import TomSelect from "tom-select";
         let nationality = $("#nationality-recordcard").val() != "" ? $("#nationality-recordcard").val() : "";
         let gender = $("#gender-recordcard").val() != "" ? $("#gender-recordcard").val() : "";
         let status = $("#status_id-recordcard").val() != "" ? $("#status_id-recordcard").val() : "";
-        
+        if(startdate !="" || worktype !="" || department !="" || ethnicity !="" || nationality !="" || gender !="" || enddate !="" || status !=1) {
+            document.getElementById("recordcardbySearchPdfBtn").style.display="block";
+            document.getElementById("allRecordCardPdfBtn").style.display="none";
+        } else {
+            document.getElementById("recordcardbySearchPdfBtn").style.display="none";
+            document.getElementById("allRecordCardPdfBtn").style.display="block";
+        }
         axios({
             method: "get",
             url: route("hr.portal.reports.recordcard.list"),
@@ -60,13 +67,10 @@ import TomSelect from "tom-select";
             },
         })
         .then((response) => {
-            $("div .recordcardAllData").hide();
             document.getElementById("recordcardBySearchData").style.display="block";
             document.getElementById("allRecordCardExcelBtn").style.display="none";
-            document.getElementById("allRecordCardPdfBtn").style.display="none";
 
             document.getElementById("recordcardbySearchExcelBtn").style.display="block";
-            document.getElementById("recordcardbySearchPdfBtn").style.display="block";
             let dataset = response.data.res;
             let html = "";
             dataset.forEach((item, index) => {

@@ -14,6 +14,7 @@ use App\Models\SexIdentifier;
 use App\Models\EmployeeEmergencyContact;
 use App\Exports\RecordCardExport;
 use App\Exports\RecordCardBySearchExport;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 use PDF;
@@ -34,7 +35,7 @@ class RecordCardController extends Controller
         ]);
     }
 
-    public function list(Request $request, $paginationOn=true){
+    public function list(Request $request){
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -51,10 +52,16 @@ class RecordCardController extends Controller
         endforeach;
 
         $query = Employee::orderByRaw(implode(',', $sorts));
-        if(!empty($ethnicity)): $query->where('ethnicity_id', 'LIKE', '%'.$ethnicity.'%'); endif;
-        if(!empty($nationality)): $query->where('nationality_id', 'LIKE', '%'.$nationality.'%'); endif;
-        if(!empty($gender)): $query->where('sex_identifier_id', 'LIKE', '%'.$gender.'%'); endif;
-        if(($status)==0): $query->where('status', $status); else: $query->where('status', '>', 0); endif;
+        if(!empty($ethnicity)): $query->where('ethnicity_id', $ethnicity); endif;
+        if(!empty($nationality)): $query->where('nationality_id', $nationality); endif;
+        if(!empty($gender)): $query->where('sex_identifier_id',$gender); endif;
+        if(($status)==0): 
+            $query->where('status', $status); 
+        elseif(($status)==1):  
+            $query->where('status', $status); 
+        else:
+            $query->whereIn('status', [0,1]);  
+        endif;
 
         if(!empty($type) || !empty($department) || !empty($startdate) || !empty($enddate)):
             $query->whereHas('employment', function($qs) use($type, $department, $startdate, $enddate){
@@ -73,12 +80,7 @@ class RecordCardController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        if($paginationOn==true)
-            $Query = $query->skip($offset)
-                ->take($limit)
-                ->get();
-        else
-            $Query = $query->get();
+        $Query = $query->get();
 
         $data = array();
 
@@ -102,7 +104,7 @@ class RecordCardController extends Controller
 
                     'started_on' => isset($list->employment->started_on) ? $list->employment->started_on : '',
                     'works_number' => isset($list->employment->works_number) ? $list->employment->works_number : '',
-                    'end_to' => isset($list->workingPattern->end_to) ? $list->workingPattern->end_to : '',
+                    'end_to' => isset($list->employment->ended_on) ? $list->employment->ended_on : '',
                     'job_title' => isset($list->employment->employee_job_title_id) ? $list->employment->employeeJobTitle->name : '',
                     'job_status' => ($list->status== 1) ? 'Active' : 'Inactive',
 
@@ -181,55 +183,60 @@ class RecordCardController extends Controller
 
     public function generatePDF(Request $request)
     {
+        set_time_limit(300);
         $items = Employee::where('status', '=', 1)->get();
-        $items->load(['address','emergencyContact']);
 
+        $items->load(['address','title','employment','ethnicity','nationality','sex','employment.employeeJobTitle']);
+      
         $i = 0;
         $dataList =[];
 
         foreach($items as $item) {
-            $emergencyContact = $item->emergencyContact;
             $address = $item->address;
             $addressOne = isset($address->address_line_1) ? $address->address_line_1 : '';
             $addressTwo = isset($address->address_line_2) ? $address->address_line_2 : '';
             $firstName = isset($item->first_name) ? $item->first_name : '';
             $lastName = isset($item->last_name) ? $item->last_name : '';
+            $ethnicity = isset($item->ethnicity_id) ? $item->ethnicity->name : '';
+            $nationality = isset($item->nationality_id) ? $item->nationality->name : '';
+            $gender = isset($item->sex_identifier_id) ? $item->sex->name : '';
+            $jobTitle = isset($item->employment->employee_job_title_id) ? $item->employment->employeeJobTitle->name : '';
             $dataList[$i++] = [
                 'title' => isset($item->title->name) ? $item->title->name : '',
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'full_name' => $firstName.' '.$lastName,
+                'name' =>$firstName.' '.$lastName,
                 'dob' => isset($item->date_of_birth) ? $item->date_of_birth : '',
-                'ethnicity' => isset($item->ethnicity_id) ? $item->ethnicity->name : '',
-                'nationality' => isset($item->nationality_id) ? $item->nationality->name : '',
+                'ethnicity' => $ethnicity,
+                'nationality' => $nationality,
                 'ni_number' => isset($item->ni_number) ? $item->ni_number : '',
-                'gender' => isset($item->sex_identifier_id) ? $item->sex->name : '',
+                'gender' => $gender,
 
                 'started_on' => isset($item->employment->started_on) ? $item->employment->started_on : '',
                 'works_number' => isset($item->employment->works_number) ? $item->employment->works_number : '',
-                'end_to' => isset($item->workingPattern->end_to) ? $item->workingPattern->end_to : '',
-                'job_title' => isset($item->employment->employee_job_title_id) ? $item->employment->employeeJobTitle->name : '',
+                'end_to' => isset($item->employment->ended_on) ? $item->employment->ended_on : '',
+                'job_title' => $jobTitle,
                 'job_status' => ($item->status== 1) ? 'Active' : 'Inactive',
                 'address' => $addressOne.','.$addressTwo,
                 'post_code' => isset($item->post_code) ? $item->post_code : '',
                 'telephone' => isset($item->telephone) ? $item->telephone : '',
                 'mobile' => isset($item->mobile) ? $item->mobile : '',
                 'email' => isset($item->email) ? $item->email : '',
-                'emergency_telephone' => isset($emergencyContact->emergency_contact_telephone) ? $emergencyContact->emergency_contact_telephone : '',
-                'emergency_mobile' => isset($emergencyContact->emergency_contact_mobile) ? $emergencyContact->emergency_contact_mobile : '',
-                'emergency_email' => isset($emergencyContact->emergency_contact_email) ? $emergencyContact->emergency_contact_email : '',
                 'disability' => $item->disability_status,
                 'car_reg' => isset($item->car_reg_number) ? $item->car_reg_number : '',
             ];
         } 
+        //dd($dataList);
 
         $pdf = PDF::loadView('pages.hr.portal.reports.pdf.recordcardpdf',compact('dataList'));
         return $pdf->download('Employee Record Card.pdf');
 
-        //return view('pages.hr.portal.reports.pdf.contactpdf', compact('dataList'));
+        //return view('pages.hr.portal.reports.pdf.recordcardpdf', compact('dataList'));
     }
 
     public function generateSearchPDF(Request $request){
+        set_time_limit(300);
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
@@ -239,7 +246,7 @@ class RecordCardController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request,false);
+        $data = $this->list($request);
         
         $returnData = json_decode($data->getContent(), true);
         
@@ -263,7 +270,7 @@ class RecordCardController extends Controller
         $gender = (isset($request->gender) && !empty($request->gender) ? $request->gender : '');
         $status = $request->status;
         
-        $data = $this->list($request,false);
+        $data = $this->list($request);
         
         $returnData = json_decode($data->getContent(), true);
                 

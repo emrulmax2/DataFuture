@@ -19,7 +19,7 @@ class EligibilityReportController extends Controller
         ]);
     }
 
-    public function visaList(Request $request){
+    public function visaList(Request $request, $paginationOn=true){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
@@ -42,11 +42,12 @@ class EligibilityReportController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        // $Query= $query->skip($offset)
-        //        ->take($limit)
-        //        ->get();
-
-        $Query = $query->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else       
+            $Query = $query->get();
 
         $data = array();
 
@@ -77,7 +78,7 @@ class EligibilityReportController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function passportList(Request $request){
+    public function passportList(Request $request, $paginationOn=true){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
@@ -100,11 +101,12 @@ class EligibilityReportController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        // $Query= $query->skip($offset)
-        //        ->take($limit)
-        //        ->get();
-
-        $Query = $query->get();
+        if($paginationOn==true)
+            $Query = $query->skip($offset)
+                ->take($limit)
+                ->get();
+        else       
+            $Query = $query->get();
         $data = array();
 
         if(!empty($Query)):
@@ -136,6 +138,7 @@ class EligibilityReportController extends Controller
 
     public function generateVisaPDF(Request $request)
     {
+        set_time_limit(300);
         $items = Employee::all();
         $items->load(['eligibilities']);
 
@@ -165,17 +168,14 @@ class EligibilityReportController extends Controller
                 'workpermit_days' => isset($eligibilities->workpermit_expire) ? $workDays : '',
             ];
         } 
-        
-        //view()->share('items',$items,'sex',$sex);
 
         $pdf = PDF::loadView('pages.hr.portal.reports.pdf.eligibilityvisapdf',compact('dataList'));
         return $pdf->download('Eligibility Expiry Visa Report.pdf');
-
-        //return view('pages.hr.portal.reports.diversitypdf', compact('dataList'));
     }
 
     public function generatePassportPDF(Request $request)
     {
+        set_time_limit(300);
         $items = Employee::all();
         $items->load(['eligibilities']);
 
@@ -206,12 +206,8 @@ class EligibilityReportController extends Controller
                 'doc_days' => isset($eligibilities->doc_expire) ? $docDays : '',
             ];
         } 
-        
-        //view()->share('items',$items,'sex',$sex);
 
         $pdf = PDF::loadView('pages.hr.portal.reports.pdf.eligibilitypassportpdf',compact('dataList'));
         return $pdf->download('Eligibility Expiry Passport Report.pdf');
-
-        //return view('pages.hr.portal.reports.diversitypdf', compact('dataList'));
     }
 }

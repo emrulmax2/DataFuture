@@ -6,183 +6,172 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Class plans</h2>
+        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('class.plan.add') }}" class="add_btn btn btn-primary shadow-md mr-2">Add New Plan</a>
+            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
         </div>
     </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <form id="tabulatorFilterForm-CPL">
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Courses</div>
-                        <select id="courses-CPL" name="courses[]" class="w-full tom-selects" multiple>
-                            @if(!empty($courses))
-                                @foreach($courses as $crs)
-                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
+
+    <!-- BEGIN: Settings Page Content -->
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
+            <!-- BEGIN: Profile Info -->
+            @include('pages.course-management.sidebar')
+            <!-- END: Profile Info -->
+        </div>
+
+        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+            <!-- BEGIN: Display Information -->
+            <div class="intro-y box lg:mt-5">
+                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                    <h2 class="font-medium text-base mr-auto">Class plans List</h2>
+                    <a href="{{ route('class.plan.add') }}" class="add_btn btn btn-primary shadow-md ml-auto">Add New Plan</a>
                 </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Terms</div>
-                        <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id[]" class="w-full tom-selects" multiple>
-                            @if(!empty($terms))
-                                @foreach($terms as $trm)
-                                    <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Tutors</div>
-                        <select data-placeholder="Select Tutor" id="tutor-CPL" name="tutors[]" class="tom-selects w-full" multiple>
-                            @if(!empty($tutor))
-                                @foreach($tutor as $tr)
-                                    <option value="{{ $tr->id }}">{{ $tr->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1" style="white-space: nowrap;">P. Tutors</div>
-                        <select data-placeholder="Select Tutor" id="ptutor-CPL" name="ptutors[]" class="tom-selects w-full" multiple>
-                            @if(!empty($ptutor))
-                                @foreach($ptutor as $ptr)
-                                    <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Rooms</div>
-                        <select data-placeholder="Select Room" id="room-CPL" name="rooms[]" class="w-full tom-selects" multiple>
-                            @if(!empty($room))
-                                @foreach($room as $rm)
-                                    <option value="{{ $rm->id }}">{{ $rm->venue->name }} - {{ $rm->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-3">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Groups</div>
-                        <select data-placeholder="Select Group" id="group-CPL" name="groups[]" class="w-full tom-selects" multiple>
-                            @if(!empty($group))
-                                @foreach($group as $gr)
-                                    <option value="{{ $gr->id }}">{{ $gr->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1" style="white-space: nowrap;">Days</div>
-                        <select data-placeholder="Select Tutor" id="days-CPL" name="days[]" class="tom-selects w-full" multiple>
-                            <option value="mon">Mon</option>
-                            <option value="tue">Tue</option>
-                            <option value="wed">Wed</option>
-                            <option value="thu">Thu</option>
-                            <option value="fri">Fri</option>
-                            <option value="sat">Sat</option>
-                            <option value="sun">Sun</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1" style="white-space: nowrap;">Status</div>
-                        <select id="status-CPL" name="status" class="w-full">
-                            <option value="1" selected>Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-2">
-                    <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1" style="white-space: nowrap;">Views</div>
-                        <select id="view-CPL" name="view" class="w-full">
-                            <option value="1" selected>List View</option>
-                            <option value="2">Grid View</option>
-                            <option value="3">Tree View</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-span-12"></div>
-                <div class="col-span-6">
-                    <button id="tabulator-html-filter-go-CPL" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset-CPL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-                <div class="col-span-6 text-right">
-                    <div class="flex mt-5 sm:mt-0 justify-end">
-                        <button id="tabulator-print-CPL" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                        </button>
-                        <div class="dropdown w-1/2 sm:w-auto mr-2" id="tabulator-export-CPL">
-                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                            </button>
-                            <div class="dropdown-menu w-40">
-                                <ul class="dropdown-content">
-                                    <li>
-                                        <a id="tabulator-export-csv-CPL" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                        </a>
-                                    </li>
-                                    {{-- <li>
-                                        <a id="tabulator-export-json-CPL" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                        </a>
-                                    </li> --}}
-                                    <li>
-                                        <a id="tabulator-export-xlsx-CPL" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                        </a>
-                                    </li>
-                                    {{-- <li>
-                                        <a id="tabulator-export-html-CPL" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                        </a>
-                                    </li> --}}
-                                </ul>
+                <div class="p-5">
+                    <form id="tabulatorFilterForm-CPL">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-3">
+                                <label class="form-label">Courses</label>
+                                <select id="courses-CPL" name="courses[]" class="w-full tom-selects" multiple>
+                                    @if(!empty($courses))
+                                        @foreach($courses as $crs)
+                                            <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Terms</label>
+                                <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id[]" class="w-full tom-selects" multiple>
+                                    @if(!empty($terms))
+                                        @foreach($terms as $trm)
+                                            <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Tutors</label>
+                                <select data-placeholder="Select Tutor" id="tutor-CPL" name="tutors[]" class="tom-selects w-full" multiple>
+                                    @if(!empty($tutor))
+                                        @foreach($tutor as $tr)
+                                            <option value="{{ $tr->id }}">{{ $tr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Personal Tutors</label>
+                                <select data-placeholder="Select Tutor" id="ptutor-CPL" name="ptutors[]" class="tom-selects w-full" multiple>
+                                    @if(!empty($ptutor))
+                                        @foreach($ptutor as $ptr)
+                                            <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Rooms</label>
+                                <select data-placeholder="Select Room" id="room-CPL" name="rooms[]" class="w-full tom-selects" multiple>
+                                    @if(!empty($room))
+                                        @foreach($room as $rm)
+                                            <option value="{{ $rm->id }}">{{ $rm->venue->name }} - {{ $rm->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Groups</label>
+                                <select data-placeholder="Select Group" id="group-CPL" name="groups[]" class="w-full tom-selects" multiple>
+                                    @if(!empty($group))
+                                        @foreach($group as $gr)
+                                            <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Days</label>
+                                <select data-placeholder="Select Tutor" id="days-CPL" name="days[]" class="tom-selects w-full" multiple>
+                                    <option value="mon">Mon</option>
+                                    <option value="tue">Tue</option>
+                                    <option value="wed">Wed</option>
+                                    <option value="thu">Thu</option>
+                                    <option value="fri">Fri</option>
+                                    <option value="sat">Sat</option>
+                                    <option value="sun">Sun</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Status</label>
+                                <select id="status-CPL" name="status" class="w-full form-control">
+                                    <option value="1" selected>Active</option>
+                                    <option value="2">Archived</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Views</label>
+                                <select id="view-CPL" name="view" class="w-full form-control">
+                                    <option value="1" selected>List View</option>
+                                    <option value="2">Grid View</option>
+                                    <option value="3">Tree View</option>
+                                </select>
+                            </div>
+                            <div class="col-span-12"></div>
+                            <div class="col-span-6">
+                                <button id="tabulator-html-filter-go-CPL" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                                <button id="tabulator-html-filter-reset-CPL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                            </div>
+                            <div class="col-span-6 text-right">
+                                <div class="flex mt-5 sm:mt-0 justify-end">
+                                    <button id="tabulator-print-CPL" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                                    </button>
+                                    <div class="dropdown w-1/2 sm:w-auto mr-2" id="tabulator-export-CPL">
+                                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                        </button>
+                                        <div class="dropdown-menu w-40">
+                                            <ul class="dropdown-content">
+                                                <li>
+                                                    <a id="tabulator-export-csv-CPL" href="javascript:;" class="dropdown-item">
+                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a id="tabulator-export-xlsx-CPL" href="javascript:;" class="dropdown-item">
+                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md mr-2 w-auto">
+                                        Generate Days
+                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                            stroke="white" class="w-4 h-4 ml-2">
+                                            <g fill="none" fill-rule="evenodd">
+                                                <g transform="translate(1 1)" stroke-width="4">
+                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                    </path>
+                                                </g>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md mr-2 w-auto">
-                            Generate Days
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
+                    </form>
+                    <div class="overflow-x-auto scrollbar-hidden">
+                        <div id="classPlansListTable" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
                 </div>
             </div>
-        </form>
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="classPlansListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
-    <!-- END: HTML Table Data -->
 
 
     <!-- BEGIN: Add Modal -->
@@ -419,5 +408,6 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/course-management.js')
     @vite('resources/js/plan.js')
 @endsection

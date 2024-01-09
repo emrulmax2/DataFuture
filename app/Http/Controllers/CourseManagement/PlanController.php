@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Plan;
 use App\Models\ModuleCreation;
@@ -28,9 +29,11 @@ class PlanController extends Controller
 {
     public function index()
     {
-        return view('pages.plan.index', [
-            'title' => 'Class Plans - LCC Data Future Managment',
+        return view('pages.course-management.plan.index', [
+            'title' => 'Plans - LCC Data Future Managment',
+            'subtitle' => 'Class Plans',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::all(),
@@ -291,9 +294,11 @@ class PlanController extends Controller
     public function add()
     {
         
-        return view('pages/plan/add', [
-            'title' => 'Add Class Plans - LCC Data Future Managment',
+        return view('pages.course-management.plan.add', [
+            'title' => 'Plans - LCC Data Future Managment',
+            'subtitle' => 'Add Class Plans',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Add Plan', 'href' => 'javascript:void(0);']
             ],
@@ -306,11 +311,13 @@ class PlanController extends Controller
     }
 
     public function classPlanBuilder($course, $instanceterm, $modulecreation){
-        return view('pages/plan/builder', [
-            'title' => 'Add Class Plans - LCC Data Future Managment',
+        return view('pages.course-management.plan.builder', [
+            'title' => 'Plans - LCC Data Future Managment',
+            'subtitle' => 'Class Plan Builder',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
-                ['label' => 'Class Plan Builder', 'href' => 'javascript:void(0);']
+                ['label' => 'Builder', 'href' => 'javascript:void(0);']
             ],
             'course' => Course::find($course),
             'instanceTerm' => InstanceTerm::find($instanceterm),

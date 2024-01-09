@@ -49,6 +49,8 @@ export default defineConfig({
                 "resources/js/interviewlist.js",
                 "resources/js/staff-interview-task.js",
                 "resources/js/staff-interviewlist.js",
+                "resources/js/staff-interview-start.js",
+                
 
                 "resources/js/admission.js",
                 "resources/js/admission-vue.js",
@@ -208,6 +210,7 @@ export default defineConfig({
                 'resources/js/term-module-creation.js',
                 'resources/js/modulelevels.js',
                 'resources/js/groups.js',
+                'resources/js/plans-date-list.js',
                 
             ],
             refresh: true,

@@ -24,11 +24,9 @@ var diversityListTable = (function () {
             printAsHtml: true,
             printCopyStyle: true,
             printStyled: true,
-            pagination:false,
             pagination: "remote",
-            paginationSize: 10,
-            //paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            paginationSizeSelector:false,
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -36,34 +34,44 @@ var diversityListTable = (function () {
                 {
                     title: "Name",
                     field: "name",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Works Number",
                     field: "works_no",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Gender",
                     field: "gender",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Ethnicity",
                     field: "ethnicity",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Nationality",
                     field: "nationality",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Status",
                     field: "status",
+                    headerSort: false,
                     headerHozAlign: "left",
                 }
             ],
+            renderStarted:function(){
+                $("#diversityListTable .tabulator-footer").hide();
+                //$(".tabulator-headers").css('height',0);  
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -100,19 +108,6 @@ var diversityListTable = (function () {
 
 (function(){
 
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " item?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
-
     $("#tabulator-html-filter-go-DR").on("click", function (event) {      
         event.preventDefault();
 
@@ -143,13 +138,25 @@ var diversityListTable = (function () {
 
     $("#tabulator-html-filter-reset-DR").on("click", function (event) {    
         $("#startdate-DR").val('');
-        $("#employee_work_type_id-diversity").val('');
-        $("#department_id-diversity").val('');
-        $("#ethnicity-DR").val('');
-        $("#nationality-DR").val('');
-        $("#gender-DR").val('');
         $("#enddate-DR").val('');
-        $("#status_id-DR").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-diversity');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-diversity');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-DR');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-DR');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-DR');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status_id-DR');
+        statusIdContact.tomselect.setValue("1");
+
         document.getElementById("allDiversityReportPdf").style.display="block";
         document.getElementById("diversitybySearchPdfBtn").style.display="none";
         diversityListTable.init();

@@ -41,8 +41,12 @@ $(document).on("click", ".interview-taskend", function (e) {
                             $("#successModal .successModalTitle").html(response.data.msg);
                             $("#successModal .successModalDesc").html('success');
                         });    
+                        
+                        $("#magic-button1").addClass('hidden');
+                        $("#magic-button2").addClass('hidden');
+                        $("#magic-button3").addClass('hidden');
                 }
-
+                
                 //interviewListTable.init();
 
             }).catch(error => {
@@ -140,6 +144,9 @@ $(document).on("click", ".interview-end", function (e) {
                     $("#successModal .successModalTitle").html(response.data.msg);
                     $("#successModal .successModalDesc").html('success');
                 });    
+
+                $("#magic-button1").addClass('hidden');
+                $("#magic-button2").removeClass('hidden');
         }
 
         //interviewListTable.init();
@@ -272,6 +279,8 @@ $(document).on("click", ".interview-end", function (e) {
                 var result = $('#editModal [name="resultValue"]').val();
                 $('#editModal input[name="resultValue"]').val(result)
                 drzn1.processQueue();
+                $("#magic-button2").addClass('hidden');
+                $("#magic-button3").removeClass('hidden');
             }else{
                 $('#editModal .modal-content .uploadError').remove();
                 $('#editModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select result type.</div>');

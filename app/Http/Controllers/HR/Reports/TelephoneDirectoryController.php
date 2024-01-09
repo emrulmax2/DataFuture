@@ -50,10 +50,16 @@ class TelephoneDirectoryController extends Controller
         endforeach;
 
         $query = Employee::orderByRaw(implode(',', $sorts));
-        if(!empty($ethnicity)): $query->where('ethnicity_id', 'LIKE', '%'.$ethnicity.'%'); endif;
-        if(!empty($nationality)): $query->where('nationality_id', 'LIKE', '%'.$nationality.'%'); endif;
-        if(!empty($gender)): $query->where('sex_identifier_id', 'LIKE', '%'.$gender.'%'); endif;
-        if(($status)==0): $query->where('status', $status); else: $query->where('status', '>', 0); endif;
+        if(!empty($ethnicity)): $query->where('ethnicity_id', $ethnicity); endif;
+        if(!empty($nationality)): $query->where('nationality_id', $nationality); endif;
+        if(!empty($gender)): $query->where('sex_identifier_id',$gender); endif;
+        if(($status)==0): 
+            $query->where('status', $status); 
+        elseif(($status)==1):  
+            $query->where('status', $status); 
+        else:
+            $query->whereIn('status', [0,1]);  
+        endif;
 
         if(!empty($type) || !empty($department) || !empty($startdate) || !empty($enddate)):
             $query->whereHas('employment', function($qs) use($type, $department, $startdate, $enddate){
@@ -126,6 +132,7 @@ class TelephoneDirectoryController extends Controller
     }
 
     public function generatePDF(Request $request){
+        set_time_limit(300);
         $query = Employee::where('status', '=', 1)->get();
 
         $data = array();
@@ -197,6 +204,7 @@ class TelephoneDirectoryController extends Controller
     }
 
     public function generateSearchPDF(Request $request){
+        set_time_limit(300);
         $startdate = (isset($request->startdate) && !empty($request->startdate) ? $request->startdate : '');
         $enddate = (isset($request->enddate) && !empty($request->enddate) ? $request->enddate : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');

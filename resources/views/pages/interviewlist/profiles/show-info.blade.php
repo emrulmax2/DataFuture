@@ -34,7 +34,14 @@
                     <div id="loading" class="flex-initial w-12 ml-2" style="display: none;"><i data-loading-icon="bars" class="w-6 h-6 ml-2 "></i></div>
                 </div>
                 <div class="col-span-6 text-right">
-                    <div class="dropdown">
+                    
+                        <button id="magic-button1" type="button" data-id="{{ $interview->id }}" class="into-x interview-end hover-bg-success hover-text-white btn w-40 {{ ($interview->end_time==null) ? '' : "hidden" }}" ><i data-lucide="alarm-clock-off" class="w-4 h-4 mr-2"></i> End interview</button>
+                    
+                        <button id="magic-button2" type="button" data-id="{{ $interview->id }}" data-tw-toggle="modal" data-tw-target="#editModal" class="into-x  w-40 interview-result hover-bg-success hover-text-white btn {{ ($interview->applicant_document_id==null && $interview->end_time!=null) ? '' : "hidden" }}" ><i data-lucide="activity" class="w-4 h-4 mr-2"></i> Update Result</button>
+                    
+                        <button id="magic-button3" type="button" data-id="{{ $interview->id }}"  class="into-x  interview-taskend hover-bg-success hover-text-white w-40 btn {{ ($interview->interview_status!='Completed' && $interview->applicant_document_id!=null && $interview->end_time!=null) ? "" : 'hidden' }}" ><i data-lucide="archive" class="w-4 h-4 mr-2"></i> Finish Task</button>
+                    
+                    {{-- <div class="dropdown">
                         <button aria-expanded="false" data-tw-toggle="dropdown"  data-id="{{ $interview->id }}" data-tw-merge class="interview-result dropdown-toggle transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-2 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1"><i data-lucide="more-vertical" width="24" height="24" class="stroke-1.5 h-5 w-5"></i></button>
                         <div class="dropdown-menu w-40">
                             <ul class="dropdown-content">
@@ -44,29 +51,25 @@
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li>
-                                    <a href="javascript:void(0)" data-id="{{ $interview->id }}"class="dropdown-item interview-start hover-bg-success hover-text-white">
-                                        <i data-lucide="alarm-clock" class="w-4 h-4 mr-2"></i> Start Interview
-                                    </a>
-                                </li>
-                                <li>
+                                <li class="step-1">
                                     <a href="javascript:void(0)" data-id="{{ $interview->id }}"class="dropdown-item interview-end hover-bg-success hover-text-white">
                                         <i data-lucide="alarm-clock-off" class="w-4 h-4 mr-2"></i> End interview
                                     </a>
                                 </li>
-                                <li>
+                                <li class="step-2">
                                     <a href="javascript:void(0)" data-id="{{ $interview->id }}" data-tw-toggle="modal" data-tw-target="#editModal" class="dropdown-item interview-result hover-bg-success hover-text-white">
                                         <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Update Result
                                     </a>
                                 </li>
-                                <li>
+                                <li class="step-3">
                                     <a href="javascript:void(0)" data-id="{{ $interview->id }}" class="dropdown-item interview-taskend hover-bg-success hover-text-white">
                                         <i data-lucide="archive" class="w-4 h-4 mr-2"></i> Finish Task
                                     </a>
                                 </li>
                             </ul>
                         </div>
-                    </div>
+
+                    </div> --}}
                 </div>
             </div>
             <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>

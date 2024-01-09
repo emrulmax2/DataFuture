@@ -6,36 +6,47 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Class plan Tree</h2>
+        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('class.plan') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to List</a>
+            <a href="{{ route('class.plan') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To List</a>
         </div>
     </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="grid grid-cols-12 gap-6  mt-5">
+
+    <!-- BEGIN: Settings Page Content -->
+    <div class="grid grid-cols-12 gap-6">
         <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <div class="intro-y box p-5">
-                <div class="planTreeWrap">
-                    @if(!empty($acyers))
-                        <ul class="classPlanTree">
-                            @foreach($acyers as $year)
-                                @if(isset($year->terms) && $year->terms->count() > 0)
-                                    <li class="hasChildren">
-                                        <a href="javascript:void(0);" data-yearid="{{ $year->id }}" class="academicYear flex items-center text-primary font-medium">{{ $year->name }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-            </div>
+            <!-- BEGIN: Profile Info -->
+            @include('pages.course-management.sidebar')
+            <!-- END: Profile Info -->
         </div>
+
         <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="intro-y box p-5">
-                <div class="classPlanTreeResultWrap" style="display: none;"></div>
-                <div class="classPlanTreeResultNotice">
-                    <div class="alert alert-success-soft show flex items-center mb-2" role="alert">
-                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a group to view the details.
+            <div class="grid grid-cols-12 gap-3 lg:mt-5">
+                <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
+                    <div class="intro-y box p-5">
+                        <div class="planTreeWrap">
+                            @if(!empty($acyers))
+                                <ul class="classPlanTree">
+                                    @foreach($acyers as $year)
+                                        @if(isset($year->terms) && $year->terms->count() > 0)
+                                            <li class="hasChildren">
+                                                <a href="javascript:void(0);" data-yearid="{{ $year->id }}" class="academicYear flex items-center text-primary font-medium">{{ $year->name }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                            </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+                    <div class="intro-y box p-5">
+                        <div class="classPlanTreeResultWrap" style="display: none;"></div>
+                        <div class="classPlanTreeResultNotice">
+                            <div class="alert alert-success-soft show flex items-center mb-2" role="alert">
+                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a group to view the details.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -328,5 +339,6 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/course-management.js')
     @vite('resources/js/plan-tree.js')
 @endsection
