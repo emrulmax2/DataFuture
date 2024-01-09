@@ -12,7 +12,7 @@ var admissionListTable = (function () {
         // Setup Tabulator
         let semesters = $("#semesters-ADM").val() != "" ? $("#semesters-ADM").val() : "";
         let courses = $("#courses-ADM").val() != "" ? $("#courses-ADM").val() : "";
-        let statuses = $("#courses-ADM").val() != "" ? $("#statuses-ADM").val() : "";
+        let statuses = $("#statuses-ADM").val() != "" ? $("#statuses-ADM").val() : "";
         let refno = $("#refno-ADM").val() != "" ? $("#refno-ADM").val() : "";
         let firstname = $("#firstname-ADM").val() != "" ? $("#firstname-ADM").val() : "";
         let lastname = $("#lastname-ADM").val() != "" ? $("#lastname-ADM").val() : "";
@@ -463,12 +463,21 @@ var employmentHistoryTable = (function () {
             };
         }
         new TomSelect(this, tomOptions);
-    })
+    });
 
     if($('#admissionListTable').length > 0){
-        var semestersADM = new TomSelect('#semesters-ADM', tomOptions);
-        var coursesADM = new TomSelect('#courses-ADM', tomOptions);
-        var statusesADM = new TomSelect('#statuses-ADM', tomOptions);
+        let multiTomOpt = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+                remove_button: {
+                    title: "Remove this item",
+                },
+            }
+        };
+        var semestersADM = new TomSelect('#semesters-ADM', multiTomOpt);
+        var coursesADM = new TomSelect('#courses-ADM', multiTomOpt);
+        var statusesADM = new TomSelect('#statuses-ADM', multiTomOpt);
 
         // Init Table
         admissionListTable.init();

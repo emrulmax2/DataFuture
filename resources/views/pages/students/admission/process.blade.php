@@ -445,6 +445,9 @@
                                                                     </div>
                                                                     <div class="ml-4">
                                                                         <div class="font-medium assignedUserName">{{ (isset($task->updatedBy->employee->full_name) ? $task->updatedBy->employee->full_name : 'Unknown Employee') }}</div>
+                                                                        @if(isset($task->updated_at) && !empty($task->updated_at))
+                                                                        <div class="text-slate-500 text-xs whitespace-nowrap">{{ date('jS M, Y', strtotime($task->updated_at)) }}</div>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             @else 
