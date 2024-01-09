@@ -42,37 +42,37 @@ var instancetermListtable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Start Date",
+                    title: "Start",
                     field: "start_date",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "End Date",
+                    title: "End",
                     field: "end_date",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Teaching Weeks",
+                    title: "T. Weeks",
                     field: "total_teaching_weeks",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Teaching Start",
+                    title: "T. Start",
                     field: "teaching_start_date",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Teaching End",
+                    title: "T. End",
                     field: "teaching_end_date",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Revision Start",
+                    title: "R. Start",
                     field: "revision_start_date",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Revision End",
+                    title: "R. End",
                     field: "revision_end_date",
                     headerHozAlign: "left",
                 },
@@ -80,9 +80,9 @@ var instancetermListtable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: "120",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -157,7 +157,7 @@ var courseCreationINListTable = (function () {
                     formatter: hideCollapsibleIcon, 
                     align: "left", 
                     title: "&nbsp;", 
-                    width: "100",
+                    width: "90",
                     headerSort: false, 
                     download: false,
                     cellClick:function(e, row, formatterParams){
@@ -218,7 +218,7 @@ var courseCreationINListTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    //width: "180",
+                    width: "230",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

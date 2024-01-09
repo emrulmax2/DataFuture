@@ -264,7 +264,7 @@ class AdmissionController extends Controller
         $request->request->remove('applicant_proof_of_id');
 
         if(!isset($applicantOldRow->application_no) || is_null($applicantOldRow->application_no)):
-            $appNo = '2000'.sprintf('%05d', $applicant_id);
+            $appNo = '2'.sprintf('%05d', $applicant_id);
             $request->merge(['application_no' => $appNo]);
         endif;
 

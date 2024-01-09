@@ -201,17 +201,10 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                    @else 
-                                                                                        {{ 'Unknown' }}
-                                                                                    @endif
-                                                                                </div>
+                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee' ) }}</div>
                                                                             </div>
                                                                         </div> 
                                                                     @endif
@@ -231,17 +224,10 @@
                                                                                     <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
                                                                                         <div class="flex items-center justify-start">
                                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                                             </div>
                                                                                             <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                                    @else 
-                                                                                                        {{ 'Unknown' }}
-                                                                                                    @endif
-                                                                                                </div>
+                                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
                                                                                             </div>
                                                                                         </div> 
                                                                                     </li>
@@ -367,17 +353,10 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                    @else 
-                                                                                        {{ 'Unknown' }}
-                                                                                    @endif
-                                                                                </div>
+                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
                                                                             </div>
                                                                         </div> 
                                                                     @endif
@@ -397,17 +376,10 @@
                                                                                     <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
                                                                                         <div class="flex items-center justify-start">
                                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                                             </div>
                                                                                             <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                                    @else 
-                                                                                                        {{ 'Unknown' }}
-                                                                                                    @endif
-                                                                                                </div>
+                                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
                                                                                             </div>
                                                                                         </div> 
                                                                                     </li>
@@ -533,17 +505,10 @@
                                                                     @if($loop->first)
                                                                         <div class="flex items-center justify-start">
                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                             </div>
                                                                             <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                    @else 
-                                                                                        {{ 'Unknown' }}
-                                                                                    @endif
-                                                                                </div>
+                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
                                                                             </div>
                                                                         </div> 
                                                                     @endif
@@ -563,17 +528,10 @@
                                                                                     <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
                                                                                         <div class="flex items-center justify-start">
                                                                                             <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->photo_url) && !empty($userser->user->photo_url) ? $userser->user->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                                                             </div>
                                                                                             <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->name }}</div>
-                                                                                                <div class="text-slate-500 text-xs mt-0.5 assignedUserDesig">
-                                                                                                    @if(isset($userser->user->userRole[0]->role->display_name) && !empty($userser->user->userRole[0]->role->display_name))
-                                                                                                        {{ $userser->user->userRole[0]->role->display_name }}
-                                                                                                    @else 
-                                                                                                        {{ 'Unknown' }}
-                                                                                                    @endif
-                                                                                                </div>
+                                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
                                                                                             </div>
                                                                                         </div> 
                                                                                     </li>

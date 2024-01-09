@@ -82,7 +82,7 @@ class ApplicationController extends Controller
         if($applicant){
             if(!isset($applicant->application_no) || is_null($applicant->application_no)):
                 $theApplicantId = $applicant->id;
-                $appNo = '2000'.sprintf('%05d', $theApplicantId);
+                $appNo = '2'.sprintf('%05d', $theApplicantId);
                 Applicant::where('id', $theApplicantId)->update(['application_no' => $appNo]);
             endif;
             $disabilityStatus = (isset($request->disability_status) && $request->disability_status > 0 ? $request->disability_status : 0);
