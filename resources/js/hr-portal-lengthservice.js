@@ -24,8 +24,8 @@ var lengthserviceTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -55,10 +55,10 @@ var lengthserviceTable = (function () {
                     layout:"fitColumns",
                     data:row.getData().dataArray,
                     columns:[
-                        {title:"Name", field:"name", headerHozAlign: "left"},
-                        {title:"Started On", field:"started_on", headerHozAlign: "left"},
-                        {title:"Ended On", field:"ended_on", headerHozAlign: "left"},
-                        {title:"Length of Service", field:"length", headerHozAlign: "left"},
+                        {title:"Name", field:"name", headerSort: false, headerHozAlign: "left"},
+                        {title:"Started On", field:"started_on", headerSort: false, headerHozAlign: "left"},
+                        {title:"Ended On", field:"ended_on", headerSort: false, headerHozAlign: "left"},
+                        {title:"Length of Service", field:"length", headerSort: false, headerHozAlign: "left"},
                     ],
                     renderComplete() {
                         createIcons({
@@ -68,6 +68,10 @@ var lengthserviceTable = (function () {
                         });
                     },
                 })
+            },
+            renderStarted:function(){
+                $("#lengthserviceTable .tabulator-footer").hide();
+                $(".tabulator-headers").css('height',0);  
             },
             renderComplete() {
                 createIcons({
@@ -97,18 +101,6 @@ var lengthserviceTable = (function () {
 })();
 
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
 
     $("#tabulator-html-filter-go-LS").on("click", function (event) { 
         event.preventDefault();
@@ -155,14 +147,26 @@ var lengthserviceTable = (function () {
 
     // On reset filter form
     $("#tabulator-html-filter-reset-LS").on("click", function (event) {
-        $("#employee_work_type_id-lengthservice").val('');
-        $("#department_id-lengthservice").val('');
-        $("#ethnicity-lengthservice").val('');
-        $("#nationality-lengthservice").val('');
-        $("#gender-lengthservice").val('');
         $("#startdate-lengthservice").val('');
         $("#enddate-lengthservice").val('');
-        $("#status_id-lengthservice").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-lengthservice');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-lengthservice');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-lengthservice');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-lengthservice');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-lengthservice');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status_id-lengthservice');
+        statusIdContact.tomselect.setValue("1");
+
         lengthserviceTable.init();
         document.getElementById("allLengthServiceExcelBtn").style.display="block";
         document.getElementById("allLengthServicePdfBtn").style.display="block";

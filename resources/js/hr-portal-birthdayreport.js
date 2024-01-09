@@ -19,15 +19,15 @@ var birthdayListSearchTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             
             columns:[
                 {
-                    title:"", field:"month",
+                    field:"month",
                     headerSort: false,
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) {  
@@ -50,11 +50,11 @@ var birthdayListSearchTable = (function () {
                     layout:"fitColumns",
                     data:row.getData().dataArray,
                     columns:[
-                        {title:"Name", field:"name", headerHozAlign: "left"},
-                        {title:"Works Number", field:"works_no", headerHozAlign: "left"},
-                        {title:"Gender", field:"gender", headerHozAlign: "left"},
-                        {title:"Date of Birth", field:"date_of_birth", headerHozAlign: "left"},
-                        {title:"Age", field:"age", headerHozAlign: "left"},
+                        {title:"Name", field:"name", headerSort: false, headerHozAlign: "left"},
+                        {title:"Works Number", field:"works_no", headerSort: false,headerHozAlign: "left"},
+                        {title:"Gender", field:"gender", headerSort: false,headerHozAlign: "left"},
+                        {title:"Date of Birth", field:"date_of_birth", headerSort: false, headerHozAlign: "left"},
+                        {title:"Age", field:"age", headerSort: false, headerHozAlign: "left"},
                     ],
                     renderComplete() {
                         createIcons({
@@ -64,6 +64,11 @@ var birthdayListSearchTable = (function () {
                         });
                     },
                 })
+            },
+            
+            renderStarted:function(){
+                $("#birthdayListSearchTable .tabulator-footer").hide();
+                $(".tabulator-headers").css('height',0);  
             },
             renderComplete() {
                 createIcons({
@@ -92,19 +97,6 @@ var birthdayListSearchTable = (function () {
     };
 })();
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
-
     $("#tabulator-html-filter-go-BR").on("click", function (event) {  
         event.preventDefault();
         var dobBR = document.getElementById("dob-BR").value;
@@ -146,10 +138,16 @@ var birthdayListSearchTable = (function () {
     });
 
     $("#tabulator-html-filter-reset-BR").on("click", function (event) {
-        $("#employee_work_type_id-birtdaylist").val('');
-        $("#department_id-birtdaylist").val('');
         $("#dob-BR").val('');
-        $("#status_id-birtdaylist").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-birtdaylist');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-birtdaylist');
+        departmentId.tomselect.setValue("");
+        
+        let statusIdContact = document.getElementById('status_id-birtdaylist');
+        statusIdContact.tomselect.setValue("1");
+        
         birthdayListSearchTable.init();
         document.getElementById("allBdayListExcelBtn").style.display="block";
         document.getElementById("allBdayListPdfBtn").style.display="block";

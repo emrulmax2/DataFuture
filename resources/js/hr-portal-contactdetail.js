@@ -13,7 +13,7 @@ var contactListTable = (function () {
         let ethnicity = $("#ethnicity-contact").val() != "" ? $("#ethnicity-contact").val() : "";
         let nationality = $("#nationality-contact").val() != "" ? $("#nationality-contact").val() : "";
         let gender = $("#gender-contact").val() != "" ? $("#gender-contact").val() : "";
-        let status = $("#status_id-contact").val() != "" ? $("#status_id-contact").val() : "";
+        let status = $("#status-contact").val() != "" ? $("#status-contact").val() : "";
 
         let tableContent = new Tabulator("#contactListTable", {
             ajaxURL: route("hr.portal.reports.contactdetail.list"),
@@ -130,29 +130,29 @@ var contactListTable = (function () {
 })();
 
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " item?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
-
     // On reset filter form
+    
     $("#tabulator-html-filter-reset-ECD").on("click", function (event) {
-        $("#employee_work_type_id-contact").val('');
-        $("#department_id-contact").val('');
-        $("#ethnicity-contact").val('');
-        $("#nationality-contact").val('');
-        $("#gender-contact").val('');
         $("#startdate-contact").val('');
         $("#enddate-contact").val('');
-        $("#status_id-contact").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-contact');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-contact');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-contact');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-contact');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-contact');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status-contact');
+        statusIdContact.tomselect.setValue("1");
+        
         document.getElementById("allContactExcelBtn").style.display="block";
         document.getElementById("allContactPdfBtn").style.display="block";
 
@@ -171,7 +171,7 @@ var contactListTable = (function () {
         let ethnicity = $("#ethnicity-contact").val() != "" ? $("#ethnicity-contact").val() : "";
         let nationality = $("#nationality-contact").val() != "" ? $("#nationality-contact").val() : "";
         let gender = $("#gender-contact").val() != "" ? $("#gender-contact").val() : "";
-        let status = $("#status_id-contact").val() != "" ? $("#status_id-contact").val() : "";
+        let status = $("#status-contact").val() != "" ? $("#status-contact").val() : "";
         
         axios({
             method: "get",
@@ -207,7 +207,7 @@ var contactListTable = (function () {
         let ethnicity = $("#ethnicity-contact").val() != "" ? $("#ethnicity-contact").val() : "";
         let nationality = $("#nationality-contact").val() != "" ? $("#nationality-contact").val() : "";
         let gender = $("#gender-contact").val() != "" ? $("#gender-contact").val() : "";
-        let status = $("#status_id-contact").val() != "" ? $("#status_id-contact").val() : "";
+        let status = $("#status-contact").val() != "" ? $("#status-contact").val() : "";
         
         axios({
             method: "get",
@@ -243,7 +243,7 @@ var contactListTable = (function () {
         let ethnicity = $("#ethnicity-contact").val() != "" ? $("#ethnicity-contact").val() : "";
         let nationality = $("#nationality-contact").val() != "" ? $("#nationality-contact").val() : "";
         let gender = $("#gender-contact").val() != "" ? $("#gender-contact").val() : "";
-        let status = $("#status_id-contact").val() != "" ? $("#status_id-contact").val() : "";
+        let status = $("#status-contact").val() != "" ? $("#status-contact").val() : "";
         
         axios({
             method: "get",

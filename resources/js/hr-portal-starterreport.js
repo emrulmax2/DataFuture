@@ -24,11 +24,9 @@ var starterListTable = (function () {
             printAsHtml: true,
             printCopyStyle: true,
             printStyled: true,
-            pagination:false,
             pagination: "remote",
-            paginationSize: 10,
-            //paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            paginationSizeSelector:false,
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -54,6 +52,9 @@ var starterListTable = (function () {
                     headerHozAlign: "left",
                 }
             ],
+            renderStarted:function(){
+                $("#starterListTable .tabulator-footer").hide();
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -89,18 +90,6 @@ var starterListTable = (function () {
 })();
 
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " item?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
 
     $("#tabulator-html-filter-go-SR").on("click", function (event) {      
         event.preventDefault();
@@ -132,14 +121,26 @@ var starterListTable = (function () {
 
     // On reset filter form
     $("#tabulator-html-filter-reset-SR").on("click", function (event) {
-        $("#employee_work_type_id-starter").val('');
-        $("#department_id-starter").val('');
-        $("#ethnicity-starter").val('');
-        $("#nationality-starter").val('');
-        $("#gender-starter").val('');
         $("#startdate-starter").val('');
         $("#enddate-starter").val('');
-        $("#status_id-starter").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-starter');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-starter');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-starter');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-starter');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-starter');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status_id-starter');
+        statusIdContact.tomselect.setValue("1");
+
         document.getElementById("starterreportPdfBtn").style.display="block";
         document.getElementById("starterreportbySearchPdfBtn").style.display="none";
         starterListTable.init();

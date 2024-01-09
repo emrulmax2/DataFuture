@@ -24,8 +24,8 @@ var telephonedirectoryTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -55,10 +55,10 @@ var telephonedirectoryTable = (function () {
                     layout:"fitColumns",
                     data:row.getData().dataArray,
                     columns:[
-                        {title:"Name", field:"name", headerHozAlign: "left"},
-                        {title:"Telephone", field:"telephone", headerHozAlign: "left"},
-                        {title:"Mobile", field:"mobile", headerHozAlign: "left"},
-                        {title:"Email", field:"email", headerHozAlign: "left"},
+                        {title:"Name", field:"name", headerSort: false, headerHozAlign: "left"},
+                        {title:"Telephone", field:"telephone", headerSort: false, headerHozAlign: "left"},
+                        {title:"Mobile", field:"mobile", headerSort: false, headerHozAlign: "left"},
+                        {title:"Email", field:"email", headerSort: false, headerHozAlign: "left"},
                     ],
                     renderComplete() {
                         createIcons({
@@ -68,6 +68,10 @@ var telephonedirectoryTable = (function () {
                         });
                     },
                 })
+            },
+            renderStarted:function(){
+                $("#telephonedirectoryTable .tabulator-footer").hide();
+                $(".tabulator-headers").css('height',0);  
             },
             renderComplete() {
                 createIcons({
@@ -97,18 +101,6 @@ var telephonedirectoryTable = (function () {
 })();
 
 (function(){
-    let tomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove this " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
 
     $("#tabulator-html-filter-go-TD").on("click", function (event) { 
         event.preventDefault();
@@ -156,14 +148,26 @@ var telephonedirectoryTable = (function () {
 
     // On reset filter form
     $("#tabulator-html-filter-reset-TD").on("click", function (event) {
-        $("#employee_work_type_id-telephonedirectory").val('');
-        $("#department_id-telephonedirectory").val('');
-        $("#ethnicity-telephonedirectory").val('');
-        $("#nationality-telephonedirectory").val('');
-        $("#gender-telephonedirectory").val('');
         $("#startdate-telephonedirectory").val('');
         $("#enddate-telephonedirectory").val('');
-        $("#status_id-telephonedirectory").val('1');
+        let employeeWork = document.getElementById('employee_work_type_id-telephonedirectory');
+        employeeWork.tomselect.setValue("");
+        
+        let departmentId = document.getElementById('department_id-telephonedirectory');
+        departmentId.tomselect.setValue("");
+        
+        let ethnicity = document.getElementById('ethnicity-telephonedirectory');
+        ethnicity.tomselect.setValue("");
+
+        let nationality = document.getElementById('nationality-telephonedirectory');
+        nationality.tomselect.setValue("");
+        
+        let gender = document.getElementById('gender-telephonedirectory');
+        gender.tomselect.setValue("");
+
+        let statusIdContact = document.getElementById('status_id-telephonedirectory');
+        statusIdContact.tomselect.setValue("1");
+
         telephonedirectoryTable.init();
         document.getElementById("allTelephoneDirectoryExcelBtn").style.display="block";
         document.getElementById("allTelephoneDirectoryPdfBtn").style.display="block";

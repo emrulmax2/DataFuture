@@ -15,11 +15,9 @@ var visaExpiryListTable = (function () {
             printAsHtml: true,
             printCopyStyle: true,
             printStyled: true,
-            pagination:false,
             pagination: "remote",
-            paginationSize: 10,
-            //paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            paginationSizeSelector:false,
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -45,6 +43,9 @@ var visaExpiryListTable = (function () {
                     headerHozAlign: "left",
                 }
             ],
+            renderStarted:function(){
+                $("#visaExpiryListTable .tabulator-footer").hide();
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -89,11 +90,9 @@ var passportExpiryListTable = (function () {
             printAsHtml: true,
             printCopyStyle: true,
             printStyled: true,
-            pagination:false,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            //paginationSizeSelector:false,
+            paginationSize: true,
+            paginationSizeSelector: false,
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -124,6 +123,9 @@ var passportExpiryListTable = (function () {
                     headerHozAlign: "left",
                 }
             ],
+            renderStarted:function(){
+                $("#passportExpiryListTable .tabulator-footer").hide();
+            },
             renderComplete() {
                 createIcons({
                     icons,

@@ -16,7 +16,7 @@
             <div class="grid grid-cols-12 gap-4 gap-y-5">
                 <div class="col-span-3">
                     <label class="form-label">Type</label>
-                    <select id="employee_work_type_id-diversity" class="lccToms tom-selects w-full" name="employee_work_type_id"> 
+                    <select id="employee_work_type_id-diversity" class="lccTom lcc-tom-select w-full form-control" name="employee_work_type_id"> 
                         <option value="" selected>Please Select</option>
                         @if($employeeWorkType->count() > 0)
                             @foreach($employeeWorkType as $si)
@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-span-2">
                     <label class="form-label">Department</label>
-                    <select id="department_id-diversity" name="department_id" class="w-full lccToms tom-selects">     
+                    <select id="department_id-diversity" name="department_id" class="w-full lccTom lcc-tom-select form-control">     
                         <option value="" selected>Please Select</option>             
                         @foreach($departments as $si)
                             <option {{ isset($employment->department_id) && $employment->department_id == $si->id }} value="{{ $si->id }}">{{ $si->name }}</option>             
@@ -36,15 +36,15 @@
                 </div>
                 <div class="col-span-2">
                     <label class="form-label">Startdate</label>
-                    <input type="text" id="startdate-DR" name="startdate-DR" placeholder="DD-MM-YYYY" value="" data-format="YYYY-MM-DD"  data-single-mode="true" class="w-full datepicker"/>                   
+                    <input type="text" id="startdate-DR" name="startdate-DR" placeholder="DD-MM-YYYY" value="" data-format="YYYY-MM-DD"  data-single-mode="true" class="w-full datepicker form-control"/>                   
                 </div>
                 <div class="col-span-2">
                     <label class="form-label">Enddate</label>
-                    <input type="text" id="enddate-DR" name="enddate-DR" placeholder="DD-MM-YYYY" value="" data-format="YYYY-MM-DD"  data-single-mode="true" class="w-full datepicker"/>                    
+                    <input type="text" id="enddate-DR" name="enddate-DR" placeholder="DD-MM-YYYY" value="" data-format="YYYY-MM-DD"  data-single-mode="true" class="w-full datepicker form-control"/>                    
                 </div>
                 <div class="col-span-3">
                     <label class="form-label">Ethnicity</label>
-                    <select id="ethnicity-DR" name="ethnicity" class="lccToms tom-selects w-full">
+                    <select id="ethnicity-DR" name="ethnicity" class="lccTom lcc-tom-select w-full form-control">
                         <option value="" selected>Please Select</option>
                         @if(!empty($ethnicity))
                             @foreach($ethnicity as $n)
@@ -55,7 +55,7 @@
                 </div>
                 <div class="col-span-3">
                     <label class="form-label">Nationality</label>
-                    <select id="nationality-DR" name="nationality" class="lccToms tom-selects w-full">
+                    <select id="nationality-DR" name="nationality" class="lccTom lcc-tom-select w-full form-control">
                         <option value="" selected>Please Select</option>
                         @if(!empty($country))
                             @foreach($country as $n)
@@ -66,7 +66,7 @@
                 </div>
                 <div class="col-span-2">
                     <label class="form-label">Gender</label>
-                    <select id="gender-DR" name="gender" class="lccToms tom-selects w-full">
+                    <select id="gender-DR" name="gender" class="lccTom lcc-tom-select w-full form-control">
                         <option value="" selected>Please Select</option>
                         @if(!empty($gender))
                             @foreach($gender as $n)
@@ -77,7 +77,7 @@
                 </div>
                 <div class="col-span-2">
                     <label class="form-label">Status</label>
-                    <select id="status_id-DR" name="status_id" class="w-full lccToms tom-selects">     
+                    <select id="status_id-DR" name="status_id" class="w-full lccTom lcc-tom-select form-control">     
                         <option value="1">Active</option>
                         <option value="0">In Active</option>
                         <option value="2">All</option>

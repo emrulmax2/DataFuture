@@ -17,11 +17,11 @@
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-4">
                     <label class="form-label">Date of Birth</label>
-                    <input type="text" id="dob-BR" name="dob-BR" placeholder="Select Month of Birth" value="" data-format="YYYY-MM"  data-single-mode="true" class="w-full datepicker"/>
+                    <input type="text" id="dob-BR" name="dob-BR" placeholder="Select Month of Birth" value="" data-format="YYYY-MM"  data-single-mode="true" class="w-full datepicker form-control"/>
                 </div>
                 <div class="col-span-4">
                     <label class="form-label">Type</label>
-                    <select id="employee_work_type_id-birtdaylist" class="lccToms tom-selects w-full" name="employee_work_type_id">    
+                    <select id="employee_work_type_id-birtdaylist" class="lccTom lcc-tom-select w-full form-control" name="employee_work_type_id">    
                         <option value="" selected>Please Select</option> 
                         @if($employeeWorkType->count() > 0)
                             @foreach($employeeWorkType as $si)
@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-span-4">
                     <label class="form-label">Department</label>
-                    <select id="department_id-birtdaylist" name="department_id" class="w-full lccToms tom-selects">     
+                    <select id="department_id-birtdaylist" name="department_id" class="w-full lccTom lcc-tom-select form-control">     
                         <option value="" selected>Please Select</option>             
                         @foreach($departments as $si)
                             <option {{ isset($employment->department_id) && $employment->department_id == $si->id }} value="{{ $si->id }}">{{ $si->name }}</option>             
@@ -41,7 +41,7 @@
                 </div>
                 <div class="col-span-4">
                     <label class="form-label">Status</label>
-                    <select id="status_id-birtdaylist" name="status_id" class="w-full lccToms tom-selects">     
+                    <select id="status_id-birtdaylist" name="status_id" class="w-full lccTom lcc-tom-select form-control">     
                         <option value="1">Active</option>
                         <option value="0">In Active</option>
                         <option value="2">All</option>

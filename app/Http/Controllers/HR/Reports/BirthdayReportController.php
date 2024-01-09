@@ -45,7 +45,13 @@ class BirthdayReportController extends Controller
 
         $query = Employee::orderByRaw(implode(',', $sorts));
         if(!empty($birthmonth)): $query->whereMonth('date_of_birth', date('m', strtotime($birthmonth))); endif;
-        if(($status)==0): $query->where('status', $status); else: $query->where('status', '>', 0); endif;
+        if(($status)==0): 
+            $query->where('status', $status); 
+        elseif(($status)==1):  
+            $query->where('status', $status); 
+        else:
+            $query->whereIn('status', [0,1]);  
+        endif;
         if(!empty($type) || !empty($department)):
 
             $query->whereHas('employment', function($qs) use($type, $department){
@@ -109,11 +115,11 @@ class BirthdayReportController extends Controller
 
             }         
         endif;
-        
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
     public function generatePDF(Request $request){
+        set_time_limit(300);
         $query = Employee::where('status', '=', 1)->get();
 
         $data = array();
@@ -181,6 +187,7 @@ class BirthdayReportController extends Controller
     }
 
     public function generateSearchPDF(Request $request){
+        set_time_limit(300);
         $birthmonth = (isset($request->birthmonth) && !empty($request->birthmonth) ? $request->birthmonth : '');
         $type = (isset($request->worktype) && !empty($request->worktype) ? $request->worktype : '');
         $department = (isset($request->department) && !empty($request->department) ? $request->department : '');
