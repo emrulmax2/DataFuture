@@ -59,6 +59,11 @@
                     </li>
                 </ul>
             </li>
+            <li>
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'plans.tree' || Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'active text-primary font-medium' : '' }}" href="{{ route('class.plan') }}">
+                    <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Plans
+                </a>
+            </li>
         </ul>
     </div>
 </div>

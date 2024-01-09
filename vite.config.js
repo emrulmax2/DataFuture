@@ -208,6 +208,7 @@ export default defineConfig({
                 'resources/js/term-module-creation.js',
                 'resources/js/modulelevels.js',
                 'resources/js/groups.js',
+                'resources/js/plans-date-list.js',
                 
             ],
             refresh: true,

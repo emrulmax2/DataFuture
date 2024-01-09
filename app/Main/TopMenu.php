@@ -50,77 +50,11 @@ class TopMenu
                 ],
             ];
             if(isset($priv['course_manage']) && $priv['course_manage'] == 1):
-                $menu['coursemanagement'] = [
+                $menu['course.management'] = [
                     'icon' => 'book-open',
                     'title' => 'Courses Management',
-                    'sub_menu' => [
-                        'courses' => [
-                            'icon' => '',
-                            'title' => 'Courses & Semesters',
-                            'sub_menu' => [
-                                'semester' => [
-                                    'icon' => '',
-                                    'route_name' => 'semester',
-                                    'params' => [],
-                                    'title' => 'Semesters'
-                                ],
-                                'term-declaration' => [
-                                    'icon' => '',
-                                    'route_name' => 'term-declaration.index',
-                                    'params' => [],
-                                    'title' => 'Term Declaration'
-                                ],
-                                'courses' => [
-                                    'icon' => '',
-                                    'route_name' => 'courses',
-                                    'params' => [],
-                                    'title' => 'Courses'
-                                ],
-                                'course.creation' => [
-                                    'icon' => '',
-                                    'route_name' => 'course.creation',
-                                    'params' => [],
-                                    'title' => 'Course Creations'
-                                ],
-                            ]
-                        ],
-                        'terms' => [
-                            'icon' => '',
-                            'title' => 'Terms & Modules',
-                            'sub_menu' => [
-                                'term.module.creation' => [
-                                    'icon' => '',
-                                    'route_name' => 'term.module.creation',
-                                    'params' => [],
-                                    'title' =>'Term Module Creations'
-                                ],
-                                'modulelevels' => [
-                                    'icon' => '',
-                                    'route_name' => 'modulelevels',
-                                    'params' => [],
-                                    'title' =>'Module Levels'
-                                ],
-                                'groups' => [
-                                    'icon' => '',
-                                    'route_name' => 'groups',
-                                    'params' => [],
-                                    'title' =>'Groups'
-                                ],
-                            ]
-                        ],
-                        'plans' => [
-                            'icon' => '',
-                            'title' => 'Plans',
-                            'sub_menu' => [
-                                'venues' => [
-                                    'icon' => '',
-                                    'route_name' => 'class.plan',
-                                    'params' => [],
-                                    'title' =>'Class Plans'
-                                ],
-                            ]
-                        ],
-                    ]
+                    'route_name' => 'course.management',
+                    'params' => []
                 ];
             endif;
             if(isset($priv['student_manage']) && $priv['student_manage'] == 1):

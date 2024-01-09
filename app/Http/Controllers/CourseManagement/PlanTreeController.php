@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\PlanAssignParticipantRequest;
 use App\Http\Requests\PlansUpdateRequest;
 use App\Models\AcademicYear;
@@ -32,10 +33,13 @@ class PlanTreeController extends Controller
         foreach($academicYears as $year):
             $yearPush[] = $year->academic_year_id;
         endforeach;       
-        return view('pages.plan.tree.index', [
-            'title' => 'Class Plans Tree - LCC Data Future Managment',
+        return view('pages.course-management.plan.tree.index', [
+            'title' => 'Plans - LCC Data Future Managment',
+            'subtitle' => 'Class Plans Tree',
             'breadcrumbs' => [
-                ['label' => 'Class Plans Tree', 'href' => 'javascript:void(0);']
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Class Plans', 'href' => route('class.plan')],
+                ['label' => 'Tree', 'href' => 'javascript:void(0);']
             ],
             'acyers' => AcademicYear::orderBy('from_date', 'DESC')->whereIn("id",$yearPush)->get(),
             'courses' => Course::all(),

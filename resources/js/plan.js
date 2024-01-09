@@ -101,6 +101,7 @@ var classPlanListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "left",
                     download: false,
+                    width: "140",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

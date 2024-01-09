@@ -32,8 +32,8 @@ use App\Http\Controllers\CourseManagement\InstanceTermController;
 use App\Http\Controllers\CourseManagement\TermModuleCreationController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Settings\RoomController;
-use App\Http\Controllers\PlanController;
-use App\Http\Controllers\PlansDateListController;
+use App\Http\Controllers\CourseManagement\PlanController;
+use App\Http\Controllers\CourseManagement\PlansDateListController;
 use App\Http\Controllers\BankHolidayController;
 use App\Http\Controllers\Settings\Studentoptions\TitleController;
 use App\Http\Controllers\Settings\Studentoptions\EthnicityController;
@@ -95,6 +95,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
@@ -139,7 +140,7 @@ use App\Http\Controllers\PlanContentUploadController;
 use App\Http\Controllers\PlanParticipantController;
 use App\Http\Controllers\PlanTaskController;
 use App\Http\Controllers\PlanTaskUploadController;
-use App\Http\Controllers\PlanTreeController;
+use App\Http\Controllers\CourseManagement\PlanTreeController;
 use App\Http\Controllers\Programme\DashboardController as ProgrammeDashboardController;
 use App\Http\Controllers\Settings\ConsentPolicyController;
 use App\Http\Controllers\Settings\LetterHeaderFooterController;
@@ -569,48 +570,48 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(PlanController::class)->group(function() {
-        Route::get('plans', 'index')->name('class.plan'); 
-        Route::get('plans/list', 'list')->name('class.plan.list'); 
-        Route::post('plans/grid', 'grid')->name('class.plan.grid'); 
-        Route::get('plans/add', 'add')->name('class.plan.add');
-        Route::get('plans/edit/{id}', 'edit')->name('class.plan.edit');
-        Route::post('plans/update', 'update')->name('class.plan.update');
-        Route::get('plans/builder/{course}/{instanceterm}/{modulecreation}', 'classPlanBuilder')->name('class.plan.builder');
-        Route::post('plans/store', 'store')->name('class.plan.store');
+        Route::get('course-management/plans', 'index')->name('class.plan'); 
+        Route::get('course-management/plans/list', 'list')->name('class.plan.list'); 
+        Route::post('course-management/plans/grid', 'grid')->name('class.plan.grid'); 
+        Route::get('course-management/plans/add', 'add')->name('class.plan.add');
+        Route::get('course-management/plans/edit/{id}', 'edit')->name('class.plan.edit');
+        Route::post('course-management/plans/update', 'update')->name('class.plan.update');
+        Route::get('course-management/plans/builder/{course}/{instanceterm}/{modulecreation}', 'classPlanBuilder')->name('class.plan.builder');
+        Route::post('course-management/plans/store', 'store')->name('class.plan.store');
 
-        Route::delete('plans/delete/{id}', 'destroy')->name('class.plan.delete');
-        Route::post('plans/restore/{id}', 'restore')->name('class.plan.restore');
+        Route::delete('course-management/plans/delete/{id}', 'destroy')->name('class.plan.delete');
+        Route::post('course-management/plans/restore/{id}', 'restore')->name('class.plan.restore');
 
-        Route::post('plans/get-modules', 'getModulesByCourseTerms')->name('class.plan.get.modules.by.course.terms');
-        Route::post('plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
-        Route::post('plans/get-courselist', 'getCourseListByAcademicYear')->name('course.list.by.academic.instance');
+        Route::post('course-management/plans/get-modules', 'getModulesByCourseTerms')->name('class.plan.get.modules.by.course.terms');
+        Route::post('course-management/plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
+        Route::post('course-management/plans/get-courselist', 'getCourseListByAcademicYear')->name('course.list.by.academic.instance');
     });
 
     Route::controller(PlanTreeController::class)->group(function() {
-        Route::get('plans/tree', 'index')->name('plans.tree');
-        Route::post('plans/tree/get-semesters', 'getAttenDanceSemester')->name('plans.tree.get.semester');
-        Route::post('plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
-        Route::post('plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
-        Route::post('plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
-        Route::post('plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
-        Route::get('plans/tree/list', 'list')->name('plans.tree.list'); 
-        Route::get('plans/tree/edit/{id}', 'edit')->name('plans.tree.edit'); 
-        Route::post('plans/tree/update', 'update')->name('plans.tree.update'); 
-        Route::delete('plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
-        Route::post('plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
+        Route::get('course-management/plans/tree', 'index')->name('plans.tree');
+        Route::post('course-management/plans/tree/get-semesters', 'getAttenDanceSemester')->name('plans.tree.get.semester');
+        Route::post('course-management/plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
+        Route::post('course-management/plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
+        Route::post('course-management/plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
+        Route::post('course-management/plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
+        Route::get('course-management/plans/tree/list', 'list')->name('plans.tree.list'); 
+        Route::get('course-management/plans/tree/edit/{id}', 'edit')->name('plans.tree.edit'); 
+        Route::post('course-management/plans/tree/update', 'update')->name('plans.tree.update'); 
+        Route::delete('course-management/plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
+        Route::post('course-management/plans/tree/restore/{id}', 'restore')->name('plans.tree.restore');
 
-        Route::post('plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
-        Route::post('plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
-        Route::post('plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
+        Route::post('course-management/plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
+        Route::post('course-management/plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
+        Route::post('course-management/plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
-        Route::get('plan-dates/all/{planId}', 'index')->name('plan.dates'); 
-        Route::get('plan-dates/list', 'list')->name('plan.dates.list'); 
-        Route::post('plan-dates/generate', 'generate')->name('plan.dates.generate'); 
-        Route::post('plan-dates/store', 'store')->name('plan.dates.store'); 
-        Route::delete('plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
-        Route::post('plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
+        Route::get('course-management/plan-dates/all/{planId}', 'index')->name('plan.dates'); 
+        Route::get('course-management/plan-dates/list', 'list')->name('plan.dates.list'); 
+        Route::post('course-management/plan-dates/generate', 'generate')->name('plan.dates.generate'); 
+        Route::post('course-management/plan-dates/store', 'store')->name('plan.dates.store'); 
+        Route::delete('course-management/plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
+        Route::post('course-management/plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
     });
 
     Route::controller(StudentController::class)->group(function() {
@@ -2082,6 +2083,10 @@ Route::middleware('auth')->group(function() {
         
         Route::post('agent-user/{agent_user}/restore', 'restore')->name('agent-user.restore');
 
+    });
+
+    Route::controller(CourseManagementController::class)->group(function() {
+        Route::get('course-management', 'index')->name('course.management'); 
     });
 });
 

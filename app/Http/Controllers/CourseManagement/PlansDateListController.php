@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CourseManagement;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Plan;
 use App\Models\PlansDateList;
@@ -20,9 +21,11 @@ use Illuminate\Support\Facades\Auth;
 class PlansDateListController extends Controller
 {
     public function index($planId){
-        return view('pages.plandates.index', [
-            'title' => 'Class Plan Dates - LCC Data Future Managment',
+        return view('pages.course-management.plandates.index', [
+            'title' => 'Plans - LCC Data Future Managment',
+            'subtitle' => 'Class Plan Dates',
             'breadcrumbs' => [
+                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Dates', 'href' => 'javascript:void(0);']
             ],
