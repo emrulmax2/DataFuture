@@ -14,6 +14,7 @@ class ReferralCode extends Model
         'code',
         'type',
         'user_id',
+        'agent_user_id',
         'student_id',
         'created_by',
         'updated_by',

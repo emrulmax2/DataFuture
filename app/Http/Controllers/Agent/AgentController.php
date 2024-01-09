@@ -7,7 +7,11 @@ use App\Models\Agent;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use App\Models\AgentUser;
+use App\Models\ReferralCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+use Illuminate\Auth\Events\Registered;
 
 class AgentController extends Controller
 {
@@ -18,10 +22,12 @@ class AgentController extends Controller
      */
     public function index()
     {
+
         return view('pages.agent.index', [
             'title' => 'Agent Creations - LCC Data Future Agent Managment',
             'breadcrumbs' => [['label' => 'Agent Creations', 'href' => 'javascript:void(0);']],
-            'agentUser' => AgentUser::all()
+            'agentUser' => AgentUser::all(),
+            "unique" => Str::random(10),
         ]);
     }
 
@@ -98,9 +104,29 @@ class AgentController extends Controller
      */
     public function store(StoreAgentRequest $request)
     {
+
         $request->request->add(['created_by' => auth()->user()->id]);
+
+        $User = AgentUser::create([
+
+                'email' => $request->input("email"),
+                'password' => $request->input("password"),
+                'active' => 1,
+                
+        ]);
+
+        $request->request->add(['agent_user_id' => $User->id]);
+
         $data = Agent::create($request->all());
-        
+       
+        $referral = ReferralCode::create([
+            'code' => $data->code,
+            'type' => 'Agent',
+            'agent_user_id' => $data->AgentUser->id,
+            'created_by' => auth()->user()->id,
+        ]);
+        event(new Registered($User));
+
         return response()->json($data);
     }
 
@@ -123,8 +149,8 @@ class AgentController extends Controller
      */
     public function edit($id)
     {
-        $data = Agent::find($id);
 
+        $data = Agent::with('AgentUser')->where('id', $id)->get()->first();
         if($data){
             return response()->json($data);
         }else{
@@ -139,9 +165,30 @@ class AgentController extends Controller
      * @param  \App\Models\Agent  $agent
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateAgentRequest $request, Agent $agent)
+    public function update(UpdateAgentRequest $request, Agent $agent_user)
     {
-        //
+
+        $request->request->add(['agent_user_id' => $agent_user->AgentUser->id]);
+        $agenUser = AgentUser::find($agent_user->AgentUser->id);
+        $agenUser->email=$request->input('email');
+        $agenUser->save();
+        if($agenUser->wasChanged()) { 
+
+            $agenUser->email_verified_at=null;
+            $agenUser->save();
+            event(new Registered($agenUser));
+        }
+        $request->request->add(['updated_by' => auth()->user()->id]);
+
+        $agent_user->fill($request->all());
+        $agent_user->save();
+        
+        if($agenUser->wasChanged() || $agent_user->wasChanged()){
+            return response()->json(['message' => 'Data updated'], 200);
+        }else{
+            return response()->json(['message' => 'something went wrong'], 422);
+        }
+
     }
 
     /**
@@ -150,8 +197,21 @@ class AgentController extends Controller
      * @param  \App\Models\Agent  $agent
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Agent $agent)
+    public function destroy(Agent $agent_user)
     {
-        //
+        
+        $data = AgentUser::find($agent_user->agent_user_id)->delete();
+
+        $agent_user->delete();
+
+        return response()->json($data);
+    }
+
+    public function restore($agent_user) {
+        
+        $data = Agent::where('id', $agent_user)->withTrashed()->restore();
+        $dataSet = Agent::find($agent_user);
+        AgentUser::where('id',$dataSet->agent_user_id)->withTrashed()->restore();
+        response()->json($data);
     }
 }

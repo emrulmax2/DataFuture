@@ -84,26 +84,81 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="first_name" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
-                            <input id="first_name" type="text" class="form-control rounded-none form-control-lg inputUppercase" name="first_name" aria-label="default input example">
-                            <div class="acc__input-error error-first_name text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="intro-x col-span-6">
+                                <label for="first_name" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
+                                <input id="first_name" type="text" class="form-control rounded-none form-control " name="first_name" aria-label="default input example">
+                                <div class="acc__input-error error-first_name text-danger mt-2"></div>
+                            </div> 
+                            <div class=" intro-x col-span-6">
+                                <label for="last_name" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
+                                <input id="last_name" type="text" class="form-control rounded-none form-control " name="last_name" aria-label="default input example">
+                                <div class="acc__input-error error-last_name text-danger mt-2"></div>
+                            </div>
+                            
+                            <div class="intro-x col-span-6">
+                                <label for="code" class="form-label inline-flex">Refferel Code <span class="text-danger">*</span></label>
+                                <input id="code" type="text" class="form-control rounded-none form-control" value="{{ $unique }}" name="code" aria-label="default input example">
+                                <div class="acc__input-error error-code text-danger mt-2"></div>
+                            </div>
+                            <div class="intro-x col-span-6">
+                                <label for="organization" class="form-label inline-flex">Organization <span class="text-danger">*</span></label>
+                                <input id="organization" type="text" class="form-control rounded-none form-control" name="organization" aria-label="default input example">
+                                <div class="acc__input-error error-organization text-danger mt-2"></div>
+                            </div>
+                            <div class="intro-x  col-span-12">
+                                    <input type="email" id="email" name="email" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Email">
+                                    <div id="error-email" class="acc__input-error error-email text-danger mt-2"></div>
+        
+                                    <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
+                                    <div id="error-password" class="acc__input-error error-password text-danger mt-2"></div>
+        
+                                    <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
+                                        <div id="strength-1" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-2" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-3" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-4" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                    </div>
+                                    <!-- BEGIN: Custom Tooltip Toggle -->
+                                    <a href="javascript:;" data-theme="light" data-tooltip="custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="What is a secure password?">What is a secure password?</a>
+                                    <!-- END: Custom Tooltip Toggle -->
+                                    <!-- BEGIN: Custom Tooltip Content -->
+                                    <div class="tooltip-content">
+                                        <div id="custom-content-tooltip" class="relative flex items-center py-1">
+                                            <ul class="list-disc mt-5 ml-4 text-md dark:text-slate-400">
+                                                <li class="">
+                                                    <span class="low-upper-case">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Lowercase &amp; Uppercase
+                                                    </span>
+                                                </li>
+                                                <li class="">
+                                                    <span class="one-number">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Number (0-9)
+                                                    </span> 
+                                                </li>
+                                                <li class="">
+                                                    <span class="one-special-char">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Special Character (!@#$%^&*)
+                                                    </span>
+                                                </li>
+                                                <li class="">
+                                                    <span class="eight-character">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Atleast 8 Character
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- END: Custom Tooltip Content -->
+                                    <input type="password" id="password_confirmation" name="password_confirmation" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
+                                    <div id="error-confirmation" class="acc__input-error error-password_confirmation  text-danger mt-2"></div>
+                                
+                            </div>
                         </div> 
-                        <div class="mt-3">
-                            <label for="last_name" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
-                            <input id="last_name" type="text" class="form-control rounded-none form-control-lg inputUppercase" name="last_name" aria-label="default input example">
-                            <div class="acc__input-error error-last_name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="agent_user_id" class="form-label inline-flex">Agent User <span class="text-danger"> *</span></label>
-                            <select id="agent_user_id" name="agent_user_id" class=" lcc-tom-select w-full lccToms  ">
-                                <option  value="">Please Select</option>   
-                                @foreach($agentUser as $user)
-                                    <option  value="{{ $user->id }}">{{ $user->email }}</option>              
-                                @endforeach
-                            </select>
-                            <div class="acc__input-error error-agent_user_id text-danger mt-2"></div>
-                        </div>   
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -140,25 +195,82 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="editfirst_name" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
-                            <input id="editfirst_name" type="text" class="form-control rounded-none form-control-lg inputUppercase" name="first_name" aria-label="default input example">
-                            <div class="acc__input-error error-first_name text-danger mt-2"></div>
-                        </div> 
-                        <div class="mt-3">
-                            <label for="editlast_name" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
-                            <input id="editlast_name" type="text" class="form-control rounded-none form-control-lg inputUppercase" name="last_name" aria-label="default input example">
-                            <div class="acc__input-error error-last_name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="editagent_userid" class="form-label inline-flex">Agent User <span class="text-danger"> *</span></label>
-                            <select id="editagent_userid" name="agent_user_id" class=" lcc-tom-select w-full lccToms  ">
-                                <option  value="">Please Select</option>   
-                                @foreach($agentUser as $user)
-                                    <option  value="{{ $user->id }}">{{ $user->email }}</option>              
-                                @endforeach
-                            </select>
-                            <div class="acc__input-error error-editagent_userid text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="intro-x col-span-6">
+                                <label for="first_name" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
+                                <input id="first_name" type="text" class="form-control rounded-none form-control " name="first_name" aria-label="default input example">
+                                <div class="acc__input-error error-first_name text-danger mt-2"></div>
+                            </div> 
+                            <div class=" intro-x col-span-6">
+                                <label for="last_name" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
+                                <input id="last_name" type="text" class="form-control rounded-none form-control " name="last_name" aria-label="default input example">
+                                <div class="acc__input-error error-last_name text-danger mt-2"></div>
+                            </div>
+                            
+                            <div class="intro-x col-span-6">
+                                <label for="code" class="form-label inline-flex">Refferel Code <span class="text-danger">*</span></label>
+                                <input id="code" type="text" class="form-control rounded-none form-control" value="{{ $unique }}" name="code" aria-label="default input example">
+                                <div class="acc__input-error error-code text-danger mt-2"></div>
+                            </div>
+                            <div class="intro-x col-span-6">
+                                <label for="organization" class="form-label inline-flex">Organization <span class="text-danger">*</span></label>
+                                <input id="organization" type="text" class="form-control rounded-none form-control" name="organization" aria-label="default input example">
+                                <div class="acc__input-error error-organization text-danger mt-2"></div>
+                            </div>
+                            <div class="intro-x  col-span-12">
+                                    <div class="inline-flex">
+                                    <input type="email" id="email" name="email" class="intro-x login__input form-control py-3 px-4 w-auto mt-4 " placeholder="Email"> <span id="verificationEmail" class="mt-4 font-medium items-center w-24 inline-flex text-danger intro-x"></span>
+                                    </div>
+                                    <div id="error-email" class="acc__input-error error-email text-danger mt-2"></div>
+        
+                                    <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
+                                    <div id="error-password" class="acc__input-error error-password text-danger mt-2"></div>
+        
+                                    <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
+                                        <div id="strength-1" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-2" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-3" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-4" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                    </div>
+                                    <!-- BEGIN: Custom Tooltip Toggle -->
+                                    <a href="javascript:;" data-theme="light" data-tooltip="custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="What is a secure password?">What is a secure password?</a>
+                                    <!-- END: Custom Tooltip Toggle -->
+                                    <!-- BEGIN: Custom Tooltip Content -->
+                                    <div class="tooltip-content">
+                                        <div id="custom-content-tooltip" class="relative flex items-center py-1">
+                                            <ul class="list-disc mt-5 ml-4 text-md dark:text-slate-400">
+                                                <li class="">
+                                                    <span class="low-upper-case">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Lowercase &amp; Uppercase
+                                                    </span>
+                                                </li>
+                                                <li class="">
+                                                    <span class="one-number">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Number (0-9)
+                                                    </span> 
+                                                </li>
+                                                <li class="">
+                                                    <span class="one-special-char">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Special Character (!@#$%^&*)
+                                                    </span>
+                                                </li>
+                                                <li class="">
+                                                    <span class="eight-character">
+                                                        <i class="fas fa-circle" aria-hidden="true"></i>
+                                                        &nbsp;Atleast 8 Character
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- END: Custom Tooltip Content -->
+                                    <input type="password" id="password_confirmation" name="password_confirmation" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
+                                    <div id="error-confirmation" class="acc__input-error error-password_confirmation  text-danger mt-2"></div>
+                                
+                            </div>
                         </div> 
                     </div>
                     <div class="modal-footer">
@@ -179,6 +291,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="id" value="0" />
+                        
                     </div>
                 </div>
             </form>

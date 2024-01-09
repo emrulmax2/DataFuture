@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateAgentRequest extends FormRequest
 {
@@ -24,7 +25,14 @@ class UpdateAgentRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'code' => 'required',
+            'organization' => 'required',
+            //'email' => Rule::unique('agent_users')->ignore($this->id),
+            //'email' => "unique:agent_users,email,$this->id,id",
+
         ];
     }
 }

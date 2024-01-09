@@ -54,7 +54,7 @@ var agentTableId = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                           // btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editAgentModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
@@ -107,7 +107,64 @@ var agentTableId = (function () {
         },
     };
 })();
+function checkPasswordStrength(password) {
+    // Initialize variables
+    let strength = 0;
+    let tips = "";
+    //let lowUpperCase = document.querySelector(".low-upper-case i");
 
+    //let number = document.querySelector(".one-number i");
+    //let specialChar = document.querySelector(".one-special-char i");
+    //let eightChar = document.querySelector(".eight-character i");
+
+    //If password contains both lower and uppercase characters
+    if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
+        strength += 1;
+        //lowUpperCase.classList.remove('fa-circle');
+        //lowUpperCase.classList.add('fa-check');
+    } else {
+        //lowUpperCase.classList.add('fa-circle');
+        //lowUpperCase.classList.remove('fa-check');
+    }
+    //If it has numbers and characters
+    if (password.match(/([0-9])/)) {
+        strength += 1;
+        //number.classList.remove('fa-circle');
+        //number.classList.add('fa-check');
+    } else {
+        //number.classList.add('fa-circle');
+        //number.classList.remove('fa-check');
+    }
+    //If it has one special character
+    if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) {
+        strength += 1;
+        //specialChar.classList.remove('fa-circle');
+        //specialChar.classList.add('fa-check');
+    } else {
+        //specialChar.classList.add('fa-circle');
+        //specialChar.classList.remove('fa-check');
+    }
+    //If password is greater than 7
+    if (password.length > 7) {
+        strength += 1;
+        //eightChar.classList.remove('fa-circle');
+        //eightChar.classList.add('fa-check');
+    } else {
+        //eightChar.classList.add('fa-circle');
+        //eightChar.classList.remove('fa-check');   
+    }
+   
+    // Return results
+    if (strength < 2) {
+        return strength;
+    } else if (strength === 2) {
+        return strength;
+    } else if (strength === 3) {
+        return strength;
+    } else {
+        return strength;
+    }
+    }
 (function () {
     if($('#agentTableId').length > 0){
         // Init Table
@@ -204,7 +261,7 @@ var agentTableId = (function () {
             if(action == 'DELETE'){
                 axios({
                     method: 'delete',
-                    url: route('agent-user.destory', recordID),
+                    url: route('agent-user.destroy', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -214,7 +271,7 @@ var agentTableId = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Course creation data successfully deleted.');
+                            $('#successModal .successModalDesc').html('Agent data successfully deleted.');
                         });
                     }
                     agentTableId.init();
@@ -234,7 +291,7 @@ var agentTableId = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Course Creation Data Successfully Restored!');
+                            $('#successModal .successModalDesc').html('Agent data Successfully Restored!');
                         });
                     }
                     agentTableId.init();
@@ -257,11 +314,27 @@ var agentTableId = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     $('#editAgentModal input[name="first_name"]').val(dataset.first_name ? dataset.first_name : '');
-                    $('#editAgentModal select[name="agent_user_id"]').val(dataset.agent_user_id ? dataset.agent_user_id : '');
                     $('#editAgentModal input[name="last_name"]').val(dataset.last_name ? dataset.last_name : '');
-                    
-
+                    $('#editAgentModal input[name="organization"]').val(dataset.organization ? dataset.organization : '');
+                    $('#editAgentModal input[name="code"]').val(dataset.code ? dataset.code : '');
+                    $('#editAgentModal input[name="email"]').val(dataset.agent_user.email ? dataset.agent_user.email : '');
                     $('#editAgentModal input[name="id"]').val(editId);
+                    if(dataset.agent_user.email_verified_at==null) {
+                        let verificationList = $("#verificationEmail");
+                            verificationList.removeClass('text-success');
+                            verificationList.addClass('text-danger');
+                            verificationList.html('<i data-lucide="x-circle" class="w-4 h-4  ml-2 mr-1  "></i>Unverifed');
+                    } else {
+                        let verificationList = $("#verificationEmail");
+                            verificationList.removeClass('text-danger');
+                            verificationList.addClass('text-success');
+                            verificationList.html('<i data-lucide="check-circle" class="w-4 h-4  ml-2 mr-1  "></i>Verified');
+                    }
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                 }
             }).catch((error) => {
                 console.log(error);
@@ -274,11 +347,12 @@ var agentTableId = (function () {
         
             document.querySelector('#updateAgent').setAttribute('disabled', 'disabled');
             document.querySelector("#updateAgent svg").style.cssText ="display: inline-block;";
-
+            let agent = $("#editAgentForm input[name=id]").val();
             let form_data = new FormData(form);
+
             axios({
                 method: "post",
-                url: route('agent-user.update'),
+                url: route('agent-user.update',agent),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -291,7 +365,7 @@ var agentTableId = (function () {
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                         $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Course creation data successfully updated.');
+                        $("#successModal .successModalDesc").html('Agent data successfully updated.');
                     });                
                         
                 }
@@ -355,5 +429,49 @@ var agentTableId = (function () {
                 }
             });
         });
+
+        $('#password').on('keyup', function(e) {
+            let totalText = this.value
+            let strenghtTips = checkPasswordStrength(totalText)
+            const box1 = document.getElementById('strength-1');
+            const box2 = document.getElementById('strength-2');
+            const box3 = document.getElementById('strength-3');
+            const box4 = document.getElementById('strength-4');
+
+            switch (strenghtTips) {
+                case 1:
+                        box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                        box1.classList.add('bg-danger');
+                        break;
+                case 2: 
+                        box2.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                        box2.classList.add('bg-warning');
+                        break;
+                case 3: 
+                        box3.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                        box3.classList.add('bg-success');
+                        break;
+                case 4: 
+                case 5: 
+                case 6: 
+                case 7: 
+                case 8: 
+                case 9: 
+                        box4.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                        box4.classList.add('bg-success');
+                        break;
+                default:
+                        box1.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                        box2.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                        box3.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                        box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                        
+                        box1.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                        box2.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                        box3.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                        box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                        break;
+            }
+        })
     }
 })()

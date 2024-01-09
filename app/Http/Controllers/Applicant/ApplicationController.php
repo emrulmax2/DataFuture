@@ -16,6 +16,7 @@ use App\Models\Semester;
 use App\Models\User;
 use App\Http\Requests\ApplicationPersonalDetailsRequest;
 use App\Models\Address;
+use App\Models\Agent;
 use App\Models\AgentApplicationCheck;
 use App\Models\Applicant;
 use App\Models\ApplicantContact;
@@ -204,7 +205,14 @@ class ApplicationController extends Controller
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
         if(auth('agent')->user()) {
+            $agentData = Agent::find(auth('agent')->user()->id);
             
+            $ref = Applicant::where('id', $applicant_id)->update([
+                'referral_code' => $agentData->code,
+                'is_referral_varified' => 1,
+                'updated_by' =>  auth('agent')->user()->id,
+            ]);
+
             $applicant = Applicant::find($applicant_id);
             $application = AgentApplicationCheck::where("email",$applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
             $application->applicant_id = $applicant_id;

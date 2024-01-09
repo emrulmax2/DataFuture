@@ -1980,6 +1980,8 @@ Route::middleware('auth')->group(function() {
         
     }); 
 
+
+
     Route::resource('student-assign',StudentAssignController::class);
 
     Route::controller(StudentAssignController::class)->group(function() {
@@ -2040,19 +2042,26 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
     });
 
-    // GET|HEAD        agent-declaration ...................................................................................................................... agent-user.index › AgentController@index  
-    // POST            agent-declaration ...................................................................................................................... agent-user.store › AgentController@store  
-    // GET|HEAD        agent-declaration/create ............................................................................................................. agent-user.create › AgentController@create  
-    // GET|HEAD        agent-declaration-list ................................................................................................................... agent-user.list › AgentController@list  
-    // GET|HEAD        agent-declaration/{agent-user} ..................................................................................................... agent-user.show › AgentController@show  
-    // PUT|PATCH       agent-declaration/{agent-user} ................................................................................................. agent-user.update › AgentController@update  
-    // DELETE          agent-declaration/{agent-user} ............................................................................................... agent-user.destroy › AgentController@destroy  
-    // GET|HEAD        agent-declaration/{agent-user}/edit 
-    Route::resource('agent-declaration', AgentController::class);
+    // GET............agent-user....................agent-user.index.............App\Http\Controllers\Agent\AgentController@index
+    // GET............agent-user/create.............agent-user.create............App\Http\Controllers\Agent\AgentController@create
+    // POST...........agent-user....................agent-user.store.............App\Http\Controllers\Agent\AgentController@store
+    // GET............agent-user/{agent_user}.......agent-user.show..............App\Http\Controllers\Agent\AgentController@show
+    // GET............agent-user/{agent_user}/edit..agent-user.edit..............App\Http\Controllers\Agent\AgentController@edit
+    // POST............agent-user/{agent_user}.......agent-user.update............App\Http\Controllers\Agent\AgentController@update
+    // DELETE.........agent-user/{agent_user}.......agent-user.destroy...........App\Http\Controllers\Agent\AgentController@destroy
+    // GET............agent-user-list...............agent-user.list..............App\Http\Controllers\Agent\AgentController@list
+    
+    Route::resource('agent-user', AgentController::class,[
+        'except' => ['update']
+    ]);
     
     Route::controller(AgentController::class)->group(function() {
-        Route::post('agent-declaration-list', 'list')->name('agent.list'); 
+
+        Route::post('agent-user/{agent_user}', 'update')->name('agent-user.update'); 
+        Route::get('agent-user-list', 'list')->name('agent-user.list'); 
+        
+        Route::post('agent-user/{agent_user}/restore', 'restore')->name('agent-user.restore');
+
     });
-    
 });
 

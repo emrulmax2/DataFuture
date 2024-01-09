@@ -26,7 +26,10 @@ class StoreAgentRequest extends FormRequest
         return [
             'first_name' => 'required',
             'last_name' => 'required',
-            'agent_user_id' => 'required'
+            'code' => 'required',
+            'organization' => 'required',
+            'email' => 'required|unique:agent_users,email',
+            'password' => 'required|confirmed|min:8',
         ];
     }
 }

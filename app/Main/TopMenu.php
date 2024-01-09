@@ -137,7 +137,12 @@ class TopMenu
                             'route_name' => 'student',
                             'params' => [],
                             'title' => 'Live'
-                        ]
+                        ],
+                        // 'agent' => [
+                        //     'route_name' => 'agent-user',
+                        //     'params' => [],
+                        //     'title' => 'Agent Information'
+                        // ]
                     ]
                 ];
             endif;
