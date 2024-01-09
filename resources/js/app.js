@@ -58,22 +58,7 @@ import "./side-menu-tooltip";
 import "./dark-mode-switcher";
 
 //all Form Data                                // Added on 05.12.22
-import "./form";                              // Added on 05.12.22
-import "./courses";                           // Added on 12.12.22
-import "./semester";          
-import "./term-declaration";          
-import "./groups";  
-import "./modulelevels";
-import "./course-module";
-import "./course-datafuture";
-import "./course-module-assesment";
-import "./module-datafuture";
-import "./course-creation";
-import "./course-creation-availability";
-import "./course-creation-datafuture";
-import "./course-creation-instance";
-import "./instance-term";
-import "./term-module-creation";
+import "./form";
 import "./assessment";
 import "./plans-date-list";
 

@@ -26,7 +26,7 @@ var courseCreationAvailabilityTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "80",
                 },
                 {
                     title: "Admission Start Date",
@@ -62,9 +62,9 @@ var courseCreationAvailabilityTable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: "120",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";

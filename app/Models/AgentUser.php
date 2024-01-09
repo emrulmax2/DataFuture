@@ -9,10 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\VerifyEmailForAgent;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AgentUser  extends Authenticatable  implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,SoftDeletes;
 
     protected $fillable = [
         'email',
@@ -39,6 +40,8 @@ class AgentUser  extends Authenticatable  implements MustVerifyEmail
         'phone_verified_at' => 'datetime'
     ];
 
+    protected $dates = ['deleted_at'];
+    
     public function setPasswordAttribute($value)
     {
        $this->attributes['password'] = Hash::make($value);

@@ -81,6 +81,12 @@ class AgentUserController extends Controller
      */
     public function destroy(AgentUser $agentUser)
     {
-        //
+        $data = $agentUser->delete();
+
+        if($agentUser->wasChanged())     
+
+            return response()->json(["msg"=>"Removed"],200);
+        else
+            return response()->json(["msg"=>"Nothing Changed"],422);
     }
 }
