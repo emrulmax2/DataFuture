@@ -390,7 +390,7 @@
                     <div class="modal-body">
                         <div>
                             <label for="dob" class="form-label">Please provide applicant date of birth to unlock profile <span class="text-danger">*</span></label>
-                            <input id="dob" type="text" name="dob" class="datepicker form-control w-full" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY"  data-single-mode="true" >
+                            <input id="dob" type="text" name="dob" class="datepicker date-picker form-control w-full" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY"  data-single-mode="true" >
                             <div class="dob__input-error error-name text-danger mt-2"></div>
                             <input type="hidden" id="applicantId" name="applicantId" value="">
                             <input type="hidden" id="taskListId" name="taskListId" value="">

@@ -12,7 +12,9 @@ use App\Models\Role;
 use App\Models\UserRole;
 use App\Models\User;
 use App\Http\Requests\InterviewerUpdateRequest;
+use App\Models\ApplicantViewUnlock;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApplicantInterviewListController extends Controller
 {
@@ -131,9 +133,16 @@ class ApplicantInterviewListController extends Controller
 
             $task = ApplicantTask::find($ApplicantInterview->task->id);
             $task->status = "Completed";
+            $task->task_status_id = 1;
             $task->updated_by = \Auth::user()->id;
             $task->save();
 
+        } else {
+            $task = ApplicantTask::find($ApplicantInterview->task->id);
+            $task->status = "Completed";
+            $task->task_status_id = 2;
+            $task->updated_by = \Auth::user()->id;
+            $task->save();
         }
         $ApplicantInterview->updated_by = \Auth::user()->id;
         $ApplicantInterview->save();
@@ -148,6 +157,48 @@ class ApplicantInterviewListController extends Controller
     
     public function interviewStartTimeUpdate(Request $request) {
         
+        $unlockedData = NULL;
+        //dd($request->applicant_task_id);
+        if($request->applicant_id && $request->applicant_task_id) {
+            $applicantTaskId = $request->applicant_task_id;
+            $authId = \Auth::id();
+
+            $findInterview = ApplicantInterview::where("user_id",$authId)
+                ->where('applicant_id',$request->applicant_id)
+                ->where('start_time',NULL)
+                ->where('interview_result','<>' , 'Pass')->get()->first();
+
+            if(!$findInterview) {
+
+                $interview = ApplicantInterview::create([
+                                        'user_id' =>$authId,
+                                        'applicant_id' =>$request->applicant_id,
+                                        'applicant_task_id' => $applicantTaskId,
+                                        'applicant_document_id' => NULL,
+                                        'interview_date' => date("Y-m-d"),
+                                        'start_time' => NULL,
+                                        'end_time' => NULL,
+                                        'interview_result' =>'N/A',
+                                        'created_by' => $authId
+                ]);
+
+            } else {
+                $interview = $findInterview;
+            }
+            
+            $ApplicantInterview = $data = ApplicantInterview::find($interview->id);
+            ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
+            $unlockedData = ApplicantViewUnlock::create([
+                    'user_id' =>$data->user_id,
+                    'applicant_id' =>$data->applicant_id,
+                    'token' => Str::random(16),
+                    'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
+                    'created_by' => \Auth::id()
+            ]);
+
+            $ref = route('applicant.interview.profile.view',[$data->applicant_id,$interview->id,$unlockedData->token]);
+        }
+        if(!isset($ApplicantInterview ))
         $ApplicantInterview = ApplicantInterview::find($request->id);
 
         $ApplicantInterview->start_time = $startTime = date("H:i",time());
@@ -162,7 +213,7 @@ class ApplicantInterviewListController extends Controller
 
         if($ApplicantInterview->wasChanged())  
            
-            return response()->json(["msg"=>"Time Started", "data"=>["start"=> date("h:i a", strtotime($startTime)),"status"=>"In Progress"]],200);
+            return response()->json(["msg"=>"Time Started", "data"=>["start"=> date("h:i a", strtotime($startTime)),"status"=>"In Progress","ref"=> (isset($ref))? $ref : null]],200);
         else
             return response()->json(["msg"=>"Nothing Changed"],422);
     }

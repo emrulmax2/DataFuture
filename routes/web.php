@@ -86,6 +86,7 @@ use App\Models\ApplicantUser;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\ApplicantQualificationController;
 use App\Http\Controllers\Applicant\ApplicantVarifyTempEmailController;
+use App\Http\Controllers\Applicant\Auth\ForgetPasswordController;
 use App\Http\Controllers\Settings\CommonSmtpController;
 use App\Http\Controllers\Settings\LetterSetController;
 use App\Http\Controllers\Settings\SignatoryController;
@@ -246,7 +247,15 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::get('login', 'loginView')->name('login');
         Route::post('login', 'login')->name('check');
     });
+    Route::controller(ForgetPasswordController::class)->middleware('applicant.loggedin')->group(function() {
+
+        Route::get('forget-password',  'showForgetPasswordForm')->name('forget.password.get');
+        Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
+        Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
+        Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
     
+    });
+
     Route::controller(RegisterController::class)->middleware('applicant.loggedin')->group(function() {
         Route::get('register', 'index')->name('register');
         Route::post('register', 'store')->name('store.register');
@@ -1373,7 +1382,9 @@ Route::middleware('auth')->group(function() {
         Route::post('interviewlist/assaign/update', 'updateAssaignInterviewer')->name('interviewlist.assign.update');
         Route::post('interviewlist/unlock', 'unlockInterView')->name('applicant.interview.unlock');
         Route::post('interviewlist/direct/unlock', 'unlockInterViewDirect')->name('applicant.interview.unlock.direct');
+        Route::post('interviewlist/only/unlock', 'unlockInterViewOnly')->name('applicant.interview.unlock.only');
         Route::get('interviewlist/profile/{id}/{interview}/{token}', 'profileView')->name('applicant.interview.profile.view')->middleware(EnsureExpiredDateIsValid::class);
+        Route::get('interviewlist/profileview/{id}/{applicant_task}/{token}', 'profileViewOnly')->name('applicant.interview.profile.viewonly')->middleware(EnsureExpiredDateIsValid::class);
         Route::get('interviewlist/staff/{userId}', 'interviewAssignedList')->name('applicant.interview.session.list');
         
         Route::get('interviewlist/showinstances', 'showInstances')->name('interviewlist.showinstances');

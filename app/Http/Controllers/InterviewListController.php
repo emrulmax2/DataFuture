@@ -98,83 +98,85 @@ class InterviewListController extends Controller
                     $nestedDataContainer = [];
                     
                         foreach ($list->applicant as $applicantData) {
-                            $ApplicantTaskInfo = ApplicantTask::where(["applicant_id"=>$applicantData->id,"task_list_id"=>$list->id])->get()->first();
-                            
-                            $tasklistUserId = TaskListUser::where(["task_list_id"=>$ApplicantTaskInfo->task_list_id])->pluck('user_id')->all();
-                            $isAdmin = 0;
-                            $logId = $request->user()->id;
-                            $roles = \Auth::user()->roles;
-                            foreach ($roles as $role):
+                            $applicant = Applicant::find($applicantData->id);
+                            $ApplicantTaskInfo = ApplicantTask::where(["applicant_id"=>$applicantData->id,"task_list_id"=>$list->id,"status"=>"Pending"])->get()->first();
+                            if($ApplicantTaskInfo ) {
+                                $tasklistUserId = TaskListUser::where(["task_list_id"=>$ApplicantTaskInfo->task_list_id])->pluck('user_id')->all();
+                                $isAdmin = 0;
+                                $logId = $request->user()->id;
+                                $roles = \Auth::user()->roles;
+                                foreach ($roles as $role):
+                                    
+                                    if($role->type == "Admin") {
+                                        $isAdmin =1 ;
+                                        break;
+                                    }
+                                endforeach;
                                 
-                                if($role->type == "Admin") {
-                                    $isAdmin =1 ;
-                                    break;
-                                }
-                            endforeach;
-                            
-                            if(in_array($logId, $tasklistUserId) || $isAdmin) {
-                            
-                                $ApplicantInterviewData = ApplicantInterview::where(["applicant_id"=>$applicantData->id,"applicant_task_id"=>$ApplicantTaskInfo->id,"interview_status"=>'Completed'])
-                                                            ->whereIn('interview_result', ['Pass','N/A','NULL'])->get()->first();
-                                //dd($ApplicantInterviewData);      
+                                if(in_array($logId, $tasklistUserId) || $isAdmin) {
+                                
+                                    $ApplicantInterviewData = ApplicantInterview::where(["applicant_id"=>$applicantData->id,"applicant_task_id"=>$ApplicantTaskInfo->id,"interview_status"=>'Completed'])
+                                                                ->whereIn('interview_result', ['Pass','N/A','NULL'])->get()->first();
+                                    //dd($ApplicantInterviewData);      
 
-                                $isFilterd = 0;
-                                if(isset($request->status) && $status=="applicantNumber") {
-                                $isFilterd = ($applicantData->application_no==$queryStr) ? 'Filtered' : 0;
+                                    $isFilterd = 0;
+                                    if(isset($request->status) && $status=="applicantNumber") {
+                                    $isFilterd = ($applicantData->application_no==$queryStr) ? 'Filtered' : 0;
 
-                                if($isFilterd) {
-                                    if(!$ApplicantInterviewData )
-                                        $nestedDataContainer[$k++] = ["data"=> [ 
-                                                                                "name" => $applicantData->title->name." ".$applicantData->full_name,
-                                                                                "id"=>$applicantData->id,
-                                                                                'register'=>$applicantData->application_no,
-                                                                                'task_list_id'=>$list->id
-                                                                            ], 
-                                                                            "location" => $ApplicantTaskInfo->status, 
-                                                                            "gender" =>$applicantData->gender, 
-                                                                            "col" =>$applicantData->application_no, 
-                                                                            "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
-                                                                    ];
+                                    if($isFilterd) {
+                                        if(!$ApplicantInterviewData )
+                                            $nestedDataContainer[$k++] = ["data"=> [ 
+                                                                                    "name" => $applicantData->title->name." ".$applicantData->full_name,
+                                                                                    "id"=>$applicantData->id,
+                                                                                    'register'=>$applicantData->application_no,
+                                                                                    'task_list_id'=>$list->id
+                                                                                ], 
+                                                                                "location" => $ApplicantTaskInfo->status, 
+                                                                                "gender" =>$applicant->sexid->name, 
+                                                                                "col" =>$applicantData->application_no, 
+                                                                                "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
+                                                                        ];
 
-                                }
-
-                                } else if(isset($request->status) && $status=="applicantName") {
-                                    $isFilterd = ( stristr($applicantData->full_name,$queryStr) ) ? 'Filtered' : 0;
-
-                                if($isFilterd) {
-                                    if(!$ApplicantInterviewData)
-                                        $nestedDataContainer[$k++] = ["data"=> [ 
-                                                                                "name" => $applicantData->title->name." ".$applicantData->full_name,
-                                                                                "id"=>$applicantData->id,
-                                                                                'register'=>$applicantData->application_no,
-                                                                                'task_list_id'=>$list->id
-                                                                            ], 
-                                                                            "task" => $list->name,
-                                                                            "location" => $ApplicantTaskInfo->status, 
-                                                                            "gender" =>$applicantData->gender, 
-                                                                            "col" =>$applicantData->application_no, 
-                                                                            "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
-                                                                    ];
                                     }
 
-                                } else {
+                                    } else if(isset($request->status) && $status=="applicantName") {
+                                        $isFilterd = ( stristr($applicantData->full_name,$queryStr) ) ? 'Filtered' : 0;
 
-                                    if(!$ApplicantInterviewData)
-                                        $nestedDataContainer[$k++] = ["data"=> [ 
-                                                                                "name" => $applicantData->title->name." ".$applicantData->full_name,
-                                                                                "id"=>$applicantData->id,
-                                                                                'register'=>$applicantData->application_no,
-                                                                                'task_list_id'=>$list->id
-                                                                            ], 
-                                                                            "task" => $list->name,
-                                                                            "location" => $ApplicantTaskInfo->status, 
-                                                                            "gender" =>$applicantData->gender, 
-                                                                            "col" =>$applicantData->application_no, 
-                                                                            "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
-                                                                    ];
+                                    if($isFilterd) {
+                                        if(!$ApplicantInterviewData)
+                                            $nestedDataContainer[$k++] = ["data"=> [ 
+                                                                                    "name" => $applicantData->title->name." ".$applicantData->full_name,
+                                                                                    "id"=>$applicantData->id,
+                                                                                    'register'=>$applicantData->application_no,
+                                                                                    'task_list_id'=>$list->id
+                                                                                ], 
+                                                                                "task" => $list->name,
+                                                                                "location" => $ApplicantTaskInfo->status, 
+                                                                                "gender" =>$applicant->sexid->name, 
+                                                                                "col" =>$applicantData->application_no, 
+                                                                                "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
+                                                                        ];
+                                        }
+
+                                    } else {
+
+                                        if(!$ApplicantInterviewData)
+                                            $nestedDataContainer[$k++] = ["data"=> [ 
+                                                                                    "name" => $applicantData->title->name." ".$applicantData->full_name,
+                                                                                    "id"=>$applicantData->id,
+                                                                                    'register'=>$applicantData->application_no,
+                                                                                    'task_list_id'=>$list->id
+                                                                                ], 
+                                                                                "task" => $list->name,
+                                                                                "location" => $ApplicantTaskInfo->status, 
+                                                                                "gender" =>$applicant->sexid->name, 
+                                                                                "col" =>$applicantData->application_no, 
+                                                                                "dob" =>date("d/m/Y",strtotime($applicantData->date_of_birth))
+                                                                        ];
+                                    }
+                                } else {
+                                    $nestedDataContainer = "No Interview access available for current logged in user";
                                 }
-                            } else {
-                                $nestedDataContainer = "No Interview access available for current logged in user";
                             }
                         }
                 endforeach;
@@ -320,9 +322,9 @@ class InterviewListController extends Controller
     {
         $data = ApplicantInterview::find($request->interviewId);
         $unlockedData = NULL;
-        $userRole = UserRole::where(["user_id"=>$data->user_id])->get()->first();
-        $role = Role::where(['id'=>$userRole->role_id])->get()->first();
-        $roleType = $role->type;
+        //$userRole = UserRole::where(["user_id"=>$data->user_id])->get()->first();
+        //$role = Role::where(['id'=>$userRole->role_id])->get()->first();
+        //$roleType = $role->type;
         
         if($data->user_id == \Auth::id()) {
             ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
@@ -333,17 +335,20 @@ class InterviewListController extends Controller
                     'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
                     'created_by' => \Auth::id()
                 ]);
-        } elseif($roleType == "Admin") {
-            ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
-            $unlockedData = ApplicantViewUnlock::create([
-                    'user_id' =>$data->user_id,
-                    'applicant_id' =>$data->applicant_id,
-                    'token' => Str::random(16),
-                    'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
-                    'created_by' => \Auth::id()
-                ]);    
+
+        // } elseif($roleType == "Admin") {
+
+        //     ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
+        //     $unlockedData = ApplicantViewUnlock::create([
+        //             'user_id' =>$data->user_id,
+        //             'applicant_id' =>$data->applicant_id,
+        //             'token' => Str::random(16),
+        //             'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
+        //             'created_by' => \Auth::id()
+        //         ]);    
         }
         if($unlockedData) {
+            
             $resultData = [
                 "applicantId" => $data->applicant_id,
                 "interviewId" => ($request->interviewId *1),
@@ -366,17 +371,28 @@ class InterviewListController extends Controller
             $applicantTaskData = ApplicantTask::where(['task_list_id'=>$request->taskListId,'applicant_id'=>$request->applicantId])->get()->first();
             $authId = \Auth::id();
 
-            $interview = ApplicantInterview::create([
-                                    'user_id' =>$authId,
-                                    'applicant_id' =>$request->applicantId,
-                                    'applicant_task_id' => $applicantTaskData->id,
-                                    'applicant_document_id' => NULL,
-                                    'interview_date' => date("Y-m-d"),
-                                    'start_time' => NULL,
-                                    'end_time' => NULL,
-                                    'interview_result' =>'N/A',
-                                    'created_by' => $authId
-            ]);
+            $findInterview = ApplicantInterview::where("user_id",$authId)
+                ->where('applicant_id',$request->applicantId)
+                ->where('start_time',NULL)
+                ->where('interview_result','<>' , 'Pass')->get()->first();
+
+            if(!$findInterview) {
+
+                $interview = ApplicantInterview::create([
+                                        'user_id' =>$authId,
+                                        'applicant_id' =>$request->applicantId,
+                                        'applicant_task_id' => $applicantTaskData->id,
+                                        'applicant_document_id' => NULL,
+                                        'interview_date' => date("Y-m-d"),
+                                        'start_time' => NULL,
+                                        'end_time' => NULL,
+                                        'interview_result' =>'N/A',
+                                        'created_by' => $authId
+                ]);
+
+            } else {
+                $interview = $findInterview;
+            }
 
             $data = ApplicantInterview::find($interview->id);
             ApplicantViewUnlock::where(['user_id' =>$data->user_id,'applicant_id' =>$data->applicant_id])->delete();
@@ -404,6 +420,40 @@ class InterviewListController extends Controller
             return response()->json(["msg"=>"Invalid Birth Date"],404);
         }
     }
+    public function unlockInterViewOnly(InterviewerUnlockDirectRequest $request)
+    {
+        $ApplicantData = Applicant::where(["date_of_birth"=>date("Y-m-d",strtotime($request->dob)),"id"=>$request->applicantId])->get()->first();
+        $unlockedData = NULL;
+
+        if($ApplicantData) {
+            $applicantTaskData = ApplicantTask::where(['task_list_id'=>$request->taskListId,'applicant_id'=>$request->applicantId])->get()->first();
+            $authId = \Auth::id();
+            ApplicantViewUnlock::where(['user_id' =>$authId,'applicant_id' =>$applicantTaskData->applicant_id])->delete();
+            
+            $unlockedData = ApplicantViewUnlock::create([
+                    'user_id' =>$authId,
+                    'applicant_id' =>$applicantTaskData->applicant_id,
+                    'token' => Str::random(16),
+                    'expired_at' => date("Y-m-d H:i:s", strtotime("+1 hours")),
+                    'created_by' => \Auth::id()
+                ]);
+        }
+        if($unlockedData) {
+
+            $resultData = [
+                "applicantId" => $request->applicantId,
+                "token" =>  $unlockedData->token
+            ];
+            
+            return response()->json(["msg"=>"Profile Unlocked",
+                "data"=>$resultData,
+                "ref"=>route('applicant.interview.profile.viewonly',["id" => $request->applicantId,"applicant_task" => $applicantTaskData->id,"token" =>$unlockedData->token] )],200);
+        
+        } else {
+
+            return response()->json(["msg"=>"Invalid Birth Date"],404);
+        }
+    }
     // route applicant.interview.profile.view
     public function profileView($id,$interview,$token) {
         
@@ -421,6 +471,26 @@ class InterviewListController extends Controller
             'disability' => Disability::all(),
             'users' => User::all(),
             'interview' => ApplicantInterview::find($interview),
+        ]);
+
+    } 
+
+    public function profileViewOnly( $id,$applicant_task,$token) {
+        
+        return view('pages.interviewlist.profiles.showonly', [
+
+            'title' => 'Admission Management - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Students Admission', 'href' => route('admission')],
+                ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
+            ],
+            'applicant' => Applicant::find($id),
+            'titles' => Title::all(),
+            'country' => Country::all(),
+            'ethnicity' => Ethnicity::all(),
+            'disability' => Disability::all(),
+            'users' => User::all(),
+            'applicantTask' => ApplicantTask::find($applicant_task)
         ]);
 
     } 

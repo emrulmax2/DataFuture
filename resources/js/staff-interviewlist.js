@@ -186,7 +186,15 @@ const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#e
 
 const lockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
 
-//
+$(".date-picker").each(function () {
+    var maskOptions = {
+        mask: Date,
+        min: new Date(1900, 0, 1),
+        max: new Date(2050, 0, 1),
+        lazy: false
+    };
+    var mask = IMask(this, maskOptions);
+});
 
 $(document).on("click", ".profile-lock__button", function (e) { 
     e.preventDefault();
@@ -359,6 +367,9 @@ $(document).on("click", ".interview-end", function (e) {
                     $("#successModal .successModalTitle").html(response.data.msg);
                     $("#successModal .successModalDesc").html('success');
                 });    
+
+           
+                
         }
 
         interviewListTable.init();
@@ -426,6 +437,11 @@ $(document).on("click", ".interview-end", function (e) {
                             $("#successModal .successModalDesc").html('success');
                         });                
                         
+                        $("#magic-button1").addClass('hidden');
+                        $("#magic-button2").removeClass('show');
+                        $("#magic-button2").addClass('hidden');
+                        $("#magic-button3").removeClass('hidden');
+                        $("#magic-button3").addClass('show');
                 }
                 interviewListTable.init();
             }).catch(error => {

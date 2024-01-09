@@ -686,7 +686,7 @@ $('#callLockModalForm').on('submit', function(e){
     //form_data.append('file', $('#addUserForm input[name="photo"]')[0].files[0]); 
     axios({
         method: "post",
-        url: route('applicant.interview.unlock.direct'),
+        url: route('applicant.interview.unlock.only'),
         data: form_data,
         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
     }).then(response => {

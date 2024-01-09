@@ -22,6 +22,6 @@ class EnsureExpiredDateIsValid
             
             return $next($request);
         }
-        return redirect(route('useraccess',\Auth::id()));
+        return redirect(route('dashboard',\Auth::id()));
     }
 }

@@ -68,9 +68,9 @@
                     </div> --}}
                 </div>
                 <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-                    <a class="flex items-center text-primary font-medium" href="">
+                    {{-- <a class="flex items-center text-primary font-medium" href="">
                         <i data-lucide="activity" class="w-4 h-4 mr-2"></i> Personal Information
-                    </a>
+                    </a> --}}
                     {{-- <a class="flex items-center mt-5" href="">
                         <i data-lucide="box" class="w-4 h-4 mr-2"></i> Account Settings
                     </a> --}}
@@ -118,7 +118,7 @@
                 <!-- BEGIN: Daily Sales -->
                 <div class="intro-y box col-span-12 2xl:col-span-6">
                     <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                        <h2 class="font-medium text-base mr-auto">Persnoal Details</h2>
+                        <h2 class="font-medium text-base mr-auto">Change Password</h2>
                         <div class="dropdown ml-auto sm:hidden">
                             <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
                                 <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
@@ -147,26 +147,6 @@
                                 <div class="text-slate-500 mr-5 sm:mr-5">Bootstrap 4 HTML Admin Template</div>
                             </div>
                             <div class="font-medium text-slate-600 dark:text-slate-500">+$19</div>
-                        </div>
-                        <div class="relative flex items-center mt-5">
-                            <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[1]['photos'][0]) }}">
-                            </div>
-                            <div class="ml-4 mr-auto">
-                                <a href="" class="font-medium">{{ $fakers[1]['users'][0]['name'] }}</a>
-                                <div class="text-slate-500 mr-5 sm:mr-5">Tailwind HTML Admin Template</div>
-                            </div>
-                            <div class="font-medium text-slate-600 dark:text-slate-500">+$25</div>
-                        </div>
-                        <div class="relative flex items-center mt-5">
-                            <div class="w-12 h-12 flex-none image-fit">
-                                <img alt="London Churchill College" class="rounded-full" src="{{ asset('build/assets/images/' . $fakers[2]['photos'][0]) }}">
-                            </div>
-                            <div class="ml-4 mr-auto">
-                                <a href="" class="font-medium">{{ $fakers[2]['users'][0]['name'] }}</a>
-                                <div class="text-slate-500 mr-5 sm:mr-5">Vuejs HTML Admin Template</div>
-                            </div>
-                            <div class="font-medium text-slate-600 dark:text-slate-500">+$21</div>
                         </div>
                     </div>
                 </div>

@@ -49,6 +49,8 @@ export default defineConfig({
                 "resources/js/interviewlist.js",
                 "resources/js/staff-interview-task.js",
                 "resources/js/staff-interviewlist.js",
+                "resources/js/staff-interview-start.js",
+                
 
                 "resources/js/admission.js",
                 "resources/js/admission-vue.js",
