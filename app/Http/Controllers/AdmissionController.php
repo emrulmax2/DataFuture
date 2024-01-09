@@ -105,6 +105,7 @@ use App\Models\StudentCourseRelation;
 use App\Models\StudentFeeEligibility;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentUser;
+use App\Models\TaskList;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
@@ -197,8 +198,8 @@ class AdmissionController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
-                    'first_name' => $list->first_name,
-                    'last_name' => $list->last_name,
+                    'first_name' => ucfirst($list->first_name),
+                    'last_name' => ucfirst($list->last_name),
                     'date_of_birth'=> $list->date_of_birth,
                     'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
@@ -1002,6 +1003,52 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function admissionPocessTaskUserList(Request $request){
+        $task_id = $request->task_id;
+        $task = TaskList::find($task_id);
+
+        $html = '';
+        if(isset($task->users) && $task->users->count() > 0):
+            foreach($task->users as $tusr):
+                $html .= '<tr>';
+                    $html .= '<td>';
+                        $html .= '<div class="block">';
+                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                $html .= '<img alt="'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'" class="rounded-full shadow" src="'.(isset($tusr->user->employee->photo_url) && !empty($tusr->user->employee->photo_url) ? $tusr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                            $html .= '</div>';
+                            $html .= '<div class="inline-block relative" style="top: -5px;">';
+                                $html .= '<div class="font-medium whitespace-nowrap uppercase">'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'</div>';
+                                if(isset($tusr->user->employee->employment->employeeJobTitle->name) && !empty($tusr->user->employee->employment->employeeJobTitle->name)):
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$tusr->user->employee->employment->employeeJobTitle->name.'</div>';
+                                endif;
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->department->name) ? $tusr->user->employee->employment->department->name : '').'</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->employeeWorkType->name) ? $tusr->user->employee->employment->employeeWorkType->name : '').'</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->works_number) ? $tusr->user->employee->employment->works_number : '').'</td>';
+                    $html .= '<td>';
+                        if(isset($tusr->user->employee->status) && $tusr->user->employee->status == 1):
+                            $html .= '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
+                        elseif(isset($tusr->user->employee->status) && $tusr->user->employee->status == 2):
+                            $html .= '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
+                        endif;
+                    $html .= '</td>';
+                $html .= '</tr>';
+            endforeach;
+        else:
+            $html .= '<tr>';
+                $html .= '<td colspan="5">';
+                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Assigned user not found';
+                    $html .= '</div>';
+                $html .= '</td>';
+            $html .= '</tr>';
+        endif;
+
+        return response()->json(['res' => $html], 200);
     }
 
     public function admissionUploads($applicantId){

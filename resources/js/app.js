@@ -58,6 +58,7 @@ import "./side-menu-tooltip";
 import "./dark-mode-switcher";
 
 //all Form Data                                // Added on 05.12.22
+import "./common";
 import "./form";
 import "./assessment";
 import "./plans-date-list";

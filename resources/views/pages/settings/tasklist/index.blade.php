@@ -397,6 +397,46 @@
         </div>
     </div>
     <!-- END: Edit Modal -->
+
+    <!-- BEGIN: Task User Modal -->
+    <div id="taskUserModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Task Assigned Users</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="taskUserModalLoader text-center flex justify-center">
+                        <i data-loading-icon="rings" class="w-20 h-20"></i>
+                    </div>
+                    <div class="taskUserModalContent" style="display: none;">
+                        <table class="table table-report">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap">NAME</th>
+                                    <th class="whitespace-nowrap">Department</th>
+                                    <th class="whitespace-nowrap">Work Type</th>
+                                    <th class="whitespace-nowrap">Work No.</th>
+                                    <th class="whitespace-nowrap">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Task User Modal -->
+
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

@@ -294,6 +294,14 @@ var studentInterviewLogTable = (function () {
     const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
     const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
 
+    const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
+    document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
+        $('#taskUserModal .taskUserModalContent').fadeOut('fast', function(){
+            $('table tbody', this).html('');
+        });
+        $('#taskUserModal .taskUserModalLoader').fadeIn();
+    });
+
     const updateTaskOutcomeModalEl = document.getElementById('updateTaskOutcomeModal')
     updateTaskOutcomeModalEl.addEventListener('hide.tw.modal', function(event) {
         $("#updateTaskOutcomeModal .modal-body").html('');
@@ -813,5 +821,32 @@ var studentInterviewLogTable = (function () {
         }
         
     })
+
+    $('.taskUserLoader').on('click', function(){
+        var task_id = $(this).attr('data-taskid');
+        taskUserModal.show();
+
+        axios({
+            method: 'post',
+            url: route('student.process.task.users'),
+            data: {task_id : task_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#taskUserModal .taskUserModalLoader').fadeOut('fast');
+                $('#taskUserModal .taskUserModalContent').fadeIn('fast', function(){
+                    $('table tbody', this).html(response.data.res);
+                });
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        }).catch(error =>{
+            console.log(error)
+        });
+    });
 
 })()

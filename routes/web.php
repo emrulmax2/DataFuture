@@ -738,6 +738,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/show-task-statuses', 'showTaskStatuses')->name('student.show.task.outmoce.statuses');
         Route::post('student/task-result-update', 'taskResultUpdate')->name('student.process.task.result.update');
         Route::get('student/task-log-list', 'taskLogList')->name('student.process.log.list');
+
+        Route::post('student/process-task-user-list', 'processTaskUserList')->name('student.process.task.users');
     });
 
     Route::controller(CourseDetailController::class)->group(function() {
@@ -807,6 +809,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/task-result-update', 'admissionTaskResultUpdate')->name('admission.process.task.result.update');
         Route::get('admission/task-log-list', 'admissionTaskLogList')->name('admission.process.log.list');
         Route::get('admission/interview-log-list', 'admissionInterviewLogList')->name('admission.applicant.interview.log');
+        Route::post('admission/process-task-user-list', 'admissionPocessTaskUserList')->name('admission.process.task.users');
 
         Route::get('admission/uploads/{applicantId}', 'admissionUploads')->name('admission.uploads');
         Route::post('admission/uploads-documents', 'AdmissionUploadDocuments')->name('admission.upload.documents');
@@ -1536,6 +1539,7 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/tasklist/update', 'update')->name('tasklist.update');
         Route::delete('site-settings/tasklist/delete/{id}', 'destroy')->name('tasklist.destory');
         Route::post('site-settings/tasklist/restore/{id}', 'restore')->name('tasklist.restore');
+        Route::post('site-settings/tasklist/restore', 'getAssignedUserList')->name('tasklist.users');
     });
 
     Route::controller(SmsTemplateController::class)->group(function() {

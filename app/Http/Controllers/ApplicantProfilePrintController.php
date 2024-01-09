@@ -392,6 +392,16 @@ class ApplicantProfilePrintController extends Controller
                     $PDFHTML .= '</tr>';
                 endif;
                 $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel" style="width: 20%;">Video Consent:</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
+                        $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';
+                            $PDFHTML .= '<span style="position: absolute; left: 0; top: 3px; width:20px; height: 20px; background: transparent; border: 1px solid #d2d4d6; font-size: 20px; text-align: center; color: #FFF; font-family: DejaVu Sans, sans-serif;"></span>';
+                            $PDFHTML .= 'I hereby authorize the filming and utilization of recordings featuring my person, conducted by members or staff of
+                                         London Churchill College, exclusively for admission purposes.';
+                        $PDFHTML .= '</div>';
+                    $PDFHTML .= '</td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 20%;">Declaration:</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 80%;" colspan="3">';
                         $PDFHTML .= '<div style="font-size: 13px; line-height: normal; position: relative; padding: 0 0 0 35px;">';

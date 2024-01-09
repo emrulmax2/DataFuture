@@ -81,9 +81,17 @@ class TaskListController extends Controller
             foreach($Query as $list):
                 $users = '';
                 if(isset($list->users) && !empty($list->users)):
+                    $u = 1;
+                    $users .= '<div class="flex taskUserLoader" data-taskid="'.$list->id.'">';
                     foreach($list->users as $usr):
-                        $users .= '<span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">'.$usr->user->name.'</span>';
+                        if($u > 3): break; endif;
+                        $photo_url = (isset($usr->user->employee->photo_url) && !empty($usr->user->employee->photo_url) ? $usr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'));
+                        $users .= '<div class="w-10 h-10 image-fit zoom-in '.($u > 1 ? ' -ml-5' : '').'">';
+                            $users .= '<img alt="'.(isset($usr->user->employee->full_name) ? $usr->user->employee->full_name : 'Unknown Employee').'" class="rounded-full" src="'.$photo_url.'">';
+                        $users .= '</div>';
+                        $u++;
                     endforeach;
+                    $users .= '</div>';
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -247,5 +255,51 @@ class TaskListController extends Controller
         $data = TaskList::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function getAssignedUserList(Request $request){
+        $task_id = $request->task_id;
+        $task = TaskList::find($task_id);
+
+        $html = '';
+        if(isset($task->users) && $task->users->count() > 0):
+            foreach($task->users as $tusr):
+                $html .= '<tr>';
+                    $html .= '<td>';
+                        $html .= '<div class="block">';
+                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                $html .= '<img alt="'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'" class="rounded-full shadow" src="'.(isset($tusr->user->employee->photo_url) && !empty($tusr->user->employee->photo_url) ? $tusr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                            $html .= '</div>';
+                            $html .= '<div class="inline-block relative" style="top: -5px;">';
+                                $html .= '<div class="font-medium whitespace-nowrap uppercase">'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'</div>';
+                                if(isset($tusr->user->employee->employment->employeeJobTitle->name) && !empty($tusr->user->employee->employment->employeeJobTitle->name)):
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$tusr->user->employee->employment->employeeJobTitle->name.'</div>';
+                                endif;
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->department->name) ? $tusr->user->employee->employment->department->name : '').'</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->employeeWorkType->name) ? $tusr->user->employee->employment->employeeWorkType->name : '').'</td>';
+                    $html .= '<td>'.(isset($tusr->user->employee->employment->works_number) ? $tusr->user->employee->employment->works_number : '').'</td>';
+                    $html .= '<td>';
+                        if(isset($tusr->user->employee->status) && $tusr->user->employee->status == 1):
+                            $html .= '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
+                        elseif(isset($tusr->user->employee->status) && $tusr->user->employee->status == 2):
+                            $html .= '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
+                        endif;
+                    $html .= '</td>';
+                $html .= '</tr>';
+            endforeach;
+        else:
+            $html .= '<tr>';
+                $html .= '<td colspan="5">';
+                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Assigned user not found';
+                    $html .= '</div>';
+                $html .= '</td>';
+            $html .= '</tr>';
+        endif;
+
+        return response()->json(['res' => $html], 200);
     }
 }
