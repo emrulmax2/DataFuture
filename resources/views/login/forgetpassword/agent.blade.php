@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('head')
-    <title>Applicant Forget Password Page For London Churchill College</title>
+    <title>Agent Forget Password Page For London Churchill College</title>
 @endsection
 
 @section('content')
@@ -33,11 +33,11 @@
                     
                     <div class="intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4">
                         <div class="flex items-center mr-auto">
-                            <label class="cursor-pointer select-none" for="remember-me">Aready Have an account? Please <a href="{{ route('applicant.login') }}">Sign In</a></label>
+                            <label class="cursor-pointer select-none" for="remember-me">Aready Have an account? Please <a href="{{ route('agent.login') }}">Sign In</a></label>
                         </div>
                     </div>
                     <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
-                        <button id="btn-login" class="btn btn-primary py-3 px-4 w-full xl:mr-3 align-top">Send Passwored Email</button>
+                        <button id="btn-login" class="btn btn-primary py-3 px-4 w-full xl:mr-3 align-top">Send Password Email</button>
                     </div>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                     $("#success-notification-toggle").trigger('click')
                     $('#btn-login').html('Send Passwored Email Link')
                     setInterval(function(){
-                         location.href = '/applicant/login'
+                         location.href = '/agent/login'
                     }, 3000);
                     
 

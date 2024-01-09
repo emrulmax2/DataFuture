@@ -56,6 +56,7 @@ use App\Http\Controllers\InterviewAssignedController;
 
 use App\Http\Controllers\Agent\Auth\LoginController as AgentLoginController;
 use App\Http\Controllers\Agent\Auth\RegisterController as AgentRegisterController;
+use App\Http\Controllers\Agent\Auth\ForgetPasswordController as AgentForgetPasswordController;
 use App\Http\Controllers\Agent\Frontend\ApplicationCheckController;
 use App\Http\Controllers\Agent\Frontend\ApplicationController as FrontendApplicationController;
 use App\Http\Controllers\Agent\Frontend\DashboardController as AgentDashboardController;
@@ -311,6 +312,15 @@ Route::prefix('/agent')->name('agent.')->group(function() {
     Route::controller(AgentRegisterController::class)->middleware('agent.loggedin')->group(function() {
         Route::get('register', 'index')->name('register');
         Route::post('register', 'store')->name('store.register');
+    });
+
+    Route::controller(AgentForgetPasswordController::class)->middleware('agent.loggedin')->group(function() {
+
+        Route::get('forget-password',  'showForgetPasswordForm')->name('forget.password.get');
+        Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
+        Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
+        Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
+    
     });
 
     /**
