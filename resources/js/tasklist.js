@@ -206,6 +206,14 @@ var taskListTable = (function () {
             $('#confirmModal .agreeWith').attr('data-action', 'none');
         });
 
+        const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
+        document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
+            $('#taskUserModal .taskUserModalContent').fadeOut('fast', function(){
+                $('table tbody', this).html('');
+            });
+            $('#taskUserModal .taskUserModalLoader').fadeIn();
+        });
+
         const addModalEl = document.getElementById('addTaskModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addTaskModal .acc__input-error').html('');
@@ -550,6 +558,33 @@ var taskListTable = (function () {
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
                 $('#confirmModal .agreeWith').attr('data-id', dataID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
+            });
+        });
+
+        $('#taskTableId').on('click', '.taskUserLoader', function(){
+            var task_id = $(this).attr('data-taskid');
+            taskUserModal.show();
+
+            axios({
+                method: 'post',
+                url: route('tasklist.users'),
+                data: {task_id : task_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#taskUserModal .taskUserModalLoader').fadeOut('fast');
+                    $('#taskUserModal .taskUserModalContent').fadeIn('fast', function(){
+                        $('table tbody', this).html(response.data.res);
+                    });
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error =>{
+                console.log(error)
             });
         });
     }

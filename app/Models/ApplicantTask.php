@@ -52,4 +52,8 @@ class ApplicantTask extends Model
     public function logs(){
         return $this->hasMany(ApplicantTaskLog::class, 'applicant_tasks_id', 'id');
     }
+
+    public function updatedBy(){
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }
