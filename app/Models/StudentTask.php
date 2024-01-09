@@ -53,4 +53,8 @@ class StudentTask extends Model
     public function logs(){
         return $this->hasMany(StudentTaskLog::class, 'student_tasks_id', 'id');
     }
+
+    public function updatedBy(){
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

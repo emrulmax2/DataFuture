@@ -738,6 +738,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/show-task-statuses', 'showTaskStatuses')->name('student.show.task.outmoce.statuses');
         Route::post('student/task-result-update', 'taskResultUpdate')->name('student.process.task.result.update');
         Route::get('student/task-log-list', 'taskLogList')->name('student.process.log.list');
+
+        Route::post('student/process-task-user-list', 'processTaskUserList')->name('student.process.task.users');
     });
 
     Route::controller(CourseDetailController::class)->group(function() {

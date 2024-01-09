@@ -196,52 +196,21 @@
                                                         <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
                                                             <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
                                                             @if(isset($task->task->users) && !empty($task->task->users))
-                                                                @foreach($task->task->users as $userser)
-                                                                    @if($loop->first)
-                                                                        <div class="flex items-center justify-start">
-                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                            </div>
-                                                                            <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ (isset($userser->user->employee->full_name) ? $userser->user->employee->full_name : 'Unknown Employee') }}</div>
-                                                                            </div>
-                                                                        </div> 
-                                                                    @endif
-                                                                @endforeach
+                                                                <div class="flex taskUserLoader" data-taskid="{{ $task->task->id }}">
+                                                                    @foreach($task->task->users as $usr)
+                                                                        @if($loop->index > 2) 
+                                                                            @break 
+                                                                        @endif
+                                                                        <div class="w-10 h-10 image-fit zoom-in {{ ($loop->first ? '' : ' -ml-5') }}">
+                                                                            <img alt="{{ (isset($usr->user->employee->full_name) ? $usr->user->employee->full_name : 'Unknown Employee') }}" class="rounded-full" src="{{ (isset($usr->user->employee->photo_url) && !empty($usr->user->employee->photo_url) ? $usr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
                                                             @else 
                                                                 <div class="ml-0">
                                                                     <div class="font-medium assignedUserName">Not Found</div>
                                                                 </div>
                                                             @endif
-                                                            <div class="ml-5">
-                                                                <div class="dropdown" id="assignedUserDropdown_{{ $task->id }}">
-                                                                    <button class="dropdown-toggle p-1 text-slate-500 rounded-full border border-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
-                                                                    <div class="dropdown-menu w-64">
-                                                                        <ul class="dropdown-content overflow-y-auto m-h-56">
-                                                                            @if(isset($task->task->users) && !empty($task->task->users))
-                                                                                @foreach($task->task->users as $userser)
-                                                                                    <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
-                                                                                        <div class="flex items-center justify-start">
-                                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                                            </div>
-                                                                                            <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->employee->full_name }}</div>
-                                                                                            </div>
-                                                                                        </div> 
-                                                                                    </li>
-                                                                                @endforeach
-                                                                            @else 
-                                                                                <li>
-                                                                                    <div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
-                                                                                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> No assigned user found!
-                                                                                    </div>
-                                                                                </li> 
-                                                                            @endif
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-span-3 sm:col-span-4 text-right">
@@ -348,52 +317,21 @@
                                                         <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
                                                             <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
                                                             @if(isset($task->task->users) && !empty($task->task->users))
-                                                                @foreach($task->task->users as $userser)
-                                                                    @if($loop->first)
-                                                                        <div class="flex items-center justify-start">
-                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                            </div>
-                                                                            <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ $userser->user->employee->full_name }}</div>
-                                                                            </div>
-                                                                        </div> 
-                                                                    @endif
-                                                                @endforeach
+                                                                <div class="flex taskUserLoader" data-taskid="{{ $task->task->id }}">
+                                                                    @foreach($task->task->users as $usr)
+                                                                        @if($loop->index > 2) 
+                                                                            @break 
+                                                                        @endif
+                                                                        <div class="w-10 h-10 image-fit zoom-in {{ ($loop->first ? '' : ' -ml-5') }}">
+                                                                            <img alt="{{ (isset($usr->user->employee->full_name) ? $usr->user->employee->full_name : 'Unknown Employee') }}" class="rounded-full" src="{{ (isset($usr->user->employee->photo_url) && !empty($usr->user->employee->photo_url) ? $usr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
                                                             @else 
                                                                 <div class="ml-0">
                                                                     <div class="font-medium assignedUserName">Not Found</div>
                                                                 </div>
                                                             @endif
-                                                            <div class="ml-5">
-                                                                <div class="dropdown" id="assignedUserDropdown_{{ $task->id }}">
-                                                                    <button class="dropdown-toggle p-1 text-slate-500 rounded-full border border-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
-                                                                    <div class="dropdown-menu w-64">
-                                                                        <ul class="dropdown-content overflow-y-auto m-h-56">
-                                                                            @if(isset($task->task->users) && !empty($task->task->users))
-                                                                                @foreach($task->task->users as $userser)
-                                                                                    <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
-                                                                                        <div class="flex items-center justify-start">
-                                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                                            </div>
-                                                                                            <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->employee->full_name }}</div>
-                                                                                            </div>
-                                                                                        </div> 
-                                                                                    </li>
-                                                                                @endforeach
-                                                                            @else 
-                                                                                <li>
-                                                                                    <div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
-                                                                                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> No assigned user found!
-                                                                                    </div>
-                                                                                </li> 
-                                                                            @endif
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-span-3 sm:col-span-4 text-right">
@@ -497,55 +435,22 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-span-3 sm:col-span-4">
-                                                        <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
-                                                            <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
-                                                            @if(isset($task->task->users) && !empty($task->task->users))
-                                                                @foreach($task->task->users as $userser)
-                                                                    @if($loop->first)
-                                                                        <div class="flex items-center justify-start">
-                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) && Storage::disk('local')->exists('public/users/'.$userser->user->id.'/'.$userser->user->photo) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                            </div>
-                                                                            <div class="ml-4">
-                                                                                <div class="font-medium assignedUserName">{{ $userser->user->employee->full_name }}</div>
-                                                                            </div>
-                                                                        </div> 
-                                                                    @endif
-                                                                @endforeach
+                                                        <div class="flex items-center justify-end assignedUserWrap completedUserWrap" id="assignedUserWrap_{{ $task->id }}">
+                                                            <div class="font-medium text-base mr-5 ml-auto">Completed By:</div>
+                                                            @if(isset($task->updatedBy->employee) && !empty($task->updatedBy->employee))
+                                                                <div class="flex items-center justify-start">
+                                                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
+                                                                        <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($task->updatedBy->employee->photo_url) && !empty($task->updatedBy->employee->photo_url) ? $task->updatedBy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                    </div>
+                                                                    <div class="ml-4">
+                                                                        <div class="font-medium assignedUserName">{{ (isset($task->updatedBy->employee->full_name) ? $task->updatedBy->employee->full_name : 'Unknown Employee') }}</div>
+                                                                    </div>
+                                                                </div>
                                                             @else 
                                                                 <div class="ml-0">
                                                                     <div class="font-medium assignedUserName">Not Found</div>
                                                                 </div>
                                                             @endif
-                                                            <div class="ml-5">
-                                                                <div class="dropdown" id="assignedUserDropdown_{{ $task->id }}">
-                                                                    <button class="dropdown-toggle p-1 text-slate-500 rounded-full border border-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
-                                                                    <div class="dropdown-menu w-64">
-                                                                        <ul class="dropdown-content overflow-y-auto m-h-56">
-                                                                            @if(isset($task->task->users) && !empty($task->task->users))
-                                                                                @foreach($task->task->users as $userser)
-                                                                                    <li class="{{ (!$loop->last ? 'mb-2' : '') }}">
-                                                                                        <div class="flex items-center justify-start">
-                                                                                            <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                                                                                <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($userser->user->employee->photo_url) && !empty($userser->user->employee->photo_url) ? $userser->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                                                                                            </div>
-                                                                                            <div class="ml-4">
-                                                                                                <div class="font-medium assignedUserName">{{ $userser->user->employee->full_name }}</div>
-                                                                                            </div>
-                                                                                        </div> 
-                                                                                    </li>
-                                                                                @endforeach
-                                                                            @else 
-                                                                                <li>
-                                                                                    <div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
-                                                                                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> No assigned user found!
-                                                                                    </div>
-                                                                                </li> 
-                                                                            @endif
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-span-3 sm:col-span-4 text-right">
@@ -709,6 +614,45 @@
         </div>
     </div>
     <!-- END: Import Modal -->
+
+    <!-- BEGIN: Task User Modal -->
+    <div id="taskUserModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Task Assigned Users</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="taskUserModalLoader text-center flex justify-center">
+                        <i data-loading-icon="rings" class="w-20 h-20"></i>
+                    </div>
+                    <div class="taskUserModalContent" style="display: none;">
+                        <table class="table table-report">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap">NAME</th>
+                                    <th class="whitespace-nowrap">Department</th>
+                                    <th class="whitespace-nowrap">Work Type</th>
+                                    <th class="whitespace-nowrap">Work No.</th>
+                                    <th class="whitespace-nowrap">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Task User Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
