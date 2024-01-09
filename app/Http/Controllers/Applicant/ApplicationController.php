@@ -622,7 +622,7 @@ class ApplicationController extends Controller
                                                         $html .= '<td>'.$emps->company_phone.'</td>';
                                                         $html .= '<td>'.$emps->position.'</td>';
                                                         $html .= '<td>'.$emps->start_date.'</td>';
-                                                        $html .= '<td>'.($continuing == 1 ? 'Continue' : $qual->end_date).'</td>';
+                                                        $html .= '<td>'.($continuing == 1 ? 'Continue' : $emps->end_date).'</td>';
                                                         $html .= '<td>'.$address.'</td>';
                                                         $html .= '<td>'.$emps->reference[0]->name.'</td>';
                                                         $html .= '<td>'.$emps->reference[0]->position.'</td>';
