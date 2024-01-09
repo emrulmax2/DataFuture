@@ -138,11 +138,11 @@ class TopMenu
                             'params' => [],
                             'title' => 'Live'
                         ],
-                        // 'agent' => [
-                        //     'route_name' => 'agent-user',
-                        //     'params' => [],
-                        //     'title' => 'Agent Information'
-                        // ]
+                        'agent' => [
+                            'route_name' => 'agent-user.index',
+                            'params' => [],
+                            'title' => 'Agent Information'
+                        ]
                     ]
                 ];
             endif;
