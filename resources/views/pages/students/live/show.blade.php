@@ -395,25 +395,19 @@
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
+                <div class="col-span-12 sm:col-span-6">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Name</div>
                         <div class="col-span-8 font-medium">{{ isset($student->kin->name) ? $student->kin->name : '' }}</div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Relation</div>
                         <div class="col-span-8 font-medium">{{ isset($student->kin->relation->name) ? $student->kin->relation->name : '' }}</div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
+                    <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
                         <div class="col-span-8 font-medium">{{ isset($student->kin->mobile) ? $student->kin->mobile : '' }}</div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Email</div>
                         <div class="col-span-8 font-medium">{{ (isset($student->kin->email) && !empty($student->kin->email) ? $student->kin->email : '---') }}</div>
@@ -440,7 +434,7 @@
                                     <span class="font-medium">{{ $student->kin->address->post_code }}</span>,
                                 @endif
                                 @if(isset($student->kin->address->country) && !empty($student->kin->address->country))
-                                    <span class="font-medium">{{ $student->kin->address->country }}</span><br/>
+                                    <br/><span class="font-medium">{{ $student->kin->address->country }}</span>
                                 @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
