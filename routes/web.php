@@ -193,6 +193,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -2098,6 +2099,12 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(CourseManagementController::class)->group(function() {
         Route::get('course-management', 'index')->name('course.management'); 
+    });
+
+    Route::controller(PendingTaskManagerController::class)->group(function() {
+        Route::get('task-manager', 'index')->name('task.manager'); 
+        Route::get('task-manager/show/{id}', 'show')->name('task.manager.show'); 
+        Route::get('task-manager/list', 'list')->name('task.manager.list'); 
     });
 });
 

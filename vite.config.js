@@ -211,6 +211,7 @@ export default defineConfig({
                 'resources/js/modulelevels.js',
                 'resources/js/groups.js',
                 'resources/js/plans-date-list.js',
+                'resources/js/task-manager.js',
                 
             ],
             refresh: true,

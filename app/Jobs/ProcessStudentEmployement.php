@@ -56,7 +56,7 @@ class ProcessStudentEmployement implements ShouldQueue
                 'company_phone' => $applicantEmployments->company_phone,
                 'position'=> $applicantEmployments->position,
                 'start_date' => $applicantEmployments->start_date,
-                'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : 'NULL',
+                'end_date' => isset($applicantEmployments->end_date) ? ($applicantEmployments->end_date) : NULL,
                 'continuing' => isset($applicantEmployments->continuing) ? ($applicantEmployments->continuing) : '0',
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
@@ -64,8 +64,8 @@ class ProcessStudentEmployement implements ShouldQueue
             $Address = new Address();
             $dataAddress = [
                 "address_line_1" => $applicantEmployments->address_line_1,
-                "address_line_2" => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : 'NULL',
-                "state"	=> isset($applicantEmployments->state) ? ($applicantEmployments->state) : 'NULL',
+                "address_line_2" => isset($applicantEmployments->address_line_2) ? ($applicantEmployments->address_line_2) : NULL,
+                "state"	=> isset($applicantEmployments->state) ? ($applicantEmployments->state) : NULL,
                 "post_code"	=> $applicantEmployments->post_code,
                 "city" =>$applicantEmployments->city,
                 "country" =>$applicantEmployments->country,

@@ -21,6 +21,7 @@ use App\Models\ApplicantTaskDocument;
 use App\Models\StudentTaskDocument; 
 use App\Models\StudentDocument;
 use App\Models\StudentUser;
+use App\Models\TaskList;
 
 class ProcessStudentTask implements ShouldQueue
 {
@@ -53,7 +54,7 @@ class ProcessStudentTask implements ShouldQueue
                 'student_id' => $student->id,
                 'applicant_task_id' =>$applicantTaskData->id,
                 'task_list_id' => $applicantTaskData->task_list_id,
-                'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : 'NULL',
+                'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : NULL,
                 'status'=> isset($applicantTaskData->status) ? ($applicantTaskData->status) : NULL,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
@@ -64,6 +65,20 @@ class ProcessStudentTask implements ShouldQueue
             $dataTask->fill($applicantTaskArray);
             $dataTask->save();
         endforeach;  
+
+        $newStudentTasks = TaskList::where('process_list_id', 2)->orderBy('id', 'ASC')->get();
+        if(!empty($newStudentTasks) && $newStudentTasks->count() > 0):
+            foreach($newStudentTasks as $stsk):
+                $task = [
+                    'student_id' => $student->id,
+                    'task_list_id' => $stsk->id,
+                    'external_link_ref'=> (isset($stsk->external_link) && $stsk->external_link == 1 ? $stsk->external_link_ref : null),
+                    'status'=> 'Pending',
+                    'created_by'=>auth()->user()->id,
+                ];
+                StudentTask::create($task);
+            endforeach;
+        endif;
 
         unset ($applicantTaskArray);
 

@@ -162,7 +162,7 @@
                                                                                 (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
                                                                             @endif
                                                                         </div>
-                                                                        <div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>
+                                                                        {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
                                                                     </div>
                                                                     <div class="text-slate-500">
                                                                         @if(isset($task->task->short_description) && !empty($task->task->short_description))
@@ -283,7 +283,7 @@
                                                                                 (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
                                                                             @endif
                                                                         </div>
-                                                                        <div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>
+                                                                        {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
                                                                     </div>
                                                                     <div class="text-slate-500">
                                                                         @if(isset($task->task->short_description) && !empty($task->task->short_description))
@@ -404,7 +404,7 @@
                                                                                 (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
                                                                             @endif
                                                                         </div>
-                                                                        <div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>
+                                                                        {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
                                                                     </div>
                                                                     <div class="text-slate-500">
                                                                         @if(isset($task->task->short_description) && !empty($task->task->short_description))
