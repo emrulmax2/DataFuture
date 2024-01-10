@@ -410,9 +410,9 @@
                     <div class="font-medium text-base">Empoyment History</div>
                 </div>
                 <div class="col-span-6">
-                    {{-- <div class="flex justify-end items-center">
+                    <div class="flex justify-end items-center">
                         <label class="form-check-label m-0 mr-2" for="employment_status">What is your current employment status?</label>
-                        <select id="employment_status" data-applicant="{{ $applicant->id }}" class="lcc-tom-select w-56 text-left" name="employment_status">
+                        <select id="employment_status" data-applicant="{{ $applicant->id }}" class="lcc-tom-select w-56 text-left" disabled>
                             <option value="">Please Select</option>
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Part Time' ? 'Selected' : '' }} value="Part Time">Part Time</option>
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Fixed Term' ? 'Selected' : '' }} value="Fixed Term">Fixed Term</option>
@@ -426,7 +426,7 @@
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Unemployed' ? 'Selected' : '' }} value="Unemployed">Unemployed</option> 
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Full Time' ? 'Selected' : '' }} value="Full Time">Full Time</option> 
                         </select>
-                    </div> --}}
+                    </div>
                 </div>
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
