@@ -115,7 +115,7 @@
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-4">
+                <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Email</div>
                         <div class="col-span-8 font-medium">
@@ -132,26 +132,30 @@
                             @endif
                         </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->contact->home }}</div>
-                    </div>
-                </div> 
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">
-                            {{ $applicant->contact->mobile }}
-                            @if($applicant->contact->mobile_verification == 1)
-                                <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                            @else
-                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
-                            @endif
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-0">
+                                <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
+                                <div class="col-span-8 font-medium">{{ $applicant->contact->home }}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-0">
+                                <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
+                                <div class="col-span-8 font-medium">
+                                    {{ $applicant->contact->mobile }}
+                                    @if($applicant->contact->mobile_verification == 1)
+                                        <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                                    @else
+                                        <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
                 <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-12 text-slate-500 font-medium">Address</div>
@@ -193,28 +197,30 @@
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->name }}</div>
+                <div class="col-span-12 sm:col-span-6">
+                    <div class="col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Name</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->name }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Relation</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->relation->name }}</div>
+                    <div class="col-span-12 ">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Relation</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->relation->name }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->mobile }}</div>
+                    <div class="col-span-12 ">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->mobile }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Email</div>
-                        <div class="col-span-8 font-medium">{{ (isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---') }}</div>
+                    <div class="col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Email</div>
+                            <div class="col-span-8 font-medium">{{ (isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---') }}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-6">
