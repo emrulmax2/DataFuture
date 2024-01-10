@@ -88,7 +88,12 @@ class Applicant extends Model
     public function users(){
         return $this->belongsTo(ApplicantUser::class, 'applicant_user_id');
     }
-
+    public function setFirstNameAttribute($value) {  
+        $this->attributes['first_name'] =  ucfirst($value);
+    }
+    public function setLastNameAttribute($value) {  
+        $this->attributes['last_name'] =  ucfirst($value);
+    }
     public function setDateOfBirthAttribute($value) {  
         $this->attributes['date_of_birth'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
     }
