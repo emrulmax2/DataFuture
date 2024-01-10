@@ -19,18 +19,27 @@ class DashboardController extends Controller
     {
         $userData = \Auth::guard('web')->user();
         $taskListData = TaskList::with('applicant')->where('interview','yes')->get();
-        $user = User::find($userData->id);
+        //$user = User::find($userData->id);
         $TotalInterviews = 0;
         $unfinishedInterviewCount = 0;
         foreach ($taskListData as $task) {
-            $TotalInterviews += $task->applicant->count();
-        }
-        foreach ($user->interviews as $interview) {
-            $ApplicantTask = ApplicantTask::find($interview->applicant_task_id);
-             if($ApplicantTask->status!="Completed") {
-                 $unfinishedInterviewCount++;
+            
+            foreach($task->applicant as $applicant) {
+                $applicantTask = ApplicantTask::where("applicant_id",$applicant->id)->where("task_list_id",$task->id)->get()->first();
+                if($applicantTask->status=="Pending" || $applicantTask->status=="In Progress") {
+                    $TotalInterviews++;
+                } 
+                if($applicantTask->status=="In Progress"){
+                    $unfinishedInterviewCount++;
+                }
             }
         }
+        // foreach ($user->interviews as $interview) {
+        //     $ApplicantTask = ApplicantTask::find($interview->applicant_task_id);
+        //      if($ApplicantTask->status!="Completed") {
+        //          $unfinishedInterviewCount++;
+        //     }
+        // }
 
 
         return view('pages.users.staffs.dashboard.index', [
