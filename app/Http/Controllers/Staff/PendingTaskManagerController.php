@@ -66,7 +66,7 @@ class PendingTaskManagerController extends Controller
         $phase = (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live');
 
         if($phase == 'Applicant'):
-            $applicant_ids = ApplicantTask::where('task_list_id', $task_id)->pluck('applicant_id')->unique()->toArray();
+            $applicant_ids = ApplicantTask::where('task_list_id', $task_id)->where('status', 'Pending')->pluck('applicant_id')->unique()->toArray();
             $Query = Applicant::whereIn('id', $applicant_ids);
             if(!empty($querystr)):
                 $Query->where('first_name', 'LIKE', '%'.$querystr.'%');
@@ -113,7 +113,7 @@ class PendingTaskManagerController extends Controller
                 endforeach;
             endif;
         else:
-            $student_ids = StudentTask::where('task_list_id', $task_id)->pluck('student_id')->unique()->toArray();
+            $student_ids = StudentTask::where('task_list_id', $task_id)->where('status', 'Pending')->pluck('student_id')->unique()->toArray();
 
             $Query = Student::whereIn('id', $student_ids);
             if(!empty($querystr)):
