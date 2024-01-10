@@ -8,7 +8,7 @@
                     </button>
                 </div>
                 <div class="ml-5">
-                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">LCC000001</div>
+                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }}</div>
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} <span class="font-black">{{ $student->last_name }}</span></div>
                     <div class="text-slate-500">{{ isset($student->crel->creation->course->name) ? $student->crel->creation->course->name : '' }} - {{ isset($student->crel->propose->semester->name) ? $student->crel->propose->semester->name : '' }}</div>
                     <div class="text-slate-500">{{ isset($student->crel->creation->available->type) ? $student->crel->creation->available->type : '' }}</div>
@@ -51,7 +51,7 @@
                                     <span class="font-medium">{{ $student->contact->termaddress->post_code }}</span>,
                                 @endif
                                 @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
-                                    <span class="font-medium">{{ $student->contact->termaddress->country }}</span><br/>
+                                    <br/><span class="font-medium">{{ $student->contact->termaddress->country }}</span>
                                 @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
