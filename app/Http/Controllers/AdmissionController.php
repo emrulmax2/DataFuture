@@ -759,7 +759,7 @@ class AdmissionController extends Controller
             'current_field_value' => 'Completed',
             'created_by' => auth()->user()->id
         ]);
-        $pendingTask = ApplicantTask::whereIn('status', ['Pending', 'In Progress'])->get();
+        $pendingTask = ApplicantTask::where('applicant_id', $applicant)->whereIn('status', ['Pending', 'In Progress'])->get();
         if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
             $applicantData['status_id'] = 4;
             Applicant::where('id', $applicant)->update($applicantData);

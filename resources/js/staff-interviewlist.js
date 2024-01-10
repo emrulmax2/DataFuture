@@ -186,15 +186,6 @@ const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#e
 
 const lockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
 
-$(".date-picker").each(function () {
-    var maskOptions = {
-        mask: Date,
-        min: new Date(1900, 0, 1),
-        max: new Date(2050, 0, 1),
-        lazy: false
-    };
-    var mask = IMask(this, maskOptions);
-});
 
 $(document).on("click", ".profile-lock__button", function (e) { 
     e.preventDefault();
