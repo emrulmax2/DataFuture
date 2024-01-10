@@ -749,6 +749,13 @@ $('#callLockModalForm').on('submit', function(e){
     coursesCOM.clear(true);
     academicCOM.clear(true);
 
+    $(".date-picker").each(function () {
+        var maskOptions = {
+            mask: '00-00-0000'
+        };
+        var mask = IMask(this, maskOptions);
+    });
+    
     $('#interviewerSelectForm').find('.assign__input').removeClass('border-danger')
     $('#interviewerSelectForm').find('.assign__input-error').html('')
 
