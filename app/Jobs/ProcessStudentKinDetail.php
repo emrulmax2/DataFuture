@@ -60,8 +60,8 @@ class ProcessStudentKinDetail implements ShouldQueue
             $Address = new Address();
             $dataAddress = [
                 "address_line_1" => $applicantKin->address_line_1,
-                "address_line_2" => isset($applicantKin->address_line_2) ? ($applicantKin->address_line_2) : 'NULL',
-                "state"	=> isset($applicantKin->state) ? ($applicantKin->state) : 'NULL',
+                "address_line_2" => isset($applicantKin->address_line_2) ? ($applicantKin->address_line_2) : NULL,
+                "state"	=> isset($applicantKin->state) ? ($applicantKin->state) : NULL,
                 "post_code"	=> $applicantKin->post_code,
                 "city" =>$applicantKin->city,
                 "country" =>$applicantKin->country,

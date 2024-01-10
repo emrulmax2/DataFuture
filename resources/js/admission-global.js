@@ -225,7 +225,7 @@ import Dropzone from "dropzone";
             var proof_type = document.getElementById("sts_proof_type").value;
             var proof_id = document.getElementById("sts_proof_id").value;
             var proof_expiredate = document.getElementById("sts_proof_expiredate").value;
-            var fee_eligibility_id = document.getElementById("fee_eligibility_id").value;
+            var fee_eligibility_id = document.getElementById("sts_fee_eligibility_id").value;
             var $theBtn = $(this);
 
             $('#statusConfirmModal button').attr('disabled', 'disabled');

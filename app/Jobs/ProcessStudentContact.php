@@ -51,9 +51,9 @@ class ProcessStudentContact implements ShouldQueue
                 'student_id' => $student->id,
                 'home' => $applicantContact->home,
                 'mobile' => $applicantContact->mobile,
-                'external_link_ref'=> isset($applicantContact->external_link_ref) ? ($applicantContact->external_link_ref) : 'NULL',
+                'external_link_ref'=> isset($applicantContact->external_link_ref) ? ($applicantContact->external_link_ref) : NULL,
                 'mobile_verification' => isset($applicantContact->mobile_verification) ? ($applicantContact->mobile_verification) : '0',
-                //'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : 'NULL',
+                //'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : NULL,
                 
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
@@ -73,8 +73,8 @@ class ProcessStudentContact implements ShouldQueue
             $Address = new Address();
             $dataAddress = [
                 "address_line_1" => $applicantContact->address_line_1,
-                "address_line_2" => isset($applicantContact->address_line_2) ? ($applicantContact->address_line_2) : 'NULL',
-                "state"	=> isset($applicantContact->state) ? ($applicantContact->state) : 'NULL',
+                "address_line_2" => isset($applicantContact->address_line_2) ? ($applicantContact->address_line_2) : NULL,
+                "state"	=> isset($applicantContact->state) ? ($applicantContact->state) : NULL,
                 "post_code"	=> $applicantContact->post_code,
                 "city" =>$applicantContact->city,
                 "country" =>$applicantContact->country,

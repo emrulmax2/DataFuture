@@ -73,7 +73,7 @@ class ProcessStudentInterview implements ShouldQueue
                     'student_id' => $student->id,
                     'applicant_task_id' =>$applicantTaskData->id,
                     'task_list_id' => $applicantTaskData->task_list_id,
-                    'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : 'NULL',
+                    'external_link_ref'=> isset($applicantTaskData->external_link_ref) ? ($applicantTaskData->external_link_ref) : NULL,
                     'status'=> isset($applicantTaskData->status) ? ($applicantTaskData->status) : NULL,
                     'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
                 ];

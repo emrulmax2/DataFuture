@@ -211,7 +211,7 @@
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-4">
+                <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Email</div>
                         <div class="col-span-8 font-medium">
@@ -228,26 +228,30 @@
                             @endif
                         </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->contact->home }}</div>
-                    </div>
-                </div> 
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">
-                            {{ $applicant->contact->mobile }}
-                            @if($applicant->contact->mobile_verification == 1)
-                                <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                            @else
-                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
-                            @endif
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-0">
+                                <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
+                                <div class="col-span-8 font-medium">{{ $applicant->contact->home }}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-0">
+                                <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
+                                <div class="col-span-8 font-medium">
+                                    {{ $applicant->contact->mobile }}
+                                    @if($applicant->contact->mobile_verification == 1)
+                                        <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                                    @else
+                                        <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
                 <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-12 text-slate-500 font-medium">Address</div>
@@ -289,28 +293,30 @@
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->name }}</div>
+                <div class="col-span-12 sm:col-span-6">
+                    <div class="col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Name</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->name }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Relation</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->relation->name }}</div>
+                    <div class="col-span-12 ">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Relation</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->relation->name }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->kin->mobile }}</div>
+                    <div class="col-span-12 ">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
+                            <div class="col-span-8 font-medium">{{ $applicant->kin->mobile }}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Email</div>
-                        <div class="col-span-8 font-medium">{{ (isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---') }}</div>
+                    <div class="col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Email</div>
+                            <div class="col-span-8 font-medium">{{ (isset($applicant->kin->email) && !empty($applicant->kin->email) ? $applicant->kin->email : '---') }}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-6">
@@ -506,9 +512,9 @@
                     <div class="font-medium text-base">Empoyment History</div>
                 </div>
                 <div class="col-span-6">
-                    {{-- <div class="flex justify-end items-center">
+                    <div class="flex justify-end items-center">
                         <label class="form-check-label m-0 mr-2" for="employment_status">What is your current employment status?</label>
-                        <select id="employment_status" data-applicant="{{ $applicant->id }}" class="lcc-tom-select w-56 text-left" name="employment_status">
+                        <select id="employment_status" data-applicant="{{ $applicant->id }}" class="lcc-tom-select w-56 text-left" name="employment_status" disabled>
                             <option value="">Please Select</option>
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Part Time' ? 'Selected' : '' }} value="Part Time">Part Time</option>
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Fixed Term' ? 'Selected' : '' }} value="Fixed Term">Fixed Term</option>
@@ -522,17 +528,12 @@
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Unemployed' ? 'Selected' : '' }} value="Unemployed">Unemployed</option> 
                             <option {{ isset($applicant->other->employment_status) && $applicant->other->employment_status == 'Full Time' ? 'Selected' : '' }} value="Full Time">Full Time</option> 
                         </select>
-                    </div> --}}
+                    </div>
                 </div>
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4">
-                <!--<div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">What is your current employment status?</div>
-                        <div class="col-span-8 font-medium">{{ $applicant->other->employment_status }}</div>
-                    </div>
-                </div>-->
+
                 <div class="col-span-12 educationEmploymentTableWrap" style="display: {{ $emptStatus ? 'block' : 'none' }};">
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                         <div id="tabulatorFilterForm-EH" class="xl:flex sm:mr-auto" >

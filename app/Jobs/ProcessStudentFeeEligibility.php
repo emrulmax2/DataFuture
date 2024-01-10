@@ -52,7 +52,7 @@ class ProcessStudentFeeEligibility implements ShouldQueue
             $dataArray = [
                 'student_id' => $student->id,
                 'student_course_relation_id' => $getStudentCourseRelationData->student_course_relation_id,
-                'fee_eligibility_id' => ($applicantSet->fee_eligibility_id) ?? 'NULL',
+                'fee_eligibility_id' => ($applicantSet->fee_eligibility_id) ?? NULL,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
 

@@ -138,83 +138,46 @@
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Recent Activities</h2>
-                            <a href="" class="ml-auto text-primary truncate">Show More</a>
+                            <h2 class="text-lg font-medium truncate mr-5">Pending Tasks</h2>
+                            @if(isset($myPendingTask['outstanding_tasks']) && $myPendingTask['outstanding_tasks'] > 0)
+                                <a href="{{ route('task.manager') }}" class="ml-auto text-primary truncate">Show More</a>
+                            @endif
                         </div>
-                        <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[9]['photos'][0]) }}">
-                                    </div>
-                                </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[9]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Has joined the team</div>
-                                </div>
-                            </div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[8]['photos'][0]) }}">
-                                    </div>
-                                </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[8]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500">
-                                        <div class="mt-1">Added 3 new photos</div>
-                                        <div class="flex mt-2">
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[0]['products'][0]['name'] }}">
-                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][0]) }}">
-                                            </div>
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[1]['products'][0]['name'] }}">
-                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][1]) }}">
-                                            </div>
-                                            <div class="tooltip w-8 h-8 image-fit mr-1 zoom-in" title="{{ $fakers[2]['products'][0]['name'] }}">
-                                                <img alt="London Churchill College" class="rounded-md border border-white" src="{{ asset('build/assets/images/' . $fakers[8]['images'][2]) }}">
-                                            </div>
+                        <div class="mt-5">
+                            @if(isset($myPendingTask['outstanding_tasks']) && $myPendingTask['outstanding_tasks'] > 0)
+                                <div class="intro-x">
+                                    <div class="box px-5 py-3 mb-3 bg-warning-soft flex items-center zoom-in">
+                                        <div class="mr-auto">
+                                            <div class="font-medium">Total Outstanding Tasks</div>
                                         </div>
+                                        <div class="w-10 h-10 rounded-full bg-warning text-white inline-flex justify-center items-center font-medium">{{ $myPendingTask['outstanding_tasks'] }}</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="intro-x text-slate-500 text-xs text-center my-4">12 November</div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[7]['photos'][0]) }}">
-                                    </div>
+                            @endif
+                            @if(isset($myPendingTask['tasks']) && !empty($myPendingTask['tasks']))
+                                @foreach($myPendingTask['tasks'] as $task_id => $pts)
+                                    @if($loop->index > 5)
+                                        @break
+                                    @endif
+                                    <a href="{{ route('task.manager.show', $task_id) }}" class="intro-x block">
+                                        <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
+                                            <div class="mr-auto">
+                                                <div class="font-medium">{{ $pts->name }}</div>
+                                                @if(!empty($pts->short_description))
+                                                    <div class="text-slate-500 text-xs mt-0.5">{{ $pts->short_description }}</div>
+                                                @endif
+                                            </div>
+                                            <div class="w-10 h-10 rounded-full bg-primary text-white text-danger inline-flex justify-center items-center font-medium">{{ $pts->pending_task }}</div>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            @else 
+                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> There are no pending task found.
                                 </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[7]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Has changed <a class="text-primary" href="">{{ $fakers[7]['products'][0]['name'] }}</a> price and description</div>
-                                </div>
-                            </div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $fakers[6]['photos'][0]) }}">
-                                    </div>
-                                </div>
-                                <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">{{ $fakers[6]['users'][0]['name'] }}</div>
-                                        <div class="text-xs text-slate-500 ml-auto">07:00 PM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Has changed <a class="text-primary" href="">{{ $fakers[6]['products'][0]['name'] }}</a> description</div>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
-
                 </div>
             </div>
         </div> 

@@ -51,9 +51,9 @@ class ProcessStudentProofOfId implements ShouldQueue
         foreach($applicantSetData as $applicantSet):
             $dataArray = [
                 'student_id' => $student->id,
-                'proof_type' => ($applicantSet->proof_type) ?? 'NULL',
-                'proof_id' => ($applicantSet->proof_id) ?? 'NULL',
-                'proof_expiredate' => ($applicantSet->proof_expiredate) ?? 'NULL',
+                'proof_type' => ($applicantSet->proof_type) ?? NULL,
+                'proof_id' => ($applicantSet->proof_id) ?? NULL,
+                'proof_expiredate' => ($applicantSet->proof_expiredate) ?? NULL,
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
 
