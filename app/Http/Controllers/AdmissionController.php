@@ -2136,31 +2136,7 @@ class AdmissionController extends Controller
         $applicant->fill($statusData);
         $changes = $applicant->getDirty();
         $applicant->save();
-        if($statusidID == 7) {
 
-            $bus = Bus::batch([
-                new ProcessNewStudentToUser($applicant),
-                new ProcessStudents($applicant),
-                new ProcessStudentNoteDetails($applicant),
-                new ProcessStudentTask($applicant),
-                new ProcessStudentTaskDocument($applicant),
-                new ProcessStudentQualification($applicant),
-                new ProcessStudentContact($applicant),
-                new ProcessStudentDisability($applicant),
-                new ProcessStudentEmployement($applicant),
-                new ProcessStudentProposedCourse($applicant),
-                new ProcessStudentKinDetail($applicant),
-                new ProcessStudentOtherDetails($applicant),
-                new ProcessStudentProofOfId($applicant),
-                new ProcessStudentFeeEligibility($applicant),
-                new ProcessStudentSms($applicant),
-                new ProcessStudentLetter($applicant),
-                new ProcessStudentInterview($applicant),
-                new ProcessStudentEmail($applicant),
-            ])->dispatch();
-            
-            session()->put("lastBatchId",$bus->id);
-        }
         if($applicant->wasChanged() && !empty($changes)):
             if($statusidID == 7):
                 $existingProofId = (isset($applicantOldRow->proof->id) && $applicantOldRow->proof->id > 0 ? $applicantOldRow->proof->id : 0);
@@ -2188,6 +2164,31 @@ class AdmissionController extends Controller
                         'updated_by' => auth()->user()->id,
                     ]);
                 endif;
+
+                /* Student Process Start */
+                $bus = Bus::batch([
+                    new ProcessNewStudentToUser($applicant),
+                    new ProcessStudents($applicant),
+                    new ProcessStudentNoteDetails($applicant),
+                    new ProcessStudentTask($applicant),
+                    new ProcessStudentTaskDocument($applicant),
+                    new ProcessStudentQualification($applicant),
+                    new ProcessStudentContact($applicant),
+                    new ProcessStudentDisability($applicant),
+                    new ProcessStudentEmployement($applicant),
+                    new ProcessStudentProposedCourse($applicant),
+                    new ProcessStudentKinDetail($applicant),
+                    new ProcessStudentOtherDetails($applicant),
+                    new ProcessStudentProofOfId($applicant),
+                    new ProcessStudentFeeEligibility($applicant),
+                    new ProcessStudentSms($applicant),
+                    new ProcessStudentLetter($applicant),
+                    new ProcessStudentInterview($applicant),
+                    new ProcessStudentEmail($applicant),
+                ])->dispatch();
+                
+                session()->put("lastBatchId",$bus->id);
+                /* Student Process END */
             endif;
             foreach($changes as $field => $value):
                 $data = [];
