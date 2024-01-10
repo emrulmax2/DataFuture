@@ -723,8 +723,8 @@ $('#callLockModalForm').on('submit', function(e){
                 errorModal.show();
                 document.getElementById("errorModal")
                         .addEventListener("shown.tw.modal", function (event) {
-                            $("#errorModal .errorModalTitle").html('Invalid Date!');
-                            $("#errorModal .errorModalDesc").html('Invalid Date');
+                            $("#errorModal .errorModalTitle").html('Wrong Date of Birth!');
+                            $("#errorModal .errorModalDesc").html('Please enter the correct DOB. If you further issue  please contact the Admission Office.');
                         }); 
                 
                         
