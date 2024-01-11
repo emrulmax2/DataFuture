@@ -12,7 +12,7 @@ class GoogleSocialiteStudentController extends Controller
 {
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google_student')->redirect();
     }
         /**
      * Create a new controller instance.
@@ -23,13 +23,13 @@ class GoogleSocialiteStudentController extends Controller
     {
         try {
      
-            $user = Socialite::driver('google')->user();
+            $user = Socialite::driver('google_student')->user();
             
             $finduser = StudentUser::where('social_id', $user->id)->first();
       
             if($finduser){
       
-                Auth::guard('student')->login($user);
+                Auth::guard('student')->login($finduser);
                 return redirect('/');
       
             } else {
