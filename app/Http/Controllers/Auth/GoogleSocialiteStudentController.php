@@ -23,7 +23,7 @@ class GoogleSocialiteStudentController extends Controller
     public function handleCallback()
     {
         try {
-     
+            config(['services.google.redirect' => env('GOOGLE_STUDENT_REDIRECT_URL')]);
             $user = Socialite::driver('google')->user();
             
             $finduser = StudentUser::where('social_id', $user->id)->first();
