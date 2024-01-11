@@ -1149,6 +1149,9 @@
 .bg-success-soft{
     background-color: rgb(var(--color-success) / .2) !important;
 }
+.bg-success-soft-1{
+    background-color: rgb(var(--color-success) / .09) !important;
+}
 .bg-success-soft-2{
     background-color: rgb(var(--color-success) / .06) !important;
 }

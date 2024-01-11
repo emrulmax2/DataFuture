@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Applicant;
 use App\Models\TaskList;
 use App\Models\ApplicantTask;
+use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentTask;
 use App\Models\TaskListUser;
@@ -54,12 +55,35 @@ class DashboardController extends Controller
     }
 
     public function getUserPendingTask(){
-        $res = [];
-        $res['tasks'] = [];
-        $res['outstanding_tasks'] = 0;
+        $result = [];
         $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
 
         if(!empty($assignedTaskIds)):
+            $assignedProcess = TaskList::whereIn('id', $assignedTaskIds)->orderBy('process_list_id', 'ASC')->pluck('process_list_id')->unique()->toArray();
+            if(!empty($assignedProcess)):
+                foreach($assignedProcess as $prs):
+                    $theProcess = ProcessList::find($prs);
+                    $result[$prs]['name'] = $theProcess->name;
+                    $result[$prs]['outstanding_tasks'] = 0;
+                    $processTasks = TaskList::whereIn('id', $assignedTaskIds)->where('process_list_id', $prs)->orderBy('name', 'ASC')->get();
+                    if(!empty($processTasks) && $processTasks->count() > 0):
+                        foreach($processTasks as $atsk):
+                            $aplPendingTask = ApplicantTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
+                            $stdPendingTask = StudentTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
+                            if($aplPendingTask->count() > 0 || $stdPendingTask->count() > 0):
+                                $result[$prs]['tasks'][$atsk->id] = $atsk;
+                                $result[$prs]['tasks'][$atsk->id]['pending_task'] = $aplPendingTask->count() + $stdPendingTask->count();
+                                $result[$prs]['outstanding_tasks'] += $aplPendingTask->count();
+                                $result[$prs]['outstanding_tasks'] += $stdPendingTask->count();
+                            endif;
+                        endforeach;
+                    endif;
+                endforeach;
+            endif;
+
+            /*$res = [];
+            $res['tasks'] = [];
+            $res['outstanding_tasks'] = 0;
             $assignedTasks = TaskList::whereIn('id', $assignedTaskIds)->orderBy('name', 'ASC')->get();
             if(!empty($assignedTasks)):
                 foreach($assignedTasks as $atsk):
@@ -72,10 +96,10 @@ class DashboardController extends Controller
                         $res['outstanding_tasks'] += $stdPendingTask->count();
                     endif;
                 endforeach;
-            endif;
+            endif;*/
         endif;
 
-        return $res;
+        return $result;
     }
     
 }

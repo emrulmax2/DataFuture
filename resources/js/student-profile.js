@@ -368,7 +368,149 @@ import TomSelect from "tom-select";
             }else{
                 successModal.hide();
             }
-        })
+        });
+
+        $('#editAdmissionContactDetailsForm #mobile').on('keyup paste', function(){
+            var $input = $(this);
+            var $btn = $(this).siblings('#sendMobileVerifiCode');
+            var $orgStatusInput = $(this).siblings('.mobile_verification');
+    
+            var orgCode = $input.attr('data-org');
+            var code = $input.val();
+            var orgStatus = $orgStatusInput.attr('data-org');
+            var status = $orgStatusInput.val();
+            if(code != '' && code != orgCode){
+                $btn.css({'display': 'inline-flex'}).removeClass('btn-primary verified').addClass('btn-danger').html('<i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code');
+                $input.css({'border-color': 'red'});
+                $orgStatusInput.val('0');
+                status = 0;
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }else if(code == orgCode){
+                if(orgStatus == 1){
+                    $btn.css({'display': 'inline-flex'}).removeClass('btn-danger').addClass('btn-primary verified').html('<i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified');
+                    $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+                
+                    $orgStatusInput.val(orgStatus);
+                    status = orgStatus;
+                }else{
+                    $btn.css({'display': 'inline-flex'}).removeClass('btn-primary verified').addClass('btn-danger').html('<i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code');
+                    $input.css({'border-color': 'red'});
+                    $orgStatusInput.val('0');
+                    status = 0;
+                }
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }else{
+                $btn.fadeOut();
+                $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+                $orgStatusInput.val(orgStatus);
+                status = orgStatus;
+            }
+        });
+
+        $('#sendMobileVerifiCode').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var $theInput = $theBtn.siblings('input[name="mobile"]');
+            if(!$theBtn.hasClass('.verified')){
+                var student_id = $theBtn.attr('data-student-id');
+                var mobileNo = $theInput.val();
+
+                $theBtn.attr('disabled', 'disabled');
+                $theInput.attr('readonly', 'readonly');
+
+                 
+                axios({
+                    method: "post",
+                    url: route('student.send.mobile.verification.code'),
+                    data: {student_id : student_id, mobileNo : mobileNo},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#editAdmissionContactDetailsForm .verifyCodeGroup').fadeIn(function(){
+                            $('#verification_code', this).val('').removeAttr('readonly');
+                            $('#verifyMobile', this).removeAttr('disabled');
+                        })
+                    }
+                }).catch(error => {
+                    $theBtn.removeAttr('disabled');
+                    $theInput.removeAttr('readonly');
+
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }
+        });
+
+        $('#verifyMobile').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var $theInput = $theBtn.siblings('input[name="verification_code"]');
+            var $orgStatusInput = $('#editAdmissionContactDetailsForm .mobile_verification');
+
+            $theBtn.attr('disabled', 'disabled');
+            $theInput.attr('readonly', 'readonly');
+
+            if($theInput.val() != '' && $theInput.val().length == 6){
+                $('.error-mobile_verification_error').html('');
+
+                var student_id = $theBtn.attr('data-student-id');
+                var code = $theInput.val();
+                var mobile = $('#editAdmissionContactDetailsForm input[name="mobile"]').val();
+
+                axios({
+                    method: "post",
+                    url: route('student.mobile.verify.code'),
+                    data: {student_id : student_id, code : code, mobile : mobile},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+
+                        if(response.data.suc == 1){
+                            $('#editAdmissionContactDetailsForm .verifyCodeGroup').fadeOut(function(){
+                                $('#verification_code', this).val('').removeAttr('readonly');
+                                $('#verifyMobile', this).removeAttr('disabled');
+                            });
+
+                            $('#editAdmissionContactDetailsForm #sendMobileVerifiCode').css({'display': 'inline-flex'}).removeClass('btn-danger').addClass('btn-primary verified').html('<i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified');
+                            $('#editAdmissionContactDetailsForm input[name="mobile"]').css({'border-color': 'rgba(226, 232, 240, 1)'});
+                        
+                            $orgStatusInput.val(1);
+                        }else{
+                            $theBtn.removeAttr('disabled');
+                            $theInput.removeAttr('readonly');
+
+                            $('.error-mobile_verification_error').html('Verification code does not found. Please insert a valid one.')
+                        }
+
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }else{
+                $theBtn.removeAttr('disabled');
+                $theInput.removeAttr('readonly');
+
+                $('.error-mobile_verification_error').html('Verification code can not be empty and code length should be 6 digit.')
+            }
+        });
     }
     /* Edit Contact Details*/
 
