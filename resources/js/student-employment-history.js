@@ -26,8 +26,8 @@ var studentEmploymentHistoryTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
-                    field: "id",
+                    title: "#SL",
+                    field: "sl",
                     width: "80",
                 },
                 {

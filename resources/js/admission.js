@@ -151,8 +151,8 @@ var educationQualTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
-                    field: "id",
+                    title: "#SL",
+                    field: "sl",
                     width: "110",
                 },
                 {
@@ -275,8 +275,8 @@ var employmentHistoryTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
-                    field: "id",
+                    title: "#SL",
+                    field: "sl",
                     width: "80",
                 },
                 {

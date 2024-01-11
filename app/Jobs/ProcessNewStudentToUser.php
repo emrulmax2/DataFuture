@@ -47,6 +47,7 @@ class ProcessNewStudentToUser implements ShouldQueue
                 'photo' =>$this->applicant->photo,
                 'gender' => (isset($this->applicant->sexid->name) ? $this->applicant->sexid->name : ''),
                 'active' =>1,
+                'email_verified_at' => (isset($ApplicantUser->email_verified_at) && !empty($ApplicantUser->email_verified_at) ? $ApplicantUser->email_verified_at : null),
             ]);
         }
     }

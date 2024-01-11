@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $appends = ['full_name'];
+    protected $appends = ['full_name', 'photo', 'photo_url'];
 
     protected $fillable = [
         'applicant_user_id',
@@ -39,6 +40,20 @@ class Student extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->applicant_id.'/'.$this->photo)) {
+            return Storage::disk('local')->url('public/applicants/'.$this->applicant_id.'/'.$this->photo);
+        } else {
+            return asset('build/assets/images/avater.png');
+            //return asset('build/assets/images/placeholders/200x200.jpg');
+        }
+    }
+
+    public function getPhotoAttribute($value){
+        return $value;
+    }
 
     public function other(){
         return $this->hasOne(StudentOtherDetail::class, 'student_id', 'id');
@@ -107,7 +122,7 @@ class Student extends Model
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
     public function getFullNameAttribute() {
-        return $this->first_name . ' ' . $this->last_name.'';
+        return (isset($this->title->name) ? $this->title->name.' ' : '').$this->first_name . ' ' . $this->last_name.'';
     }
 
     public function emails(){
