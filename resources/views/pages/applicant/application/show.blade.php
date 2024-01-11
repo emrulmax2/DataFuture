@@ -9,7 +9,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Application View</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            @if(auth('agent')->user()->id)
+            @if(isset(auth('agent')->user()->id))
                 <a href="{{ route('agent.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
             @else
                 <a href="{{ route('applicant.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
