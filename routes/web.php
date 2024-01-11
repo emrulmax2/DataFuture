@@ -391,8 +391,10 @@ Route::prefix('/students')->name('students.')->group(function() {
 
     });
     Route::controller(GoogleSocialiteStudentController::class)->middleware('students.loggedin')->group(function() {
+
         Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
         Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
+        
     });
 
     Route::middleware('auth.students')->group(function() {

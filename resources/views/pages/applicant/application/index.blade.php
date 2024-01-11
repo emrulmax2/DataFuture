@@ -11,9 +11,9 @@
         <h2 class="text-lg font-medium mr-auto">Application Form</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             @if(isset(auth('agent')->user()->id))
-            <a href="{{ route('agent.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
+                <a href="{{ route('agent.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
             @else
-            <a href="{{ route('applicant.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
+                <a href="{{ route('applicant.dashboard') }}" class="btn btn-primary shadow-md mr-2">Back To Dashobard</a>
             @endif
         </div>
     </div>
@@ -865,7 +865,7 @@
             <form method="POST" action="#" id="addEmployementHistoryForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Employment History</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Employment Details</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
@@ -971,7 +971,7 @@
             <form method="POST" action="#" id="editEmployementHistoryForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Employment History</h2>
+                        <h2 class="font-medium text-base mr-auto">Edit Employment Details</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>

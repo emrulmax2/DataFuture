@@ -26,8 +26,8 @@ var liveStudentsListTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "Ref. No",
-                    field: "application_no",
+                    title: "Reg. No",
+                    field: "registration_no",
                     headerHozAlign: "left",
                 },
                 {

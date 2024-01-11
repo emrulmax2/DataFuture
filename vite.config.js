@@ -212,6 +212,7 @@ export default defineConfig({
                 'resources/js/groups.js',
                 'resources/js/plans-date-list.js',
                 'resources/js/task-manager.js',
+                'resources/js/admission-communication.js',
                 
             ],
             refresh: true,

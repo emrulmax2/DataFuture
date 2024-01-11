@@ -178,7 +178,7 @@ class StudentController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
+                    'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
                     'date_of_birth'=> $list->date_of_birth,
@@ -344,9 +344,9 @@ class StudentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'google');
+        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'local');
         if(!empty($oldPhoto)):
-            if (Storage::disk('google')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
+            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
                 Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
             endif;
         endif;
