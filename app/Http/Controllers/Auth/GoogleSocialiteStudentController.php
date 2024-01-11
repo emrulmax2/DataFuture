@@ -31,7 +31,7 @@ class GoogleSocialiteStudentController extends Controller
             if($finduser){
       
                 Auth::guard('student')->login($finduser);
-                return redirect('/');
+                return redirect(route('students.dashboard'));
       
             } else {
                 
@@ -45,7 +45,7 @@ class GoogleSocialiteStudentController extends Controller
                 
                 Auth::guard('student')->login($finduser);
       
-                return redirect('/');
+                return redirect(route('students.dashboard'));
             }
      
         } catch (Exception $e) {
