@@ -314,9 +314,8 @@
                             <div class="acc__input-error error-institutional_email_name text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="phone" class="form-label">Home Phone <span class="text-danger">*</span></label>
+                            <label for="phone" class="form-label">Home Phone</label>
                             <input value="{{ isset($student->contact->home) ? $student->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control" name="phone">
-                            <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
                         {{--<div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
