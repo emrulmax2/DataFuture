@@ -68,6 +68,7 @@ use App\Jobs\UserMailerJob;
 use App\Models\ApplicantFeeEligibility;
 use App\Jobs\ProcessStudents;
 use App\Jobs\ProcessNewStudentToUser;
+use App\Jobs\ProcessStudentConsent;
 use App\Jobs\ProcessStudentNoteDetails;
 use App\Jobs\ProcessStudentTask;
 use App\Jobs\ProcessStudentTaskDocument;
@@ -2185,6 +2186,7 @@ class AdmissionController extends Controller
                     new ProcessStudentLetter($applicant),
                     new ProcessStudentInterview($applicant),
                     new ProcessStudentEmail($applicant),
+                    new ProcessStudentConsent($applicant),
                 ])->dispatch();
                 
                 session()->put("lastBatchId",$bus->id);
