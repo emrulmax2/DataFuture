@@ -642,6 +642,9 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/slc-history/{id}', 'slcHistory')->name('student.slc.history');
         Route::get('student/accounts/{id}', 'accounts')->name('student.accounts');
+
+        Route::post('student/send-mobile-verification-code','sendMobileVerificationCode')->name('student.send.mobile.verification.code');
+        Route::post('student/send-mobile-verify-code','verifyMobileVerificationCode')->name('student.mobile.verify.code');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -2105,6 +2108,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(PendingTaskManagerController::class)->group(function() {
         Route::get('task-manager', 'index')->name('task.manager'); 
+        Route::get('task-manager/all', 'allTasks')->name('task.manager.all'); 
         Route::get('task-manager/show/{id}', 'show')->name('task.manager.show'); 
         Route::get('task-manager/list', 'list')->name('task.manager.list'); 
     });

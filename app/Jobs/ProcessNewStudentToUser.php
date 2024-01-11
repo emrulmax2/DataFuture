@@ -46,8 +46,8 @@ class ProcessNewStudentToUser implements ShouldQueue
                 'password' =>$ApplicantUser->password,
                 'photo' =>$this->applicant->photo,
                 'gender' => (isset($this->applicant->sexid->name) ? $this->applicant->sexid->name : ''),
-                'active' =>1,
-                'email_verified_at' => (isset($ApplicantUser->email_verified_at) && !empty($ApplicantUser->email_verified_at) ? $ApplicantUser->email_verified_at : null),
+                'active' => 1,
+                'email_verified_at' => (isset($ApplicantUser->email_verified_at) && !empty($ApplicantUser->email_verified_at) ? date('Y-m-d H:i:s', strtotime($ApplicantUser->email_verified_at)) : null),
             ]);
         }
     }

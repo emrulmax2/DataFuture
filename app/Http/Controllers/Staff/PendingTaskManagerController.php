@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Applicant;
 use App\Models\ApplicantTask;
+use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentTask;
 use App\Models\TaskList;
@@ -164,5 +165,46 @@ class PendingTaskManagerController extends Controller
 
         
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function allTasks(){
+        return view('pages.users.staffs.task.all-task', [
+            'title' => 'User Task Manager - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Task Manager', 'href' => route('task.manager')],
+                ['label' => 'All Task', 'href' => 'javascript:void(0);'],
+            ],
+            'processTasks' => $this->getAllPendingProcessTasks()
+        ]);
+    }
+
+    public function getAllPendingProcessTasks(){
+        $result = [];
+        $allProcess = ProcessList::orderBy('name', 'ASC')->get();
+
+        if(!empty($allProcess)):
+            foreach($allProcess as $theProcess):
+                $processTasks = TaskList::where('process_list_id', $theProcess->id)->orderBy('name', 'ASC')->get();
+                if(!empty($processTasks) && $processTasks->count() > 0):
+                    $outstanding_tasks = 0;
+                    foreach($processTasks as $atsk):
+                        $aplPendingTask = ApplicantTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
+                        $stdPendingTask = StudentTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
+                        if($aplPendingTask->count() > 0 || $stdPendingTask->count() > 0):
+                            $result[$theProcess->id]['tasks'][$atsk->id] = $atsk;
+                            $result[$theProcess->id]['tasks'][$atsk->id]['pending_task'] = $aplPendingTask->count() + $stdPendingTask->count();
+                            $outstanding_tasks += $aplPendingTask->count();
+                            $outstanding_tasks += $stdPendingTask->count();
+                        endif;
+                    endforeach;
+                    if($outstanding_tasks > 0):
+                        $result[$theProcess->id]['name'] = $theProcess->name;
+                        $result[$theProcess->id]['outstanding_tasks'] = $outstanding_tasks;
+                    endif;
+                endif;
+            endforeach;
+        endif;
+
+        return $result;
     }
 }

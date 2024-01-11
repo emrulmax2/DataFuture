@@ -539,7 +539,7 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Empoyment History</div>
+                    <div class="font-medium text-base">Employment History</div>
                 </div>
                 <div class="col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editStudentEmpStatusModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
