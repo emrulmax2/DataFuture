@@ -94,7 +94,7 @@ class EmployeeWorkingPatternController extends Controller
 
             EmployeeWorkingPatternPay::create($data);
             if($active == 1):
-                EmployeeWorkingPattern::where('id', '!=', $pattern->id)->where('active', 1)->update(['active' => 0]);
+                EmployeeWorkingPattern::where('employee_id', $employee_id)->where('id', '!=', $pattern->id)->where('active', 1)->update(['active' => 0]);
             endif;
         endif;
 
