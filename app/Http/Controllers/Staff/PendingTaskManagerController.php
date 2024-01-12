@@ -23,15 +23,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Hash;
-
-use Spatie\Browsershot\Browsershot;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PendingTaskManagerController extends Controller
 {
     public function index()
     {
         $userData = \Auth::guard('web')->user();
-        Browsershot::html('<h1>Helow world</h1>')->save();
+        
         return view('pages.users.staffs.task.index', [
             'title' => 'User Task Manager - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -366,6 +365,24 @@ class PendingTaskManagerController extends Controller
     }
 
     public function downloadIdCard(Request $request){
-        
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>ID CARD</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{background-image: url(https://datafuture2.lcc.ac.uk/limon/id_card_bg.jpg); background-repeat: no-repeat; background-position: center top; background-color: #1a2c44;}
+                                @page{margin: 0;}
+                            </style>';
+            $PDFHTML .= '</head>';
+            $PDFHTML .= '<body>';
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = 'Student_ID_Card.pdf';
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper(array(0, 0, 240, 324), 'portrait')
+            ->setWarnings(false);
+        return $pdf->download($fileName);
     }
 }
