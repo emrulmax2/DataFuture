@@ -361,7 +361,9 @@
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Institutional Email</div>
-                        <div class="col-span-8 font-medium">---</div>
+                        <div class="col-span-8 font-medium">
+                            ---
+                        </div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>

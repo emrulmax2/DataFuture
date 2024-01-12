@@ -82,7 +82,7 @@ class EmployeeAppraisalCron extends Command
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
             ];
-            $mailTo[] = 'limon@churchill.ac'; //'hr@lcc.ac.uk';
+            $mailTo[] = 'hr@lcc.ac.uk';
 
             $PDFHTML = '';
             $PDFHTML .= '<html>';

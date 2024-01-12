@@ -297,21 +297,12 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
                         <div class="col-span-12 sm:col-span-6">
                             <label for="personal_email" class="form-label">Personal Email <span class="text-danger">*</span></label>
-                            <input value="{{ isset($student->users->email) ? $student->users->email : '' }}" type="text" placeholder="Email" id="email" class="form-control" name="personal_email">
+                            <input value="{{ (isset($student->contact->personal_email) && !empty($student->contact->personal_email) ? $student->contact->personal_email : '') }}" type="text" placeholder="Email" id="email" class="form-control" name="personal_email">
                             <div class="acc__input-error error-personal_email text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="institutional_email" class="form-label">Institutional Email <span class="text-danger">*</span></label>
-                            <div class="input-group emailGroup">
-                                <input type="text" class="form-control" name="institutional_email_name">
-                                <div class="input-group-text">
-                                    <select class="form-control" name="institutional_email_domain">
-                                        <option value="lcc.ac.uk">lcc.ac.uk</option>
-                                        <option value="lcc.co.uk">lcc.co.uk</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-institutional_email_name text-danger mt-2"></div>
+                            <input readonly value="{{ isset($student->users->email) && !empty($student->users->email) && (isset($student->contact->personal_email) && !empty($student->contact->personal_email)) ? $student->users->email : '' }}" type="text" placeholder="lcc000001@lcc.ac.uk" id="org_email" class="form-control" name="org_email">
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="phone" class="form-label">Home Phone</label>
