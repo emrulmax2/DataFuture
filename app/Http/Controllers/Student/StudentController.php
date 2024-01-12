@@ -185,7 +185,7 @@ class StudentController extends Controller
                     'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
-                    'date_of_birth'=> $list->date_of_birth,
+                    'date_of_birth'=> (!empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : '') ,
                     'course'=> (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
                     'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
                     'gender'=> (isset($list->sexid_name) && !empty($list->sexid_name) ? $list->sexid_name : ''),
