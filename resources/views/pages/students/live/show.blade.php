@@ -673,7 +673,7 @@
                                 <div class="text-slate-500 font-medium mr-3 mw-120">Referrer</div>
                                 <div class="font-medium">
                                     @if($referral->type == 'Student')
-                                        <span>{{ $referral->student->frist_name }} {{ $referral->student->last_naem }}</span><br/>
+                                        <span>{{ $referral->student->first_name }} {{ $referral->student->last_name }}</span><br/>
                                         <span>{{ $referral->student->users->email }}</span><br/>
                                         <span>{{ $referral->student->contact->mobile }}</span>
                                     @else 
