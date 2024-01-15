@@ -203,19 +203,33 @@ var classPlanListTable = (function () {
     };
     var tomSelectList = []
     $('.lccTom').each(function(){
-        let select = document.getElementById(this.id);
-        if(select!=null) {
-            let control = select.tomselect;
-            tomSelectList.push(control)
+        if ($(this).attr("multiple") !== undefined) {
+            tomOptions = {
+                ...tomOptions,
+                plugins: {
+                    ...tomOptions.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                }
+            };
         }
+        tomSelectList.push(new TomSelect(this, tomOptions));
     })
-
+    // $('.lccTom').each(function(){
+    //     let select = document.getElementById(this.id);
+    //     if(select!=null) {
+    //         let control = select.tomselect;
+    //         tomSelectList.push(control)
+    //     }
+    // })
+    
     if($('#academic-year').length > 0) {
         // On reset filter form
         $("#academic-year").on("change", function (event) {
             let tthis = $(this)
             let academicYearData = tthis.val()
-            tomSelectList[1].clear()
+            tomSelectList[1].clear();
             $('#search-module__box').hide()
             $(".instanceTermDetails").html("");
             $(".availableModules").html("");

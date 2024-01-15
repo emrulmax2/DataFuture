@@ -43,7 +43,7 @@
                 
                 <div class="intro-y col-span-12 sm:col-span-6">
                     <label for="input-wizard-4" class="form-label inline-flex">Nationality <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-4" name="nationality" class="w-full  lccTom ">
+                    <select id="data-4" name="nationality" class="w-full  lccTom lcc-tom-select">
                         
                         @foreach($countries as $country)
                             <option {{ ($studentData["nationality"] == $country->id  ? "selected":"") }} value="{{ $country->id }}">{{ $country->name }}</option>              
@@ -173,188 +173,175 @@
         </fieldset>
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
             <form method="post" action="#" id="appicantFormStep_2" class="wizard-step-form">
-                
-                <div id="currentAdressQuestion" class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                    <div class="col-span-12">
-                        <div class="grid grid-cols-12 gap-x-4">
-                            <div class="intro-y col-span-12 py-1">
-                                <label for="input-wizard-4" class="form-label inline-flex mr-2">When you submitted your application, you supplied us with the address {{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}. Is this the address where you will be residing during your study term?</label>
-                                <button id="agreeCurrentAddress" data-addressid="{{ $studentData["current_address"]->id }}"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
-                                <button id="disagreeCurrentAddress"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
-                            </div>
+                <div class="grid grid-cols-12 gap-x-4">    
+                    <div id="currentAdressQuestion" class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
+                        <div class="col-span-12">
+                                <div class="intro-y col-span-12 py-1">
+                                    <label for="input-wizard-4" class="form-label inline-flex mr-2">When you submitted your application, you supplied us with the address {{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}. Is this the address where you will be residing during your study term?</label>
+                                    <button id="agreeCurrentAddress" data-addressid="{{ $studentData["current_address"]->id }}"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
+                                    <button id="disagreeCurrentAddress"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
+                                </div>
                         </div>
                     </div>
-                </div>
-                <div id="currentAddress" class="hidden">
-                    <div class="font-medium text-base">
-                        <label for="input-wizard-4" class="form-label inline-flex">Term Time Address/Correspondence Address<i data-theme="light" data-tooltip-content="#address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                    <div id="currentAddress" class="hidden">
+                        <div class="font-medium text-base">
+                            <label for="input-wizard-4" class="form-label inline-flex">Term Time Address/Correspondence Address<i data-theme="light" data-tooltip-content="#address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
 
-                        <!-- BEGIN: Custom Tooltip Content -->
-                        <div class="tooltip-content">
-                            <div id="address-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Please confirm if your Term Time Address/Correspondence Address is still current as provided during the application process.</div>
-                            </div>
-                        </div>
-                        <!-- END: Custom Tooltip Content -->
-                    </div>
-                    <div id="currenAdress__no" class="hidden">
-                        <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                            <div class="col-span-12">
-                                <div class="grid grid-cols-12 gap-x-4">
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
-                                        <input type="text" name="address_line_1" value="" class="w-full text-sm" />
-                                    </div>
-
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
-                                        <input type="text" name="address_line_2" value="" class="w-full text-sm" />
-                                    </div>
-
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
-                                        <input type="text" name="post_code" value="" class="w-full text-sm" />
-                                    </div>
+                            <!-- BEGIN: Custom Tooltip Content -->
+                            <div class="tooltip-content">
+                                <div id="address-tooltip" class="relative flex items-center py-1">
+                                    <div class="text-slate-500 dark:text-slate-400">Please confirm if your Term Time Address/Correspondence Address is still current as provided during the application process.</div>
                                 </div>
                             </div>
+                            <!-- END: Custom Tooltip Content -->
                         </div>
-                        <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                            <div class="col-span-12">
-                                <div class="grid grid-cols-12 gap-x-4">
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">City</label>
-                                        <input type="text" name="city" value="" class="w-full text-sm"  />
-                                    </div>
+                        <div id="currenAdress__no" class="hidden">
+                                <div class="col-span-12">
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
+                                            <input type="text" name="address_line_1" value="" class="w-full text-sm" />
+                                        </div>
 
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">State</label>
-                                        <input type="text" name="state" value="" class="w-full text-sm" />
-                                    </div>
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
+                                            <input type="text" name="address_line_2" value="" class="w-full text-sm" />
+                                        </div>
 
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Country</label>
-                                        <input type="text" name="country" value="" class="w-full text-sm" />
-                                    </div>
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
+                                            <input type="text" name="post_code" value="" class="w-full text-sm" />
+                                        </div>
+                                
+                                </div>
+                                <div class="col-span-12">
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">City</label>
+                                            <input type="text" name="city" value="" class="w-full text-sm"  />
+                                        </div>
+
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">State</label>
+                                            <input type="text" name="state" value="" class="w-full text-sm" />
+                                        </div>
+
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Country</label>
+                                            <input type="text" name="country" value="" class="w-full text-sm" />
+                                        </div>
+                                    
+                                </div>
+                        </div>
+                        <div id="currenAddress__yes" class="hidden">
+                            <input name="current_address_id" type="hidden" value="" />
+                            <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}</div>
+                        </div>
+                        
+                        <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
+                            <label for="input-wizard-4" class="form-label inline-flex">Please Select your current accomodation type <span class="text-danger">*</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                            <select id="data-4" name="term_time_accommodation_type_id" class="w-auto lccTom lcc-tom-select ">
+                                
+                                @foreach($termTimeAccomadtionTypes as $termTimeAccomadtionType)
+                                    <option {{ ($studentData["term_time_accommodation_type_id"] == $termTimeAccomadtionType->id  ? "selected":"") }} value="{{ $termTimeAccomadtionType->id }}">{{ $termTimeAccomadtionType->name }}</option>              
+                                @endforeach
+                            </select>
+                            <!-- BEGIN: Custom Tooltip Content -->
+                            <div class="tooltip-content">
+                                <div id="nationality-tooltip" class="relative flex items-center py-1">
+                                    <div class="text-slate-500 dark:text-slate-400">Please specify your current term accomodation Type.</div>
                                 </div>
                             </div>
+                            <!-- END: Custom Tooltip Content -->
                         </div>
                     </div>
-                    <div id="currenAddress__yes" class="hidden">
-                        <input name="current_address_id" type="hidden" value="" />
-                        <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}</div>
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                    <div id="askPermanentAdress" class="col-span-12 hidden">
+                        <div class="col-span-12">
+                                <div class="intro-y col-span-12 py-1">
+                                    <label for="input-wizard-4" class="form-label inline-flex mr-2">Is the address mentioned above is your permanent residence address?</label>
+                                    <button id="agreePermanentAddress" data-addressid="{{ $studentData["current_address"]->id }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
+                                    <button id="disagreePermanentAddress" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
+                                </div>
+                        </div>
                     </div>
-                    
-                    <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
-                        <label for="input-wizard-4" class="form-label inline-flex">Please Select your current accomodation type <span class="text-danger">*</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                        <select id="data-4" name="term_time_accommodation_type_id" class="w-full ">
+                    <div id="permanentAdressBox" class="col-span-12 hidden">
+                        <div class="font-medium text-base">
+                            <label for="input-wizard-4" class="form-label inline-flex">Permanent Address<i data-theme="light" data-tooltip-content="#permanent-address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+
+                            <!-- BEGIN: Custom Tooltip Content -->
+                            <div class="tooltip-content">
+                                <div id="permanent-address-tooltip" class="relative flex items-center py-1">
+                                    <div class="text-slate-500 dark:text-slate-400">Please your term time address the same as your permanent address?</div>
+                                </div>
+                            </div>
+                            <!-- END: Custom Tooltip Content -->
+                        </div>
+                        <div id="permanentAddress__no" class="hidden">
+                                <div class="col-span-12">
+                                    <div class="grid grid-cols-12 gap-x-4">
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
+                                            <input type="text" name="permanent_address_line_1" class="w-full text-sm" />
+                                        </div>
+
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
+                                            <input type="text" name="permanent_address_line_2" class="w-full text-sm" />
+                                        </div>
+
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
+                                            <input type="text" name="permanent_post_code" class="w-full text-sm" />
+                                        </div>
+                                    </div>
+                                </div>
                             
-                            @foreach($termTimeAccomadtionTypes as $termTimeAccomadtionType)
-                                <option {{ ($studentData["term_time_accommodation_type_id"] == $termTimeAccomadtionType->id  ? "selected":"") }} value="{{ $termTimeAccomadtionType->id }}">{{ $termTimeAccomadtionType->name }}</option>              
-                            @endforeach
-                        </select>
-                        <!-- BEGIN: Custom Tooltip Content -->
-                        <div class="tooltip-content">
-                            <div id="nationality-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Please specify your current term accomodation Type.</div>
-                            </div>
-                        </div>
-                        <!-- END: Custom Tooltip Content -->
-                    </div>
-                </div>
-                <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                <div id="askPermanentAdress" class="grid grid-cols-12 gap-4 gap-y-5 mt-5 hidden">
-                    <div class="col-span-12">
-                        <div class="grid grid-cols-12 gap-x-4">
-                            <div class="intro-y col-span-12 py-1">
-                                <label for="input-wizard-4" class="form-label inline-flex mr-2">Is the address mentioned above is your permanent residence address?</label>
-                                <button id="agreePermanentAddress" data-addressid="{{ $studentData["current_address"]->id }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
-                                <button id="disagreePermanentAddress" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="permanentAdressBox" class="hidden">
-                    <div class="font-medium text-base">
-                        <label for="input-wizard-4" class="form-label inline-flex">Permanent Address<i data-theme="light" data-tooltip-content="#permanent-address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                                <div class="col-span-12">
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">City</label>
+                                            <input type="text" name="permanent_city" class="w-full text-sm"  />
+                                        </div>
 
-                        <!-- BEGIN: Custom Tooltip Content -->
-                        <div class="tooltip-content">
-                            <div id="permanent-address-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Please your term time address the same as your permanent address?</div>
-                            </div>
-                        </div>
-                        <!-- END: Custom Tooltip Content -->
-                    </div>
-                    <div id="permanentAddress__no" class="hidden">
-                        <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                            <div class="col-span-12">
-                                <div class="grid grid-cols-12 gap-x-4">
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
-                                        <input type="text" name="permanent_address_line_1" class="w-full text-sm" />
-                                    </div>
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">State</label>
+                                            <input type="text" name="permanent_state" class="w-full text-sm" />
+                                        </div>
 
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
-                                        <input type="text" name="permanent_address_line_2" class="w-full text-sm" />
-                                    </div>
-
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
-                                        <input type="text" name="permanent_post_code" class="w-full text-sm" />
-                                    </div>
+                                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
+                                            <label for="input-wizard-4" class="form-label inline-flex">Country</label>
+                                            <input type="text" name="permanent_country" class="w-full text-sm" />
+                                        </div>
+                                    
                                 </div>
-                            </div>
+                            
                         </div>
-                        <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                            <div class="col-span-12">
-                                <div class="grid grid-cols-12 gap-x-4">
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">City</label>
-                                        <input type="text" name="permanent_city" class="w-full text-sm"  />
-                                    </div>
-
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">State</label>
-                                        <input type="text" name="permanent_state" class="w-full text-sm" />
-                                    </div>
-
-                                    <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                        <label for="input-wizard-4" class="form-label inline-flex">Country</label>
-                                        <input type="text" name="permanent_country" class="w-full text-sm" />
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="permanentAddress__yes" class="hidden" >
+                            <input name="permanent_address_id" type="hidden" value="" />
+                            <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}</div>
                         </div>
                     </div>
-                    <div id="permanentAddress__yes" class="hidden" >
-                        <input name="permanent_address_id" type="hidden" value="" />
-                        <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}</div>
-                    </div>
-                </div>
-                <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
-                    <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn mr-2">
-                        Back
-                    </button>
-                    <button id="form2SaveButton" type="button" class="btn btn-primary w-auto  form-wizard-next-btn hidden">
-                        Save & Continue 
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 svg_2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
+                    <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
+                        <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn mr-2">
+                            Back
+                        </button>
+                        <button id="form2SaveButton" type="button" class="btn btn-primary w-auto  form-wizard-next-btn hidden">
+                            Save & Continue 
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2 svg_2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
                                 </g>
-                            </g>
-                        </svg>
-                    </button>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </form>
         </fieldset>
-        
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
             <form method="post" action="#" id="appicantFormStep_3" class="wizard-step-form">
                 <input type="hidden" name="url" value="{{ route('students.dashboard') }}"/>
@@ -418,6 +405,7 @@
                         </svg>
                     </button>
                 </div>
+            
             </form>
         </fieldset>
         {{-- <fieldset class="wizard-fieldset wizard-last-step px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
