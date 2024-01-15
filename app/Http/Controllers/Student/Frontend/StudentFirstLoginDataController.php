@@ -31,13 +31,13 @@ class StudentFirstLoginDataController extends Controller
         $StudentData->sex_identifier_id = $request->sex_identifier_id;
         $StudentData->save();
 
-        $otherDetailsId = StudentOtherDetail::where('student_id',$request->student_id)->get()->first()->pluck('id')->toArray();
-        
-        $studentOtherDetails = StudentOtherDetail::find($otherDetailsId[0]);
-        $studentOtherDetails->religion_id  = $request->ethnicity;
-        $studentOtherDetails->ethnicity_id = $request->religion;
+        $otherDetails = StudentOtherDetail::where('student_id',$request->student_id)->get()->first();
+
+        $studentOtherDetails = StudentOtherDetail::find($otherDetails->id);
+        $studentOtherDetails->religion_id  = $request->religion;
+        $studentOtherDetails->ethnicity_id = $request->ethnicity;
         $studentOtherDetails->sexual_orientation_id = $request->sexual_orientation;
-        $studentOtherDetails->hesa_gender_id = $request->gender;
+        $studentOtherDetails->hesa_gender_id = $sexIdentifier->id;
         $studentOtherDetails->save();
 
         return response()->json("Data Updated");
