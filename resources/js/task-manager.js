@@ -94,7 +94,13 @@ var taskAssignedStudentTable = (function () {
                         var html = '<div class="flex justify-start items-center">';
                                 html += '<div>';
                                     html += '<span class="font-medium">'+cell.getData().task_status+'</span><br/>';
+                                    if(cell.getData().task_created_by != ''){
+                                        html += '<span class="font-medium"> By: '+cell.getData().task_created_by+'</span><br/>';
+                                    }
                                     html += '<span>'+cell.getData().task_created+'</span><br/>';
+                                    if(cell.getData().canceled_reason != ''){
+                                        html += '<span class="font-medium"> Reason: </span><span>'+cell.getData().canceled_reason+'</span>';
+                                    }
                                 html += '</div>';
                                 if(cell.getData().task_id == 2){
                                     html += '<button data-taskid="'+cell.getData().task_id+'" data-studentid="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#downloadIDCard" type="button" class="downloadIDCardBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-4"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>';
@@ -120,11 +126,13 @@ var taskAssignedStudentTable = (function () {
                         $('#exportTaskStudentsBtn').fadeIn();
                         $('#completeEmailTaskStudentsBtn').fadeIn();
                     }else{
+                        $('#exportTaskStudentListBtn').fadeIn();
                         $('#commonActionBtns').fadeIn();
                     }
                 }else{
                     $('#exportTaskStudentsBtn').fadeOut();
                     $('#completeEmailTaskStudentsBtn').fadeOut();
+                    $('#exportTaskStudentListBtn').fadeOut();
                     $('#commonActionBtns').fadeOut();
                 }
             },
@@ -214,11 +222,18 @@ var taskAssignedStudentTable = (function () {
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const downloadIDCard = tailwind.Modal.getOrCreateInstance(document.querySelector("#downloadIDCard"));
+    const canceledReasonModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#canceledReasonModal"));
 
     const downloadIDCardEl = document.getElementById('downloadIDCard')
     downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
         $('#downloadIDCard .idContent').html('').fadeOut('fast');
         $('#downloadIDCard .idLoader').fadeIn('fast');
+    });
+
+    const canceledReasonModalEl = document.getElementById('canceledReasonModal')
+    canceledReasonModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#canceledReasonModal .acc__input-error').html('');
+        $('#canceledReasonModal textarea, #canceledReasonModal input').val('');
     });
 
     $('#exportTaskStudentsBtn').on('click', function(e){
@@ -416,6 +431,129 @@ var taskAssignedStudentTable = (function () {
                 taskAssignedStudentTable.init();
             }
         }
+    });
+
+    $('#exportTaskStudentListBtn').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-taskid');
+        var phase = $btn.attr('data-phase');
+        var task_name = $('.theTaskName').text();
+        var ids = [];
+
+        $btn.attr('disabled', 'disabled');
+        $btn.find('svg.theLoaderSvg').fadeIn();
+
+        $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.ids').val());
+        });
+
+        if(ids.length > 0){
+            $.ajax({
+                type: 'GET',
+                url: route('task.manager.students.list.excel'),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                    ids: ids,
+                    task_id : task_id,
+                    phase : phase
+                },
+                xhrFields:{
+                    responseType: 'blob'
+                },
+                beforeSend: function() {},
+                success: function(data) {
+                    $btn.removeAttr('disabled');
+                    $btn.find('svg.theLoaderSvg').fadeOut();
+                    taskAssignedStudentTable.init();
+
+                    var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(data);
+                        link.download = task_name.replace(' ', '_')+'_Assigned_Student_List.xlsx';
+                        link.click();
+
+                        link.remove();
+
+                    /*var url = window.URL || window.webkitURL;
+                    var objectUrl = url.createObjectURL(data);
+                    var newWindow = window.open(objectUrl);
+                    newWindow.document.title = 'New_Student_Email_Id_Create_Task';*/
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }else{
+            $btn.removeAttr('disabled');
+            $btn.find('svg.theLoaderSvg').fadeOut();
+            taskAssignedStudentTable.init();
+        }
+    });
+
+
+    $('.markAsCanceled').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-taskid');
+        var phase = $btn.attr('data-phase');
+        var ids = [];
+        $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.ids').val());
+        });
+
+        if(ids.length > 0){
+            canceledReasonModal.show();
+            document.getElementById("canceledReasonModal").addEventListener("shown.tw.modal", function (event) {
+                $('#canceledReasonModal input[name="phase"]').val(phase);
+                $('#canceledReasonModal input[name="task_id"]').val(task_id);
+                $('#canceledReasonModal input[name="ids"]').val(ids.join());
+            });
+        }
+    });
+
+    $('#canceledReasonForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('canceledReasonForm');
+    
+        document.querySelector('#updateReason').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateReason svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('task.manager.canceled.task'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateReason').removeAttribute('disabled');
+            document.querySelector("#updateReason svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                canceledReasonModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Selected student task successfully canceled.');
+                });     
+            }
+            taskAssignedStudentTable.init();
+        }).catch(error => {
+            document.querySelector('#updateReason').removeAttribute('disabled');
+            document.querySelector("#updateReason svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#canceledReasonForm .${key}`).addClass('border-danger');
+                        $(`#canceledReasonForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
     });
 
 })();

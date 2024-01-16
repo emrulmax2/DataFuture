@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TaskCanceledReasonRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
@@ -110,6 +112,15 @@ class PendingTaskManagerController extends Controller
                 $i = 1;
                 foreach($Query as $list):
                     $theApplicantTask = ApplicantTask::where('task_list_id', $task_id)->where('applicant_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
+                    $createOrUpdate = '';
+                    $createOrUpdateBy = '';
+                    $status = (isset($theApplicantTask->status) && !empty($theApplicantTask->status) ? $theApplicantTask->status : '');
+                    if($status != 'Pending'):
+                        $createOrUpdateBy = (isset($theApplicantTask->updatedBy->employee->full_name) && !empty($theApplicantTask->updatedBy->employee->full_name) ? $theApplicantTask->updatedBy->employee->full_name : '');
+                        $createOrUpdate = (isset($theApplicantTask->updated_at) && !empty($theApplicantTask->updated_at) ? date('jS M, Y', strtotime($theApplicantTask->updated_at)) : '');
+                    else:
+                        $createOrUpdate = (isset($theApplicantTask->status) && !empty($theApplicantTask->status) ? $theApplicantTask->status : '');
+                    endif;
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
@@ -123,10 +134,12 @@ class PendingTaskManagerController extends Controller
                         'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                         'url' => route('admission.show', $list->id),
                         'task_id' => $task_id,
-                        'task_created' => (isset($theApplicantTask->created_at) && !empty($theApplicantTask->created_at) ? date('jS M, Y', strtotime($theApplicantTask->created_at)) : ''),
-                        'task_status' => (isset($theApplicantTask->status) && !empty($theApplicantTask->status) ? $theApplicantTask->status : ''),
-                        'ids' => '',
-                        'phase' => $phase
+                        'task_created_by' => $createOrUpdateBy,
+                        'task_created' => $createOrUpdate,
+                        'task_status' => $status,
+                        'ids' => $list->id,
+                        'phase' => $phase,
+                        'canceled_reason' => ($status == 'Canceled' && isset($theApplicantTask->canceled_reason) && !empty($theApplicantTask->canceled_reason) ? $theApplicantTask->canceled_reason : '')
                     ];
                     $i++;
                 endforeach;
@@ -160,6 +173,15 @@ class PendingTaskManagerController extends Controller
                 $i = 1;
                 foreach($Query as $list):
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
+                    $createOrUpdate = '';
+                    $createOrUpdateBy = '';
+                    $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
+                    if($status != 'Pending'):
+                        $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
+                        $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
+                    else:
+                        $createOrUpdate = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
+                    endif;
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
@@ -173,10 +195,12 @@ class PendingTaskManagerController extends Controller
                         'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                         'url' => route('student.show', $list->id),
                         'task_id' => $task_id,
-                        'task_created' => (isset($theStudentTask->created_at) && !empty($theStudentTask->created_at) ? date('jS M, Y', strtotime($theStudentTask->created_at)) : ''),
-                        'task_status' => (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : ''),
+                        'task_created_by' => $createOrUpdateBy,
+                        'task_created' => $createOrUpdate,
+                        'task_status' => $status,
                         'ids' => $list->id,
-                        'phase' => $phase
+                        'phase' => $phase,
+                        'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : '')
                     ];
                     $i++;
                 endforeach;
@@ -406,7 +430,7 @@ class PendingTaskManagerController extends Controller
             if($phase == 'Applicant'):
                 $taskOldRow = ApplicantTask::where('applicant_id', $student_id)->where('task_list_id', $task_id)->get()->first();
 
-                $studentTask = ApplicantTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'updated_by' => auth()->user()->id]);
+                $studentTask = ApplicantTask::where('task_list_id', $task_id)->where('applicant_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
                 $studentTaskLog = ApplicantTaskLog::create([
                     'applicant_tasks_id' => $taskOldRow->id,
                     'actions' => 'Status Changed',
@@ -418,7 +442,7 @@ class PendingTaskManagerController extends Controller
             else:
                 $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
 
-                $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'updated_by' => auth()->user()->id]);
+                $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
                 $studentTaskLog = StudentTaskLog::create([
                     'student_tasks_id' => $taskOldRow->id,
                     'actions' => 'Status Changed',
@@ -431,5 +455,99 @@ class PendingTaskManagerController extends Controller
         endforeach;
 
         return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
+    }
+
+    public function canceledTask(TaskCanceledReasonRequest $request){
+        $canceled_reason = $request->canceled_reason;
+        $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : 'Live');
+        $task_id = (isset($request->task_id) && !empty($request->task_id) ? $request->task_id : 0);
+        $ids = (isset($request->ids) && !empty($request->ids) ? explode(',', $request->ids) : []);
+
+        if(!empty($ids) && $task_id > 0):
+            foreach($ids as $id):
+                if($phase == 'Applicant'):
+                    $taskOldRow = ApplicantTask::where('applicant_id', $id)->where('task_list_id', $task_id)->get()->first();
+    
+                    $studentTask = ApplicantTask::where('task_list_id', $task_id)->where('applicant_id', $id)->update(['status' => 'Canceled', 'canceled_reason' => $canceled_reason, 'updated_by' => auth()->user()->id]);
+                    $studentTaskLog = ApplicantTaskLog::create([
+                        'applicant_tasks_id' => $taskOldRow->id,
+                        'actions' => 'Status Changed',
+                        'field_name' => 'status',
+                        'prev_field_value' => $taskOldRow->status,
+                        'current_field_value' => 'Canceled',
+                        'created_by' => auth()->user()->id
+                    ]);
+                else:
+                    $taskOldRow = StudentTask::where('student_id', $id)->where('task_list_id', $task_id)->get()->first();
+    
+                    $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $id)->update(['status' => 'Canceled', 'canceled_reason' => $canceled_reason, 'updated_by' => auth()->user()->id]);
+                    $studentTaskLog = StudentTaskLog::create([
+                        'student_tasks_id' => $taskOldRow->id,
+                        'actions' => 'Status Changed',
+                        'field_name' => 'status',
+                        'prev_field_value' => $taskOldRow->status,
+                        'current_field_value' => 'Canceled',
+                        'created_by' => auth()->user()->id
+                    ]);
+                endif;
+            endforeach;
+        endif;
+
+        return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
+    }
+
+    public function downloadTaskStudentListExcel(Request $request){
+        $ids = $request->ids;
+        $task_id = $request->task_id;
+        $phase = $request->phase;
+        $task = TaskList::find($task_id);
+
+        if(!empty($ids)):
+            $theCollection = [];
+            $theCollection[1][] = ($phase == 'Applicant' ? 'Ref. No' : 'Reg. No');
+            $theCollection[1][] = 'First Name';
+            $theCollection[1][] = 'Last Name';
+            $theCollection[1][] = 'Email Address';
+            $theCollection[1][] = 'Date of Birth';
+            $theCollection[1][] = 'Course';
+            $theCollection[1][] = 'Semester';
+            $theCollection[1][] = 'Status';
+
+            $row = 2;
+            foreach($ids as $id):
+                if($phase == 'Applicant'):
+                    $applicant = Applicant::find($id);
+                    $applicantUserEmail = $applicant->users->email;
+                    
+                    /* Excel Data Array */
+                    $theCollection[$row][] = $applicant->application_no;
+                    $theCollection[$row][] = $applicant->first_name;
+                    $theCollection[$row][] = $applicant->last_name;
+                    $theCollection[$row][] = $applicantUserEmail;
+                    $theCollection[$row][] = (isset($applicant->date_of_birth) && !empty($applicant->date_of_birth) ? date('d-m-Y', strtotime($applicant->date_of_birth)) : '');
+                    $theCollection[$row][] = (isset($applicant->course->creation->course->name) && !empty($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : '');
+                    $theCollection[$row][] = (isset($applicant->course->creation->semester->name) && !empty($applicant->course->creation->semester->name) ? $applicant->course->creation->semester->name : '');
+                    $theCollection[$row][] = (isset($applicant->status->name) && !empty($applicant->status->name) ? $applicant->status->name : '');
+                else:
+                    $student = Student::find($id);
+                    $studentUserEmail = $student->users->email;
+                    
+                    /* Excel Data Array */
+                    $theCollection[$row][] = $student->registration_no;
+                    $theCollection[$row][] = $student->first_name;
+                    $theCollection[$row][] = $student->last_name;
+                    $theCollection[$row][] = $studentUserEmail;
+                    $theCollection[$row][] = (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('d-m-Y', strtotime($student->date_of_birth)) : '');
+                    $theCollection[$row][] = (isset($student->crel->creation->course->name) && !empty($student->crel->creation->course->name) ? $student->crel->creation->course->name : '');
+                    $theCollection[$row][] = (isset($student->crel->creation->semester->name) && !empty($student->crel->creation->semester->name) ? $student->crel->creation->semester->name : '');
+                    $theCollection[$row][] = (isset($student->status->name) && !empty($student->status->name) ? $student->status->name : '');
+                endif;
+                $row++;
+            endforeach;
+
+            return Excel::download(new ArrayCollectionExport($theCollection), 'Task_Student_List.xlsx');
+        else:
+            return response()->json(['msg' => 'Error Found!'], 422);
+        endif;
     }
 }

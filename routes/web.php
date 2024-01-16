@@ -2112,11 +2112,13 @@ Route::middleware('auth')->group(function() {
         Route::get('task-manager/show/{id}', 'show')->name('task.manager.show'); 
         Route::get('task-manager/list', 'list')->name('task.manager.list'); 
 
-        Route::get('task-manager/download-task-students', 'downloadTaskStudentEmailListExcel')->name('task.manager.students.email.excel'); 
+        Route::get('task-manager/download-task-students-emails', 'downloadTaskStudentEmailListExcel')->name('task.manager.students.email.excel'); 
         Route::post('task-manager/complete-email-id-task', 'completeTaskStudentEmailTask')->name('task.manager.comlete.students.email.id.task'); 
         Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card'); 
 
         Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
+        Route::get('task-manager/download-task-students-list', 'downloadTaskStudentListExcel')->name('task.manager.students.list.excel'); 
+        Route::post('task-manager/canceled-task', 'canceledTask')->name('task.manager.canceled.task'); 
     });
 });
 
