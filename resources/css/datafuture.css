@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 /* Core Setup Extended Start */
 .block{
     display: block;
@@ -1205,3 +1207,53 @@
     background: rgb(217 119 6);
     color: #FFF;
 }
+
+
+
+/* ID Card CSS */
+#downloadIDCard .modal-dialog{
+    width: 778px;
+    margin-bottom: 4rem;
+}
+#downloadIDCard .modal-content{
+    border-radius: 0;
+}
+#downloadIDCard .modal-body{
+    padding: 0;
+    width: 100%;
+    position: relative;
+}
+#downloadIDCard .printBtns{
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
+}
+#downloadIDCard .printBtns .btn{
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+#downloadIDCard .theIDCard{
+    font-family: "Roboto", sans-serif; 
+    color: #FFF; 
+    font-size: 16px; 
+    line-height: normal; 
+    background-image: url('../images/id_card_bg.jpg'); 
+    background-repeat: no-repeat; 
+    background-position: center top; 
+    background-color: #1a2c44;
+    width: 100%;
+    height: 1322px;
+}
+#downloadIDCard .profilePicWrap{text-align: center; padding: 186px 0 0; margin: 0 0 0;}
+#downloadIDCard .profilePicWrap span{display: inline-block; width: 330px; height: 330px; border-radius: 50%;}
+#downloadIDCard .profilePicWrap span img{ width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+#downloadIDCard .profileInfWrap{text-align: center; padding: 96px 0 0; margin: 0 0 0;}
+#downloadIDCard .profileInfWrap h2{font-family: "Roboto", sans-serif; font-size: 65.14px; font-weight: 700; line-height: normal; color: #FFF; margin: 0 0 0;}
+#downloadIDCard .profileInfWrap p{font-family: "Roboto", sans-serif; font-size: 38px; font-weight: 400; line-height: 37.53px; color: #FFF; padding: 0 102px 0; margin: -2px 0 0;}
+
+#downloadIDCard .profileFooterWra{padding: 246px 55px 0; display: flex; align-items: flex-end;}
+#downloadIDCard .iconCol{margin: 0 0 -2px; padding: 0 39px 0 0;}
+#downloadIDCard .descCol{font-family: "Roboto", sans-serif; font-size: 44.35px; line-height: 59px; color: #FFF; font-weight: 400; margin: 0 0 -13px;}
+#downloadIDCard .qrcodeCol{background: #FFF; padding: 17px 20px 13px; margin: 0 0 0 auto;}

@@ -2114,7 +2114,9 @@ Route::middleware('auth')->group(function() {
 
         Route::get('task-manager/download-task-students', 'downloadTaskStudentEmailListExcel')->name('task.manager.students.email.excel'); 
         Route::post('task-manager/complete-email-id-task', 'completeTaskStudentEmailTask')->name('task.manager.comlete.students.email.id.task'); 
-        Route::get('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id'); 
+        Route::post('task-manager/download-id-cards', 'downloadIdCard')->name('task.manager.download.id.card'); 
+
+        Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
     });
 });
 

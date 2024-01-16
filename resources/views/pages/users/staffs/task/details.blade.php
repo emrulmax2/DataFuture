@@ -16,8 +16,12 @@
         <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
             <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
                 <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
+                    <select name="status" id="status" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0">
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Canceled">Canceled</option>
+                    </select>
                 </div>
                 <div class="mt-2 xl:mt-0">
                     <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
@@ -33,6 +37,50 @@
                         <button type="button" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2" id="completeEmailTaskStudentsBtn" style="display: none;">
                             <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Complete & Send Email
                         </button>
+                    @else 
+                        <div class="dropdown w-1/2 sm:w-auto" id="commonActionBtns">
+                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                <i data-lucide="settings-2" class="w-4 h-4 mr-2"></i> Update Task Status <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            </button>
+                            <div class="dropdown-menu w-80">
+                                <ul class="dropdown-content">
+                                    <li>
+                                        <a data-phase="{{ $task->processlist->phase }}" data-taskid="{{ $task->id }}" data-status="Completed" href="javascript:void(0);" class="dropdown-item updateSelectedStudentTaskStatusBtn">
+                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Mark As Completed 
+                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                stroke="white" class="w-4 h-4 ml-2 theLoaderSvg">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a data-phase="{{ $task->processlist->phase }}" data-taskid="{{ $task->id }}" data-status="Canceled" href="javascript:void(0);" class="dropdown-item updateSelectedStudentTaskStatusBtn">
+                                            <i data-lucide="x-circle" class="w-4 h-4 mr-2 text-danger"></i> Mark As Canceled 
+                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                stroke="white" class="w-4 h-4 ml-2 theLoaderSvg">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -42,6 +90,17 @@
         </div>
     </div>
     <!-- END: HTML Table Data -->
+
+    <div id="downloadIDCard" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="idLoader flex justify-center items-center p-10"><i data-loading-icon="rings" class="w-20 h-20"></i></div>
+                    <div class="idContent" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
