@@ -1,19 +1,21 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import html2canvas from "html2canvas";
+import { saveAs } from 'file-saver';
 
 ("use strict");
 var taskAssignedStudentTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
+        let status = $("#status").val() != "" ? $("#status").val() : "";
         let task_id = $("#taskAssignedStudentTable").attr('data-taskid');
         let phase = $("#taskAssignedStudentTable").attr('data-phase');
         
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
             ajaxURL: route("task.manager.list"),
-            ajaxParams: { querystr : querystr, task_id : task_id, phase : phase},
+            ajaxParams: { status : status, task_id : task_id, phase : phase},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -25,7 +27,7 @@ var taskAssignedStudentTable = (function () {
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             
-            selectable: (phase == 'Live' ? true : false),
+            selectable: true,
             columns: [
                 {
                     formatter: "rowSelection", 
@@ -35,7 +37,6 @@ var taskAssignedStudentTable = (function () {
                     width: "60",
                     headerSort: false, 
                     download: false,
-                    visible: (phase == 'Live' ? true : false),
                     cellClick:function(e, cell){
                         cell.getRow().toggleSelect();
                     }
@@ -44,6 +45,12 @@ var taskAssignedStudentTable = (function () {
                     title: (phase == 'Applicant' ? 'Ref. No' : 'Reg. No'),
                     field: (phase == 'Applicant' ? "application_no" : 'registration_no'),
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<a href="'+cell.getData().url+'" class="whitespace-normal font-medium text-primary">';
+                                html += (phase == 'Applicant' ? cell.getData().application_no : cell.getData().registration_no),
+                            html += '</a>';
+                        return html;
+                    }
                 },
                 {
                     title: "First Name",
@@ -84,9 +91,20 @@ var taskAssignedStudentTable = (function () {
                     headerSort: false,
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) {  
-                        var html = '<div>';
-                                html += '<span class="font-medium">'+cell.getData().task_status+'</span><br/>';
-                                html += '<span>'+cell.getData().task_created+'</span><br/>';
+                        var html = '<div class="flex justify-start items-center">';
+                                html += '<div>';
+                                    html += '<span class="font-medium">'+cell.getData().task_status+'</span><br/>';
+                                    if(cell.getData().task_created_by != ''){
+                                        html += '<span class="font-medium"> By: '+cell.getData().task_created_by+'</span><br/>';
+                                    }
+                                    html += '<span>'+cell.getData().task_created+'</span><br/>';
+                                    if(cell.getData().canceled_reason != ''){
+                                        html += '<span class="font-medium"> Reason: </span><span>'+cell.getData().canceled_reason+'</span>';
+                                    }
+                                html += '</div>';
+                                if(cell.getData().task_id == 2){
+                                    html += '<button data-taskid="'+cell.getData().task_id+'" data-studentid="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#downloadIDCard" type="button" class="downloadIDCardBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-4"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>';
+                                }
                             html += '</div>';
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
                             html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
@@ -101,19 +119,21 @@ var taskAssignedStudentTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
-            rowClick:function(e, row){
-                window.open(row.getData().url, '_blank');
-            },
             rowSelectionChanged:function(data, rows){
                 var ids = [];
                 if(rows.length > 0){
                     if(task_id == 5){
                         $('#exportTaskStudentsBtn').fadeIn();
                         $('#completeEmailTaskStudentsBtn').fadeIn();
+                    }else{
+                        $('#exportTaskStudentListBtn').fadeIn();
+                        $('#commonActionBtns').fadeIn();
                     }
                 }else{
                     $('#exportTaskStudentsBtn').fadeOut();
                     $('#completeEmailTaskStudentsBtn').fadeOut();
+                    $('#exportTaskStudentListBtn').fadeOut();
+                    $('#commonActionBtns').fadeOut();
                 }
             },
             selectableCheck:function(row){
@@ -201,6 +221,20 @@ var taskAssignedStudentTable = (function () {
     }
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const downloadIDCard = tailwind.Modal.getOrCreateInstance(document.querySelector("#downloadIDCard"));
+    const canceledReasonModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#canceledReasonModal"));
+
+    const downloadIDCardEl = document.getElementById('downloadIDCard')
+    downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
+        $('#downloadIDCard .idContent').html('').fadeOut('fast');
+        $('#downloadIDCard .idLoader').fadeIn('fast');
+    });
+
+    const canceledReasonModalEl = document.getElementById('canceledReasonModal')
+    canceledReasonModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#canceledReasonModal .acc__input-error').html('');
+        $('#canceledReasonModal textarea, #canceledReasonModal input').val('');
+    });
 
     $('#exportTaskStudentsBtn').on('click', function(e){
         e.preventDefault();
@@ -299,4 +333,227 @@ var taskAssignedStudentTable = (function () {
             taskAssignedStudentTable.init();
         }
     });
+
+    $('#taskAssignedStudentTable').on('click', '.downloadIDCardBtn', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-taskid');
+        var student_id = $btn.attr('data-studentid');
+
+        axios({
+            method: "post",
+            url: route('task.manager.download.id.card'),
+            data: {student_id : student_id, task_id : task_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#downloadIDCard .idLoader').fadeOut('fast');
+                $('#downloadIDCard .idContent').fadeIn('fast').html(response.data.res);
+            }
+        }).catch(error => {
+            if(error.response){
+                console.log('error');
+            }
+        });
+    })
+
+    $('#downloadIDCard').on('click', '.thePrintBtn', function(){
+        var $currentBtn = $(this);
+        var currentIdAttr = $currentBtn.attr('data-id');
+        var currentId = '#theIDCard_'+currentIdAttr;
+        var $currentIDCard = $('#theIDCard_'+currentIdAttr);
+
+        html2canvas(document.querySelector(currentId), { useCORS: true, allowTaint : true }).then(canvas => {
+            canvas.toBlob(function(blob) {
+                window.saveAs(blob, currentIdAttr+'.jpg');
+
+                setTimeout(function(){
+                    downloadIDCard.hide();
+                }, 2000);
+            });
+        });
+    });
+
+    
+    $('.updateSelectedStudentTaskStatusBtn').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+
+        if(!$btn.hasClass('disabled')){
+
+            $btn.addClass('disabled');
+            $btn.find('svg.theLoaderSvg').fadeIn();
+            $btn.closest('.updateSelectedStudentTaskStatusBtn').addClass('disabled');
+
+            var task_id = $btn.attr('data-taskid');
+            var status = $btn.attr('data-status');
+            var phase = $btn.attr('data-phase');
+            var student_ids = [];
+            $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                student_ids.push($row.find('.ids').val());
+            });
+
+            if(student_ids.length > 0){
+                axios({
+                    method: "post",
+                    url: route('task.manager.update.task.status'),
+                    data: {student_ids : student_ids, task_id : task_id, status : status, phase : phase},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $btn.removeClass('disabled');
+                        $btn.find('svg.theLoaderSvg').fadeOut();
+                        $btn.closest('.updateSelectedStudentTaskStatusBtn').removeClass('disabled');
+
+                        taskAssignedStudentTable.init();
+
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html('Congratulations!');
+                            $("#successModal .successModalDesc").html('Selected students task status successfully updated.');
+                        });
+
+                        setTimeout(function(){
+                            successModal.hide();
+                        }, 2000);
+                    }
+                }).catch(error => {
+                    if(error.response){
+                        console.log('error');
+                    }
+                });
+            }else{
+                $btn.removeClass('disabled');
+                $btn.find('svg.theLoaderSvg').fadeOut();
+                $btn.closest('.updateSelectedStudentTaskStatusBtn').removeClass('disabled');
+
+                taskAssignedStudentTable.init();
+            }
+        }
+    });
+
+    $('#exportTaskStudentListBtn').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-taskid');
+        var phase = $btn.attr('data-phase');
+        var task_name = $('.theTaskName').text();
+        var ids = [];
+
+        $btn.attr('disabled', 'disabled');
+        $btn.find('svg.theLoaderSvg').fadeIn();
+
+        $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.ids').val());
+        });
+
+        if(ids.length > 0){
+            $.ajax({
+                type: 'GET',
+                url: route('task.manager.students.list.excel'),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                    ids: ids,
+                    task_id : task_id,
+                    phase : phase
+                },
+                xhrFields:{
+                    responseType: 'blob'
+                },
+                beforeSend: function() {},
+                success: function(data) {
+                    $btn.removeAttr('disabled');
+                    $btn.find('svg.theLoaderSvg').fadeOut();
+                    taskAssignedStudentTable.init();
+
+                    var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(data);
+                        link.download = task_name.replace(' ', '_')+'_Assigned_Student_List.xlsx';
+                        link.click();
+
+                        link.remove();
+
+                    /*var url = window.URL || window.webkitURL;
+                    var objectUrl = url.createObjectURL(data);
+                    var newWindow = window.open(objectUrl);
+                    newWindow.document.title = 'New_Student_Email_Id_Create_Task';*/
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }else{
+            $btn.removeAttr('disabled');
+            $btn.find('svg.theLoaderSvg').fadeOut();
+            taskAssignedStudentTable.init();
+        }
+    });
+
+
+    $('.markAsCanceled').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-taskid');
+        var phase = $btn.attr('data-phase');
+        var ids = [];
+        $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.ids').val());
+        });
+
+        if(ids.length > 0){
+            canceledReasonModal.show();
+            document.getElementById("canceledReasonModal").addEventListener("shown.tw.modal", function (event) {
+                $('#canceledReasonModal input[name="phase"]').val(phase);
+                $('#canceledReasonModal input[name="task_id"]').val(task_id);
+                $('#canceledReasonModal input[name="ids"]').val(ids.join());
+            });
+        }
+    });
+
+    $('#canceledReasonForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('canceledReasonForm');
+    
+        document.querySelector('#updateReason').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateReason svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('task.manager.canceled.task'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateReason').removeAttribute('disabled');
+            document.querySelector("#updateReason svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                canceledReasonModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Selected student task successfully canceled.');
+                });     
+            }
+            taskAssignedStudentTable.init();
+        }).catch(error => {
+            document.querySelector('#updateReason').removeAttribute('disabled');
+            document.querySelector("#updateReason svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#canceledReasonForm .${key}`).addClass('border-danger');
+                        $(`#canceledReasonForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
 })();

@@ -17,6 +17,7 @@ class ApplicantTask extends Model
         'assign_user',
         'external_link_ref',
         'status',
+        'canceled_reason',
         'task_status_id',
         'created_by',
         'updated_by',
