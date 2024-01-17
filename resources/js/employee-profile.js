@@ -112,6 +112,21 @@ import { createIcons, icons } from "lucide";
             });
         }
     });
+
+    $('#editAdmissionPersonalDetailsForm #status').on('change', function(){
+        if($(this).prop('checked')){
+            $('#editAdmissionPersonalDetailsForm .statusDisplay').text('Active').addClass('text-success').removeClass('text-danger');
+            $('#editAdmissionPersonalDetailsForm .employmentEndedOn').fadeOut('fast', function(){
+                $('#editAdmissionPersonalDetailsForm [name="ended_on"]').val('')
+            })
+        }else{
+            $('#editAdmissionPersonalDetailsForm .statusDisplay').text('Inactive').addClass('text-danger').removeClass('text-success');
+            $('#editAdmissionPersonalDetailsForm .employmentEndedOn').fadeIn('fast', function(){
+                $('#editAdmissionPersonalDetailsForm [name="ended_on"]').val('')
+            })
+        }
+    })
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editPersonalModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));
     const editEmploymentlModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmploymentDetailsModal"));

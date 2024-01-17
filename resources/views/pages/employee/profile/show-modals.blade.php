@@ -133,13 +133,22 @@
                             @endif 
                             <div class="acc__input-error error-disability_id text-danger mt-2"></div>
                         </div>
+                        
+                        <div class="col-span-12 sm:col-span-3">
+                            <label for="active" class="form-label">Employee Status </label>
+                            <div class="form-check form-switch">
+                                <input id="status" {{ $employee->status == 1 ? 'checked' : '' }} class="form-check-input m-0" name="status" value="1" type="checkbox">
+                                <label class="form-check-label ml-4 font-medium statusDisplay {{ $employee->status == 1 ? 'text-success' : 'text-danger' }}" for="active">{{ $employee->status == 1 ? 'Active' : 'Inactive' }}</label>
+                            </div>
+                        </div> 
+                        <div class="col-span-12 sm:col-span-3 employmentEndedOn" style="display: {{ $employee->status != 1 ? 'block' : 'none' }};">
+                            <label for="ended_on" class="form-label">Employment End Date <span class="text-danger">*</span></label>
+                            <input type="text" value="{{ isset($employee->employment->ended_on) && !empty($employee->employment->ended_on) ? date('d-m-Y', strtotime($employee->employment->ended_on)) : '' }}" placeholder="DD-MM-YYYY" id="ended_on" class="form-control datepicker" name="ended_on" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-ended_on text-danger mt-2"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
-                        <label class="form-check-label mr-3 ml-0" for="active">Status</label>
-                        <input id="status" {{ $employee->status == 1 ? 'checked' : '' }} class="form-check-input m-0" name="status" value="1" type="checkbox">
-                    </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
                         Update                      

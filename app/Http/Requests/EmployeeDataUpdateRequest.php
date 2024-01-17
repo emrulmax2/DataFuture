@@ -34,6 +34,27 @@ class EmployeeDataUpdateRequest extends FormRequest
             'ethnicity_id' => "required",
             "user_id" => "required",
             "mobile" => "required",
+
+            'status' => 'sometimes',
+            'ended_on' => 'required_unless:status,1',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'title_id.required' => "This field is required.",
+            'first_name.required' => "This field is required.",
+            'last_name.required' => "This field is required.",
+            'sex_identifier_id.required' => "This field is required.",
+            'date_of_birth.required' => "This field is required.",
+            'ni_number.required' => "This field is required.",
+            'nationality_id.required' => "This field is required.",
+            'ethnicity_id.required' => "This field is required.",
+            "user_id.required" => "This field is required.",
+            "mobile.required" => "This field is required.",
+
+            'ended_on.required_unless' => 'This field is required.',
         ];
     }
 }

@@ -242,6 +242,19 @@ var educationQualTable = (function () {
 })();
 
 (function () {
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {},
+        },
+        placeholder: 'Search Here...',
+        persist: false,
+        create: true,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    
     if($('#educationQualTable').length > 0){
         if($('#educationQualTable').hasClass('activeTable')){
             educationQualTable.init();
@@ -294,6 +307,8 @@ var educationQualTable = (function () {
 
 
     }
+
+
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
     
