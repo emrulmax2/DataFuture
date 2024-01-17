@@ -174,7 +174,7 @@
                                         @endif
                                     @endforeach 
                                 </div>
-                                <a href="{{ route('task.manager') }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">All Tasks</a>
+                                <a href="{{ route('task.manager') }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">My Tasks</a>
                             @else 
                                 <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
                                     <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> There are no pending task found.
