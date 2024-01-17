@@ -813,16 +813,16 @@
         },
         {
             "name": "doctrine/inflector",
-            "version": "2.0.8",
+            "version": "2.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/inflector.git",
-                "reference": "f9301a5b2fb1216b2b08f02ba04dc45423db6bff"
+                "reference": "2930cd5ef353871c821d5c43ed030d39ac8cfe65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/inflector/zipball/f9301a5b2fb1216b2b08f02ba04dc45423db6bff",
-                "reference": "f9301a5b2fb1216b2b08f02ba04dc45423db6bff",
+                "url": "https://api.github.com/repos/doctrine/inflector/zipball/2930cd5ef353871c821d5c43ed030d39ac8cfe65",
+                "reference": "2930cd5ef353871c821d5c43ed030d39ac8cfe65",
                 "shasum": ""
             },
             "require": {
@@ -884,7 +884,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/inflector/issues",
-                "source": "https://github.com/doctrine/inflector/tree/2.0.8"
+                "source": "https://github.com/doctrine/inflector/tree/2.0.9"
             },
             "funding": [
                 {
@@ -900,7 +900,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-06-16T13:40:37+00:00"
+            "time": "2024-01-15T18:05:13+00:00"
         },
         {
             "name": "doctrine/lexer",
@@ -3088,16 +3088,16 @@
         },
         {
             "name": "maatwebsite/excel",
-            "version": "3.1.51",
+            "version": "3.1.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SpartnerNL/Laravel-Excel.git",
-                "reference": "6d3c78ce6645abada32e03b40dc7f3c561878bc3"
+                "reference": "4471416045dbb869d0a218d2e88441adc362e2b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/6d3c78ce6645abada32e03b40dc7f3c561878bc3",
-                "reference": "6d3c78ce6645abada32e03b40dc7f3c561878bc3",
+                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/4471416045dbb869d0a218d2e88441adc362e2b0",
+                "reference": "4471416045dbb869d0a218d2e88441adc362e2b0",
                 "shasum": ""
             },
             "require": {
@@ -3109,6 +3109,7 @@
                 "psr/simple-cache": "^1.0||^2.0||^3.0"
             },
             "require-dev": {
+                "laravel/scout": "^7.0||^8.0||^9.0||^10.0",
                 "orchestra/testbench": "^6.0||^7.0||^8.0",
                 "predis/predis": "^1.1"
             },
@@ -3152,7 +3153,7 @@
             ],
             "support": {
                 "issues": "https://github.com/SpartnerNL/Laravel-Excel/issues",
-                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.51"
+                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.52"
             },
             "funding": [
                 {
@@ -3164,7 +3165,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-12-08T12:44:49+00:00"
+            "time": "2024-01-16T10:41:30+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -8552,16 +8553,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.27.0",
+            "version": "v1.27.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "65a7764af5daadbd122e3b0d67be371d158a9b9a"
+                "reference": "9dc648978e4276f2bfd37a076a52e3bd9394777f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/65a7764af5daadbd122e3b0d67be371d158a9b9a",
-                "reference": "65a7764af5daadbd122e3b0d67be371d158a9b9a",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/9dc648978e4276f2bfd37a076a52e3bd9394777f",
+                "reference": "9dc648978e4276f2bfd37a076a52e3bd9394777f",
                 "shasum": ""
             },
             "require": {
@@ -8613,7 +8614,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2024-01-03T14:07:34+00:00"
+            "time": "2024-01-13T18:46:48+00:00"
         },
         {
             "name": "maximebf/debugbar",

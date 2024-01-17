@@ -179,6 +179,11 @@ class StudentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                if ($list->photo !== null && Storage::disk('local')->exists('public/applicants/'.$list->applicant_id.'/'.$list->photo)) {
+                    $photo_url = Storage::disk('local')->url('public/applicants/'.$list->applicant_id.'/'.$list->photo);
+                } else {
+                    $photo_url = asset('build/assets/images/user_avatar.png');
+                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -190,7 +195,8 @@ class StudentController extends Controller
                     'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
                     'gender'=> (isset($list->sexid_name) && !empty($list->sexid_name) ? $list->sexid_name : ''),
                     'status_id'=> (isset($list->status_name) && !empty($list->status_name) ? $list->status_name : ''),
-                    'url' => route('student.show', $list->id)
+                    'url' => route('student.show', $list->id),
+                    'photo_url' => $photo_url
                 ];
                 $i++;
             endforeach;

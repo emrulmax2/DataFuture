@@ -84,8 +84,7 @@
                         </a>
                         @endif
                         @if(isset(auth()->user()->priv()['req_interview']) && auth()->user()->priv()['req_interview'] == 1)
-                        <a href="{{ route('interviewlist') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                        {{-- <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">--}}                            
+                        {{--<a href="{{ route('interviewlist') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                          
                             <div class="report-box zoom-in">                               
                                 <div class="box p-5">                                    
                                     <div class="flex">
@@ -99,9 +98,8 @@
                                     <div class="text-3xl font-medium leading-8 mt-6">{{ $interview }}</div>
                                     <div class="text-base text-slate-500 mt-1">Required Interviews</div>                              
                                 </div>                               
-                            </div>                        
-                        {{-- </div> --}}
-                        </a>
+                            </div>        
+                        </a>--}}
                         @endif
                         @if(isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
                         <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           

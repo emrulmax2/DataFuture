@@ -412,7 +412,7 @@ class EmployeeController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? 1 : 0);
         $request->merge([
             'disability_status' => ($request->disability_status)? "Yes":"No",
-            'status' => (isset($request->status) && $request->status > 0 ? 1 : 0)
+            'status' => $status
         ]);
         $input = $request->all();
         $employee->fill($input);
@@ -422,7 +422,7 @@ class EmployeeController extends Controller
         $employee->disability()->sync($request->disability_id);
 
         if($status == 0){
-            $emptData['ended_on'] = date('Y-m-d');
+            $emptData['ended_on'] = (isset($request->ended_on) && !empty($request->ended_on) ? date('Y-m-d', strtotime($request->ended_on)) : date('Y-m-d'));
             Employment::where('employee_id', $employee->id)->update($emptData);
         }else{
             $emptData['ended_on'] = null;

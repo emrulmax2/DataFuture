@@ -68,8 +68,8 @@ class DashboardController extends Controller
                     $processTasks = TaskList::whereIn('id', $assignedTaskIds)->where('process_list_id', $prs)->orderBy('name', 'ASC')->get();
                     if(!empty($processTasks) && $processTasks->count() > 0):
                         foreach($processTasks as $atsk):
-                            $aplPendingTask = ApplicantTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
-                            $stdPendingTask = StudentTask::where('task_list_id', $atsk->id)->where('status', 'Pending')->get();
+                            $aplPendingTask = ApplicantTask::where('task_list_id', $atsk->id)->whereIn('status', ['Pending', 'In Progress'])->get();
+                            $stdPendingTask = StudentTask::where('task_list_id', $atsk->id)->whereIn('status', ['Pending', 'In Progress'])->get();
                             if($aplPendingTask->count() > 0 || $stdPendingTask->count() > 0):
                                 $result[$prs]['tasks'][$atsk->id] = $atsk;
                                 $result[$prs]['tasks'][$atsk->id]['pending_task'] = $aplPendingTask->count() + $stdPendingTask->count();

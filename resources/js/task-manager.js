@@ -84,6 +84,50 @@ var taskAssignedStudentTable = (function () {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
+                    width: "120",
+                },
+                {
+                    title: "Interview Details",
+                    field: "task_id",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    visible: (task_id == 6 && (status == 'In Progress' || status == 'Completed') ? true : false),
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="flex justify-start items-center">';
+                                html += '<div>';
+                                    if(cell.getData().interview.date){
+                                        html += '<span class="font-medium"> Date: '+cell.getData().interview.date+'</span><br/>';
+                                    }
+                                    if(cell.getData().interview.time){
+                                        html += '<span class="font-medium"> Time: '+cell.getData().interview.time+'</span><br/>';
+                                    }
+                                    if(cell.getData().interview.interviewer){
+                                        html += '<span class="font-medium"> Interviewer: '+cell.getData().interview.interviewer+'</span><br/>';
+                                    }
+                                    if(cell.getData().interview.result){
+                                        html += '<span class="font-medium"> Result: '+cell.getData().interview.result+'</span><br/>';
+                                    }
+                                    if(cell.getData().interview.interview_id && cell.getData().interview.interview_id > 0){
+                                        html += '<a data-id="'+cell.getData().interview.interview_id+'" href="javascript:void(0);" class="applicantprofile-lock__button inline-flex justify-start font-medium text-primary pt-2 underline"><i data-lucide="eye-off" class="w-4 h-4 mr-2"></i>\
+                                            View Profile\
+                                            <svg width="25" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="rgb(100,116,139)" class="loading invisible w-4 h-4 ml-2">\
+                                                <g fill="none" fill-rule="evenodd" stroke-width="4">\
+                                                    <circle cx="22" cy="22" r="1">\
+                                                        <animate attributeName="r" begin="0s" dur="1.8s" values="1; 20" calcMode="spline" keyTimes="0; 1" keySplines="0.165, 0.84, 0.44, 1" repeatCount="indefinite" />\
+                                                        <animate attributeName="stroke-opacity" begin="0s" dur="1.8s" values="1; 0" calcMode="spline" keyTimes="0; 1" keySplines="0.3, 0.61, 0.355, 1" repeatCount="indefinite" />\
+                                                    </circle>\
+                                                    <circle cx="22" cy="22" r="1">\
+                                                        <animate attributeName="r" begin="-0.9s" dur="1.8s" values="1; 20" calcMode="spline" keyTimes="0; 1" keySplines="0.165, 0.84, 0.44, 1" repeatCount="indefinite" />\
+                                                        <animate attributeName="stroke-opacity" begin="-0.9s" dur="1.8s" values="1; 0" calcMode="spline" keyTimes="0; 1" keySplines="0.3, 0.61, 0.355, 1" repeatCount="indefinite" />\
+                                                    </circle>\
+                                                </g>\
+                                            </svg>\
+                                        </a>';
+                                    }
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Task Status",
@@ -103,7 +147,9 @@ var taskAssignedStudentTable = (function () {
                                     }
                                 html += '</div>';
                                 if(cell.getData().task_id == 2){
-                                    html += '<button data-taskid="'+cell.getData().task_id+'" data-studentid="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#downloadIDCard" type="button" class="downloadIDCardBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-4"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>';
+                                    html += '<button data-taskid="'+cell.getData().task_id+'" data-studentid="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#downloadIDCard" type="button" class="downloadIDCardBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-4"><i data-lucide="download-cloud" class="w-4 h-4"></i></button>';
+                                }else if(cell.getData().task_id == 6 && cell.getData().task_status == 'Pending'){
+                                    html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
@@ -223,6 +269,8 @@ var taskAssignedStudentTable = (function () {
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const downloadIDCard = tailwind.Modal.getOrCreateInstance(document.querySelector("#downloadIDCard"));
     const canceledReasonModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#canceledReasonModal"));
+    const callLockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
+    const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
 
     const downloadIDCardEl = document.getElementById('downloadIDCard')
     downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
@@ -234,6 +282,12 @@ var taskAssignedStudentTable = (function () {
     canceledReasonModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#canceledReasonModal .acc__input-error').html('');
         $('#canceledReasonModal textarea, #canceledReasonModal input').val('');
+    });
+
+    const callLockModalEl = document.getElementById('callLockModal')
+    callLockModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#callLockModal .acc__input-error').html('');
+        $('#callLockModal textarea, #canceledReasonModal input').val('');
     });
 
     $('#exportTaskStudentsBtn').on('click', function(e){
@@ -554,6 +608,118 @@ var taskAssignedStudentTable = (function () {
                 }
             }
         });
+    });
+
+    $('#taskAssignedStudentTable').on('click', '.unlockApplicantInterview', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var task_id = $btn.attr('data-task');
+        var id = $btn.attr('data-id');
+
+        $('#callLockModal input[name="applicantId"]').val(id);
+        $('#callLockModal input[name="taskListId"]').val(task_id);
+    });
+
+    
+    $('#callLockModalForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('callLockModalForm');
+    
+        document.querySelector('#unlock').setAttribute('disabled', 'disabled');
+        document.querySelector("#unlock svg.loading").style.cssText ="display: inline-block;";
+    
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('applicant.interview.unlock.only'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#unlock').removeAttribute('disabled');
+            document.querySelector("#unlock svg.loading").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                callLockModal.hide();
+    
+                successModal.show();
+                let Data = response.data.ref;
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Profile Unlocked.');
+                });   
+                
+                location.href= Data;  
+            }
+        }).catch(error => {
+            document.querySelector('#unlock').removeAttribute('disabled');
+            document.querySelector("#unlock svg.loading").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#callLockModalForm .${key}`).addClass('border-danger');
+                        $(`#callLockModalForm  .error-${key}`).html(val);
+                    }
+                } else if (error.response.status == 404) {
+                    successModal.hide();
+                    callLockModal.hide();
+                    errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html('Wrong Date of Birth!');
+                        $("#errorModal .errorModalDesc").html('Please enter the correct DOB. If you further issue  please contact the Admission Office.');
+                    });     
+                } else {
+                    console.log('error')
+                }
+            }
+        });
+    });
+
+    $('#taskAssignedStudentTable').on('click', '.applicantprofile-lock__button', function (e) { 
+        e.preventDefault();
+        document.querySelector(".applicantprofile-lock__button svg.loading").classList.remove('invisible')
+        const data = {
+            interviewId : $(this).attr("data-id")
+        }
+        axios({
+            method: "post",
+            url: route('applicant.interview.unlock'),
+            data: data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector(".applicantprofile-lock__button svg.loading").classList.add('invisible')
+            if (response.status == 200) {
+                successModal.show();
+                let Data = response.data.ref;
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Success!" );
+                    $("#successModal .successModalDesc").html('Profile Matched.');
+                });   
+                
+                location.href= Data;  
+            }
+        }).catch(error => {
+            document.querySelector(".applicantprofile-lock__button svg.loading").classList.add('invisible')
+            if (error.response) {
+                if (error.response.status == 422) {
+                    successModal.hide();
+                    errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html('Invalid Profile!');
+                        $("#errorModal .errorModalDesc").html('Something went wrong. Please try later.');
+                    });
+                } else if (error.response.status == 404) {
+                    successModal.hide();
+                    errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html('Invalid Profile!');
+                        $("#errorModal .errorModalDesc").html('Interviewer didn\'t match');
+                    });  
+                } else {
+                    console.log('error')
+                }
+            }
+        });
+    
     });
 
 })();

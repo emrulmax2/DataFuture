@@ -208,6 +208,7 @@ class ApplicantInterviewListController extends Controller
         $task = ApplicantTask::find($ApplicantInterview->task->id);
 
         $task->status = "In Progress";
+        $task->updated_by = \Auth::id();
         
         $task->save();
 
