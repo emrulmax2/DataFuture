@@ -171,9 +171,11 @@ var employeeDocumentListTable = (function () {
         $('#uploadEmployeeDocumentModal input[name="display_file_name"]').val('');
         $('#uploadEmployeeDocumentModal input[name="document_setting_id"]').val('0');
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val('0');
-        $('#uploadEmployeeDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
+        $('#uploadEmployeeDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', true);
         document.querySelector('#uploadEmpDocBtn').removeAttribute('disabled', 'disabled');
         document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
+
+        Dropzone.forElement('#uploadDocumentForm').removeAllFiles(true);
     });
     const confirmModalEl = document.getElementById('confirmModal')
     confirmModalEl.addEventListener('hide.tw.modal', function(event) {

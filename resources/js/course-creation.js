@@ -28,7 +28,7 @@ var courseCreationListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "80",
                 },
                 {
                     title: "Course",

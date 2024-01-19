@@ -31,7 +31,7 @@
             </form>
             <div class="flex mt-5 sm:mt-0">
                 <div class="taskActionBtnGroup">
-                    @if($task->id == 5)
+                    @if($task->org_email == 'Yes')
                         <button type="button" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2" id="exportTaskStudentsBtn" style="display: none;">
                             <i data-lucide="sheet" class="w-4 h-4 mr-2"></i> Export Students Email
                         </button>
@@ -102,7 +102,7 @@
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
-            <div id="taskAssignedStudentTable" data-taskid="{{ $task->id }}" data-phase={{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }} class="mt-5 table-report table-report--tabulator"></div>
+            <div id="taskAssignedStudentTable" data-email="{{ $task->org_email }}" data-idcard="{{ $task->id_card }}" data-interview="{{ $task->interview }}" data-taskid="{{ $task->id }}" data-phase={{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }} class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: HTML Table Data -->

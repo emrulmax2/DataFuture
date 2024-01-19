@@ -118,6 +118,19 @@
                                 </select>
                                 <div class="acc__input-error error-phase text-danger mt-2"></div>
                             </div>
+                            <div class="mt-3 autoFeedWrap" style="display: none;">
+                                <label for="auto_feed" class="form-label">Auto Feed</label>
+                                <div class="flex flex-col sm:flex-row">
+                                    <div class="form-check mr-3">
+                                        <input id="auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
+                                        <label class="form-check-label" for="auto_feed-yes">Yes</label>
+                                    </div>
+                                    <div class="form-check mr-2">
+                                        <input checked id="auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
+                                        <label class="form-check-label" for="auto_feed-no">No</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -170,6 +183,19 @@
                                 <option value="Live">Live</option>
                             </select>
                             <div class="acc__input-error error-phase text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 autoFeedWrap" style="display: none;">
+                            <label for="auto_feed" class="form-label">Auto Feed</label>
+                            <div class="flex flex-col sm:flex-row">
+                                <div class="form-check mr-3">
+                                    <input id="edit_auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
+                                    <label class="form-check-label" for="edit_auto_feed-yes">Yes</label>
+                                </div>
+                                <div class="form-check mr-2">
+                                    <input checked id="edit_auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
+                                    <label class="form-check-label" for="edit_auto_feed-no">No</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

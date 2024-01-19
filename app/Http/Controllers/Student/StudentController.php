@@ -56,6 +56,7 @@ use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Session;
 
 
 class StudentController extends Controller
@@ -252,9 +253,9 @@ class StudentController extends Controller
             'instance' => CourseCreationInstance::all(),
             'feeelegibility' => FeeEligibility::all(),
             'proposedCourse' => StudentProposedCourse::where('student_id', $studentId)->first(),
-            "courseCreations" => CourseCreation::all(),
-            "academicYears" => AcademicYear::all(),
-            "semesters" => Semester::all(),
+            "courses" => Course::orderBy('name', 'ASC')->get(),
+            "academicYears" => AcademicYear::orderBy('from_date', 'DESC')->get(),
+            "semesters" => Semester::orderBy('id', 'DESC')->get(),
         ]);
     }
 
@@ -502,5 +503,17 @@ class StudentController extends Controller
         else:
             return response()->json(['suc' => 2], 200);
         endif;
+    }
+
+    public function setTempCourse($student, $crel){
+        Session::put(['student_temp_course_relation_'.$student => $crel]);
+
+        return redirect()->route('student.show', $student);
+    }
+
+    public function setDefaultCourse($student){
+        Session::forget('student_temp_course_relation_'.$student);
+
+        return redirect()->route('student.show', $student);
     }
 }

@@ -12,6 +12,10 @@ var taskAssignedStudentTable = (function () {
         let task_id = $("#taskAssignedStudentTable").attr('data-taskid');
         let phase = $("#taskAssignedStudentTable").attr('data-phase');
         
+        let org_email = ($("#taskAssignedStudentTable").attr('data-email') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-email') : 'No');
+        let id_card = ($("#taskAssignedStudentTable").attr('data-idcard') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-idcard') : 'No');
+        let interview = ($("#taskAssignedStudentTable").attr('data-interview') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-interview') : 'No');
+        
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
             ajaxURL: route("task.manager.list"),
@@ -91,7 +95,7 @@ var taskAssignedStudentTable = (function () {
                     field: "task_id",
                     headerSort: false,
                     headerHozAlign: "left",
-                    visible: (task_id == 6 && (status == 'In Progress' || status == 'Completed') ? true : false),
+                    visible: (interview == 'Yes' && (status == 'In Progress' || status == 'Completed') ? true : false),
                     formatter(cell, formatterParams) {  
                         var html = '<div class="flex justify-start items-center">';
                                 html += '<div>';
@@ -146,9 +150,9 @@ var taskAssignedStudentTable = (function () {
                                         html += '<span class="font-medium"> Reason: </span><span>'+cell.getData().canceled_reason+'</span>';
                                     }
                                 html += '</div>';
-                                if(cell.getData().task_id == 2){
+                                if(id_card == 'Yes'){
                                     html += '<button data-taskid="'+cell.getData().task_id+'" data-studentid="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#downloadIDCard" type="button" class="downloadIDCardBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-4"><i data-lucide="download-cloud" class="w-4 h-4"></i></button>';
-                                }else if(cell.getData().task_id == 6 && cell.getData().task_status == 'Pending'){
+                                }else if(interview == 'Yes' && cell.getData().task_status == 'Pending'){
                                     html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
@@ -168,7 +172,7 @@ var taskAssignedStudentTable = (function () {
             rowSelectionChanged:function(data, rows){
                 var ids = [];
                 if(rows.length > 0){
-                    if(task_id == 5){
+                    if(org_email == 'Yes'){
                         $('#exportTaskStudentsBtn').fadeIn();
                         $('#completeEmailTaskStudentsBtn').fadeIn();
                     }else{
