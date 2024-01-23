@@ -405,6 +405,9 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/profile', 'profileView')->name('dashboard.profile');
             
+            Route::get('/dashboard/plan/{plan}', 'showCourseContent')->name('dashboard.plan.module.show'); 
+            Route::get('/dashboard/plan-dates/list', 'planDatelist')->name('dashboard.plan.dates.list');
+
         });
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
