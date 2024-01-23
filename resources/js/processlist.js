@@ -161,17 +161,54 @@ var table = (function () {
         const addModalEl = document.getElementById('addProcessModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addProcessModal .acc__input-error').html('');
-            $('#editProcessModal input').val('');
+            $('#editProcessModal input:not([type="radio"])').val('');
             $('#editProcessModal select').val('');
+            $('#editProcessModal .autoFeedWrap').fadeOut('fast', function(){
+                $('#editProcessModal #auto_feed-no').prop('checked', true);
+            })
         });
         
         const editModalEl = document.getElementById('editProcessModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editProcessModal .acc__input-error').html('');
-            $('#editProcessModal input').val('');
+            $('#editProcessModal input:not([type="radio"])').val('');
             $('#editProcessModal select').val('');
             $('#editProcessModal input[name="id"]').val('0');
+
+            $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
+                $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
+            })
         });
+
+        $('#addProcessForm [name="phase"]').on('change', function(e){
+            var $phase = $(this);
+            var phase = $phase.val();
+
+            if(phase == 'Live'){
+                $('#addProcessForm .autoFeedWrap').fadeIn('fast', function(){
+                    $('#addProcessForm #auto_feed-no').prop('checked', true);
+                })
+            }else{
+                $('#addProcessForm .autoFeedWrap').fadeOut('fast', function(){
+                    $('#addProcessForm #auto_feed-no').prop('checked', true);
+                })
+            }
+        })
+
+        $('#editProcessForm [name="phase"]').on('change', function(e){
+            var $phase = $(this);
+            var phase = $phase.val();
+
+            if(phase == 'Live'){
+                $('#editProcessForm .autoFeedWrap').fadeIn('fast', function(){
+                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
+                })
+            }else{
+                $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
+                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
+                })
+            }
+        })
 
         $('#addProcessForm').on('submit', function(e){
             e.preventDefault();
@@ -242,6 +279,19 @@ var table = (function () {
                         $('#editProcessModal select[name="phase"]').val(dataset.phase ? dataset.phase : '');
 
                         $('#editProcessModal input[name="id"]').val(editId);
+                        if(dataset.phase == 'Live'){
+                            $('#editProcessForm .autoFeedWrap').fadeIn('fast', function(){
+                                if(dataset.auto_feed == 'Yes'){
+                                    $('#editProcessForm #edit_auto_feed-yes').prop('checked', true);
+                                }else{
+                                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
+                                }
+                            })
+                        }else{
+                            $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
+                                $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
+                            })
+                        }
                     }
                 })
                 .catch((error) => {

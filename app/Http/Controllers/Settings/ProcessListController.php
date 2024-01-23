@@ -68,7 +68,7 @@ class ProcessListController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
-                    'phase' => $list->phase,
+                    'phase' => $list->phase.($list->phase == 'Live' && isset($list->auto_feed) && $list->auto_feed == 'Yes' ? ' (Auto)' : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -88,6 +88,7 @@ class ProcessListController extends Controller
         $data = ProcessList::create([
             'name' => $request->name,
             'phase' => $request->phase,
+            'auto_feed' => ($request->phase == 'Live' && (isset($request->auto_feed) && !empty($request->auto_feed)) ? $request->auto_feed : 'No'),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -132,6 +133,7 @@ class ProcessListController extends Controller
         $data = ProcessList::where('id', $request->id)->update([
             'name' => $request->name,
             'phase' => $request->phase,
+            'auto_feed' => ($request->phase == 'Live' && (isset($request->auto_feed) && !empty($request->auto_feed)) ? $request->auto_feed : 'No'),
             'updated_by' => auth()->user()->id
         ]);
 

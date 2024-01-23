@@ -649,6 +649,9 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/send-mobile-verification-code','sendMobileVerificationCode')->name('student.send.mobile.verification.code');
         Route::post('student/send-mobile-verify-code','verifyMobileVerificationCode')->name('student.mobile.verify.code');
+
+        Route::get('student/set-temp-course/{student}/{crel}', 'setTempCourse')->name('student.set.temp.course');
+        Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -764,6 +767,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(CourseDetailController::class)->group(function() {
         Route::post('student/update-course-details', 'update')->name('student.update.course.details');
+
+        Route::post('student/get-semesters-by-academic', 'getSemesterByAcademic')->name('student.get.semesters.by.academic');
+        Route::post('student/get-courses-by-academic-semester', 'getCourseByAcademicSemester')->name('student.get.courses.by.academic.semester');
+        Route::post('student/assigned-new-course', 'assignedNewCourse')->name('student.assigned.new.course');
     });
 
     Route::controller(AwardingBodyDetailController::class)->group(function() {

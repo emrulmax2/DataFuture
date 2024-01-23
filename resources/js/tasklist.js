@@ -29,22 +29,19 @@ var taskListTable = (function () {
                     title: "#ID",
                     headerSort: false,
                     field: "id",
-                    width: "90",
-                },
-                {
-                    title: "Process",
-                    field: "processlist",
-                    headerHozAlign: "left",
+                    width: "70",
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
-                },
-                {
-                    title: "Description",
-                    field: "short_description",
-                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<div>';
+                                html += '<span class="font-medium">'+cell.getData().processlist+'</span><br/>';
+                                html += '<span>'+cell.getData().name+'</span>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Interview",
@@ -57,13 +54,23 @@ var taskListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "External Link",
+                    title: "Ex. Link",
                     field: "external_link",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Status",
                     field: "status",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Email",
+                    field: "org_email",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "ID Card",
+                    field: "id_card",
                     headerHozAlign: "left",
                 },
                 {
@@ -81,7 +88,7 @@ var taskListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: "120",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -364,6 +371,16 @@ var taskListTable = (function () {
                             $('#editTaskModal input[name="upload"][value="Yes"]').prop('checked', true);
                         }else{
                             $('#editTaskModal input[name="upload"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.org_email == 'Yes'){
+                            $('#editTaskModal input[name="org_email"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="org_email"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.id_card == 'Yes'){
+                            $('#editTaskModal input[name="id_card"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="id_card"][value="No"]').prop('checked', true);
                         }
                         
                         if(dataset.external_link == 1){
