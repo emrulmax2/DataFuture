@@ -33,13 +33,12 @@
                                 <div class="col-span-8 font-medium">{{ (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('jS M, Y', strtotime($student->date_of_birth)) : '') }}</div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-3">
+                        <div class="col-span-12 sm:col-span-6">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4 text-slate-500 font-medium">Sex Identifier/Gender</div>
                                 <div class="col-span-8 font-medium">{{ (isset($student->sexid->name) ? $student->sexid->name : '') }}</div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-3"></div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
@@ -52,7 +51,7 @@
                                 <div class="col-span-8 font-medium">{{ $student->country->name }}</div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-3">
+                        <div class="col-span-12 sm:col-span-6">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4 text-slate-500 font-medium">Ethnicity</div>
                                 <div class="col-span-8 font-medium">{{ isset($student->other->ethnicity->name) ? $student->other->ethnicity->name : '' }}</div>

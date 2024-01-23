@@ -14,17 +14,28 @@
                         <div class="ml-10">
                             <div class="w-auto truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} {{ $student->last_name }} - <span class="font-black">{{ $student->registration_no }}</span></div>
                             <div class="text-slate-500 mb-3">{{ isset($student->crel->creation->course->name) ? $student->crel->creation->course->name : '' }} - {{ isset($student->crel->propose->semester->name) ? $student->crel->propose->semester->name : '' }}</div>
-                            <div class="truncate sm:whitespace-normal flex items-center font-medium">
-                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> xyz@gmail.com<br/>{{ $student->users->email }}
-                            </div>
                             
-                            <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
-                                <i data-lucide="phone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Phone:</span> {{ $student->contact->home }}
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
-                                <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $student->contact->mobile }}
-                            </div>
                         </div>
+                    </div>
+                </div>
+                <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0 phoneEmail" id="phoneEmail">
+                    
+                    <div class="ml-10 mt-10">
+                        @if($student->users->email)
+                        <div class="truncate sm:whitespace-normal flex items-center font-medium">
+                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $student->contact->personal_email }} {{  ($student->contact->email) ? "<br/>" : "" }}{{ $student->users->email }}
+                        </div>
+                        @endif
+                        @if($student->contact->home)
+                        <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
+                            <i data-lucide="phone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Phone:</span> {{ $student->contact->home }}
+                        </div>
+                        @endif
+                        @if($student->contact->mobile)
+                        <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
+                            <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $student->contact->mobile }}
+                        </div>
+                        @endif
                     </div>
                 </div>
                 <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0 addressWrap" id="employeeAddress">

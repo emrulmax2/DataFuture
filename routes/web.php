@@ -404,6 +404,7 @@ Route::prefix('/students')->name('students.')->group(function() {
         Route::controller(StudentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/profile', 'profileView')->name('dashboard.profile');
+            
         });
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {

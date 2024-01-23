@@ -159,6 +159,7 @@ export default defineConfig({
                 "resources/js/attendance-feed.js",
                 "resources/js/tutor-attendance-feed.js",
                 "resources/js/plan-tasks.js",
+                "resources/js/plan-tasks-students.js",
                 "resources/js/create-module-activity.js",
                 "resources/js/employee-global.js",
                 "resources/js/employee-banks.js",

@@ -42,6 +42,7 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
             </ol>
         </nav>
         <!-- END: Breadcrumb -->
+        @if(Auth::check())
         <!-- BEGIN: Search -->
         <div class="intro-x relative mr-3 sm:mr-6">
             <div class="search hidden sm:block">
@@ -127,6 +128,7 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
             </div>
         </div>
         <!-- END: Notifications -->
+        @endif
         <!-- BEGIN: Account Menu -->
         <div class="intro-x dropdown w-8 h-8">
             <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in scale-110" role="button" aria-expanded="false" data-tw-toggle="dropdown">
@@ -164,6 +166,13 @@ $opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_S
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
                         <a href="{{ route('agent.account') }}" class="dropdown-item hover:bg-white/5">
+                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> Profile
+                        </a>
+                    </li>
+                    @elseif(Auth::guard('student')->check())
+                    <li><hr class="dropdown-divider border-white/[0.08]"></li>
+                    <li>
+                        <a href="{{ route('students.dashboard.profile') }}" class="dropdown-item hover:bg-white/5">
                             <i data-lucide="user" class="w-4 h-4 mr-2"></i> Profile
                         </a>
                     </li>

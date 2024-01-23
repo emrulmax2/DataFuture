@@ -5,16 +5,26 @@ namespace App\Http\Controllers\Student\Frontend;
 use App\Exports\FeeEligibilityExport;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
+use App\Models\Assign;
 use App\Models\AwardingBody;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
 use App\Models\CourseCreationInstance;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
+use App\Models\ELearningActivitySetting;
+use App\Models\Employee;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
 use App\Models\HesaGender;
 use App\Models\KinsRelation;
+use App\Models\ModuleCreation;
+use App\Models\Plan;
+use App\Models\PlanContent;
+use App\Models\PlanContentUpload;
+use App\Models\PlansDateList;
+use App\Models\PlanTask;
+use App\Models\PlanTaskUpload;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\SexIdentifier;
@@ -26,6 +36,7 @@ use App\Models\StudentUser;
 use App\Models\TermTimeAccommodationType;
 use App\Models\Title;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -211,5 +222,156 @@ class DashboardController extends Controller
         return $dataSet = ["termList" =>$termData,
             "data" => $data,
             "currenTerm" => $currentTerm ];
+    }
+
+    public function showCourseContent(Plan $plan) {
+
+        $userData = StudentUser::find(Auth::guard('student')->user()->id);
+        //$employee = Employee::where("user_id",$userData->id)->get()->first();
+
+        $tutor = Employee::where("user_id",$plan->tutor->id)->get()->first();
+        
+        $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
+        
+        $planTask = PlanTask::where("plan_id",$plan->id)->get();  
+        
+        $studentAssign = Assign::where('plan_id', $plan->id)->get();
+        $studentListCount = $studentAssign->count();
+        // $planParticipant = PlanParticipant::where('plan_id', $plan->id)->get();
+        // $participantList = $planParticipant->count();
+        $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
+        $eLearningActivites = ELearningActivitySetting::all();
+        $planDateWiseContent = [];
+        foreach($planDates as $classDate) {
+            $content = PlanContent::where("plans_date_list_id", $classDate->id)->get();
+            foreach($content as $singleContent){
+                $uploads = PlanContentUpload::where("plan_content_id",$singleContent->id)->get();
+    
+                $planDateWiseContent[$classDate->id] = (object) [
+                    "task" => $content,
+                    "taskUploads" => $uploads,
+                ];
+            }
+            
+        }
+        $allPlanTasks = [];
+
+            foreach($planTask as $task){
+                $uploads = PlanTaskUpload::where("plan_task_id",$task->id)->get();
+
+                $allPlanTasks[$task->id] = (object) [
+                    "task"=> $task,
+                    "taskUploads" => $uploads
+                ]; 
+            }
+        
+        $moduleCreations = ModuleCreation::find($plan->creations->id);
+                    $data = (object) [
+                        'id' => $plan->id,
+                        'term_name' => $moduleCreations->term->name,
+                        'course' => $plan->course->name,
+                        
+                        'classType' => $plan->creations->class_type,
+                        'module' => $plan->creations->module_name,
+                        'group'=> $plan->group->name,           
+                        'room'=> $plan->room->name,           
+                        'venue'=> $plan->venu->name,           
+                        'tutor'=> ($tutor) ?? null,           
+                        'personalTutor'=> ($personalTutor) ?? null,           
+                    ];
+
+                
+       
+        return view('pages.students.frontend.dashboard.module.view', [
+            'title' => 'Attendance - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Attendance', 'href' => 'javascript:void(0);']
+            ],
+            "plan" => $plan,
+            "user" => $userData,
+            "employee" => NULL,
+            "data" => $data,
+            'planTasks' => $allPlanTasks,
+            'planDates' => $planDateWiseContent,
+            'planDateList' => $planDateList,
+            'eLearningActivites' => $eLearningActivites,
+            'studentCount' => $studentListCount,
+        ]);
+    }
+
+    public function planDatelist(Request $request) {
+        $planid = (isset($request->planid) && !empty($request->planid) ? $request->planid : 0);
+        $dates = (isset($request->dates) && !empty($request->dates) ? date('Y-m-d', strtotime($request->dates)) : '');
+        $status = (isset($request->status) && !empty($request->status) ? $request->status : '1');
+        
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'date', 'dir' => 'ASC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = PlansDateList::orderByRaw(implode(',', $sorts));
+        if(!empty($planid)): $query->where('plan_id', $planid); endif;
+        if(!empty($dates)): $query->where('date', $dates); endif;
+        if($status == 2): $query->onlyTrashed(); endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+               
+        $data = array();
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+
+                $theDay = date("Y-m-d", strtotime($list->date));
+
+                $start_time = date($theDay." ".$list->plan->start_time);
+                $start_time = date('h:i A', strtotime($start_time));
+                
+                $end_day = date($theDay." ".$list->plan->end_time);
+                $end_time = date('h:i A', strtotime($end_day));
+                if(strtotime(now())> strtotime($end_day)) {
+                    $upcommingStatus = "Unknown";
+                } else {
+                    $upcommingStatus = "Upcomming";
+                }
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'name' => (isset($list->plan->virtual_room) && !empty($list->plan->virtual_room) ? 'Virtual - ' : 'Physical - ').$list->name,
+                    'date'=> date('l jS M, Y', strtotime($list->date)),
+                    'room' => (isset($list->plan->room->name) && !empty($list->plan->room->name) ? $list->plan->room->name : ''),
+                    'time' => (isset($list->plan->start_time) && !empty($list->plan->start_time) ? date('H:i', strtotime($list->plan->start_time)) : 'Unknown').' - '.(isset($list->plan->end_time) && !empty($list->plan->end_time) ? date('H:i', strtotime($list->plan->end_time)) : 'Unknown'),
+                    'status' => '',
+                    'deleted_at' => $list->deleted_at,
+                    'tutor_id'=>$list->plan->tutor_id,
+                    "start_time" => $start_time,
+                    "end_time" => $end_time,
+                    "end_date_time" => $end_day,
+                    'venue' => $list->plan->venu->name,
+                    'virtual_room'=> $list->plan->virtual_room,   
+                    'upcomming_status' => $upcommingStatus, 
+                    "attendance_information" => ($list->attendanceInformation) ?? null,    
+                    "foundAttendances"  => ($list->attendances) ?? null, 
+                ];
+                $i++;
+            endforeach;
+        endif;
+        
+        
+        
+          
+
+
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 }
