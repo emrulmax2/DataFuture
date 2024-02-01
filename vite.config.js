@@ -135,6 +135,7 @@ export default defineConfig({
                 "resources/js/employee-profile.js",
 
                 "resources/js/attendance.js",
+                "resources/js/attendance-studentstaff.js",
 
                 "resources/js/user-holiday.js",
                 "resources/js/machine-live.js",

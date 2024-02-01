@@ -20,10 +20,16 @@
                 </div>
                 <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0 phoneEmail" id="phoneEmail">
                     
-                    <div class="ml-10 mt-10">
+                    <div class="ml-10 mt-3">
                         @if($student->users->email)
                         <div class="truncate sm:whitespace-normal flex items-center font-medium">
-                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $student->contact->personal_email }} {{  ($student->contact->email) ? "<br/>" : "" }}{{ $student->users->email }}
+                            <div class="flex">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> 
+                            </div>
+                            <div class="flex mr-auto mt-6 leading-6 px-2">
+                                {{ $student->users->email }} {!!  ($student->contact->personal_email) ? '<br />': "" !!} {{ $student->contact->personal_email }}
+                            </div>
+
                         </div>
                         @endif
                         @if($student->contact->home)

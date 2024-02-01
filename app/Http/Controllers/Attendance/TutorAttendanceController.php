@@ -78,20 +78,21 @@ class TutorAttendanceController extends Controller
     {
         $employment = Employment::where("punch_number",$request->punch_number)->get()->first();
         if($employment) {
-            if($employment->employee->user_id != Auth::user()->id) {
-                return response()->json(["data"=>'It is not your punch number'],304);
-            }
+            // if($employment->employee->user_id != Auth::user()->id) {
+            //     return response()->json(["data"=>'It is not your punch number'],444);
+            // }
             $planDateList = PlansDateList::find($request->plan_date_list_id);
             $plan = Plan::find($planDateList->plan_id);
             
             $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
             if($attendanceFind) {
-                return response()->json(["data"=>'Attendance Start Found'],303);
+                return response()->json(["data"=>'Attendance Start Found'],443);
             } else {
-                if($plan->tutor_id!=Auth::user()->id) {
-                    return response()->json(["data"=>'Not Matched Tutor',],302);
+                //if($plan->tutor_id!=Auth::user()->id) {
+                if($plan->tutor_id!=$employment->employee->user_id) {
+                    return response()->json(["data"=>'Not Matched Tutor',],442);
                 } else {
-                    return response()->json(["data"=>'Tutor Matched'],200);
+                    return response()->json(["data"=>'Tutor Matched'],207);
                 }
             }
         } else {

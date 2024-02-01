@@ -635,6 +635,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/list', 'list')->name('student.list'); 
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
+        Route::get('student/attendance/{student}', 'AttendanceDetails')->name('student.attendance');
+        Route::get('student/attendance/{student}/edit', 'AttendanceEditDetail')->name('student.attendance.edit');
         Route::get('student/communication/{id}', 'communications')->name('student.communication');
         Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
         Route::get('student/notes/{id}', 'notes')->name('student.notes');
@@ -1928,7 +1930,9 @@ Route::middleware('auth')->group(function() {
         Route::get('attendance/list', 'list')->name('attendance.list'); 
         Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
         Route::post('attendance/save', 'store')->name('attendance.store'); 
-
+        Route::post('attendance/update', 'updateAll')->name('attendance.update.all'); 
+        Route::delete('attendance/delete/{id}', 'destroy')->name('attendance.destory');
+        Route::post('attendance/restore', 'restore')->name('attendance.restore');
         Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
     });
 

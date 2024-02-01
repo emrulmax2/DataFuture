@@ -38,6 +38,7 @@ var classPlanDateListsTutorTable = (function () {
                     title: "DATE",
                     field: "date",
                     headerHozAlign: "left",
+                    headerSortTristate:true
                 },
                 {
                     title: "ROOM",
@@ -86,6 +87,7 @@ var classPlanDateListsTutorTable = (function () {
                     formatter(cell, formatterParams) {
                         let dropdown = [];
                         let attendanceInformation = cell.getData().attendance_information
+                        let foundAttendances = cell.getData().foundAttendances
                         if(attendanceInformation!=null) {
                             if(attendanceInformation.end_time==null) { 
                             dropdown =`<div data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&amp;:hover:not(:disabled)]:bg-success/10 mb-2 mr-1  w-24">Class on going...</div>`;
