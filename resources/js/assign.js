@@ -187,7 +187,7 @@ import TomSelect from "tom-select";
 
         $('#potentialStudentSearch').val('');
         $('.assignStudentsList.potentialStudentList').removeClass('loading').html('');
-        $('button.addStudents').removeAttr('disabled');
+        $('button.addStudents').attr('disabled', 'disabled');
         $('.potentialCount').html('');
         $('.termModuleBox').fadeOut('fast', function(){
             $('#termModuleBoxBody', this).html('');
@@ -249,7 +249,7 @@ import TomSelect from "tom-select";
 
         $('#potentialStudentSearch').val('');
         $('.assignStudentsList.potentialStudentList').removeClass('loading').html('');
-        $('button.addStudents').removeAttr('disabled');
+        $('button.addStudents').attr('disabled', 'disabled');
         $('.potentialCount').html('');
         $('.termModuleBox').fadeOut('fast', function(){
             $('#termModuleBoxBody', this).html('');
@@ -359,7 +359,7 @@ import TomSelect from "tom-select";
         $('.potentialCount').html('');
 
         $('.assignStudentsList.potentialStudentList').addClass('loading').html('');
-        $('button.addStudents').removeAttr('disabled');
+        $('button.addStudents').attr('disabled', 'disabled');
         $potentialModules.parent('div').siblings('div').children('.theLoading').fadeIn();
         axios({
             method: "post",
@@ -401,7 +401,7 @@ import TomSelect from "tom-select";
 
     function resetTermSearch(){
         $('.assignStudentsList.potentialStudentList').removeClass('loading').html('');
-        $('button.addStudents').removeAttr('disabled');
+        $('button.addStudents').attr('disabled', 'disabled');
         $('.potentialCount').html('');
 
         potentialTermDeclaration.clear(true);
