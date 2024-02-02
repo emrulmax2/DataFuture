@@ -34,9 +34,21 @@
                                 <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
                             </div>
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Terms</label>
+                                <select id="term" name="term" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="">Please Select</option>
+                                    @if(!empty($term_decs))
+                                        @foreach($term_decs as $td)
+                                            <option value="{{ $td->id }}">{{ $td->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
                             </div>
@@ -46,23 +58,33 @@
                             </div>
                         </form>
                         <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            <div class="dropdown w-1/2 sm:w-auto groupActions ml-2 hidden">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" id="groupActionDropdown" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Group Actions <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
                                     <ul class="dropdown-content">
                                         <li>
-                                            <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                            <a id="activeSelected" data-action="ACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Mark as Active
                                             </a>
                                         </li>
                                         <li>
-                                            <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                            <a id="inactiveSelected" data-action="INACTIVEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2 text-warning"></i> Mark as Inactive
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="deleteSelected" data-action="DELETEALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                                <i data-lucide="trash-2" class="w-4 h-4 mr-2 text-danger"></i> Move to Archive
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="restoreSelected" data-action="RESTOREALL" href="javascript:;" class="dropdown-item groupActionBTN">
+                                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 text-success"></i> Restore
                                             </a>
                                         </li>
                                     </ul>
@@ -91,6 +113,17 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="term_declaration_id" class="form-label">Term</label>
+                            <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($term_decs))
+                                    @foreach($term_decs as $td)
+                                        <option value="{{ $td->id }}">{{ $td->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
                             <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
                             <select id="course_id" name="course_id" class="form-control w-full">
                                 <option value="">Please Select</option>
@@ -151,6 +184,17 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="edit_term_declaration_id" class="form-label">Term</label>
+                            <select id="edit_term_declaration_id" name="term_declaration_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($term_decs))
+                                    @foreach($term_decs as $td)
+                                        <option value="{{ $td->id }}">{{ $td->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
                             <label for="edit_course_id" class="form-label">Course <span class="text-danger">*</span></label>
                             <select id="edit_course_id" name="course_id" class="form-control w-full">
                                 <option value="">Please Select</option>

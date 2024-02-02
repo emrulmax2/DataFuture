@@ -26,10 +26,12 @@ class GroupsUpdateRequests extends FormRequest
     {
         return [
             'course_id' => 'required',
+            'term_declaration_id' => 'required',
             'name' => [ 'required', 
                 Rule::unique('groups')
                        ->ignore($this->id)
                        ->where('course_id', $this->course_id)
+                       ->where('term_declaration_id', $this->term_declaration_id)
             ]
 
         ];

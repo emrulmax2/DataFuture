@@ -16,10 +16,11 @@ var classPlanListTable = (function () {
         let ptutor = $("#ptutor-CPL").val() != "" ? $("#ptutor-CPL").val() : "";
         let days = $("#days-CPL").val() != "" ? $("#days-CPL").val() : "";
         let status = $("#status-CPL").val() != "" ? $("#status-CPL").val() : "";
+        let dates = $("#date-CPL").val() != "" ? $("#date-CPL").val() : "";
 
         let tableContent = new Tabulator("#classPlansListTable", {
             ajaxURL: route("class.plan.list"),
-            ajaxParams: { courses: courses, term_declarations: instance_term, room: room, group: group, tutor: tutor, ptutor: ptutor, days: days, status: status},
+            ajaxParams: { courses: courses, term_declarations: instance_term, room: room, group: group, tutor: tutor, ptutor: ptutor, days: days, status: status, dates : dates},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -77,11 +78,6 @@ var classPlanListTable = (function () {
                 {
                     title: "Time",
                     field: "time",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Key",
-                    field: "module_enrollment_key",
                     headerHozAlign: "left",
                 },
                 {
@@ -228,13 +224,10 @@ var classPlanListTable = (function () {
 
         let tomOptions = {
             plugins: {
-                dropdown_input: {},
-                remove_button: {
-                    title: "Remove this item",
-                },
+                dropdown_input: {}
             },
             placeholder: 'Please Select',
-            persist: false,
+            //persist: false,
             create: true,
             onDelete: function (values) {
                 return confirm(
@@ -248,14 +241,24 @@ var classPlanListTable = (function () {
                 );
             },
         };
+        let topOptionsMultiple = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+                remove_button: {
+                    title: "Remove this item",
+                },
+            }
+        };
         
         var coursesCPL = new TomSelect('#courses-CPL', tomOptions);
         var instanceTermCPL = new TomSelect('#instance_term-CPL', tomOptions);
-        var tutorCPL = new TomSelect('#tutor-CPL', tomOptions);
-        var ptutorCPL = new TomSelect('#ptutor-CPL', tomOptions);
-        var roomCPL = new TomSelect('#room-CPL', tomOptions);
         var groupCPL = new TomSelect('#group-CPL', tomOptions);
-        var daysCPL = new TomSelect('#days-CPL', tomOptions);
+            groupCPL.disable();
+        var tutorCPL = new TomSelect('#tutor-CPL', topOptionsMultiple);
+        var ptutorCPL = new TomSelect('#ptutor-CPL', topOptionsMultiple);
+        var roomCPL = new TomSelect('#room-CPL', topOptionsMultiple);
+        var daysCPL = new TomSelect('#days-CPL', topOptionsMultiple);
 
         // Init Table
         classPlanListTable.init();
@@ -277,6 +280,44 @@ var classPlanListTable = (function () {
             }
         );
 
+        // On Change Course & Term Filter field. 
+        $('#courses-CPL, #instance_term-CPL').on('change', function(e){
+            var course = $('#courses-CPL').val();
+            var term = $('#instance_term-CPL').val();
+
+            if(course > 0 && term > 0){
+                $('.termCplLoader, .courseCplLoader').removeClass('hidden');
+                axios({
+                    method: "post",
+                    url: route('class.plan.get.group.filter'),
+                    data: {course : course, term : term},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    $('.termCplLoader, .courseCplLoader').addClass('hidden');
+                    groupCPL.enable();
+                    groupCPL.clearOptions();
+                    if (response.status == 200) {
+                        $.each(response.data.res, function(index, row) {
+                            groupCPL.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        groupCPL.refreshOptions()
+                    }
+                }).catch(error => {
+                    $('.termCplLoader, .courseCplLoader').addClass('hidden');
+                    groupCPL.enable();
+                    console.log('error');
+                });
+            }else{
+                $('.termCplLoader, .courseCplLoader').addClass('hidden');
+                groupCPL.clear();
+                groupCPL.clearOptions();
+                groupCPL.disable();
+            }
+        });
+
         // On click go button
         $("#tabulator-html-filter-go-CPL").on("click", function (event) {
             var views = ($("#view-CPL").val() > 0 ? $("#view-CPL").val() : 1);
@@ -293,15 +334,16 @@ var classPlanListTable = (function () {
                 let ptutor = $("#ptutor-CPL").val() != "" ? $("#ptutor-CPL").val() : "";
                 let days = $("#days-CPL").val() != "" ? $("#days-CPL").val() : "";
                 let status = $("#status-CPL").val() != "" ? $("#status-CPL").val() : "";
+                let dates = $("#date-CPL").val() != "" ? $("#date-CPL").val() : "";
 
                 axios({
                     method: "post",
                     url: route('class.plan.grid'),
-                    data: {courses : courses, instance_term : instance_term, room : room, group : group, tutor : tutor, ptutor : ptutor, days : days, status : status},
+                    data: {courses : courses, term_declaration : instance_term, room : room, group : group, tutor : tutor, ptutor : ptutor, days : days, status : status, dates : dates},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#classPlansListTable').removeAttr('tabulator-layout').removeAttr('role').html(response.data.htm);
+                        $('#classPlansListTable').removeAttr('tabulator-layout').removeAttr('role').removeClass('tabulator').html(response.data.htm);
                         createIcons({
                             icons,
                             "stroke-width": 1.5,
@@ -330,6 +372,7 @@ var classPlanListTable = (function () {
             groupCPL.clear(true);
             daysCPL.clear(true);
             $("#status-CPL").val('1');
+            $("#date-CPL").val('');
 
             $('#tabulator-print-CPL, #tabulator-export-CPL').fadeIn();
             $('#generateDaysBtn').fadeOut();
@@ -411,14 +454,17 @@ var classPlanListTable = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     
+                    $('#editPlanModal .termName').html(dataset.plan.term ? dataset.plan.term : '');
                     $('#editPlanModal .courseName').html(dataset.plan.course ? dataset.plan.course : '');
-                    $('#editPlanModal .moduleName').html(dataset.plan.module ? dataset.plan.module : '');
-                    $('#editPlanModal select[name="group_id"]').val(dataset.plan.group_id ? dataset.plan.group_id : '');
+                    $('#editPlanModal .groupName').html(dataset.plan.group ? dataset.plan.group : '');
+
+                    $('#editPlanModal select[name="module_creation_id"]').html(dataset.plan.modules ? dataset.plan.modules : '');
+
                     $('#editPlanModal select[name="rooms_id"]').val(dataset.plan.rooms_id ? dataset.plan.rooms_id : '');
                     $('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                     $('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
                     $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
-                    $('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
+                    //$('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
                     $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
                     $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
                     $('#editPlanModal input[name="submission_date"]').val(dataset.plan.submission_date ? dataset.plan.submission_date : '');
@@ -671,9 +717,13 @@ var classPlanListTable = (function () {
         $('#classPlanBuilderForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('classPlanBuilderForm');
-            var module_creation_id = $('#classPlanBuilderForm #module_creation_id').val();
+            var term_declaration_id = $('#classPlanBuilderForm #term_declaration_id').val();
+            var academic_year_id = $('#classPlanBuilderForm #academic_year_id').val();
+            var course_creation_id = $('#classPlanBuilderForm #course_creation_id').val();
             var instance_term_id = $('#classPlanBuilderForm #instance_term_id').val();
             var course_id = $('#classPlanBuilderForm #course_id').val();
+            var group_id = $('#classPlanBuilderForm #group_id').val();
+
         
             document.querySelector('.addPlanBox').setAttribute('disabled', 'disabled');
             document.querySelector('#saveUpdatePlans').setAttribute('disabled', 'disabled');
@@ -732,7 +782,16 @@ var classPlanListTable = (function () {
             axios({
                 method: "post",
                 url: route('class.plan.store'),
-                data: {routineData : routineData, module_creation_id : module_creation_id, instance_term_id : instance_term_id, course_id : course_id},
+                data: {
+                    routineData : routineData, 
+
+                    term_declaration_id : term_declaration_id, 
+                    academic_year_id : academic_year_id, 
+                    course_creation_id : course_creation_id,
+                    instance_term_id : instance_term_id,
+                    course_id : course_id,
+                    group_id : group_id
+                },
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 document.querySelector('.addPlanBox').removeAttribute('disabled');
@@ -780,9 +839,12 @@ var classPlanListTable = (function () {
             var $td = $(this).parent('.routineDay');
             var $box = $('.routineDayBoxes', $td);
 
-            var course_id = $form.find('input[name="course_id"]').val();
+            var term_declaration_id = $form.find('input[name="term_declaration_id"]').val();
+            var academic_year_id = $form.find('input[name="academic_year_id"]').val();
+            var course_creation_id = $form.find('input[name="course_creation_id"]').val();
             var instance_term_id = $form.find('input[name="instance_term_id"]').val();
-            var module_creation_id = $form.find('input[name="module_creation_id"]').val();
+            var course_id = $form.find('input[name="course_id"]').val();
+            var group_id = $form.find('input[name="group_id"]').val();
 
             var day = $btn.attr('data-day');
             var venue = $btn.attr('data-venue');
@@ -792,7 +854,17 @@ var classPlanListTable = (function () {
             axios({
                 method: "post",
                 url: route('class.plan.get.box'),
-                data: {course_id : course_id, instance_term_id : instance_term_id, module_creation_id : module_creation_id, day : day, venue : venue, room : room},
+                data: {
+                    term_declaration_id : term_declaration_id, 
+                    academic_year_id : academic_year_id, 
+                    course_creation_id : course_creation_id, 
+                    instance_term_id : instance_term_id, 
+                    course_id : course_id, 
+                    group_id : group_id, 
+                    day : day, 
+                    venue : venue, 
+                    room : room
+                },
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -979,13 +1051,62 @@ var classPlanListTable = (function () {
             var $this = $(this);
             var id = $this.attr('data-value');
             var title = $this.html();
+            var $theDropdown = $this.closest('.dropdownMenus.active');
+            var label = $theDropdown.attr('data-label');
             
-            $this.closest('.dropdownMenus.active').attr('data-id', id);
-            $this.closest('.dropdownMenus.active').children('.DMToggle').children('span').html(title);
-            
-            $('.dropdownMenus.active .dropdownMenuSearch').val('');
-            $('.dropdownMenus.active .dropdownMenuBox').slideUp();
-            $('.dropdownMenus').removeClass('active');
+            $theDropdown.attr('data-id', id);
+            $theDropdown.children('.DMToggle').children('span').html(title);
+
+            if(label == 'Module'){
+                axios({
+                    method: 'post',
+                    url: route('class.plan.get.module.details'),
+                    data: {id : id},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        var module = response.data.res;
+                        if(module.moodle_enrollment_key){
+                            $theDropdown.siblings('.enrollmentKey').attr('data-id', module.moodle_enrollment_key);
+                            $theDropdown.siblings('.enrollmentKey').children('.btn-ekey').children('span').html(module.moodle_enrollment_key)
+                        }else{
+                            $theDropdown.siblings('.enrollmentKey').attr('data-id', '0');
+                            $theDropdown.siblings('.enrollmentKey').children('.btn-ekey').children('span').html('Enrollment')
+                        }
+                        if(module.submission_date){
+                            $theDropdown.siblings('.submissionDate').attr('data-id', module.submission_date);
+                            $theDropdown.siblings('.submissionDate').children('.btn-submission').children('span').html(module.submission_date)
+                        }else{
+                            $theDropdown.siblings('.submissionDate').attr('data-id', '0');
+                            $theDropdown.siblings('.submissionDate').children('.btn-submission').children('span').html('Submission')
+                        }
+                        if(module.class_type){
+                            $theDropdown.siblings('.classType').attr('data-id', module.class_type);
+                            $theDropdown.siblings('.classType').children('.btn-class-type').children('span').html(module.class_type)
+                        }else{
+                            $theDropdown.siblings('.classType').attr('data-id', '0');
+                            $theDropdown.siblings('.classType').children('.btn-class-type').children('span').html('Class Type')
+                        }
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        $theDropdown.siblings('.enrollmentKey').attr('data-id', '0');
+                        $theDropdown.siblings('.enrollmentKey').children('.btn-ekey').children('span').html('Enrollment')
+                        $theDropdown.siblings('.submissionDate').attr('data-id', '0');
+                        $theDropdown.siblings('.submissionDate').children('.btn-submission').children('span').html('Submission')
+                        $theDropdown.siblings('.classType').attr('data-id', '0');
+                        $theDropdown.siblings('.classType').children('.btn-class-type').children('span').html('Class Type')
+                        console.log('error');
+                    }
+                });
+                $('.dropdownMenus.active .dropdownMenuSearch').val('');
+                $('.dropdownMenus.active .dropdownMenuBox').slideUp();
+                $('.dropdownMenus').removeClass('active');
+            }else{
+                $('.dropdownMenus.active .dropdownMenuSearch').val('');
+                $('.dropdownMenus.active .dropdownMenuBox').slideUp();
+                $('.dropdownMenus').removeClass('active');
+            }
         });
 
         /* Clear Selected Value from Item */
@@ -1115,6 +1236,25 @@ var classPlanListTable = (function () {
                     }
                 });
         });
+
+        $('.cp_venue_id').on('change', function(){
+            var $cp_venue_id = $(this);
+            var cp_venue_id = $cp_venue_id.val();
+
+            if($cp_venue_id.prop('checked')){
+                $('.routineBuilderTable .cp_venue_col_'+cp_venue_id).css({'display' : 'table-cell'});
+            }else{
+                var routineCount = 0;
+                $('.routineBuilderTable tbody .cp_venue_col_'+cp_venue_id).each(function(){
+                    routineCount += $(this).find('.routineDayBox').length;
+                });
+                if(routineCount > 0){
+                    $cp_venue_id.prop('checked', true);
+                }else{
+                    $('.routineBuilderTable .cp_venue_col_'+cp_venue_id).css({'display' : 'none'});
+                }
+            }
+        })
     }
 
 })()

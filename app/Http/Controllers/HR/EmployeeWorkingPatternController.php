@@ -50,7 +50,7 @@ class EmployeeWorkingPatternController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'effective_from' => date('jS M, Y', strtotime($list->effective_from)),
-                    'end_to' => (!empty($list->end_to) ? date('js M, Y', strtotime($list->end_to)) : ''),
+                    'end_to' => (!empty($list->end_to) ? date('jS M, Y', strtotime($list->end_to)) : ''),
                     'contracted_hour' => $list->contracted_hour,
                     'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at,

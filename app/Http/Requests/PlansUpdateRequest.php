@@ -24,11 +24,12 @@ class PlansUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'group_id' => 'required',
+            //'group_id' => 'required',
             'rooms_id' => 'required',
             'tutor_id' => 'required',
             'personal_tutor_id' => 'required',
-            'module_enrollment_key' => 'required',
+            'module_creation_id' => 'required',
+            //'module_enrollment_key' => 'required',
             'start_time' => 'required',
             'end_time' => 'required',
             'submission_date' => 'required|date',

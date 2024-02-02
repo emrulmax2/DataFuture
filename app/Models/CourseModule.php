@@ -41,4 +41,8 @@ class CourseModule extends Model
     public function assesments(){
         return $this->hasMany(CourseModuleBaseAssesment::class, 'course_module_id', 'id');
     }
+
+    public function creation(){
+        return $this->hasMany(ModuleCreation::class, 'course_module_id', 'id');
+    }
 }

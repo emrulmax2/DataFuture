@@ -265,7 +265,7 @@
                             </div>
                             @else
                                 <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holida data not found!
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holiday data not found!
                                 </div>
                             @endif
                         </div>
@@ -297,7 +297,7 @@
                             <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-12 sm:col-span-4">
-                                    <label class="block font-medium pt-2">Holiday Years</label>
+                                    <label class="block font-medium pt-2">Holiday Year</label>
                                 </div>
                                 <div class="col-span-12 sm:col-span-8">
                                     <select class="form-control w-full" name="leave_holiday_years">

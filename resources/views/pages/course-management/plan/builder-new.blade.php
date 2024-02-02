@@ -24,9 +24,8 @@
             <div class="intro-y box p-5 lg:mt-5">
                 <form method="post" action="#" id="classPlanBuilderForm">
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12 flex">
+                        <div class="col-span-12">
                             <h2 class="text-xl font-medium mb-4 text-left"><u>{{ $group->name }}</u></h2>
-                            <h2 class="text-xl font-medium mb-4 ml-auto">No of Modul: {{ $moduleCount }}</h2>
                         </div>
                         <div class="col-span-3">
                             <div class="grid grid-cols-12 gap-0">
@@ -98,26 +97,6 @@
                                 <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($instanceTerm->revision_end_date) ? $instanceTerm->revision_end_date : '---') }}</div></div>
                             </div>
                         </div>
-
-                        <div class="col-span-12">
-                            <h2 class="text-xl font-medium mt-5 mb-4 text-left"><u>Venues</u></h2>
-                        </div>
-                        <div class="col-span-12">
-                            @if($venues->count() > 0)
-                                <div class="flex flex-col sm:flex-row">
-                                    @foreach($venues as $vns)
-                                        <div class="form-check mr-5">
-                                            <input checked id="cp_venue_id_{{ $vns->id }}" class="form-check-input cp_venue_id" name="cp_venue_id[]" type="checkbox" value="{{ $vns->id }}">
-                                            <label class="form-check-label" for="cp_venue_id_{{ $vns->id }}">{{ $vns->name }}</label>
-                                        </div>  
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
-                                    <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Venues not found.
-                                </div>
-                            @endif
-                        </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-center mt-7 pt-3 border-t">
@@ -162,7 +141,7 @@
                                     <th class="whitespace-nowrap">Day</th>
                                     @if(!empty($rooms))
                                         @foreach($rooms as $rm)
-                                            <th class="whitespace-nowrap cp_venue_col_{{ $rm->venue_id }}">{{ $rm->name }} - {{ isset($rm->venue->name) ? $rm->venue->name : '' }}</th>
+                                            <th class="whitespace-nowrap">{{ $rm->name }} - {{ isset($rm->venue->name) ? $rm->venue->name : '' }}</th>
                                         @endforeach
                                     @endif
                                 </tr>
@@ -176,7 +155,7 @@
                                         <td class="text-center font-bold">{{ $day[$i] }}</td>
                                         @if(!empty($rooms))
                                         @foreach($rooms as $rm)
-                                            <td class="routineDay relative cp_venue_col_{{ $rm->venue_id }}" data-venuRoom="{{ $rm->venue_id }}_{{ $rm->id }}">
+                                            <td class="routineDay relative" data-venuRoom="{{ $rm->venue_id }}_{{ $rm->id }}">
                                                 <div class="routineDayBoxes">
                                                     @if(isset($plans[$i][$rm->id]) && !empty($plans[$i][$rm->id]))
                                                         @foreach($plans[$i][$rm->id] as $rmhtml)

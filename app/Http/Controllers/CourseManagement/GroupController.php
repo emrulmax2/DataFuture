@@ -8,6 +8,7 @@ use App\Http\Requests\GroupsRequests;
 use App\Http\Requests\GroupsUpdateRequests;
 use App\Models\Course;
 use App\Models\Group;
+use App\Models\TermDeclaration;
 use App\Models\User;
 
 class GroupController extends Controller
@@ -21,13 +22,16 @@ class GroupController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Groups', 'href' => 'javascript:void(0);']
             ],
-            'courses' => Course::all()
+            'courses' => Course::orderBy('name', 'ASC')->get(),
+            'term_decs' => TermDeclaration::orderBy('id', 'DESC')->get(),
+
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
+        $term = (isset($request->term) && $request->term > 0 ? $request->term : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -39,8 +43,11 @@ class GroupController extends Controller
         if(!empty($queryStr)):
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
+        if($term > 0): $query->where('term_declaration_id', $term); endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
 
         $total_rows = $count = $query->count();
@@ -62,9 +69,11 @@ class GroupController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'term' => (isset($list->term->name) && !empty($list->term->name) ? $list->term->name : ''),
                     'course' => (isset($list->course->name) && !empty($list->course->name) ? $list->course->name : ''),
                     'name' => $list->name,
                     'evening_and_weekend' => (isset($list->evening_and_weekend) && $list->evening_and_weekend == '1' ? 'Yes' : 'No'),
+                    'active' => (isset($list->active) ? $list->active : 0),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -75,10 +84,12 @@ class GroupController extends Controller
 
     public function store(GroupsRequests $request){
         $data = Group::create([
+            'term_declaration_id'=> (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null),
             'course_id'=> $request->course_id,
             'name'=> $request->name,
             'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
-            'created_by' => auth()->user()->id
+            'created_by' => auth()->user()->id,
+            'active' => 1
         ]);
         return response()->json($data);
     }
@@ -95,6 +106,7 @@ class GroupController extends Controller
 
     public function update(GroupsUpdateRequests $request, Group $group){
         $data = Group::where('id', $request->id)->update([
+            'term_declaration_id'=> (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null),
             'course_id'=> $request->course_id,
             'name'=> $request->name,
             'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
@@ -120,5 +132,23 @@ class GroupController extends Controller
         $data = Group::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function groupBulkActions(Request $request){
+        $ids = (isset($request->ids) && !empty($request->ids) ? explode(',', $request->ids) : []);
+        $action = $request->action;
+
+        if(!empty($ids) && !empty($action)):
+            if($action == 'ACTIVEALL'):
+                Group::whereIn('id', $ids)->update(['active' => 1]);
+            elseif($action == 'INACTIVEALL'):
+                Group::whereIn('id', $ids)->update(['active' => 0]);
+            elseif($action == 'DELETEALL'):
+                Group::whereIn('id', $ids)->delete();
+            elseif($action == 'RESTOREALL'):
+                Group::whereIn('id', $ids)->withTrashed()->restore();
+            endif;
+        endif;
+        return response()->json(['message' => 'Data updated'], 200);
     }
 }

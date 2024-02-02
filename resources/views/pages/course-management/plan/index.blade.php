@@ -29,10 +29,11 @@
                 </div>
                 <div class="p-5">
                     <form id="tabulatorFilterForm-CPL">
-                        <div class="grid grid-cols-12 gap-3">
+                        <div class="grid grid-cols-12 gap-3 gap-y-2">
                             <div class="col-span-3">
-                                <label class="form-label">Courses</label>
-                                <select id="courses-CPL" name="courses[]" class="w-full tom-selects" multiple>
+                                <label class="form-label flex items-center">Courses <i data-loading-icon="three-dots" class="w-6 h-6 ml-3 courseCplLoader hidden"></i></label>
+                                <select id="courses-CPL" name="courses" class="w-full tom-selects">
+                                    <option value="">Please Select</option>
                                     @if(!empty($courses))
                                         @foreach($courses as $crs)
                                             <option value="{{ $crs->id }}">{{ $crs->name }}</option>
@@ -41,13 +42,20 @@
                                 </select>
                             </div>
                             <div class="col-span-3">
-                                <label class="form-label">Terms</label>
-                                <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id[]" class="w-full tom-selects" multiple>
+                                <label class="form-label flex items-center">Terms <i data-loading-icon="three-dots" class="w-6 h-6 ml-3 termCplLoader hidden"></i></label>
+                                <select data-placeholder="Select Term" id="instance_term-CPL" name="term_declaration_id" class="w-full tom-selects">
+                                    <option value="">Please Select</option>
                                     @if(!empty($terms))
                                         @foreach($terms as $trm)
                                             <option value="{{ $trm->id }}">{{ $trm->name }} - {{ $trm->termType->name }}</option>
                                         @endforeach
                                     @endif
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="form-label">Groups</label>
+                                <select data-placeholder="Select Group" id="group-CPL" name="groups" class="w-full tom-selects">
+                                    <option value="">Please Select</option>
                                 </select>
                             </div>
                             <div class="col-span-3">
@@ -80,16 +88,6 @@
                                     @endif
                                 </select>
                             </div>
-                            <div class="col-span-3">
-                                <label class="form-label">Groups</label>
-                                <select data-placeholder="Select Group" id="group-CPL" name="groups[]" class="w-full tom-selects" multiple>
-                                    @if(!empty($group))
-                                        @foreach($group as $gr)
-                                            <option value="{{ $gr->id }}">{{ $gr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
                             <div class="col-span-2">
                                 <label class="form-label">Days</label>
                                 <select data-placeholder="Select Tutor" id="days-CPL" name="days[]" class="tom-selects w-full" multiple>
@@ -101,6 +99,10 @@
                                     <option value="sat">Sat</option>
                                     <option value="sun">Sun</option>
                                 </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Date</label>
+                                <input type="text" name="date-CPL" id="date-CPL" class="w-full form-control datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
                             </div>
                             <div class="col-span-2">
                                 <label class="form-label">Status</label>
@@ -189,27 +191,29 @@
                     <div class="grid grid-cols-12 gap-3">
                             <div class="col-span-6">
                                 <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Term</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold termName">Term Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
                                     <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Course</div></label>
                                     <div class="col-span-8"><div class="text-left font-medium font-bold courseName">Course Name</div></div>
                                 </div>
                             </div>
                             <div class="col-span-6">
                                 <div class="grid grid-cols-12 gap-0">
-                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Module</div></label>
-                                    <div class="col-span-8"><div class="text-left font-medium font-bold moduleName">Module Name</div></div>
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Group</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold groupName">Group Name</div></div>
                                 </div>
                             </div>
+                            <div class="col-span-6"></div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="group_id" class="form-label">Group <span class="text-danger">*</span></label>
-                                <select id="group_id" name="group_id" class="form-control w-full">
+                                <label for="module_creation_id" class="form-label">Module <span class="text-danger">*</span></label>
+                                <select id="module_creation_id" name="module_creation_id" class="form-control w-full">
                                     <option value="">Please Select</option>
-                                    @if(!empty($group))
-                                        @foreach($group as $gr)
-                                            <option value="{{ $gr->id }}">{{ $gr->name }}</option>
-                                        @endforeach
-                                    @endif
                                 </select>
-                                <div class="acc__input-error error-group_id text-danger mt-2"></div>
+                                <div class="acc__input-error error-module_creation_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="rooms_id" class="form-label">Room <span class="text-danger">*</span></label>
@@ -257,11 +261,11 @@
                                     <option value="Seminar">Seminar</option>
                                 </select>
                             </div>
-                            <div class="col-span-6 sm:col-span-4">
+                            {{--<div class="col-span-6 sm:col-span-4">
                                 <label for="module_enrollment_key" class="form-label">Enrollment Key <span class="text-danger">*</span></label>
                                 <input id="module_enrollment_key" type="text" name="module_enrollment_key" class="form-control w-full">
                                 <div class="acc__input-error error-module_enrollment_key text-danger mt-2"></div>
-                            </div>
+                            </div>--}}
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
                                 <input id="start_time" type="text" name="start_time" class="form-control w-full theTimeField" placeholder="00:00">

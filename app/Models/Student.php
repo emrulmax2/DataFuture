@@ -183,6 +183,10 @@ class Student extends Model
         endif;
     }
 
+    public function activeCR(){
+        return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
+    }
+
     public function otherCrels(){
         return $this->hasMany(StudentCourseRelation::class, 'student_id')->where('active', '!=', 1);
     }
