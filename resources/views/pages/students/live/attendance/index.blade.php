@@ -14,39 +14,45 @@
     <!-- END: Profile Info -->
 
     <!-- BEGIN: Daily Sales -->
-    <div class="intro-y box col-span-12 p-5 mt-5">
+        @php $termstart=0 @endphp
         @foreach($dataSet as $termId =>$dataStartPoint)
-        <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-            <h2 class="font-medium text-base mr-auto">{{ $term[$termId]["name"] }} <div class="font-medium dark:text-slate-500 bg-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }}/20 text-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
-                <div class="text-slate-500 sm:mr-5 ml-auto text-sm mt-2">[ {{ $totalFullSetFeedList[$termId] }} ] Total: {{ $totalClassFullSet[$termId] }} days class</div>
-            </h2>
-            <div class="text-slate-500 sm:mr-5 ml-auto">Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} </div>
-            <div class="dropdown ml-auto sm:hidden">
-                <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                    <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
-                </a>
-                <div class="dropdown-menu w-40">
-                    <ul class="dropdown-content">
-                        <li>
-                            <a href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('student.attendance.edit',$student->id) }}" class="dropdown-item">
-                                <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                            </a>
-                        </li>
-                    </ul>
+        @php $termstart++ @endphp
+        <div class="intro-y box col-span-12 p-5 mt-5">
+            <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
+                <h2 class="font-medium text-base mr-auto">{{ $term[$termId]["name"] }} <div class="font-medium dark:text-slate-500 bg-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }}/20 text-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                    <div class="text-slate-500 sm:mr-5 ml-auto text-sm mt-2">[ {{ $totalFullSetFeedList[$termId] }} ] Total: {{ $totalClassFullSet[$termId] }} days class</div>
+                </h2>
+                <div class="text-slate-500 sm:mr-5 ml-auto">Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} </div>
+                <div class="dropdown ml-auto sm:hidden">
+                    <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
+                        <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
+                    </a>
+                    <div class="dropdown-menu w-40">
+                        <ul class="dropdown-content">
+                            <li>
+                                <a href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
+                                </a>
+                            </li>
+                            @if($termstart==1)
+                            <li>
+                                <a href="{{ route('student.attendance.edit',$student->id) }}" class="dropdown-item">
+                                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </div>
                 </div>
+                <button class="btn btn-outline-secondary hidden sm:flex">
+                    <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print Now
+                </button>
+                @if($termstart==1)
+                <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
+                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
+                </a>
+                @endif
             </div>
-            <button class="btn btn-outline-secondary hidden sm:flex">
-                <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print Now
-            </button>
-            <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
-                <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-            </a>
-        </div>
             @foreach($dataStartPoint as $moduleDetails => $data)
             
             <div class="p-5">
@@ -62,6 +68,7 @@
                         
                         $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
                         $end_time = date('h:i A', strtotime($end_time));  
+                        
                     @endphp
                     <div class="ml-4 mr-auto">
                         <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
@@ -106,7 +113,7 @@
                                     
                                     // $end_time = date("Y-m-d ".$planDateList["attendance_information"]->end_time);
                                     // $end_time = date('h:i A', strtotime($end_time));  
-                                    
+                                    //dd($planDateList["attendance_information"])
                                 @endphp
                                 <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
@@ -140,8 +147,9 @@
                 </div>
             </div>
             @endforeach
+        </div>
         @endforeach
-    </div>
+    
     
     <!-- END: Daily Sales -->
 
