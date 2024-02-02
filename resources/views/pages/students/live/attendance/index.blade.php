@@ -59,8 +59,8 @@
 
                 <div class="relative flex items-center mb-5">
                     <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer">
-                        <i data-lucide="minus" class="plusminus w-6 h-6 mr-2"></i>
-                            <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 hidden"></i>
+                        <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
+                            <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                     </div>
                     @php
                         $start_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->start_time);
@@ -68,10 +68,10 @@
                         
                         $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
                         $end_time = date('h:i A', strtotime($end_time));  
-                        if(!isset($planDetails[$termId][$moduleDetails]->tutor->employee))
-                            dd($planDetails[$termId][$moduleDetails]->tutor);
+                        // if(!isset($planDetails[$termId][$moduleDetails]->tutor->employee))
+                        //     dd($planDetails[$termId][$moduleDetails]->tutor);
                     @endphp
-                    <div class="ml-4 mr-auto">
+                    <div class="ml-4 mr-auto toggle-heading">
                         <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
                         <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ $planDetails[$termId][$moduleDetails]->tutor->employee->full_name }}</div>
                     </div>
@@ -80,7 +80,7 @@
                 </div>
                 
                 
-                <div id="tabledata{{ $planDetails[$termId][$moduleDetails]->id }}" class="tabledataset overflow-x-auto p-5 pt-0">
+                <div id="tabledata{{ $planDetails[$termId][$moduleDetails]->id }}" class="tabledataset overflow-x-auto p-5 pt-0" style="display: none;">
                     <table data-tw-merge class="w-full text-left">
                         <thead data-tw-merge class="">
                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
@@ -161,6 +161,7 @@
     <script type="module">
         (function () {
             $(".tablepoint-toggle").on('click', function(e) {
+                e.preventDefault();
                 let tthis = $(this)
                 let currentThis=tthis.children(".plusminus").eq(0);
                 console.log(currentThis);
@@ -176,6 +177,11 @@
                 tthis.parent().siblings('div.tabledataset').slideToggle();
 
             });
+            $(".toggle-heading").on('click', function(e) {
+                e.preventDefault();
+                let tthis = $(this)
+                tthis.siblings("div.tablepoint-toggle").trigger('click')
+            })
         })()
     </script>
 @endsection

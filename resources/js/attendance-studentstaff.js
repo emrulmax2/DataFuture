@@ -80,6 +80,11 @@ import Tabulator from "tabulator-tables";
         tthis.parent().siblings('div.tabledataset').slideToggle();
 
     });
+    $(".toggle-heading").on('click', function(e) {
+        e.preventDefault();
+        let tthis = $(this)
+        tthis.siblings("div.tablepoint-toggle").trigger('click')
+    })
 
     $('div.tabledataset').on('click', '.delete_btn', function(){
         let $statusBTN = $(this);

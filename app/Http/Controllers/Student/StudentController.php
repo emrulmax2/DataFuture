@@ -525,15 +525,6 @@ class StudentController extends Controller
 
     public function AttendanceDetails(Student $student) {
 
-        // $Query = DB::table('term_declarations as td')
-        //             ->select( 'td.*' )
-        //             ->leftJoin('plans as plan', 'td.id', 'plan.term_declaration_id')
-        //             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
-        //             ->where('assign.student_id', $student->id)
-        //             ->groupBy('td.id');
-
-        // $Query = $Query->get();
-        // foreach($Query as $list):
             $attendanceFeedStatus = AttendanceFeedStatus::all();
             $termData = [];
 
@@ -547,11 +538,38 @@ class StudentController extends Controller
                             ->where('assign.student_id', $student->id)
                             ->orderBy("pdl.date",'desc')
                             ->get();
-                foreach($QueryInner as $list):
-                    $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                    $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
 
-                    if($attendance) {
+                // $planDateLists = DB::table('plans_date_lists as pdl')
+                //             ->select( 'pdl.id' )
+                //             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
+                //             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
+                //             ->where('assign.student_id', $student->id)
+                //             ->groupBy("pdl.id")
+                //             ->get()->pluck('id');
+                
+                //$attendancelist = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->whereIn("plans_date_list_id",$planDateLists)->get();
+                //$attendanceInformationlist =AttendanceInformation::with(["tutor","planDate"])->whereIn("plans_date_list_id",$planDateLists)->get();
+                //dd($attendanceInformationlist);
+                foreach($QueryInner as $list):
+                    // foreach($attendancelist as $attendanceData) {
+                    //     if($attendanceData->plans_date_list_id==$list->id) {
+                    //         $attendance =  $attendanceData;
+                    //         break;
+                    //     }
+                    // }
+
+                    // foreach($attendanceInformationlist as $attendanceInformationData) {
+                    //     if($attendanceInformationData->plans_date_list_id==$list->id) {
+                    //         $attendanceInformation =  $attendanceInformationData;
+                    //         break;
+                    //     }
+                    // }
+                    $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
+                    if(isset($attendance)) {
+
+                        $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
+                        if(isset($attendanceInformation))
+                            $attendanceInformation->tutor->load(["employee"]);
                         if(!isset($arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code])) {
                             $arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code] = 0;
                         }
@@ -579,7 +597,7 @@ class StudentController extends Controller
                     $data[$list->term_id][$list->module_name."-".$list->module_code][$list ->date] = [
                             "id" => $list->id,
                             "date" => date("d-m-Y", strtotime($list ->date)),
-                            "attendance_information" => ($attendanceInformation) ?? null,
+                            "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
                             "attendance"=> ($attendance) ?? null,
                             "term_id"=> $list->term_id,
                             "module_creation_id"=>$list->module_creation_id,
@@ -660,9 +678,11 @@ class StudentController extends Controller
                             ->get();
                 foreach($QueryInner as $list):
                     $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                    $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
-
+                    
                     if($attendance) {
+                        $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
+                        $attendanceInformation->tutor->load(["employee"]);
+                        
                         if(!isset($arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code])) {
                             $arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code] = 0;
                         }
