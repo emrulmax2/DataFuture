@@ -325,23 +325,24 @@ class AttendanceController extends Controller
 
     public function updateAll(Request $request)
     {
-        
+    
         foreach ( $request->get('id') as  $value) {
-            
-            $attendance = Attendance::find($value); 
+            if(isset($request->attendance_feed[$value])) {
+                $attendance = Attendance::find($value); 
+                
+                $data = [
+                    'attendance_feed_status_id' => $request->attendance_feed[$value],
+                    'updated_by' => Auth::user()->id,
+                ];
 
-            $data = [
-                'attendance_feed_status_id' => $request->attendance_feed[$value],
-                'updated_by' => Auth::user()->id,
-            ];
-
-            $attendance->fill($data);
-            $attendance->save();
+                $attendance->fill($data);
+                $attendance->save();
+            }
         }
-        if($attendance->id) 
+        if(isset($attendance->id)) 
             return response()->json(["all data updated successfully"]);
         else 
-            return response()->json(["data could not update.",422]);
+            return response()->json(["data could not update."],422);
     }
     /**
      * Remove the specified resource from storage.

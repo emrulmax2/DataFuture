@@ -51,12 +51,18 @@ import Tabulator from "tabulator-tables";
         }).catch(error => {
             $('.load-update').addClass('hidden');
             
+
             if (error.response) {
                 if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#attendance-update_all .${key}`).addClass('border-danger')
-                        $(`#attendance-update_all  .error-${key}`).html(val)
-                    }
+
+                    errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html("OOPS!");
+                        $("#errorModal .errorModalDesc").html('No Update Found.');
+                    }); 
+                    setTimeout(function(){
+                        errorModal.hide();
+                    }, 1500);
                 } else {
                     console.log('error');
                 }
