@@ -36,7 +36,7 @@
                             <select id="unsigned_statuses" class="form-control w-full lcc-tom-select" name="unsigned_statuses[]" multiple>
                                 @if($statuses->count() > 0)
                                     @foreach($statuses as $sts)
-                                        <option {{ (in_array($sts->id, [9, 14, 15, 19, 20]) ? 'selected' : '') }} value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                        <option {{ (in_array($sts->id, [18, 23, 24, 28, 29]) ? 'selected' : '') }} value="{{ $sts->id }}">{{ $sts->name }}</option>
                                     @endforeach
                                 @endif
                             </select>
