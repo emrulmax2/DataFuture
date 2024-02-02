@@ -68,7 +68,8 @@
                         
                         $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
                         $end_time = date('h:i A', strtotime($end_time));  
-                        
+                        if(!isset($planDetails[$termId][$moduleDetails]->tutor->employee))
+                            dd($planDetails[$termId][$moduleDetails]->tutor);
                     @endphp
                     <div class="ml-4 mr-auto">
                         <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
@@ -113,7 +114,7 @@
                                     
                                     // $end_time = date("Y-m-d ".$planDateList["attendance_information"]->end_time);
                                     // $end_time = date('h:i A', strtotime($end_time));  
-                                    //dd($planDateList["attendance_information"])
+                                    
                                 @endphp
                                 <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
