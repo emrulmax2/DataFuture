@@ -17,6 +17,7 @@ use App\Models\Plan;
 use App\Models\Semester;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentCourseRelation;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
@@ -259,7 +260,7 @@ class AssignController extends Controller
                 $res['modules'][$i]['id'] = $md->id;
                 $res['modules'][$i]['name'] = (isset($md->creations->module_name) && !empty($md->creations->module_name) ? $md->creations->module_name : 'Unknown');
 
-                $res['module_html'] .= '<li class="flex items-start mb-2"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> ';
+                $res['module_html'] .= '<li  class="potential_modules_'.$md->id.' active flex items-start mb-2"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> ';
                     $res['module_html'] .= (isset($md->creations->module_name) ? $md->creations->module_name : 'Unknown Module');
                     $res['module_html'] .= (isset($md->assign) ? '&nbsp;<strong>('.$md->assign->count().')</strong>' : '&nbsp;<strong>(0)</strong>');
                 $res['module_html'] .= '</li>';
@@ -389,6 +390,7 @@ class AssignController extends Controller
     }
 
     public function assignStudentsToPlan(Request $request){
+        $term_declaration_id = $request->term_declaration;
         $plans_id = (isset($request->plans_id) && !empty($request->plans_id) ? $request->plans_id : []);
         $students_id = (isset($request->students_id) && !empty($request->students_id) ? $request->students_id : []);
 
@@ -414,6 +416,13 @@ class AssignController extends Controller
                         Assign::create([
                             'plan_id' => $plan,
                             'student_id' => $student,
+                            'created_by' => auth()->user()->id
+                        ]);
+
+                        StudentAttendanceTermStatus::create([
+                            'student_id' => $student,
+                            'term_declaration_id' => $term_declaration_id,
+                            'status_id' => $theStudent->status_id,
                             'created_by' => auth()->user()->id
                         ]);
                         $successids[] = $theStudent->id;
@@ -444,12 +453,14 @@ class AssignController extends Controller
     }
 
     public function deassignStudentsFromPlan(Request $request){
+        $term_declaration_id = $request->term_declaration;
         $plans_id = (isset($request->plans_id) && !empty($request->plans_id) ? $request->plans_id : []);
         $students_id = (isset($request->students_id) && !empty($request->students_id) ? $request->students_id : []);
 
         if(!empty($plans_id) && !empty($students_id)):
             foreach($plans_id as $plan):
                 $assigns = Assign::where('plan_id', $plan)->whereIn('student_id', $students_id)->forceDelete();
+                $termStatus = StudentAttendanceTermStatus::where('term_declaration_id', $term_declaration_id)->whereIn('student_id', $students_id)->forceDelete();
             endforeach;
         endif;
 
