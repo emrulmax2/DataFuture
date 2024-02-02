@@ -1482,3 +1482,8 @@
 .assignStudentsList.potentialStudentList li.noticeItem label{
     cursor: not-allowed;
 }
+
+#termModuleBoxBody ul li.active svg{
+    stroke: rgb(13 148 136);
+    stroke-width: 2.2;
+}

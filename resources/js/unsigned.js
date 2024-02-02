@@ -118,11 +118,11 @@ var unsignedStudentList = (function () {
     $('#unsignnedStudentList-reset').on('click', function(){
         unsignedTerm.clear(true);
         unsignedStatuses.clear(true);
-        unsignedStatuses.addItem(9, true);
-        unsignedStatuses.addItem(14, true);
-        unsignedStatuses.addItem(15, true);
-        unsignedStatuses.addItem(19, true);
-        unsignedStatuses.addItem(20, true);
+        unsignedStatuses.addItem(18, true);
+        unsignedStatuses.addItem(23, true);
+        unsignedStatuses.addItem(24, true);
+        unsignedStatuses.addItem(28, true);
+        unsignedStatuses.addItem(29, true);
         $('.unsignedStudentListWrap').fadeOut('fast', function(){
             unsignedStudentList.init();
         })

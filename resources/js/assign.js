@@ -355,6 +355,13 @@ import TomSelect from "tom-select";
             })
         }
         
+        if(assignModuleId > 0){
+            $('#termModuleBoxBody ul li').removeClass('active');
+            $('#termModuleBoxBody ul li.potential_modules_'+assignModuleId).addClass('active');
+        }else{
+            $('#termModuleBoxBody ul li').addClass('active');
+        }
+
         $('#potentialStudentSearch').val('');
         $('.potentialCount').html('');
 
@@ -480,7 +487,7 @@ import TomSelect from "tom-select";
             axios({
                 method: "post",
                 url: route('assign.students.to.plan'),
-                data: {plans_id : plans_id, students_id : students_id},
+                data: {term_declaration : term_declaration, plans_id : plans_id, students_id : students_id},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $theBtn.find('svg.theLoader').fadeOut();
@@ -604,7 +611,7 @@ import TomSelect from "tom-select";
             axios({
                 method: "post",
                 url: route('assign.remove.students.from.plan'),
-                data: {plans_id : plans_id, students_id : students_id},
+                data: {term_declaration : term_declaration, plans_id : plans_id, students_id : students_id},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $theBtn.find('svg.theLoader').fadeOut();
