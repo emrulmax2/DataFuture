@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('term_declaration_id')->references('id')->on('term_declarations')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('set null')->onUpdate('cascade');
+            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
