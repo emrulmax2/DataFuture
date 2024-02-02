@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
@@ -175,7 +176,19 @@ class Student extends Model
     }
 
     public function crel(){
+        if(Session::has('student_temp_course_relation_'.$this->id) && Session::get('student_temp_course_relation_'.$this->id) > 0):
+            return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('id', '=', Session::get('student_temp_course_relation_'.$this->id));
+        else:
+            return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
+        endif;
+    }
+
+    public function activeCR(){
         return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
+    }
+
+    public function otherCrels(){
+        return $this->hasMany(StudentCourseRelation::class, 'student_id')->where('active', '!=', 1);
     }
 
     public function sexid(){

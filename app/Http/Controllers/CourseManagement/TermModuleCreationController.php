@@ -25,9 +25,9 @@ class TermModuleCreationController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Term Modules', 'href' => 'javascript:void(0);']
             ],
-            'terms' => InstanceTerm::all(),
-            'courses' => Course::all(),
-            'semesters' => Semester::all()
+            'terms' => InstanceTerm::orderBy('id', 'DESC')->get(),
+            'courses' => Course::orderBy('name', 'ASC')->get(),
+            'semesters' => Semester::orderBy('name', 'ASC')->get()
         ]);
     }
 
@@ -36,7 +36,9 @@ class TermModuleCreationController extends Controller
         $instance_term = (isset($request->instance_term) && $request->instance_term > 0 ? $request->instance_term : 0);
 
         $query = DB::table('instance_terms as it')
-                    ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name')
+                    ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name', 'td.name as term_dec_name', 'tt.name as term_type_name')
+                    ->leftJoin('term_declarations as td', 'it.term_declaration_id', '=', 'td.id')
+                    ->leftJoin('term_types as tt', 'it.term_type_id', '=', 'tt.id')
                     ->leftJoin('course_creation_instances as cci', 'it.course_creation_instance_id', '=', 'cci.id')
                     ->leftJoin('course_creations as cc', 'cci.course_creation_id', '=', 'cc.id')
                     ->leftJoin('courses as c', 'cc.course_id', '=', 'c.id')
@@ -73,9 +75,8 @@ class TermModuleCreationController extends Controller
                     'course_creation_id' => $list->course_creation_id,
                     'course_id' => $list->course_id,
                     'course_name' => $list->course_name,
-                    'term_name' => $list->name,
-                    'term' => $list->term,
-                    'session_term' => ($list->session_term > 0 && !empty($list->session_term) ? 'Term '.$list->session_term : ''),
+                    'term_dec_name' => (isset($list->term_dec_name) && !empty($list->term_dec_name) ? $list->term_dec_name : ''),
+                    'term_type' => (isset($list->term_type_name) && !empty($list->term_type_name) ? $list->term_type_name : ''),
                     'start_date' => (isset($list->start_date) && !empty($list->start_date) && $list->start_date != '0000-00-00' ? date('jS F, Y', strtotime($list->start_date)) : ''),
                     'end_date' => (isset($list->end_date) && !empty($list->end_date) && $list->end_date != '0000-00-00' ? date('jS F, Y', strtotime($list->end_date)) : ''),
                     'modules_count' => $moduleCreations->count(),

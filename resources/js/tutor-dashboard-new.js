@@ -128,6 +128,7 @@ var attendanceListTable = (function () {
         const editPunchNumberDeteilsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPunchNumberDeteilsModal"));
         
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
         const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
         
         const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
@@ -173,7 +174,14 @@ var attendanceListTable = (function () {
                             location.href= route("tutor-dashboard.attendance",[res.data.tutor ,res.data.plandate])
                         }, 1000);
 
-                    } else if(xhr.status == 200){
+                    }if(xhr.status == 207){
+                        //update Alert
+                        editPunchNumberDeteilsModal.hide();
+                        successModal.hide();
+                        startClassConfirmModal.show();
+                        errorModal.hide();
+
+                    }  else if(xhr.status == 200){
                         //update Alert
                         editPunchNumberDeteilsModal.hide();
                         successModal.show();
@@ -199,7 +207,7 @@ var attendanceListTable = (function () {
                             $(`#${formID} .${key}`).addClass('border-danger');
                             $(`#${formID}  .error-${key}`).html(val);
                         }
-                    }else if(jqXHR.status == 303){
+                    }else if(jqXHR.status == 443){
 
                         document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
                             $("#confirmModal .confModTitle").html("End Class!");
@@ -208,7 +216,7 @@ var attendanceListTable = (function () {
                         confirmModal.show();
                         editPunchNumberDeteilsModal.hide();
 
-                    }else if(jqXHR.status == 302)
+                    }else if(jqXHR.status == 442)
                     {
                         document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
                             $("#confirmModal .confModTitle").html("Different Tutor ?");
@@ -216,7 +224,7 @@ var attendanceListTable = (function () {
                         });  
                         editPunchNumberDeteilsModal.hide();
                         confirmModal.show();
-                    }else if(jqXHR.status == 304)
+                    }else if(jqXHR.status == 444)
                     {
                         document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
                             $("#errorModal .errorModalTitle").html("Wrong Punch Number");

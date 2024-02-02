@@ -103,7 +103,7 @@
 
     <!-- BEGIN: Add Modal -->
     <div id="addCourseCreationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="addCourseCreationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -113,82 +113,91 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
-                            <select id="course_id" name="course_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($courses))
-                                    @foreach($courses as $crs)
-                                        <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-course_id text-danger mt-2"></div>
-                        </div> 
-                        <div class="mt-3">
-                            <label for="course_creation_qualification_id" class="form-label">Qualification <span class="text-danger">*</span></label>
-                            <select id="course_creation_qualification_id" name="course_creation_qualification_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($qualifications))
-                                    @foreach($qualifications as $qua)
-                                        <option value="{{ $qua->id }}">{{ $qua->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-course_creation_qualification_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="semester_id" class="form-label">Semester <span class="text-danger">*</span></label>
-                            <select id="semester_id" name="semester_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($semesters))
-                                    @foreach($semesters as $crs)
-                                        <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-semester_id text-danger mt-2"></div>
-                        </div> 
-                        <div class="mt-3">
-                            <label for="duration" class="form-label">Duration <span class="text-danger">*</span></label>
-                            <input id="duration" type="number" name="duration" class="form-control w-full">
-                            <div class="acc__input-error error-duration text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="unit_length" class="form-label">Unit Length <span class="text-danger">*</span></label>
-                            <select id="unit_length" name="unit_length" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="Years">Years</option>
-                                <option value="Months">Months</option>
-                                <option value="Days">Days</option>
-                                <option value="Hours">Hours</option>
-                                <option value="Not applicable">Not applicable</option>
-                            </select>
-                            <div class="acc__input-error error-unit_length text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="slc_code" class="form-label">SLC Code</label>
-                            <input id="slc_code" type="text" name="slc_code" class="form-control w-full">
-                        </div> 
-                        <div class="mt-3">
-                            <label for="venue_id" class="form-label">Venue</label>
-                            <select id="venue_id" name="venue_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($venues))
-                                    @foreach($venues as $vn)
-                                        <option value="{{ $vn->id }}">{{ $vn->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div> 
-                        <div class="mt-3">
-                            <label for="fees" class="form-label">Fees(UK)</label>
-                            <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
-                        </div> 
-                        <div class="mt-3">
-                            <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
-                            <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
-                        </div>       
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
+                                <select id="course_id" name="course_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($courses))
+                                        @foreach($courses as $crs)
+                                            <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-course_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="course_creation_qualification_id" class="form-label">Qualification <span class="text-danger">*</span></label>
+                                <select id="course_creation_qualification_id" name="course_creation_qualification_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($qualifications))
+                                        @foreach($qualifications as $qua)
+                                            <option value="{{ $qua->id }}">{{ $qua->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-course_creation_qualification_id text-danger mt-2"></div>
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="semester_id" class="form-label">Semester <span class="text-danger">*</span></label>
+                                <select id="semester_id" name="semester_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($semesters))
+                                        @foreach($semesters as $crs)
+                                            <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-semester_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="duration" class="form-label">Duration <span class="text-danger">*</span></label>
+                                <input id="duration" type="number" name="duration" class="form-control w-full">
+                                <div class="acc__input-error error-duration text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="unit_length" class="form-label">Unit Length <span class="text-danger">*</span></label>
+                                <select id="unit_length" name="unit_length" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    <option value="Years">Years</option>
+                                    <option value="Months">Months</option>
+                                    <option value="Days">Days</option>
+                                    <option value="Hours">Hours</option>
+                                    <option value="Not applicable">Not applicable</option>
+                                </select>
+                                <div class="acc__input-error error-unit_length text-danger mt-2"></div>
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="slc_code" class="form-label">SLC Code</label>
+                                <input id="slc_code" type="text" name="slc_code" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="venue_id" class="form-label">Venue</label>
+                                <select id="venue_id" name="venue_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($venues))
+                                        @foreach($venues as $vn)
+                                            <option value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="fees" class="form-label">Fees(UK)</label>
+                                <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
+                                <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="workplacement" class="form-label">Workplacement</label>
+                                <div class="form-check form-switch">
+                                    <input id="workplacement" name="workplacement" class="form-check-input" value="1" type="checkbox">
+                                    <label class="form-check-label" for="workplacement">No</label>
+                                </div>
+                            </div> 
+                        </div>      
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

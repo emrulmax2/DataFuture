@@ -38,7 +38,7 @@
                             @foreach($data as $termId => $termModuleList)
                                 @if($termList[$currenTerm]->id == $termId)
                                     @foreach($termModuleList as $termData)
-                                        <a href="{{ route('tutor-dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
+                                        <a href="{{ route('students.dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
                                             <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
                                                     <div class="ml-4 mr-auto">

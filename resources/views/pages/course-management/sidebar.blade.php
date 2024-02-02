@@ -59,10 +59,27 @@
                     </li>
                 </ul>
             </li>
-            <li>
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'plans.tree' || Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'active text-primary font-medium' : '' }}" href="{{ route('class.plan') }}">
-                    <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Plans
+            <li class="hasChild">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'assign' || Route::currentRouteName() == 'plans.tree' || Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                    <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Plans <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'assign' || Route::currentRouteName() == 'plans.tree' || Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'block' : 'none' }};">
+                    <li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'active text-primary' : '' }}" href="{{ route('class.plan') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Plans
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'plans.tree' ? 'active text-primary' : '' }}" href="{{ route('plans.tree') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Plan Tree View
+                        </a>
+                    </li>
+                    {{--<li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'assign' ? 'active text-primary' : '' }}" href="{{ route('assign') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Student Assign / Deassign
+                        </a>
+                    </li>--}}
+                </ul>
             </li>
         </ul>
     </div>

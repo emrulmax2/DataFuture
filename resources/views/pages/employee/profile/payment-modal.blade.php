@@ -77,7 +77,7 @@
                         {{-- Hour Authorised By --}}
 
                         <div class="col-span-12">
-                            <label for="holiday_entitled" class="form-label">Holiday Entitled</label>
+                            <label for="holiday_entitled" class="form-label">Holiday Entitlement</label>
                             <div class="form-check form-switch">
                                 <input id="holiday_entitled" name="holiday_entitled" value="1" class="form-check-input" type="checkbox">
                             </div>
@@ -235,7 +235,7 @@
                         {{-- Hour Authorised By --}}
 
                         <div class="col-span-12">
-                            <label for="edit_holiday_entitled" class="form-label">Holiday Entitled</label>
+                            <label for="edit_holiday_entitled" class="form-label">Holiday Entitlement</label>
                             <div class="form-check form-switch">
                                 <input id="edit_holiday_entitled" name="holiday_entitled" {{ (isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes' ? 'checked' : '') }} value="1" class="form-check-input" type="checkbox">
                             </div>

@@ -126,7 +126,7 @@ class PendingTaskManagerController extends Controller
                         $createOrUpdate = (isset($theApplicantTask->created_at) && !empty($theApplicantTask->created_at) ? date('jS M, Y', strtotime($theApplicantTask->created_at)) : '');
                     endif;
                     $interviewDetails = [];
-                    if($task_id == 6 && ($status == 'In Progress' || $status == 'Completed')):
+                    if($task->interview == 'Yes' && ($status == 'In Progress' || $status == 'Completed')):
                         $interview = ApplicantInterview::where('applicant_id', $list->id)->where('applicant_task_id', $theApplicantTask->id)->orderBy('id', 'DESC')->get()->first();
                         if(isset($interview->id) && $interview->id > 0):
                             $interviewDetails['interview_id'] = (isset($interview->id) && $interview->id > 0 ? $interview->id : 0);
@@ -375,7 +375,8 @@ class PendingTaskManagerController extends Controller
                 endif;
                 $mailTo[] = 'limon@churchill.ac';
 
-                $theStudentTask = StudentTask::where('task_list_id', 5)->where('student_id', $student->id)->where('status', 'Pending')->get()->first();
+                $theEmailTask = TaskList::where('org_email', 'Yes')->orderBy('id', 'DESC')->get()->first();
+                $theStudentTask = StudentTask::where('task_list_id', $theEmailTask->id)->where('student_id', $student->id)->where('status', 'Pending')->get()->first();
                 if($orgEmail == $studentUserEmail && (isset($theStudentTask->id) && $theStudentTask->id > 0)):
                     $updateStudentTask = StudentTask::where('id', $theStudentTask->id)->where('student_id', $student->id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
                     $studentTaskLog = StudentTaskLog::create([

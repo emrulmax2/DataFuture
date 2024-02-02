@@ -22,6 +22,7 @@ use App\Http\Requests\PlansUpdateRequest;
 use App\Models\AcademicYear;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
+use App\Models\PlansDateList;
 use App\Models\TermDeclaration;
 use App\Models\TermType;
 
@@ -36,33 +37,36 @@ class PlanController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Class Plans', 'href' => 'javascript:void(0);']
             ],
-            'courses' => Course::all(),
-            'terms' => TermDeclaration::with('termType')->orderBy('name','desc')->get(),
+            'courses' => Course::orderBy('name', 'ASC')->get(),
+            'terms' => TermDeclaration::with('termType')->orderBy('id','DESC')->get(),
             'room' => Room::with('venue')->get(),
-            'group' => Group::all(),
+            'group' => Group::orderBy('id', 'ASC')->get(),
             'tutor' => User::all(),
             'ptutor' => User::all(),
         ]);
     }
 
     public function list(Request $request){
-        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
-        $term_declarations = (isset($request->term_declarations) && !empty($request->term_declarations) ? $request->term_declarations : []);
-        $termDeclarationIds = [];
-        if(!empty($term_declarations)):
-            $termDeclarationId = TermDeclaration::whereIn('id', $term_declarations)->get();
-            if(!empty($termDeclarationId)):
-                foreach($termDeclarationId as $mc):
-                    $termDeclarationIds[] = $mc->id;
-                endforeach;
-            endif;
-        endif;
+        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : 0);
+        $term_declarations = (isset($request->term_declarations) && !empty($request->term_declarations) ? $request->term_declarations : 0);
+        $group = (isset($request->group) && !empty($request->group) ? $request->group : 0);
         $room = (isset($request->room) && !empty($request->room) ? $request->room : []);
-        $group = (isset($request->group) && !empty($request->group) ? $request->group : []);
         $tutor = (isset($request->tutor) && !empty($request->tutor) ? $request->tutor : []);
         $ptutor = (isset($request->ptutor) && !empty($request->ptutor) ? $request->ptutor : []);
         $days = (isset($request->days) && !empty($request->days) ? $request->days : []);
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+
+        $sameNameGroupIds = [];
+        if($group > 0):
+            $groups = Group::find($group);
+            $sameNameGroupIds = Group::where('term_declaration_id', $term_declarations)->where('course_id', $courses)
+                                ->where('name', $groups->name)->pluck('id')->unique()->toArray();
+        endif;
+
+        $datesCPIds = [];
+        if(isset($request->dates) && !empty($request->dates)):
+            $datesCPIds = PlansDateList::where('date', date('Y-m-d', strtotime($request->dates)))->pluck('plan_id')->unique()->toArray();
+        endif;
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -71,11 +75,11 @@ class PlanController extends Controller
         endforeach;
 
         $query = Plan::orderByRaw(implode(',', $sorts));
-        if(!empty($courses)): $query->whereIn('course_id', $courses); endif;
-        if(!empty($termDeclarationIds)): $query->whereIn('term_declaration_id', $termDeclarationIds); endif;
+        if(!empty($courses) && $courses > 0): $query->where('course_id', $courses); endif;
+        if(!empty($term_declarations) && $term_declarations > 0): $query->where('term_declaration_id', $term_declarations); endif;
+        if(!empty($sameNameGroupIds)): $query->whereIn('group_id', $sameNameGroupIds); endif;
         
         if(!empty($room)): $query->whereIn('rooms_id', $room); endif;
-        if(!empty($group)): $query->whereIn('group_id', $group); endif;
         if(!empty($tutor)): $query->whereIn('tutor_id', $tutor); endif;
         if(!empty($ptutor)): $query->whereIn('personal_tutor_id', $ptutor); endif;
         if(!empty($days)):
@@ -85,6 +89,7 @@ class PlanController extends Controller
                 endforeach;
             });
         endif;
+        if(!empty($datesCPIds)): $query->whereIn('id', $datesCPIds); endif;
         if($status == 2): $query->onlyTrashed(); endif;
 
         $total_rows = $query->count();
@@ -158,7 +163,8 @@ class PlanController extends Controller
         $data = [];
         $data['venue_id'] = (isset($room->venue->id) ? $room->venue->id : null);
         $data['rooms_id'] = (isset($room->id) ? $room->id : null);
-        $data['group_id'] = $request->group_id;
+        //$data['group_id'] = $request->group_id;
+        $data['module_creation_id'] = $request->module_creation_id;
         $data['start_time'] = $start_time;
         $data['end_time'] = $end_time;
         foreach($day as $d):
@@ -166,7 +172,7 @@ class PlanController extends Controller
         endforeach;
         $data['tutor_id'] = (isset($request->tutor_id) ? $request->tutor_id : null);
         $data['personal_tutor_id'] = (isset($request->personal_tutor_id) ? $request->personal_tutor_id : null);
-        $data['module_enrollment_key'] = (isset($request->module_enrollment_key) ? $request->module_enrollment_key : null);
+        //$data['module_enrollment_key'] = (isset($request->module_enrollment_key) ? $request->module_enrollment_key : null);
         $data['virtual_room'] = (isset($request->virtual_room) ? $request->virtual_room : null);
         $data['note'] = (isset($request->note) ? $request->note : null);
         $data['submission_date'] = (isset($request->submission_date) && !empty($request->submission_date) ? date('Y-m-d', strtotime($request->submission_date)) : null);
@@ -182,16 +188,8 @@ class PlanController extends Controller
 
     public function grid(Request $request){
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
-        $instance_term = (isset($request->instance_term) && !empty($request->instance_term) ? $request->instance_term : []);
-        $moduleCreationIds = [];
-        if(!empty($instance_term)):
-            $moduleCreations = ModuleCreation::whereIn('', $instance_term)->get();
-            if(!empty($moduleCreations)):
-                foreach($moduleCreations as $mc):
-                    $moduleCreationIds[] = $mc->id;
-                endforeach;
-            endif;
-        endif;
+        $term_declaration = (isset($request->term_declaration) && !empty($request->term_declaration) ? $request->term_declaration : []);
+        
         $room = (isset($request->room) && !empty($request->room) ? $request->room : []);
         $group = (isset($request->group) && !empty($request->group) ? $request->group : []);
         $tutor = (isset($request->tutor) && !empty($request->tutor) ? $request->tutor : []);
@@ -199,13 +197,18 @@ class PlanController extends Controller
         $days = (isset($request->days) && !empty($request->days) ? $request->days : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
+        $datesCPIds = [];
+        if(isset($request->dates) && !empty($request->dates)):
+            $datesCPIds = PlansDateList::where('date', date('Y-m-d', strtotime($request->dates)))->pluck('plan_id')->unique()->toArray();
+        endif;
+
         $allRooms = (!empty($room) ? Room::whereIn('id', $room)->get() : Room::all());
         $weekDays = [1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
         $groups = Group::all();
         $users = User::all();
         
         $html = '';
-        $html .= implode(',', $days);
+        //$html .= implode(',', $days);
         $html .= '<table class="table table-striped table-bordered routineBuilderTable">';
             $html .= '<thead>';
                 $html .= '<tr>';
@@ -225,10 +228,11 @@ class PlanController extends Controller
                             foreach($allRooms as $rm):
                                 $query = Plan::where('rooms_id', $rm->id);
                                 if(!empty($courses)): $query->whereIn('course_id', $courses); endif;
-                                if(!empty($moduleCreationIds)): $query->whereIn('module_creation_id', $moduleCreationIds); endif;
+                                if(!empty($term_declaration)): $query->whereIn('term_declaration_id', $term_declaration); endif;
                                 if(!empty($group)): $query->whereIn('group_id', $group); endif;
                                 if(!empty($tutor)): $query->whereIn('tutor_id', $tutor); endif;
                                 if(!empty($ptutor)): $query->whereIn('personal_tutor_id', $ptutor); endif;
+                                if(!empty($datesCPIds)): $query->whereIn('id', $datesCPIds); endif;
                                 if($status == 2): $query->onlyTrashed(); endif;
                                 
                                 $query->where(strtolower($dayName), 1);
@@ -310,7 +314,17 @@ class PlanController extends Controller
         ]);
     }
 
-    public function classPlanBuilder($course, $instanceterm, $modulecreation){
+    public function classPlanBuilder($academic, $term, $creation, $group){
+        $creations = CourseCreation::find($creation);
+        $creationInstance = CourseCreationInstance::where('course_creation_id', $creation)->where('academic_year_id', $academic)->orderBy('id', 'DESC')->get()->first();
+        $instanceTerm = InstanceTerm::where('course_creation_instance_id', $creationInstance->id)->where('term_declaration_id', $term)->orderBy('id', 'DESC')->get()->first();
+        $groups = Group::find($group);
+        $sameNameGroupIds = Group::where('term_declaration_id', $term)->where('course_id', $creations->course_id)
+                            ->where('name', $groups->name)->pluck('id')->unique()->toArray();
+        $modules = Plan::where('term_declaration_id', $term)->where('academic_year_id', $academic)->where('course_creation_id', $creation)
+                    ->where('instance_term_id', $instanceTerm->id)->where('course_id', $creations->course_id)->whereIn('group_id', $sameNameGroupIds)
+                    ->pluck('module_creation_id')->unique()->toArray();
+
         return view('pages.course-management.plan.builder', [
             'title' => 'Plans - LCC Data Future Managment',
             'subtitle' => 'Class Plan Builder',
@@ -319,23 +333,29 @@ class PlanController extends Controller
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Builder', 'href' => 'javascript:void(0);']
             ],
-            'course' => Course::find($course),
-            'instanceTerm' => InstanceTerm::find($instanceterm),
-            'moduleCreation' => ModuleCreation::where('id', $modulecreation)->first(),
+            'academic' => AcademicYear::find($academic),
+            'termDec' => TermDeclaration::find($term),
+            'creation' => $creations,
+            'group' => $groups,
+
+            'instanceTerm' => $instanceTerm,
+            'moduleCount' => (!empty($modules) ? count($modules) : 0),
+
+            //'moduleCreation' => ModuleCreation::where('id', $modulecreation)->first(),
+            'venues' => Venue::orderBy('name', 'ASC')->get(),
             'rooms' => Room::with('venue')->get(),
-            'plans' => $this->getExistClassPlanBox($course, $instanceterm, $modulecreation)
+            'plans' => $this->getExistClassPlanBox($academic, $term, $creation, $group)
         ]);
     }
 
     public function store(Request $request){
         $routineData = $request->routineData;
-        $module_creation_id = $request->module_creation_id;
+        $term_declaration_id = $request->term_declaration_id;
+        $academic_year_id = $request->academic_year_id; 
+        $course_creation_id = $request->course_creation_id;
         $instance_term_id = $request->instance_term_id;
         $course_id = $request->course_id;
-        $instanceTerm = InstanceTerm::find($instance_term_id);
-        $term_declaration_id = $instanceTerm->term_declaration_id;
-        $courseCreationInstanceId = $instanceTerm->course_creation_instance_id;
-        $courseCreationInstance = CourseCreationInstance::find($courseCreationInstanceId);
+        $group_id = $request->group_id;
 
 
         $days = [ 1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
@@ -354,24 +374,24 @@ class PlanController extends Controller
                             $times = (isset($box['time']) && !empty($box['time']) ? explode(' - ', $box['time']) : []);
                             
                             $data = [];
-                            $data['course_id'] = (isset($box['course']) ? $box['course'] : $course_id);
-                            $data['module_creation_id'] = $module_creation_id;
-                            $data['module_creation_id'] = $module_creation_id;
                             $data['term_declaration_id'] = $term_declaration_id;
-                            $data['academic_year_id'] = $courseCreationInstance->academic_year_id;
-                            $data['course_creation_id'] = $courseCreationInstance->course_creation_id;
+                            $data['academic_year_id'] = $academic_year_id;
+                            $data['course_creation_id'] = $course_creation_id;
+                            $data['instance_term_id'] = $instance_term_id;
+                            $data['course_id'] = (isset($box['course']) ? $box['course'] : $course_id);
+                            $data['module_creation_id'] = (isset($box['module']) ? $box['module'] : null);
                             $data['venue_id'] = $venue;
                             $data['rooms_id'] = $room;
-                            $data['group_id'] = (isset($box['group']) ? $box['group'] : null);
-                            $data['name'] = '';
+                            $data['group_id'] = (isset($box['group']) ? $box['group'] : $group_id);
+                            $data['name'] = null;
                             $data['start_time'] = (isset($times[0]) && !empty($times[0]) ? $times[0].':00' : null);
                             $data['end_time'] = (isset($times[1]) && !empty($times[1]) ? $times[1].':00' : null);
-                            $data['label'] = '';
+                            $data['label'] = null;
                             $data[strtolower($days[$day])] = 1;
-                            $data['module_enrollment_key'] = (isset($box['enrollment']) ? $box['enrollment'] : null);
+                            $data['module_enrollment_key'] = null;
+                            $data['submission_date'] = (isset($box['submission']) && !empty($box['submission']) ? date('Y-m-d', strtotime($box['submission'])) : null);
                             $data['tutor_id'] = (isset($box['tutor']) ? $box['tutor'] : null);
                             $data['personal_tutor_id'] = (isset($box['personal_tutor']) ? $box['personal_tutor'] : null);
-                            $data['submission_date'] = (isset($box['submission']) && !empty($box['submission']) ? date('Y-m-d', strtotime($box['submission'])) : null);
                             $data['virtual_room'] = (isset($box['virtual_room']) && !empty($box['virtual_room']) ? $box['virtual_room'] : '');
                             $data['note'] = (isset($box['note']) && !empty($box['note']) ? $box['note'] : '');
 
@@ -410,9 +430,18 @@ class PlanController extends Controller
         $plan = Plan::where('id', $id)->first();
         $start_time = (!empty($plan->start_time) ? substr($plan->start_time, 0, 5) : '');
         $end_time = (!empty($plan->end_time) ? substr($plan->end_time, 0, 5) : '');
+        $moduleCreations = ModuleCreation::where('instance_term_id', $plan->instance_term_id)->orderBy('module_name', 'ASC')->get();
+        $modules = '<option value="">Please Select</option>';
+        if(!empty($moduleCreations)):
+            foreach($moduleCreations as $mods):
+                $modules .= '<option '.($plan->module_creation_id == $mods->id ? 'selected' : '').' value="'.$mods->id.'">'.$mods->module_name.'</option>';
+            endforeach;
+        endif;
 
         $data = [];
-        $data['course'] = $plan->course->name;
+        $data['term'] = (isset($plan->attenTerm->name) && !empty($plan->attenTerm->name) ? $plan->attenTerm->name : '---');
+        $data['course'] = (isset($plan->course->name) ? $plan->course->name : '---');
+        $data['group'] = (isset($plan->group->name) ? $plan->group->name : '---');
         $data['module'] = $plan->creations->module_name;
         $data['venue_id'] = $plan->venue_id;
         $data['rooms_id'] = $plan->rooms_id;
@@ -433,6 +462,7 @@ class PlanController extends Controller
         $data['wed'] = $plan->wed;
         $data['thu'] = $plan->thu;
         $data['fri'] = $plan->fri;
+        $data['modules'] = $modules;
 
         return response()->json(['plan' => $data], 200);
     }
@@ -448,10 +478,16 @@ class PlanController extends Controller
         response()->json($data);
     }
 
-    public function getExistClassPlanBox($course, $instanceterm, $modulecreation){
+    public function getExistClassPlanBox($academic, $term, $creation, $group){
         $plans = [];
 
-        $groups = Group::where('course_id', $course)->get();
+        $courseCreation = CourseCreation::find($creation);
+        $creationInstance = CourseCreationInstance::where('course_creation_id', $creation)->where('academic_year_id', $academic)->orderBy('id', 'DESC')->get()->first();
+        $instanceTerm = InstanceTerm::where('course_creation_instance_id', $creationInstance->id)->where('term_declaration_id', $term)->orderBy('id', 'DESC')->get()->first();
+        $moduleCreations = ModuleCreation::where('instance_term_id', $instanceTerm->id)->orderBy('module_name', 'ASC')->get();
+        $groups = Group::find($group);
+        $sameNameGroupIds = Group::where('term_declaration_id', $term)->where('course_id', $courseCreation->course_id)->where('name', $groups->name)
+                            ->pluck('id')->unique()->toArray();
         $users = User::all();
 
         $days = [ 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
@@ -459,8 +495,14 @@ class PlanController extends Controller
         foreach($days as $key => $day){
             if(!empty($rooms)){
                 foreach($rooms as $rms){
-                    $cps = Plan::where('course_id', $course)->where('module_creation_id', $modulecreation)->where($day, 1)->where('rooms_id', $rms->id)->get();
+                    $cps = Plan::where('term_declaration_id', $term)->where('academic_year_id', $academic)
+                           ->where('course_creation_id', $creation)->where('instance_term_id', $instanceTerm->id)
+                           ->where('course_id', $courseCreation->course_id)
+                           ->whereIn('group_id', $sameNameGroupIds)
+                           ->where($day, 1)->where('rooms_id', $rms->id)
+                           ->get();
                     if(!empty($cps)):
+                        $r = 1;
                         foreach($cps as $cp):
                             $times = (isset($cp->start_time) && !empty($cp->start_time) ? substr($cp->start_time, 0, 5) : '');
                             $times .= (isset($cp->end_time) && !empty($cp->end_time) ? ' - '.substr($cp->end_time, 0, 5) : '');
@@ -469,10 +511,31 @@ class PlanController extends Controller
                                 $html .= '<div class="rdbItem course" data-id="'.$cp->course_id.'" data-label="Course">';
                                     $html .= '<button type="button" class="btn btn-course inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="book" class="w-4 h-4 mr-1"></i> '.$cp->course->name.'</button>';
                                 $html .= '</div>';
-                                $html .= '<div class="rdbItem module" data-id="'.$cp->module_creation_id.'" data-label="Module">';
+                                
+                                /*$html .= '<div class="rdbItem module" data-id="'.$cp->module_creation_id.'" data-label="Module">';
                                     $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.(isset($cp->creations->module_name) ? $cp->creations->module_name : '').'</button>';
+                                $html .= '</div>';*/
+                                
+                                $html .= '<div class="rdbItem group" data-id="'.$groups->id.'" data-label="Group">';
+                                    $html .= '<button type="button" class="btn btn-group inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="tag" class="w-4 h-4 mr-1"></i> '.$groups->name.'</button>';
                                 $html .= '</div>';
-                                $html .= '<div class="rdbItem group dropdownMenus" data-id="'.$cp->group_id.'" data-label="Group">';
+
+                                $html .= '<div class="rdbItem module dropdownMenus" data-id="'.(isset($cp->module_creation_id) && $cp->module_creation_id > 0 ? $cp->module_creation_id : 0).'" data-label="Module">';
+                                    $html .= '<button type="button" class="DMToggle btn btn-module inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->creations->module_name) ? $cp->creations->module_name : '').'</span></button>';
+                                    $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
+                                    $html .= '<div class="dropdownMenuBox">';
+                                        $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
+                                        $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
+                                            if(!empty($moduleCreations) && $moduleCreations->count() > 0):
+                                                foreach($moduleCreations as $mc):
+                                                    $html .= '<li data-value="'.$mc->id.'">'.$mc->module_name.'</li>';
+                                                endforeach;
+                                            endif;
+                                        $html .= '</ul>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+
+                                /*$html .= '<div class="rdbItem group dropdownMenus" data-id="'.$cp->group_id.'" data-label="Group">';
                                     $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->group->name) ? $cp->group->name : '').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="dropdownMenuBox">';
@@ -485,7 +548,8 @@ class PlanController extends Controller
                                             endif;
                                         $html .= '</ul>';
                                     $html .= '</div>';
-                                $html .= '</div>';
+                                $html .= '</div>';*/
+
                                 $html .= '<div class="rdbItem tutor dropdownMenus" data-id="'.$cp->tutor_id.'" data-label="Tutor">';
                                     $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>'.(isset($cp->tutor->name) ? $cp->tutor->name : '').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
@@ -514,7 +578,7 @@ class PlanController extends Controller
                                         $html .= '</ul>';
                                     $html .= '</div>';
                                 $html .= '</div>';
-                                $html .= '<div class="rdbItem rdItemHalf odds classType dropdownMenus" data-id="'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 0).'" data-label="Class Type">';
+                                $html .= '<div class="rdbItem classType dropdownMenus" data-id="'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 0).'" data-label="Class Type">';
                                     $html .= '<button type="button" class="DMToggle btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->creations->class_type) ? $cp->creations->class_type : 'Class Type').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="dropdownMenuBox">';
@@ -527,14 +591,16 @@ class PlanController extends Controller
                                         $html .= '</ul>';
                                     $html .= '</div>';
                                 $html .= '</div>';
-                                $html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 0).'" data-label="Enrollment">';
-                                $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 'Enrollment').'</span></button>';
+
+                                /*$html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 0).'" data-label="Enrollment">';
+                                    $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->module_enrollment_key) ? $cp->module_enrollment_key : 'Enrollment').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="inputWraps">';
                                         $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Enrollment Key">';
                                         $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
                                     $html .= '</div>';
-                                $html .= '</div>';
+                                $html .= '</div>';*/
+
                                 $html .= '<div class="rdbItem rdItemHalf odds timePicker inputFields" data-id="'.$times.'" data-label="Time">';
                                     $html .= '<button type="button" class="inputToggles btn btn-time inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="clock" class="w-4 h-4 mr-1"></i> <span>'.(!empty($times) ? $times : 'Time').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
@@ -560,7 +626,7 @@ class PlanController extends Controller
                                     $html .= '</div>';
                                 $html .= '</div>';
                                 $html .= '<div class="rdbItem notes inputFields" data-id="'.(!empty($cp->note) ? $cp->note : '0').'" data-label="Note">';
-                                    $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="edit-2" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->note) ? $cp->note : 'Note').'</span></button>';
+                                    $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="pencil" class="w-4 h-4 mr-1"></i> <span>'.(!empty($cp->note) ? $cp->note : 'Note').'</span></button>';
                                     $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                                     $html .= '<div class="inputWraps">';
                                         $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Note">';
@@ -572,7 +638,8 @@ class PlanController extends Controller
                                 $html .= '<a href="javascript:void(0);" class="btn btn-danger text-white w-5 h-5 removePlanBTN"><i data-lucide="x-circle" class="w-5 h-5"></i></a>';
                                 $html .= '<input type="hidden" name="existing_id" class="existing_id" value="'.$cp->id.'"/>';
                             $html .= '</div>';
-                            $plans[$key][$rms->id] = $html;
+                            $plans[$key][$rms->id][$r] = $html;
+                            $r++;
                         endforeach;
                     endif;
                 }
@@ -583,30 +650,54 @@ class PlanController extends Controller
     }
 
     public function getClassPlanBox(Request $request){
+        $term_declaration_id = $request->term_declaration_id;
+        $academic_year_id = $request->academic_year_id;
+        $course_creation_id = $request->course_creation_id;
+        $instance_term_id = $request->instance_term_id; 
+        $course_id = $request->course_id;
+        $group_id = $request->group_id;
+
+        $day = $request->day;
+        $venue = $request->venue; 
+        $room = $request->room;
+
+
         $course_id = $request->course_id;
         $course = Course::find($course_id);
 
-        $instance_term_id = $request->instance_term_id;
-
-        $module_creation_id = $request->module_creation_id;
-        $moduleCreation = ModuleCreation::find($module_creation_id);
-
-        $groups = Group::where('course_id', $course_id)->get();
+        $group = Group::find($group_id);
         $users = User::all();
 
-        $day = $request->day;
-        $venue = $request->venue;
-        $room = $request->room;
+        $moduleCreations = ModuleCreation::where('instance_term_id', $instance_term_id)->orderBy('module_name', 'ASC')->get();
 
         $html = '';
         $html .= '<div class="routineDayBox" data-day="'.$day.'" data-venue="'.$venue.'" data-room="'.$room.'">';
             $html .= '<div class="rdbItem course" data-id="'.$course->id.'" data-label="Course">';
                 $html .= '<button type="button" class="btn btn-course inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="book" class="w-4 h-4 mr-1"></i> '.$course->name.'</button>';
             $html .= '</div>';
-            $html .= '<div class="rdbItem module" data-id="'.$moduleCreation->id.'" data-label="Module">';
+            /*$html .= '<div class="rdbItem module" data-id="'.$moduleCreation->id.'" data-label="Module">';
                 $html .= '<button type="button" class="btn btn-module inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> '.$moduleCreation->module_name.'</button>';
+            $html .= '</div>';*/
+            $html .= '<div class="rdbItem group" data-id="'.$group->id.'" data-label="Group">';
+                $html .= '<button type="button" class="btn btn-group inline-flex items-start justify-start w-full px-3 py-1 text-left text-white"><i data-lucide="tag" class="w-4 h-4 mr-1"></i> '.$group->name.'</button>';
             $html .= '</div>';
-            $html .= '<div class="rdbItem group dropdownMenus" data-id="0" data-label="Group">';
+
+            $html .= '<div class="rdbItem module dropdownMenus" data-id="0" data-label="Module">';
+                $html .= '<button type="button" class="DMToggle btn btn-module inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> <span>Module</span></button>';
+                $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
+                $html .= '<div class="dropdownMenuBox">';
+                    $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
+                    $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
+                        if(!empty($moduleCreations) && $moduleCreations->count() > 0):
+                            foreach($moduleCreations as $mc):
+                                $html .= '<li data-value="'.$mc->id.'">'.$mc->module_name.'</li>';
+                            endforeach;
+                        endif;
+                    $html .= '</ul>';
+                $html .= '</div>';
+            $html .= '</div>';
+
+            /*$html .= '<div class="rdbItem group dropdownMenus" data-id="0" data-label="Group">';
                 $html .= '<button type="button" class="DMToggle btn btn-group inline-flex items-start justify-start w-full px-3 py-2 text-left text-white" ><i data-lucide="tag" class="w-4 h-4 mr-1"></i> <span>Group</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                 $html .= '<div class="dropdownMenuBox">';
@@ -619,7 +710,8 @@ class PlanController extends Controller
                         endif;
                     $html .= '</ul>';
                 $html .= '</div>';
-            $html .= '</div>';
+            $html .= '</div>';*/
+
             $html .= '<div class="rdbItem tutor dropdownMenus" data-id="0" data-label="Tutor">';
                 $html .= '<button type="button" class="DMToggle btn btn-tutor inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="user" class="w-4 h-4 mr-1"></i> <span>Tutor</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
@@ -648,8 +740,8 @@ class PlanController extends Controller
                     $html .= '</ul>';
                 $html .= '</div>';
             $html .= '</div>';
-            $html .= '<div class="rdbItem rdItemHalf odds classType dropdownMenus" data-id="'.(!empty($moduleCreation->class_type) ? $moduleCreation->class_type : 0).'" data-label="Class Type">';
-                $html .= '<button type="button" class="DMToggle btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>'.(!empty($moduleCreation->class_type) ? $moduleCreation->class_type : 'Class Type').'</span></button>';
+            $html .= '<div class="rdbItem classType dropdownMenus" data-id="0" data-label="Class Type">';
+                $html .= '<button type="button" class="DMToggle btn btn-class-type inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="columns" class="w-4 h-4 mr-1"></i> <span>Class Type</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionDropdown"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                 $html .= '<div class="dropdownMenuBox">';
                     $html .= '<input type="text" class="form-control form-control-sm dropdownMenuSearch" placeholder="Search here...">';
@@ -661,14 +753,16 @@ class PlanController extends Controller
                     $html .= '</ul>';
                 $html .= '</div>';
             $html .= '</div>';
-            $html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="'.(!empty($moduleCreation->moodle_enrollment_key) ? $moduleCreation->moodle_enrollment_key : 0).'" data-label="Enrollment">';
-            $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>'.(!empty($moduleCreation->moodle_enrollment_key) ? $moduleCreation->moodle_enrollment_key : 'Enrollment').'</span></button>';
+
+            /*$html .= '<div class="rdbItem rdItemHalf evens enrollmentKey inputFields" data-id="0" data-label="Enrollment">';
+                $html .= '<button type="button" class="inputToggles btn btn-ekey inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="key" class="w-4 h-4 mr-1"></i> <span>Enrollment</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                 $html .= '<div class="inputWraps">';
                     $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Enrollment Key">';
                     $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
                 $html .= '</div>';
-            $html .= '</div>';
+            $html .= '</div>';*/
+
             $html .= '<div class="rdbItem rdItemHalf odds timePicker inputFields" data-id="0" data-label="Time">';
                 $html .= '<button type="button" class="inputToggles btn btn-time inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="clock" class="w-4 h-4 mr-1"></i> <span>Time</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
@@ -677,8 +771,8 @@ class PlanController extends Controller
                     $html .= '<button type="button" class="okInputValue btn btn-success text-white inline-flex items-start justify-start"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>';
                 $html .= '</div>';
             $html .= '</div>';
-            $html .= '<div class="rdbItem rdItemHalf evens submissionDate inputFields" data-id="'.(!empty($moduleCreation->submission_date) ? date('d-m-Y', strtotime($moduleCreation->submission_date)) : 0).'" data-label="Submission">';
-                $html .= '<button type="button" class="inputToggles btn btn-submission inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> <span>'.(!empty($moduleCreation->submission_date) ? date('d-m-Y', strtotime($moduleCreation->submission_date)) : 'Submission').'</span></button>';
+            $html .= '<div class="rdbItem rdItemHalf evens submissionDate inputFields" data-id="0" data-label="Submission">';
+                $html .= '<button type="button" class="inputToggles btn btn-submission inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> <span>Submission</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                 $html .= '<div class="inputWraps">';
                     $html .= '<input type="text" class="form-control inputFieldsInput dateMask" placeholder="DD-MM-YYYY">';
@@ -694,7 +788,7 @@ class PlanController extends Controller
                 $html .= '</div>';
             $html .= '</div>';
             $html .= '<div class="rdbItem notes inputFields" data-id="0" data-label="Note">';
-                $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="edit-2" class="w-4 h-4 mr-1"></i> <span>Note</span></button>';
+                $html .= '<button type="button" class="inputToggles btn btn-note inline-flex items-start justify-start w-full px-3 py-1 text-left text-white" ><i data-lucide="pencil" class="w-4 h-4 mr-1"></i> <span>Note</span></button>';
                 $html .= '<a href="javascript:void(0);" class="clearSelection clearSelectionInput"><i data-lucide="x-circle" class="w-4 h-4"></i></a>';
                 $html .= '<div class="inputWraps">';
                     $html .= '<input type="text" class="form-control inputFieldsInput" placeholder="Note">';
@@ -708,6 +802,13 @@ class PlanController extends Controller
         $html .= '</div>';
 
         return response()->json(['htmls' => $html], 200);
+    }
+
+    public function getModuleDetails(Request $request){
+        $id = $request->id;
+        $moduleCreation = ModuleCreation::find($id);
+
+        return response()->json(['res' => $moduleCreation], 200);
     }
 
     public function getModulesByCourseTerms(Request $request){
@@ -849,6 +950,90 @@ class PlanController extends Controller
     }
 
 
+    public function getTermDeclarationByAcademicYear(Request $request){
+        $academicYear = $request->academicYear;
+        $data = [];
+
+        $termDeclarations = TermDeclaration::where('academic_year_id', $academicYear)->orderBy('id', 'ASC')->get();
+        if(!empty($termDeclarations)):
+            $i = 1;
+            foreach($termDeclarations as $td):
+                $data[$i]['id'] = $td->id;
+                $data[$i]['name'] = $td->name;
+                $i++;
+            endforeach;
+        endif;
+
+        if(!empty($data)):
+            return response()->json(['res' => $data], 200);
+        else:
+            return response()->json(['res' => ''], 304);
+        endif;
+    }
+
+    public function getCourseByAcademicTerm(Request $request){
+        $academicYear = $request->academicYear;
+        $term_declaration_id = $request->term_declaration_id;
+        $data = [];
+
+        $courseCreationInstanceIds = InstanceTerm::where('term_declaration_id', $term_declaration_id)->pluck('course_creation_instance_id')->unique()->toArray();
+        if(!empty($courseCreationInstanceIds)):
+            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->where('academic_year_id', $academicYear)->pluck('course_creation_id')->unique()->toArray();
+            if(!empty($courseCreationIds)):
+                $courseCreations = DB::table('course_creations as cc') 
+                    ->select('cc.id', 'cc.course_id', 'cr.name')
+                    ->leftJoin('courses as cr', 'cr.id', 'cc.course_id')
+                    ->whereRaw('cc.id IN (SELECT MAX(id) FROM course_creations WHERE id IN ('.implode(',', $courseCreationIds).') GROUP BY (course_id))')
+                    ->get();
+                if(!empty($courseCreations)):
+                    $i = 1;
+                    foreach($courseCreations as $ccrs):
+                        $data[$i]['id'] = $ccrs->id;
+                        $data[$i]['name'] = $ccrs->name;
+                        $i++;
+                    endforeach;
+                endif;
+            endif;
+        endif;
+
+        if(!empty($data)):
+            return response()->json(['res' => $data], 200);
+        else:
+            return response()->json(['res' => ''], 304);
+        endif;
+    }
+
+    public function getGroupByAcademicTermCourse(Request $request){
+        $academicYear = $request->academicYear;
+        $term_declaration_id = $request->term_declaration_id;
+        $course_creation_id = $request->course_creation_id;
+        $course_id = CourseCreation::find($course_creation_id)->course_id;
+        $data = [];
+
+        //$groups = Group::where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->orderBy('name', 'ASC')->get();
+        $groups = DB::table('groups')->select('name')->where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)
+                  ->where('active', 1)
+                  ->groupBy('name')->orderBy('name', 'ASC')->get();
+        if(!empty($groups)):
+            $i = 1;
+            foreach($groups as $gr):
+                $group = Group::where('name', $gr->name)->where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+                if(!empty($group)):
+                    $data[$i]['id'] = $group->id;
+                    $data[$i]['name'] = $group->name;
+                $i++;   
+                endif;
+            endforeach;
+        endif;
+
+        if(!empty($data)):
+            return response()->json(['res' => $data], 200);
+        else:
+            return response()->json(['res' => ''], 304);
+        endif;
+    }
+
+
     public function getCourseListByAcademicYear(Request $request) {
         
         $academicYear = $request->academicYear;
@@ -912,5 +1097,27 @@ class PlanController extends Controller
         return response()->json([$data]);
     }
 
-    
+    public function getFilteredGroup(Request $request){
+        $course = (isset($request->course) && $request->course > 0 ? $request->course : null);
+        $term = (isset($request->term) && $request->term > 0 ? $request->term : null);
+
+        $res = [];
+        $groups = DB::table('groups')->select('name')->where('course_id', $course)->where('term_declaration_id', $term)
+                  ->where('active', 1)
+                  ->groupBy('name')->orderBy('name', 'ASC')->get();
+        if(!empty($groups)):
+            $i = 1;
+            foreach($groups as $gr):
+                $group = Group::where('name', $gr->name)->where('course_id', $course)->where('term_declaration_id', $term)
+                         ->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+                if(!empty($group)):
+                    $res[$i]['id'] = $group->id;
+                    $res[$i]['name'] = $group->name;
+                $i++;   
+                endif;
+            endforeach;
+        endif;
+
+        return response()->json(['res' => $res], 200);
+    }
 }

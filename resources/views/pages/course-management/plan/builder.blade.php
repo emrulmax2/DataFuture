@@ -24,71 +24,36 @@
             <div class="intro-y box p-5 lg:mt-5">
                 <form method="post" action="#" id="classPlanBuilderForm">
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12">
-                            <h2 class="text-xl font-medium mb-4 text-left"><u>{{ $moduleCreation->module_name }}</u></h2>
+                        <div class="col-span-12 flex">
+                            <h2 class="text-xl font-medium mb-4 text-left"><u>{{ $group->name }}</u></h2>
+                            <h2 class="text-xl font-medium mb-4 ml-auto">No of Modul: {{ $moduleCount }}</h2>
                         </div>
                         <div class="col-span-3">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Course:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold"><u>{{ (!empty($course->name) ? ucfirst($course->name) : '---')  }}</u></div></div>
+                                <div class="col-span-8"><div class="text-left font-medium font-bold"><u>{{ (isset($creation->course->name) && !empty($creation->course->name) ? ucfirst($creation->course->name) : '---')  }}</u></div></div>
                             </div>
                         </div>
                         <div class="col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Code:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($moduleCreation->code) ? ucfirst($moduleCreation->code) : '---')  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Status:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ !empty($moduleCreation->status) ? $moduleCreation->status : $moduleCreation->status  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Credit Value:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ !empty($moduleCreation->credit_value) ? $moduleCreation->credit_value : '---'  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Unit Value:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ !empty($moduleCreation->unit_value) ? $moduleCreation->unit_value : '---'  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Enrollment Key:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ !empty($moduleCreation->moodle_enrollment_key) ? $moduleCreation->moodle_enrollment_key : '---'  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Class Type:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ !empty($moduleCreation->class_type) ? $moduleCreation->class_type : '---'  }}</div></div>
-                            </div>
-                        </div>
-                        <div class="col-span-3">
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Submission Date:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($moduleCreation->submission_date) ? $moduleCreation->submission_date : '---') }}</div></div>
+                                <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Academic Year:</div></div>
+                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($academic->name) ? ucfirst($academic->name) : '---')  }}</div></div>
                             </div>
                         </div>
 
                         <div class="col-span-12">
-                            <h2 class="text-xl font-medium mt-5 mb-4 text-left"><u>{{ $instanceTerm->name }}</u></h2>
+                            <h2 class="text-xl font-medium mt-5 mb-4 text-left"><u>{{ $termDec->name }}</u></h2>
                         </div>
                         <div class="col-span-3">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Term:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold"><u>{{ $instanceTerm->term  }}</u></div></div>
+                                <div class="col-span-8"><div class="text-left font-medium font-bold"><u>{{ $termDec->name }}</u></div></div>
                             </div>
                         </div>
                         <div class="col-span-3">
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Session Term:</div></div>
-                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($instanceTerm->session_term) ? 'Term '. $instanceTerm->session_term : 'Unknown') }}</div></div>
+                                <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (isset($instanceTerm->termType->name) ? $instanceTerm->termType->name : '---') }}</div></div>
                             </div>
                         </div>
                         <div class="col-span-3">
@@ -132,6 +97,26 @@
                                 <div class="col-span-4"><div class="text-left text-slate-500 font-medium">Revision End:</div></div>
                                 <div class="col-span-8"><div class="text-left font-medium font-bold">{{ (!empty($instanceTerm->revision_end_date) ? $instanceTerm->revision_end_date : '---') }}</div></div>
                             </div>
+                        </div>
+
+                        <div class="col-span-12">
+                            <h2 class="text-xl font-medium mt-5 mb-4 text-left"><u>Venues</u></h2>
+                        </div>
+                        <div class="col-span-12">
+                            @if($venues->count() > 0)
+                                <div class="flex flex-col sm:flex-row">
+                                    @foreach($venues as $vns)
+                                        <div class="form-check mr-5">
+                                            <input checked id="cp_venue_id_{{ $vns->id }}" class="form-check-input cp_venue_id" name="cp_venue_id[]" type="checkbox" value="{{ $vns->id }}">
+                                            <label class="form-check-label" for="cp_venue_id_{{ $vns->id }}">{{ $vns->name }}</label>
+                                        </div>  
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="alert alert-warning-soft show flex items-center mb-2" role="alert">
+                                    <i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Venues not found.
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -177,7 +162,7 @@
                                     <th class="whitespace-nowrap">Day</th>
                                     @if(!empty($rooms))
                                         @foreach($rooms as $rm)
-                                            <th class="whitespace-nowrap">{{ $rm->name }} - {{ isset($rm->venue->name) ? $rm->venue->name : '' }}</th>
+                                            <th class="whitespace-nowrap cp_venue_col_{{ $rm->venue_id }}">{{ $rm->name }} - {{ isset($rm->venue->name) ? $rm->venue->name : '' }}</th>
                                         @endforeach
                                     @endif
                                 </tr>
@@ -191,10 +176,12 @@
                                         <td class="text-center font-bold">{{ $day[$i] }}</td>
                                         @if(!empty($rooms))
                                         @foreach($rooms as $rm)
-                                            <td class="routineDay relative" data-venuRoom="{{ $rm->venue_id }}_{{ $rm->id }}">
+                                            <td class="routineDay relative cp_venue_col_{{ $rm->venue_id }}" data-venuRoom="{{ $rm->venue_id }}_{{ $rm->id }}">
                                                 <div class="routineDayBoxes">
                                                     @if(isset($plans[$i][$rm->id]) && !empty($plans[$i][$rm->id]))
-                                                        {!! $plans[$i][$rm->id] !!}
+                                                        @foreach($plans[$i][$rm->id] as $rmhtml)
+                                                            {!! $rmhtml !!}
+                                                        @endforeach
                                                     @endif
                                                 </div>
                                                 <button data-day="{{ $i }}" data-venue="{{ $rm->venue_id }}" data-room="{{ $rm->id }}" type="button" class="addPlanBox btn btn-success text-white absolute r-0 b-0 px-2 py-2 theAddBTN">
@@ -208,9 +195,12 @@
                             </tbody>
                         </table>
                     </div>
-                    <input type="hidden" id="course_id" name="course_id" value="{{ $course->id }}"/>
+                    <input type="hidden" id="term_declaration_id" name="term_declaration_id" value="{{ $termDec->id }}"/>
+                    <input type="hidden" id="academic_year_id" name="academic_year_id" value="{{ $academic->id }}"/>
+                    <input type="hidden" id="course_creation_id" name="course_creation_id" value="{{ $creation->id }}"/>
                     <input type="hidden" id="instance_term_id" name="instance_term_id" value="{{ $instanceTerm->id }}"/>
-                    <input type="hidden" id="module_creation_id" name="module_creation_id" value="{{ $moduleCreation->id }}"/>
+                    <input type="hidden" id="course_id" name="course_id" value="{{ $creation->course_id }}"/>
+                    <input type="hidden" id="group_id" name="group_id" value="{{ $group->id }}"/>
                 </form>
             </div>
         </div>

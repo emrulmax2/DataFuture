@@ -100,12 +100,13 @@
                                         @endif --}}
                                     </div>
                                     <div class="mt-5 px-5 pb-5 flex font-medium justify-center">
+                                    
                                     @if($list["attendance_information"]!=null)
                                         @if($list["end_time"]==null)
-                                            <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" href="{{ route(tutor-dashboard.attendance,[$list["tutor_id"],$list["id"]]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
+                                            <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" href="{{ route("tutor-dashboard.attendance",[$list["tutor_id"],$list["id"]]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
                                             <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">End Class</a>
                                         @else
-                                            <a href="{{ route(tutor-dashboard.attendance,[$list["tutor_id"],$list["id"]]) }}"  data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
+                                            <a href="{{ route("tutor-dashboard.attendance",[$list["tutor_id"],$list["id"]]) }}"  data-attendanceinfo="{{ $list['attendance_information']->id }}" data-id="{{ $list['id'] }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
                                         @endif
                                     @else
                                         <a data-tw-toggle="modal" data-id="{{ $list["id"] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>

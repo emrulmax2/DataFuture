@@ -26,8 +26,9 @@ class GroupsRequests extends FormRequest
     {
         return [
             'course_id' => 'required',
+            'term_declaration_id' => 'required',
             'name' => ['required', 
-                Rule::unique('groups')->where('course_id', $this->course_id)
+                Rule::unique('groups')->where('course_id', $this->course_id)->where('term_declaration_id', $this->term_declaration_id)
             ]
         ];
     }

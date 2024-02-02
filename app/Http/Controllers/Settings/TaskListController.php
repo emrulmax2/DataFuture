@@ -105,6 +105,8 @@ class TaskListController extends Controller
                     'external_link' => ($list->external_link == 1 ? 'Yes' : 'No'),
                     'status' => $list->status,
                     'user' => $users,
+                    'org_email' => $list->org_email,
+                    'id_card' => $list->id_card,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -202,6 +204,8 @@ class TaskListController extends Controller
             'interview'=> $request->interview,
             'status'=> $request->status,
             'upload'=> $request->upload,
+            'org_email'=> $request->org_email,
+            'id_card'=> $request->id_card,
             'external_link' => (isset($request->external_link) ? $request->external_link : '0'),
             'external_link_ref' => (isset($request->external_link) && $request->external_link == 1 && !empty($request->external_link_ref) ? $request->external_link_ref : ''),
             'updated_by' => auth()->user()->id

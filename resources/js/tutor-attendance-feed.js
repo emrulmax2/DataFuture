@@ -76,7 +76,7 @@ import { createIcons, icons } from "lucide";
         let a = hms.split(':');
         let seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
         var totalSeconds = seconds;
-        alert(hms)
+        
         setInterval(setTime, 1000);
 
         function setTime() {

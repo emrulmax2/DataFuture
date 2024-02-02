@@ -135,6 +135,7 @@ export default defineConfig({
                 "resources/js/employee-profile.js",
 
                 "resources/js/attendance.js",
+                "resources/js/attendance-studentstaff.js",
 
                 "resources/js/user-holiday.js",
                 "resources/js/machine-live.js",
@@ -159,6 +160,7 @@ export default defineConfig({
                 "resources/js/attendance-feed.js",
                 "resources/js/tutor-attendance-feed.js",
                 "resources/js/plan-tasks.js",
+                "resources/js/plan-tasks-students.js",
                 "resources/js/create-module-activity.js",
                 "resources/js/employee-global.js",
                 "resources/js/employee-banks.js",
@@ -213,6 +215,10 @@ export default defineConfig({
                 'resources/js/plans-date-list.js',
                 'resources/js/task-manager.js',
                 'resources/js/admission-communication.js',
+
+
+                'resources/js/unsigned.js',
+                'resources/js/assign.js',
                 
             ],
             refresh: true,

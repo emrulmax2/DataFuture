@@ -179,6 +179,36 @@
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <div>
+                                    <label for="org_email" class="form-label">Organization Email</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
+                                            <label class="form-check-label" for="org_email-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
+                                            <label class="form-check-label" for="org_email-no">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="id_card" class="form-label">ID Card</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
+                                            <label class="form-check-label" for="id_card-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
+                                            <label class="form-check-label" for="id_card-no">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
                                     <div class="form-check form-switch">
                                         <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
                                         <input id="external_link" class="form-check-input" name="external_link" value="1" type="checkbox">
@@ -320,6 +350,36 @@
                                         <div class="form-check mr-2">
                                             <input checked id="edit_upload-no" class="form-check-input" type="radio" name="upload" value="No">
                                             <label class="form-check-label" for="edit_upload-no">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="org_email" class="form-label">Organization Email</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="edit_org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
+                                            <label class="form-check-label" for="edit_org_email-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="edit_org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
+                                            <label class="form-check-label" for="edit_org_email-no">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="id_card" class="form-label">ID Card</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="edit_id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
+                                            <label class="form-check-label" for="edit_id_card-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="edit_id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
+                                            <label class="form-check-label" for="edit_id_card-no">No</label>
                                         </div>
                                     </div>
                                 </div>

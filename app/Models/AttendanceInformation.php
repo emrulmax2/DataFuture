@@ -22,4 +22,11 @@ class AttendanceInformation extends Model
         'created_by',
         'updated_by',
     ];
+
+    public function tutor(){
+        return $this->belongsTo(User::class, 'tutor_id');
+    }
+    public function planDate(){
+        return $this->belongsTo(PlansDateList::class, 'plans_date_list_id');
+    }
 }

@@ -182,7 +182,7 @@ class DashboardController extends Controller
         ]);
     }
     
-    public function showNew($id){
+    public function showNew($id) {
 
         $userData = User::find($id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
@@ -244,12 +244,23 @@ class DashboardController extends Controller
         $request = new Request();
 
         $request->merge([
-            'plan_date' => "13-09-2023",
+            'plan_date' => date("d-m-Y"),
             'id' =>$id,
         ]);
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
-   
+       // dd($returnData["data"]);
+        foreach($returnData["data"] as $index=>$dataSet){
+            
+            $returnData["data"][$index]["tutor_id"] = User::find($dataSet["tutor_id"]);
+
+            if($dataSet["attendance_information"]) {
+                $returnData["data"][$index]["attendance_information"] = AttendanceInformation::find($dataSet["attendance_information"]["id"]);
+            }
+            if($dataSet["foundAttendances"]) {
+                $returnData["data"][$index]["foundAttendances"] = Attendance::find($dataSet["foundAttendances"]["id"]);
+            }
+        }
         return view('pages.tutor.dashboard.indexnew', [
             'title' => 'Tutor Dashboard New - LCC Data Future Managment',
             'breadcrumbs' => [],
@@ -329,14 +340,14 @@ class DashboardController extends Controller
             endforeach;
         endif;
         
-        return response()->json([ 'data' => $data]);
+        return response()->json(['data' => $data]);
 
     }
     public function attendanceFeedShow(User $tutor,PlansDateList $plandate)
     {
         $attendanceInformation = AttendanceInformation::where("plans_date_list_id",$plandate->id)->get()->first();
-        $employee = Employee::where("user_id",Auth::user()->id)->get()->first();
-        
+        $employee = Employee::where("user_id",$tutor->id)->get()->first();
+    
         if($attendanceInformation) {
 
             if($attendanceInformation->tutor_id != Auth::user()->id) {
@@ -355,8 +366,9 @@ class DashboardController extends Controller
             else 
                 $now = strtotime($classEnd) - strtotime($attendanceInformation->start_time);
 
+        
         }
-
+        
         $Query = DB::table('plans_date_lists as datelist')
                     ->select('datelist.*','terms.name as term_name','terms.term as term','plan.id as plan_id','plan.tutor_id','plan.start_time','plan.end_time','plan.virtual_room','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
                     ->leftJoin('plans as plan', 'datelist.plan_id', 'plan.id')

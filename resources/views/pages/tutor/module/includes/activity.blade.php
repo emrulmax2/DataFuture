@@ -52,7 +52,7 @@
                                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                 }
 
-                                dd($task->task->user);
+                                //dd($task->task->user);
 
                                 $FullName = $task->task->user->employee->full_name;
                                 $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;

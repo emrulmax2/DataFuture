@@ -307,19 +307,56 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, Attendance $attendance)
+    {     
+            $data = [
+                'attendance_feed_status_id' => $request->attendance_feed_status_id,
+                'updated_by' => Auth::user()->id,
+            ];
+
+            $attendance->fill($data);
+            $attendance->save();
+     
+        if($attendance->id) 
+            return response()->json(["data updated successfully"]);
+        else 
+            return response()->json(["data could not update.",422]);
     }
 
+    public function updateAll(Request $request)
+    {
+        
+        foreach ( $request->get('id') as  $value) {
+            
+            $attendance = Attendance::find($value); 
+
+            $data = [
+                'attendance_feed_status_id' => $request->attendance_feed[$value],
+                'updated_by' => Auth::user()->id,
+            ];
+
+            $attendance->fill($data);
+            $attendance->save();
+        }
+        if($attendance->id) 
+            return response()->json(["all data updated successfully"]);
+        else 
+            return response()->json(["data could not update.",422]);
+    }
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy($id){
+        $data = Attendance::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function restore($id) {
+        $data = Attendance::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
     }
 }

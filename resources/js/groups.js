@@ -7,30 +7,51 @@ var table = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
+        let term = $("#term").val() != "" ? $("#term").val() : "";
+        let status = $("#status").val() != "" ? $("#status").val() : "1";
 
         let tableContent = new Tabulator("#groupsTableId", {
             ajaxURL: route("groups.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, term : term},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 5, 10, 20, 30, 50, 100, 200, 500, 1000],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            selectable:true,
             columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
                 {
                     title: "#ID",
                     field: "id",
                     width: "180",
                 },
                 {
+                    title: "Term",
+                    field: "term",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Course",
                     field: "course",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
@@ -42,6 +63,14 @@ var table = (function () {
                     title: "Evening & Weekend",
                     field: "evening_and_weekend",
                     headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        return (cell.getData().active == 1 ? '<span class="font-medium text-success">Active</span>' : '<span class="font-medium text-danger">Inactive</span>')
+                    }
                 },
                 {
                     title: "Actions",
@@ -59,7 +88,7 @@ var table = (function () {
                         }  else if (cell.getData().deleted_at != null) {
                             btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
+                        btns += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().id+'"/>';
                         return btns;
                     },
                 },
@@ -70,6 +99,20 @@ var table = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+            },
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                const groupActionDropdown1 = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#groupActionDropdown"));
+                if(rows.length > 0){
+                    $('.groupActions').removeClass('hidden');
+                    groupActionDropdown1.hide();
+                }else{
+                    $('.groupActions').addClass('hidden');
+                    groupActionDropdown1.hide();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
             },
         });
 
@@ -148,6 +191,7 @@ var table = (function () {
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
+            $("#term").val("");
             $("#status").val("1");
             filterHTMLForm();
         });
@@ -156,6 +200,8 @@ var table = (function () {
         const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
         const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+
+        const groupActionDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#groupActionDropdown"));
 
         let confModalDelTitle = 'Are you sure?';
         let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
@@ -241,6 +287,7 @@ var table = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
+                    $('#editModal select[name="term_declaration_id"]').val(dataset.term_declaration_id ? dataset.term_declaration_id : '');
                     $('#editModal select[name="course_id"]').val(dataset.course_id ? dataset.course_id : '');
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
 
@@ -365,6 +412,31 @@ var table = (function () {
                 }).catch(error =>{
                     console.log(error)
                 });
+            }else if(action == 'ACTIVEALL' || action == 'INACTIVEALL' || action == 'DELETEALL' || action == 'RESTOREALL'){
+                axios({
+                    method: 'post',
+                    url: route('groups.bulk.action'),
+                    data: {ids : recordID, 'action' : action},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Success!');
+                            $('#successModal .successModalDesc').html('Bulk action successfull.');
+                        });
+
+                        setTimeout(function(){
+                            succModal.hide();
+                        }, 2000)
+                    }
+                    table.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
             }
         })
 
@@ -395,5 +467,29 @@ var table = (function () {
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });
         });
+
+        $('.groupActionBTN').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var action = $theBtn.attr('data-action');
+            var ids = [];
+
+            $('#groupsTableId').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                ids.push($row.find('.ids').val());
+            });
+
+            if(ids.length > 0){
+                confModal.show();
+                document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                    $('#confirmModal .confModTitle').html(confModalDelTitle);
+                    $('#confirmModal .confModDesc').html('Do you really want to proceed with the selected action?');
+                    $('#confirmModal .agreeWith').attr('data-id', ids.join(','));
+                    $('#confirmModal .agreeWith').attr('data-action', action);
+                });
+            }else{
+                table.init();
+            }
+        })
     }
 })();

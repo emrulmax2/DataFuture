@@ -622,9 +622,10 @@ var employeePatternListTable = (function () {
 
                 if(dataset.end_to && dataset.end_to != ''){
                     edit_end_to.setOptions({
-                        startDate : dataset.end_to,
+                        //startDate : dataset.end_to,
                         minDate : effectiveFromDate
                     });
+                    $('#editEmployeeWorkingPatternModal [name="end_to"]').val(dataset.end_to);
                 }else{
                     edit_end_to.clearSelection();
                     edit_end_to.setOptions({

@@ -20,8 +20,7 @@
             </div>
             <div class="col-span-6 text-right">
 
-                <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1"><i data-lucide="hard-drive" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
-                
+                <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="btn btn-outline-secondary mr-2 w-auto"><i data-lucide="book-copy" class="stroke-1.5 h-4 w-4"></i></button>
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                     <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Course Informations
                 </button>
@@ -156,6 +155,96 @@
         </div>
     </div>
 
+
+    <!-- BEGIN: Course Change Modal -->
+    <div id="editStudentCourseChangeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="editStudentCourseChangeForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Change Course</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="academic_year_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 flex justify-start">Academic year <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
+                                    <div class="col-span-12 sm:col-span-7">
+                                        <select id="academic_year_id" class="lcc-tom-select w-full" name="academic_year_id">
+                                            <option value="">Please Select</option>
+                                            @if($academicYears->count() > 0)
+                                                @foreach($academicYears as $data)
+                                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 semesterWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="semester_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 flex justify-start">Semester <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
+                                    <div class="col-span-12 sm:col-span-7">
+                                        <select id="semester_id" class="lcc-tom-select w-full" name="semester_id">
+                                            <option value="">Please Select</option>
+                                            {{-- @if($semesters->count() > 0)
+                                                @foreach($semesters as $data)
+                                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                                @endforeach
+                                            @endif --}}
+                                        </select>
+                                        <div class="acc__input-error error-semester_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 courseWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="course_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5">Course <span class="text-danger">*</span></label>
+                                    <div class="col-span-12 sm:col-span-7">
+                                        <select id="course_id" class="lcc-tom-select w-full" name="course_id">
+                                            <option value="">Please Select</option>
+                                            {{-- @if($courses->count() > 0)
+                                                @foreach($courses as $course)
+                                                    <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                                @endforeach
+                                            @endif --}}
+                                        </select>
+                                        <div class="acc__input-error error-course_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="saveSCR" class="btn btn-success text-white w-auto">     
+                            Change Course                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" value="{{ $student->id }}" name="student_id"/>
+                        <input type="hidden" value="{{ $student->crel->id }}" name="student_course_relation_id"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Course Change Modal -->
+
     <!-- BEGIN: Edit Modal -->
     <div id="editStudentCourseDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -226,96 +315,7 @@
         </div>
     </div>
     <!-- END: Update Modal -->
-        <!-- BEGIN: Edit Modal -->
-        <div id="editStudentCourseChangeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <form method="POST" action="#" id="editStudentCourseChangeForm" enctype="multipart/form-data">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 class="font-medium text-base mr-auto">Change Course</h2>
-                            <a data-tw-dismiss="modal" href="javascript:;">
-                                <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                            </a>
-                        </div>
-                        <div class="modal-body">
-                            <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-12">
-                                    <div class="grid grid-cols-12 gap-x-4">
-                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Academic year <span class="text-danger">*</span></label>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
-                                                <option value="">Please Select</option>
-                                                @if($academicYears->count() > 0)
-                                                    @foreach($academicYears as $data)
-                                                        <option {{ isset($student->crel->academic_year_id) && $student->crel->academic_year_id == $data->id ? 'Selected' : '' }} value="{{ $data->id }}">{{ $data->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-span-12">
-                                    <div class="grid grid-cols-12 gap-x-4">
-                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Semester <span class="text-danger">*</span></label>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
-                                                <option value="">Please Select</option>
-                                                @if($semesters->count() > 0)
-                                                    @foreach($semesters as $data)
-                                                        <option {{ isset($student->crel->course_creation_id) && $student->crel->course_creation_id == $data->id ? 'Selected' : '' }} value="{{ $data->id }}">{{ $data->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-span-12">
-                                    <div class="grid grid-cols-12 gap-x-4">
-                                        <label for="course_rel" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course <span class="text-danger">*</span></label>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <select id="course_rel" class="lcc-tom-select lccTom w-full" name="course_rel">
-                                                <option value="">Please Select</option>
-                                                @if($courseCreations->count() > 0)
-                                                    @foreach($courseCreations as $cc)
-                                                        <option {{ isset($student->crel->course_creation_id) && $student->crel->course_creation_id == $cc->id ? 'Selected' : '' }} value="{{ $cc->course_creation_id }}">{{ $cc->course->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            <div class="acc__input-error error-course_rel text-danger mt-2"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                            <button type="submit" id="savePCP" class="btn btn-danger w-auto">     
-                                Change Now                      
-                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                    stroke="white" class="w-4 h-4 ml-2">
-                                    <g fill="none" fill-rule="evenodd">
-                                        <g transform="translate(1 1)" stroke-width="4">
-                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                            <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </button>
-                            <input type="hidden" value="{{ $student->id }}" name="student_id"/>
-                            <input type="hidden" value="{{ $student->crel->id }}" name="student_course_relation_id"/>
-                            <input type="hidden" value="{{ (isset($student->crel->propose->id) ? $student->crel->propose->id : 0) }}" name="id"/>
-                            <input type="hidden" value="{{ (isset($student->crel->feeeligibility->id) && $student->crel->feeeligibility->id > 0 ? $student->crel->feeeligibility->id : 0) }}" name="student_fee_eligibility_id"/>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- END: Update Modal -->
+
     <!-- BEGIN: Edit Modal -->
     <div id="editStudentAWBModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -345,7 +345,7 @@
                                 <div class="acc__input-error error-registration_date text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
-                                <label for="registration_expire_date" class="form-label">Awarding Body Reg. Date</label>
+                                <label for="registration_expire_date" class="form-label">Awarding Body Reg. Expiry Date</label>
                                 <input type="text" id="registration_expire_date" class="form-control w-full datepicker" name="registration_expire_date" value="{{ isset($student->crel->abody->registration_expire_date) ? $student->crel->abody->registration_expire_date : '' }}" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
                                 <div class="acc__input-error error-registration_expire_date text-danger mt-2"></div>
                             </div>
@@ -377,6 +377,21 @@
         </div>
     </div>
     <!-- END: Update Modal -->
+
+    <!-- BEGIN: Error Modal Content -->
+    <div id="errorModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 errorModalTitle"></div>
+                        <div class="text-slate-500 mt-2 errorModalDesc"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- END: Error Modal Content -->
 
 
     <!-- BEGIN: Success Modal Content -->

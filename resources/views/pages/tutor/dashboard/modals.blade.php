@@ -15,7 +15,7 @@
                             <label for="employee_punch_number" class="form-label inline-flex font-medium ">Please Swipe or Touch your card </label>
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-6">
-                            <input id="employee_punch_number" type="text" value="" class="form-control rounded  form-control-lg" name="punch_number" aria-label="default input example">
+                            <input id="employee_punch_number" type="password" value="" class="form-control rounded  form-control-lg" name="punch_number" aria-label="default input example">
                             <input class="plan-datelist" type="hidden" name="plan_date_list_id" value="">
                         </div>
                     </div>
@@ -97,6 +97,47 @@
                 </div>
             </div>
         </div>
+        </form>
+    </div>
+</div>
+
+<div id="startClassConfirmModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="startClassConfirmModalForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Confirmed Class Teacher</div>
+                        <div class="text-slate-500 mt-2 mb-2 confModDesc">Do you want to start this class?</div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <input class="plan-datelist" type="hidden" name="plan_date_list_id" value="">
+                        <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
+                        <input type="hidden" value="Class Started By {{ $employee->full_name }}" name="note"/>
+                        
+                        <input type="hidden" name="url" value="{{ route('tutor-attendance.store') }}" />
+                        <input type="hidden" name="user_id" value="{{ $employee->user_id }}" />
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+
+                        <button type="submit" data-id="0" data-action="none" class="save btn btn-success w-auto text-white">
+                            Yes, Start Class
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>
