@@ -64,7 +64,7 @@
                             $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
                             $end_time = date('h:i A', strtotime($end_time));  
                         @endphp
-                        <div class="ml-4 mr-auto">
+                        <div class="ml-4 mr-auto toggle-heading">
                             <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
                             <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ $planDetails[$termId][$moduleDetails]->tutor->employee->full_name }}</div>
                         </div>
@@ -113,7 +113,7 @@
                                             @php $iCountColSpan++; @endphp    
                                         @if($planDateList["attendance"]->feed->code == $status->code)
                                             
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t {{ ($planDateList["attendance"]->feed->attendance_count ? "text-emerald-600" : "text-red-600") }}  ">
                                                     {{ $planDateList["attendance"]->feed->code }} - {{ $planDateList["attendance"]->feed->name }}
                                                 </td>
                                             @else
