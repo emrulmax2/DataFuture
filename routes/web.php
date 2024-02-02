@@ -1942,7 +1942,7 @@ Route::middleware('auth')->group(function() {
         Route::get('attendance/list', 'list')->name('attendance.list'); 
         Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
         Route::post('attendance/save', 'store')->name('attendance.store'); 
-        Route::post('attendance/update', 'updateAll')->name('attendance.update.all'); 
+        Route::post('attendance/update-all', 'updateAll')->name('attendance.update.all'); 
         Route::delete('attendance/delete/{id}', 'destroy')->name('attendance.destory');
         Route::post('attendance/restore', 'restore')->name('attendance.restore');
         Route::get('attendance/{data}', 'generatePDF')->name('attendance.print');
