@@ -9,14 +9,14 @@ var classPlanTreeListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let courses = $("#classPlanTreeListTable").attr('data-course') ;
-        let instance_term = $("#classPlanTreeListTable").attr('data-term');
+        //let instance_term = $("#classPlanTreeListTable").attr('data-term');
         let group = $("#classPlanTreeListTable").attr('data-group');
         let year = $("#classPlanTreeListTable").attr('data-year');
         let attendanceSemester = $("#classPlanTreeListTable").attr('data-attendanceSemester');
 
         let tableContent = new Tabulator("#classPlanTreeListTable", {
             ajaxURL: route("plans.tree.list"),
-            ajaxParams: { courses: courses, instance_term: instance_term, group: group, year: year, attendanceSemester: attendanceSemester},
+            ajaxParams: { courses: courses, group: group, year: year, attendanceSemester: attendanceSemester}, //instance_term: instance_term,
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -44,12 +44,19 @@ var classPlanTreeListTable = (function () {
                 {
                     title: "ID",
                     field: "id",
+                    width: 110,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Module",
                     field: "module",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<a class="font-medium text-primary whitespace-normal break-all" href="'+route('tutor-dashboard.plan.module.show', cell.getData().id)+'">';
+                                html += cell.getData().module;
+                            html += '</a>';
+                        return html;
+                    }
                 },
                 {
                     title: "Tutor",
@@ -88,7 +95,6 @@ var classPlanTreeListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<a href="'+route('tutor-dashboard.plan.module.show', cell.getData().id)+'" data-id="'+cell.getData().id +'" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 ml-1"><i data-lucide="eye" class="w-4 h-4 mr-1"></i> View</a>';
                             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 ml-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</a>';
                             btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
                         }  else if (cell.getData().deleted_at != null) {
@@ -117,7 +123,7 @@ var classPlanTreeListTable = (function () {
                 });
             },
             selectableCheck:function(row){
-                return row.getData().dates < 1; //allow selection of rows where the age is greater than 18
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
             },
         });
 
@@ -326,7 +332,6 @@ var classPlanTreeListTable = (function () {
         }else{
             $('svg', $link).fadeIn();
             var courseId = $link.attr('data-courseid');
-            //var termId = $link.attr('data-termid');
             var attendanceSemester = $link.attr('data-attendanceSemester');
             var academicYearId = $link.attr('data-yearid');
             axios({
@@ -379,17 +384,16 @@ var classPlanTreeListTable = (function () {
             $parent.siblings('li').removeClass('hasData opened');
             $('svg', $link).fadeIn();
             var courseId = $link.attr('data-courseid');
-            var termId = $link.attr('data-termid');
+            //var termId = $link.attr('data-termid');
             var academicYearId = $link.attr('data-yearid');
             var attendancesemester = $link.attr('data-attendancesemester');
             var groupId = $link.attr('data-groupid');
-            var groupId = $link.attr('data-groupid');
 
-
+            //termId : termId,
             axios({
                 method: "post",
                 url: route('plans.tree.get.module'),
-                data: {courseId : courseId, termId : termId, attendancesemester: attendancesemester, academicYearId : academicYearId, groupId : groupId},
+                data: {courseId : courseId, attendancesemester: attendancesemester, academicYearId : academicYearId, groupId : groupId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -443,10 +447,13 @@ var classPlanTreeListTable = (function () {
         }).then((response) => {
             if (response.status == 200) {
                 let dataset = response.data;
-                
+
+                $('#editPlanModal .termName').html(dataset.plan.term ? dataset.plan.term : '');
                 $('#editPlanModal .courseName').html(dataset.plan.course ? dataset.plan.course : '');
-                $('#editPlanModal .moduleName').html(dataset.plan.module ? dataset.plan.module : '');
-                $('#editPlanModal select[name="group_id"]').val(dataset.plan.group_id ? dataset.plan.group_id : '');
+                $('#editPlanModal .groupName').html(dataset.plan.group ? dataset.plan.group : '');
+
+                $('#editPlanModal select[name="module_creation_id"]').html(dataset.plan.modules ? dataset.plan.modules : '');
+                
                 $('#editPlanModal select[name="rooms_id"]').val(dataset.plan.rooms_id ? dataset.plan.rooms_id : '');
                 $('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                 $('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
@@ -681,7 +688,7 @@ var classPlanTreeListTable = (function () {
         
         
         var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
-        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        var termid = ((typeof $btn.attr('data-attendanceSemester') !== 'undefined' && $btn.attr('data-attendanceSemester') !== false) ? $btn.attr('data-attendanceSemester') : false);
         var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
         var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
 
@@ -718,14 +725,15 @@ var classPlanTreeListTable = (function () {
                 console.log('error');
             }
         });
-    })
+    });
+
     $(document).on('click', '.assignCoOrdinator', function(e){
         e.preventDefault();
         var $btn = $(this);
         
         
         var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
-        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        var termid = ((typeof $btn.attr('data-attendanceSemester') !== 'undefined' && $btn.attr('data-attendanceSemester') !== false) ? $btn.attr('data-attendanceSemester') : false);
         var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
         var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
 
@@ -762,7 +770,7 @@ var classPlanTreeListTable = (function () {
                 console.log('error');
             }
         });
-    })
+    });
 
     $('#assignManagerOrCoOrdinatorForm').on('submit', function(e){
         e.preventDefault();
@@ -835,16 +843,17 @@ var classPlanTreeListTable = (function () {
         
         var visibility = ((typeof $btn.attr('data-visibility') !== 'undefined' && $btn.attr('data-visibility') !== false) ? $btn.attr('data-visibility') : 1);
         var yearid = ((typeof $btn.attr('data-yearid') !== 'undefined' && $btn.attr('data-yearid') !== false) ? $btn.attr('data-yearid') : false);
-        var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
+        //var termid = ((typeof $btn.attr('data-termid') !== 'undefined' && $btn.attr('data-termid') !== false) ? $btn.attr('data-termid') : false);
         var courseid = ((typeof $btn.attr('data-courseid') !== 'undefined' && $btn.attr('data-courseid') !== false) ? $btn.attr('data-courseid') : false);
         var groupid = ((typeof $btn.attr('data-groupid') !== 'undefined' && $btn.attr('data-groupid') !== false) ? $btn.attr('data-groupid') : false);
+        var attendancesemester = ((typeof $btn.attr('data-attendancesemester') !== 'undefined' && $btn.attr('data-attendancesemester') !== false) ? $btn.attr('data-attendancesemester') : false);
 
         $btn.attr('disabled', 'disabled');
 
         axios({
             method: "post",
             url: route('plans.update.visibility'),
-            data: {yearid : yearid, termid : termid, courseid : courseid, groupid : groupid, visibility : visibility},
+            data: {yearid : yearid, attendancesemester : attendancesemester, courseid : courseid, groupid : groupid, visibility : visibility},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {

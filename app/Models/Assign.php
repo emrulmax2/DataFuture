@@ -13,6 +13,7 @@ class Assign extends Model
     protected $fillable = [
         'plan_id',
         'student_id',
+        'attendance',
         'created_by',
         'updated_by',
     ];
@@ -29,6 +30,6 @@ class Assign extends Model
     }
 
     public function plan(){
-        return $this->belongsTo(Student::class, 'plan_id');
+        return $this->belongsTo(Plan::class, 'plan_id');
     }
 }

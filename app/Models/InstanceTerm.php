@@ -13,6 +13,7 @@ class InstanceTerm extends Model
     protected $fillable = [
         'course_creation_instance_id',
         'term_declaration_id',
+        'term_type_id',
         'session_term',
         'start_date',
         'end_date',
@@ -80,6 +81,10 @@ class InstanceTerm extends Model
 
     public function termDeclaration(){
         return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
+
+    public function termType(){
+        return $this->belongsTo(TermType::class, 'term_type_id');
     }
 
 }

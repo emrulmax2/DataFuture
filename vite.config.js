@@ -215,6 +215,10 @@ export default defineConfig({
                 'resources/js/plans-date-list.js',
                 'resources/js/task-manager.js',
                 'resources/js/admission-communication.js',
+
+
+                'resources/js/unsigned.js',
+                'resources/js/assign.js',
                 
             ],
             refresh: true,

@@ -90,5 +90,9 @@ class Plan extends Model
     public function attenTerm(){
         return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
     }
+
+    public function assign(){
+        return $this->hasMany(Assign::class, 'plan_id', 'id');
+    }
     
 }

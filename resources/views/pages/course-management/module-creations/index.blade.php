@@ -31,7 +31,7 @@
                         <form id="tabulatorFilterForm-mc" class="xl:flex sm:mr-auto" >
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Course</label>
-                                <select id="courses" name="courses" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                <select id="courses" name="courses" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" style="max-width: 250px;">
                                     <option value="">Please Select</option>
                                     @if(!empty($courses))
                                         @foreach($courses as $cr)
@@ -46,7 +46,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($terms))
                                         @foreach($terms as $trm)
-                                            <option value="{{ $trm->id }}">{{ $trm->term }}</option>
+                                            <option value="{{ $trm->id }}">{{ (isset($trm->termDeclaration->name) && !empty($trm->termDeclaration->name) ? $trm->termDeclaration->name : '') }}</option>
                                         @endforeach
                                     @endif
                                 </select>

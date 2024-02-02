@@ -84,7 +84,7 @@ class UserHolidayController extends Controller
                         $end_to = (isset($pattern->end_to) && !empty($pattern->end_to) & $pattern->end_to != '0000-00-00' ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
                         if(
-                            ((!empty($end_to) && $end_to > $yearStart && $end_to <= $yearEnd) && ($effective_from < $yearStart || ($effective_from > $yearStart && $effective_from < $yearEnd)))
+                            ((!empty($end_to) && $end_to > $yearStart && ($end_to <= $yearEnd || $end_to >= $yearEnd)) && ($effective_from < $yearStart || ($effective_from > $yearStart && $effective_from < $yearEnd)))
                             || 
                             ($end_to != '' && $effective_from < $yearStart && $end_to > $yearEnd) 
                             || 
@@ -294,7 +294,7 @@ class UserHolidayController extends Controller
                     $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
                     $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? date('Y-m-d', strtotime($ptr->end_to)) : '');
                     if(
-                        (($end_to != '' && $end_to > $year_start && $end_to < $year_end) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
+                        (($end_to != '' && $end_to > $year_start && ($end_to <= $year_end || $end_to >= $year_end)) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
                         || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
                         || ($end_to == '' && $effective_from < $year_end)
                     ):
@@ -405,7 +405,7 @@ class UserHolidayController extends Controller
                 $end_to = (isset($r->end_to) && $r->end_to != '' & $r->end_to != '0000-00-00' ? date('Y-m-d', strtotime($r->end_to)) : '');
 
                 if(
-                    ($end_to != '' && $end_to > $start && $end_to < $end) && ($effective_from < $start || ($effective_from > $start && $effective_from < $end)) 
+                    ($end_to != '' && $end_to > $start && ($end_to <= $end || $end_to >= $end)) && ($effective_from < $start || ($effective_from > $start && $effective_from < $end)) 
                     || 
                     ($end_to != '' && $effective_from < $start && $end_to > $end) 
                     || 

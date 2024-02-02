@@ -7,7 +7,7 @@ import TomSelect from "tom-select";
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
-        persist: false,
+        //persist: false,
         create: true,
         allowEmptyOption: true,
         onDelete: function (values) {

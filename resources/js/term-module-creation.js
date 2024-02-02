@@ -38,17 +38,14 @@ var termModuleCreationsListTable = (function () {
                 },
                 {
                     title: "Name",
-                    field: "term_name",
+                    field: "term_dec_name",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Term",
-                    field: "term",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Session",
-                    field: "session_term",
+                    title: "Type",
+                    field: "term_type",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {

@@ -96,6 +96,7 @@ use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
@@ -592,8 +593,12 @@ Route::middleware('auth')->group(function() {
         Route::get('course-management/plans/add', 'add')->name('class.plan.add');
         Route::get('course-management/plans/edit/{id}', 'edit')->name('class.plan.edit');
         Route::post('course-management/plans/update', 'update')->name('class.plan.update');
-        Route::get('course-management/plans/builder/{course}/{instanceterm}/{modulecreation}', 'classPlanBuilder')->name('class.plan.builder');
         Route::post('course-management/plans/store', 'store')->name('class.plan.store');
+
+        //Route::get('course-management/plans/builder/{course}/{instanceterm}/{modulecreation}', 'classPlanBuilder')->name('class.plan.builder');
+
+        Route::get('course-management/plans/builder/{academic}/{term}/{creation}/{group}', 'classPlanBuilder')->name('class.plan.builder');
+        Route::post('course-management/plans/get-modul-details', 'getModuleDetails')->name('class.plan.get.module.details');
 
         Route::delete('course-management/plans/delete/{id}', 'destroy')->name('class.plan.delete');
         Route::post('course-management/plans/restore/{id}', 'restore')->name('class.plan.restore');
@@ -601,12 +606,17 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/get-modules', 'getModulesByCourseTerms')->name('class.plan.get.modules.by.course.terms');
         Route::post('course-management/plans/get-plans-box', 'getClassPlanBox')->name('class.plan.get.box');
         Route::post('course-management/plans/get-courselist', 'getCourseListByAcademicYear')->name('course.list.by.academic.instance');
+
+        Route::post('course-management/plans/get-term-declaration', 'getTermDeclarationByAcademicYear')->name('termdeclaration.list.by.academic.year');
+        Route::post('course-management/plans/get-course-list', 'getCourseByAcademicTerm')->name('course.list.by.academic.term');
+        Route::post('course-management/plans/get-group-list', 'getGroupByAcademicTermCourse')->name('group.list.by.academic.term.course');
+
+        Route::post('course-management/plans/get-filtered-group', 'getFilteredGroup')->name('class.plan.get.group.filter');
     });
 
     Route::controller(PlanTreeController::class)->group(function() {
         Route::get('course-management/plans/tree', 'index')->name('plans.tree');
         Route::post('course-management/plans/tree/get-semesters', 'getAttenDanceSemester')->name('plans.tree.get.semester');
-        Route::post('course-management/plans/tree/get-term', 'getTerm')->name('plans.tree.get.terms');
         Route::post('course-management/plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
         Route::post('course-management/plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
         Route::post('course-management/plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
@@ -1329,6 +1339,8 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/groups/update/{id}', 'update')->name('groups.update');
         Route::delete('course-management/groups/delete/{id}', 'destroy')->name('groups.destory');
         Route::post('course-management/groups/restore/{id}', 'restore')->name('groups.restore');
+
+        Route::post('course-management/groups/bulk/', 'groupBulkActions')->name('groups.bulk.action');
     });
 
     Route::controller(ModuleLevelController::class)->group(function() {
@@ -2134,6 +2146,23 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
         Route::get('task-manager/download-task-students-list', 'downloadTaskStudentListExcel')->name('task.manager.students.list.excel'); 
         Route::post('task-manager/canceled-task', 'canceledTask')->name('task.manager.canceled.task'); 
+    });
+
+    Route::controller(AssignController::class)->group(function() {
+        Route::get('course-management/assign/{acid}/{tdid}/{crid}/{grid}', 'index')->name('assign'); 
+
+        Route::post('course-management/assign/get-existing-student-list-by-module', 'getExistingStudentListByModule')->name('assign.get.existing.student.list.by.module'); 
+        Route::post('course-management/assign/get-potential-student-list-by-search', 'getPotentialStudentListBySearch')->name('assign.get.potential.student.list.by.search'); 
+        Route::post('course-management/assign/get-group-list', 'getGroupList')->name('assign.get.group.list'); 
+        Route::post('course-management/assign/get-module-and-student-list', 'getModuleAndStudentList')->name('assign.get.module.student.list'); 
+        Route::post('course-management/assign/get-student-list-by-module', 'getStudentListByModule')->name('assign.get.student.list.by.module'); 
+
+        Route::get('course-management/assign/unsignned-list', 'unsignnedList')->name('assign.unsignned.list'); 
+
+        Route::post('course-management/assign/module-list-html', 'getModulListHtml')->name('assign.get.module.list.html'); 
+
+        Route::post('course-management/assign/students-to-plan', 'assignStudentsToPlan')->name('assign.students.to.plan'); 
+        Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
     });
 });
 

@@ -18,7 +18,7 @@
                 
             </div>
         </div>
-        <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
+        <div class="mt-6 lg:mt-0 flex-1 px-5 border-l  border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
             <div class="font-medium text-center lg:text-left lg:mt-3">Module Details</div>
             <div class="flex flex-col justify-center items-center lg:items-start mt-4">
                 <div class="truncate sm:whitespace-normal flex items-center">
@@ -34,8 +34,29 @@
                 </div>
             </div>
         </div>
-        <div class="mt-6 lg:mt-0 flex-1 px-5 pt-5 lg:pt-0">
-            
+        <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
+            @if($plan->tutor_id > 0)
+                <div class="flex items-center lg:mt-3">
+                    <div class="w-10 h-10 intro-x image-fit mr-5 inline-block">
+                        <img alt="{{ (isset($plan->tutor->employee->full_name) ? $plan->tutor->employee->full_name : '') }}" class="rounded-full shadow" src="{{ (isset($plan->tutor->employee->photo_url) ? $plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'))}}">
+                    </div>
+                    <div class="inline-block relative">
+                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($plan->tutor->employee->full_name) ? $plan->tutor->employee->full_name : '') }}</div>
+                        <div class="text-slate-500 text-xs whitespace-nowrap">Tutor</div>
+                    </div>
+                </div>
+            @endif
+            @if($plan->personal_tutor_id > 0)
+                <div class="flex items-center mt-4">
+                    <div class="w-10 h-10 intro-x image-fit mr-5 inline-block">
+                        <img alt="{{ (isset($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : '') }}" class="rounded-full shadow" src="{{ (isset($plan->personalTutor->employee->photo_url) ? $plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'))}}">
+                    </div>
+                    <div class="inline-block relative">
+                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : '') }}</div>
+                        <div class="text-slate-500 text-xs whitespace-nowrap">Personal Tutor</div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">

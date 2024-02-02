@@ -13,40 +13,30 @@
     </div>
 
     <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
+    <div class="grid grid-cols-12 gap-3 lg:mt-5">
         <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
-
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="grid grid-cols-12 gap-3 lg:mt-5">
-                <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-                    <div class="intro-y box p-5">
-                        <div class="planTreeWrap">
-                            @if(!empty($acyers))
-                                <ul class="classPlanTree">
-                                    @foreach($acyers as $year)
-                                        @if(isset($year->terms) && $year->terms->count() > 0)
-                                            <li class="hasChildren">
-                                                <a href="javascript:void(0);" data-yearid="{{ $year->id }}" class="academicYear flex items-center text-primary font-medium">{{ $year->name }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
-                                            </li>
-                                        @endif
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
+            <div class="intro-y box p-5">
+                <div class="planTreeWrap">
+                    @if(!empty($acyers))
+                        <ul class="classPlanTree">
+                            @foreach($acyers as $year)
+                                @if(isset($year->terms) && $year->terms->count() > 0)
+                                    <li class="hasChildren">
+                                        <a href="javascript:void(0);" data-yearid="{{ $year->id }}" class="academicYear flex items-center text-primary font-medium">{{ $year->name }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
-                <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-                    <div class="intro-y box p-5">
-                        <div class="classPlanTreeResultWrap" style="display: none;"></div>
-                        <div class="classPlanTreeResultNotice">
-                            <div class="alert alert-success-soft show flex items-center mb-2" role="alert">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a group to view the details.
-                            </div>
-                        </div>
+            </div>
+        </div>
+        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+            <div class="intro-y box p-5">
+                <div class="classPlanTreeResultWrap" style="display: none;"></div>
+                <div class="classPlanTreeResultNotice">
+                    <div class="alert alert-success-soft show flex items-center mb-2" role="alert">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select a group to view the details.
                     </div>
                 </div>
             </div>
@@ -121,27 +111,29 @@
                         <div class="grid grid-cols-12 gap-3">
                             <div class="col-span-6">
                                 <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Term</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold termName">Term Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
                                     <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Course</div></label>
                                     <div class="col-span-8"><div class="text-left font-medium font-bold courseName">Course Name</div></div>
                                 </div>
                             </div>
                             <div class="col-span-6">
                                 <div class="grid grid-cols-12 gap-0">
-                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Module</div></label>
-                                    <div class="col-span-8"><div class="text-left font-medium font-bold moduleName">Module Name</div></div>
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Group</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold groupName">Group Name</div></div>
                                 </div>
                             </div>
+                            <div class="col-span-6"></div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="group_id" class="form-label">Group <span class="text-danger">*</span></label>
-                                <select id="group_id" name="group_id" class="form-control w-full">
+                                <label for="module_creation_id" class="form-label">Module <span class="text-danger">*</span></label>
+                                <select id="module_creation_id" name="module_creation_id" class="form-control w-full">
                                     <option value="">Please Select</option>
-                                    @if(!empty($group))
-                                        @foreach($group as $gr)
-                                            <option value="{{ $gr->id }}">{{ $gr->name }}</option>
-                                        @endforeach
-                                    @endif
                                 </select>
-                                <div class="acc__input-error error-group_id text-danger mt-2"></div>
+                                <div class="acc__input-error error-module_creation_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="rooms_id" class="form-label">Room <span class="text-danger">*</span></label>
