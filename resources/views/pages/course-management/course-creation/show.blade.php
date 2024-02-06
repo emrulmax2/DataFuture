@@ -41,19 +41,22 @@
                             <div class="truncate sm:whitespace-normal flex items-center mt-3">
                                 <i data-lucide="key" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">SLC Code:</span> <span class="font-medium ml-2">{{ $creation->slc_code }}</span>
                             </div>
+                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
+                                <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Venue:</span> <span class="font-medium ml-2">{{ (isset($creation->venue->name) ? $creation->venue->name : '') }}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-6 lg:mt-0 flex-1 px-5 pt-5 lg:pt-0">
                         <div class="font-medium text-center lg:text-left lg:mt-3">&nbsp;</div>
                         <div class="flex flex-col justify-center items-center lg:items-start mt-4">
-                            <div class="truncate sm:whitespace-normal flex items-center">
-                                <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Venue:</span> <span class="font-medium ml-2">{{ (isset($creation->venue->name) ? $creation->venue->name : '') }}</span>
-                            </div>
                             <div class="truncate sm:whitespace-normal flex items-center mt-3">
                                 <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Fees:</span> <span class="font-medium ml-2">{{ isset($creation->fees) && !empty($creation->fees) ? '£'.number_format($creation->fees, 2) : '' }}</span>
                             </div>
                             <div class="truncate sm:whitespace-normal flex items-center mt-3">
                                 <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Reg. Fees:</span> <span class="font-medium ml-2">{{ isset($creation->reg_fees) && !empty($creation->reg_fees) ? '£'.number_format($creation->reg_fees, 2) : '' }}</span>
+                            </div>
+                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
+                                <i data-lucide="fingerprint" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Workplacement:</span> <span class="font-medium ml-2">{{ isset($creation->is_workplacement) && $creation->is_workplacement == 1 ? 'Yes' : 'No' }}</span>
                             </div>
                         </div>
                     </div>

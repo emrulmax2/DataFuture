@@ -105,40 +105,6 @@
 
                         </div>
                     </div>
-                    {{--<div class="grid grid-cols-12 gap-x-4">
-                        <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="vertical-form-13" class="form-label inline-flex">Address Line 1 <span class="text-danger">*</span></label>
-                            <input id="vertical-form-13" type="text" name="address_line_1" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
-                            <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
-                        </div>
-                        <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="vertical-form-14" class="form-label inline-flex">Address Line 2</label>
-                            <input id="vertical-form-14" type="text" name="address_line_2" class="form-control rounded-none form-control-lg inputUppercase"  aria-label="default input example">
-                            
-                        </div>
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="post_code" class="form-label inline-flex">Post Code <span class="text-danger">*</span></label>
-                            <input  id="post_code" type="text" name="post_code" value="" class="w-full text-sm inputUppercase"  />
-                            <div class="acc__input-error error-post_code text-danger mt-2"></div>
-                        </div>
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-13" class="form-label inline-flex">City <span class="text-danger">*</span></label>
-                            <input  id="vertical-form-13" type="text" name="city" value="" class="w-full text-sm inputUppercase"  />
-                            <div class="acc__input-error error-city text-danger mt-2"></div>
-                        </div>
-
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-14" class="form-label inline-flex">State <span class="text-danger">*</span></label>
-                            <input id="vertical-form-14" type="text" name="state" value="" class="w-full text-sm inputUppercase" />
-                            <div class="acc__input-error error-state text-danger mt-2"></div>
-                        </div>
-
-                        <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                            <label for="vertical-form-15" class="form-label inline-flex">Country <span class="text-danger">*</span></label>
-                            <input id="vertical-form-15" type="text" name="country" value="" class="w-full text-sm inputUppercase" />
-                            <div class="acc__input-error error-country text-danger mt-2"></div>
-                        </div>
-                    </div>--}}
                 </div>
                 <div class="intro-y col-span-12">
                     <div class="font-medium text-base">
@@ -270,7 +236,7 @@
                     </div>            
                     <div class="intro-y col-span-12 sm:col-span-4">
                         <label for="vertical-form-3" class="form-label inline-flex">Site Location <span class="text-danger">*</span></label>
-                        <select id="vertical-form-11" name="site_location[]" class=" w-fulllccToms lcc-tom-select" multiple>
+                        <select id="vertical-form-11" name="site_location[]" class=" w-full lccToms lcc-tom-select" multiple>
                             <option value="">Please Select</option>
                             @foreach($venues as $venue)
                                 <option  value="{{ $venue->id }}">{{ $venue->name }}</option>              
@@ -303,7 +269,7 @@
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="job_title" class="form-label inline-flex">Job Title <span class="text-danger">*</span></label>
-                        <select id="job_title" name="job_title" class=" w-fulllccToms lcc-tom-select">
+                        <select id="job_title" name="job_title" class=" w-full lccToms lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($jobTitles as $jobTitle)
                                 <option  value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>              
@@ -313,7 +279,7 @@
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="department" class="form-label inline-flex">Department <span class="text-danger">*</span></label>
-                        <select id="department" name="department" class=" w-fulllccToms lcc-tom-select">
+                        <select id="department" name="department" class=" w-full lccToms lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($departments as $department)
                                 <option  value="{{ $department->id }}">{{ $department->name }}</option>              
@@ -353,7 +319,7 @@
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="notice-period" class="form-label inline-flex">Notice Period  <span class="text-danger"> *</span> <span class="form-help m-0 ml-2">Employee must give</span></label>
-                                <select id="notice-period" name="notice_period" class="form-controllccToms lcc-tom-select">
+                                <select id="notice-period" name="notice_period" class="form-control lccToms lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($noticePeriods as $noticePeriod)
                                         <option  value="{{ $noticePeriod->id }}">{{ $noticePeriod->name }}</option>              
@@ -365,7 +331,7 @@
 
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span> <span class="form-help m-0 ml-2">This employment is</span></label>
-                                <select id="employment-period" name="employment_period" class="form-controllccToms lcc-tom-select">
+                                <select id="employment-period" name="employment_period" class="form-control lccToms lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($employmentPeriods as $employmentPeriod)
                                         <option  value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>              
@@ -377,7 +343,7 @@
 
                             <div class="intro-y col-span-12 sm:col-span-4">
                                 <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span> <span class="form-help m-0 ml-2" >Employee receives</span></label>
-                                <select id="ssp-term" name="ssp_term" class="form-controllccToms lcc-tom-select">
+                                <select id="ssp-term" name="ssp_term" class="form-control lccToms lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($sspTerms as $sspterm)
                                         <option  value="{{ $sspterm->id }}">{{ $sspterm->name }}</option>              
@@ -453,7 +419,7 @@
                         <div class="grid grid-cols-12 gap-x-4">
                             <div class="intro-y col-span-12 sm:col-span-6 py-1"> <!-- checkbox for yes/no -->
                                 <label for="document_type" class="form-label inline-flex">Document Type <span class="text-danger"> *</span></label>
-                                <select id="document_type" name="document_type" class="form-controllccToms lcc-tom-select">
+                                <select id="document_type" name="document_type" class="form-control lccToms lcc-tom-select">
                                     <option value="">Please Select</option>
                                     @foreach($documentTypes as $documentType)
                                         <option  value="{{ $documentType->id }}">{{ $documentType->name }}</option>              
@@ -521,7 +487,7 @@
                     </div>              
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="relationship" class="form-label inline-flex">Relationship <span class="text-danger">*</span></label>
-                        <select id="relationship" name="relationship" class="form-controllccToms lcc-tom-select">
+                        <select id="relationship" name="relationship" class="form-control lccToms lcc-tom-select">
                             <option value="">Please Select</option>
                             @foreach($relation as $kins)
                                 <option  value="{{ $kins->id }}">{{ $kins->name }}</option>              

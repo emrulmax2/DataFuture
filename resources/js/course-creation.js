@@ -189,16 +189,20 @@ var courseCreationListTable = (function () {
         const addCourseCreationModalEl = document.getElementById('addCourseCreationModal')
         addCourseCreationModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addCourseCreationModal .acc__input-error').html('');
-            $('#addCourseCreationModal input').val('');
+            $('#addCourseCreationModal input:not([type="checkbox"]').val('');
             $('#addCourseCreationModal select').val('');
+            $('#addCourseCreationModal [name="is_workplacement"]').prop('checked', false);
+            $('#addCourseCreationModal .iwkp_label').text('No');
         });
         
         const editCourseCreationModalEl = document.getElementById('editCourseCreationModal')
         editCourseCreationModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editCourseCreationModal .acc__input-error').html('');
-            $('#editCourseCreationModal input').val('');
+            $('#editCourseCreationModal input:not([type="checkbox"]').val('');
             $('#editCourseCreationModal select').val('');
             $('#editCourseCreationModal input[name="id"]').val('0');
+            $('#editCourseCreationModal [name="is_workplacement"]').prop('checked', false);
+            $('#editCourseCreationModal .iwkp_label').text('No');
         });
 
 
@@ -278,6 +282,13 @@ var courseCreationListTable = (function () {
             }
         })
 
+        $('#is_workplacement').on('change', function(){
+            if($(this).prop('checked')){
+                $(this).siblings('label.iwkp_label').text('Yes');
+            }else{
+                $(this).siblings('label.iwkp_label').text('No');
+            }
+        })
 
         $("#courseCreationTableId").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
@@ -301,6 +312,13 @@ var courseCreationListTable = (function () {
                     $('#editCourseCreationModal input[name="fees"]').val(dataset.fees ? dataset.fees : '');
                     $('#editCourseCreationModal input[name="reg_fees"]').val(dataset.reg_fees ? dataset.reg_fees : '');
                     
+                    if(dataset.is_workplacement == 1){
+                        $('#editCourseCreationModal input[name="is_workplacement"]').prop('checked', true);
+                        $('#editCourseCreationModal .iwkp_label').text('Yes');
+                    }else{
+                        $('#editCourseCreationModal input[name="is_workplacement"]').prop('checked', false);
+                        $('#editCourseCreationModal .iwkp_label').text('No');
+                    }
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);
                 }
