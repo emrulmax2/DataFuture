@@ -150,6 +150,7 @@ class CoursCreationController extends Controller
             'venue_id'=> (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : null),
             'fees'=> (isset($request->fees) && $request->fees > 0 ? $request->fees : null),
             'reg_fees'=> (isset($request->reg_fees) && $request->reg_fees > 0 ? $request->reg_fees : null),
+            'is_workplacement'=> (isset($request->is_workplacement) && $request->is_workplacement > 0 ? $request->is_workplacement : 0),
             'updated_by' => auth()->user()->id
         ]);
 

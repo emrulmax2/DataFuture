@@ -147,18 +147,18 @@ class EmployeeController extends Controller
     {
         $titles = Title::all();
         // $gender = HesaGender::all();
-        $sexIdentifier = SexIdentifier::all();
-        $country = Country::all();
-        $relation = KinsRelation::all();
-        $ethnicity = Ethnicity::all();
-        $disability = Disability::all();
-        $venues = Venue::all();
-        $workTypes = EmployeeWorkType::all();
-        $departments = Department::all();
+        $sexIdentifier = SexIdentifier::orderBy('name', 'ASC')->get();
+        $country = Country::orderBy('name', 'ASC')->get();
+        $relation = KinsRelation::orderBy('name', 'ASC')->get();
+        $ethnicity = Ethnicity::orderBy('name', 'ASC')->get();
+        $disability = Disability::orderBy('name', 'ASC')->get();
+        $venues = Venue::orderBy('name', 'asc')->get();
+        $workTypes = EmployeeWorkType::orderBy('name', 'asc')->get();
+        $departments = Department::orderBy('name', 'ASC')->get();
         $noticePeriods = EmployeeNoticePeriod::all();
         $employmentPeriods = EmploymentPeriod::all();
         $sspTerms = EmploymentSspTerm::all();
-        $jobTitles = EmployeeJobTitle::all();
+        $jobTitles = EmployeeJobTitle::orderBy('name', 'ASC')->get();
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
         

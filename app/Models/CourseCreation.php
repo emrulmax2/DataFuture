@@ -21,6 +21,7 @@ class CourseCreation extends Model
         'venue_id',
         'fees',
         'reg_fees',
+        'is_workplacement',
         'created_by',
         'updated_by',
     ];

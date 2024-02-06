@@ -149,7 +149,7 @@ import IMask from 'imask';
 
             next.parents('.wizard-fieldset').removeClass("show");
             currentActiveStep.removeClass('active').addClass('activated').next().addClass('active');
-            console.log(currentActiveStep);
+            
             next.parents('.wizard-fieldset').next('.wizard-fieldset').addClass("show");
 
             $(document).find('.wizard-fieldset').each(function () {
@@ -233,7 +233,7 @@ import IMask from 'imask';
         let $this = $(this)
         var employee_work_type = $this.val();
         
-        if(employee_work_type == 1) {
+        if(employee_work_type == 3) {
             $('.employeeWorkTypeFields').fadeIn('fast', function(){
                 $('input', this).val('');
             });
@@ -242,8 +242,6 @@ import IMask from 'imask';
                 $('input', this).val('');
             });
         }
-        
-
     });
 
     
