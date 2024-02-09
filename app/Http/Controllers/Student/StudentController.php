@@ -44,6 +44,7 @@ use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Signatory;
 use App\Models\SlcAgreement;
+use App\Models\SlcPaymentMethod;
 use App\Models\SlcRegistration;
 use App\Models\SlcRegistrationStatus;
 use App\Models\SmsTemplate;
@@ -57,6 +58,7 @@ use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
+use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -425,12 +427,14 @@ class StudentController extends Controller
                 ['label' => 'Student SLC History', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
-            'ac_years' => AcademicYear::orderBy('from_date', 'ASC')->get(),
+            'ac_years' => AcademicYear::orderBy('from_date', 'DESC')->get(),
             'active_ac_year' => (isset($firstCreationInstance->academic_year_id) && $firstCreationInstance->academic_year_id > 0 ? $firstCreationInstance->academic_year_id : 0),
             'reg_status' => SlcRegistrationStatus::where('active', 1)->get(),
             'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
             'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get(),
-            'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get()
+            'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get(),
+            'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
+            'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first()
         ]);
     }
 
@@ -446,8 +450,11 @@ class StudentController extends Controller
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
-            'agreements' => SlcAgreement::where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->orderBy('id', 'ASC')->get(),
+            'agreements' => SlcAgreement::with('installments')->where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->orderBy('id', 'ASC')->get(),
             'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
+            'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
+            'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
+            'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),
         ]);
     }
 

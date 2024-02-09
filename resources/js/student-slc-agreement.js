@@ -48,6 +48,16 @@ import Tabulator from "tabulator-tables";
         }
     })
 
+    $('#warningModal .warningCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            warningModal.hide();
+            window.location.reload();
+        }else{
+            warningModal.hide();
+        }
+    })
+
     $('#addAgreementForm [name="course_creation_instance_id"]').on('change', function(){
         var $select = $(this);
         var course_creation_instance_id = $select.val();
@@ -75,11 +85,13 @@ import Tabulator from "tabulator-tables";
 
     $('#addAgreementForm').on('submit', function(e){
         e.preventDefault();
+        var $form = $(this);
         const form = document.getElementById('addAgreementForm');
     
         document.querySelector('#addAgre').setAttribute('disabled', 'disabled');
         document.querySelector("#addAgre svg").style.cssText ="display: inline-block;";
 
+        var year = $('[name="year"]', $form).val();
         let form_data = new FormData(form);
         axios({
             method: "post",
@@ -114,6 +126,20 @@ import Tabulator from "tabulator-tables";
                         $(`#addAgreementForm .${key}`).addClass('border-danger');
                         $(`#addAgreementForm  .error-${key}`).html(val);
                     }
+                }else if (error.response.status == 304){
+                    $('#addAgreementForm').animate({ scrollTop: 0 });
+                    $form.find('.alert').remove();
+                    $('.modal-content', $form).prepend('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Existing agreement found under this sutdent active course relation for the year '+year+'.</div>')
+                
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+
+                    setTimeout(function(){
+                        $form.find('.alert').remove();
+                    }, 3000)
                 } else {
                     console.log('error');
                 }
@@ -199,6 +225,81 @@ import Tabulator from "tabulator-tables";
                 }
             }
         });
+    });
+
+    $('.deleteAgreementBtn').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var slc_agreement_id = $theBtn.attr('data-id');
+
+        axios({
+            method: 'post',
+            url: route('student.slc.agreement.has.data'),
+            data: {slc_agreement_id : slc_agreement_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                if(response.data.res == 0){
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html("Oops!" );
+                        $("#warningModal .warningModalDesc").html('Oops! You can not delete this agreement. To delete this agreement please remove related Installment and Payments first.');
+                        $("#warningModal .warningCloser").attr('data-status', 'DISMISS');
+                    });
+                }else{
+                    confirmModal.show();
+                    document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#confirmModal .confModTitle").html("Are you sure?" );
+                        $("#confirmModal .confModDesc").html('Want to delete this agreement from the list? Please click on agree to continue.');
+                        $("#confirmModal .agreeWith").attr('data-recordid', slc_attendance_id);
+                        $("#confirmModal .agreeWith").attr('data-status', 'DELETEAGR');
+                    });
+                }
+            }
+        }).catch(error =>{
+            confirmModal.hide();
+            console.log(error);
+        });
+    });
+
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+        let $agreeBTN = $(this);
+        let recordid = $agreeBTN.attr('data-recordid');
+        let action = $agreeBTN.attr('data-status');
+        let student = $agreeBTN.attr('data-student');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+
+        if(action == 'DELETE'){
+            axios({
+                method: 'delete',
+                url: route('student.destory.slc.agreement'),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s agreement  successfully deleted.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else{
+            confirmModal.hide();
+        }
     });
 
 })()

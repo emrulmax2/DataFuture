@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SlcAttendanceUpdateRequest extends FormRequest
+class SlcMoneyReceiptRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,23 +24,26 @@ class SlcAttendanceUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'confirmation_date' => 'required',
-            'attendance_year' => 'required',
+            'invoice_no' => 'required',
+            'payment_date' => 'required',
+            'slc_payment_method_id' => 'required',
             'term_declaration_id' => 'required',
             'session_term' => 'required',
-            'attendance_code_id' => 'required',
+            'amount' => 'required',
+            'payment_type' => 'required',
         ];
     }
-
 
     public function messages()
     {
         return [
-            'confirmation_date.required' => 'This field is required.',
-            'attendance_year.required' => 'This field is required.',
+            'invoice_no.required' => 'This field is required.',
+            'payment_date.required' => 'This field is required.',
+            'slc_payment_method_id.required' => 'This field is required.',
             'term_declaration_id.required' => 'This field is required.',
             'session_term.required' => 'This field is required.',
-            'attendance_code_id.required' => 'This field is required.',
+            'amount.required' => 'This field is required.',
+            'payment_type.required' => 'This field is required.',
         ];
     }
 }

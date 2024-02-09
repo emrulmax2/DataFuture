@@ -15,32 +15,38 @@ class SlcInstallmentController extends Controller
 {
     public function store(SlcInstallmentUpdateRequest $request){
         $student_id = $request->student_id;
-        $student = Student::find($student_id);
-        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
-
+        $session_term = $request->session_term;
         $slc_agreement_id = $request->slc_agreement_id;
-        $slcAgreement = SlcAgreement::find($slc_agreement_id);
-        $slc_registration_id = (isset($slcAgreement->slc_registration_id) && $slcAgreement->slc_registration_id > 0 ? $slcAgreement->slc_registration_id : 0);
-        $slcAttendance = SlcAttendance::where('slc_registration_id', $slc_registration_id)->get()->first();
-        $slc_attendance_id = (isset($slcAttendance->id) && $slcAttendance->id > 0 ? $slcAttendance->id : 0);
+
+        $existingInst = SlcInstallment::where('student_id', $student_id)->where('session_term', $session_term)->where('slc_agreement_id', $slc_agreement_id)->get()->count();
+        if($existingInst > 0):
+            return response()->json(['res' => 'Installment exist'], 304);
+        else:
+            $student = Student::find($student_id);
+            $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+
+            $slcAgreement = SlcAgreement::find($slc_agreement_id);
+            $slc_registration_id = (isset($slcAgreement->slc_registration_id) && $slcAgreement->slc_registration_id > 0 ? $slcAgreement->slc_registration_id : 0);
+            $slcAttendance = SlcAttendance::where('slc_registration_id', $slc_registration_id)->where('attendance_code_id', 1)->orderBy('id', 'DESC')->get()->first();
+            $slc_attendance_id = (isset($slcAttendance->id) && $slcAttendance->id > 0 ? $slcAttendance->id : 0);
 
 
-        $installmentData = [];
-        $installmentData['student_id'] = $student_id;
-        $installmentData['student_course_relation_id'] = $courseRelationId;
-        $installmentData['course_creation_instance_id'] = $slcAgreement->course_creation_instance_id;
-        $installmentData['slc_attendance_id'] = $slc_attendance_id;
-        $installmentData['slc_agreement_id'] = $slc_agreement_id;
-        $installmentData['installment_date'] = (!empty($request->installment_date) ? date('Y-m-d', strtotime($request->installment_date)) : null);
-        $installmentData['amount'] = $request->amount;
-        $installmentData['term'] = $request->term;
-        $installmentData['session_term'] = $request->session_term;
-        $installmentData['attendance_term'] = (isset($request->attendance_term) && $request->attendance_term > 0 ? $request->attendance_term : null);
-        $installmentData['created_by'] = auth()->user()->id;
+            $installmentData = [];
+            $installmentData['student_id'] = $student_id;
+            $installmentData['student_course_relation_id'] = $courseRelationId;
+            $installmentData['course_creation_instance_id'] = $slcAgreement->course_creation_instance_id;
+            $installmentData['slc_attendance_id'] = $slc_attendance_id;
+            $installmentData['slc_agreement_id'] = $slc_agreement_id;
+            $installmentData['installment_date'] = (!empty($request->installment_date) ? date('Y-m-d', strtotime($request->installment_date)) : null);
+            $installmentData['amount'] = $request->amount;
+            $installmentData['session_term'] = $session_term;
+            $installmentData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
+            $installmentData['created_by'] = auth()->user()->id;
 
-        $installment = SlcInstallment::create($installmentData);
+            $installment = SlcInstallment::create($installmentData);
 
-        return response()->json(['res' => 'Student SLC Installment successfully added!'], 200);
+            return response()->json(['res' => 'Student SLC Installment successfully added!'], 200);
+        endif;
     }
 
 
@@ -67,9 +73,8 @@ class SlcInstallmentController extends Controller
         $installmentData = [];
         $installmentData['installment_date'] = (!empty($request->installment_date) ? date('Y-m-d', strtotime($request->installment_date)) : null);
         $installmentData['amount'] = $request->amount;
-        $installmentData['term'] = $request->term;
         $installmentData['session_term'] = $request->session_term;
-        $installmentData['attendance_term'] = (isset($request->attendance_term) && $request->attendance_term > 0 ? $request->attendance_term : null);
+        $installmentData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
         $installmentData['updated_by'] = auth()->user()->id;
 
         $installment = SlcInstallment::where('id', $slc_installment_id)->update($installmentData);
@@ -91,5 +96,45 @@ class SlcInstallmentController extends Controller
         $res['remaining_amount_html'] = '£'.number_format($remainingAmount, 2);
 
         return response()->json(['res' => $res], 200);
+    }
+
+    public function installmentExistence(Request $request){
+        $theSession = $request->theSession;
+        $slc_agreement_id = $request->slc_agreement_id;
+        $student_id = $request->student_id;
+
+        $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $slc_agreement_id)
+                        ->where('session_term', $theSession)->orderBy('id', 'DESC')
+                        ->get()->first();
+        if(isset($existingInst->id) && $existingInst->id > 0):
+            return response()->json(['res' => 0], 200);
+        else:
+            return response()->json(['res' => 1], 200);
+        endif;
+    }
+
+    public function editInstallmentExistence(Request $request){
+        $slc_installment_id = $request->slc_installment_id;
+        $student_id = $request->student_id;
+        $theSession = $request->theSession;
+
+        $theInstallment = SlcInstallment::find($slc_installment_id);
+        $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $theInstallment->slc_agreement_id)
+                        ->where('session_term', $theSession)->orderBy('id', 'DESC')
+                        ->get()->first();
+        if(isset($existingInst->id) && $existingInst->id > 0):
+            return response()->json(['res' => 0, 'inst' => $theInstallment], 200);
+        else:
+            return response()->json(['res' => 1, 'inst' => $theInstallment], 200);
+        endif;
+    }
+
+    public function destroy(Request $request){
+        $student = $request->student;
+        $slc_installment_id = $request->recordid;
+
+        SlcInstallment::where('student_id', $student)->where('id', $slc_installment_id)->delete();
+
+        return response()->json(['res' => 'Success'], 200);
     }
 }

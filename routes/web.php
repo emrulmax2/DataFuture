@@ -195,6 +195,8 @@ use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\SlcCocController;
+use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -795,6 +797,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/store-slc-registration', 'store')->name('student.store.registration');
         Route::post('student/edit-slc-registration', 'edit')->name('student.edit.registration');
         Route::post('student/update-slc-registration', 'update')->name('student.update.registration');
+
+        Route::post('student/slc-registration-has-data', 'hasData')->name('student.slc.registration.has.data');
+        Route::delete('student/slc-registration-destory', 'destroy')->name('student.slc.registration.destroy');
     });
 
     Route::controller(SlcAttendanceController::class)->group(function() {
@@ -802,6 +807,10 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-attendance', 'update')->name('student.update.slc.attendance');
         Route::post('student/populate-slc-attendance', 'populateAttendanceForm')->name('student.slc.attendance.populate');
         Route::post('student/store-slc-attendance', 'store')->name('student.store.slc.attendance');
+
+        Route::post('student/store-slc-installment-exist', 'checkInstallmentExistence')->name('student.installment.existence');
+        Route::post('student/slc-attendance-has-data', 'hasData')->name('student.slc.attendance.has.data');
+        Route::delete('student/slc-attendance-destory', 'destroy')->name('student.slc.attendance.destroy');
     });
 
     Route::controller(SlcAgreementController::class)->group(function() {
@@ -809,6 +818,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-agreement', 'update')->name('student.update.slc.agreement');
         Route::post('student/get-instance-fees', 'getInstanceFees')->name('student.get.slc.agreement.instance.fees');
         Route::post('student/store-agreement', 'store')->name('student.store.slc.agreement');
+
+        Route::post('student/agreement-has-data', 'hasData')->name('student.slc.agreement.has.data');
+        Route::delete('student/destroy-agreement', 'destroy')->name('student.destory.slc.agreement');
     });
 
     Route::controller(SlcInstallmentController::class)->group(function() {
@@ -816,6 +828,27 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-installment', 'update')->name('student.update.slc.intallment');
         Route::post('student/get-slc-installment-details', 'getDetails')->name('student.get.slc.intallment.details');
         Route::post('student/store-slc-installment', 'store')->name('student.store.slc.intallment');
+
+        Route::post('student/slc-installment-existence', 'installmentExistence')->name('student.slc.intallment.existence');
+        Route::post('student/slc-installment-edit-existence', 'editInstallmentExistence')->name('student.slc.intallment.existence.edit');
+
+        Route::delete('student/slc-installment-destroy', 'destroy')->name('student.destory.slc.intallment');
+    });
+
+    Route::controller(SlcCocController::class)->group(function() {
+        Route::post('student/edit-slc-coc', 'edit')->name('student.edit.slc.coc');
+        Route::post('student/update-slc-coc', 'update')->name('student.slc.coc.update');
+        Route::post('student/store-slc-coc', 'store')->name('student.slc.coc.store');
+
+        Route::post('student/destory-slc-coc-doc', 'destroyCocDocument')->name('student.destory.coc.document');
+        Route::delete('student/destory-slc-coc', 'destroy')->name('student.destory.coc');
+    });
+
+    Route::controller(SlcMoneyReceiptController::class)->group(function() {
+        Route::post('student/store-slc-payment', 'store')->name('student.store.slc.payment');
+        Route::post('student/edit-slc-payment', 'edit')->name('student.edit.slc.payment');
+        Route::post('student/update-slc-payment', 'update')->name('student.update.slc.payment');
+        Route::delete('student/destroy-slc-payment', 'destroy')->name('student.destory.slc.payment');
     });
 
     Route::controller(AdmissionController::class)->group(function() {

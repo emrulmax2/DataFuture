@@ -44,7 +44,7 @@
                     </div>
                     <div class="col-span-6 text-right relative">
                         <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                        <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Installment</button>
+                        <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
                 <div class="intro-y mt-5">
@@ -128,36 +128,49 @@
                                         <div class="col-span-6">
                                             <div class="font-medium text-base">Installments</div>
                                         </div>
+                                        <div class="col-span-6 text-right">
+                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Installment</button>
+                                        </div>
                                     </div>
                                     <div class="intro-y mt-5 bg-white">
-                                        @if(!empty($agr->installments) && $agr->installments->count() > 0)
-                                            <table class="table table-bordered table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="whitespace-nowrap">#</th>
-                                                        <th class="whitespace-nowrap">Date</th>
-                                                        <th class="whitespace-nowrap">Year</th>
-                                                        <th class="whitespace-nowrap">Term Name</th>
-                                                        <th class="whitespace-nowrap">Term</th>
-                                                        <th class="whitespace-nowrap">Amount</th>
-                                                        <th class="whitespace-nowrap">Course Code</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
+                                        <table class="table table-bordered table-sm padding-less">
+                                            <thead>
+                                                <tr>
+                                                    <th class="whitespace-nowrap">#</th>
+                                                    <th class="whitespace-nowrap">Date</th>
+                                                    <th class="whitespace-nowrap">Term</th>
+                                                    <th class="whitespace-nowrap">Ses. Term</th>
+                                                    <th class="whitespace-nowrap">Amount</th>
+                                                    <th class="whitespace-nowrap">Course Code</th>
+                                                    <th class="whitespace-nowrap">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if(!empty($agr->installments) && $agr->installments->count() > 0)
                                                     @foreach($agr->installments as $inst)
-                                                        <tr class="cursor-pointer installmentRow" data-id="{{ $inst->id }}">
+                                                        <tr class="cursor-pointer installmentRow {{ isset($inst->slc_money_receipt_id) && $inst->slc_money_receipt_id > 0 ? 'paidInstllment' : '' }}" data-id="{{ $inst->id }}">
                                                             <td>{{ $inst->id.'-'.$inst->slc_attendance_id }}</td>
                                                             <td>{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
-                                                            <td>{{ isset($inst->agreement->year) && !empty($inst->agreement->year) ? $inst->agreement->year : ''  }}</td>
-                                                            <td>{{ '---' }}</td>
-                                                            <td>{{ $inst->term }}</td>
+                                                            <td>
+                                                                {{ isset($inst->declaraton->name) && !empty($inst->declaraton->name) ? $inst->declaraton->name : '' }}
+                                                                {!! isset($inst->declaraton->termType->code) && !empty($inst->declaraton->termType->code) ? '<br/>'.$inst->declaraton->termType->code : '' !!}
+                                                            </td>
+                                                            <td>{{ isset($inst->session_term) && $inst->session_term > 0 ? 'Term '.$inst->session_term : '' }}</td>
                                                             <td class="font-medium">{{ ($inst->amount > 0 ? '£'.number_format($inst->amount, 2) : '£0.00') }}</td>
                                                             <td>{{ (isset($inst->agreement->slc_coursecode) && !empty($inst->agreement->slc_coursecode) ? $inst->agreement->slc_coursecode : '') }}</td>
+                                                            <td>
+                                                                <button data-id="{{ $inst->id }}" data-tw-toggle="modal" data-tw-target="#editInstallmentModal" type="button" class="editInstallmentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
+                                                                <button data-id="{{ $inst->id }}" type="button" class="deleteInstallmentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                            </td>
                                                         </tr>
                                                     @endforeach
-                                                </tbody>
-                                            </table>
-                                        @endif
+                                                @else
+                                                    <tr>
+                                                        <td colspan="7" class="text-center">Installments not found for this agreement.</td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -167,9 +180,53 @@
                                         <div class="col-span-6">
                                             <div class="font-medium text-base">Invoices</div>
                                         </div>
+                                        <div class="col-span-6 text-right">
+                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn btn btn-sm btn-twitter shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Payment</button>
+                                        </div>
                                     </div>
-                                    <div class="intro-y mt-5">
-
+                                    <div class="intro-y mt-5 bg-white">
+                                        <table class="table table-bordered table-sm padding-less">
+                                            <thead>
+                                                <tr>
+                                                    <th class="whitespace-nowrap">Inv.</th>
+                                                    <th class="whitespace-nowrap">Date</th>
+                                                    <th class="whitespace-nowrap">Term</th>
+                                                    <th class="whitespace-nowrap">Ses. Term</th>
+                                                    <th class="whitespace-nowrap">Method</th>
+                                                    <th class="whitespace-nowrap">Rec. By</th>
+                                                    <th class="whitespace-nowrap">Type</th>
+                                                    <th class="whitespace-nowrap">Amount</th>
+                                                    <th class="whitespace-nowrap">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if(isset($agr->payments) && $agr->payments->count() > 0)
+                                                    @foreach($agr->payments as $payment)
+                                                        <tr title="{!! $payment->remarks !!}" class="payment_row {{ !empty($payment->remarks) ? 'tooltip' : '' }} payment_row_{{ isset($payment->payment_type) && !empty($payment->payment_type) ? str_replace(' ', '_', strtolower($payment->payment_type)) : '' }}">
+                                                            <td>{{ $payment->invoice_no }}</td>
+                                                            <td>{{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : '') }}</td>
+                                                            <td>
+                                                                {{ isset($payment->declaraton->name) && !empty($payment->declaraton->name) ? $payment->declaraton->name : '' }}
+                                                                {!! isset($payment->declaraton->termType->code) && !empty($payment->declaraton->termType->code) ? '<br/>'.$payment->declaraton->termType->code : '' !!}
+                                                            </td>
+                                                            <td>{{ isset($payment->session_term) && $payment->session_term > 0 ? 'Term '.$payment->session_term : '' }}</td>
+                                                            <td>{{ isset($payment->method->name) && $payment->slc_payment_method_id > 0 ? $payment->method->name : '' }}</td>
+                                                            <td>{{ isset($payment->received->employee->full_name) && !empty($payment->received->employee->full_name) ? $payment->received->employee->full_name : '' }}</td>
+                                                            <td>{{ isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '' }}</td>
+                                                            <td>{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
+                                                            <td>
+                                                                <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
+                                                                <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                @else
+                                                    <tr>
+                                                        <td colspan="10" class="text-center">Payments not found for this agreement.</td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -380,36 +437,39 @@
                                 <input type="text" value="" placeholder="DD-MM-YYYY" id="installment_date" class="form-control datepicker" name="installment_date" data-format="DD-MM-YYYY" data-single-mode="true">
                                 <div class="acc__input-error error-installment_date text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
-                                <div class="acc__input-error error-amount text-danger mt-2"></div>
-                            </div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="attendance_term" class="form-label">Attendance Term <span class="text-danger">*</span></label>
-                                <select id="attendance_term" class="form-control w-full" name="attendance_term">
+                                <label for="term_declaration_id" class="form-label">Attendance Term <span class="text-danger">*</span></label>
+                                <select id="term_declaration_id" class="form-control w-full" name="term_declaration_id">
                                     <option value="">Please Select</option>
+                                    @if(!empty($term_declarations) && $term_declarations->count() > 0)
+                                        @foreach($term_declarations as $td)
+                                            <option {{ (isset($lastAssigns->plan->term_declaration_id) && $lastAssigns->plan->term_declaration_id == $td->id ? 'Selected' : '')}} value="{{ $td->id }}">{{ $td->name }}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
-                                <div class="acc__input-error error-attendance_term text-danger mt-2"></div>
+                                <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="session_term" class="form-label">Session Term <span class="text-danger">*</span></label>
                                 <select id="session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
                                     <option value="1">Term 01</option>
                                     <option value="2">Term 02</option>
                                     <option value="3">Term 03</option>
+                                    <option value="4">Term 04</option>
+                                    <option value="5">N/A</option>
                                 </select>
                                 <div class="acc__input-error error-session_term text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="term" class="form-label">Term Name <span class="text-danger">*</span></label>
-                                <select id="term" class="form-control w-full" name="term">
-                                    <option value="Autumn Term">Autumn Term</option>
-                                    <option value="Spring Term">Spring Term</option>
-                                    <option value="Summer Term">Summer Term</option>
-                                    <option value="Winter Term">Winter Term</option>
-                                </select>
-                                <div class="acc__input-error error-term text-danger mt-2"></div>
+                            <div class="col-span-12 sm:col-span-4 installmentAmountWrap" style="display: none;">
+                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
+                                <div class="acc__input-error error-amount text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4 installmentAmountNotice" style="display: none;">
+                                <div class="alert alert-warning-soft show flex items-center px-2 py-1 mt-0" role="alert">
+                                    Opps! Installment already exist under this session term.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -474,36 +534,39 @@
                                 <input type="text" value="" placeholder="DD-MM-YYYY" id="installment_date" class="form-control datepicker" name="installment_date" data-format="DD-MM-YYYY" data-single-mode="true">
                                 <div class="acc__input-error error-installment_date text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-12 sm:col-span-4">
-                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
-                                <div class="acc__input-error error-amount text-danger mt-2"></div>
-                            </div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="attendance_term" class="form-label">Attendance Term <span class="text-danger">*</span></label>
-                                <select id="attendance_term" class="form-control w-full" name="attendance_term">
+                                <label for="term_declaration_id" class="form-label">Attendance Term <span class="text-danger">*</span></label>
+                                <select id="term_declaration_id" class="form-control w-full" name="term_declaration_id">
                                     <option value="">Please Select</option>
+                                    @if(!empty($term_declarations) && $term_declarations->count() > 0)
+                                        @foreach($term_declarations as $td)
+                                            <option {{ (isset($lastAssigns->plan->term_declaration_id) && $lastAssigns->plan->term_declaration_id == $td->id ? 'Selected' : '')}} value="{{ $td->id }}">{{ $td->name }}</option>
+                                        @endforeach
+                                    @endif
                                 </select>
-                                <div class="acc__input-error error-attendance_term text-danger mt-2"></div>
+                                <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="session_term" class="form-label">Session Term <span class="text-danger">*</span></label>
                                 <select id="session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
                                     <option value="1">Term 01</option>
                                     <option value="2">Term 02</option>
                                     <option value="3">Term 03</option>
+                                    <option value="4">Term 04</option>
+                                    <option value="5">N/A</option>
                                 </select>
                                 <div class="acc__input-error error-session_term text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="term" class="form-label">Term Name <span class="text-danger">*</span></label>
-                                <select id="term" class="form-control w-full" name="term">
-                                    <option value="Autumn Term">Autumn Term</option>
-                                    <option value="Spring Term">Spring Term</option>
-                                    <option value="Summer Term">Summer Term</option>
-                                    <option value="Winter Term">Winter Term</option>
-                                </select>
-                                <div class="acc__input-error error-term text-danger mt-2"></div>
+                            <div class="col-span-12 sm:col-span-4 installmentAmountWrap" style="display: none;">
+                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
+                                <div class="acc__input-error error-amount text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4 installmentAmountNotice" style="display: none;">
+                                <div class="alert alert-warning-soft show flex items-center px-2 py-1 mt-5" role="alert">
+                                    Opps! Installment already exist under this session term.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -535,6 +598,228 @@
         </div>
     </div>
     <!-- END: Edit Installment Modal -->
+
+    <!-- BEGIN: Add Payment Modal -->
+    <div id="addPaymentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="addPaymentForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Add Payment</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4 gap-y-2">
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="invoice_no" class="form-label">Invoice No <span class="text-danger">*</span></label>
+                                <input type="text" readonly value="" id="invoice_no" class="form-control" name="invoice_no">
+                                <div class="acc__input-error error-invoice_no text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="payment_date" class="form-label">Payment Date <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="payment_date" class="form-control datepicker" name="payment_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-payment_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="slc_payment_method_id" class="form-label">Payment Method <span class="text-danger">*</span></label>
+                                <select id="slc_payment_method_id" class="form-control w-full" name="slc_payment_method_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($paymentMethods) && $paymentMethods->count() > 0)
+                                        @foreach($paymentMethods as $pm)
+                                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-slc_payment_method_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="term_declaration_id" class="form-label">Payment Term <span class="text-danger">*</span></label>
+                                <select id="term_declaration_id" class="form-control w-full" name="term_declaration_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($term_declarations) && $term_declarations->count() > 0)
+                                        @foreach($term_declarations as $td)
+                                            <option {{ (isset($lastAssigns->plan->term_declaration_id) && $lastAssigns->plan->term_declaration_id == $td->id ? 'Selected' : '')}} value="{{ $td->id }}">{{ $td->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="session_term" class="form-label">Session Term <span class="text-danger">*</span></label>
+                                <select id="session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Term 01</option>
+                                    <option value="2">Term 02</option>
+                                    <option value="3">Term 03</option>
+                                    <option value="4">Term 04</option>
+                                    <option value="5">N/A</option>
+                                </select>
+                                <div class="acc__input-error error-session_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
+                                <div class="acc__input-error error-amount text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="payment_type" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                <select id="payment_type" class="form-control w-full" name="payment_type">
+                                    <option value="">Please Select</option>
+                                    <option value="Course Fee">Course Fee</option>
+                                    <option value="Exam Fee">Exam Fee</option>
+                                    <option value="ID Card Fee">ID Card Fee</option>
+                                    <option value="Photocopy Card Fee">Photocopy Card Fee</option>
+                                    <option value="Late Fee">Late Fee</option>
+                                    <option value="Refund">Refund</option>
+                                    <option value="Letter Request">Letter Request</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                                <div class="acc__input-error error-payment_type text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="remarks" class="form-label">Remarks</label>
+                                <textarea id="remarks" rows="2" class="form-control w-full" name="remarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="savePayment" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="slc_agreement_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Payment Modal -->
+
+    <!-- BEGIN: Add Payment Modal -->
+    <div id="editPaymentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editPaymentForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit Payment</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4 gap-y-2">
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="invoice_no" class="form-label">Invoice No <span class="text-danger">*</span></label>
+                                <input type="text" readonly value="" id="invoice_no" class="form-control" name="invoice_no">
+                                <div class="acc__input-error error-invoice_no text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="payment_date" class="form-label">Payment Date <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="payment_date" class="form-control datepicker" name="payment_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-payment_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="slc_payment_method_id" class="form-label">Payment Method <span class="text-danger">*</span></label>
+                                <select id="slc_payment_method_id" class="form-control w-full" name="slc_payment_method_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($paymentMethods) && $paymentMethods->count() > 0)
+                                        @foreach($paymentMethods as $pm)
+                                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-slc_payment_method_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="term_declaration_id" class="form-label">Payment Term <span class="text-danger">*</span></label>
+                                <select id="term_declaration_id" class="form-control w-full" name="term_declaration_id">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($term_declarations) && $term_declarations->count() > 0)
+                                        @foreach($term_declarations as $td)
+                                            <option {{ (isset($lastAssigns->plan->term_declaration_id) && $lastAssigns->plan->term_declaration_id == $td->id ? 'Selected' : '')}} value="{{ $td->id }}">{{ $td->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="session_term" class="form-label">Session Term <span class="text-danger">*</span></label>
+                                <select id="session_term" class="form-control w-full" name="session_term">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Term 01</option>
+                                    <option value="2">Term 02</option>
+                                    <option value="3">Term 03</option>
+                                    <option value="4">Term 04</option>
+                                    <option value="5">N/A</option>
+                                </select>
+                                <div class="acc__input-error error-session_term text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-4">
+                                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                                <input id="amount" class="form-control w-full" name="amount" type="number" step="any">
+                                <div class="acc__input-error error-amount text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="payment_type" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                <select id="payment_type" class="form-control w-full" name="payment_type">
+                                    <option value="">Please Select</option>
+                                    <option value="Course Fee">Course Fee</option>
+                                    <option value="Exam Fee">Exam Fee</option>
+                                    <option value="ID Card Fee">ID Card Fee</option>
+                                    <option value="Photocopy Card Fee">Photocopy Card Fee</option>
+                                    <option value="Late Fee">Late Fee</option>
+                                    <option value="Refund">Refund</option>
+                                    <option value="Letter Request">Letter Request</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                                <div class="acc__input-error error-payment_type text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="remarks" class="form-label">Remarks</label>
+                                <textarea id="remarks" rows="2" class="form-control w-full" name="remarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updatePayment" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Payment Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -599,4 +884,5 @@
     @vite('resources/js/student-global.js')
     @vite('resources/js/student-slc-agreement.js')
     @vite('resources/js/student-slc-installment.js')
+    @vite('resources/js/student-slc-payment.js')
 @endsection

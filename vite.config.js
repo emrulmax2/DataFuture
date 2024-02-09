@@ -219,6 +219,8 @@ export default defineConfig({
 
                 'resources/js/unsigned.js',
                 'resources/js/assign.js',
+                'resources/js/student-slc-coc.js',
+                'resources/js/student-slc-payment.js',
                 
             ],
             refresh: true,

@@ -1487,3 +1487,28 @@
     stroke: rgb(13 148 136);
     stroke-width: 2.2;
 }
+
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+.table.table-sm.padding-less th,
+.table.table-sm.padding-less td{
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
+.payment_row.payment_row_refund{
+    background-color: rgb(var(--color-warning) / .2) !important;
+}
+.installmentRow.paidInstllment{
+    background-color: rgb(var(--color-success) / .2) !important;
+}

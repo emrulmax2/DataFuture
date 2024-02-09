@@ -26,7 +26,7 @@ class SlcAttendanceRequest extends FormRequest
         return [
             'confirmation_date' => 'required',
             'attendance_year' => 'required',
-            //'attendance_term' => 'required',
+            'term_declaration_id' => 'required',
             'session_term' => 'required',
 
             'attendance_code_id' => 'required',
@@ -40,7 +40,7 @@ class SlcAttendanceRequest extends FormRequest
         return [
             'confirmation_date.required' => 'This field is required.',
             'attendance_year.required' => 'This field is required.',
-            //'attendance_term.required' => 'This field is required.',
+            'term_declaration_id.required' => 'This field is required.',
             'session_term.required' => 'This field is required.',
             'attendance_code_id.required' => 'This field is required.',
             'installment_amount.required_if' => 'This field is required.',
