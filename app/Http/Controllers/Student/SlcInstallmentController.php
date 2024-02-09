@@ -7,6 +7,7 @@ use App\Http\Requests\SlcInstallmentUpdateRequest;
 use App\Models\SlcAgreement;
 use App\Models\SlcAttendance;
 use App\Models\SlcInstallment;
+use App\Models\SlcMoneyReceipt;
 use App\Models\SlcRegistration;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -69,12 +70,19 @@ class SlcInstallmentController extends Controller
     public function update(SlcInstallmentUpdateRequest $request){
         $studen_id = $request->studen_id;
         $slc_installment_id = $request->slc_installment_id;
+        $installmentRow = SlcInstallment::find($slc_installment_id);
+        
+        $moneyRceipt = SlcMoneyReceipt::where('slc_agreement_id', $installmentRow->slc_agreement_id)->where('student_id', $studen_id)
+                       ->where('student_course_relation_id', $installmentRow->student_course_relation_id)
+                       ->where('term_declaration_id', $request->term_declaration_id)->where('session_term', $request->session_term)
+                       ->where('amount', $request->amount)->get()->first();
 
         $installmentData = [];
         $installmentData['installment_date'] = (!empty($request->installment_date) ? date('Y-m-d', strtotime($request->installment_date)) : null);
         $installmentData['amount'] = $request->amount;
         $installmentData['session_term'] = $request->session_term;
         $installmentData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
+        $installmentData['slc_money_receipt_id'] = (isset($moneyRceipt->id) && $moneyRceipt->id > 0 ? $moneyRceipt->id : null);
         $installmentData['updated_by'] = auth()->user()->id;
 
         $installment = SlcInstallment::where('id', $slc_installment_id)->update($installmentData);
