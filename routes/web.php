@@ -204,6 +204,7 @@ use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
+use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\WblProfileController;
 
 /*
@@ -2241,6 +2242,11 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('student/destroy-wbl-profile/{id}', 'destroy')->name('student.destroy.wbl.profile'); 
         Route::post('student/restore-wbl-profile', 'restore')->name('student.restore.wbl.profile'); 
+    });
+
+    Route::controller(MyStaffController::class)->group(function(){
+        Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
+        
     });
 });
 
