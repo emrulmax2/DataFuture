@@ -18,7 +18,8 @@
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request</h2>
-                <a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>
+                {{--<a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>--}}
+                <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
             </div>
             <div class="mt-5">
                 @if($pendingLeaves->count() > 0)
@@ -67,12 +68,12 @@
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">Absent Today</h2>
-                <a href="{{ route('hr.attendance') }}" class="ml-auto text-primary truncate">Manage Attendance</a>
+                {{--<a href="{{ route('hr.attendance') }}" class="ml-auto text-primary truncate">Manage Attendance</a>--}}
             </div>
             <div class="mt-5">
                 @if(!empty($absentToday))
                     @foreach($absentToday as $employee_id => $absent)
-                        <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday" data-emloyee="{{ $employee_id }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
+                        <div class="intro-x">
                             <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
                                 <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
                                     <img src="{{ $absent['photo_url'] }}" alt="{{ $absent['full_name'] }}">
@@ -94,15 +95,15 @@
                         <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not absent attendance found for today.
                     </div>
                 @endif
-                <a href="{{ route('hr.portal.absent.employee', strtotime(date('Y-m-d'))) }}" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
+                {{-- <a href="{{ route('hr.portal.absent.employee', strtotime(date('Y-m-d'))) }}" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
                     View More
-                </a>
+                </a> --}}
             </div>
         </div>
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">Holiday Today</h2>
-                <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
+                
             </div>
             <div class="mt-5">
                 @if($holidays->count() > 0)
@@ -142,7 +143,7 @@
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days</h2>
-                <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a>
+                {{-- <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a> --}}
             </div>
             <div class="mt-5">
                 @if($appraisal->count() > 0)
@@ -158,7 +159,7 @@
                                     <img src="{{ $apr->employee->photo_url }}" alt="{{ $apr->employee->first_name.' '.$apr->employee->last_name }}">
                                 </div>
                             </div>
-                            <a href="{{ route('employee.appraisal', $apr->employee_id) }}" class="box px-5 py-3 ml-4 flex-1 zoom-in">
+                            <a href="javascript:void(0);" class="box px-5 py-3 ml-4 flex-1 zoom-in">
                                 <div class="flex items-center">
                                     <div class="font-medium uppercase">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
                                     <div class="text-xs text-slate-500 ml-auto">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>
