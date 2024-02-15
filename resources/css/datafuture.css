@@ -1512,3 +1512,24 @@ input[type=number] {
 .installmentRow.paidInstllment{
     background-color: rgb(var(--color-success) / .2) !important;
 }
+
+.active-bg-white.active{
+    background-color: #FFF !important;
+}
+.hover-bg-white:hover{
+    background-color: #FFF !important;
+}
+.workplacementtab .btn:focus{
+    box-shadow: none !important;
+}
+.workplacementtabcontent .thebtnarea{
+    right: 0;
+    top: -40px;
+}
+.workplacementtabcontent .thebtnarea .btn{
+    margin-left: -3px;
+}
+.workplacementtabcontent .box{
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}

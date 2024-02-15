@@ -194,14 +194,17 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\Settings\Studentoptions\CompanyController;
+use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
+use App\Http\Controllers\Student\WorkPlacementController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
-
+use App\Http\Controllers\WblProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -653,6 +656,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
         Route::get('student/notes/{id}', 'notes')->name('student.notes');
         Route::get('student/process/{id}', 'process')->name('student.process');
+        Route::get('student/workplacement/{id}', 'workplacement')->name('student.workplacement');
 
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
@@ -666,6 +670,8 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/set-temp-course/{student}/{crel}', 'setTempCourse')->name('student.set.temp.course');
         Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
+
+        Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -2196,6 +2202,45 @@ Route::middleware('auth')->group(function() {
 
         Route::post('course-management/assign/students-to-plan', 'assignStudentsToPlan')->name('assign.students.to.plan'); 
         Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
+    });
+
+    Route::controller(CompanyController::class)->group(function() {
+        Route::get('companies/list', 'list')->name('companies.list'); 
+        Route::post('companies/store', 'store')->name('companies.store'); 
+        Route::get('companies/edit/{id}', 'edit')->name('companies.edit');
+        Route::post('companies/update', 'update')->name('companies.update');
+        Route::delete('companies/delete/{id}', 'destroy')->name('companies.destory');
+        Route::post('companies/restore/{id}', 'restore')->name('companies.restore');
+        Route::post('companies/update-status/{id}', 'updateStatus')->name('companies.update.status');
+    });
+
+    Route::controller(CompanySupervisorController::class)->group(function() {
+        Route::get('companies/supervisor/list', 'list')->name('companies.supervisor.list'); 
+        Route::post('companies/supervisor/store', 'store')->name('companies.supervisor.store'); 
+        Route::post('companies/supervisor/edit', 'edit')->name('companies.supervisor.edit');
+        Route::post('companies/supervisor/update', 'update')->name('companies.supervisor.update');
+        Route::delete('companies/supervisor/delete/{id}', 'destroy')->name('companies.supervisor.destroy');
+    });
+
+    Route::controller(WorkPlacementController::class)->group(function() {
+        Route::post('student/get-company-supervisor', 'getSupervisorByCompany')->name('student.get.company.supervisor'); 
+        Route::post('student/store-work-placement-hour', 'storeHour')->name('student.store.work.placement.hour'); 
+        Route::get('student/store-work-placement-hour-list', 'hourList')->name('student.work.placement.hour.list'); 
+        Route::get('student/edit-work-placement-hour/{id}', 'editHour')->name('student.edit.work.placement.hour'); 
+        Route::post('student/update-work-placement-hour', 'updateHour')->name('student.update.work.placement.hour'); 
+
+        Route::delete('student/destroy-work-placement-hour/{id}', 'destroyHour')->name('student.destroy.work.placement.hour'); 
+        Route::post('student/restore-work-placement-hour', 'restoreHour')->name('student.restore.work.placement.hour'); 
+    });
+
+    Route::controller(WblProfileController::class)->group(function() {
+        Route::post('student/store-wbl-profile', 'store')->name('student.store.wbl.profile'); 
+        Route::get('student/wbl-profile-list', 'list')->name('student.wbl.profile.list'); 
+        Route::get('student/edit-wbl-profile/{id}', 'edit')->name('student.edit.wbl.profile'); 
+        Route::post('student/update-wbl-profile', 'update')->name('student.update.wbl.profile'); 
+
+        Route::delete('student/destroy-wbl-profile/{id}', 'destroy')->name('student.destroy.wbl.profile'); 
+        Route::post('student/restore-wbl-profile', 'restore')->name('student.restore.wbl.profile'); 
     });
 });
 

@@ -107,7 +107,12 @@ class CoursCreationController extends Controller
     }
 
     public function store(CourseCreationsRequest $request){
-        $request->request->add(['created_by' => auth()->user()->id]);
+        $is_workplacement = (isset($request->is_workplacement) && $request->is_workplacement > 0 ? $request->is_workplacement : 0);
+        $required_hours = ($is_workplacement == 1 && isset($request->required_hours) && $request->required_hours > 0 ? $request->required_hours : 0);
+        $request->remove('is_workplacement');
+        $request->remove('required_hours');
+
+        $request->request->add(['is_workplacement' => $is_workplacement, 'required_hours' => $required_hours, 'created_by' => auth()->user()->id]);
         $courseCreation = CourseCreation::create($request->all());
         
         return response()->json($courseCreation);
@@ -141,6 +146,8 @@ class CoursCreationController extends Controller
 
     public function update(CourseCreationsRequest $request){
         $CC_ID = $request->id;
+        $is_workplacement = (isset($request->is_workplacement) && $request->is_workplacement > 0 ? $request->is_workplacement : 0);
+        $required_hours = ($is_workplacement == 1 && isset($request->required_hours) && $request->required_hours > 0 ? $request->required_hours : 0);
         $courseDF = CourseCreation::where('id', $CC_ID)->update([
             'semester_id'=> $request->semester_id,
             'course_id'=> $request->course_id,
@@ -150,8 +157,10 @@ class CoursCreationController extends Controller
             'venue_id'=> (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : null),
             'fees'=> (isset($request->fees) && $request->fees > 0 ? $request->fees : null),
             'reg_fees'=> (isset($request->reg_fees) && $request->reg_fees > 0 ? $request->reg_fees : null),
-            'is_workplacement'=> (isset($request->is_workplacement) && $request->is_workplacement > 0 ? $request->is_workplacement : 0),
-            'updated_by' => auth()->user()->id
+            'is_workplacement'=> $is_workplacement,
+            'required_hours'=> $required_hours,
+            'updated_by' => auth()->user()->id,
+            'course_creation_qualification_id' => (isset($request->course_creation_qualification_id) && $request->course_creation_qualification_id > 0 ? $request->course_creation_qualification_id : null),
         ]);
 
 

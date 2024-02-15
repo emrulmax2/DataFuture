@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseCreationsRequest extends FormRequest
+class StudentWorkPlacementHourRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +24,11 @@ class CourseCreationsRequest extends FormRequest
     public function rules()
     {
         return [
-            'semester_id' => 'required',
-            'course_id' => 'required',
-            'course_creation_qualification_id' => 'required',
-            'duration' => 'required',
-            'unit_length' => 'required',
-
-            'is_workplacement' => 'sometimes',
-            'required_hours' => 'required_if:is_workplacement,1'
+            'company_id' => 'required',
+            'company_supervisor_id' => 'required',
+            'start_date' => 'required',
+            'hours' => 'required|min:1',
+            'contract_type' => 'required',
         ];
     }
 }
