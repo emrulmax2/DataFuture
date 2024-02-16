@@ -101,5 +101,9 @@ class User extends Authenticatable
     public function hourauth(){
         return $this->hasMany(EmployeeHourAuthorisedBy::class, 'user_id', 'id');
     }
+
+    public function holiauth(){
+        return $this->hasMany(EmployeeHolidayAuthorisedBy::class, 'user_id', 'id');
+    }
     
 }

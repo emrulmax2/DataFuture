@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\EmployeeAppraisal;
 use App\Models\EmployeeAttendanceLive;
+use App\Models\EmployeeHolidayAuthorisedBy;
 use App\Models\EmployeeHourAuthorisedBy;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLeaveDay;
@@ -25,8 +26,9 @@ class MyStaffController extends Controller
         $userData = User::find($employee->user_id);
         $employment = Employment::where("employee_id", $employeeId)->get()->first();
 
-        $auth_emp_ids = EmployeeHourAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
-        $auth_emp_ids = !empty($auth_emp_ids) ? $auth_emp_ids : [0];
+        $hour_auth_ids = EmployeeHourAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+        $holiday_auth_ids = EmployeeHolidayAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+        $auth_emp_ids = array_unique(array_merge($hour_auth_ids, $holiday_auth_ids));
 
         return view('pages.users.my-account.my-staff',[
             'title' => 'Welcome - LCC Data Future Managment',
