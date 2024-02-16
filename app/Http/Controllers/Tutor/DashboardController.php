@@ -452,7 +452,11 @@ class DashboardController extends Controller
     }
 
     public function showCourseContent(Plan $plan) {
-
+        
+        $moduleCreation = ModuleCreation::find($plan->module_creation_id);
+        
+        $assessmentlist = $moduleCreation->module->assesments;
+  
         $userData = User::find(Auth::user()->id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
@@ -464,8 +468,7 @@ class DashboardController extends Controller
         
         $studentAssign = Assign::where('plan_id', $plan->id)->get();
         $studentListCount = $studentAssign->count();
-        // $planParticipant = PlanParticipant::where('plan_id', $plan->id)->get();
-        // $participantList = $planParticipant->count();
+
         $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
         $eLearningActivites = ELearningActivitySetting::all();
         $planDateWiseContent = [];
@@ -523,6 +526,7 @@ class DashboardController extends Controller
             'planDateList' => $planDateList,
             'eLearningActivites' => $eLearningActivites,
             'studentCount' => $studentListCount,
+            'assessmentlist' => $assessmentlist
         ]);
     }
 

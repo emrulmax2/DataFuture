@@ -8,6 +8,8 @@ use App\Models\Course;
 use App\Models\ModuleLevels;
 use App\Models\CourseModule;
 use App\Http\Requests\CourseModuleRequests;
+use App\Models\AssessmentType;
+use App\Models\Grade;
 
 class CourseModuleController extends Controller
 {
@@ -85,6 +87,8 @@ class CourseModuleController extends Controller
 
     public function show($id){
         $modules = CourseModule::find($id);
+        $assementTypes = AssessmentType::all();
+        $gradesList = Grade::all();
         return view('pages.course-management.modules.show', [
             'title' => 'Course & Semester - LCC Data Future Managment',
             'subtitle' => 'Courses Module Details',
@@ -94,7 +98,9 @@ class CourseModuleController extends Controller
                 ['label' => 'Course Details', 'href' => route('courses.show', $modules->course_id)],
                 ['label' => 'Module Details', 'href' => 'javascript:void(0);']
             ],
-            'module' => $modules
+            'module' => $modules,
+            'assementTypes' =>$assementTypes,
+            'gradesList' =>$gradesList
         ]);
     }
 

@@ -51,17 +51,18 @@ class StudentAssignController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-
-                $data[] = [
-                    'id' => $list->id,
-                    'sl' => $i,
-                    'name' => (isset($list->student->full_name) && !empty($list->student->full_name)) ?  $list->student->title->name." ".$list->student->full_name :$list->student->title->name." ".$list->student->first_name . " ". $list->student->last_name,
-                    'register_no' => ($list->student->registration_no),
-                    'images' => (isset($list->student->photo) && !empty($list->student->photo) && Storage::disk('google')->exists('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) ? Storage::disk('google')->url('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) : asset('build/assets/images/avater.png')),
-                    'status' => '',
-                    'deleted_at' => $list->deleted_at,
-                ];
-                $i++;
+                if(isset($list->student)) {
+                    $data[] = [
+                        'id' => $list->id,
+                        'sl' => $i,
+                        'name' => (isset($list->student->full_name) && !empty($list->student->full_name)) ?  $list->student->title->name." ".$list->student->full_name :$list->student->title->name." ".$list->student->first_name . " ". $list->student->last_name,
+                        'register_no' => ($list->student->registration_no),
+                        'images' => (isset($list->student->photo) && !empty($list->student->photo) && Storage::disk('google')->exists('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) ? Storage::disk('google')->url('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) : asset('build/assets/images/avater.png')),
+                        'status' => '',
+                        'deleted_at' => $list->deleted_at,
+                    ];
+                    $i++;
+                }
             endforeach;
         endif;
         

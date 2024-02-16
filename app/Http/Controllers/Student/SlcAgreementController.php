@@ -7,6 +7,8 @@ use App\Http\Requests\SlcAgreementRequest;
 use App\Http\Requests\SlcAgreementUpdateRequest;
 use App\Models\CourseCreationInstance;
 use App\Models\SlcAgreement;
+use App\Models\SlcInstallment;
+use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -16,25 +18,32 @@ class SlcAgreementController extends Controller
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+        $agreement_year = $request->year;
 
-        $fees = (isset($request->fees) && $request->fees > 0 ? $request->fees : 0);
-        $agreementData = [];
-        $agreementData['student_id'] = $student_id;
-        $agreementData['student_course_relation_id'] = $courseRelationId;
-        $agreementData['course_creation_instance_id'] = $request->course_creation_instance_id;
-        $agreementData['slc_registration_id'] = null;
-        $agreementData['slc_coursecode'] = $request->slc_coursecode;
-        $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
-        $agreementData['date'] = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null);
-        $agreementData['year'] = $request->year;
-        $agreementData['fees'] = $fees;
-        $agreementData['discount'] = 0;
-        $agreementData['total'] = $fees;
-        $agreementData['created_by'] = auth()->user()->id;
+        $existingAgreement = SlcAgreement::where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->where('year', $agreement_year)->get()->first();
 
-        $slcAgreement = SlcAgreement::create($agreementData);
+        if(isset($existingAgreement->id) && $existingAgreement->id > 0):
+            return response()->json(['res' => 'Existing agreement found under this sutdent active course relation for the year '.$agreement_year], 304);
+        else:
+            $fees = (isset($request->fees) && $request->fees > 0 ? $request->fees : 0);
+            $agreementData = [];
+            $agreementData['student_id'] = $student_id;
+            $agreementData['student_course_relation_id'] = $courseRelationId;
+            $agreementData['course_creation_instance_id'] = $request->course_creation_instance_id;
+            $agreementData['slc_registration_id'] = null;
+            $agreementData['slc_coursecode'] = $request->slc_coursecode;
+            $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
+            $agreementData['date'] = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null);
+            $agreementData['year'] = $agreement_year;
+            $agreementData['fees'] = $fees;
+            $agreementData['discount'] = 0;
+            $agreementData['total'] = $fees;
+            $agreementData['created_by'] = auth()->user()->id;
 
-        return response()->json(['res' => 'Student Slc Agreement successfully inserted.'], 200);
+            $slcAgreement = SlcAgreement::create($agreementData);
+
+            return response()->json(['res' => 'Student Slc Agreement successfully inserted.'], 200);
+        endif;
     }
 
     public function edit(Request $request){
@@ -73,5 +82,27 @@ class SlcAgreementController extends Controller
         $fees = (isset($courseCreationInstance->fees) && $courseCreationInstance->fees > 0 ? $courseCreationInstance->fees : 0);
 
         return response()->json(['fees' => $fees], 200);
+    }
+
+    public function hasData(Request $request){
+        $slc_agreement_id = $request->slc_agreement_id;
+
+        $slcInst = SlcInstallment::where('slc_agreement_id', $slc_agreement_id)->get()->count();
+        $slcMoneyReceipt = SlcMoneyReceipt::where('slc_agreement_id', $slc_agreement_id)->get()->count();
+
+        if($slcMoneyReceipt > 0 || $slcInst > 0):
+            return response()->json(['res' => 0], 200);
+        else:
+            return response()->json(['res' => 1], 200);
+        endif;
+    }
+
+    public function destroy(Request $request){
+        $student = $request->student;
+        $slc_agreement_id = $request->recordid;
+
+        SlcAgreement::where('student_id', $student)->where('id', $slc_agreement_id)->delete();
+
+        return response()->json(['res' => 'Success'], 200);
     }
 }

@@ -8,8 +8,9 @@ import TomSelect from "tom-select";
 var liveStudentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        const form = document.getElementById('studentSearchForm');
-        let form_data = new FormData(form);
+        //const form = document.getElementById('studentSearchForm');
+        //let form_data = new FormData(form);
+        let form_data = $('#studentSearchForm').serialize();
 
         let tableContent = new Tabulator("#liveStudentsListTable", {
             ajaxURL: route("student.list"),
@@ -175,16 +176,58 @@ var liveStudentsListTable = (function () {
             }
         };
         var student_status = new TomSelect('#student_status', tomOptionsMul);
-        var academic_year = new TomSelect('#academic_year', tomOptionsMul);
-        var intake_semester = new TomSelect('#intake_semester', tomOptionsMul);
-        var attendance_semester = new TomSelect('#attendance_semester', tomOptionsMul);
-        var instance_year = new TomSelect('#instance_year', tomOptionsMul);
-        var course = new TomSelect('#course', tomOptionsMul);
-        var group = new TomSelect('#group', tomOptionsMul);
-        var module = new TomSelect('#module', tomOptionsMul);
+        var academic_year = new TomSelect('#academic_year', tomOptions);
+        var intake_semester = new TomSelect('#intake_semester', tomOptions);
+        var attendance_semester = new TomSelect('#attendance_semester', tomOptions);
+        var course = new TomSelect('#course', tomOptions);
+        var group = new TomSelect('#group', tomOptions);
+            group.clear(true)
+            group.disable();
         var term_status = new TomSelect('#term_status', tomOptionsMul);
-        var student_type = new TomSelect('#student_type', tomOptionsMul);
+        var student_type = new TomSelect('#student_type', tomOptions);
         var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
+
+        /* get group by term & course Start */
+        $('#attendance_semester, #course').on('change', function(){
+            var $termDeclaration = $('#attendance_semester');
+            var $course = $('#course');
+
+            var term_declaration_id = $termDeclaration.val();
+            var course = $course.val();
+
+            if(term_declaration_id > 0 && course > 0){
+                axios({
+                    method: "post",
+                    url: route('student.get.groups'),
+                    data: {term_declaration_id : term_declaration_id, course : course},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        var res = response.data.res;
+                        group.enable();
+                        $.each(res, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        group.refreshOptions();
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        group.enable();
+                        group.clear();
+                        group.clearOptions();
+                        console.log('error');
+                    }
+                });
+            }else{
+                group.clear(true)
+                group.clearOptions();
+                group.disable();
+            }
+        })
+        /* get group by term & course End */
 
         // Reset Tom Select
         function resetStudentIDSearch(){
@@ -201,10 +244,9 @@ var liveStudentsListTable = (function () {
             academic_year.clear(true);
             intake_semester.clear(true);
             attendance_semester.clear(true);
-            instance_year.clear(true);
             course.clear(true);
             group.clear(true);
-            module.clear(true);
+            
             term_status.clear(true);
             student_type.clear(true);
             group_student_status.clear(true);
@@ -219,8 +261,38 @@ var liveStudentsListTable = (function () {
                 liveStudentsListTable.init();
             }
 
-            $("#studentIDSearchBtn, #studentSearchBtn, #studentGroupSearchBtn").on("click", function (event) {
+            $("#studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();
+            });
+            $("#studentGroupSearchSubmitBtn").on("click", function (event) {
+                var $academic_year = $('#academic_year');
+                var $intake_semester = $('#intake_semester');
+                var $termDeclaration = $('#attendance_semester');
+                var $course = $('#course');
+                if($academic_year.val() != '' && $intake_semester.val() != '' && $termDeclaration.val() != '' && $course.val() != ''){
+                    filterStudentListTable();
+                }else{
+                    if($academic_year.val() != ''){
+                        $academic_year.siblings('.acc__input-error').html('This field is required.')
+                    }else{
+                        $academic_year.siblings('.acc__input-error').html('')
+                    }
+                    if($intake_semester.val() != ''){
+                        $intake_semester.siblings('.acc__input-error').html('This field is required.')
+                    }else{
+                        $intake_semester.siblings('.acc__input-error').html('')
+                    }
+                    if($termDeclaration.val() != ''){
+                        $termDeclaration.siblings('.acc__input-error').html('This field is required.')
+                    }else{
+                        $termDeclaration.siblings('.acc__input-error').html('')
+                    }
+                    if($course.val() != ''){
+                        $course.siblings('.acc__input-error').html('This field is required.')
+                    }else{
+                        $course.siblings('.acc__input-error').html('')
+                    }
+                }
             });
 
             $("#resetStudentSearch").on("click", function (event) {

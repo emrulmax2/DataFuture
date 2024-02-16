@@ -97,5 +97,13 @@ class User extends Authenticatable
         return $this->hasMany(UserPrivilege::class, 'user_id', 'id')
             ->select('access', 'name')->pluck('access', 'name')->toArray();
     }
+
+    public function hourauth(){
+        return $this->hasMany(EmployeeHourAuthorisedBy::class, 'user_id', 'id');
+    }
+
+    public function holiauth(){
+        return $this->hasMany(EmployeeHolidayAuthorisedBy::class, 'user_id', 'id');
+    }
     
 }

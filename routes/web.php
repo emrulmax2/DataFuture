@@ -94,6 +94,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\AssessmentPlanController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\CourseManagement\AssignController;
@@ -194,12 +195,19 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\Settings\Studentoptions\CompanyController;
+use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\SlcCocController;
+use App\Http\Controllers\Student\SlcMoneyReceiptController;
+use App\Http\Controllers\Student\WorkPlacementController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
-
+use App\Http\Controllers\User\MyStaffController;
+use App\Http\Controllers\WblProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -651,6 +659,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
         Route::get('student/notes/{id}', 'notes')->name('student.notes');
         Route::get('student/process/{id}', 'process')->name('student.process');
+        Route::get('student/workplacement/{id}', 'workplacement')->name('student.workplacement');
 
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
@@ -664,6 +673,8 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/set-temp-course/{student}/{crel}', 'setTempCourse')->name('student.set.temp.course');
         Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
+
+        Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -795,6 +806,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/store-slc-registration', 'store')->name('student.store.registration');
         Route::post('student/edit-slc-registration', 'edit')->name('student.edit.registration');
         Route::post('student/update-slc-registration', 'update')->name('student.update.registration');
+
+        Route::post('student/slc-registration-has-data', 'hasData')->name('student.slc.registration.has.data');
+        Route::delete('student/slc-registration-destory', 'destroy')->name('student.slc.registration.destroy');
     });
 
     Route::controller(SlcAttendanceController::class)->group(function() {
@@ -802,6 +816,10 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-attendance', 'update')->name('student.update.slc.attendance');
         Route::post('student/populate-slc-attendance', 'populateAttendanceForm')->name('student.slc.attendance.populate');
         Route::post('student/store-slc-attendance', 'store')->name('student.store.slc.attendance');
+
+        Route::post('student/store-slc-installment-exist', 'checkInstallmentExistence')->name('student.installment.existence');
+        Route::post('student/slc-attendance-has-data', 'hasData')->name('student.slc.attendance.has.data');
+        Route::delete('student/slc-attendance-destory', 'destroy')->name('student.slc.attendance.destroy');
     });
 
     Route::controller(SlcAgreementController::class)->group(function() {
@@ -809,6 +827,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-agreement', 'update')->name('student.update.slc.agreement');
         Route::post('student/get-instance-fees', 'getInstanceFees')->name('student.get.slc.agreement.instance.fees');
         Route::post('student/store-agreement', 'store')->name('student.store.slc.agreement');
+
+        Route::post('student/agreement-has-data', 'hasData')->name('student.slc.agreement.has.data');
+        Route::delete('student/destroy-agreement', 'destroy')->name('student.destory.slc.agreement');
     });
 
     Route::controller(SlcInstallmentController::class)->group(function() {
@@ -816,6 +837,27 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-slc-installment', 'update')->name('student.update.slc.intallment');
         Route::post('student/get-slc-installment-details', 'getDetails')->name('student.get.slc.intallment.details');
         Route::post('student/store-slc-installment', 'store')->name('student.store.slc.intallment');
+
+        Route::post('student/slc-installment-existence', 'installmentExistence')->name('student.slc.intallment.existence');
+        Route::post('student/slc-installment-edit-existence', 'editInstallmentExistence')->name('student.slc.intallment.existence.edit');
+
+        Route::delete('student/slc-installment-destroy', 'destroy')->name('student.destory.slc.intallment');
+    });
+
+    Route::controller(SlcCocController::class)->group(function() {
+        Route::post('student/edit-slc-coc', 'edit')->name('student.edit.slc.coc');
+        Route::post('student/update-slc-coc', 'update')->name('student.slc.coc.update');
+        Route::post('student/store-slc-coc', 'store')->name('student.slc.coc.store');
+
+        Route::post('student/destory-slc-coc-doc', 'destroyCocDocument')->name('student.destory.coc.document');
+        Route::delete('student/destory-slc-coc', 'destroy')->name('student.destory.coc');
+    });
+
+    Route::controller(SlcMoneyReceiptController::class)->group(function() {
+        Route::post('student/store-slc-payment', 'store')->name('student.store.slc.payment');
+        Route::post('student/edit-slc-payment', 'edit')->name('student.edit.slc.payment');
+        Route::post('student/update-slc-payment', 'update')->name('student.update.slc.payment');
+        Route::delete('student/destroy-slc-payment', 'destroy')->name('student.destory.slc.payment');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
@@ -1973,6 +2015,13 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/show-new/{tutor}', 'showNew')->name('tutor-dashboard.show.new'); 
     });
 
+    Route::resource('plan-assessment', AssessmentPlanController::class);
+
+    Route::controller(AssessmentPlanController::class)->group(function() {
+        Route::get('plan-assessment-list', 'list')->name('assessment.plan.list');
+        Route::get('plan-assessment/{plan_assessment}/restore', 'restore')->name('plan-assessment.restore');
+        
+    });
     // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  
     // POST            tutor_module_activity ............................ tutor_module_activity.store › TutorModuleActivityController@store
     // GET|HEAD        tutor_module_activity/create ................... tutor_module_activity.create › TutorModuleActivityController@create  
@@ -2163,6 +2212,84 @@ Route::middleware('auth')->group(function() {
 
         Route::post('course-management/assign/students-to-plan', 'assignStudentsToPlan')->name('assign.students.to.plan'); 
         Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
+    });
+
+    // GET|HEAD        result ................................................................................................................................................... result.index › ResultController@index  
+    // POST            result ................................................................................................................................................... result.store › ResultController@store  
+    // GET|HEAD        result-list/{assessment_plan} .............................................................................................................................. result.list › ResultController@list  
+    // POST            result-list/{assessment_plan}/restore ................................................................................................................ result.restore › ResultController@restore  
+    // GET|HEAD        result/create .......................................................................................................................................... result.create › ResultController@create
+    // GET|HEAD        result/{result} ............................................................................................................................................ result.show › ResultController@show  
+    // PUT|PATCH       result/{result} ........................................................................................................................................ result.update › ResultController@update  
+    // DELETE          result/{result} ...................................................................................................................................... result.destroy › ResultController@destroy  
+    // GET|HEAD        result/{result}/edit ....................................................................................................................................... result.edit › ResultController@edit 
+    Route::resource('result', ResultController::class,[
+        'except' => ['index']
+    ]);
+    
+    Route::controller(ResultController::class)->group(function() {
+        
+        Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
+        Route::post('result/update-all', 'updateAll')->name('result.update.all');
+        Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
+        Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
+        
+        Route::get('result-list/{assessment_plan}', 'list')->name('result.list'); 
+        Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore');
+
+        Route::get('result-list/{assessmentPlan}/download', 'downloadStudentListExcel')->name('result.download-excel');
+        Route::get('result-list/{assessmentPlan}/download-result', 'downloadStudentResultExcel')->name('result.downloadresult-excel');
+        Route::post('result-list-upload', 'uploadStudentExcel')->name('result.upload-excel');
+        Route::delete('result-list/{assessmentPlan}/delete-all', 'destroyByAssessmentPlan')->name('result.all.delete');
+        Route::get('result-list/{assessmentPlan}/show/{student}', 'resultByAssessmentAndStudent')->name('result.show.assessment');
+        
+        
+    });
+
+    
+
+    Route::controller(CompanyController::class)->group(function() {
+        Route::get('companies/list', 'list')->name('companies.list'); 
+        Route::post('companies/store', 'store')->name('companies.store'); 
+        Route::get('companies/edit/{id}', 'edit')->name('companies.edit');
+        Route::post('companies/update', 'update')->name('companies.update');
+        Route::delete('companies/delete/{id}', 'destroy')->name('companies.destory');
+        Route::post('companies/restore/{id}', 'restore')->name('companies.restore');
+        Route::post('companies/update-status/{id}', 'updateStatus')->name('companies.update.status');
+    });
+
+    Route::controller(CompanySupervisorController::class)->group(function() {
+        Route::get('companies/supervisor/list', 'list')->name('companies.supervisor.list'); 
+        Route::post('companies/supervisor/store', 'store')->name('companies.supervisor.store'); 
+        Route::post('companies/supervisor/edit', 'edit')->name('companies.supervisor.edit');
+        Route::post('companies/supervisor/update', 'update')->name('companies.supervisor.update');
+        Route::delete('companies/supervisor/delete/{id}', 'destroy')->name('companies.supervisor.destroy');
+    });
+
+    Route::controller(WorkPlacementController::class)->group(function() {
+        Route::post('student/get-company-supervisor', 'getSupervisorByCompany')->name('student.get.company.supervisor'); 
+        Route::post('student/store-work-placement-hour', 'storeHour')->name('student.store.work.placement.hour'); 
+        Route::get('student/store-work-placement-hour-list', 'hourList')->name('student.work.placement.hour.list'); 
+        Route::get('student/edit-work-placement-hour/{id}', 'editHour')->name('student.edit.work.placement.hour'); 
+        Route::post('student/update-work-placement-hour', 'updateHour')->name('student.update.work.placement.hour'); 
+
+        Route::delete('student/destroy-work-placement-hour/{id}', 'destroyHour')->name('student.destroy.work.placement.hour'); 
+        Route::post('student/restore-work-placement-hour', 'restoreHour')->name('student.restore.work.placement.hour'); 
+    });
+
+    Route::controller(WblProfileController::class)->group(function() {
+        Route::post('student/store-wbl-profile', 'store')->name('student.store.wbl.profile'); 
+        Route::get('student/wbl-profile-list', 'list')->name('student.wbl.profile.list'); 
+        Route::get('student/edit-wbl-profile/{id}', 'edit')->name('student.edit.wbl.profile'); 
+        Route::post('student/update-wbl-profile', 'update')->name('student.update.wbl.profile'); 
+
+        Route::delete('student/destroy-wbl-profile/{id}', 'destroy')->name('student.destroy.wbl.profile'); 
+        Route::post('student/restore-wbl-profile', 'restore')->name('student.restore.wbl.profile'); 
+    });
+
+    Route::controller(MyStaffController::class)->group(function(){
+        Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
+        
     });
 });
 

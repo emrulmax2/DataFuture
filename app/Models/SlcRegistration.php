@@ -35,6 +35,10 @@ class SlcRegistration extends Model
         return $this->hasMany(SlcAttendance::class, 'slc_registration_id', 'id');
     }
 
+    public function cocs(){
+        return $this->hasMany(SlcCoc::class, 'slc_registration_id', 'id');
+    }
+
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }

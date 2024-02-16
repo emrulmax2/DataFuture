@@ -60,6 +60,7 @@
     </div>
 </div>
 <!-- END: Edit Punch Modal -->
+
 <!-- BEGIN: Delete Confirm Modal Content -->
 <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -166,7 +167,7 @@
 </div>
 <!-- END: Delete Confirm Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
+<!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmDeleteModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -195,7 +196,7 @@
             </div>
         </div>
     </div>
-    <!-- END: Delete Confirm Modal Content -->
+<!-- END: Delete Confirm Modal Content -->
 
 <!-- BEGIN: Error Modal Content -->
     <div id="errorModal" class="modal" tabindex="-1" aria-hidden="true">

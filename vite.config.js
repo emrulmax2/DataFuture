@@ -219,6 +219,11 @@ export default defineConfig({
 
                 'resources/js/unsigned.js',
                 'resources/js/assign.js',
+                'resources/js/student-slc-coc.js',
+                'resources/js/student-slc-payment.js',
+                'resources/js/wp-company.js',
+                'resources/js/student-workplacement.js',
+                'resources/js/student-wbl-profile.js',
                 
             ],
             refresh: true,

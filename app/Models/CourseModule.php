@@ -33,15 +33,12 @@ class CourseModule extends Model
     public function course(){
         return $this->belongsTo(Course::class, 'course_id');
     }
-
     public function level(){
         return $this->belongsTo(ModuleLevel::class, 'module_level_id');
     }
-
     public function assesments(){
         return $this->hasMany(CourseModuleBaseAssesment::class, 'course_module_id', 'id');
     }
-
     public function creation(){
         return $this->hasMany(ModuleCreation::class, 'course_module_id', 'id');
     }

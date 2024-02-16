@@ -24,8 +24,7 @@ class CourseModuleBaseAssesmentRequest extends FormRequest
     public function rules()
     {
         return [
-            'assesment_code' => 'required',
-            'assesment_name' => 'required'
+            'assessment_type_id' => 'required',
         ];
     }
 }

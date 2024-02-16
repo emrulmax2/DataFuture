@@ -167,7 +167,7 @@
                     </button>
                     <input type="hidden" value="{{ $employee->id }}" name="id"/>
                     
-                    <input type="hidden" name="url" value="{{ route("employee.update", $employee->id) }}" />
+                    <input type="hidden" name="url" value="{{ route('employee.update', $employee->id) }}" />
                     <input type="hidden" name="user_id" value="{{ $employee->user_id }}" />
                 </div>
             </div>
@@ -181,7 +181,7 @@
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editEmploymentDetailsForm" enctype="multipart/form-data">
             
-            <input type="hidden" name="url" value="{{ route("employee.employment.update",$employment->id) }}" />
+            <input type="hidden" name="url" value="{{ route('employee.employment.update', $employment->id) }}" />
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
@@ -538,7 +538,7 @@
     <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editTermDetailsForm" enctype="multipart/form-data">
             
-            <input type="hidden" name="url" value="{{ route('employee.term.update',$employeeTerms->id) }}" />
+            <input type="hidden" name="url" value="{{ route('employee.term.update', $employeeTerms->id) }}" />
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">

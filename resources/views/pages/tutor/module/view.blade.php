@@ -121,7 +121,7 @@
     <div id="assessment" class="tab-pane " role="tabpanel"  aria-labelledby="assessment-tab">
         <!-- BEGIN: HTML Table Data -->
         <div class="intro-y box p-5 mt-5">
-            <h2>Upcoming....</h2>
+            @include('pages.tutor.module.includes.assessments')
         </div>
         <!-- END: HTML Table Data -->
     </div>
