@@ -49,7 +49,7 @@ class EmployeeHolidayController extends Controller
             "employment" => $employment,
             'holidayDetails' => $this->employeeHolidayDetails($id),
             'holidayStatistics' => $this->employeeLeaveStatistics($id),
-            'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get(),
+            'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'DESC')->get(),
             'empPatterns' => EmployeeWorkingPattern::where('employee_id', $id)->where('active', 1)->where(
                     function($query) use ($today){
                         $query->whereNull('end_to')->orWhere('end_to', '>=', $today);
