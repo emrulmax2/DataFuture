@@ -3,6 +3,15 @@
 @section('subhead')
     <title>Dashboard - London Churchill College</title>
 @endsection
+@if(Auth::guard('applicant')->check())
+  
+@elseif(Auth::guard('student')->check())
+
+@elseif(Auth::guard('agent')->check())
+
+@else
+    @php $employeeUser = cache()->get('employeeCache'.Auth::id()) ?? Auth::user()->load('employee'); @endphp
+@endif
 
 @section('subcontent')
     <div class="grid grid-cols-12 gap-6">       
@@ -16,7 +25,27 @@
                             <i data-lucide="refresh-ccw" class="w-4 h-4 mr-3"></i> Reload Data
                         </a>
                     </div>
+
                     <div class="grid grid-cols-12 gap-6 mt-5">
+                        
+                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
+                            <div class="report-box zoom-in">                               
+                                <div class="box flex  p-5 ">                                    
+                                    <div class="w-20 h-20 rounded-full overflow-hidden shadow-md image-fit zoom-in scale-110 my-4">
+                                        @if(Auth::guard('applicant')->check())
+                                            <img src="{{ asset('build/assets/images/avater.png') }}">
+                                        @elseif(Auth::guard('student')->check())
+                                            <img src="{{ asset('build/assets/images/avater.png') }}">
+                                        @elseif(Auth::guard('agent')->check())
+                                            <img src="{{ asset('build/assets/images/avater.png') }}">
+                                        @else
+                                            <img  alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
+                                        @endif
+                                    </div>
+                                    <div class="text-base text-slate-500 mt-1 text-right py-10 px-5 font-medium">My HR</div>                              
+                                </div>                               
+                            </div>        
+                        </a>
                         @if(isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <a href="{{ route('admission') }}" class="report-box zoom-in">
@@ -127,17 +156,7 @@
                             </div>        
                         </a>
                         @endif
-                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
-                            <div class="report-box zoom-in">                               
-                                <div class="box p-5">                                    
-                                    <div class="flex">
-                                        <i data-lucide="contact-2" class="report-box__icon text-success"></i>
-                                    </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">00</div>
-                                    <div class="text-base text-slate-500 mt-1">My HR</div>                              
-                                </div>                               
-                            </div>        
-                        </a>
+                        
                     </div>
                 </div>
             </div>

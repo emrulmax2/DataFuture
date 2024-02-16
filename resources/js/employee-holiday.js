@@ -186,7 +186,7 @@ import 'litepicker/dist/plugins/multiselect';
             if(LeaveDates.length > 0){
                 axios({
                     method: "POST",
-                    url: route('user.account.holiday.ajax.limit'),
+                    url: route('employee.holiday.ajax.limit'),
                     data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType, LeaveDates : LeaveDates},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
