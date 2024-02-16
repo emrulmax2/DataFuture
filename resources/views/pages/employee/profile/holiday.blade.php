@@ -306,13 +306,15 @@
                                             @foreach($holidayYears as $hy)
                                                 @php
                                                     $today = date('Y-m-d');
-                                                    $selected = ($today >= $hy->start_date && $today <= $hy->end_date ? 'selected' : '');
+                                                    $startDate = (isset($hy->start_date) && !empty($hy->start_date) ? date('Y-m-d', strtotime($hy->start_date)) : '');
+                                                    $endDate = (isset($hy->end_date) && !empty($hy->end_date) ? date('Y-m-d', strtotime($hy->end_date)) : '');
+                                                    $selected = ($today >= $startDate && $today <= $endDate ? 'selected' : '');
                                                 @endphp 
-                                                @if($today >= $hy->start_date && $today <= $hy->end_date)
+                                                {{--@if($today >= $startDate && $today <= $endDate)--}}
                                                     <option {{ $selected }} data-notice="{{ $hy->notice_period }}" value="{{ $hy->id }}">
                                                         {{ date('Y', strtotime($hy->start_date)) }} - {{ date('Y', strtotime($hy->end_date)) }}
                                                     </option>
-                                                @endif
+                                                {{--@endif--}}
                                             @endforeach
                                         @endif
                                     </select>

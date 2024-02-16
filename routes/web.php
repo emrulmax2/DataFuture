@@ -1077,14 +1077,14 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/holidays/{id}', 'index')->name('employee.holiday'); 
         Route::post('employee-profile/holidays/update-adjustment', 'updateAdjustment')->name('employee.holiday.update.adjustment'); 
 
-        Route::post('my-account/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('employee.holiday.ajax.statistics'); 
-        Route::post('my-account/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('employee.holiday.ajax.limit'); 
-        Route::post('my-account/holidays/leave-submission', 'employeeLeaveSubmission')->name('employee.holiday.leave.submission'); 
+        Route::post('employee-profile/holidays/get-ajax-leave-statistics', 'employeeAjaxLeaveStatistics')->name('employee.holiday.ajax.statistics'); 
+        Route::post('employee-profile/holidays/get-ajax-leave-limit', 'employeeAjaxLeaveLimit')->name('employee.holiday.ajax.limit'); 
+        Route::post('employee-profile/holidays/leave-submission', 'employeeLeaveSubmission')->name('employee.holiday.leave.submission'); 
 
-        Route::post('my-account/holidays/get-leave', 'getEmployeeLeave')->name('employee.holiday.get.leave'); 
-        Route::post('my-account/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
-        Route::post('my-account/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
-        Route::post('my-account/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
+        Route::post('employee-profile/holidays/get-leave', 'getEmployeeLeave')->name('employee.holiday.get.leave'); 
+        Route::post('employee-profile/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
+        Route::post('employee-profile/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
+        Route::post('employee-profile/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
     });
 
     Route::controller(EmployeeDocumentsController::class)->group(function(){

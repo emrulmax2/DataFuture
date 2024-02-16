@@ -138,8 +138,8 @@ class EmployeeHolidayController extends Controller
         $bank_holiday_data = [];
 
         $year = HrHolidayYear::find($year_id);
-        $yearStart = date('Y-m-d', strtotime($year->start_date));
-        $yearEnd = date('Y-m-d', strtotime($year->end_date));
+        $yearStart = (isset($year->start_date) && !empty($year->start_date) ? date('Y-m-d', strtotime($year->start_date)) : '');
+        $yearEnd = (isset($year->end_date) && !empty($year->end_date) ? date('Y-m-d', strtotime($year->end_date)) : '');
 
         $PaymentSettings = EmployeePaymentSetting::where('employee_id', $employee_id)->get()->first();
         $bank_holiday_auto_book = (isset($PaymentSettings->bank_holiday_auto_book) ? $PaymentSettings->bank_holiday_auto_book : 'No');
@@ -498,8 +498,8 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $year_id = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $year_start = $hrHolidayYear->start_date;
-        $year_end = $hrHolidayYear->end_date;
+        $year_start = (isset($hrHolidayYear->start_date) && !empty($hrHolidayYear->start_date) ? date('Y-m-d', strtotime($hrHolidayYear->start_date)) : '');
+        $year_end = (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : '');
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
@@ -541,8 +541,8 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $year_id = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $year_start = date('Y-m-d', strtotime($hrHolidayYear->start_date));
-        $year_end = date('Y-m-d', strtotime($hrHolidayYear->end_date));
+        $year_start = (isset($hrHolidayYear->start_date) && !empty($hrHolidayYear->start_date) ? date('Y-m-d', strtotime($hrHolidayYear->start_date)) : '');
+        $year_end = (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : '');
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
@@ -632,8 +632,8 @@ class EmployeeHolidayController extends Controller
         endif;
 
         $year_id = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
-        $year_start = date('Y-m-d', strtotime($hrHolidayYear->start_date));
-        $year_end = date('Y-m-d', strtotime($hrHolidayYear->end_date));
+        $year_start = (isset($hrHolidayYear->start_date) && !empty($hrHolidayYear->start_date) ? date('Y-m-d', strtotime($hrHolidayYear->start_date)) : '');
+        $year_end = (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : '');
 
         $pattern_id = ($pattern_id > 0 ? $pattern_id : $this->employeePossibleActivePattern($employee_id, $year_id));
         $workingPattern = EmployeeWorkingPattern::find($pattern_id);
