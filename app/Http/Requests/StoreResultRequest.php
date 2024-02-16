@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseModuleBaseAssesmentRequest extends FormRequest
+class StoreResultRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,16 @@ class CourseModuleBaseAssesmentRequest extends FormRequest
     public function rules()
     {
         return [
-            'assessment_type_id' => 'required',
+            "student_id"=> 'required|array',
+            "assessment_plan_id"=> 'required|array',
+            "grade_id"=> 'required|array',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'grade_id.required' => 'This field is required.',
         ];
     }
 }

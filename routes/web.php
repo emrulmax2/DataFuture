@@ -94,6 +94,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
+use App\Http\Controllers\AssessmentPlanController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\CourseManagement\AssignController;
@@ -194,6 +195,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
@@ -1973,6 +1975,13 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/show-new/{tutor}', 'showNew')->name('tutor-dashboard.show.new'); 
     });
 
+    Route::resource('plan-assessment', AssessmentPlanController::class);
+
+    Route::controller(AssessmentPlanController::class)->group(function() {
+        Route::get('plan-assessment-list', 'list')->name('assessment.plan.list');
+        Route::get('plan-assessment/{plan_assessment}/restore', 'restore')->name('plan-assessment.restore');
+        
+    });
     // GET|HEAD        tutor_module_activity ............................ tutor_module_activity.index › TutorModuleActivityController@index  
     // POST            tutor_module_activity ............................ tutor_module_activity.store › TutorModuleActivityController@store
     // GET|HEAD        tutor_module_activity/create ................... tutor_module_activity.create › TutorModuleActivityController@create  
@@ -2164,5 +2173,39 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/assign/students-to-plan', 'assignStudentsToPlan')->name('assign.students.to.plan'); 
         Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
     });
+
+    // GET|HEAD        result ................................................................................................................................................... result.index › ResultController@index  
+    // POST            result ................................................................................................................................................... result.store › ResultController@store  
+    // GET|HEAD        result-list/{assessment_plan} .............................................................................................................................. result.list › ResultController@list  
+    // POST            result-list/{assessment_plan}/restore ................................................................................................................ result.restore › ResultController@restore  
+    // GET|HEAD        result/create .......................................................................................................................................... result.create › ResultController@create
+    // GET|HEAD        result/{result} ............................................................................................................................................ result.show › ResultController@show  
+    // PUT|PATCH       result/{result} ........................................................................................................................................ result.update › ResultController@update  
+    // DELETE          result/{result} ...................................................................................................................................... result.destroy › ResultController@destroy  
+    // GET|HEAD        result/{result}/edit ....................................................................................................................................... result.edit › ResultController@edit 
+    Route::resource('result', ResultController::class,[
+        'except' => ['index']
+    ]);
+    
+    Route::controller(ResultController::class)->group(function() {
+        
+        Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
+        Route::post('result/update-all', 'updateAll')->name('result.update.all');
+        Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
+        Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
+        
+        Route::get('result-list/{assessment_plan}', 'list')->name('result.list'); 
+        Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore');
+
+        Route::get('result-list/{assessmentPlan}/download', 'downloadStudentListExcel')->name('result.download-excel');
+        Route::get('result-list/{assessmentPlan}/download-result', 'downloadStudentResultExcel')->name('result.downloadresult-excel');
+        Route::post('result-list-upload', 'uploadStudentExcel')->name('result.upload-excel');
+        Route::delete('result-list/{assessmentPlan}/delete-all', 'destroyByAssessmentPlan')->name('result.all.delete');
+        Route::get('result-list/{assessmentPlan}/show/{student}', 'resultByAssessmentAndStudent')->name('result.show.assessment');
+        
+        
+    });
+
+    
 });
 

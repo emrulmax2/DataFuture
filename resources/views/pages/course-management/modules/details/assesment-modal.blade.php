@@ -10,16 +10,36 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="assesment_code" class="form-label">Assesment Code <span class="text-danger">*</span></label>
-                            <input id="assesment_code" type="text" name="assesment_code" class="form-control w-full">
-                            <div class="acc__input-error error-assesment_code text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4 gap-y-2">
+                            <div class="col-span-12">
+                                <label for="assessment_type_id" class="form-label">Assesment <span class="text-danger">*</span></label>
+                                <select id="assessment_type_id" class="assementlccTom lcc-tom-select w-full" name="assessment_type_id">
+                                    <option value="" selected>Please Select</option>
+                                    @if(!empty($assementTypes))
+                                        @foreach($assementTypes as $t)
+                                            <option value="{{ $t->id }}">{{ $t->name }} - {{ $t->code }}</option>
+                                        @endforeach 
+                                    @endif 
+                                </select>
+                                <div class="acc__input-error error-assessment_type_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 border-b">
+                                <label for="is_result_segment" class="form-label">Please Select Result Set from Result segment</label>
+                                    <input type="hidden"  id="is_result_segment" class="form-check-input" name="is_result_segment" value="1">
+                            </div>    
+                            <div class="col-span-12">
+                                
+                                @if(!empty($gradesList))
+                                   @foreach($gradesList as $grade)
+                                   <div data-tw-merge class="flex items-center mt-2">
+                                        <input id="checkbox-switch-{{ $grade->id }}" data-tw-merge type="checkbox" name="grade[]" value="{{ $grade->id }}" checked class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  />
+                                        <label data-tw-merge for="checkbox-switch-{{ $grade->id }}"  class="cursor-pointer ml-2"> {{ $grade->name }}</label>
+                                        
+                                    </div>
+                                    @endforeach 
+                                @endif 
+                            </div>
                         </div>
-                        <div class="mt-3">
-                            <label for="assesment_name" class="form-label">Assesment Name <span class="text-danger">*</span></label>
-                            <input id="assesment_name" type="text" name="assesment_name" class="form-control w-full">
-                            <div class="acc__input-error error-assesment_name text-danger mt-2"></div>
-                        </div>     
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -58,16 +78,36 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="edit_assesment_code" class="form-label">Assesment Code <span class="text-danger">*</span></label>
-                            <input id="edit_assesment_code" type="text" name="assesment_code" class="form-control w-full">
-                            <div class="acc__input-error error-assesment_code text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4 gap-y-5">
+                            <div class="col-span-12">
+                                <label for="assessment_type_id" class="form-label">Assesment <span class="text-danger">*</span></label>
+                                <select id="assessment_type_id" class="assementlccTom lcc-tom-select w-full" name="assessment_type_id">
+                                    <option value="" selected>Please Select</option>
+                                    @if(!empty($assementTypes))
+                                        @foreach($assementTypes as $t)
+                                            <option value="{{ $t->id }}">{{ $t->name }} - {{ $t->code }}</option>
+                                        @endforeach 
+                                    @endif 
+                                </select>
+                                <div class="acc__input-error error-assessment_type_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 border-b">
+                                <label for="is_result_segment" class="form-label">Please Select Result Set from Result segment</label>
+                                    <input type="hidden"  id="is_result_segment" class="form-check-input" name="is_result_segment" value="1">
+                            </div>    
+                            <div class="col-span-12">
+                                
+                                @if(!empty($gradesList))
+                                   @foreach($gradesList as $grade)
+                                    <div data-tw-merge class="flex items-center mt-2">
+                                            <input id="checkbox-switch-{{ $grade->id }}" data-tw-merge type="checkbox" name="grade[]" value="{{ $grade->id }}" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  />
+                                            <label data-tw-merge for="checkbox-switch-{{ $grade->id }}"  class="cursor-pointer ml-2"> {{ $grade->name }}</label>
+                                        </div>
+                                    @endforeach 
+                                @endif 
+                            </div>
                         </div>
-                        <div class="mt-3">
-                            <label for="edit_assesment_name" class="form-label">Assesment Name <span class="text-danger">*</span></label>
-                            <input id="edit_assesment_name" type="text" name="assesment_name" class="form-control w-full">
-                            <div class="acc__input-error error-assesment_name text-danger mt-2"></div>
-                        </div>     
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

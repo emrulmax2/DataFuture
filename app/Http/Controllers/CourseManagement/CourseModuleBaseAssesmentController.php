@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\CourseModule;
 use App\Models\CourseModuleBaseAssesment;
 use App\Http\Requests\CourseModuleBaseAssesmentRequest;
+use App\Models\AssessmentType;
+use App\Models\ResultsegmentInCoursemodules;
 
 class CourseModuleBaseAssesmentController extends Controller
 {
@@ -53,6 +55,10 @@ class CourseModuleBaseAssesmentController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'is_result_segment' => $list->is_result_segment,
+                    'view_in_plan' => $list->view_in_plan,
+                    'course_module_id'  => $list->course_module_id,
+                    'assessment_type_id'  => $list->assessment_type_id,
                     'code' => $list->assesment_code,
                     'name' => $list->assesment_name,
                     'deleted_at' => $list->deleted_at
@@ -65,17 +71,29 @@ class CourseModuleBaseAssesmentController extends Controller
 
 
     public function store(CourseModuleBaseAssesmentRequest $request){
+    
+        $assementType = AssessmentType::find($request->assessment_type_id);
         $request->merge([
-            'created_by' => auth()->user()->id
+            'created_by' => auth()->user()->id,
+            'assesment_code' => $assementType->code,
+            'assesment_name' => $assementType->name,
         ]);
-        
         $courseModuleAssesment = CourseModuleBaseAssesment::create($request->all());
-        
+        if(isset($request->grade)) {
+            foreach($request->grade as $grade) {
+                
+                ResultsegmentInCoursemodules::create([
+                    "grade_id" => $grade,
+                    "course_module_base_assesment_id" => $courseModuleAssesment->id,
+                ]);
+
+            }
+        }
         return response()->json($courseModuleAssesment);
     }
 
     public function edit($id){
-        $data = CourseModuleBaseAssesment::find($id);
+        $data = CourseModuleBaseAssesment::with(["-"])->where('id',$id)->get()->first();
 
         if($data){
             return response()->json($data);
@@ -87,17 +105,30 @@ class CourseModuleBaseAssesmentController extends Controller
     public function update(CourseModuleBaseAssesmentRequest $request){
         $courseModuleID = $request->course_module_id;
         $courseModuleAssesmentID = $request->id;
+        $assementType = AssessmentType::find($request->assessment_type_id);
         $courseModuleAssesments = CourseModuleBaseAssesment::where('id', $courseModuleAssesmentID)->where('course_module_id', $courseModuleID)->update([
-            'assesment_code'=> $request->assesment_code,
-            'assesment_name'=> $request->assesment_name,
+            'assesment_code'=>  $assementType->code,
+            'assesment_name'=>  $assementType->name,
+            'assessment_type_id' => $request->assessment_type_id,
+            'is_result_segment'=> isset($request->is_result_segment) ? $request->is_result_segment : 0,
+            'view_in_plan' => isset($request->view_in_plan) ? $request->view_in_plan : 1,
             'updated_by' => auth()->user()->id
         ]);
-
+        if(isset($request->grade)) {
+            $courseModuleAssesments = CourseModuleBaseAssesment::find($courseModuleAssesmentID);
+            
+            $courseModuleAssesments->grades()->sync($request->grade);
+            
+        }
 
         if($courseModuleAssesments){
+
             return response()->json(['message' => 'Data updated'], 200);
+
         }else{
+
             return response()->json(['message' => 'omething went wrong!'], 422);
+            
         }
     }
 

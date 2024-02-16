@@ -6,7 +6,7 @@
 
 @section('subcontent')
 <div class="intro-y flex items-center mt-8">
-    <h2 class="text-lg font-medium mr-auto">Module Details</h2>
+    <h2 class="text-lg font-medium mr-auto">Result Details</h2>
 </div>
 <!-- BEGIN: Profile Info -->
 <div class="intro-y box px-5 pt-5 mt-5">
@@ -27,8 +27,6 @@
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="users" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Student : </span> <span class="font-medium ml-2">{{ $studentCount }}</span>
                 </div>
-                
-                
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Class Type</span> <span class="font-medium ml-2">{{ $data->classType }}</span>
                 </div>
@@ -62,78 +60,50 @@
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
         <li id="availabilty-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#availabilty" aria-controls="availabilty" aria-selected="true" role="tab" >
-                <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
-            </a>
-        </li>
-        <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#class-dates" aria-controls="class-dates" aria-selected="true" role="tab" >
-                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Class Dates
-            </a>
-        </li>
-        <li id="participants-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#participants" aria-controls="participants" aria-selected="true" role="tab" >
-                <i data-lucide="users" class="w-4 h-4 mr-2"></i> Participants
-            </a>
-        </li>
-
-
-        <li id="assessment-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
-                <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
-            </a>
-        </li>
-        <li id="analytics-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#analytics" aria-controls="analytics" aria-selected="true" role="tab" >
-                <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
+                <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Result
             </a>
         </li>
     </ul>
 </div>
+
+<form id="resultBulkInsert" method="post" action="{{ route("result.store") }}">
 <div class="intro-y tab-content mt-5">
     <div id="availabilty" class="tab-pane active" role="tabpanel" aria-labelledby="availabilty-tab">
-        <div class="intro-y box p-5 mt-5">
-            @include('pages.tutor.module.includes.activity')
-        </div>
-    </div>
-    <div id="class-dates" class="tab-pane " role="tabpanel" aria-labelledby="classDates-tab">
-        
-        <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            @include('pages.tutor.module.includes.dates')
-        </div>
-        <!-- END: HTML Table Data -->
-       
-    </div>
-    <div id="participants" class="tab-pane " role="tabpanel"  aria-labelledby="participants-tab">
-        <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            @include('pages.tutor.module.includes.participants')
-        </div>
-        <!-- END: HTML Table Data -->
+        <div class="intro-y box lg:mt-5">
+            <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                <h2 class="font-medium text-base mr-auto">{{ $assessmentPlan->courseModuleBase->type->name }} - {{ $assessmentPlan->courseModuleBase->type->code }}</h2>
+                <a href="{{ route("tutor-dashboard.plan.module.show",$plan->id) }}" data-tw-merge class="mr-2 ml-auto inline-flex transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-primary text-primary dark:border-primary [&:hover:not(:disabled)]:bg-primary/10 "><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back To assessment</a>
+                @if(isset($result) && count($result)>0) 
+                <button type="submit" class="update_all_result btn btn-success shadow-md mr-2"><i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Update Bulk Results <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
+                
+                <button type="button"  data-assessmentPlan= {{ $assessmentPlan->id }} class="delete_all_result btn btn-danger shadow-md"><i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete All <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
 
-        <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            @include('pages.tutor.module.includes.studentlist')
+                @else
+                <button type="submit" id="insertAllResult" class="insert_all_result btn btn-warning shadow-md"><i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Insert Bulk Results <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
+                @endif
+            </div>
         </div>
-        <!-- END: HTML Table Data -->
-    </div>
+        <div class="intro-y box p-5 mt-5">
+            @include('pages.tutor.module.includes.result.index')
+        </div>
+        <div class="intro-y box lg:mt-5">
+            <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                <h2 class="font-medium text-base mr-auto">{{ $assessmentPlan->courseModuleBase->type->name }} - {{ $assessmentPlan->courseModuleBase->type->code }}</h2>
+                <a href="{{ route("tutor-dashboard.plan.module.show",$plan->id) }}" data-tw-merge class="mr-2 ml-auto inline-flex transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-primary text-primary dark:border-primary [&:hover:not(:disabled)]:bg-primary/10 "><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back To assessment</a>
+                @if(isset($result) && count($result)>0) 
+                <button type="submit" class="update_all_result btn btn-success shadow-md mr-2"><i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Update Bulk Results <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
+                
+                <button type="button"  data-assessmentPlan= {{ $assessmentPlan->id }} class="delete_all_result btn btn-danger shadow-md"><i data-lucide="trash" class="w-4 h-4 mr-2"></i> Delete All <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
 
-    <div id="assessment" class="tab-pane " role="tabpanel"  aria-labelledby="assessment-tab">
-        <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            @include('pages.tutor.module.includes.assessments')
+                @else
+                <button type="submit" id="insertAllResult" class="insert_all_result btn btn-warning shadow-md"><i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Insert Bulk Results <i data-loading-icon="oval" class="w-4 h-4 ml-1 hidden text-white" ></i></button>
+                @endif
+            </div>
         </div>
-        <!-- END: HTML Table Data -->
-    </div>
-    <div id="analytics" class="tab-pane " role="tabpanel"  aria-labelledby="analytics-tab">
-        <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            <h2>Upcoming....</h2>
-        </div>
-        <!-- END: HTML Table Data -->
     </div>
 </div>
-@include('pages.tutor.module.component.modal')
+</form>
+@include('pages.tutor.module.component.result.modal')
 @endsection
 
 @section('script')

@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var moduleAssesmentListTable = (function () {
@@ -30,14 +31,58 @@ var moduleAssesmentListTable = (function () {
                     width: "180",
                 },
                 {
-                    title: "Assesment Code",
+                    title: "Name",
+                    field: "name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Code",
                     field: "code",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Assesment Name",
-                    field: "name",
-                    headerHozAlign: "left",
+                    title: "View In Plans",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        if (cell.getData().view_in_plan == 1) {
+                            btns = `<div class=" form-switch">
+                                        <input  id="view_in_plan" class="form-check-input view-plans" data-course_module_id="${cell.getData().course_module_id}" data-assessment_type_id="${cell.getData().assessment_type_id}" data-is_result_segment="${cell.getData().is_result_segment}" data-id="${cell.getData().id}" name="view_in_plan" value="1" checked type="checkbox">
+                                        <label class="form-check-label" for="view_in_plan">&nbsp;</label>
+                                    </div>`;
+                        }else {
+                            btns = `<div class=" form-switch">
+                                        <input  id="view_in_plan" class="form-check-input view-plans" data-course_module_id="${cell.getData().course_module_id}" data-assessment_type_id="${cell.getData().assessment_type_id}" data-is_result_segment="${cell.getData().is_result_segment}" data-id="${cell.getData().id}" name="view_in_plan" value="1" type="checkbox">
+                                        <label class="form-check-label" for="view_in_plan">&nbsp;</label>
+                                    </div>`;
+                        }
+                        
+                        return btns;
+                    },
+                },
+                {
+                    title: "Have Result Segment?",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        if (cell.getData().is_result_segment == 1) {
+                            btns = "Yes";
+                        }else {
+                            btns = "No";
+                        }
+                        
+                        return btns;
+                    },
                 },
                 {
                     title: "Actions",
@@ -61,6 +106,47 @@ var moduleAssesmentListTable = (function () {
                 },
             ],
             renderComplete() {
+                const succReModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+                $("#moduleAssesmentDataTable .view-plans").on('click', function(){
+                    let view_in_plan = 0   
+                    let tthis = $(this);
+                    let id = tthis.data("id")
+                    let course_module_id  = tthis.data("course_module_id")
+                    let assessment_type_id  = tthis.data("assessment_type_id")
+                    let is_result_segment  = tthis.data("is_result_segment")
+                    if(tthis.prop("checked")) {
+                        view_in_plan = 1;
+                    }
+                    axios({
+                        method: "post",
+                        url: route('course.module.assesment.update'),
+                        data: { id: id, view_in_plan: view_in_plan ,course_module_id:course_module_id, assessment_type_id:assessment_type_id, is_result_segment:is_result_segment },
+                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    }).then(response => {
+                        
+                        if (response.status == 200) {
+                           
+                            //succReModal.show();
+                            // document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            //     $('#successModal .successModalTitle').html('Congratulations!');
+                            //     $('#successModal .successModalDesc').html('Course Module Assesment data successfully updated.');
+                            // });
+                            moduleAssesmentListTable.init();
+                        }
+                        
+                    }).catch(error => {
+                        if (error.response) {
+                            if (error.response.status == 422) {
+                                for (const [key, val] of Object.entries(error.response.data.errors)) {
+                                    $(`#moduleAssesmentEditForm .${key}`).addClass('border-danger')
+                                    $(`#moduleAssesmentEditForm  .error-${key}`).html(val)
+                                }
+                            } else {
+                                console.log('error');
+                            }
+                        }
+                    });    
+                });
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -143,7 +229,7 @@ var moduleAssesmentListTable = (function () {
         const moduleAssesmentEditModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#moduleAssesmentEditModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModalCMA = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalCMA"));
-
+        
         let confModalDelTitle = 'Are you sure?';
         let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
         let confModalRestDescription = 'Do you really want to re-store these records? Click agree to continue.';
@@ -194,7 +280,33 @@ var moduleAssesmentListTable = (function () {
                 $('#confirmModalCMA .agreeWithCMA').attr('data-action', 'RESTORE');
             });
         });
-
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            persist: false,
+            create: true,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+        var tomSelectArray = [];
+        $('.assementlccTom').each(function(){
+            if ($(this).attr("multiple") !== undefined) {
+                tomOptions = {
+                    ...tomOptions,
+                    plugins: {
+                        ...tomOptions.plugins,
+                        remove_button: {
+                            title: "Remove this item",
+                        },
+                    }
+                };
+            }
+            tomSelectArray.push(new TomSelect(this, tomOptions));
+        });
         // Confirm Modal Action
         $('#confirmModalCMA .agreeWithCMA').on('click', function(){
             let $agreeBTN = $(this);
@@ -257,11 +369,25 @@ var moduleAssesmentListTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
-                    $('#moduleAssesmentEditModal input[name="assesment_code"]').val(dataset.assesment_code ? dataset.assesment_code : '');
-                    $('#moduleAssesmentEditModal input[name="assesment_name"]').val(dataset.assesment_name ? dataset.assesment_name : '');
-                    
-
-                    $('#moduleAssesmentEditModal input[name="id"]').val(editId);
+                    if(dataset.grades.length>0)
+                        $.each(dataset.grades,function(index,value){
+                            for(let i=0;i<(dataset.grades.length+20);i++)
+                                if(index==i)
+                                    $('#moduleAssesmentEditModal input[name="grade[]"]').eq(index).prop('checked',true)
+                                else
+                                    $('#moduleAssesmentEditModal input[name="grade[]"]').eq(i).prop('checked',false)
+                        });
+                    else
+                        for(let i=0;i<(dataset.grades.length+33);i++)
+                            $('#moduleAssesmentEditModal input[name="grade[]"]').eq(i).prop('checked',false)
+                    if(dataset.is_result_segment==1)
+                        $('#moduleAssesmentEditModal input[name="is_result_segment"]').prop('checked',true)
+                    else
+                        $('#moduleAssesmentEditModal input[name="is_result_segment"]').prop('checked', false);
+                        tomSelectArray[1].setValue(dataset.assessment_type_id);
+                        $('#moduleAssesmentEditModal input[name="id"]').val(editId);
+                        
+                        $('#moduleAssesmentEditModal input[name="view_in_plan"]').val(dataset.view_in_plan);
                 }
             }).catch((error) => {
                 console.log(error);

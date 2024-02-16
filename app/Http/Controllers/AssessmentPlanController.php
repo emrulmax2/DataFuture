@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Student;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Assign;
+use App\Models\AssessmentPlan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
-class StudentAssignController extends Controller
+class AssessmentPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,22 +16,22 @@ class StudentAssignController extends Controller
     {
         //
     }
-
     public function list(Request $request){
-        $planid = (isset($request->planid) && !empty($request->planid) ? $request->planid : 0);
-        //$dates = (isset($request->dates) && !empty($request->dates) ? date('Y-m-d', strtotime($request->dates)) : '');
-        $status = (isset($request->status) && !empty($request->status) ? $request->status : '1');
-        
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
+        $plan_id = (isset($request->planid) && $request->planid > 0 ? $request->planid : 0);
+        $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
+        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Assign::orderByRaw(implode(',', $sorts));
-        if(!empty($planid)): $query->where('plan_id', $planid); endif;
-        //if(!empty($dates)): $query->where('date', $dates); endif;
-        if($status == 2): $query->onlyTrashed(); endif;
+        $query = AssessmentPlan::with('courseModuleBase','plan','results')->orderByRaw(implode(',', $sorts))->where('plan_id', $plan_id);
+
+        if($status == 2):
+            $query->onlyTrashed();
+        endif;
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -46,26 +44,23 @@ class StudentAssignController extends Controller
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
-               
         $data = array();
+
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                if(isset($list->student)) {
-                    $data[] = [
-                        'id' => $list->id,
-                        'sl' => $i,
-                        'name' => (isset($list->student->full_name) && !empty($list->student->full_name)) ?  $list->student->title->name." ".$list->student->full_name :$list->student->title->name." ".$list->student->first_name . " ". $list->student->last_name,
-                        'register_no' => ($list->student->registration_no),
-                        'images' => (isset($list->student->photo) && !empty($list->student->photo) && Storage::disk('google')->exists('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) ? Storage::disk('google')->url('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) : asset('build/assets/images/avater.png')),
-                        'status' => '',
-                        'deleted_at' => $list->deleted_at,
-                    ];
-                    $i++;
-                }
+            
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'name' => ucfirst($list->courseModuleBase->type->name). " - ". $list->courseModuleBase->type->code,
+                    'published_at' => $list->published_at,
+                    'resultFound' => $list->results->count() ? 1 : 0,
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
             endforeach;
         endif;
-        
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
     /**
@@ -86,7 +81,11 @@ class StudentAssignController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $assessmentPlan = new AssessmentPlan();
+        $assessmentPlan->plan_id = $request->plan_id;
+        $assessmentPlan->course_module_base_assesment_id = $request->course_module_base_assesment_id;
+        $assessmentPlan->save();
+        return response()->json(["Assessment Created"],200);
     }
 
     /**
@@ -129,8 +128,20 @@ class StudentAssignController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(AssessmentPlan $plan_assessment)
     {
-        //
+        $plan_assessment->delete();
+
+        if($plan_assessment->wasChanged())     
+
+            return response()->json(["msg"=>"Removed"],200);
+        else
+            return response()->json(["msg"=>"Nothing Changed"],422);
+    }
+
+    public function restore($plan_assessment) {
+        $data = AssessmentPlan::where('id', $plan_assessment)->withTrashed()->restore();
+
+        return response()->json($data);
     }
 }
