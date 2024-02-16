@@ -51,7 +51,7 @@ class UserHolidayController extends Controller
             'holidayDetails' => $this->employeeHolidayDetails($employeeId),
             'holidayStatistics' => $this->employeeLeaveStatistics($employeeId),
             'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'ASC')->get(),
-            'empPatterns' => EmployeeWorkingPattern::where('active', 1)->where(
+            'empPatterns' => EmployeeWorkingPattern::where('employee_id', $employeeId)->where('active', 1)->where(
                     function($query) use ($today){
                         $query->whereNull('end_to')->orWhere('end_to', '>=', $today);
                     })->where('effective_from', '<=', $today)->where('active', 1)->orderBy('effective_from', 'ASC')->get(),
@@ -70,7 +70,7 @@ class UserHolidayController extends Controller
         $response = [];
         $employment = Employment::where('employee_id', $employee_id)->get()->first();
 
-        $holidayYears = HrHolidayYear::orderBy('start_date', 'DESC')->get();
+        $holidayYears = HrHolidayYear::where('active', 1)->orderBy('start_date', 'DESC')->get();
         if(!empty($holidayYears)):
             foreach($holidayYears as $year):
                 $yearStart = date('Y-m-d', strtotime($year->start_date));
@@ -841,7 +841,7 @@ class UserHolidayController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
                     $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Allowance</label>';
+                        $html .= '<label class="font-medium block pt-2">Allowance Left</label>';
                     $html .= '</div>';
                     $html .= '<div class="col-span-12 sm:col-span-8">';
                         $html .= '<div class="font-medium text-right balanceLeft">'.$this->calculateHourMinute(($balance_left - $bookedHours)).'</div>';

@@ -149,7 +149,7 @@
                         <div class="col-span-8 font-medium">{{ isset($employment->punch_number) ? $employment->punch_number : '' }}</div>
                     </div>
                 </div>
-                @if($employment->employeeWorkType->name == "Employee")
+                @if(isset($employment->employeeWorkType->name) && $employment->employeeWorkType->name == "Employee")
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Works number</div>

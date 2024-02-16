@@ -32,10 +32,10 @@ class AddRegistrationRequest extends FormRequest
             'slc_registration_status_id' => 'required',
             
             'confirm_attendance' => 'sometimes',
-            'attendance_term' => 'required_if:confirm_attendance,1',
+            'term_declaration_id' => 'required_if:confirm_attendance,1',
             'session_term' => 'required_if:confirm_attendance,1',
 
-            'attendance_code_id' => 'required',
+            'attendance_code_id' => 'required_if:confirm_attendance,1',
             'installment_amount' => 'required_if:attendance_code_id,1',
         ];
     }
@@ -50,7 +50,7 @@ class AddRegistrationRequest extends FormRequest
             'instance_fees.required' => 'This field is required.',
             'slc_registration_status_id.required' => 'This field is required.',
             
-            'attendance_term.required_if' => 'This field is required.',
+            'term_declaration_id.required_if' => 'This field is required.',
             'session_term.required_if' => 'This field is required.',
 
             'attendance_code_id.required' => 'This field is required.',

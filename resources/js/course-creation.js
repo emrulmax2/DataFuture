@@ -193,6 +193,10 @@ var courseCreationListTable = (function () {
             $('#addCourseCreationModal select').val('');
             $('#addCourseCreationModal [name="is_workplacement"]').prop('checked', false);
             $('#addCourseCreationModal .iwkp_label').text('No');
+
+            $('#addCourseCreationModal .requiredHoursWrap').fadeOut('fast', function(){
+                $('[name="required_hours"]', this).val('');
+            })
         });
         
         const editCourseCreationModalEl = document.getElementById('editCourseCreationModal')
@@ -203,6 +207,10 @@ var courseCreationListTable = (function () {
             $('#editCourseCreationModal input[name="id"]').val('0');
             $('#editCourseCreationModal [name="is_workplacement"]').prop('checked', false);
             $('#editCourseCreationModal .iwkp_label').text('No');
+
+            $('#editCourseCreationModal .requiredHoursWrap').fadeOut('fast', function(){
+                $('[name="required_hours"]', this).val('');
+            })
         });
 
 
@@ -285,10 +293,30 @@ var courseCreationListTable = (function () {
         $('#is_workplacement').on('change', function(){
             if($(this).prop('checked')){
                 $(this).siblings('label.iwkp_label').text('Yes');
+                $('#addCourseCreationForm .requiredHoursWrap').fadeIn('fast', function(){
+                    $('[name="required_hours"]', this).val('');
+                })
             }else{
                 $(this).siblings('label.iwkp_label').text('No');
+                $('#addCourseCreationForm .requiredHoursWrap').fadeOut('fast', function(){
+                    $('[name="required_hours"]', this).val('');
+                })
             }
-        })
+        });
+
+        $('#edit_is_workplacement').on('change', function(){
+            if($(this).prop('checked')){
+                $(this).siblings('label.iwkp_label').text('Yes');
+                $('#editCourseCreationForm .requiredHoursWrap').fadeIn('fast', function(){
+                    $('[name="required_hours"]', this).val('');
+                })
+            }else{
+                $(this).siblings('label.iwkp_label').text('No');
+                $('#editCourseCreationForm .requiredHoursWrap').fadeOut('fast', function(){
+                    $('[name="required_hours"]', this).val('');
+                })
+            }
+        });
 
         $("#courseCreationTableId").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
@@ -315,9 +343,15 @@ var courseCreationListTable = (function () {
                     if(dataset.is_workplacement == 1){
                         $('#editCourseCreationModal input[name="is_workplacement"]').prop('checked', true);
                         $('#editCourseCreationModal .iwkp_label').text('Yes');
+                        $('#editCourseCreationForm .requiredHoursWrap').fadeIn('fast', function(){
+                            $('[name="required_hours"]', this).val(dataset.required_hours ? dataset.required_hours : '');
+                        })
                     }else{
                         $('#editCourseCreationModal input[name="is_workplacement"]').prop('checked', false);
                         $('#editCourseCreationModal .iwkp_label').text('No');
+                        $('#editCourseCreationForm .requiredHoursWrap').fadeOut('fast', function(){
+                            $('[name="required_hours"]', this).val('');
+                        })
                     }
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);

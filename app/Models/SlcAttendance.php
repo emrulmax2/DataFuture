@@ -17,7 +17,7 @@ class SlcAttendance extends Model
         'slc_registration_id',
         'confirmation_date',
         'attendance_year',
-        'attendance_term',
+        'term_declaration_id',
         'session_term',
         'attendance_code_id',
         'note',
@@ -41,9 +41,13 @@ class SlcAttendance extends Model
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }
+    
+    public function term(){
+        return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
 
     public function coc(){
-        return $this->hasOne(SlcCoc::class, 'slc_attendance_id', 'id')->latestOfMany();
+        return $this->hasMany(SlcCoc::class, 'slc_attendance_id', 'id');
     }
 
     public function setConfirmationDateAttribute($value) {  
@@ -52,5 +56,9 @@ class SlcAttendance extends Model
 
     public function getConfirmationDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function installment(){
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

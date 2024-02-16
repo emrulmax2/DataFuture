@@ -57,8 +57,8 @@ class EmployeeHolidayController extends Controller
             'activePattern' => $this->employeePossibleActivePattern($id),
             'leaveOptionTypes' => $this->employeeLeaveOptionTypes($id),
             'calendarOptions' => [
-                'startDate' => $this->employeeLeaveStartDate($id, 0, 1),
-                'endDate' => (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown'),
+                'startDate' => '', //$this->employeeLeaveStartDate($id, 0, 1),
+                'endDate' => '', //(isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown'),
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
             ],
@@ -69,7 +69,7 @@ class EmployeeHolidayController extends Controller
         $response = [];
         $employment = Employment::where('employee_id', $employee_id)->get()->first();
 
-        $holidayYears = HrHolidayYear::orderBy('start_date', 'DESC')->get();
+        $holidayYears = HrHolidayYear::where('active', 1)->orderBy('start_date', 'DESC')->get();
         if(!empty($holidayYears)):
             foreach($holidayYears as $year):
                 $yearStart = date('Y-m-d', strtotime($year->start_date));
@@ -842,7 +842,7 @@ class EmployeeHolidayController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
                     $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Allowance</label>';
+                        $html .= '<label class="font-medium block pt-2">Allowance Left</label>';
                     $html .= '</div>';
                     $html .= '<div class="col-span-12 sm:col-span-8">';
                         $html .= '<div class="font-medium text-right balanceLeft">'.$this->calculateHourMinute(($balance_left - $bookedHours)).'</div>';

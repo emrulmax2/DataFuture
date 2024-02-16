@@ -52,6 +52,16 @@ import Tabulator from "tabulator-tables";
         }
     })
 
+    $('#warningModal .warningCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            warningModal.hide();
+            window.location.reload();
+        }else{
+            warningModal.hide();
+        }
+    })
+
 
     $('#addRegistrationForm #confirm_attendance').on('change', function(){
         if($(this).prop('checked')){
@@ -75,11 +85,8 @@ import Tabulator from "tabulator-tables";
                     }else{
                         $('#addRegistrationForm select[name="self_funded_year"]').val('');
                     }
-                    if(session_term_html != ''){
-                        $('#addRegistrationForm select[name="session_term"]').html(session_term_html).removeAttr('readonly');
-                    }else{
-                        $('#addRegistrationForm select[name="session_term"]').html('<option value="">Please Select</option>').removeAttr('readonly');
-                    }
+
+                    $('#addRegistrationForm select[name="attendance_term"]').val('');
                     $('#addRegistrationForm select[name="attendance_code_id"]').val('');
                     $('#addRegistrationForm textarea[name="attendance_note"]').val('');
 
@@ -97,7 +104,8 @@ import Tabulator from "tabulator-tables";
             $('#addRegistrationForm .confirmAttendanceArea').fadeOut('fast', function(){
                 $('#addRegistrationForm .confirmAttendanceArea').removeClass('opened');
                 $('#addRegistrationForm select[name="self_funded_year"]').val('');
-                $('#addRegistrationForm select[name="session_term"]').html('<option value="">Please Select</option>').attr('readonly');
+                $('#addRegistrationForm select[name="attendance_term"]').val('');
+                $('#addRegistrationForm select[name="session_term"]').val('');
 
                 $('#addRegistrationForm select[name="attendance_code_id"]').val('');
                 $('#addRegistrationForm textarea[name="attendance_note"]').val('');
@@ -129,13 +137,8 @@ import Tabulator from "tabulator-tables";
 
                 
                 $('#addRegistrationForm input[name="instance_fees"]').val(fees);
-                if($('#addRegistrationForm .confirmAttendanceArea').hasClass('opened')){
-                    if(session_term_html != ''){
-                        $('#addRegistrationForm select[name="session_term"]').html(session_term_html).removeAttr('readonly');
-                    }else{
-                        $('#addRegistrationForm select[name="session_term"]').html('<option value="">Please Select</option>').removeAttr('readonly');
-                    }
-                }
+                $('#addRegistrationForm select[name="term_declaration_id"]').val('');
+                $('#addRegistrationForm select[name="session_term"]').val('');
             }).catch(error => {
                 if (error.response.status == 422) {
                     console.log('error');
@@ -144,7 +147,8 @@ import Tabulator from "tabulator-tables";
         }else{
             $('#addRegistrationForm input[name="instance_fees"]').val('');
             if($('#addRegistrationForm .confirmAttendanceArea').hasClass('opened')){
-                $('#addRegistrationForm select[name="session_term"]').html('<option value="">Please Select</option>');
+                $('#addRegistrationForm select[name="session_term"]').val('');
+                $('#addRegistrationForm select[name="term_declaration_id"]').val('');
             }
         }
     });
@@ -166,10 +170,16 @@ import Tabulator from "tabulator-tables";
     $('#addRegistrationForm [name="attendance_code_id"]').on('change', function(){
         var $attendance_code_id = $(this);
         var attendance_code_id = $attendance_code_id.val();
+        var coc_required = $('option:selected', $attendance_code_id).attr('data-coc-required');
         var session_term = $('#addRegistrationForm [name="session_term"]').val();
         var instance_fees = $('#addRegistrationForm [name="instance_fees"]').val();
             instance_fees = instance_fees != '' ? parseInt(instance_fees, 10) : 0;
 
+        if(coc_required == 1){
+            $('#addRegistrationForm .cocReqWrap').fadeIn();
+        }else{
+            $('#addRegistrationForm .cocReqWrap').fadeOut();
+        }
         if(attendance_code_id == 1){
             var installment_amount;
             if(session_term != '' && instance_fees != '' && instance_fees > 0){
@@ -182,7 +192,7 @@ import Tabulator from "tabulator-tables";
             $('#addRegistrationForm .installmentAmountWrap').addClass('opened');
             $('#addRegistrationForm .installmentAmountWrap').fadeIn('fast', function(){
                 $('#addRegistrationForm [name="installment_amount"]').val(installment_amount > 0 && installment_amount != '' ? installment_amount.toFixed(2) : '');
-            })
+            });
         }else{
             $('#addRegistrationForm .installmentAmountWrap').removeClass('opened');
             $('#addRegistrationForm .installmentAmountWrap').fadeOut('fast', function(){
@@ -215,6 +225,7 @@ import Tabulator from "tabulator-tables";
 
     $('#addRegistrationForm').on('submit', function(e){
         e.preventDefault();
+        let $form = $(this);
         const form = document.getElementById('addRegistrationForm');
     
         document.querySelector('#saveReg').setAttribute('disabled', 'disabled');
@@ -254,6 +265,20 @@ import Tabulator from "tabulator-tables";
                         $(`#addRegistrationForm .${key}`).addClass('border-danger');
                         $(`#addRegistrationForm  .error-${key}`).html(val);
                     }
+                } else if (error.response.status == 304){
+                    $('#addRegistrationModal').animate({ scrollTop: 0 });
+                    $form.find('.alert').remove();
+                    $('.modal-content', $form).prepend('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Selected registration year already exist.</div>')
+                
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+
+                    setTimeout(function(){
+                        $form.find('.alert').remove();
+                    }, 3000)
                 } else {
                     console.log('error');
                 }
@@ -291,6 +316,7 @@ import Tabulator from "tabulator-tables";
 
     $('#editRegistrationForm').on('submit', function(e){
         e.preventDefault();
+        let $form = $(this);
         const form = document.getElementById('editRegistrationForm');
     
         document.querySelector('#updateReg').setAttribute('disabled', 'disabled');
@@ -330,11 +356,99 @@ import Tabulator from "tabulator-tables";
                         $(`#editRegistrationForm .${key}`).addClass('border-danger');
                         $(`#editRegistrationForm  .error-${key}`).html(val);
                     }
+                } else if (error.response.status == 304){
+                    $form.find('.alert').remove();
+                    $('.modal-content', $form).prepend('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Selected registration year already exist.</div>')
+                
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+
+                    setTimeout(function(){
+                        $form.find('.alert').remove();
+                    }, 3000)
                 } else {
                     console.log('error');
                 }
             }
         });
+    });
+
+    $('.delete_reg_btn').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var slc_registration_id = $theBtn.attr('data-id');
+
+        axios({
+            method: 'post',
+            url: route('student.slc.registration.has.data'),
+            data: {slc_registration_id : slc_registration_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                if(response.data.res == 0){
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html("Oops!" );
+                        $("#warningModal .warningModalDesc").html('Oops! You can not delete this registration. To delete the registration please remove related Attendance, COC and Agreements first.');
+                        $("#warningModal .warningCloser").attr('data-status', 'DISMISS');
+                    });
+                }else{
+                    confirmModal.show();
+                    document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#confirmModal .confModTitle").html("Are you sure?" );
+                        $("#confirmModal .confModDesc").html('Want to delete this registration from the list? Please click on agree to continue.');
+                        $("#confirmModal .agreeWith").attr('data-recordid', slc_registration_id);
+                        $("#confirmModal .agreeWith").attr('data-status', 'DELETEREG');
+                    });
+                }
+            }
+        }).catch(error =>{
+            confirmModal.hide();
+            console.log(error);
+        });
+    });
+
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+        let $agreeBTN = $(this);
+        let recordid = $agreeBTN.attr('data-recordid');
+        let action = $agreeBTN.attr('data-status');
+        let student = $agreeBTN.attr('data-student');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+
+        if(action == 'DELETEREG'){
+            axios({
+                method: 'delete',
+                url: route('student.slc.registration.destroy'),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s SLC Registration successfully deleted.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else{
+            confirmModal.hide();
+        }
     });
 
 })();

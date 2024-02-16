@@ -29,7 +29,7 @@
                 <div class="col-span-12 sm:col-span-4 text-right"></div>
                 <div class="col-span-12 sm:col-span-4 text-right">
                     <div class="flex justify-end items-center">
-                        <button id="studentIDSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                        <button id="studentIDSearchBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
                         <button id="resetStudentSearch" type="button" class="btn btn-danger w-auto ml-2" ><i class="w-4 h-4 mr-2" data-lucide="rotate-cw"></i> Reset</button>
                         <button id="advanceSearchToggle" type="button" class="btn btn-facebook ml-2 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
                     </div>
@@ -99,7 +99,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3"></div>
                                             <div class="col-span-12 sm:col-span-3 text-right pt-7">
-                                                <button id="studentSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                                <button id="studentSearchSubmitBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
                                             </div>
                                         </div>
                                         <input type="hidden" value="0" id="studentSearchStatus" class="form-control" name="student[stataus]">
@@ -117,8 +117,8 @@
                                     <div class="accordion-body">
                                         <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="academic_year" class="form-label">Academic Year</label>
-                                                <select id="academic_year" class="w-full tom-selects" name="group[academic_year][]" multiple>
+                                                <label for="academic_year" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                                                <select id="academic_year" class="w-full tom-selects" name="group[academic_year]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($academicYear))
                                                         @foreach($academicYear as $acy)
@@ -126,10 +126,11 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
+                                                <div class="acc__input-error error-academic_year text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="intake_semester" class="form-label">Intake Semester</label>
-                                                <select id="intake_semester" class="w-full tom-selects" name="group[intake_semester][]" multiple>
+                                                <label for="intake_semester" class="form-label">Intake Semester <span class="text-danger">*</span></label>
+                                                <select id="intake_semester" class="w-full tom-selects" name="group[intake_semester]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($semesters))
                                                         @foreach($semesters as $sem)
@@ -137,10 +138,11 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
+                                                <div class="acc__input-error error-intake_semester text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="attendance_semester" class="form-label">Attendance Semester</label>
-                                                <select id="attendance_semester" class="w-full tom-selects" name="group[attendance_semester][]" multiple>
+                                                <label for="attendance_semester" class="form-label">Attendance Semester <span class="text-danger">*</span></label>
+                                                <select id="attendance_semester" class="w-full tom-selects" name="group[attendance_semester]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($terms))
                                                         @foreach($terms as $trm)
@@ -148,16 +150,11 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
+                                                <div class="acc__input-error error-attendance_semester text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="instance_year" class="form-label">Instance Year</label>
-                                                <select id="instance_year" class="w-full tom-selects" name="group[instance_year][]" multiple>
-                                                    <option value="">Please Select</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12 sm:col-span-3">
-                                                <label for="course" class="form-label">Course</label>
-                                                <select id="course" class="w-full tom-selects" name="group[course][]" multiple>
+                                                <label for="course" class="form-label">Course <span class="text-danger">*</span></label>
+                                                <select id="course" class="w-full tom-selects" name="group[course]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($courses))
                                                         @foreach($courses as $crs)
@@ -165,32 +162,11 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
+                                                <div class="acc__input-error error-course text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="group" class="form-label">Group</label>
-                                                <select id="group" class="w-full tom-selects" name="group[group][]" multiple>
-                                                    <option value="">Please Select</option>
-                                                    @if(!empty($groups))
-                                                        @foreach($groups as $grps)
-                                                            <option value="{{ $grps->id }}">{{ $grps->name }}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12 sm:col-span-3">
-                                                <label for="module" class="form-label">Module</label>
-                                                <select id="module" class="w-full tom-selects" name="group[module][]" multiple>
-                                                    <option value="">Please Select</option>
-                                                    @if(!empty($modules))
-                                                        @foreach($modules as $mod)
-                                                            <option value="{{ $mod->id }}">{{ $mod->name }}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12 sm:col-span-3">
-                                                <label for="term_status" class="form-label">Student Term Status</label>
-                                                <select id="term_status" class="w-full tom-selects" name="group[term_status][]" multiple>
+                                                <label for="group" class="form-label">Master Group</label>
+                                                <select id="group" class="w-full tom-selects" name="group[group]">
                                                     <option value="">Please Select</option>
                                                 </select>
                                             </div>
@@ -204,7 +180,16 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="student_type" class="form-label">Student Type</label>
-                                                <select id="student_type" class="w-full tom-selects" name="group[student_type][]" multiple>
+                                                <select id="student_type" class="w-full tom-selects" name="group[student_type]">
+                                                    <option value="">Please Select</option>
+                                                    <option value="UK">UK</option>
+                                                    <option value="BOTH">BOTH</option>
+                                                    <option value="OVERSEAS">OVERSEAS</option></option>
+                                                </select>
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-3">
+                                                <label for="term_status" class="form-label">Student Term Status</label>
+                                                <select id="term_status" class="w-full tom-selects" name="group[term_status][]" multiple>
                                                     <option value="">Please Select</option>
                                                 </select>
                                             </div>
@@ -219,8 +204,8 @@
                                                     @endif
                                                 </select>
                                             </div>
-                                            <div class="col-span-12 sm:col-span-3 text-right pt-7">
-                                                <button id="studentGroupSearchBtn" type="submit" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                            <div class="col-span-12 sm:col-span-6 text-right pt-7">
+                                                <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
                                             </div>
                                             <input type="hidden" id="groupSearchStatus" value="0" class="form-control" name="group[stataus]">
                                         </div>

@@ -53,7 +53,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
-                        <div class="col-span-8 font-medium">{{ $employee->nationality->name }}</div>
+                        <div class="col-span-8 font-medium">{{ isset($employee->nationality->name) ? $employee->nationality->name : '' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
@@ -123,7 +123,7 @@
                     <div class="col-span-12 sm:col-span-4">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                            <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_name }}</div>
+                            <div class="col-span-8 font-medium">{{ isset($emergencyContacts->emergency_contact_name) ? $emergencyContacts->emergency_contact_name : '' }}</div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
@@ -135,13 +135,13 @@
                     <div class="col-span-12 sm:col-span-4">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Telephone</div>
-                            <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_telephone }}</div>
+                            <div class="col-span-8 font-medium">{{ isset($emergencyContacts->emergency_contact_telephone) ? $emergencyContacts->emergency_contact_telephone : '' }}</div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-6">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                            <div class="col-span-8 font-medium">{{ $emergencyContacts->emergency_contact_mobile }}</div>
+                            <div class="col-span-8 font-medium">{{ isset($emergencyContacts->emergency_contact_mobile) ? $emergencyContacts->emergency_contact_mobile : '' }}</div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-6">

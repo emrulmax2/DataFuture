@@ -16,6 +16,7 @@ class SlcCoc extends Model
         'student_id',
         'student_course_relation_id',
         'course_creation_instance_id',
+        'slc_registration_id',
         'slc_attendance_id',
         'confirmation_date',
         'coc_type',
@@ -32,4 +33,20 @@ class SlcCoc extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function setConfirmationDateAttribute($value) {  
+        $this->attributes['confirmation_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getConfirmationDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+    
+    public function user(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function documents(){
+        return $this->belongsToMany(StudentDocument::class, 'slc_coc_documents');
+    }
 }

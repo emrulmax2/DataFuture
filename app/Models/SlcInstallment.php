@@ -10,6 +10,7 @@ class SlcInstallment extends Model
 {
     use HasFactory, SoftDeletes;
 
+
     protected $fillable = [
         'student_id',
         'student_course_relation_id',
@@ -18,9 +19,9 @@ class SlcInstallment extends Model
         'slc_agreement_id',
         'installment_date',
         'amount',
-        'term',
         'session_term',
-        'attendance_term',
+        'term_declaration_id',
+        'slc_money_receipt_id',
 
         'created_by',
         'updated_by',
@@ -45,11 +46,19 @@ class SlcInstallment extends Model
         return $this->belongsTo(SlcAttendance::class, 'slc_attendance_id');
     }
 
+    public function declaraton(){
+        return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
+
     public function setInstallmentDateAttribute($value) {  
         $this->attributes['installment_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getInstallmentDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function payment(){
+        return $this->belongsTo(SlcMoneyReceipt::class, 'slc_money_receipt_id');
     }
 }

@@ -26,9 +26,8 @@ class SlcInstallmentUpdateRequest extends FormRequest
         return [
             'installment_date' => 'required',
             'amount' => 'required',
-            //'attendance_term' => 'required',
+            'term_declaration_id' => 'required',
             'session_term' => 'required',
-            'term' => 'required',
         ];
     }
 
@@ -37,9 +36,8 @@ class SlcInstallmentUpdateRequest extends FormRequest
         return [
             'installment_date.required' => 'This field is required.',
             'amount.required' => 'required',
-            //'attendance_term.required' => 'This field is required.',
+            'term_declaration_id.required' => 'This field is required.',
             'session_term.required' => 'This field is required.',
-            'term.required' => 'This field is required.',
         ];
     }
 }

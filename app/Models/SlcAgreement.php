@@ -55,4 +55,8 @@ class SlcAgreement extends Model
     public function registration(){
         return $this->belongsTo(SlcRegistration::class, 'slc_registration_id');
     }
+
+    public function payments(){
+        return $this->hasMany(SlcMoneyReceipt::class, 'slc_agreement_id', 'id');
+    }
 }

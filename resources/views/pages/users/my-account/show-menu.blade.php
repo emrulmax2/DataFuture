@@ -4,10 +4,18 @@
             Profile
         </a>
     </li>
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('user.account.holiday') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.holiday' ? 'active' : '' }}">
-            Holidays
-        </a>
-    </li>
-    
+    @if(isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes')
+        <li class="nav-item" role="presentation">
+            <a href="{{ route('user.account.holiday') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.holiday' ? 'active' : '' }}">
+                Holidays
+            </a>
+        </li>
+    @endif
+    @if((isset($employee->user->hourauth) && $employee->user->hourauth->count() > 0) || (isset($employee->user->holiauth) && $employee->user->holiauth->count() > 0))
+        <li class="nav-item" role="presentation">
+            <a href="{{ route('user.account.staff') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.staff' ? 'active' : '' }}">
+                My Staffs
+            </a>
+        </li>
+    @endif
 </ul>

@@ -28,7 +28,10 @@ class CourseCreationsRequest extends FormRequest
             'course_id' => 'required',
             'course_creation_qualification_id' => 'required',
             'duration' => 'required',
-            'unit_length' => 'required'
+            'unit_length' => 'required',
+
+            'is_workplacement' => 'sometimes',
+            'required_hours' => 'required_if:is_workplacement,1'
         ];
     }
 }

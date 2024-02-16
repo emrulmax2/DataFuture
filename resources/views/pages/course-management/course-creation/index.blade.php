@@ -191,11 +191,16 @@
                                 <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
                             </div> 
                             <div class="col-span-12 sm:col-span-6">
-                                <label for="is_workplacement" class="form-label">Workplacement</label>
+                                <label for="is_workplacement" class="form-label">Has Workplacement</label>
                                 <div class="form-check form-switch">
                                     <input id="is_workplacement" name="is_workplacement" class="form-check-input" value="1" type="checkbox">
                                     <label class="form-check-label ml-3 iwkp_label" for="is_workplacement">No</label>
                                 </div>
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6 requiredHoursWrap" style="display: none;">
+                                <label for="required_hours" class="form-label">Required Hours <span class="text-danger">*</span></label>
+                                <input id="required_hours" type="number" step="any" name="required_hours" class="form-control w-full">
+                                <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 
                         </div>      
                     </div>
@@ -317,6 +322,11 @@
                                     <input id="edit_is_workplacement" name="is_workplacement" class="form-check-input" value="1" type="checkbox">
                                     <label class="form-check-label ml-3 iwkp_label" for="is_workplacement">No</label>
                                 </div>
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6 requiredHoursWrap" style="display: none;">
+                                <label for="edit_required_hours" class="form-label">Required Hours <span class="text-danger">*</span></label>
+                                <input id="edit_required_hours" type="number" step="any" name="required_hours" class="form-control w-full">
+                                <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 
                         </div>
                     </div>

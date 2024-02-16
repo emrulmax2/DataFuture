@@ -127,6 +127,17 @@
                             </div>        
                         </a>
                         @endif
+                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
+                            <div class="report-box zoom-in">                               
+                                <div class="box p-5">                                    
+                                    <div class="flex">
+                                        <i data-lucide="contact-2" class="report-box__icon text-success"></i>
+                                    </div>
+                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">00</div>
+                                    <div class="text-base text-slate-500 mt-1">My HR</div>                              
+                                </div>                               
+                            </div>        
+                        </a>
                     </div>
                 </div>
             </div>
