@@ -523,6 +523,35 @@ var classPlanAssessmentModuleTable = (function () {
                         </div>`;
                     },
                 },
+                
+                {
+                    title: "Publish Date",
+                    field: "published_at",
+                    vertAlign: "middle",
+                    headerHozAlign: "center",
+                    hozAlign:  "center",
+                    formatter(cell, formatterParams) {
+                        return `<div>
+                            <div class="font-medium whitespace-nowrap">${
+                                cell.getData().published_at
+                            }</div>
+                        </div>`;
+                    },
+                },
+                {
+                    title: "Resubmission Date",
+                    field: "resubmission_at",
+                    vertAlign: "middle",
+                    headerHozAlign: "center",
+                    hozAlign:  "center",
+                    formatter(cell, formatterParams) {
+                        return `<div>
+                            <div class="font-medium whitespace-nowrap">${
+                                cell.getData().resubmission_at
+                            }</div>
+                        </div>`;
+                    },
+                },
                 {
                     title: "Actions",
                     field: "id",

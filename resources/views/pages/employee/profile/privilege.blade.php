@@ -12,8 +12,48 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.employee.profile.show-info')
     <!-- END: Profile Info -->
+    
     <form method="post" action="#" id="employeePrivilegeForm">
         <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Remote Access Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['remote_access']['ra_status']) && $priv['remote_access']['ra_status'] == 1 ? 'checked' : '') }} id="permission_remote_access_1" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][ra_status]">
+                            <label class="form-check-label ml-4 ra_status_label" for="permission_remote_access_1">
+                                {{ (isset($priv['remote_access']['ra_status']) && $priv['remote_access']['ra_status'] == 1 ? 'Allowed' : 'Not Allowed') }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3" id="inRangeSwitch" style="display: {{ (isset($priv['remote_access']['ra_status']) && $priv['remote_access']['ra_status'] == 1 ? 'block' : 'none') }};">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['remote_access']['in_range']) && $priv['remote_access']['in_range'] == 1 ? 'checked' : '') }} id="permission_remote_access_2" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][in_range]">
+                            <label class="form-check-label ml-4" for="permission_remote_access_2">Open in a Range</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3" id="dateRangeWrap" style="display: {{ (isset($priv['remote_access']['in_range']) && $priv['remote_access']['in_range'] == 1 ? 'block' : 'none') }};">
+                        <div class="flex justify-between items-center">
+                            <input type="text" name="permission[remote_access][date_range]" value="{{ (isset($priv['remote_access']['date_range']) && !empty($priv['remote_access']['date_range']) ? $priv['remote_access']['date_range'] : '') }}" data-daterange="true" id="rangepicker" class="rangepicker form-control w-56 block mx-auto">
+                        </div>
+                    </div>
+                    <div class="col-span-12">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['remote_access']['work_home']) && $priv['remote_access']['work_home'] == 1 ? 'checked' : '') }} id="permission_remote_access_4" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][work_home]">
+                            <label class="form-check-label ml-4" for="permission_remote_access_4">Working From Home</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">

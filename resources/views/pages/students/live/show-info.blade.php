@@ -21,6 +21,7 @@
                     <div class="text-slate-500">{{ isset($student->crel->creation->available->type) ? $student->crel->creation->available->type : '' }}</div>
                 </div>
             </div>
+            
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
                 <div class="font-medium text-center lg:text-left lg:mt-3">Contact Details</div>
                 <div class="flex flex-col justify-center items-center lg:items-start mt-4">

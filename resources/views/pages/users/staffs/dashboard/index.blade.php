@@ -47,6 +47,19 @@
                             </div>        
                         </a>
                         @if(isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
+                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
+                            <div class="report-box zoom-in">                               
+                                <div class="box p-5">                                    
+                                    <div class="flex">
+                                        <i data-lucide="contact-2" class="report-box__icon text-success"></i>
+                                    </div>
+                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">00</div>
+                                    <div class="text-base text-slate-500 mt-1">My HR</div>                              
+                                </div>                               
+                            </div>        
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <a href="{{ route('admission') }}" class="report-box zoom-in">
                                 <div class="box p-5">
@@ -59,7 +72,7 @@
                             </a>
                         </div>
                         @endif
-                        @if(isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <a href="{{ route('student') }}" class="report-box zoom-in">
                                 <div class="box p-5">
@@ -72,7 +85,7 @@
                             </a>
                         </div> 
                         @endif
-                        @if(isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
                         <a href="{{ route('tutor-dashboard.show.new',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                                 <div class="report-box zoom-in">
@@ -92,7 +105,7 @@
                             </div>
                         </a>
                         @endif
-                        @if(isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
                         <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                             <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                                 <div class="report-box zoom-in">
@@ -130,7 +143,7 @@
                             </div>        
                         </a>--}}
                         @endif
-                        @if(isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
                         <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
                             <div class="report-box zoom-in">                               
                                 <div class="box p-5">                                    
@@ -143,7 +156,7 @@
                             </div>        
                         </a>
                         @endif
-                        @if(isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
                         <a href="{{ route('programme.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
                             <div class="report-box zoom-in">                               
                                 <div class="box p-5">                                    

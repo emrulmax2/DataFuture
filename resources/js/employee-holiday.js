@@ -82,6 +82,7 @@ import 'litepicker/dist/plugins/multiselect';
         const leaveCalendar = new Litepicker({
             element: document.getElementById('leaveCalendar'),
             ...dateOption,
+            autoRefresh: true,
             plugins: ['multiselect'],
             multiselect: {
                 max: 20,

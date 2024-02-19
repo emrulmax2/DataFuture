@@ -27,7 +27,7 @@ class EmployeePrivilegeController extends Controller
             'breadcrumbs' => [],
             "employee" => $employee,
             "employment" => $employment,
-            'priv' => $res
+            'priv' => $res,
         ]);
     }
 
@@ -41,15 +41,17 @@ class EmployeePrivilegeController extends Controller
             foreach($request->permission as $category => $accesses):
                 if(isset($accesses) && !empty($accesses)):
                     foreach($accesses as $name => $access):
-                        $data = [];
-                        $data['user_id'] = $user_id;
-                        $data['employee_id'] = $employee_id;
-                        $data['category'] = $category;
-                        $data['name'] = $name;
-                        $data['access'] = $access > 0 ? $access : 0;
-                        $data['created_by'] = auth()->user()->id;
+                        if(isset($access) && !empty($access)):
+                            $data = [];
+                            $data['user_id'] = $user_id;
+                            $data['employee_id'] = $employee_id;
+                            $data['category'] = $category;
+                            $data['name'] = $name;
+                            $data['access'] = (!empty($access) ? $access : 0);
+                            $data['created_by'] = auth()->user()->id;
 
-                        UserPrivilege::create($data);
+                            UserPrivilege::create($data);
+                        endif;
                     endforeach;
                 endif;
             endforeach;

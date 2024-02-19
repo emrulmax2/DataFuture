@@ -49,7 +49,7 @@ class TopMenu
                     'params' => []
                 ],
             ];
-            if(isset($priv['course_manage']) && $priv['course_manage'] == 1):
+            if(auth()->user()->remote_access && isset($priv['course_manage']) && $priv['course_manage'] == 1):
                 $menu['course.management'] = [
                     'icon' => 'book-open',
                     'title' => 'Courses Management',
@@ -57,7 +57,7 @@ class TopMenu
                     'params' => []
                 ];
             endif;
-            if(isset($priv['student_manage']) && $priv['student_manage'] == 1):
+            if(auth()->user()->remote_access && isset($priv['student_manage']) && $priv['student_manage'] == 1):
                 $menu['students'] = [
                     'icon' => 'users',
                     'title' => 'Student Management',
@@ -80,7 +80,7 @@ class TopMenu
                     ]
                 ];
             endif;
-            if(isset($priv['settings']) && $priv['settings'] == 1):
+            if(auth()->user()->remote_access && isset($priv['settings']) && $priv['settings'] == 1):
                 $menu['site.setting'] = [
                     'icon' => 'settings',
                     'title' => 'Settings',
