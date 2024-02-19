@@ -71,7 +71,7 @@ class UserHolidayController extends Controller
         $employment = Employment::where('employee_id', $employee_id)->get()->first();
 
         $holidayYears = HrHolidayYear::where('active', 1)->orderBy('start_date', 'DESC')->get();
-        if(!empty($holidayYears)):
+        if(!empty($holidayYears) && $holidayYears->count() > 0):
             foreach($holidayYears as $year):
                 $yearStart = date('Y-m-d', strtotime($year->start_date));
                 $yearEnd = date('Y-m-d', strtotime($year->end_date));
@@ -462,11 +462,17 @@ class UserHolidayController extends Controller
             $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
         endif;
 
+        if(!isset($hrHolidayYear->id)):
+            return 'unknown';
+        endif;
+
         $hrHolidayYearStart = (isset($hrHolidayYear->start_date) && !empty($hrHolidayYear->start_date) ? date('Y-m-d', strtotime($hrHolidayYear->start_date)) : '');
+        $noticePeriod = (isset($hrHolidayYear->notice_period) && $hrHolidayYear->notice_period > 0 ? $hrHolidayYear->notice_period : 0);
+        
         if(!empty($hrHolidayYearStart) && $hrHolidayYearStart < $today):
-            if(isset($hrHolidayYear->notice_period) && $hrHolidayYear->notice_period > 0 && $leave_start == 1):
+            if($noticePeriod > 0 && $leave_start == 1):
                 $today = date('Y-m-d');
-                $next_today = date('Y-m-d', strtotime($today. ' + '.$hrHolidayYear->notice_period.' days'));
+                $next_today = date('Y-m-d', strtotime($today. ' + '.$noticePeriod.' days'));
                 if($next_today > $hrHolidayYear->end_date):
                     $today = $hrHolidayYear->end_date;
                 else:
@@ -478,12 +484,17 @@ class UserHolidayController extends Controller
         else:
             if($leave_start == 1):
                 $date1 = new DateTime($today);
-                $date2 = new DateTime($hrHolidayYear->start_date);
+                $date2 = new DateTime($hrHolidayYearStart);
                 $interval = $date1->diff($date2);
-                $days = $interval->d;
-                $today = date('Y-m-d', strtotime($hrHolidayYear->start_date. ' + '.$hrHolidayYear->holiday_notice.' days'));
+                $days = $interval->days;
+                if($days >= $noticePeriod):
+                    $today = date('Y-m-d', strtotime($hrHolidayYearStart));
+                else:
+                    $newNoticePeriod = $noticePeriod - $days;
+                    $today = date('Y-m-d', strtotime($hrHolidayYearStart. ' + '.$newNoticePeriod.' days'));
+                endif;
             else:
-                $today = date('Y-m-d', strtotime($hrHolidayYear->start_date));
+                $today = date('Y-m-d', strtotime($hrHolidayYearStart));
             endif;
         endif;
 

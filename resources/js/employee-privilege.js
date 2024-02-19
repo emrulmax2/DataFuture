@@ -1,6 +1,28 @@
 import { createIcons, icons } from "lucide";
+import dayjs from "dayjs";
+import Litepicker from "litepicker";
 
 (function(){
+    let rangeDateOpton = {
+        autoApply: true,
+        singleMode: false,
+        numberOfColumns: 2,
+        numberOfMonths: 2,
+        showWeekNumbers: false,
+        format: "DD-MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+
+    const picker = new Litepicker({ 
+        element: document.getElementById('rangepicker'),
+        ...rangeDateOpton,
+    });
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
@@ -41,4 +63,34 @@ import { createIcons, icons } from "lucide";
             }
         });
     });
+
+    /* Login Date Range Toggle Start */
+    $('#permission_remote_access_1').on('change', function(){
+        $('#dateRangeWrap').fadeOut(function(e){
+            $('.rangepicker', this).val('').removeAttr('required');
+        })
+        if($(this).prop('checked')){
+            $(this).siblings('.ra_status_label').text('Allowed');
+            $('#inRangeSwitch').fadeIn('fast', function(){
+                $('#permission_remote_access_2').prop('checked', false);
+            })
+        }else{
+            $(this).siblings('.ra_status_label').text('Not Allowed');
+            $('#inRangeSwitch').fadeOut('fast', function(){
+                $('#permission_remote_access_2').prop('checked', false);
+            })
+        }
+    });
+    $('#permission_remote_access_2').on('change', function(){
+        if($(this).prop('checked')){
+            $('#dateRangeWrap').fadeIn(function(e){
+                $('.rangepicker', this).val('').attr('required', 'required');
+            });
+        }else{
+            $('#dateRangeWrap').fadeOut(function(e){
+                $('.rangepicker', this).val('').removeAttr('required');
+            });
+        }
+    })
+    /* Login Date Range Toggle End */
 })();

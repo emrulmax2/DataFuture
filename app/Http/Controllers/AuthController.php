@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Request\LoginRequest;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
@@ -37,6 +38,9 @@ class AuthController extends Controller
         ])) {
             throw new \Exception('Wrong email or password.');
         } else {
+            User::where('id', auth()->user()->id)->update([
+                'last_login_ip' => $request->getClientIp()
+            ]);
             Cache::forever('employeeCache'.\Auth::user()->id, \Auth::user()->load('employee'));
         }
     }

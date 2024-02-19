@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
@@ -53,7 +54,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends = ['photo', 'photo_url'];
+    protected $appends = ['photo', 'photo_url', 'remote_access'];
 
     /**
      * The getter that return accessible URL for user photo.
@@ -96,6 +97,44 @@ class User extends Authenticatable
     public function priv(){
         return $this->hasMany(UserPrivilege::class, 'user_id', 'id')
             ->select('access', 'name')->pluck('access', 'name')->toArray();
+    }
+    
+    public function getRemoteAccessAttribute(){
+        $userip = auth()->user()->last_login_ip;
+        $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
+        $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
+        $remoteAccess = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'ra_status')->get()->first();
+        if(isset($remoteAccess->access) && $remoteAccess->access == 1):
+            $range = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'in_range')->get()->first();
+            $dateRange = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'date_range')->get()->first();
+            if((isset($range->access) && $range->access == 1) && isset($dateRange->access) && !empty($dateRange->access)):
+                $dates = explode(' - ', $dateRange->access);
+                $startDate = (isset($dates[0]) && !empty($dates[0]) ? date('Y-m-d', strtotime($dates[0])) : '');
+                $endDate = (isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : '');
+                if(!empty($startDate) && !empty($endDate)):
+                    $today = date('Y-m-d');
+                    if($today >= $startDate && $today <= $endDate):
+                        return true;
+                    else:
+                        if(is_array($ips) && in_array($userip, $ips)):
+                            return true;
+                        else:
+                            return false;
+                        endif;
+                    endif;
+                else:
+                    return true;
+                endif;
+            else:
+                return true;
+            endif;
+        else:
+            if(is_array($ips) && in_array($userip, $ips)):
+                return 'true';
+            else:
+                return false;
+            endif;
+        endif;
     }
 
     public function hourauth(){

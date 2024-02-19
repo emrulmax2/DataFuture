@@ -16,6 +16,7 @@ class UserPrivilege extends Model
         'category',
         'name',
         'access',
+        'content',
         'created_by',
         'updated_by',
     ];
