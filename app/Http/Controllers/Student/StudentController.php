@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 use App\Models\Applicant;
 use App\Models\ApplicantTemporaryEmail;
+use App\Models\AssessmentPlan;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\AttendanceCode;
@@ -42,6 +43,7 @@ use App\Models\Plan;
 use App\Models\ProcessList;
 use App\Models\ReferralCode;
 use App\Models\Religion;
+use App\Models\Result;
 use App\Models\Semester;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
@@ -559,31 +561,8 @@ class StudentController extends Controller
                             ->orderBy("pdl.date",'desc')
                             ->get();
 
-                // $planDateLists = DB::table('plans_date_lists as pdl')
-                //             ->select( 'pdl.id' )
-                //             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
-                //             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
-                //             ->where('assign.student_id', $student->id)
-                //             ->groupBy("pdl.id")
-                //             ->get()->pluck('id');
-                
-                //$attendancelist = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->whereIn("plans_date_list_id",$planDateLists)->get();
-                //$attendanceInformationlist =AttendanceInformation::with(["tutor","planDate"])->whereIn("plans_date_list_id",$planDateLists)->get();
-                //dd($attendanceInformationlist);
                 foreach($QueryInner as $list):
-                    // foreach($attendancelist as $attendanceData) {
-                    //     if($attendanceData->plans_date_list_id==$list->id) {
-                    //         $attendance =  $attendanceData;
-                    //         break;
-                    //     }
-                    // }
 
-                    // foreach($attendanceInformationlist as $attendanceInformationData) {
-                    //     if($attendanceInformationData->plans_date_list_id==$list->id) {
-                    //         $attendanceInformation =  $attendanceInformationData;
-                    //         break;
-                    //     }
-                    // }
                     $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
                     if(isset($attendance)) {
 
@@ -678,6 +657,63 @@ class StudentController extends Controller
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
             "attendanceFeedStatus" =>$attendanceFeedStatus
+        ]);
+    }
+
+    public function ResultDetails(Student $student) {
+
+        $AssessmentPlans = AssessmentPlan::where('plan_id',$student->id)->get();
+        $termData = [];
+
+            $QueryInner = DB::table('plans as plan')
+                        ->select('td.id as term_id','td.name as term_name','instance_terms.start_date','instance_terms.end_date', 'plan.module_creation_id as module_creation_id' , 'mc.module_name','mc.code as module_code', 'plan.id as plan_id' )
+                        ->leftJoin('instance_terms', 'instance_terms.id', 'plan.instance_term_id')
+                        ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
+                        ->leftJoin('term_declarations as td', 'td.id', 'plan.term_declaration_id')
+                        ->leftJoin('module_creations as mc', 'mc.id', 'plan.module_creation_id')
+                        ->where('assign.student_id', $student->id)
+                        ->orderBy("td.id",'desc')
+                        ->get();
+
+            foreach($QueryInner as $list):
+
+                $resultByPlanGroup[$list->plan_id] = Result::with(["assementPlan","grade","createdBy","updatedBy"])->where("student_id", $student->id)->where("plan_id",$list->plan_id)->orderBy('id','DESC')->get()->groupBy(function($data) {
+                    return $data->assessment_plan_id;
+                });
+                
+                //$resultFinal = $resultByPlanGroup[$list->plan_id]->first();
+                
+                if(isset($resultByPlanGroup) && count($resultByPlanGroup[$list->plan_id])>0) {
+                    
+                    $data[$list->term_id][$list->module_name."-".$list->module_code] = [
+                            "term_id"=> $list->term_id,
+                            "module_creation_id"=>$list->module_creation_id,
+                            "id" => $list->plan_id,
+                            "results" => ($resultByPlanGroup[$list->plan_id]) ?? null
+                    ];
+                    
+                    $termData[$list->term_id] = [
+                        "name" => $list->term_name,
+                        "start_date" => $list->start_date,
+                        "end_date" => $list->end_date,
+                    ];
+                    $planDetails[$list->term_id][$list->module_name."-".$list->module_code] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
+                    
+
+                    //total code list and total class list
+
+                }
+            endforeach;
+        return view('pages.students.live.result.index', [
+            'title' => 'Live Students - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'dataSet' => ($data) ?? null,
+            "term" =>$termData,
+            "planDetails" => $planDetails ?? null,
         ]);
     }
 

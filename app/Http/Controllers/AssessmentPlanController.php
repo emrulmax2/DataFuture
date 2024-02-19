@@ -55,6 +55,7 @@ class AssessmentPlanController extends Controller
                     'sl' => $i,
                     'name' => ucfirst($list->courseModuleBase->type->name). " - ". $list->courseModuleBase->type->code,
                     'published_at' => $list->published_at,
+                    'resubmission_at' => $list->resubmission_at,
                     'resultFound' => $list->results->count() ? 1 : 0,
                     'deleted_at' => $list->deleted_at
                 ];

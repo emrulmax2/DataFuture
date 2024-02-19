@@ -24,4 +24,16 @@ class Result extends Model
     public function grade(){
         return $this->belongsTo(Grade::class);
     }
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class,'created_by');
+    }
+    
+    public function updatedBy(){
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function assementPlan() {
+        return $this->belongsTo(AssessmentPlan::class,'assessment_plan_id');
+    }
 }

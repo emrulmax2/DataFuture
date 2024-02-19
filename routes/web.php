@@ -654,7 +654,10 @@ Route::middleware('auth')->group(function() {
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
         Route::get('student/attendance/{student}', 'AttendanceDetails')->name('student.attendance');
+        Route::get('student/result/{student}', 'ResultDetails')->name('student.result');
         Route::get('student/attendance/{student}/edit', 'AttendanceEditDetail')->name('student.attendance.edit');
+        
+        Route::get('student/result/{student}', 'resultDetails')->name('student.result');
         Route::get('student/communication/{id}', 'communications')->name('student.communication');
         Route::get('student/uploads/{id}', 'uploads')->name('student.uploads');
         Route::get('student/notes/{id}', 'notes')->name('student.notes');
