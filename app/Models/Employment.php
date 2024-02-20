@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employment extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
     
 
     protected $fillable = [
@@ -23,6 +23,9 @@ class Employment extends Model
         'office_telephone',
         'mobile',
         'email',
+        'last_action',
+        'last_action_date',
+        'last_action_time',
         
     ];
 

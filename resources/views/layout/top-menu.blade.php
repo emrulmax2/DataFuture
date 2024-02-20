@@ -8,7 +8,7 @@
     @include('../layout/components/mobile-menu')
     @include('../layout/components/top-bar', ['class' => 'top-bar-boxed--top-menu'])
     <!-- BEGIN: Top Menu -->
-    <nav class="top-nav">
+    <nav class="top-nav flex">
         <ul>
             @foreach ($top_menu as $menuKey => $menu)
             
@@ -59,7 +59,12 @@
                     @endif
                 </li>
             @endforeach
-        </ul>
+        </ul> 
+        @if(Auth::user() && Route::currentRouteName() == 'dashboard' && !empty($home_work_history) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
+            <div class="clockinArea inline-flex justify-end items-center">
+                {!! $home_work_history !!}
+            </div>
+        @endif
     </nav>
     <!-- END: Top Menu -->
     <!-- BEGIN: Content -->

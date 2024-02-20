@@ -37,7 +37,7 @@
                     <div class="col-span-12 sm:col-span-3" id="inRangeSwitch" style="display: {{ (isset($priv['remote_access']['ra_status']) && $priv['remote_access']['ra_status'] == 1 ? 'block' : 'none') }};">
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['remote_access']['in_range']) && $priv['remote_access']['in_range'] == 1 ? 'checked' : '') }} id="permission_remote_access_2" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][in_range]">
-                            <label class="form-check-label ml-4" for="permission_remote_access_2">Open in a Range</label>
+                            <label class="form-check-label ml-4" for="permission_remote_access_2">Allowed Termporary</label>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-3" id="dateRangeWrap" style="display: {{ (isset($priv['remote_access']['in_range']) && $priv['remote_access']['in_range'] == 1 ? 'block' : 'none') }};">
@@ -45,10 +45,16 @@
                             <input type="text" name="permission[remote_access][date_range]" value="{{ (isset($priv['remote_access']['date_range']) && !empty($priv['remote_access']['date_range']) ? $priv['remote_access']['date_range'] : '') }}" data-daterange="true" id="rangepicker" class="rangepicker form-control w-56 block mx-auto">
                         </div>
                     </div>
-                    <div class="col-span-12">
+                    <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['remote_access']['work_home']) && $priv['remote_access']['work_home'] == 1 ? 'checked' : '') }} id="permission_remote_access_4" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][work_home]">
                             <label class="form-check-label ml-4" for="permission_remote_access_4">Working From Home</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['remote_access']['desktop_login']) && $priv['remote_access']['desktop_login'] == 1 ? 'checked' : '') }} id="permission_remote_access_5" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][desktop_login]">
+                            <label class="form-check-label ml-4" for="permission_remote_access_5">Desktop Login</label>
                         </div>
                     </div>
                 </div>

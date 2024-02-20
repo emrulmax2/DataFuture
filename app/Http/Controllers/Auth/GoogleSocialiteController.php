@@ -32,6 +32,9 @@ class GoogleSocialiteController extends Controller
             if($finduser){
       
                 Auth::login($finduser);
+                User::where('id', $finduser->id)->update([
+                    'last_login_ip' => request()->ip()
+                ]);
                 Cache::forever('employeeCashe'.$finduser->id, Auth::user()->load('employee'));
                 return redirect('/');
       
@@ -46,6 +49,9 @@ class GoogleSocialiteController extends Controller
                 $finduser->save();
                 
                 Auth::login($finduser);
+                User::where('id', $finduser->id)->update([
+                    'last_login_ip' => request()->ip()
+                ]);
                 Cache::forever('employeeCache'.$finduser->id, Auth::user()->load('employee'));
                 return redirect('/');
             }

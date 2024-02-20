@@ -723,6 +723,12 @@
 .r-0{
     right: 0;
 }
+.l-0{
+    left: 0;
+}
+.b-0{
+    bottom: 0;
+}
 .t-0{
     top: 0;
 }
@@ -1532,4 +1538,10 @@ input[type=number] {
 .workplacementtabcontent .box{
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+
+.clockinArea{
+    margin-left: auto;
+    margin-right: 22px;
 }

@@ -224,6 +224,8 @@ export default defineConfig({
                 'resources/js/wp-company.js',
                 'resources/js/student-workplacement.js',
                 'resources/js/student-wbl-profile.js',
+                'resources/js/staff-dashboard.js',
+                'resources/js/jquery-stopwatch.js',
                 
             ],
             refresh: true,
