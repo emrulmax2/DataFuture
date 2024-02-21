@@ -28,6 +28,44 @@
 
                     <div class="grid grid-cols-12 gap-6 mt-5">
                         
+                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MY-HR-logos.jpeg') }}">
+                        </a>
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
+                        <a href="{{ route('admission') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y relative">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/APPLICANT-logos.jpeg') }}">
+                            <span style="margin-top: -55px;" class="absolute bg-white rounded-full l-0 r-0 mr-auto ml-auto w-10 text-center font-bold py-2 text-base text-slate-500">{{ $applicant }}</span>
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
+                        <a href="{{ route('student') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/STUDENTS-logos.jpeg') }}">
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
+                        <a href="{{ route('tutor-dashboard.show.new', 32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Tutor-logos.jpeg') }}">
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
+                        <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/personal_tutor-logos.jpeg') }}">
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
+                        <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Human-Resources-logos.jpeg') }}">
+                        </a>
+                        @endif
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
+                        <a href="{{ route('programme.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MANAGER-logos.jpeg') }}">
+                        </a>
+                        @endif
+
+
+
+                        {{--
                         <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
                             <div class="report-box zoom-in">                               
                                 <div class="box flex  p-5 ">                                    
@@ -46,60 +84,52 @@
                                 </div>                               
                             </div>        
                         </a>
-                        @if(isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
-                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
-                            <div class="report-box zoom-in">                               
-                                <div class="box p-5">                                    
-                                    <div class="flex">
-                                        <i data-lucide="contact-2" class="report-box__icon text-success"></i>
+                        
+                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
+                        <a href="{{ route('admission') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                            <div class="report-box zoom-in">
+                                <div class="box p-5">
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/applicant.png') }}">
+                                        </div>
+                                        <div class="ml-5">
+                                            <div class="text-xl font-bold">{{ $applicant }}</div>                                    
+                                            <div class="text-base text-slate-500 font-medium">Applicant</div> 
+                                        </div>
                                     </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">00</div>
-                                    <div class="text-base text-slate-500 mt-1">My HR</div>                              
-                                </div>                               
-                            </div>        
+                                </div>
+                            </div>
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
-                        <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <a href="{{ route('admission') }}" class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex">
-                                        <i data-lucide="user" class="report-box__icon text-pending"></i>
-                                    </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $applicant }}</div>                                    
-                                    <div class="text-base text-slate-500 mt-1">Applicant</div> 
-                                </div>
-                            </a>
-                        </div>
-                        @endif
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
-                        <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <a href="{{ route('student') }}" class="report-box zoom-in">
+                        <a href="{{ route('student') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                            <div class="report-box zoom-in">
                                 <div class="box p-5">
-                                    <div class="flex">
-                                        <i data-lucide="user-check" class="report-box__icon text-success"></i>
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/student_2.png') }}">
+                                        </div>
+                                        <div class="ml-5">
+                                            <div class="text-xl font-bold">{{ $student }}</div>
+                                            <div class="text-base text-slate-500 font-medium">Live Student</div>
+                                        </div>
                                     </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $student }}</div>
-                                    <div class="text-base text-slate-500 mt-1">Live Student</div>
                                 </div>
-                            </a>
-                        </div> 
+                            </div>
+                        </a> 
                         @endif
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
                         <a href="{{ route('tutor-dashboard.show.new',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                                <div class="report-box zoom-in">
-                                    <div class="box p-5">
-                                        <div class="flex">
-                                            <i data-lucide="monitor" class="report-box__icon text-warning"></i>
-                                            <div class="ml-auto">
-                                                <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
-                                                    % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
-                                                </div>
-                                            </div>
+                            <div class="report-box zoom-in">
+                                <div class="box p-5">
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/tutor.png') }}">
                                         </div>
-                                        <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                        <div class="text-base text-slate-500 mt-1">Tutor Dashboard</div>
+                                        <div class="ml-5">
+                                            <div class="text-base text-slate-500 font-medium">Tutor Dashboard</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -107,51 +137,32 @@
                         @endif
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
                         <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                                <div class="report-box zoom-in">
-                                    <div class="box p-5">
-                                        <div class="flex">
-                                            <i data-lucide="monitor" class="report-box__icon text-warning"></i>
-                                            <div class="ml-auto">
-                                                <div class="report-box__indicator bg-success tooltip cursor-pointer" title="12% Higher than last month">
-                                                    % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
-                                                </div>
-                                            </div>
+                            <div class="report-box zoom-in">
+                                <div class="box p-5">
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/personal_tutor.png') }}">
                                         </div>
-                                        <div class="text-3xl font-medium leading-8 mt-6">0.00</div>
-                                        <div class="text-base text-slate-500 mt-1">Personal Tutor Dashboard</div>
+                                        <div class="ml-5">
+                                            <div class="text-base text-slate-500 font-medium">Personal Tutor Dashboard</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </a>
                         @endif
-                        @if(isset(auth()->user()->priv()['req_interview']) && auth()->user()->priv()['req_interview'] == 1)
-                        {{--<a href="{{ route('interviewlist') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                          
-                            <div class="report-box zoom-in">                               
-                                <div class="box p-5">                                    
-                                    <div class="flex">
-                                        <i data-lucide="user" class="report-box__icon text-success"></i>
-                                        <div class="ml-auto">
-                                            <div class="report-box__indicator bg-success tooltip cursor-pointer" title="22% Higher than last month">
-                                                22 % <i data-lucide="chevron-up" class="w-4 h-4 ml-0.5"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $interview }}</div>
-                                    <div class="text-base text-slate-500 mt-1">Required Interviews</div>                              
-                                </div>                               
-                            </div>        
-                        </a>--}}
-                        @endif
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
                         <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
                             <div class="report-box zoom-in">                               
                                 <div class="box p-5">                                    
-                                    <div class="flex">
-                                        <i data-lucide="contact" class="report-box__icon text-success"></i>
-                                    </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">04</div>
-                                    <div class="text-base text-slate-500 mt-1">HR Portal</div>                              
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/hr.png') }}">
+                                        </div>
+                                        <div class="ml-5">
+                                            <div class="text-base text-slate-500 font-medium">HR Portal</div>     
+                                        </div>
+                                    </div>                         
                                 </div>                               
                             </div>        
                         </a>
@@ -160,15 +171,18 @@
                         <a href="{{ route('programme.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
                             <div class="report-box zoom-in">                               
                                 <div class="box p-5">                                    
-                                    <div class="flex">
-                                        <i data-lucide="calendar-range" class="report-box__icon text-success"></i>
-                                    </div>
-                                    <div class="text-3xl font-medium leading-8 mt-6" style="color: transparent;">00</div>
-                                    <div class="text-base text-slate-500 mt-1">Programme Dashboard</div>                              
+                                    <div class="flex justify-start items-center my-4">
+                                        <div class="w-20 h-20  image-fit">
+                                            <img src="{{ asset('build/assets/images/dash_icons/programme_2.png') }}">
+                                        </div>
+                                        <div class="ml-5">
+                                            <div class="text-base text-slate-500 font-medium">Programme Dashboard</div> 
+                                        </div>
+                                    </div>                          
                                 </div>                               
                             </div>        
                         </a>
-                        @endif
+                        @endif --}}
                         
                     </div>
                 </div>
@@ -261,4 +275,29 @@
             </div>
         </div> 
     </div>
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
+    
+@endsection
+
+@section('script')
+    @vite('resources/js/jquery-stopwatch.js')
+    @vite('resources/js/staff-dashboard.js')
 @endsection

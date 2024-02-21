@@ -1263,6 +1263,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/dashboard', 'index')->name('staff.dashboard');
         Route::get('/dashboard/list', 'list')->name('dashboard.staff.list');
+        Route::post('/dashboard/fee-attendance', 'feeAttendance')->name('dashboard.feed.attendance');
     });
 
 
