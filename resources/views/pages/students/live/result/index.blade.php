@@ -169,6 +169,11 @@
                                                     {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}}
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                    
+                                                    <button class="mr-3 items-center inline-flex add_btn" type="button" data-tw-toggle="modal" data-tw-target="#addAttemptModal" data-plan="{{ $planDetails[$termId][$moduleDetails]->id }}" data-assessmentPlan="{{  $assessmentPlan }}">
+                                                        <i data-lucide="plus-square" class="w-4 h-4 mr-1"></i>
+                                                        Add New
+                                                    </button>
                                                     <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-publishTime={{ date('h:m',strtotime($result->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result->published_at))  }} data-grade="{{ $result->grade->id }}" data-id="{{ $result->id  }}">
                                                         <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                         Edit
@@ -186,6 +191,61 @@
                         </table>
                     </div>
                 </div>
+                <!-- BEGIN: Add Modal -->
+                <div id="addAttemptModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form method="POST" id="addAttemptForm">
+
+                            <input type="hidden" name="assessment_plan_id" value="" />
+                            <input type="hidden" name="plan_id" value="" />
+                            <input type="hidden" name="student_id" value="{{ $student->id }}" />
+                            <input type="hidden" name="created_by" value="{{ Auth::id() }}" />
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2 class="font-medium text-base mr-auto">Add New Submission</h2>
+                                    <a data-tw-dismiss="modal" href="javascript:;">
+                                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                                    </a>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        <div>
+                                            <label for="grade_id" class="form-label">Grade <span class="text-danger">*</span></label>
+                                            <select id="grade_id" name="grade_id" class="form-control w-full">
+                                                <option value="">Please Select</option>
+                                                @if(!empty($grades))
+                                                    @foreach($grades as $grade)
+                                                        <option value="{{ $grade->id }}">{{ $grade->name }} - {{ $grade->code }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div>
+                                            <label class="form-label" for="published_at">Publish Date</label>
+                                            <input id="published_at" placeholder="DD-MM-YYYY" class="datepicker form-control w-full" name="published_at" data-single-mode="true">
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div>
+                                            <label class="form-label" for="published_time">Publish Time</label>
+                                            <input id="published_time" autocomplete="off" placeholder="HH:MM" class="timeMask form-control w-full" name="published_time" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                                    <button type="submit" id="save" class="btn btn-primary w-auto">
+                                        Add Now <i class="w-4 h-4 ml-2 text-white hidden" data-loading-icon="oval" ></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- END: Add Modal -->
                 <!-- BEGIN: Edit Modal -->
                 <div id="editAttemptModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
@@ -214,13 +274,13 @@
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <div class="form-check form-switch">
+                                        <div>
                                             <label class="form-label" for="published_at">Publish Date</label>
-                                            <input id="published_at" class="datepicker form-control w-full" name="published_at" data-single-mode="true">
+                                            <input id="published_at" placeholder="DD-MM-YYYY" class="datepicker form-control w-full" name="published_at" data-single-mode="true">
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <div class="form-check form-switch">
+                                        <div>
                                             <label class="form-label" for="published_time">Publish Time</label>
                                             <input id="published_time" autocomplete="off" placeholder="HH:MM" class="timeMask form-control w-full" name="published_time" value="">
                                         </div>

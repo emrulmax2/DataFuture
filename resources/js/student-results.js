@@ -55,6 +55,7 @@ import IMask from 'imask';
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#delete-confirmation-modal"));
     const editAttemptModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAttemptModal"));
+    const addAttemptModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addAttemptModal"));
     // Confirm Modal Action
 
     $('.delete_btn').on('click', function(){
@@ -85,6 +86,62 @@ import IMask from 'imask';
         });
     });
 
+    $('.add_btn').on('click', function(){
+        let $statusBTN = $(this);
+        let assessmentPlan = $statusBTN.attr('data-assessmentPlan');
+        let plan = $statusBTN.attr('data-plan');
+    
+        document.getElementById('addAttemptModal').addEventListener('shown.tw.modal', function(event){
+            $('#addAttemptModal input[name="assessment_plan_id"]').val(assessmentPlan);
+            $('#addAttemptModal input[name="plan_id"]').val(plan);
+        });
+    });
+    
+    $("#addAttemptForm").on("submit", function (e) {
+
+        e.preventDefault();
+        const form = document.getElementById("addAttemptForm");
+
+        document.querySelector('#save').setAttribute('disabled', 'disabled');
+        document.querySelector('#save svg').style.cssText = 'display: inline-block;';
+
+        let form_data = new FormData(form);
+
+        axios({
+            method: "post",
+            url: route("result.store.single"),
+            data: form_data,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                document.querySelector("#save").removeAttribute("disabled");
+                document.querySelector("#save svg").style.cssText = "display: none;";
+                addAttemptModal.hide();
+
+                succModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Success!");
+                    $("#successModal .successModalDesc").html('Result updated');
+                });
+            }
+            location.reload();
+        }).catch((error) => {
+            document.querySelector("#save").removeAttribute("disabled");
+            document.querySelector("#save svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editForm .${key}`).addClass('border-danger')
+                        $(`#editForm  .error-${key}`).html(val)
+                    }
+                }else {
+                    console.log("error");
+                }
+            }
+        });
+    });
     $("#editAttemptForm").on("submit", function (e) {
         let editId = $('#editAttemptForm input[name="id"]').val();
 

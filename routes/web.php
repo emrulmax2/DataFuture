@@ -2233,6 +2233,7 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(ResultController::class)->group(function() {
         
+        Route::post('result-single/', 'storeSingle')->name('result.store.single'); 
         Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
         Route::post('result/update-all', 'updateAll')->name('result.update.all');
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
