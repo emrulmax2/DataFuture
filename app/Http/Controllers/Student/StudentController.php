@@ -31,6 +31,7 @@ use App\Models\DocumentSettings;
 use App\Models\EmailTemplate;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
+use App\Models\Grade;
 use App\Models\Group;
 use App\Models\HesaGender;
 use App\Models\InstanceTerm;
@@ -661,8 +662,8 @@ class StudentController extends Controller
     }
 
     public function ResultDetails(Student $student) {
-
-        $AssessmentPlans = AssessmentPlan::where('plan_id',$student->id)->get();
+        $grades = Grade::all();
+        //$AssessmentPlans = AssessmentPlan::where('plan_id',$student->id)->get();
         $termData = [];
 
             $QueryInner = DB::table('plans as plan')
@@ -713,6 +714,7 @@ class StudentController extends Controller
             'student' => $student,
             'dataSet' => ($data) ?? null,
             "term" =>$termData,
+            "grades" =>$grades,
             "planDetails" => $planDetails ?? null,
         ]);
     }

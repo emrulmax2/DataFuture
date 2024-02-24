@@ -6,6 +6,7 @@ use App\Exports\StudentEmailIdTaskExport;
 use App\Imports\ResultImport;
 use App\Models\Result;
 use App\Http\Requests\StoreResultRequest;
+use App\Http\Requests\StoreResultSingleRequest;
 use App\Http\Requests\UpdateResultRequest;
 use App\Imports\ResultImportUpdate;
 use App\Models\Assessment;
@@ -284,6 +285,24 @@ class ResultController extends Controller
         }
         
     }
+    public function storeSingle(StoreResultSingleRequest $request)
+    {
+            $date = $request->input('published_at');
+            $time = $request->input('published_time');
+            $request->flashOnly(['published_at', 'published_time']);
+            $request->merge(["published_at"=> date('Y-m-d',strtotime($date))." ".$time]);
+
+            $result = new Result();
+            $result->fill($request->except(['published_time']));
+            $result->save();
+
+            if($result->id)
+                return response()->json(['message' => 'Result successfully created.',"data"=>['result'=>$result]], 200);
+            else
+                return response()->json(['message' => 'Result could not be saved'], 302);
+        
+        
+    }
     public function resubmit(Request $request)
     {
         $assessmentPlan = AssessmentPlan::find($request->input('assessment_plan_id'));
@@ -350,7 +369,13 @@ class ResultController extends Controller
     public function update(UpdateResultRequest $request, Result $result)
     {
         //
-        $result->fill($request->all());
+      
+        $request->merge(["updated_by"=>Auth::id()]);
+        $date = $request->input('published_at');
+        $time = $request->input('published_time');
+        $request->flashOnly(['published_at', 'published_time']);
+        $request->merge(["published_at"=> date('Y-m-d',strtotime($date))." ".$time]);
+        $result->fill($request->except(['id','published_time']));
         $result->save();
 
         if($result->wasChanged()) {
@@ -417,7 +442,7 @@ class ResultController extends Controller
      */
     public function destroy(Result $result)
     {
-        $result->forceDelete();
+        $result->delete();
     }
 
     public function destroyByAssessmentPlan(AssessmentPlan $assessmentPlan)
@@ -426,7 +451,7 @@ class ResultController extends Controller
 
         foreach($resultList as $result) {
 
-            $result->forceDelete();
+            $result->delete();
         }
         
     }

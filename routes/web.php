@@ -2233,13 +2233,15 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(ResultController::class)->group(function() {
         
+        Route::post('result-single/', 'storeSingle')->name('result.store.single'); 
         Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
         Route::post('result/update-all', 'updateAll')->name('result.update.all');
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
         Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
+        Route::post('result/{result}/restore', 'restoreSingle')->name('result.restore');
         
         Route::get('result-list/{assessment_plan}', 'list')->name('result.list'); 
-        Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore');
+        Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore.all');
 
         Route::get('result-list/{assessmentPlan}/download', 'downloadStudentListExcel')->name('result.download-excel');
         Route::get('result-list/{assessmentPlan}/download-result', 'downloadStudentResultExcel')->name('result.downloadresult-excel');
