@@ -350,7 +350,13 @@ class ResultController extends Controller
     public function update(UpdateResultRequest $request, Result $result)
     {
         //
-        $result->fill($request->all());
+      
+        $request->merge(["updated_by"=>Auth::id()]);
+        $date = $request->input('published_at');
+        $time = $request->input('published_time');
+        $request->flashOnly(['published_at', 'published_time']);
+        $request->merge(["published_at"=> date('Y-m-d',strtotime($date))." ".$time]);
+        $result->fill($request->except(['id','published_time']));
         $result->save();
 
         if($result->wasChanged()) {
@@ -417,7 +423,7 @@ class ResultController extends Controller
      */
     public function destroy(Result $result)
     {
-        $result->forceDelete();
+        $result->delete();
     }
 
     public function destroyByAssessmentPlan(AssessmentPlan $assessmentPlan)
@@ -426,7 +432,7 @@ class ResultController extends Controller
 
         foreach($resultList as $result) {
 
-            $result->forceDelete();
+            $result->delete();
         }
         
     }
