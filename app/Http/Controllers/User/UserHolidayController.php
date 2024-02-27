@@ -122,6 +122,7 @@ class UserHolidayController extends Controller
                         endif;
                     endforeach;
                     if(!empty($empPatterms)):
+                        $response[$year->id]['is_active'] = (date('Y-m-d') >= $yearStart && date('Y-m-d') <= $yearEnd ? 1 : 0);
                         $response[$year->id]['start'] = $yearStart;
                         $response[$year->id]['end'] = $yearEnd;
                         $response[$year->id]['patterns'] = $empPatterms;

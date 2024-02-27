@@ -30,9 +30,9 @@
                     <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">A few more clicks to sign in to your account. Manage all your e-commerce accounts in one place</div>
                     <div class="intro-x mt-8">
                         <form id="login-form">
-                            <input id="username" type="text" class="intro-x login__input form-control py-3 px-4 block" placeholder="User Name" value="1">
+                            <input id="username" type="text" class="intro-x login__input form-control py-3 px-4 block" placeholder="User Name" value="">
                             <div id="error-username" class="login__input-error text-danger mt-2"></div>
-                            <input id="password" type="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password" value="password">
+                            <input id="password" type="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password" value="">
                             <div id="error-password" class="login__input-error text-danger mt-2"></div>
                         </form>
                     </div>
@@ -81,7 +81,7 @@
                     location.href = '/machine/live'
                 }).catch(err => {
                     $('#btn-login').html('Login')
-                    if (err.response.data.message != 'Wrong email or password.') {
+                    if (err.response.data.message != 'Wrong user name or password.') {
                         for (const [key, val] of Object.entries(err.response.data.errors)) {
                             $(`#${key}`).addClass('border-danger')
                             $(`#error-${key}`).html(val)

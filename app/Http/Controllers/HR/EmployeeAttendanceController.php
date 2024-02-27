@@ -459,10 +459,10 @@ class EmployeeAttendanceController extends Controller
                         $work_start = strtotime($work_start);
                         $work_end = strtotime($work_end);
 
-                        $system_start = strtotime($system_work_start);
-                        $system_end = strtotime($system_work_end);
+                        $system_start = ($system_work_start != '' ? strtotime($system_work_start) : 0);
+                        $system_end = ($system_work_end != '' ? strtotime($system_work_end) : 0);
 
-                        if($system_end != '' && $system_end > 0):
+                        if($system_end != '' && $system_end > 0 && $system_start != '' && $system_start > 0):
                             $total_today_break = $actualBreak + $this->convertStringToMinute($unpaid_break);
 
                             $total_today = round(abs($system_start - $system_end) / 60,2);
@@ -498,7 +498,7 @@ class EmployeeAttendanceController extends Controller
                     $data['note'] = '';
                     $data['status'] = 1; 
                     $data['created_by'] = auth()->user()->id;
-
+                    
                     EmployeeAttendance::create($data);
                 elseif($day_status == 1 && $todayAttendance->count() == 0):
                     $leave_type = ($leave_type > 0) ? $leave_type : 4;
@@ -529,7 +529,7 @@ class EmployeeAttendanceController extends Controller
             endif;
         endforeach;
 
-        return response()->json(['res' => 'Employee attendance successfully sincronised.', 'date' => date('D jS M', strtotime($theDate))], 200);
+        return response()->json(['res' => 'Employee attendance successfully sincronised.', 'date' => date('D jS M', strtotime($theDate)), 'url' => url('hr/attendance/show/'.strtotime($theDate))], 200);
     }
 
     public function convertStringToMinute($string){

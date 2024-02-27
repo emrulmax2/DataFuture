@@ -6,113 +6,115 @@ import { createIcons, icons } from "lucide";
         if(event.which == 13){
             
             var $form = $('#liveAttendanceForm');
+            let clock_in_no = $form.find('[name="clock_in_no"]').val();
             var $buttonGroup = $form.find('.liveAttendanceFormBtnGroup');
             var $actionButtons = $buttonGroup.find('.btn-action');
             var $backButton = $buttonGroup.find('.btn-back');
             var clockinno = $form.find('#clock_in_no').val();
+            if(clock_in_no != ''){
+                axios({
+                    method: "post",
+                    url: route('machine.get.attendance.history'),
+                    data: {clockinno : clockinno},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+                        if(res.loc == '0'){
+                            $buttonGroup.fadeIn('fast', function(){
+                                $form.find('.theMessage').remove();
+                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
-            axios({
-                method: "post",
-                url: route('machine.get.attendance.history'),
-                data: {clockinno : clockinno},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    let res = response.data.res;
-                    if(res.loc == '0'){
-                        $buttonGroup.fadeIn('fast', function(){
-                            $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
-                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                            $actionButtons.fadeOut().attr('disabled', 'disabled');
-                            $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
-                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                        });
-
-                        $form.addClass('activeForm');
-                    }else if(res.loc == '1'){
-                        $buttonGroup.fadeIn('fast', function(){
-                            $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
-                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                            $actionButtons.fadeOut().attr('disabled', 'disabled');
-                            $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
-                            $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled');
-                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                        });
-
-                        $form.addClass('activeForm');
-                    }else if(res.loc == '2'){
-                        $buttonGroup.fadeIn('fast', function(){
-                            $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
-                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                            $actionButtons.fadeOut().attr('disabled', 'disabled');
-                            $buttonGroup.find('.btn-action.btn-type-3').fadeIn().removeAttr('disabled');
-                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                        });
-
-                        $form.addClass('activeForm');
-                    }else if(res.loc == '3'){
-                        $buttonGroup.fadeIn('fast', function(){
-                            $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
-                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                            $actionButtons.fadeOut().attr('disabled', 'disabled');
-                            $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
-                            $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled');
-                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                        });
-
-                        $form.addClass('activeForm');
-                    }else if(res.loc == '4'){
-                        $buttonGroup.fadeIn('fast', function(){
-                            $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
-                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                            $actionButtons.fadeOut().attr('disabled', 'disabled');
-                            $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
-                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                        });
-
-                        $form.addClass('activeForm');
-                    }else{
-                        $form.find('.theMessage').remove();
-                        $form.prepend('<div class="alert alert-danger-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> User does not foud!</div>')
-                        createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
-
-                        $buttonGroup.fadeIn();
-                        $actionButtons.attr('disabled', 'disabled');
-                        $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
-                    }
-
-                    setTimeout(function(){
-                        var $form = $('#liveAttendanceForm');
-                        if($form.hasClass('activeForm')){
-                            $form.find('.theMessage').remove();
-                            $form.find('.liveAttendanceFormBtnGroup').fadeOut('fast', function(){
-                                $form.find('.btn-action').fadeOut().attr('disabled', 'disabled');
-                                $form.find('.btn-back').fadeOut().attr('disabled', 'disabled');
-                                $form.find('#clock_in_no').val('');
-                                $form.find('[name="attendance_type"]').val('0');
+                                $actionButtons.fadeOut().attr('disabled', 'disabled');
+                                $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
+                                $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
-                            $form.removeClass('activeForm');
+
+                            $form.addClass('activeForm');
+                        }else if(res.loc == '1'){
+                            $buttonGroup.fadeIn('fast', function(){
+                                $form.find('.theMessage').remove();
+                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+
+                                $actionButtons.fadeOut().attr('disabled', 'disabled');
+                                $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
+                                $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled');
+                                $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
+                            });
+
+                            $form.addClass('activeForm');
+                        }else if(res.loc == '2'){
+                            $buttonGroup.fadeIn('fast', function(){
+                                $form.find('.theMessage').remove();
+                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+
+                                $actionButtons.fadeOut().attr('disabled', 'disabled');
+                                $buttonGroup.find('.btn-action.btn-type-3').fadeIn().removeAttr('disabled');
+                                $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
+                            });
+
+                            $form.addClass('activeForm');
+                        }else if(res.loc == '3'){
+                            $buttonGroup.fadeIn('fast', function(){
+                                $form.find('.theMessage').remove();
+                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+
+                                $actionButtons.fadeOut().attr('disabled', 'disabled');
+                                $buttonGroup.find('.btn-action.btn-type-2').fadeIn().removeAttr('disabled');
+                                $buttonGroup.find('.btn-action.btn-type-4').fadeIn().removeAttr('disabled');
+                                $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
+                            });
+
+                            $form.addClass('activeForm');
+                        }else if(res.loc == '4'){
+                            $buttonGroup.fadeIn('fast', function(){
+                                $form.find('.theMessage').remove();
+                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+
+                                $actionButtons.fadeOut().attr('disabled', 'disabled');
+                                $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
+                                $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
+                            });
+
+                            $form.addClass('activeForm');
+                        }else{
+                            $form.find('.theMessage').remove();
+                            $form.prepend('<div class="alert alert-danger-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> User does not foud!</div>')
+                            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
+
+                            $buttonGroup.fadeIn();
+                            $actionButtons.attr('disabled', 'disabled');
+                            $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                         }
-                    }, 40000);
-                }
-                
-            }).catch(error => {
-                if(error.response){
-                    if(error.response.status == 422){
-                        console.log('error');
+
+                        setTimeout(function(){
+                            var $form = $('#liveAttendanceForm');
+                            if($form.hasClass('activeForm')){
+                                $form.find('.theMessage').remove();
+                                $form.find('.liveAttendanceFormBtnGroup').fadeOut('fast', function(){
+                                    $form.find('.btn-action').fadeOut().attr('disabled', 'disabled');
+                                    $form.find('.btn-back').fadeOut().attr('disabled', 'disabled');
+                                    $form.find('#clock_in_no').val('');
+                                    $form.find('[name="attendance_type"]').val('0');
+                                });
+                                $form.removeClass('activeForm');
+                            }
+                        }, 40000);
                     }
-                }
-            });
+                    
+                }).catch(error => {
+                    if(error.response){
+                        if(error.response.status == 422){
+                            console.log('error');
+                        }
+                    }
+                });
+            }
         }
     });
 
