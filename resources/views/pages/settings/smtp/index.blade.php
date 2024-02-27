@@ -135,8 +135,8 @@
                             <label for="edit_smtp_authentication" class="form-label">SMTP Authentication <span class="text-danger">*</span></label>
                             <select id="edit_smtp_authentication" name="smtp_authentication" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option value="true">True</option>
-                                <option value="false">False</option>
+                                <option value="TRUE">TRUE</option>
+                                <option value="FALSE">FALSE</option>
                             </select>
                             <div class="acc__input-error error-smtp_authentication text-danger mt-2"></div>
                         </div>
@@ -213,8 +213,8 @@
                         <div class="mt-3">
                             <label for="smtp_authentication" class="form-label">SMTP Authentication <span class="text-danger">*</span></label>
                             <select id="smtp_authentication" name="smtp_authentication" class="form-control w-full">
-                                <option selected value="true">True</option>
-                                <option value="false">False</option>
+                                <option selected value="TRUE">TRUE</option>
+                                <option value="FALSE">FALSE</option>
                             </select>
                             <div class="acc__input-error error-smtp_authentication text-danger mt-2"></div>
                         </div>
