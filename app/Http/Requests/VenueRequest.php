@@ -24,9 +24,9 @@ class VenueRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|unique:venues,name',
-            'idnumber' => 'required|unique:venues,idnumber',
-            'ukprn' => 'required|unique:venues,ukprn',
+            'name' => 'required',
+            'idnumber' => 'required',
+            'ukprn' => 'required',
         ];
     }
 }

@@ -43,11 +43,15 @@ class EmployeeHolidayController extends Controller
 
         return view('pages.employee.profile.holiday', [
             'title' => 'Welcome - LCC Data Future Managment',
-            'breadcrumbs' => [],
+            'breadcrumbs' => [
+                ['label' => 'HR Portal', 'href' => route('hr.portal')],
+                ['label' => 'Employee Holidays', 'href' => 'javascript:void(0);']
+            ],
             "user" => $userData,
             "employee" => $employee,
             "employment" => $employment,
             'holidayDetails' => $this->employeeHolidayDetails($id),
+            'holidayStatistics' => $this->employeeLeaveStatistics($id),
             'holidayStatistics' => $this->employeeLeaveStatistics($id),
             'holidayYears' => HrHolidayYear::where('active', 1)->orderBy('start_date', 'DESC')->get(),
             'empPatterns' => EmployeeWorkingPattern::where('employee_id', $id)->where('active', 1)->where(
@@ -121,6 +125,7 @@ class EmployeeHolidayController extends Controller
                         endif;
                     endforeach;
                     if(!empty($empPatterms)):
+                        $response[$year->id]['is_active'] = (date('Y-m-d') >= $yearStart && date('Y-m-d') <= $yearEnd ? 1 : 0);
                         $response[$year->id]['start'] = $yearStart;
                         $response[$year->id]['end'] = $yearEnd;
                         $response[$year->id]['patterns'] = $empPatterms;

@@ -31,12 +31,12 @@
                                 @foreach($holidayDetails  as $year => $yearDetails)
                                     <div class="accordion-item bg-slate-100">
                                         <div id="employeeHolidayAccordion-{{ $loop->index }}" class="accordion-header">
-                                            <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $loop->index }}">
+                                            <button class="accordion-button {{ $yearDetails['is_active'] == 1 ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $loop->index }}" aria-expanded="{{ $yearDetails['is_active'] == 1 ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $loop->index }}">
                                                 <span class="font-normal">Holiday Year:</span> {{ date('Y', strtotime($yearDetails['start'])) }} - {{ date('Y', strtotime($yearDetails['end'])) }}
                                                 <span class="accordionCollaps"></span>
                                             </button>
                                         </div>
-                                        <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
+                                        <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ $yearDetails['is_active'] == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
                                             <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                                 <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
                                                     @foreach($yearDetails['patterns'] as $pattern)

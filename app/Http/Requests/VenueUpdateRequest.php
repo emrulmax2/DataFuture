@@ -24,8 +24,8 @@ class VenueUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|unique:venues,name,'. $this->id,
-            'idnumber' => 'required|unique:venues,idnumber,'. $this->id,
+            'name' => 'required',
+            'idnumber' => 'required',
             'ukprn' => 'required',
         ];
     }
