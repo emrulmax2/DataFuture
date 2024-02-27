@@ -10,6 +10,7 @@ use App\Models\EmployeeAppraisal;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeEligibilites;
+use App\Models\EmployeeHolidayAuthorisedBy;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLeaveDay;
 use App\Models\EmployeeWorkingPattern;
@@ -111,7 +112,7 @@ class EmployeePortalController extends Controller
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Manage Holidays', 'href' => 'javascript:void(0);']
             ],
-            'years' => HrHolidayYear::orderBy('id', 'DESC')->get(),
+            'years' => HrHolidayYear::where('active', 1)->orderBy('id', 'DESC')->get(),
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
         ]);
     }
@@ -153,6 +154,7 @@ class EmployeePortalController extends Controller
         if(!empty($Query) && $type == 'approved'):
             $i = 1;
             foreach($Query as $list):
+                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
                 $status = 'Approved ';
                 if(isset($list->leave->leave_type) && $list->leave->leave_type > 0):
                     switch($list->leave->leave_type):
@@ -185,13 +187,15 @@ class EmployeePortalController extends Controller
                     'end_date' => date('D jS F, Y', strtotime($list->leave_date)),
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
-                    'type' => 'approved'
+                    'type' => 'approved',
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
                 ];
                 $i++;
             endforeach;
         elseif(!empty($Query) && $type == 'rejected'):
             $i = 1;
             foreach($Query as $list):
+                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
                 $status = 'Rejected ';
                 if(isset($list->leave->leave_type) && $list->leave->leave_type > 0):
                     switch($list->leave->leave_type):
@@ -224,13 +228,15 @@ class EmployeePortalController extends Controller
                     'end_date' => date('D jS F, Y', strtotime($list->leave_date)),
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
-                    'type' => 'rejected'
+                    'type' => 'rejected',
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
                 ];
                 $i++;
             endforeach;
         elseif(!empty($Query) && $type == 'pending'):
             $i = 1;
             foreach($Query as $list):
+                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->employee_id)->pluck('user_id')->unique()->toArray();
                 $leaveHours = 0;
                 $leaveDays = 0;
                 if(isset($list->leaveDays)):
@@ -251,7 +257,8 @@ class EmployeePortalController extends Controller
                     'end_date' => date('D jS F, Y', strtotime($list->to_date)),
                     'title' => 'Holiday / Vacation',
                     'hour' => $this->calculateHourMinute($leaveHours),
-                    'type' => 'pending'
+                    'type' => 'pending',
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
                 ];
                 $i++;
             endforeach;

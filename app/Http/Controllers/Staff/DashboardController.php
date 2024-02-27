@@ -146,7 +146,7 @@ class DashboardController extends Controller
             $ntime = strtotime(date('H:i:s'));
             $duration_seconds = round(abs($rtime - $ntime), 2) * 1000;
             
-            $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', strtotime($rtime)) : '').'</span>&nbsp;';
+            $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', $rtime) : '').'</span>&nbsp;';
             $html .= '<button data-value="2" type="button" class="btn btn btn-twitter btn-sm attendance_action_btn">Take Break  '.$svg.'</button>';
             $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger btn-sm attendance_action_btn">Clock Out  '.$svg.'</button>';
         elseif($loc == 2):
@@ -155,7 +155,7 @@ class DashboardController extends Controller
             $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : '');
             $ntime = strtotime(date('H:i:s'));
             $duration_seconds = round(abs($rtime - $ntime), 2);
-            $html .= '<span class="text-primary font-bold mr-2" >'.(!empty($rtime) ? date('H:i', strtotime($rtime)) : '').'</span>&nbsp;';
+            $html .= '<span class="text-primary font-bold mr-2" >'.(!empty($rtime) ? date('H:i', $rtime) : '').'</span>&nbsp;';
             
             $live = EmployeeAttendanceLive::where('attendance_type', 2)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
             $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : '');
@@ -169,7 +169,7 @@ class DashboardController extends Controller
             $ntime = strtotime(date('H:i:s'));
             $duration_seconds = round(abs($rtime - $ntime), 2) * 1000;
             
-            $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', strtotime($rtime)) : '').'</span>&nbsp;';
+            $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', $rtime) : '').'</span>&nbsp;';
             $html .= '<button data-value="2" type="button" class="btn btn-twitter btn-sm attendance_action_btn">Take Break  '.$svg.'</button>';
             $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger btn-sm attendance_action_btn">Clock Out  '.$svg.'</button>';
         elseif($loc == 4):

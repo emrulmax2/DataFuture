@@ -1019,7 +1019,7 @@ class EmployeeHolidayController extends Controller
                             $message .= 'Thanks<br/>';
                             $message .= $siteName;
 
-                            UserMailerJob::dispatch($configuration, $approverEmail, new CommunicationSendMail('Leave Request', $message, []));
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request', $message, []));
                         endif;
                     endforeach;
                 endif;
@@ -1029,7 +1029,7 @@ class EmployeeHolidayController extends Controller
                     $message2 .= '<br/><br/>Thanks<br/><br/>';
                     $message2 .= $siteName;
 
-                    UserMailerJob::dispatch($configuration, $employee->user->email, new CommunicationSendMail('Leave Request', $message2, []));
+                    UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request', $message2, []));
                 endif;
 
                 return response()->json(['res' => 'Request successfully submitted'], 200);
@@ -1212,7 +1212,7 @@ class EmployeeHolidayController extends Controller
                     $message .= 'Thanks<br/>';
                     $message .= $siteName;
 
-                    UserMailerJob::dispatch($configuration, $approverEmail, new CommunicationSendMail('Leave Request Reviewed', $message, []));
+                    UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Reviewed', $message, []));
                 endif;
             endforeach;
         endif;
@@ -1241,7 +1241,7 @@ class EmployeeHolidayController extends Controller
             $message .= '<br/><br/>Thanks<br/><br/>';
             $message .= $siteName;
 
-            UserMailerJob::dispatch($configuration, $employee->user->email, new CommunicationSendMail('Leave Request Review', $message, []));
+            UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request Review', $message, []));
         endif;
 
 
