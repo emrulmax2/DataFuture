@@ -41,6 +41,15 @@ class EmployeeHolidayController extends Controller
         $empLeaveDisableDays = $this->employeeNonWorkingDays($id, $activePattern);
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
+        $can_auth = false;
+        if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
+            foreach($employee->holidayAuth as $empAuth):
+                if($empAuth->user_id == auth()->user()->id):
+                    $can_auth = true;
+                endif;
+            endforeach;
+        endif;
+
         return view('pages.employee.profile.holiday', [
             'title' => 'Welcome - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -66,6 +75,7 @@ class EmployeeHolidayController extends Controller
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
             ],
+            'can_auth' => $can_auth
         ]);
     }
 

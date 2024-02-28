@@ -76,9 +76,11 @@
                                                                                 <span style="line-height: 24px;">
                                                                                     {{ (isset($pattern->holidayEntitlement) && !empty($pattern->holidayEntitlement) ? $pattern->holidayEntitlement : '00:00') }}
                                                                                 </span>
+                                                                                @if($can_auth)
                                                                                 <button data-year="{{ $year }}" data-pattern="{{ $pattern->id }}" data-tw-toggle="modal" data-tw-target="#empHolidayAdjustmentModal" class="holidayAdjustmentBtn btn btn-success w-auto px-1 py-1 border-0 text-white ml-2 mr-2">
                                                                                     <i data-lucide="repeat-1" class="w-4 h-4"></i>
                                                                                 </button>
+                                                                                @endif
                                                                                 <span class="line-height: 24px;">{{ $pattern->adjustmentHtml }} = {{ $pattern->totalHolidayEntitlement }}</span>
                                                                             </div>
                                                                         </div>
@@ -112,7 +114,7 @@
                                                                                     @endif
                                                                                     @if(isset($pattern->approvedLeaves) && !empty($pattern->approvedLeaves))
                                                                                         @foreach($pattern->approvedLeaves as $leaveDay)
-                                                                                            <tr  class="approvedDayRow" data-leavedayid="{{ $leaveDay->id }}">
+                                                                                            <tr  class="approvedDayRow {{ (!$can_auth ? 'disabledRow' : '') }}" data-leavedayid="{{ $leaveDay->id }}">
                                                                                                 <td>
                                                                                                     Approved 
                                                                                                     @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
@@ -174,7 +176,7 @@
                                                                                                 @endphp
                                                                                             @endforeach
                                                                                         @endif
-                                                                                        <tr class="newRequestRow" data-id="{{ $leave->id }}">
+                                                                                        <tr class="newRequestRow  {{ (!$can_auth ? 'disabledRow' : '') }}" data-id="{{ $leave->id }}">
                                                                                             <td>Request for approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})</td>
                                                                                             <td>
                                                                                                 {{ date('D jS F, Y', strtotime($leave->from_date))}}
@@ -207,7 +209,7 @@
                                                                                 <table class="table table-bordered rejectedLeaveTable">
                                                                                     <tbody>
                                                                                         @foreach($pattern->rejectedLeaves as $leaveDay)
-                                                                                            <tr class="rejectedDayRow" data-leavedayid="{{ $leaveDay->id }}">
+                                                                                            <tr class="rejectedDayRow {{ (!$can_auth ? 'disabledRow' : '') }}" data-leavedayid="{{ $leaveDay->id }}">
                                                                                                 <td>
                                                                                                     Rejected  
                                                                                                     @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
@@ -272,7 +274,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-12 sm:col-span-4">
+            <div class="col-span-12 sm:col-span-4 relative {{ (!$can_auth ? 'disabledElement' : '') }}">
                 <div class="intro-y box p-5 pb-7">
                     <div class="grid grid-cols-12 gap-0 items-center">
                         <div class="col-span-6">
