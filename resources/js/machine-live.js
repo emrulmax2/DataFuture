@@ -23,7 +23,7 @@ import { createIcons, icons } from "lucide";
                         if(res.loc == '0'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -35,7 +35,7 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '1'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -48,7 +48,7 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '2'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -60,7 +60,7 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '3'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -73,7 +73,7 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '4'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
@@ -84,7 +84,7 @@ import { createIcons, icons } from "lucide";
                             $form.addClass('activeForm');
                         }else{
                             $form.find('.theMessage').remove();
-                            $form.prepend('<div class="alert alert-danger-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> User does not foud!</div>')
+                            $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> User does not foud!</div>')
                             createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                             $buttonGroup.fadeIn();
@@ -169,11 +169,11 @@ import { createIcons, icons } from "lucide";
                     
                 if(res.suc == 2){
                     $form.find('.theMessage').remove();
-                    $form.prepend('<div class="alert alert-warning-soft theMessage show flex items-start mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
+                    $form.prepend('<div class="text-white alert alert-warning theMessage show flex items-start mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
                     createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
                 }else{
                     $form.find('.theMessage').remove();
-                    $form.prepend('<div class="alert alert-success-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
+                    $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
                     createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
                 }
             }
@@ -187,7 +187,7 @@ import { createIcons, icons } from "lucide";
             if(error.response){
                 if(error.response.status == 422){
                     $form.find('.theMessage').remove();
-                    $form.prepend('<div class="alert alert-danger-soft theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Something went wrong. Please try later.</div>')
+                    $form.prepend('<div class="alert alert-danger text-white theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Something went wrong. Please try later.</div>')
                     createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                     console.log('error');
