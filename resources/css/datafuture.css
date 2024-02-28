@@ -981,17 +981,32 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 .content.content--top-nav.machineLiveBody::before{
     display: none;
 }
-.theLiveCard{
+.theCardWrap{
     max-width: 768px;
     width: 100%;
+}
+.theLiveCard{
+    position: relative;
 }
 #liveAttendanceForm .clock_in_no.form-control {
     height: 70px;
     font-size: 1.5rem;
+}
+#liveAttendanceForm .clock_in_no.form-control::placeholder,
+#liveAttendanceForm .clock_in_no.form-control::-webkit-input-placeholder,
+#liveAttendanceForm .clock_in_no.form-control::-moz-placeholder,
+#liveAttendanceForm .clock_in_no.form-control:-moz-placeholder,
+#liveAttendanceForm .clock_in_no.form-control::-ms-input-placeholder {
+    opacity: 1 !important;
+    color: #333;
 }
 .liveAttendanceFormBtnGroup{
     display: flex;

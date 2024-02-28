@@ -88,6 +88,37 @@
                                                                             <div class="text-slate-500 font-medium">Bank Holiday Auto Book</div>
                                                                             <div class="font-medium">{{ (isset($pattern->autoBookedBankHoliday) && !empty($pattern->autoBookedBankHoliday) ? $pattern->autoBookedBankHoliday : '00:00') }}</div>
                                                                         </div>
+
+                                                                        <div class="col-span-12">
+                                                                            <table class="table table-bordered table-hover">
+                                                                                <tr>
+                                                                                    <td>Holiday Base</td>
+                                                                                    <td>{{ (isset($employee->payment->holiday_base) && !empty($employee->payment->holiday_base) ? $employee->payment->holiday_base : '') }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Start Date</td>
+                                                                                    <td>{{ date('jS F, Y', strtotime($pattern->pattern_start)) }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>End Date</td>
+                                                                                    <td>{{ date('jS F, Y', strtotime($pattern->pattern_end)) }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Years Working Days</td>
+                                                                                    <td>
+                                                                                        @php 
+                                                                                            $fd = new DateTime(date('Y-m-d', strtotime($pattern->pattern_start)));
+                                                                                            $ed = new DateTime(date('Y-m-d', strtotime($pattern->pattern_end)));
+                                                                                            $df = $fd->diff($ed);
+                                                                                            $years_working_days = $df->format('%a');
+                                                                                            $years_working_days += 1;
+
+                                                                                            echo $years_working_days;
+                                                                                        @endphp
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </div>
                                                                         
                                                                         <div class="col-span-12">
                                                                             <table class="table table-bordered table-hover">
