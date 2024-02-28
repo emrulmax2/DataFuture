@@ -782,7 +782,7 @@ class UserHolidayController extends Controller
                 
                 $todayIsFraction = false;
                 $todaysFractionHour = 0;
-                if(($bookedHours + $todayHours) > $balance_left && $bookedHours <br $balance_left ):
+                if(($bookedHours + $todayHours) > $balance_left && $bookedHours < $balance_left ):
                     $todayIsFraction = $fractionFound =  true;
                     $todaysFractionHour = ($balance_left - $bookedHours);
                 endif;
@@ -1029,7 +1029,7 @@ class UserHolidayController extends Controller
 
                     $message2 = 'Dear '.$employeeName.',<br/><br/>';
                     $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
-                    $message2 .= '<a href="'.url('/').'">Click Here</a></br>';
+                    $message2 .= '<a href="'.url('/').'">Click Here</a><br/>';
                     $message2 .= 'Thank you for your cooperation.<br/>Sincerely,<br/>'.$siteName;
 
                     UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request', $message2, []));
