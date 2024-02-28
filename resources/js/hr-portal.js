@@ -145,6 +145,7 @@ var employeeListTable = (function () {
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const absentUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#absentUpdateModal"));
+    const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
 
     const absentUpdateModalEl = document.getElementById('absentUpdateModal')
     absentUpdateModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -154,6 +155,12 @@ var employeeListTable = (function () {
 
         $('#absentUpdateModal input[name="employee_id"]').html('0');
         $('#absentUpdateModal input[name="minutes"]').html('0');
+    });
+
+    const empNewLeaveRequestModalEl = document.getElementById('empNewLeaveRequestModal')
+    empNewLeaveRequestModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#empNewLeaveRequestModal .modal-body').html('');
+        $('#empNewLeaveRequestModal [name="employee_leave_id"]').html('0');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -221,4 +228,100 @@ var employeeListTable = (function () {
             }
         });
     });
+
+    /* Pending Leave Request Action Start */
+    $('.actPendingHoliday').on('click', function(e){
+        e.preventDefault();
+        var employee_leave_id = $(this).attr('data-leave');
+
+        empNewLeaveRequestModal.show();
+        axios({
+            method: "post",
+            url: route('employee.holiday.get.leave'),
+            data: {employee_leave_id : employee_leave_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#empNewLeaveRequestModal .modal-body').html(response.data.res);
+                $('#empNewLeaveRequestModal [name="employee_leave_id"]').val(employee_leave_id);
+            } 
+        }).catch(error => {
+            if(error.response){
+                if(error.response.status == 422){
+                    empNewLeaveRequestModal.hide();
+                    console.log('error');
+                }
+            }
+        });
+    })
+
+    
+    $('#empNewLeaveRequestForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('empNewLeaveRequestForm');
+
+        document.querySelector('#updateNLR').setAttribute('disabled', 'disabled');
+        document.querySelector('#updateNLR svg').style.cssText = 'display: inline-block;';
+
+        var err = 0;
+        $('#empNewLeaveRequestModal .leaveRequestDaysTable tbody tr').each(function(){
+            var $tableTr = $(this);
+            if($('input[type="radio"]:checked', $tableTr).length == 0){
+                err += 1;
+            }
+        });
+
+        if(err > 0){
+            document.querySelector('#updateNLR').removeAttribute('disabled');
+            document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
+
+            $('#empNewLeaveRequestForm .validationWarning').remove();
+            $('#empNewLeaveRequestForm .modal-content').prepend('<div class="alert validationWarning alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Validation error found! Leave status can nto be un-checked.</div>')
+            
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+            
+            setTimeout(function(){
+                $('#empNewLeaveRequestForm .validationWarning').remove()
+            }, 2000);
+        }else{
+            let form_data = new FormData(form);
+            axios({
+                method: "POST",
+                url: route('employee.holiday.update.leave'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#updateNLR').removeAttribute('disabled');
+                document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
+                
+                if (response.status == 200) {
+                    empNewLeaveRequestModal.hide();
+                    
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulations!');
+                        $('#successModal .successModalDesc').html('Employee leave request successfully updated.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                } 
+            }).catch(error => {
+                document.querySelector('#updateNLR').removeAttribute('disabled');
+                document.querySelector('#updateNLR svg').style.cssText = 'display: none;';
+                if(error.response){
+                    console.log('error');
+                }
+            });
+        }
+    }); 
+    /* Pending Leave Request Action End */
+
 })();

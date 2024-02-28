@@ -42,7 +42,7 @@
                             $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
                         @endphp
                         <div class="intro-x">
-                            <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
+                            <div class="flex items-center px-5 py-3 mb-3 box zoom-in actPendingHoliday" data-leave="{{ $leave->id }}">
                                 <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
                                     <img src="{{ $leave->employee->photo_url }}" alt="{{ $leave->employee->first_name.' '.$leave->employee->last_name }}">
                                 </div>
@@ -178,6 +178,43 @@
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Edit New Request Modal -->
+    <div id="empNewLeaveRequestModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="empNewLeaveRequestForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Update Leave Request</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateNLR" class="btn btn-primary w-auto">     
+                            Save                  
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="employee_leave_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit New Request Modal -->
 
 
     <!-- BEGIN: Warning Modal Content -->

@@ -1120,31 +1120,38 @@
 .labelsBtnsGroup span{
     font-size: 12px;
 }
-.holidayVacationBG{
+.holidayVacationBG,
+.leaveCalendarTable tbody tr td.holidayVacationBG{
     background: rgb(0 119 181);
     color: #FFF;
 }
-.meetingTrainingBG{
+.meetingTrainingBG,
+.leaveCalendarTable tbody tr td.meetingTrainingBG{
     background: rgb(0 0 0);
     color: #FFF;
 }
-.sickLeaveBG{
+.sickLeaveBG,
+.leaveCalendarTable tbody tr td.sickLeaveBG{
     background: rgb(30 41 59);
     color: #FFF;
 }
-.authoriseUnpaidBG{
+.authoriseUnpaidBG,
+.leaveCalendarTable tbody tr td.authoriseUnpaidBG{
     background: rgb(185 28 28);
     color: #FFF;
 }
-.authorisedPaidBG{
+.authorisedPaidBG,
+.leaveCalendarTable tbody tr td.authorisedPaidBG{
     background: rgb(59 89 152);
     color: #FFF;
 }
-.bankHolidayBG{
+.bankHolidayBG,
+.leaveCalendarTable tbody tr td.bankHolidayBG{
     background: rgb(243, 110, 38);
     color: #FFF;
 }
-.pendingDay{
+.pendingDay,
+.leaveCalendarTable tbody tr td.pendingDay{
     background-image: repeating-linear-gradient(180deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 6px );
 }
 
@@ -1544,4 +1551,15 @@ input[type=number] {
 .clockinArea{
     margin-left: auto;
     margin-right: 22px;
+}
+
+.disabledElement::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    background: transparent;
 }

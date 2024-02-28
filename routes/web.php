@@ -198,6 +198,7 @@ use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\Settings\HrMachineController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
@@ -2296,6 +2297,17 @@ Route::middleware('auth')->group(function() {
     Route::controller(MyStaffController::class)->group(function(){
         Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
         
+    });
+    
+    Route::controller(HrMachineController::class)->group(function() {
+        Route::get('site-settings/hr-machine', 'index')->name('hr.machine'); 
+        Route::get('site-settings/hr-machine/list', 'list')->name('hr.machine.list');
+        Route::post('site-settings/hr-machine/store', 'store')->name('hr.machine.store');
+        Route::post('site-settings/hr-machine/edit', 'edit')->name('hr.machine.edit');
+        Route::post('site-settings/hr-machine/update', 'update')->name('hr.machine.update');
+
+        Route::delete('site-settings/hr-machine/destory/{id}', 'destroy')->name('hr.machine.destroy'); 
+        Route::post('site-settings/hr-machine/restore', 'restore')->name('hr.machine.restore'); 
     });
 });
 

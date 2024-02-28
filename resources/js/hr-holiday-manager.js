@@ -81,45 +81,47 @@ var manageHolidayListTable = (function () {
                 var type = row.getData().type;
                 var id = row.getData().id;
                 var yearid = row.getData().yearid;
+                var can_auth = row.getData().can_auth;
 
-                
-                if(type == 'approved'){
-                    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-                    confirmModal.show();
-                    document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                        $('#confirmModal .confModTitle').html('Are you sure?');
-                        $('#confirmModal .confModDesc').html('Do you really want to reject this day\'s leave hour? Then click on agree to continue.');
-                        $('#confirmModal .agreeWith').attr('data-id', id).attr('data-action', 'REJECTLEAVE');
-                    });
-                }else if(type == 'rejected'){
-                    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-                    confirmModal.show();
-                    document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                        $('#confirmModal .confModTitle').html('Are you sure?');
-                        $('#confirmModal .confModDesc').html('Do you really want to approve this day\'s leave hour? Then click on agree to continue.');
-                        $('#confirmModal .agreeWith').attr('data-id', id).attr('data-action', 'APPROVELEAVE');
-                    });
-                }else{
-                    const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
-                    empNewLeaveRequestModal.show();
-                    axios({
-                        method: "post",
-                        url: route('employee.holiday.get.leave'),
-                        data: {employee_leave_id : id},
-                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                    }).then(response => {
-                        if (response.status == 200) {
-                            $('#empNewLeaveRequestModal .modal-body').html(response.data.res);
-                            $('#empNewLeaveRequestModal [name="employee_leave_id"]').val(employee_leave_id);
-                        } 
-                    }).catch(error => {
-                        if(error.response){
-                            if(error.response.status == 422){
-                                empNewLeaveRequestModal.hide();
-                                console.log('error');
+                if(can_auth == 1){
+                    if(type == 'approved'){
+                        const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+                        confirmModal.show();
+                        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                            $('#confirmModal .confModTitle').html('Are you sure?');
+                            $('#confirmModal .confModDesc').html('Do you really want to reject this day\'s leave hour? Then click on agree to continue.');
+                            $('#confirmModal .agreeWith').attr('data-id', id).attr('data-action', 'REJECTLEAVE');
+                        });
+                    }else if(type == 'rejected'){
+                        const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+                        confirmModal.show();
+                        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                            $('#confirmModal .confModTitle').html('Are you sure?');
+                            $('#confirmModal .confModDesc').html('Do you really want to approve this day\'s leave hour? Then click on agree to continue.');
+                            $('#confirmModal .agreeWith').attr('data-id', id).attr('data-action', 'APPROVELEAVE');
+                        });
+                    }else{
+                        const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
+                        empNewLeaveRequestModal.show();
+                        axios({
+                            method: "post",
+                            url: route('employee.holiday.get.leave'),
+                            data: {employee_leave_id : id},
+                            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                        }).then(response => {
+                            if (response.status == 200) {
+                                $('#empNewLeaveRequestModal .modal-body').html(response.data.res);
+                                $('#empNewLeaveRequestModal [name="employee_leave_id"]').val(id);
+                            } 
+                        }).catch(error => {
+                            if(error.response){
+                                if(error.response.status == 422){
+                                    empNewLeaveRequestModal.hide();
+                                    console.log('error');
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             }
         });

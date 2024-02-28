@@ -1017,7 +1017,7 @@ class UserHolidayController extends Controller
                             $message .= 'Thanks<br/>';
                             $message .= $siteName;
 
-                            UserMailerJob::dispatch($configuration, $approverEmail, new CommunicationSendMail('Leave Request', $message, []));
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request', $message, []));
                         endif;
                     endforeach;
                 endif;
@@ -1027,7 +1027,7 @@ class UserHolidayController extends Controller
                     $message2 .= '<br/><br/>Thanks<br/><br/>';
                     $message2 .= $siteName;
 
-                    UserMailerJob::dispatch($configuration, $employee->user->email, new CommunicationSendMail('Leave Request', $message2, []));
+                    UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request', $message2, []));
                 endif;
 
                 return response()->json(['res' => 'Request successfully submitted'], 200);

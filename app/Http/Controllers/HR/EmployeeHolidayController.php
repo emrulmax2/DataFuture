@@ -41,6 +41,15 @@ class EmployeeHolidayController extends Controller
         $empLeaveDisableDays = $this->employeeNonWorkingDays($id, $activePattern);
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
+        $can_auth = false;
+        if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
+            foreach($employee->holidayAuth as $empAuth):
+                if($empAuth->user_id == auth()->user()->id):
+                    $can_auth = true;
+                endif;
+            endforeach;
+        endif;
+
         return view('pages.employee.profile.holiday', [
             'title' => 'Welcome - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -66,6 +75,7 @@ class EmployeeHolidayController extends Controller
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
             ],
+            'can_auth' => $can_auth
         ]);
     }
 
@@ -1019,7 +1029,7 @@ class EmployeeHolidayController extends Controller
                             $message .= 'Thanks<br/>';
                             $message .= $siteName;
 
-                            UserMailerJob::dispatch($configuration, $approverEmail, new CommunicationSendMail('Leave Request', $message, []));
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request', $message, []));
                         endif;
                     endforeach;
                 endif;
@@ -1029,7 +1039,7 @@ class EmployeeHolidayController extends Controller
                     $message2 .= '<br/><br/>Thanks<br/><br/>';
                     $message2 .= $siteName;
 
-                    UserMailerJob::dispatch($configuration, $employee->user->email, new CommunicationSendMail('Leave Request', $message2, []));
+                    UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request', $message2, []));
                 endif;
 
                 return response()->json(['res' => 'Request successfully submitted'], 200);
@@ -1212,7 +1222,7 @@ class EmployeeHolidayController extends Controller
                     $message .= 'Thanks<br/>';
                     $message .= $siteName;
 
-                    UserMailerJob::dispatch($configuration, $approverEmail, new CommunicationSendMail('Leave Request Reviewed', $message, []));
+                    UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Reviewed', $message, []));
                 endif;
             endforeach;
         endif;
@@ -1241,7 +1251,7 @@ class EmployeeHolidayController extends Controller
             $message .= '<br/><br/>Thanks<br/><br/>';
             $message .= $siteName;
 
-            UserMailerJob::dispatch($configuration, $employee->user->email, new CommunicationSendMail('Leave Request Review', $message, []));
+            UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request Review', $message, []));
         endif;
 
 
