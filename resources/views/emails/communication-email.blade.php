@@ -324,7 +324,7 @@
 				<tr>
 					<td style="text-align: center;">
 						<p style="margin: 0; font-size: 13px; line-height: 20px; color: #777; padding: 10px 0;">
-							<span class="text">Barclay Hall, 156 Green Street, London, E78JQ</span><br/>
+							<span class="text">Barclay Hall, 156B Green Street, London, E7 8JQ</span><br/>
 						    <span class="text">+44 (0) 207 377 1077</span>
 						</p>
 					</td>
