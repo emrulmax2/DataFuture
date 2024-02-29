@@ -1089,6 +1089,8 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/holidays/update-leave', 'employeeUpdateLeave')->name('employee.holiday.update.leave'); 
         Route::post('employee-profile/holidays/approve-leave', 'employeeApproveLeave')->name('employee.holiday.approve.leave'); 
         Route::post('employee-profile/holidays/reject-leave', 'employeeRejectLeave')->name('employee.holiday.rject.leave'); 
+
+        Route::post('employee-profile/holidays/check-leave-day-is-approved', 'employeeCheckLeaveDayIsApproved')->name('employee.holiday.check.day.is.approved'); 
     });
 
     Route::controller(EmployeeDocumentsController::class)->group(function(){
@@ -1158,6 +1160,8 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
         
         Route::get('hr/portal/reports', 'employmentReportShow')->name('hr.portal.employment.reports.show');
+
+        Route::post('hr/portal/get-leave-day-details', 'getLeaveDayDetails')->name('hr.portal.get.leave.day.details');
         
     });     
 

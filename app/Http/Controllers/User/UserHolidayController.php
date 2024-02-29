@@ -115,6 +115,7 @@ class UserHolidayController extends Controller
                                                           ->where('employee_working_pattern_id', $pattern->id)
                                                           ->where('status', 'Pending')
                                                           ->where('to_date', '<=', $ped)
+                                                          ->orderBy('from_date', 'ASC')
                                                           ->get();
                             $pattern['approvedLeaves'] = $this->employeesApprovedLeaves($employee_id, $year->id, $pattern->id);
                             $pattern['rejectedLeaves'] = $this->employeesRejectedLeaves($employee_id, $year->id, $pattern->id);
@@ -618,7 +619,7 @@ class UserHolidayController extends Controller
                               ->where('status', 'Approved')
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
-            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->orderBy('leave_date', 'DESC')->get();
+            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->orderBy('leave_date', 'ASC')->get();
         else:
             return [];
         endif;
@@ -630,7 +631,7 @@ class UserHolidayController extends Controller
                               ->where('status', '!=', 'Pending')
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
-            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'In Active')->orderBy('leave_date', 'DESC')->get();
+            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'In Active')->orderBy('leave_date', 'ASC')->get();
         else:
             return [];
         endif;
@@ -888,6 +889,13 @@ class UserHolidayController extends Controller
     public function employeeLeaveSubmission(Request $request){
         $employee_id = $request->employee_id;
         $employee = Employee::find($employee_id);
+        $employee_emails = [];
+        if(!empty($employee->email) && !empty($employee->email)):
+            $employee_emails[] = $employee->email;
+        endif;
+        if(!empty($employee->employment->email) && !empty($employee->employment->email)):
+            $employee_emails[] = $employee->employment->email;
+        endif;
 
         $year_id = $request->leave_holiday_years;
         $pattern_id = $request->leave_pattern;
@@ -923,7 +931,7 @@ class UserHolidayController extends Controller
         $leaveData['status'] = 'Pending';
         $leaveData['created_by'] = auth()->user()->id;
 
-        if(!empty($leaves)):
+        if(!empty($leaves) && isset($commonSmtp->id) && $commonSmtp->id > 0):
             $empLeaves = EmployeeLeave::create($leaveData);
             if($empLeaves):
                 $startDate = '';
@@ -970,27 +978,20 @@ class UserHolidayController extends Controller
                         $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');
                         $approverName .= (isset($approver->employee->first_name) ? $approver->employee->first_name.' ' : ''); 
                         $approverName .= (isset($approver->employee->last_name) ? $approver->employee->last_name.' ' : '');
-                        $approverEmail = (isset($approver->email) && !empty($approver->email) ? $approver->email : '');
+                        $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : '');
                         
                         if(!empty($approverEmail)):
-                            $message = 'Hi '.$approverName.'<br/><br/>';
-                            $message .= $employeeName.' has requested you to approve leave from '.date('d-m-Y', strtotime($startDate)).' 
-                                    to '.date('d-m-Y', strtotime($endDate)).'. Login <a href="'.url('/').'">here</a> to approve the leave. Leave details are
-                                    noted bellow.<br/><br/>';
+                            $message = '';
+                            $message .= 'Dear '.$approverName.',<br/>';
+                            $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has designated you as the approver.<br/>';
+                            $message .= 'Please log in <a href="'.url('/').'">here</a> to review and approve the leave.<br/>';
+                            $message .= 'Leave details are provided below for your reference.<br/><br/>';
+
                             $message .= '<table border="1" style="text-align: left;">';
                                 $message .= '<tr>';
-                                    $message .= '<th>From</th>';
-                                    $message .= '<td>'.$startDate.'</td>';
-                                $message .= '</tr>';
-                                $message .= '<tr>';
-                                    $message .= '<th>To</th>';
-                                    $message .= '<td>'.$endDate.'</td>';
-                                $message .= '</tr>';
-                                $message .= '<tr>';
-                                    $message .= '<th>Days</th>';
+                                    $message .= '<th>No of Days</th>';
                                     $message .= '<td>'.$days.'Days</td>';
                                 $message .= '</tr>';
-                                
                                 if(!empty($daysHtml)):
                                     $message .= '<tr>';
                                         $message .= '<th>Dates</th>';
@@ -1001,7 +1002,6 @@ class UserHolidayController extends Controller
                                         $message .= '</td>'; 
                                     $message .= '</tr>';
                                 endif;
-                                
                                 $message .= '<tr>';
                                     $message .= '<th>Hours</th>';
                                     $message .= '<td>'.$this->calculateHourMinute($totalHours).'</td>';
@@ -1012,27 +1012,25 @@ class UserHolidayController extends Controller
                                     $message .= '<td>'.$note.'</td>';
                                 $message .= '</tr>';
                                 endif;
-                            $message .= '</table>';
-
-                            $message .= 'Thanks<br/>';
-                            $message .= $siteName;
+                                $message .= '<tr>';
+                                    $message .= '<th>Requested By</th>';
+                                    $message .= '<td>'.$employeeName.' on '.date('jS F, Y H:i').'</td>';
+                                $message .= '</tr>';
+                            $message .= '</table><br/>';
+                            $message .= 'Thank you for your attention to this matter.<br/><br/>';
+                            $message .= 'Sincerely,<br/>'.$siteName;
 
                             UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request', $message, []));
                         endif;
                     endforeach;
                 endif;
-                if(isset($employee->user->email) && !empty($employee->user->email)):
-                    /*$message2 = 'Hi '.$employeeName.'<br/><br/>';
-                    $message2 .= 'Your leave request successfully submited for review. You can check your request satus <a href="'.url('/').'">here</a>.';
-                    $message2 .= '<br/><br/>Thanks<br/><br/>';
-                    $message2 .= $siteName;*/
-
+                if(!empty($employee_emails)):
                     $message2 = 'Dear '.$employeeName.',<br/><br/>';
                     $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
-                    $message2 .= '<a href="'.url('/').'">Click Here</a><br/>';
+                    $message2 .= '<a href="'.url('/').'">Click Here</a><br/><br/>';
                     $message2 .= 'Thank you for your cooperation.<br/>Sincerely,<br/>'.$siteName;
 
-                    UserMailerJob::dispatch($configuration, [$employee->user->email], new CommunicationSendMail('Leave Request', $message2, []));
+                    UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request', $message2, []));
                 endif;
 
                 return response()->json(['res' => 'Request successfully submitted'], 200);

@@ -463,12 +463,12 @@
                                             $break_return = (isset($isses_field['break_return']) && $isses_field['break_return'] == 1) ? 1 : 0;
                                         @endphp
                                         <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
-                                            <td class="text-center inputCheckbox" rowspan="{{ ($atten->leave_status > 0 ? 2 : 0) }}">
+                                            <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
                                                 </div>
                                             </td>
-                                            <td rowspan="{{ ($atten->leave_status > 0 ? 2 : 0) }}">
+                                            <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <span class="m-0 font-medium block">
                                                     {{ (isset($atten->employee->title->name) && !empty($atten->employee->title->name) ? $atten->employee->title->name : '') }}
                                                     {{ (isset($atten->employee->first_name) && !empty($atten->employee->first_name) ? ' '.$atten->employee->first_name : '') }}
@@ -520,7 +520,7 @@
                                                         <td>
                                                             <input name="attendance[{{ $atten->id }}][clockout_system]" value="{{ $atten->clockout_system }}" 
                                                                 type="text" 
-                                                                class="clockout_system time rounded-0 form-control w-full {{ ($clockout == 1 ? 'border-danger' : '') }}"/>
+                                                                class="clockout_system time rounded-0 form-control w-full {{ ($clockout == 1 ? 'border-danger' : '') }}" />
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -558,7 +558,7 @@
                                                 <span class="total_work_hour_text font-medium">{{ $atten->work_hour }}</span>
                                                 <input type="hidden" class="total_work_hour" name="attendance[{{ $atten->id }}][total_work_hour]" data-prev="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}" value="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}"/>
                                             </td>
-                                            <td rowspan="{{ ($atten->leave_status > 0 ? 2 : 0) }}">
+                                            <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                 <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>

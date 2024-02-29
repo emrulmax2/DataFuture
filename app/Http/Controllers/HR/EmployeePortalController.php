@@ -384,7 +384,7 @@ class EmployeePortalController extends Controller
         return $html;
     }
 
-    public function getCalendarBody($theDate, $department = 0, $employee = []){
+    public function getCalendarBody($theDate, $department = 4, $employee = []){
         $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
         if($department > 0):
             $query->whereHas('employment', function($q) use ($department){
@@ -602,5 +602,61 @@ class EmployeePortalController extends Controller
         endif;
 
         return $pattern;
+    }
+
+    public function getLeaveDayDetails(Request $request){
+        $theLeaveDayId = $request->theLeaveDayId;
+        $theLeaveDate = $request->theLeaveDate;
+        $theEmployee = $request->theEmployee;
+
+        $empLeaveDay = EmployeeLeaveDay::find($theLeaveDayId);
+        $employee_id = $empLeaveDay->leave->employee_id;
+        $employee = Employee::find($employee_id);
+
+        $title = $employee->full_name.' ('.date('D, jS M, Y', strtotime($theLeaveDate)).')';
+
+        $leave_type = 'Unknown';
+        switch ($empLeaveDay->leave->leave_type) {
+            case 1:
+                $leave_type = 'Holiday / Vacation';
+                break;
+            case 2:
+                $leave_type = 'Meeting / Training';
+                break;
+            case 3:
+                $leave_type = 'Sick Leave';
+                break;
+            case 4:
+                $leave_type = 'Authorised Unpaid';
+                break;
+            case 5:
+                $leave_type = 'Authorised Paid';
+                break;
+        }
+        $html = '';
+        $html .= '<div class="grid grid-cols-12 gap-4">';
+            $html .= '<div class="col-span-4 text-slate-500 font-medium">Type</div>';
+            $html .= '<div class="col-span-8 font-medium">'.$leave_type.'</div>';
+            $html .= '<div class="col-span-4 text-slate-500 font-medium">Status</div>';
+            $html .= '<div class="col-span-8 font-medium">';
+                if($empLeaveDay->leave->status == 'Approved'):
+                    $html .= '<span class="btn btn-sm rounded-0 btn-success text-white">Approved</span>';
+                elseif($empLeaveDay->leave->status == 'Pending'):
+                    $html .= '<span class="btn btn-sm rounded-0 btn-warning text-white">Pending</span>';
+                else:
+                    $html .= '<span class="btn btn-sm rounded-0 btn-danger text-white">Rejected</span>';
+                endif;
+            $html .='</div>';
+            $html .= '<div class="col-span-4 text-slate-500 font-medium">Date</div>';
+            $html .= '<div class="col-span-8 font-medium">'.date('jS F, Y', strtotime($theLeaveDate)).'</div>';
+            $html .= '<div class="col-span-4 text-slate-500 font-medium">Hours</div>';
+            $html .= '<div class="col-span-8 font-medium">'.$this->calculateHourMinute($empLeaveDay->hour).' Hours</div>';
+            if(isset($empLeaveDay->leave->note) && !empty($empLeaveDay->leave->note)):
+                $html .= '<div class="col-span-4 text-slate-500 font-medium">Note</div>';
+                $html .= '<div class="col-span-8 font-medium">'.$empLeaveDay->leave->note.'</div>';
+            endif;
+        $html .= '</div>';
+
+        return response()->json(['htm' => $html, 'title' => $title], 200);
     }
 }

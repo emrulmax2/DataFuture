@@ -82,75 +82,82 @@
                                                                         </div>
                                                                         
                                                                         <div class="col-span-12">
-                                                                            <table class="table table-bordered table-hover">
-                                                                                <thead>
+                                                                            <table class="table table-bordered table-hover bankHolidayTable">
+                                                                                <thead class="cursor-pointer">
                                                                                     <tr>
-                                                                                        <th class="whitespace-nowrap">Status</th>
-                                                                                        <th class="whitespace-nowrap">Start Date</th>
-                                                                                        <th class="whitespace-nowrap">End Date</th>
+                                                                                        <th class="whitespace-nowrap w-1/5">Status</th>
+                                                                                        <th class="whitespace-nowrap w-1/5">Start Date</th>
+                                                                                        <th class="whitespace-nowrap w-1/5">End Date</th>
                                                                                         <th class="whitespace-nowrap">Title</th>
-                                                                                        <th class="whitespace-nowrap">Hour</th>
+                                                                                        <th class="whitespace-nowrap w-24">Hour</th>
                                                                                     </tr>
                                                                                 </thead>
                                                                                 <tbody>
                                                                                     @if(isset($pattern->bankHolidays) && !empty($pattern->bankHolidays))
                                                                                         @foreach($pattern->bankHolidays as $bhd)
                                                                                             <tr class="bankHolidayRow">
-                                                                                                <td>Bank Holiday Auto Booked</td>
-                                                                                                <td>{{ isset($bhd['start_date']) && !empty($bhd['start_date']) ? date('D jS F, Y', strtotime($bhd['start_date'])) : '' }}</td>
-                                                                                                <td>{{ isset($bhd['end_date']) && !empty($bhd['end_date']) ? date('D jS F, Y', strtotime($bhd['end_date'])) : '' }}</td>
+                                                                                                <td class="w-1/5">Bank Holiday Auto Booked</td>
+                                                                                                <td class="w-1/5">{{ isset($bhd['start_date']) && !empty($bhd['start_date']) ? date('D jS F, Y', strtotime($bhd['start_date'])) : '' }}</td>
+                                                                                                <td class="w-1/5">{{ isset($bhd['end_date']) && !empty($bhd['end_date']) ? date('D jS F, Y', strtotime($bhd['end_date'])) : '' }}</td>
                                                                                                 <td>{{ isset($bhd['name']) && !empty($bhd['name']) ? $bhd['name'] : '' }}</td>
-                                                                                                <td>{{ isset($bhd['hour']) && !empty($bhd['hour']) ? $bhd['hour'] : '00:00' }}</td>
-                                                                                            </tr>
-                                                                                        @endforeach
-                                                                                    @endif
-
-                                                                                    @if(isset($pattern->approvedLeaves) && !empty($pattern->approvedLeaves))
-                                                                                        @foreach($pattern->approvedLeaves as $leaveDay)
-                                                                                            <tr  class="approvedDayRow" data-leavedayid="{{ $leaveDay->id }}">
-                                                                                                <td>
-                                                                                                    Approved 
-                                                                                                    @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
-                                                                                                        @switch($leaveDay->leave->leave_type)
-                                                                                                            @case(1)
-                                                                                                                Holiday / Vacation
-                                                                                                                @break
-                                                                                                            @case(2)
-                                                                                                                Meeting / Training
-                                                                                                                @break
-                                                                                                            @case(3)
-                                                                                                                Sick Leave
-                                                                                                                @break
-                                                                                                            @case(4)
-                                                                                                                Authorised Unpaid
-                                                                                                                @break
-                                                                                                            @case(5)
-                                                                                                                Authorised Paid
-                                                                                                                @break
-                                                                                                        @endswitch
-                                                                                                    @endif
-                                                                                                </td>
-                                                                                                <td>{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                                <td>{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                                <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
-                                                                                                <td>
-                                                                                                    @php 
-                                                                                                        $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
-                                                                                                        $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
-                                                                                                    
-                                                                                                        $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                                                        $hourMins .= ':';
-                                                                                                        $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                                                                        
-                                                                                                        echo $hourMins;
-                                                                                                    @endphp
-                                                                                                </td>
+                                                                                                <td class="w-24">{{ isset($bhd['hour']) && !empty($bhd['hour']) ? $bhd['hour'] : '00:00' }}</td>
                                                                                             </tr>
                                                                                         @endforeach
                                                                                     @endif
                                                                                 </tbody>
                                                                             </table>
                                                                         </div>
+
+                                                                        
+                                                                        @if(isset($pattern->approvedLeaves) && !empty($pattern->approvedLeaves))
+                                                                        <div class="col-span-12">
+                                                                            <table class="table table-bordered approvedLeaveTable">
+                                                                                <tbody>
+                                                                                    @foreach($pattern->approvedLeaves as $leaveDay)
+                                                                                        <tr  class="approvedDayRow" data-leavedayid="{{ $leaveDay->id }}">
+                                                                                            <td class="w-1/5">
+                                                                                                Approved 
+                                                                                                @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
+                                                                                                    @switch($leaveDay->leave->leave_type)
+                                                                                                        @case(1)
+                                                                                                            Holiday / Vacation
+                                                                                                            @break
+                                                                                                        @case(2)
+                                                                                                            Meeting / Training
+                                                                                                            @break
+                                                                                                        @case(3)
+                                                                                                            Sick Leave
+                                                                                                            @break
+                                                                                                        @case(4)
+                                                                                                            Authorised Unpaid
+                                                                                                            @break
+                                                                                                        @case(5)
+                                                                                                            Authorised Paid
+                                                                                                            @break
+                                                                                                    @endswitch
+                                                                                                @endif
+                                                                                            </td>
+                                                                                            <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                            <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                            <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
+                                                                                            <td class="w-24">
+                                                                                                @php 
+                                                                                                    $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
+                                                                                                    $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
+                                                                                                
+                                                                                                    $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
+                                                                                                    $hourMins .= ':';
+                                                                                                    $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
+                                                                                                    
+                                                                                                    echo $hourMins;
+                                                                                                @endphp
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    @endforeach
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        @endif
                                                                         
                                                                         @if(isset($pattern->requestedLeaves) && !empty($pattern->requestedLeaves))
                                                                         <div class="col-span-12">
@@ -170,15 +177,15 @@
                                                                                             @endforeach
                                                                                         @endif
                                                                                         <tr class="newRequestRow">
-                                                                                            <td>Awaiting Approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})</td>
-                                                                                            <td>
+                                                                                            <td class="w-1/5">Awaiting Approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})</td>
+                                                                                            <td class="w-1/5">
                                                                                                 {{ date('D jS F, Y', strtotime($leave->from_date))}}
                                                                                             </td>
-                                                                                            <td>
+                                                                                            <td class="w-1/5">
                                                                                                 {{ date('D jS F, Y', strtotime($leave->to_date))}}
                                                                                             </td>
                                                                                             <td>Holiday / Vacation</td>
-                                                                                            <td>
+                                                                                            <td class="w-24">
                                                                                                 @php 
                                                                                                     $hours = (intval(trim($leaveHours)) / 60 >= 1) ? intval(intval(trim($leaveHours)) / 60) : '00';
                                                                                                     $mins = (intval(trim($leaveHours)) % 60 != 0) ? intval(trim($leaveHours)) % 60 : '00';
@@ -203,7 +210,7 @@
                                                                                     <tbody>
                                                                                         @foreach($pattern->rejectedLeaves as $leaveDay)
                                                                                             <tr class="rejectedDayRow" data-leavedayid="{{ $leaveDay->id }}">
-                                                                                                <td>
+                                                                                                <td class="w-1/5">
                                                                                                     Rejected  
                                                                                                     @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
                                                                                                         @switch($leaveDay->leave->leave_type)
@@ -225,10 +232,10 @@
                                                                                                         @endswitch
                                                                                                     @endif
                                                                                                 </td>
-                                                                                                <td>{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                                <td>{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                                <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                                <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
                                                                                                 <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
-                                                                                                <td>
+                                                                                                <td class="w-24">
                                                                                                     @php 
                                                                                                         $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
                                                                                                         $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
