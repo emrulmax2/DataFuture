@@ -544,5 +544,9 @@ import 'litepicker/dist/plugins/multiselect';
         }); 
     }
     /* Pending Leave Request Action End */
+
+    $('.bankHolidayTable thead').on('click', function(){
+        $('.bankHolidayTable tbody').fadeToggle();
+    })
     
 })();

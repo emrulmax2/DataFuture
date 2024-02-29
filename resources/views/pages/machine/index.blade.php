@@ -115,7 +115,7 @@
     <script type="module">
         (function () {
             function weatherBGImageLoading(){
-                let api = 'fb0049072f1e7bb5014fe868b6257087'; 
+                let api = '{{ env("OPEN_WEATHER_MAP_API") }}'; 
                 let lat = 51.5422602;
                 let lon = 0.0325046;
 

@@ -139,15 +139,30 @@ import IMask from 'imask';
     $('.leaveCalendarTable').on('click', '.view_leave', function(e){
         e.preventDefault();
         var $theTd = $(this);
-        var $theLeaveDayId = $theTd.attr('data-leaveday-id');
-        var $theLeaveDate = $theTd.attr('data-date');
-        var $theEmployee = $theTd.attr('data-employee');
+        var theLeaveDayId = $theTd.attr('data-leaveday-id');
+        var theLeaveDate = $theTd.attr('data-date');
+        var theEmployee = $theTd.attr('data-employee');
 
-        viewLeaveModal.show();
-        document.getElementById('viewLeaveModal').addEventListener('shown.tw.modal', function(event){
-            $('#viewLeaveModal .leaveDetailsModalLoader').fadeOut();
-            $('#viewLeaveModal .leaveDetailsModalContent').html('Comming Soon...').fadeIn();
-            $('#viewLeaveModal .modal-titles').text('Leave Details');
+        axios({
+            method: "post",
+            url: route('hr.portal.get.leave.day.details'),
+            data: {theLeaveDayId : theLeaveDayId, theLeaveDate : theLeaveDate, theEmployee : theEmployee},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                viewLeaveModal.show();
+                document.getElementById('viewLeaveModal').addEventListener('shown.tw.modal', function(event){
+                    $('#viewLeaveModal .leaveDetailsModalLoader').fadeOut();
+                    $('#viewLeaveModal .leaveDetailsModalContent').html(response.data.htm).fadeIn();
+                    $('#viewLeaveModal .modal-titles').text(response.data.title);
+                });
+            } 
+        }).catch(error => {
+            if(error.response){
+                if(error.response.status == 422){
+                    console.log('error');
+                }
+            }
         });
     });
 

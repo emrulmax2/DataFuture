@@ -27,4 +27,8 @@ class EmployeeLeaveDay extends Model
     public function leave() {
         return $this->belongsTo(EmployeeLeave::class, 'employee_leave_id');
     }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

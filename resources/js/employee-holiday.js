@@ -559,18 +559,43 @@ import 'litepicker/dist/plugins/multiselect';
                 }
             });
         }
-    }); //confirmModal
+    }); 
 
+    
     $('.rejectedDayRow').on('click', function(){
         var $theRow = $(this);
         var leave_day_id = $theRow.attr('data-leavedayid');
+        
 
         if(!$theRow.hasClass('disabledRow')){
-            confirmModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html('Are you sure?');
-                $('#confirmModal .confModDesc').html('Do you really want to approve this day\'s leave hour? Then click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', leave_day_id).attr('data-action', 'APPROVELEAVE');
+            axios({
+                method: 'post',
+                url: route('employee.holiday.check.day.is.approved'),
+                data: {leave_day_id : leave_day_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    if(response.data.res == 1){
+                        warningModal.show();
+                        document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                            $('#warningModal .warningModalTitle').html('Oops!');
+                            $('#warningModal .warningModalDesc').html('Existing approved leave found for this day. You can not approved another leave on same day.');
+                        });
+
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 5000);
+                    }else{
+                        confirmModal.show();
+                        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                            $('#confirmModal .confModTitle').html('Are you sure?');
+                            $('#confirmModal .confModDesc').html('Do you really want to approve this day\'s leave hour? Then click on agree to continue.');
+                            $('#confirmModal .agreeWith').attr('data-id', leave_day_id).attr('data-action', 'APPROVELEAVE');
+                        });
+                    }
+                }
+            }).catch(error =>{
+                console.log(error)
             });
         }
     });
@@ -595,6 +620,7 @@ import 'litepicker/dist/plugins/multiselect';
         var row_id = $theBtn.attr('data-id');
         var action = $theBtn.attr('data-action');
 
+        $('#confirmModal button').attr('disabled', 'disabled');
         if(action == 'APPROVELEAVE'){
             axios({
                 method: 'post',
@@ -619,7 +645,19 @@ import 'litepicker/dist/plugins/multiselect';
                     }, 2000);
                 }
             }).catch(error =>{
-                console.log(error)
+                $('#confirmModal button').removeAttr('disabled');
+                if (error.response.status == 422) {
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "Oops!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try latter or contact with the administrator');
+                    });   
+                
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000)
+                    console.log('error');
+                }
             });
         }else if(action == 'REJECTLEAVE'){
             axios({
@@ -645,7 +683,19 @@ import 'litepicker/dist/plugins/multiselect';
                     }, 2000);
                 }
             }).catch(error =>{
-                console.log(error)
+                $('#confirmModal button').removeAttr('disabled');
+                if (error.response.status == 422) {
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "Oops!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try latter or contact with the administrator');
+                    });   
+                
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000)
+                    console.log('error');
+                }
             });
         }
     })
@@ -730,5 +780,10 @@ import 'litepicker/dist/plugins/multiselect';
         });
     });
     /* Holiday Adjustment End */
+
+
+    $('.bankHolidayTable thead').on('click', function(){
+        $('.bankHolidayTable tbody').fadeToggle();
+    })
 
 })();
