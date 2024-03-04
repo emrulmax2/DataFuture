@@ -118,6 +118,7 @@ class UserHolidayController extends Controller
                                                           ->orderBy('from_date', 'ASC')
                                                           ->get();
                             $pattern['approvedLeaves'] = $this->employeesApprovedLeaves($employee_id, $year->id, $pattern->id);
+                            $pattern['takenLeaves'] = $this->employeesTakenLeaves($employee_id, $year->id, $pattern->id);
                             $pattern['rejectedLeaves'] = $this->employeesRejectedLeaves($employee_id, $year->id, $pattern->id);
                             $empPatterms[] = $pattern;
                         endif;
@@ -579,8 +580,17 @@ class UserHolidayController extends Controller
             foreach($bookedLeaves as $bl):
                 if(isset($bl->leaveDays) && $bl->leaveDays->count() > 0):
                     foreach($bl->leaveDays as $bld):
-                        if($bld->status == 'Active'):
+                        if($bld->status == 'Active' && ($bld->is_taken == 0 || $bld->is_taken == '')):
                             $leaveBooked += $bld->hour;
+                        endif;
+                    endforeach;
+                endif;
+            endforeach;
+            foreach($bookedLeaves as $tkn):
+                if(isset($tkn->leaveDays) && $tkn->leaveDays->count() > 0):
+                    foreach($tkn->leaveDays as $tknd):
+                        if($tknd->status == 'Active' && $tknd->is_taken == 1):
+                            $leaveTaken += $tknd->hour;
                         endif;
                     endforeach;
                 endif;
@@ -596,7 +606,7 @@ class UserHolidayController extends Controller
             foreach($requestedLeaves as $rl):
                 if(isset($rl->leaveDays) && $rl->leaveDays->count() > 0):
                     foreach($rl->leaveDays as $rld):
-                        if($rld->status == 'Active'):
+                        if($rld->status == 'Active' && ($bld->is_taken == 0 || $bld->is_taken == '')):
                             $leaveRequested += $rld->hour;
                         endif;
                     endforeach;
@@ -619,7 +629,19 @@ class UserHolidayController extends Controller
                               ->where('status', 'Approved')
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
-            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->orderBy('leave_date', 'ASC')->get();
+            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->where('is_taken', '!=', 1)->orderBy('leave_date', 'ASC')->get();
+        else:
+            return [];
+        endif;
+    }
+
+    public function employeesTakenLeaves($employee_id, $year_id, $pattern_id){
+        $employee_leave_ids = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year_id)
+                              ->where('employee_working_pattern_id', $pattern_id)
+                              ->where('status', 'Approved')
+                              ->pluck('id')->toArray();
+        if(!empty($employee_leave_ids)):
+            return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->where('is_taken', 1)->orderBy('leave_date', 'ASC')->get();
         else:
             return [];
         endif;
