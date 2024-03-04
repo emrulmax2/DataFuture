@@ -82,6 +82,7 @@ class EmployeeAppraisalCron extends Command
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
             ];
+            $mailTo = [];
             $mailTo[] = 'hr@lcc.ac.uk';
 
             $PDFHTML = '';
@@ -240,7 +241,7 @@ class EmployeeAppraisalCron extends Command
             $content = $pdf->output();
             Storage::disk('google')->put('public/reports/'.$fileName, $content );
 
-
+            $attachmentFiles = [];
             $attachmentFiles[] = [
                 "pathinfo" => 'public/reports/'.$fileName,
                 "nameinfo" => $fileName,

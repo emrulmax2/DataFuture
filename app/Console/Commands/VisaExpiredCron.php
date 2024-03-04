@@ -80,6 +80,7 @@ class VisaExpiredCron extends Command
                 $employee = Employee::find($employee_id);
                 $workpermit_expire = $vse->workpermit_expire;
 
+                $mailTo = [];
                 $mailTo[] = $employee->email;
                 if(isset($employee->employment->email) && !empty($employee->employment->email)):
                     $mailTo[] = $employee->employment->email;
@@ -252,6 +253,7 @@ class VisaExpiredCron extends Command
                 $data['created_by'] = 1;
                 $employeeDocuments = EmployeeDocuments::create($data);
 
+                $attachmentFiles = [];
                 $attachmentFiles[] = [
                     "pathinfo" => 'public/employees/'.$employee_id.'/documents/'.$fileName,
                     "nameinfo" => $fileName,
