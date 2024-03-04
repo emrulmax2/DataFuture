@@ -16,11 +16,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('passportexpiry:cron')->weeklyOn(8, '10:00');
-        $schedule->command('visaexpiry:cron')->weeklyOn(8, '10:10');
-        $schedule->command('visaexpired:cron')->weeklyOn(8, '10:20');
-        $schedule->command('passportexpired:cron')->weeklyOn(8, '10:30');
-        $schedule->command('employeeappraisal:cron')->weeklyOn(8, '10:40');
+        $schedule->command('passportexpiry:cron')->weeklyOn(7, '23:00');
+        $schedule->command('visaexpiry:cron')->weeklyOn(7, '23:10');
+        $schedule->command('visaexpired:cron')->weeklyOn(7, '23:20');
+        $schedule->command('passportexpired:cron')->weeklyOn(7, '23:30');
+        $schedule->command('employeeappraisal:cron')->weeklyOn(7, '23:40');
         
 
         // $schedule->command('passportexpiry:cron')->everyMinute();
