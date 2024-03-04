@@ -140,7 +140,7 @@ class PassportExpiryCron extends Command
                     $PDFHTML .= '<body>';
                         if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
                             $PDFHTML .= '<header>';
-                                $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                                $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
                             $PDFHTML .= '</header>';
                         endif;
 
@@ -150,7 +150,7 @@ class PassportExpiryCron extends Command
                                 if(isset($LetterFooter->current_file_name) && !empty($LetterFooter->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooter->current_file_name)):
                                     $PDFHTML .= '<tr>';
                                         $PDFHTML .= '<td class="footerPartners" style="text-align: center; vertical-align: middle; padding-bottom: 5px;">';
-                                            $PDFHTML .= '<img style=" max-width: 100%; height: auto;" src="'.Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooter->current_file_name).'" alt="'.$LetterFooter->name.'"/>';
+                                            $PDFHTML .= '<img style=" max-width: 100%; height: auto;" src="'.url('storage/letterheaderfooter/footer/'.$LetterFooter->current_file_name).'" alt="'.$LetterFooter->name.'"/>';
                                         $PDFHTML .= '</td>';
                                     $PDFHTML .= '</tr>';
                                 endif;

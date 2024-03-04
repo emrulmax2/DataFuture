@@ -288,8 +288,9 @@
 	</style>
 </head>
 	@php
-		$opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray();
-		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : '');
+		$opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? url('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
+		
 	@endphp
 	<body width="100%" style="margin: 0; padding: 15px 0 !important; background-color: #f1f1f1;">
 		<div style="max-width: 600px; margin: 0 auto; background: #FFF; border-radius: 5px;" class="email-container">
