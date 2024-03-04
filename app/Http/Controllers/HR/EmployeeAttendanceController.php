@@ -466,7 +466,8 @@ class EmployeeAttendanceController extends Controller
                             $total_today_break = $actualBreak + $this->convertStringToMinute($unpaid_break);
 
                             $total_today = round(abs($system_start - $system_end) / 60,2);
-                            $total_work = ($total_today > $total_today_break ? ($total_today - $total_today_break) : $total_today);
+                            //$total_work = ($total_today > $total_today_break ? ($total_today - $total_today_break) : $total_today);
+                            $total_work = ($total_today > $total_today_break ? ($total_today - $total_today_break) : 0);
                         else:
                             $total_work = 0;
                         endif;
@@ -500,6 +501,9 @@ class EmployeeAttendanceController extends Controller
                     $data['created_by'] = auth()->user()->id;
                     
                     EmployeeAttendance::create($data);
+                    if(isset($today_leave_id) && $today_leave_id > 0 && $leave_type > 0):
+                        EmployeeLeaveDay::where('id', $today_leave_id)->update(['is_taken' => 1]);
+                    endif;
                 elseif($day_status == 1 && $todayAttendance->count() == 0):
                     $leave_type = ($leave_type > 0) ? $leave_type : 4;
                     $data['clockin_contract'] = '';
@@ -525,6 +529,9 @@ class EmployeeAttendanceController extends Controller
                     $data['created_by'] = auth()->user()->id;
 
                     EmployeeAttendance::create($data);
+                    if(isset($today_leave_id) && $today_leave_id > 0):
+                        EmployeeLeaveDay::where('id', $today_leave_id)->update(['is_taken' => 1]);
+                    endif;
                 endif;
             endif;
         endforeach;

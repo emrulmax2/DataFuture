@@ -78,6 +78,7 @@ import IMask from 'imask';
             var $total_work_hour = $theTr.find('.total_work_hour');
             var total_work_hour = parseInt($total_work_hour.attr('data-prev'), 10);
 
+
             var total_adjustment = 0;
             var adjustmentOperator = 0;
             if (adjustment.indexOf('-') != -1) {
@@ -104,8 +105,18 @@ import IMask from 'imask';
                     new_total = (new_total + total_adjustment);
                 }
                 
-                $total_work_hour.val(new_total).attr('data-prev', new_total);
-                $theTr.find('.total_work_hour_text').text(convertMinuteToHourMinute(new_total));
+                if(new_total >= 0){
+                    $total_work_hour.val(new_total).attr('data-prev', new_total);
+                    $theTr.find('.total_work_hour_text').text(convertMinuteToHourMinute(new_total));
+                    $theTr.find('.saveRow').removeAttr('disabled').removeClass('btn-danger').addClass('btn-success');
+                    $theTr.find('.employee_attendance_id').removeAttr('disabled');
+                }else{
+                    var n_total = new_total * -1;
+                    $total_work_hour.val('-'+n_total).attr('data-prev', '-'+n_total);
+                    $theTr.find('.total_work_hour_text').text('-'+convertMinuteToHourMinute(n_total));
+                    $theTr.find('.saveRow').attr('disabled', 'disabled').removeClass('btn-success').addClass('btn-danger');
+                    $theTr.find('.employee_attendance_id').attr('disabled', 'disabled');
+                }
             }else{
                 var new_total = totalMinutes - unpadi_break;
                 
@@ -114,9 +125,19 @@ import IMask from 'imask';
                 }else if(total_adjustment > 0 && adjustmentOperator == 2){
                     new_total = (new_total + total_adjustment);
                 }
-                
-                $total_work_hour.val(new_total).attr('data-prev', new_total);
-                $theTr.find('.total_work_hour_text').text(convertMinuteToHourMinute(new_total));
+                console.log(new_total);
+                if(new_total >= 0){
+                    $total_work_hour.val(new_total).attr('data-prev', new_total);
+                    $theTr.find('.total_work_hour_text').text(convertMinuteToHourMinute(new_total));
+                    $theTr.find('.saveRow').removeAttr('disabled').removeClass('btn-danger').addClass('btn-success');
+                    $theTr.find('.employee_attendance_id').removeAttr('disabled');
+                }else{
+                    var n_total = new_total * -1;
+                    $total_work_hour.val('-'+n_total).attr('data-prev', '-'+n_total);
+                    $theTr.find('.total_work_hour_text').text('-'+convertMinuteToHourMinute(n_total));
+                    $theTr.find('.saveRow').attr('disabled', 'disabled').removeClass('btn-success').addClass('btn-danger');
+                    $theTr.find('.employee_attendance_id').attr('disabled', 'disabled');
+                }
             }
         }
     });

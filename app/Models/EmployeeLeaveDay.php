@@ -18,6 +18,7 @@ class EmployeeLeaveDay extends Model
         'hour',
         'is_fraction',
         'status',
+        'is_taken',
         'created_by',
         'updated_by',
     ];

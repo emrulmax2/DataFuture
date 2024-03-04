@@ -158,6 +158,54 @@
                                                                             </table>
                                                                         </div>
                                                                         @endif
+
+                                                                        @if(isset($pattern->takenLeaves) && !empty($pattern->takenLeaves))
+                                                                        <div class="col-span-12">
+                                                                            <table class="table table-bordered takenLeaveTable">
+                                                                                @foreach($pattern->takenLeaves as $leaveDay)
+                                                                                    <tr  class="takenDayRow" data-leavedayid="{{ $leaveDay->id }}">
+                                                                                        <td class="w-1/5">
+                                                                                            Taken 
+                                                                                            @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
+                                                                                                @switch($leaveDay->leave->leave_type)
+                                                                                                    @case(1)
+                                                                                                        Holiday / Vacation
+                                                                                                        @break
+                                                                                                    @case(2)
+                                                                                                        Meeting / Training
+                                                                                                        @break
+                                                                                                    @case(3)
+                                                                                                        Sick Leave
+                                                                                                        @break
+                                                                                                    @case(4)
+                                                                                                        Authorised Unpaid
+                                                                                                        @break
+                                                                                                    @case(5)
+                                                                                                        Authorised Paid
+                                                                                                        @break
+                                                                                                @endswitch
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                        <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
+                                                                                        <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
+                                                                                        <td class="w-24">
+                                                                                            @php 
+                                                                                                $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
+                                                                                                $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
+                                                                                            
+                                                                                                $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
+                                                                                                $hourMins .= ':';
+                                                                                                $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
+                                                                                                
+                                                                                                echo $hourMins;
+                                                                                            @endphp
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                            </table>
+                                                                        </div>
+                                                                        @endif
                                                                         
                                                                         @if(isset($pattern->requestedLeaves) && !empty($pattern->requestedLeaves))
                                                                         <div class="col-span-12">
