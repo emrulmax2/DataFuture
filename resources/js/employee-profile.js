@@ -8,7 +8,7 @@ import { createIcons, icons } from "lucide";
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
-        persist: false,
+        //persist: false,
         create: true,
         allowEmptyOption: true,
         onDelete: function (values) {
@@ -19,6 +19,25 @@ import { createIcons, icons } from "lucide";
 
     var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
     var employee_work_type_id_tom = new TomSelect('#employee_work_type_id', tomOptions);
+
+    let multiTomOption = tomOptions
+    $('.lccTom').each(function(){
+        if ($(this).attr("multiple") !== undefined) {
+            multiTomOption = {
+                ...multiTomOption,
+                plugins: {
+                    ...multiTomOption.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                }
+            };
+            new TomSelect(this, multiTomOption);
+        }else{
+            new TomSelect(this, tomOptions);
+        }
+        
+    });
 
 
 

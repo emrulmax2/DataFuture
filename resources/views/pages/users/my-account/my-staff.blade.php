@@ -42,7 +42,8 @@
                             $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
                         @endphp
                         <div class="intro-x">
-                            <div class="flex items-center px-5 py-3 mb-3 box zoom-in actPendingHoliday" data-leave="{{ $leave->id }}">
+                            {{--<div class="flex items-center px-5 py-3 mb-3 box zoom-in actPendingHoliday" data-leave="{{ $leave->id }}">--}}
+                            <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
                                 <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
                                     <img src="{{ $leave->employee->photo_url }}" alt="{{ $leave->employee->first_name.' '.$leave->employee->last_name }}">
                                 </div>

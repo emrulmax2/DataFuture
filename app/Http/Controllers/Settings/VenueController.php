@@ -93,7 +93,7 @@ class VenueController extends Controller
             foreach($ip_addresses as $ip):
                 $datas = VenueIpAddress::create([
                     'venue_id'=> $data->id,
-                    'ip'=> $ip,
+                    'ip'=> trim($ip),
                     'created_by' => auth()->user()->id
                 ]);
             endforeach;
@@ -129,7 +129,7 @@ class VenueController extends Controller
             foreach($ip_addresses as $ip):
                 $datas = VenueIpAddress::create([
                     'venue_id'=> $request->id,
-                    'ip'=> $ip,
+                    'ip'=> trim($ip),
                     'created_by' => auth()->user()->id
                 ]);
             endforeach;

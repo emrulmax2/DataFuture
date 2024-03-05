@@ -1218,8 +1218,7 @@ class EmployeeHolidayController extends Controller
 
         EmployeeLeave::where('id', $employee_leave_id)->update($data);
         
-        $currentUserName = (isset(Auth::user()->load('employee')->employee->first_name) ? Auth::user()->load('employee')->employee->first_name.' ' : ''); 
-        $currentUserName .= (isset(Auth::user()->load('employee')->employee->last_name) ? Auth::user()->load('employee')->employee->last_name.' ' : '');
+        $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
         if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
             foreach($employee->holidayAuth as $authUsers):
                 if($authUsers->user_id != auth()->user()->id):
@@ -1248,6 +1247,9 @@ class EmployeeHolidayController extends Controller
                                 $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>Details</strong></td>';
                             $message .= '</tr>';
                             $message .= $leaveDayHTML;
+                            $message .= '<tr>';
+                                $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
+                            $message .= '</tr>';
                         $message .= '</table><br/>';
                         $message .= 'Thank you for your cooperation.<br/><br/>';
                         $message .= 'Sincerely,<br/>'.$siteName;
@@ -1329,6 +1331,7 @@ class EmployeeHolidayController extends Controller
 
             EmployeeLeave::where('id', $empLeaveId)->update($data);
 
+            $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
             if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
                 foreach($employee->holidayAuth as $authUsers):
                     if($authUsers->user_id != auth()->user()->id):
@@ -1357,6 +1360,9 @@ class EmployeeHolidayController extends Controller
                                     $message .= '<td style="padding: 5px 10px;">Approved</td>';
                                     $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
                                     $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
+                                $message .= '</tr>';
+                                $message .= '<tr>';
+                                    $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
                                 $message .= '</tr>';
                             $message .= '</table><br/>';
                             $message .= 'Thank you for your cooperation.<br/><br/>';
@@ -1447,6 +1453,7 @@ class EmployeeHolidayController extends Controller
 
             EmployeeLeave::where('id', $empLeaveId)->update($data);
 
+            $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
             if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
                 foreach($employee->holidayAuth as $authUsers):
                     if($authUsers->user_id != auth()->user()->id):
@@ -1475,6 +1482,9 @@ class EmployeeHolidayController extends Controller
                                     $message .= '<td style="padding: 5px 10px;">Rejected</td>';
                                     $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
                                     $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
+                                $message .= '</tr>';
+                                $message .= '<tr>';
+                                    $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
                                 $message .= '</tr>';
                             $message .= '</table><br/>';
                             $message .= 'Thank you for your cooperation.<br/><br/>';

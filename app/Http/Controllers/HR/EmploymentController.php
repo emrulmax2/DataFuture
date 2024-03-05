@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HR\EmploymentDataUpdateRequest;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\Employment;
 use Illuminate\Http\Request;
 
@@ -72,7 +73,7 @@ class EmploymentController extends Controller
      */
     public function update(EmploymentDataUpdateRequest $request, Employment $employment)
     {
-        //$request->merge(['disability_status' => ($request->disability_status)? "Yes":"No"]);
+        $employmentOld = Employment::where('employee_id', $request->employee_id)->get()->first();
         $input = $request->all();
         $employment->fill($input);
         $changes = $employment->getDirty();
@@ -81,9 +82,23 @@ class EmploymentController extends Controller
         $employee = Employee::find($employment->employee_id);
         $employee->venues()->sync($request->site_location);
 
+        if($employment->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employment->employee_id;
+                $data['table'] = 'employments';
+                $data['field_name'] = $field;
+                $data['field_value'] = $employmentOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
+
         
         if($employment->wasChanged())
-            return response()->json(["message"=>"updated","data"=>$changes]);
+            return response()->json(["message"=>"updated", ]);
         else
             return response()->json(["no update"]);
     }

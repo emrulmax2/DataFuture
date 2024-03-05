@@ -13,10 +13,9 @@ import IMask from 'imask';
             },
         },
         placeholder: 'Search Here...',
-        labelField: 'Select Employee',
-        persist: false,
-        create: true,
-        allowEmptyOption: false,
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },

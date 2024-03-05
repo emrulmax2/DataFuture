@@ -17,6 +17,7 @@ use App\Models\KinsRelation;
 use App\Models\Ethnicity;
 use App\Models\Disability;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeEligibilites;
 use App\Models\EmployeeEmergencyContact;
 use App\Models\EmployeeJobTitle;
@@ -409,29 +410,42 @@ class EmployeeController extends Controller
      */
     public function update(EmployeeDataUpdateRequest $request, Employee $employee)
     {
+        $employeeOldRow = Employee::find($request->id);
         $status = (isset($request->status) && $request->status > 0 ? 1 : 0);
+        if($status == 0){
+            $ended_on = (isset($request->ended_on) && !empty($request->ended_on) ? date('Y-m-d', strtotime($request->ended_on)) : date('Y-m-d'));
+        }else{
+            $ended_on = null;
+        }
         $request->merge([
-            'disability_status' => ($request->disability_status)? "Yes":"No",
-            'status' => $status
+            'disability_status' => ($request->disability_status) ? "Yes" : "No",
+            'status' => $status,
+            'ended_on' => $ended_on
         ]);
         $input = $request->all();
         $employee->fill($input);
         $changes = $employee->getDirty();
         $employee->save();
 
-        $employee->disability()->sync($request->disability_id);
+        if($employee->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employee->id;
+                $data['table'] = 'employees';
+                $data['field_name'] = $field;
+                $data['field_value'] = $employeeOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
 
-        if($status == 0){
-            $emptData['ended_on'] = (isset($request->ended_on) && !empty($request->ended_on) ? date('Y-m-d', strtotime($request->ended_on)) : date('Y-m-d'));
-            Employment::where('employee_id', $employee->id)->update($emptData);
-        }else{
-            $emptData['ended_on'] = null;
-            Employment::where('employee_id', $employee->id)->update($emptData);
-        }
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
+
+        $employee->disability()->sync($request->disability_id);
 
         
         if($employee->wasChanged())
-            return response()->json(["message"=>"updated","data"=>$changes]);
+            return response()->json(["message"=>"updated"]);
         else
             return response()->json(["no update"]);
         

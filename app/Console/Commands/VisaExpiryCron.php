@@ -252,7 +252,9 @@ class VisaExpiryCron extends Command
                 $data['path'] = Storage::disk('google')->url('public/employees/'.$employee_id.'/documents/'.$fileName);
                 $data['display_file_name'] = 'Visa Expiry';
                 $data['current_file_name'] = $fileName;
+                $data['type'] = 2;
                 $data['created_by'] = 1;
+                $data['created_at'] = date('Y-m-d H:i:s');
                 $employeeDocuments = EmployeeDocuments::create($data);
 
                 $attachmentFiles = [];

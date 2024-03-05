@@ -135,6 +135,137 @@ var employeeDocumentListTable = (function () {
         },
     };
 })();
+var employeeCommunicationDocumentListTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let employeeId = $("#employeeCommunicationDocumentListTable").attr('data-employee') != "" ? $("#employeeCommunicationDocumentListTable").attr('data-employee') : "0";
+        let queryStr = $("#query-EDC").val() != "" ? $("#query-EDC").val() : "";
+        let status = $("#status-EDC").val() != "" ? $("#status-EDC").val() : "1";
+
+        let tableContent = new Tabulator("#employeeCommunicationDocumentListTable", {
+            ajaxURL: route("employee.documents.communication.list"),
+            ajaxParams: { employeeId: employeeId, queryStr : queryStr, status : status},
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "#ID",
+                    field: "id",
+                    headerHozAlign: "left",
+                    width: "120",
+                },
+                {
+                    title: "Name",
+                    field: "display_file_name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Checked",
+                    field: "hard_copy_check",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        if(cell.getData().hard_copy_check == 1){
+                            return '<span class="btn btn-success-soft px-1 py-0 rounded-0">Yes</span>';
+                        }else{
+                            return '<span class="btn btn-pending-soft px-1 py-0 rounded-0">No</span>';
+                        }
+                    }
+                },
+                {
+                    title: "Uploaded By",
+                    field: "created_by",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div>';
+                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                        html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
+                    title: "Actions",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        btns +='<a target="_blank" href="'+cell.getData().url+'" download class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                        if (cell.getData().deleted_at == null) {
+                            btns += '<button data-id="' + cell.getData().id + '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                        }else if(cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        }
+                        
+                        return btns;
+                    },
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+        // Export
+        $("#tabulator-export-csv-EDC").on("click", function (event) {
+            tableContent.download("csv", "data.csv");
+        });
+
+        $("#tabulator-export-json-EDC").on("click", function (event) {
+            tableContent.download("json", "data.json");
+        });
+
+        $("#tabulator-export-xlsx-EDC").on("click", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "data.xlsx", {
+                sheetName: "Employee Upload Details",
+            });
+        });
+
+        $("#tabulator-export-html-EDC").on("click", function (event) {
+            tableContent.download("html", "data.html", {
+                style: true,
+            });
+        });
+
+        // Print
+        $("#tabulator-print-EDC").on("click", function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
 
 (function(){
     if ($("#employeeDocumentListTable").length) {
@@ -160,6 +291,31 @@ var employeeDocumentListTable = (function () {
         });
 
     }
+    if ($("#employeeCommunicationDocumentListTable").length) {
+        // Init Table
+        employeeCommunicationDocumentListTable.init();
+
+        // Filter function
+        function filterHTMLFormEDC() {
+            employeeCommunicationDocumentListTable.init();
+        }
+
+
+        // On click go button
+        $("#tabulator-html-filter-go-EDC").on("click", function (event) {
+            filterHTMLFormEDC();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-reset-EDC").on("click", function (event) {
+            $("#query-EDC").val("");
+            $("#status-EDC").val("1");
+            filterHTMLFormEDC();
+        });
+
+    }
+
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
@@ -397,6 +553,7 @@ var employeeDocumentListTable = (function () {
                     $('#confirmModal button').removeAttr('disabled');
                     confirmModal.hide();
                     employeeDocumentListTable.init();
+                    employeeCommunicationDocumentListTable.init();
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
@@ -423,6 +580,7 @@ var employeeDocumentListTable = (function () {
                     $('#confirmModal button').removeAttr('disabled');
                     confirmModal.hide();
                     employeeDocumentListTable.init();
+                    employeeCommunicationDocumentListTable.init();
 
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){

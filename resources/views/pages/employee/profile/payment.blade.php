@@ -98,6 +98,9 @@
                                     </ul>
                                 </div>
                             </div>
+                            @if(isset($employee->banks) && $employee->banks->count() == 0)
+                                <button data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn btn-primary text-white ml-2"><i data-lucide="plus-circle" class="w-4 h-4"></i> Add Bank Details</button>
+                            @endif
                         </div>
                     </div>
                     <div class="overflow-x-auto scrollbar-hidden">

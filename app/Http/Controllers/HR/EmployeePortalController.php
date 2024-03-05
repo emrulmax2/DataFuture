@@ -188,7 +188,9 @@ class EmployeePortalController extends Controller
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
                     'type' => 'approved',
-                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
+                    'approved_by' => (isset($list->leave->approved->employee->full_name) && !empty($list->leave->approved->employee->full_name) ? $list->leave->approved->employee->full_name : ''),
+                    'approved_at' => (isset($list->leave->approved_at) && !empty($list->leave->approved_at) ? date('jS M, Y', strtotime($list->leave->approved_at)) : ''),
                 ];
                 $i++;
             endforeach;
@@ -229,7 +231,9 @@ class EmployeePortalController extends Controller
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
                     'type' => 'rejected',
-                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
+                    'approved_by' => '',
+                    'approved_at' => ''
                 ];
                 $i++;
             endforeach;
@@ -258,7 +262,9 @@ class EmployeePortalController extends Controller
                     'title' => 'Holiday / Vacation',
                     'hour' => $this->calculateHourMinute($leaveHours),
                     'type' => 'pending',
-                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0)
+                    'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
+                    'approved_by' => '',
+                    'approved_at' => ''
                 ];
                 $i++;
             endforeach;
@@ -384,7 +390,7 @@ class EmployeePortalController extends Controller
         return $html;
     }
 
-    public function getCalendarBody($theDate, $department = 4, $employee = []){
+    public function getCalendarBody($theDate, $department = 0, $employee = []){
         $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
         if($department > 0):
             $query->whereHas('employment', function($q) use ($department){
@@ -394,7 +400,6 @@ class EmployeePortalController extends Controller
         if(!empty($employee)):
             $query->whereIn('id', $employee);
         endif;
-        //$query->where('id', 41);
         $employees = $query->get();
         
         $today = date('Y-m-d');

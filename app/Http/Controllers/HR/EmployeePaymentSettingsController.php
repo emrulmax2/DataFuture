@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeePaymentSettingsRequest;
 use App\Http\Requests\EmployeePaymentSettingsUpdateRequest;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeBankDetail;
 use App\Models\EmployeeHolidayAuthorisedBy;
 use App\Models\EmployeeHourAuthorisedBy;
@@ -126,6 +127,7 @@ class EmployeePaymentSettingsController extends Controller
     public function update(EmployeePaymentSettingsUpdateRequest $request){
         $employee_id = $request->employee_id;
         $employee_payment_setting_id = $request->employee_payment_setting_id;
+        $paymentRequestOld = EmployeePaymentSetting::find($employee_payment_setting_id);
 
         $payment_method = (isset($request->payment_method) ? $request->payment_method : null);
         $subject_to_clockin = (isset($request->subject_to_clockin) ? $request->subject_to_clockin : 0);
@@ -197,7 +199,24 @@ class EmployeePaymentSettingsController extends Controller
             $data['pension_enrolled'] = 'No';
         endif;
 
-        $paymentSetting = EmployeePaymentSetting::where('employee_id', $employee_id)->where('id', $employee_payment_setting_id)->update($data);
+        $employeePaymentSettings = EmployeePaymentSetting::find($employee_payment_setting_id);
+        $employeePaymentSettings->fill($data);
+        $changes = $employeePaymentSettings->getDirty();
+        $employeePaymentSettings->save();
+
+        if($employeePaymentSettings->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employeePaymentSettings->employee_id;
+                $data['table'] = 'employee_terms';
+                $data['field_name'] = $field;
+                $data['field_value'] = $paymentRequestOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
 
         return response()->json(['msg' => 'Payment Settings Successfully updated.'], 200);
     }

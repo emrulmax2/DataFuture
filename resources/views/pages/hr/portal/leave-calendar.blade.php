@@ -31,7 +31,7 @@
                         <option value="">Please Select</option>
                         @if($employees->count() > 0)
                             @foreach($employees as $emp)
-                                <option value="{{ $emp->id }}">{{ $emp->first_name.' '.$emp->last_name }}</option>
+                                <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
                             @endforeach
                         @endif
                     </select>
