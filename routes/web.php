@@ -195,6 +195,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\hr\portal\reports\DataReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -1097,6 +1098,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/documents/{id}', 'index')->name('employee.documents'); 
         Route::post('employee-profile/documents/uploads-documents', 'employeeUploadDocument')->name('employee.documents.upload.documents'); 
         Route::get('employee-profile/documents-upload/uploads-list', 'list')->name('employee.documents.uploads.list');
+        Route::get('employee-profile/documents-upload/communication-list', 'communicationList')->name('employee.documents.communication.list');
         Route::delete('employee-profile/documents/uploads-destroy', 'destroy')->name('employee.documents.destory.uploads');
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
     });
@@ -1213,6 +1215,12 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/starterreport/starterreportbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.starterreportbysearch.pdf');
     });            
     
+    Route::controller(DataReportController::class)->group(function(){
+        Route::get('hr/portal/reports/datareport', 'index')->name('hr.portal.reports.datareport');
+        Route::post('hr/portal/reports/datareport', 'genrateDataReport')->name('employee.hr.datareport');
+        Route::get('hr/portal/reports/datareport/list', 'list')->name('hr.portal.reports.datareport.list'); 
+    });       
+
     Route::controller(RecordCardController::class)->group(function(){
         Route::get('hr/portal/reports/recordcard', 'index')->name('hr.portal.reports.recordcard');
         Route::get('hr/portal/reports/recordcard/list', 'searchlist')->name('hr.portal.reports.recordcard.list'); 

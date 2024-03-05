@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmpoyeePenssionSchemeRequest;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeePenssionScheme;
 use Illuminate\Http\Request;
 
@@ -85,6 +86,7 @@ class EmployeePenssionSchemeController extends Controller
     public function update(EmpoyeePenssionSchemeRequest $request){
         $employee_id = $request->employee_id;
         $id = $request->id;
+        $penssionSchemeOld = EmployeePenssionScheme::find($id);
 
         $adata = [];
         $adata['employee_id'] = $employee_id;
@@ -93,7 +95,25 @@ class EmployeePenssionSchemeController extends Controller
         $adata['date_left'] = (isset($request->date_left) && !empty($request->date_left) ? date('Y-m-d', strtotime($request->date_left)) : null);
         $adata['updated_by'] = auth()->user()->id;
 
-        EmployeePenssionScheme::where('id', $id)->update($adata);
+        $employeePenssion = EmployeePenssionScheme::find($id);
+        $employeePenssion->fill($adata);
+        $changes = $employeePenssion->getDirty();
+        $employeePenssion->save();
+
+        if($employeePenssion->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employee_id;
+                $data['table'] = 'employee_penssion_schemes';
+                $data['row_id'] = $id;
+                $data['field_name'] = $field;
+                $data['field_value'] = $penssionSchemeOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
 
         return response()->json(['message' => 'Data successfully updated'], 200);
     }

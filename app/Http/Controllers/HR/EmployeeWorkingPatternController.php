@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeWorkPatternRequest;
 use App\Http\Requests\EmployeeWorkPatterUpdateRequest;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\EmployeeWorkingPatternPay;
@@ -113,6 +114,7 @@ class EmployeeWorkingPatternController extends Controller
     public function update(EmployeeWorkPatterUpdateRequest $request){
         $employee_id = $request->employee_id;
         $id = $request->id;
+        $employeeWorkingPatternOld = EmployeeWorkingPattern::find($id);
 
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
         $end_to = (isset($request->end_to) && !empty($request->end_to) ? date('Y-m-d', strtotime($request->end_to)) : Null);
@@ -126,7 +128,26 @@ class EmployeeWorkingPatternController extends Controller
         $data['active'] = $active;
         $data['updated_by'] = auth()->user()->id;
 
-        EmployeeWorkingPattern::where('id', $id)->update($data);
+        $employeeWorkingPattern = EmployeeWorkingPattern::find($id);
+        $employeeWorkingPattern->fill($request->input());
+        $changes = $employeeWorkingPattern->getDirty();
+        $employeeWorkingPattern->save();
+
+        if($employeeWorkingPattern->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employee_id;
+                $data['table'] = 'employee_bank_details';
+                $data['row_id'] = $id;
+                $data['field_name'] = $field;
+                $data['field_value'] = $employeeWorkingPatternOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
+
         if($active == 1):
             EmployeeWorkingPattern::where('employee_id', $employee_id)->where('id', '!=', $id)->where('active', 1)->update(['active' => 0]);
         endif;

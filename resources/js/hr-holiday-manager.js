@@ -69,6 +69,19 @@ var manageHolidayListTable = (function () {
                     field: "hour",
                     headerHozAlign: "left",
                 },
+                {
+                    title: "Approved By",
+                    field: "approved_by",
+                    headerHozAlign: "left",
+                    visible: (type == 'approved' ? true : false),
+                    formatter(cell, formatterParams) { 
+                        var html = '<div class="block">';
+                                html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().approved_by+'</div>';
+                                html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().approved_at+'</div>';
+                            html += '</div>';
+                        return html;
+                    }
+                },
             ],
             renderComplete() {
                 createIcons({

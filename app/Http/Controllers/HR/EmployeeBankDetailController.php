@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeBankDetailRequest;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeBankDetail;
 use Illuminate\Http\Request;
 
@@ -95,13 +96,30 @@ class EmployeeBankDetailController extends Controller
         $id = $request->id;
         $employee_id = $request->employee_id;
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
+        $bankOld = EmployeeBankDetail::find($id);
 
         $request->request->remove('active');
         $request->request->add(['active' => $active, 'updated_by' => auth()->user()->id]);
 
         $bank = EmployeeBankDetail::find($id);
         $bank->fill($request->input());
+        $changes = $bank->getDirty();
         $bank->save();
+
+        if($bank->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employee_id;
+                $data['table'] = 'employee_bank_details';
+                $data['row_id'] = $id;
+                $data['field_name'] = $field;
+                $data['field_value'] = $bankOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
 
         if($active == 1){
             EmployeeBankDetail::where('id', '!=', $id)->where('active', 1)->update(['active' => 0]);
