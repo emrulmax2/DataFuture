@@ -388,6 +388,37 @@
                     <input type="hidden" name="labels[ac_no]" value="Account Number">
                 </div>
             </div>
+            <div class="grid grid-cols-12 gap-4 mt-10 workingpatternsrows">
+                <div class="col-span-12">
+                    <h3 class="empDatasTitle font-medium">Working Patters <a href="javascript: void(0);" data-parent="workingpatternsrows" class="btn btn-sm btn-primary checkedAlls ml-1">All</a></h3>
+                    <input type="hidden" name="tables[employee_working_patterns]" value="EmployeeWorkingPattern" />
+                </div>
+                <div class="col-span-3">
+                    <div class="singlefields relative mb-2">
+                        <input id="s63" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_working_patterns][effective_from]" value="1"> 
+                        <label class= "cursor-pointer ml-2" for="s63">Effective From</label>
+                    </div>
+                    <input type="hidden" name="labels[effective_from]" value="Working Pattern Effective From">
+                </div>
+                <div class="col-span-3">
+                    <div class="singlefields relative mb-2">
+                        <input id="s63" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_working_patterns][contracted_hour]" value="1"> 
+                        <label class= "cursor-pointer ml-2" for="s63">Contracted Hour(s)</label>
+                    </div>
+                    <input type="hidden" name="labels[contracted_hour]" value="Contracted Hour">
+                </div>
+
+                <div class="col-span-3">
+                    
+                    <input type="hidden" name="tables[employee_working_pattern_pays]" value="EmployeeWorkingPatternPay" />
+                    <div class="singlefields relative mb-2">
+                        <input id="s63" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_working_pattern_pays][salary]" value="1"> 
+                        <label class= "cursor-pointer ml-2" for="s63">Salary</label>
+                    </div>
+                    <input type="hidden" name="labels[salary]" value="Salary">
+                </div>
+            </div>
+
             {{-- <div class="grid grid-cols-12 gap-4 mt-10 payrollRow">
                 <div class="col-span-12">
                     <h3 class="empDatasTitle font-medium">Payroll Info <a href="javascript: void(0);" data-parent="payrollRow" class="btn btn-sm btn-primary checkedAlls ml-1">All</a></h3>
