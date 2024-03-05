@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HR\EmployeeTermUpdateRequest;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeTerm;
 use Illuminate\Http\Request;
 
@@ -71,16 +72,30 @@ class EmployeeTermController extends Controller
      */
     public function update(EmployeeTermUpdateRequest $request, EmployeeTerm $term)
     {
-
+        $employeeTermOld = EmployeeTerm::where('employee_id', $request->employee_id)->orderBy('id', 'DESC')->get()->first();
         $input = $request->all();
         
         $term->fill($input);
         $changes = $term->getDirty();
         $term->save();
 
+        if($term->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $term->employee_id;
+                $data['table'] = 'employee_terms';
+                $data['field_name'] = $field;
+                $data['field_value'] = $employeeTermOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
+
         
         if($term->wasChanged())
-            return response()->json(["message"=>"updated","data"=>$changes]);
+            return response()->json(["message"=>"updated"]);
         else
             return response()->json(["no update"]);
     }

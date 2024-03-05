@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeWorkingPatternPayRequest;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternPay;
 use Illuminate\Http\Request;
@@ -93,6 +94,7 @@ class EmployeeWorkingPatternPayController extends Controller
         $employee_id = $request->employee_id;
         $payId = $request->id;
         $employee_working_pattern_id = $request->employee_working_pattern_id;
+        $patternPayOld = EmployeeWorkingPatternPay::find('id', $payId);
 
         $salary = (isset($request->salary) ? $request->salary : 0);
         $hourlyRate = (isset($request->hourly_rate) ? $request->hourly_rate : 0);
@@ -108,7 +110,25 @@ class EmployeeWorkingPatternPayController extends Controller
         $data['active'] = (isset($request->active) && $request->active > 0 ? $request->active : 0);
         $data['updated_by'] = auth()->user()->id;
 
-        EmployeeWorkingPatternPay::where('id', $payId)->where('employee_working_pattern_id', $employee_working_pattern_id)->update($data);
+        $employeeWorkingPatternPay = EmployeeWorkingPatternPay::find($payId);
+        $employeeWorkingPatternPay->fill($request->input());
+        $changes = $employeeWorkingPatternPay->getDirty();
+        $employeeWorkingPatternPay->save();
+
+        if($employeeWorkingPatternPay->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $employee_id;
+                $data['table'] = 'employee_working_pattern_pays';
+                $data['row_id'] = $payId;
+                $data['field_name'] = $field;
+                $data['field_value'] = $patternPayOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
 
         $res = [];
         $res['end'] = (!empty($endTo) ? 1 : 2);

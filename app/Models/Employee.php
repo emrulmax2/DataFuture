@@ -146,4 +146,10 @@ class Employee extends Model
     public function emergencyContact(){
         return $this->hasOne(EmployeeEmergencyContact::class, 'employee_id', 'id')->latestOfMany();
     }
+
+    public function banks(){
+        $banks = $this->hasMany(EmployeeBankDetail::class, 'employee_id', 'id');
+        $banks->getQuery()->where('active', '1');
+        return $banks;
+    }
 }

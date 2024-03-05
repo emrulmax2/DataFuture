@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HR\EmployeeEmergencyContactUpdateRequest;
 use App\Models\Address;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeEmergencyContact;
 use Illuminate\Http\Request;
 
@@ -72,15 +73,30 @@ class EmployeeEmergencyContactController extends Controller
      */
     public function update(EmployeeEmergencyContactUpdateRequest $request, EmployeeEmergencyContact $contact)
     {
+        $contactOld = EmployeeEmergencyContact::where('employee_id', $request->employee_id)->orderBy('id', 'desc')->get()->first();
         $input = $request->all();
         
         $contact->fill($input);
         $changes = $contact->getDirty();
         $contact->save();
 
+        if($contact->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $contact->employee_id;
+                $data['table'] = 'employee_emergency_contacts';
+                $data['field_name'] = $field;
+                $data['field_value'] = $contactOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
+
         
         if($contact->wasChanged())
-            return response()->json(["message"=>"updated","data"=>$changes]);
+            return response()->json(["message"=>"updated",]);
         else
             return response()->json(["no update"]);
     }

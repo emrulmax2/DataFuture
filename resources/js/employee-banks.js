@@ -63,10 +63,10 @@ var employeeBankListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                             if(cell.getData().active == 1){
-                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></a>';
+                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></button>';
                             }
                         }  else if (cell.getData().deleted_at != null) {
                             btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';

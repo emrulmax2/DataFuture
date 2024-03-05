@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HR\EmployeeEligibilityUpdateRequest;
 use App\Models\Employee;
+use App\Models\EmployeeArchive;
 use App\Models\EmployeeEligibilites;
 use Illuminate\Http\Request;
 
@@ -72,6 +73,7 @@ class EmployeeEligibilityController extends Controller
      */
     public function update(EmployeeEligibilityUpdateRequest $request,EmployeeEligibilites $eligibility)
     {
+        $eligibilityOld = EmployeeEligibilites::where('employee_id', $request->employee_id)->get()->first();
         $mergeData = [   
             'eligible_to_work' => ($request->eligible_to_work_status)? "Yes":"No",
             'employee_work_permit_type_id'=> $request->workpermit_type,
@@ -101,8 +103,19 @@ class EmployeeEligibilityController extends Controller
         $changes = $eligibility->getDirty();
         $eligibility->save();
 
-        //$employee = Employee::find($employeeEligibilites->employee_id);
-        //$employee->venues()->sync($request->site_location);
+        if($eligibility->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['employee_id'] = $eligibility->employee_id;
+                $data['table'] = 'employee_eligibilites';
+                $data['field_name'] = $field;
+                $data['field_value'] = $eligibilityOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeArchive::create($data);
+            endforeach;
+        endif;
 
         
         if($eligibility->wasChanged())

@@ -138,7 +138,7 @@ class DashboardController extends Controller
         $html = '';
         $svg = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"stroke="white" class="w-4 h-4 ml-2 loaderSvg"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
         if($loc == 0):
-            $html .= '<button data-value="1" type="button" class="btn btn-facebook btn-sm attendance_action_btn text-white">Clock In '.$svg.'</button>';
+            $html .= '<button data-value="1" type="button" class="btn btn-facebook attendance_action_btn text-white">Clock In '.$svg.'</button>';
         elseif($loc == 1):
             $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
             
@@ -147,8 +147,8 @@ class DashboardController extends Controller
             $duration_seconds = round(abs($rtime - $ntime), 2) * 1000;
             
             $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', $rtime) : '').'</span>&nbsp;';
-            $html .= '<button data-value="2" type="button" class="btn btn btn-twitter btn-sm attendance_action_btn">Take Break  '.$svg.'</button>';
-            $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger btn-sm attendance_action_btn">Clock Out  '.$svg.'</button>';
+            $html .= '<button data-value="2" type="button" class="btn btn btn-twitter attendance_action_btn">Take Break  '.$svg.'</button>';
+            $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger attendance_action_btn">Clock Out  '.$svg.'</button>';
         elseif($loc == 2):
             $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
             
@@ -162,7 +162,7 @@ class DashboardController extends Controller
             $ntime = strtotime(date('H:i:s'));
             $duration_seconds = round(abs($rtime - $ntime), 2) * 1000;
             $html .= '<span class="text-success font-bold clockin_from mr-2" data-delays="'.$duration_seconds.'">00:00:00</span>&nbsp;';
-            $html .= '<button data-value="3" type="button" class="btn btn-warning text-white btn-sm attendance_action_btn">Return  '.$svg.'</button>';
+            $html .= '<button data-value="3" type="button" class="btn btn-warning text-white attendance_action_btn">Return  '.$svg.'</button>';
         elseif($loc == 3):
             $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
             $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : '');
@@ -170,10 +170,10 @@ class DashboardController extends Controller
             $duration_seconds = round(abs($rtime - $ntime), 2) * 1000;
             
             $html .= '<span class="text-primary font-bold mr-2">'.(!empty($rtime) ? date('H:i', $rtime) : '').'</span>&nbsp;';
-            $html .= '<button data-value="2" type="button" class="btn btn-twitter btn-sm attendance_action_btn">Take Break  '.$svg.'</button>';
-            $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger btn-sm attendance_action_btn">Clock Out  '.$svg.'</button>';
+            $html .= '<button data-value="2" type="button" class="btn btn-twitter attendance_action_btn">Take Break  '.$svg.'</button>';
+            $html .= '&nbsp;<button data-value="4" type="button" class="btn btn-danger attendance_action_btn">Clock Out  '.$svg.'</button>';
         elseif($loc == 4):
-            $html .= '<button data-value="1" type="button" class="btn btn-facebook btn-sm attendance_action_btn">Clock In  '.$svg.'</button>';
+            $html .= '<button data-value="1" type="button" class="btn btn-facebook attendance_action_btn">Clock In  '.$svg.'</button>';
         else:
             $html .= '';
         endif;

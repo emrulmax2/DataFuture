@@ -1097,6 +1097,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/documents/{id}', 'index')->name('employee.documents'); 
         Route::post('employee-profile/documents/uploads-documents', 'employeeUploadDocument')->name('employee.documents.upload.documents'); 
         Route::get('employee-profile/documents-upload/uploads-list', 'list')->name('employee.documents.uploads.list');
+        Route::get('employee-profile/documents-upload/communication-list', 'communicationList')->name('employee.documents.communication.list');
         Route::delete('employee-profile/documents/uploads-destroy', 'destroy')->name('employee.documents.destory.uploads');
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
     });

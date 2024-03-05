@@ -360,7 +360,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-12 sm:col-span-4 relative {{ (!$can_auth ? 'disabledElement' : '') }}">
+            <div class="col-span-12 sm:col-span-4">
                 <div class="intro-y box p-5 pb-7">
                     <div class="grid grid-cols-12 gap-0 items-center">
                         <div class="col-span-6">
@@ -433,7 +433,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5">
+                            <div class="grid grid-cols-12 gap-0 mt-5  relative {{ (!$can_auth ? 'disabledElement' : '') }}">
                                 <div class="col-span-12 sm:col-span-4"></div>
                                 <div class="col-span-12 sm:col-span-8">
                                     <div class="leaveCalendar" 
@@ -449,7 +449,7 @@
                             <div class="leaveFormStep2" style="display: none;">
                                 
                             </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5">
+                            <div class="grid grid-cols-12 gap-0 mt-5 relative {{ (!$can_auth ? 'disabledElement' : '') }}">
                                 <div class="col-span-12 sm:col-span-4"></div>
                                 <div class="col-span-12 sm:col-span-8 text-right">
                                     <button type="submit" id="confirmRequest" disabled class="btn btn-primary w-auto save">  

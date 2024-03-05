@@ -48,4 +48,8 @@ class EmployeeLeave extends Model
     public function leaveDays(){
         return $this->hasMany(EmployeeLeaveDay::class, 'employee_leave_id', 'id');
     }
+
+    public function approved(){
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 }
