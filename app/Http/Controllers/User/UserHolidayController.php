@@ -606,7 +606,7 @@ class UserHolidayController extends Controller
             foreach($requestedLeaves as $rl):
                 if(isset($rl->leaveDays) && $rl->leaveDays->count() > 0):
                     foreach($rl->leaveDays as $rld):
-                        if($rld->status == 'Active' && ($bld->is_taken == 0 || $bld->is_taken == '')):
+                        if($rld->status == 'Active' && ($rld->is_taken == 0 || $rld->is_taken == '')):
                             $leaveRequested += $rld->hour;
                         endif;
                     endforeach;
