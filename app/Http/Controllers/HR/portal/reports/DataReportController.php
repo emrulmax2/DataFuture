@@ -13,6 +13,8 @@ use App\Models\Department;
 use App\Models\EmployeeBankDetail;
 use App\Models\EmployeeEligibilites;
 use App\Models\EmployeeEmergencyContact;
+use App\Models\EmployeeWorkingPattern;
+use App\Models\EmployeeWorkingPatternPay;
 use App\Models\EmployeeWorkType;
 use App\Models\SexIdentifier;
 use App\Models\Venue;
@@ -125,6 +127,9 @@ class DataReportController extends Controller
                                             case 'ethnicity_id':
                                                 $theCollection[$row][] = $employee->ethnicity->name;
                                                 break;
+                                            case 'status':
+                                                    $theCollection[$row][] = ($employee->status) ? "Active": "Inactive";
+                                                    break;
                                             case 'address_id':
                                                 
                                                 $theCollection[$row][] = $employee->address->address_line_1.", ".$employee->address->address_line_2.", ".$employee->address->state.","
@@ -236,6 +241,32 @@ class DataReportController extends Controller
                                         $theCollection[$row][] =  ($employeeBankDetail) ? $employeeBankDetail->$fieldName : "";
                                     }
                                     
+                                }
+                                
+                                
+                            }
+                            $employeeWorkingPattern = "";
+                            if($table=="EmployeeWorkingPattern") {
+                                foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
+                                    
+                                    $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->whereNull('end_to')->get()->first();
+                                    if($fieldValue)
+                                        $theCollection[$row][] = ($employeeWorkingPattern==null) ? "": $employeeWorkingPattern->$fieldName;
+                                    
+                                }
+                                
+                                
+                            }
+
+                            if($table=="EmployeeWorkingPatternPay") {
+                                foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
+                                    
+                                    if($employeeWorkingPattern!="") {
+                                        $patternPay = EmployeeWorkingPatternPay::where("employee_working_pattern_id",$employeeWorkingPattern->id)->where("active",1)->get()->first();
+
+                                        if($fieldValue)
+                                        $theCollection[$row][] = ($patternPay==null) ? "": $patternPay->$fieldName;
+                                    }
                                 }
                                 
                                 
