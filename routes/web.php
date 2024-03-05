@@ -195,6 +195,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\hr\portal\reports\DataReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -1213,6 +1214,12 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/starterreport/starterreportbysearchpdf', 'generateSearchPDF')->name('hr.portal.reports.starterreportbysearch.pdf');
     });            
     
+    Route::controller(DataReportController::class)->group(function(){
+        Route::get('hr/portal/reports/datareport', 'index')->name('hr.portal.reports.datareport');
+        Route::post('hr/portal/reports/datareport', 'genrateDataReport')->name('employee.hr.datareport');
+        Route::get('hr/portal/reports/datareport/list', 'list')->name('hr.portal.reports.datareport.list'); 
+    });       
+
     Route::controller(RecordCardController::class)->group(function(){
         Route::get('hr/portal/reports/recordcard', 'index')->name('hr.portal.reports.recordcard');
         Route::get('hr/portal/reports/recordcard/list', 'searchlist')->name('hr.portal.reports.recordcard.list'); 
