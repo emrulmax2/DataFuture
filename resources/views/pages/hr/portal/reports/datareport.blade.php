@@ -390,7 +390,7 @@
             </div>
             <div class="grid grid-cols-12 gap-4 mt-10 workingpatternsrows">
                 <div class="col-span-12">
-                    <h3 class="empDatasTitle font-medium">Working Patters <a href="javascript: void(0);" data-parent="workingpatternsrows" class="btn btn-sm btn-primary checkedAlls ml-1">All</a></h3>
+                    <h3 class="empDatasTitle font-medium">Working Patterns <a href="javascript: void(0);" data-parent="workingpatternsrows" class="btn btn-sm btn-primary checkedAlls ml-1">All</a></h3>
                     <input type="hidden" name="tables[employee_working_patterns]" value="EmployeeWorkingPattern" />
                 </div>
                 <div class="col-span-3">
