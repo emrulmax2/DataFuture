@@ -51,6 +51,8 @@ class EmploymentReportController extends Controller
                     $url = route('hr.portal.reports.telephonedirectory');
                 elseif(($list->report_description=='Employee Eligibility Entry')):
                     $url = route('hr.portal.reports.eligibilityreport');
+                    elseif(($list->report_description=='Employee Data Report')):
+                        $url = route('hr.portal.reports.datareport');
                 endif;
                 $data[] = [
                     'sl' => $list->id,
