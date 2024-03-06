@@ -1581,3 +1581,14 @@ input[type=number] {
     z-index: 999999;
     background: transparent;
 }
+.clockinStatistics{
+    margin-right: 22px;
+}
+.sinceArea{
+    margin-left: 50px;
+    max-width: 92px;
+}
+.attendance_action_btn.disabled{
+    cursor: not-allowed;
+    opacity: .7;
+}

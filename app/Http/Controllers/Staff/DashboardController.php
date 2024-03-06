@@ -61,7 +61,8 @@ class DashboardController extends Controller
             'myPendingTask' => $this->getUserPendingTask(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
             'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
-            'home_work_history' => $this->getUserAttendanceLiveHistory(),
+            'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
+            'home_work_history_btns' => $this->getUserAttendanceLiveBtns(),
             'venue_ips' => $ips
         ]);
     }
@@ -112,6 +113,116 @@ class DashboardController extends Controller
         endif;
 
         return $result;
+    }
+
+    public function getUserAttendanceLiveStatistics(){
+        $user_id = auth()->user()->id;
+        $employee_id = auth()->user()->employee->id;
+        $today = date('Y-m-d');
+        $employee = Employee::find($employee_id);
+
+        $html = '';
+        $last_date = (isset($employee->employment->last_action_date) && $employee->employment->last_action_date != '') ? $employee->employment->last_action_date : '';
+        $last_action = (isset($employee->employment->last_action) && $employee->employment->last_action > 0) ? $employee->employment->last_action : 0;
+        $last_action_label = '';
+        switch ($last_action) {
+            case 1:
+                $last_action_label = 'Working';
+                break;
+            case 2:
+                $last_action_label = 'In a Break';
+                break;
+            case 3:
+                $last_action_label = 'Working';
+                break;
+            case 4:
+                $last_action_label = 'Clocked Out';
+                break;
+            default:
+                $last_action_label = 'No clock-in';
+        }
+        $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
+        if(isset($employee->employment->id) && $employee->employment->id > 0):
+            if($today == $last_date && (isset($live->id) && $live->id > 0)):
+                $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : strtotime(date('H:i:s')));
+                $duration_seconds = $rtime * 1000;
+
+                $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
+                    $html .= '<div class="statusArea">';
+                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
+                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.$last_action_label.'</div>';
+                    $html .= '</div>';
+                    $html .= '<div class="sinceArea">';
+                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">since</div>';
+                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.date('H:i A', strtotime($live->time)).'</div>';
+                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap clockedInFrom" id="clockedInFrom" data-starts="'.$duration_seconds.'">00:00</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+            else:
+                $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
+                    $html .= '<div class="statusArea">';
+                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
+                        $html .= '<div class="font-medium whitespace-nowrap uppercase text-danger">No clock-in</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+            endif;
+        endif;
+
+        return $html;
+    }
+
+    public function getUserAttendanceLiveBtns(){
+        $user_id = auth()->user()->id;
+        $employee_id = auth()->user()->employee->id;
+        $today = date('Y-m-d');
+        $employee = Employee::find($employee_id);
+
+        $last_date = (isset($employee->employment->last_action_date) && $employee->employment->last_action_date != '') ?$employee->employment->last_action_date : '';
+        $row = array();
+        if(isset($employee->employment->id) && $employee->employment->id > 0):
+            if($today == $last_date):
+                $row['loc'] = $loc = (isset($employee->employment->last_action) && $employee->employment->last_action > 0) ? $employee->employment->last_action : 'error';
+            else:
+                $row['loc'] = $loc = 0;
+            endif;
+            $row['name'] = (isset($employee->full_name) && $employee->full_name != '') ? $employee->full_name : '';
+        else:
+            $row['loc'] = $loc = 'error';
+            $row['name'] = '';
+        endif;
+
+        $html = '';
+        if($loc == 0):
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="1">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_In.png').'">';
+            $html .= '</a>';
+        elseif($loc == 1):
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="2">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
+            $html .= '</a>';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="4">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
+            $html .= '</a>';
+        elseif($loc == 2):
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="3">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Return.png').'">';
+            $html .= '</a>';
+        elseif($loc == 3):
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="2">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
+            $html .= '</a>';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="4">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
+            $html .= '</a>';
+        elseif($loc == 4):
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="1">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_In.png').'">';
+            $html .= '</a>';
+        else:
+            $html .= '';
+        endif;
+
+        return $html;
     }
 
     public function getUserAttendanceLiveHistory(){
