@@ -19,14 +19,8 @@
             <div class="grid grid-cols-12 gap-6">
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8">
-                    <div class="intro-y flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">General Report</h2>
-                        <a href="" class="ml-auto flex items-center text-primary">
-                            <i data-lucide="refresh-ccw" class="w-4 h-4 mr-3"></i> Reload Data
-                        </a>
-                    </div>
 
-                    <div class="grid grid-cols-12 gap-6 mt-5">
+                    <div class="grid grid-cols-12 gap-6">
                         
                         <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MY-HR-logos.jpeg') }}">
