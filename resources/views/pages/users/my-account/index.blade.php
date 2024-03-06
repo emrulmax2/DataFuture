@@ -7,7 +7,7 @@
 @section('subcontent')
 
     <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">My Account</h2>
+        <h2 class="text-lg font-medium mr-auto">My HR</h2>
     </div>
 
     <!-- BEGIN: Profile Info -->

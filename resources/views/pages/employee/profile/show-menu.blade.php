@@ -47,5 +47,11 @@
             Time Recored
         </a>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('employee.archive', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.archive' ? 'active' : '' }}">
+            Archive
+        </a>
+    </li>
     
 </ul>
