@@ -54,7 +54,7 @@
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['remote_access']['desktop_login']) && $priv['remote_access']['desktop_login'] == 1 ? 'checked' : '') }} id="permission_remote_access_5" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][desktop_login]">
-                            <label class="form-check-label ml-4" for="permission_remote_access_5">Desktop Login</label>
+                            <label class="form-check-label ml-4" for="permission_remote_access_5">Desktop Clock In</label>
                         </div>
                     </div>
                 </div>

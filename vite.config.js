@@ -229,6 +229,7 @@ export default defineConfig({
                 'resources/js/student-wbl-profile.js',
                 'resources/js/staff-dashboard.js',
                 'resources/js/jquery-stopwatch.js',
+                'resources/js/employee-archive.js',
                 
             ],
             refresh: true,

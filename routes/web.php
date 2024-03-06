@@ -195,6 +195,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -2320,6 +2321,11 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('site-settings/hr-machine/destory/{id}', 'destroy')->name('hr.machine.destroy'); 
         Route::post('site-settings/hr-machine/restore', 'restore')->name('hr.machine.restore'); 
+    });
+
+    Route::controller(EmployeeArchiveController::class)->group(function(){
+        Route::get('employee-profile/archive/{id}', 'index')->name('employee.archive'); 
+        Route::get('employee-profile/archive-list', 'list')->name('employee.archive.list'); 
     });
 });
 

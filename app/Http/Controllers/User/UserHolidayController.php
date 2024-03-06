@@ -1000,7 +1000,7 @@ class UserHolidayController extends Controller
                         $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');
                         $approverName .= (isset($approver->employee->first_name) ? $approver->employee->first_name.' ' : ''); 
                         $approverName .= (isset($approver->employee->last_name) ? $approver->employee->last_name.' ' : '');
-                        $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : '');
+                        $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : $approver->email);
                         
                         if(!empty($approverEmail)):
                             $message = '';
