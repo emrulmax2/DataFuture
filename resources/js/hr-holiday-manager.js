@@ -32,11 +32,11 @@ var manageHolidayListTable = (function () {
                     field: "name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        var html = '<a href="'+cell.getData().url+'" class="flex justify-start items-center">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5">';
+                        var html = '<a href="'+cell.getData().url+'" class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
                                 html += '</div>';
-                                html += '<div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
                                     html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
                                     html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().designation != '' ? cell.getData().designation : 'Unknown')+'</div>';
                                 html += '</div>';
@@ -158,6 +158,14 @@ var manageHolidayListTable = (function () {
 
 
 (function(){
+    if($('#employeeHolidayAccordion-0').length > 0){
+        var yearid = $('#employeeHolidayAccordion-0 .holidayCollapseBtns').attr('data-year');
+        if(!$('#employeeHolidayAccordion-0 .holidayCollapseBtns').hasClass('collapsed')){
+            manageHolidayListTable.init(yearid, 'pending');
+            manageHolidayListTable.init(yearid, 'approved');
+            manageHolidayListTable.init(yearid, 'rejected');
+        }
+    }
 
     $('.holidayCollapseBtns').on('click', function(e){
         e.preventDefault();
