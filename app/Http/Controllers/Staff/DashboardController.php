@@ -130,7 +130,7 @@ class DashboardController extends Controller
                 $last_action_label = 'Working';
                 break;
             case 2:
-                $last_action_label = 'In a Break';
+                $last_action_label = 'Break';
                 break;
             case 3:
                 $last_action_label = 'Working';
