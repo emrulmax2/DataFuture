@@ -18,8 +18,7 @@
         var $this = $(this);
         var action_type = $this.attr('data-value');
 
-        $('.attendance_action_btn').attr('disabled', 'disabled');
-        $('svg', $this).fadeIn();
+        $('.attendance_action_btn').addClass('disabled');
         axios({
             method: 'post',
             url: route('dashboard.feed.attendance'),
@@ -28,8 +27,7 @@
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
         }).then((response) => {
-            $('.attendance_action_btn').removeAttr('disabled');
-            $('svg', $this).fadeOut();
+            $('.attendance_action_btn').removeClass('disabled');
 
             if (response.status == 200) {
                 successModal.show();
@@ -45,8 +43,7 @@
                 }, 2000)
             }
         }).catch((error) => {
-            $('.attendance_action_btn').removeAttr('disabled');
-            $('svg', $this).fadeOut();
+            $('.attendance_action_btn').removeClass('disabled');
             if (error.response) {
                 console.log("error");
             }

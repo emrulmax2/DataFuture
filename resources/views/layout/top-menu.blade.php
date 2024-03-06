@@ -60,10 +60,22 @@
                 </li>
             @endforeach
         </ul> 
-        @if(Auth::user() && Route::currentRouteName() == 'dashboard' && !empty($home_work_history) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
-            <div class="clockinArea inline-flex justify-end items-center">
+        @if(Auth::user() && Route::currentRouteName() == 'dashboard' && !empty($home_work_statistics) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
+            {!! $home_work_statistics !!}
+            {{--<div class="clockinStatistics inline-flex justify-end items-start ml-auto">
+                <div class="statusArea">
+                    <div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>
+                    <div class="font-medium whitespace-nowrap uppercase">Working</div>
+                </div>
+                <div class="sinceArea">
+                    <div class="text-slate-500 text-xs whitespace-nowrap uppercase">since</div>
+                    <div class="font-medium whitespace-nowrap uppercase">09:00 AM</div>
+                    <div class="text-slate-500 text-xs whitespace-nowrap">7 hours 5 mins</div>
+                </div>
+            </div>--}}
+            {{--<div class="clockinArea inline-flex justify-end items-center">
                 {!! $home_work_history !!}
-            </div>
+            </div>--}}
         @endif
     </nav>
     <!-- END: Top Menu -->
