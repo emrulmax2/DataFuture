@@ -195,7 +195,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
-use App\Http\Controllers\hr\portal\reports\DataReportController;
+use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;

@@ -20,12 +20,12 @@
                 @foreach($years as $year)
                     <div class="accordion-item bg-slate-100">
                         <div id="employeeHolidayAccordion-{{ $loop->index }}" class="accordion-header">
-                            <button  data-year="{{ $year->id }}" class="holidayCollapseBtns accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $loop->index }}" aria-expanded="false" aria-controls="employeeHolidayAccordion-collapse-{{ $loop->index }}">
+                            <button  data-year="{{ $year->id }}" class="holidayCollapseBtns accordion-button {{ ($loop->index == 0 ? '' : 'collapsed') }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $loop->index }}" aria-expanded="{{ ($loop->index == 0 ? 'true' : 'false') }}" aria-controls="employeeHolidayAccordion-collapse-{{ $loop->index }}">
                                 <span class="font-normal">Holiday Year:</span> {{ date('Y', strtotime($year->start_date)).' - '.date('Y', strtotime($year->end_date)) }}
                                 <span class="accordionCollaps"></span>
                             </button>
                         </div>
-                        <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
+                        <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ ($loop->index == 0 ? 'show' : '') }}" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
                             <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                 <div class="intro-y box p-5 pb-7">
                                     <div class="grid grid-cols-12 gap-0 items-center">

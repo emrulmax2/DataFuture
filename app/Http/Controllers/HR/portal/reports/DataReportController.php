@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\hr\portal\reports;
+namespace App\Http\Controllers\HR\portal\reports;
 
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
