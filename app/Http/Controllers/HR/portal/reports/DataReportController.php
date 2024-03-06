@@ -261,12 +261,15 @@ class DataReportController extends Controller
 
                             if($table=="EmployeeWorkingPatternPay") {
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
-                                    
+
+                                    $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->get()->first();
+
                                     if($employeeWorkingPattern!="") {
+                                        
                                         $patternPay = EmployeeWorkingPatternPay::where("employee_working_pattern_id",$employeeWorkingPattern->id)->where("active",1)->get()->first();
 
                                         if($fieldValue)
-                                        $theCollection[$row][] = ($patternPay==null) ? "": $patternPay->$fieldName;
+                                        $theCollection[$row][] = isset($patternPay) ? $patternPay->$fieldName : "";
                                     }
                                 }
                                 
