@@ -1586,7 +1586,6 @@ input[type=number] {
 }
 .sinceArea{
     margin-left: 50px;
-    max-width: 92px;
 }
 .attendance_action_btn.disabled{
     cursor: not-allowed;
