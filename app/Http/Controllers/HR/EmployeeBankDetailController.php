@@ -78,7 +78,7 @@ class EmployeeBankDetailController extends Controller
         $bankId = $bank->id;
 
         if($active == 1){
-            EmployeeBankDetail::where('id', '!=', $bankId)->where('active', 1)->update(['active' => 0]);
+            EmployeeBankDetail::where('id', '!=', $bankId)->where('employee_id', $employee_id)->where('active', 1)->update(['active' => 0]);
         }
 
         return response()->json(['msg' => 'Bank Successfully inserted'], 200);
@@ -122,7 +122,7 @@ class EmployeeBankDetailController extends Controller
         endif;
 
         if($active == 1){
-            EmployeeBankDetail::where('id', '!=', $id)->where('active', 1)->update(['active' => 0]);
+            EmployeeBankDetail::where('id', '!=', $id)->where('employee_id', $employee_id)->where('active', 1)->update(['active' => 0]);
         }
 
         return response()->json(['msg' => 'Bank Successfully updated'], 200);
