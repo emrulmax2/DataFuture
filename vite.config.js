@@ -190,6 +190,8 @@ export default defineConfig({
                 'resources/js/hr-portal-lengthservice.js',
                 'resources/js/hr-portal-telephonedirectory.js',
                 'resources/js/hr-portal-recordcard.js',
+                'resources/js/hr-portal-datareport.js',
+                
 
                 'resources/js/df-field-category.js',
                 'resources/js/df-field.js',
