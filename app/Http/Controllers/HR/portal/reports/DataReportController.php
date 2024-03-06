@@ -101,6 +101,7 @@ class DataReportController extends Controller
             }
             $row = 2;
             $serial = 1;
+            
             foreach($query->get() as $employee):
                 $listCount = $query->count();
                 
@@ -116,27 +117,27 @@ class DataReportController extends Controller
                                     if($fieldValue)
                                         switch($fieldName) {
                                             case 'title_id':
-                                                $theCollection[$row][] = ($employee->title) ? $employee->title->name : "";
+                                                $theCollection[$row][] = isset($employee->title) ? $employee->title->name : "";
                                                 break;
                                             case 'sex_identifier_id':
-                                                $theCollection[$row][] = ($employee->sex) ? $employee->sex->name : "";
+                                                $theCollection[$row][] = isset($employee->sex) ? $employee->sex->name : "";
                                                 break;
                                             case 'nationality_id':
-                                                $theCollection[$row][] = ($employee->nationality) ? $employee->nationality->name : "";
+                                                $theCollection[$row][] = isset($employee->nationality) ? $employee->nationality->name : "";
                                                 break;
                                             case 'ethnicity_id':
-                                                $theCollection[$row][] = ($employee->ethnicity) ? $employee->ethnicity->name : "";
+                                                $theCollection[$row][] = isset($employee->ethnicity) ? $employee->ethnicity->name : "";
                                                 break;
                                             case 'status':
-                                                    $theCollection[$row][] = ($employee->status) ? "Active": "Inactive";
+                                                    $theCollection[$row][] = isset($employee->status) ? "Active": "Inactive";
                                                     break;
                                             case 'address_id':
                                                 
-                                                $theCollection[$row][] = ($employee->address) ? $employee->address->address_line_1.", ".$employee->address->address_line_2.", ".$employee->address->state.","
+                                                $theCollection[$row][] = isset($employee->address) ? $employee->address->address_line_1.", ".$employee->address->address_line_2.", ".$employee->address->state.","
                                                                         .$employee->address->post_code.",".$employee->address->city.",".ucwords($employee->address->country) : "";
                                                 break;
                                             default:
-                                                $theCollection[$row][] = ($employee->$fieldName) ? $employee->$fieldName : "";
+                                                $theCollection[$row][] = isset($employee->$fieldName) ? $employee->$fieldName : "";
                                         }
                                 }
                                 
@@ -147,13 +148,13 @@ class DataReportController extends Controller
                                     if($fieldValue)
                                         switch($fieldName) {
                                             case 'employee_work_type_id':
-                                                $theCollection[$row][] = ($employee->employment->employeeWorkType) ? $employee->employment->employeeWorkType->name : "";
+                                                $theCollection[$row][] = isset($employee->employment->employeeWorkType) ? $employee->employment->employeeWorkType->name : "";
                                                 break;
                                             case 'employee_job_title_id':
-                                                $theCollection[$row][] = ($employee->employment->employeeJobTitle) ? $employee->employment->employeeJobTitle->name : "";
+                                                $theCollection[$row][] = isset($employee->employment->employeeJobTitle) ? $employee->employment->employeeJobTitle->name : "";
                                                 break;
                                             case 'department_id':
-                                                $theCollection[$row][] = ($employee->employment->department) ? $employee->employment->department->name : "";
+                                                $theCollection[$row][] = isset($employee->employment->department) ? $employee->employment->department->name : "";
                                                 break;
                                             case 'site_location':
                                                 $siteLocation = "";
@@ -163,16 +164,16 @@ class DataReportController extends Controller
                                                 $theCollection[$row][] = $siteLocation;
                                                 break;
                                             case 'office_telephone':
-                                                $theCollection[$row][] = ($employee->employment->office_telephone) ? $employee->employment->office_telephone : "";
+                                                $theCollection[$row][] = isset($employee->employment->office_telephone) ? $employee->employment->office_telephone : "";
                                                 break;
                                             case 'office_mobile':
-                                                $theCollection[$row][] = ($employee->employment->mobile) ? $employee->employment->mobile : "";
+                                                $theCollection[$row][] = isset($employee->employment->mobile) ? $employee->employment->mobile : "";
                                                 break;
                                             case 'office_email':
-                                                $theCollection[$row][] = ($employee->employment->email) ? $employee->employment->email : "";
+                                                $theCollection[$row][] = isset($employee->employment->email) ? $employee->employment->email : "";
                                                 break;
                                             default:
-                                                $theCollection[$row][] = ($employee->employment->$fieldName) ? $employee->employment->$fieldName : "";
+                                                $theCollection[$row][] = isset($employee->employment->$fieldName) ? $employee->employment->$fieldName : "";
                                         }
                                 }
                                 
@@ -185,17 +186,17 @@ class DataReportController extends Controller
                                     if($fieldValue)
                                         switch($fieldName) {
                                             case 'employee_work_permit_type_id':
-                                                $theCollection[$row][] = ($employee->eligibilities->employeeDocType)? $employee->eligibilities->employeeWorkPermitType->name :"";
+                                                $theCollection[$row][] = isset($employee->eligibilities->employeeDocType)? $employee->eligibilities->employeeWorkPermitType->name :"";
                                                 break;
                                             case 'document_type':
-                                                $theCollection[$row][] = ($employee->eligibilities->employeeDocType) ? $employee->eligibilities->employeeDocType->name : "";
+                                                $theCollection[$row][] = isset($employee->eligibilities->employeeDocType) ? $employee->eligibilities->employeeDocType->name : "";
                                                 break;
                                             case 'doc_issue_country':
-                                                $theCollection[$row][] = ($employee->eligibilities->docIssueCountry) ? $employee->eligibilities->docIssueCountry->name : "";
+                                                $theCollection[$row][] = isset($employee->eligibilities->docIssueCountry) ? $employee->eligibilities->docIssueCountry->name : "";
                                                 
                                                 break;
                                             default:
-                                                $theCollection[$row][] = ($employee->eligibilities->$fieldName) ? $employee->eligibilities->$fieldName : "";
+                                                $theCollection[$row][] = isset($employee->eligibilities->$fieldName) ? $employee->eligibilities->$fieldName : "";
                                         }
                                 }
                                 
@@ -209,14 +210,14 @@ class DataReportController extends Controller
                                     if($fieldValue)
                                         switch($fieldName) {
                                             case 'kins_relation_id':
-                                                $theCollection[$row][] = ($employee->emergencyContact->kin) ? $employee->emergencyContact->kin->name : "";
+                                                $theCollection[$row][] = isset($employee->emergencyContact->kin) ? $employee->emergencyContact->kin->name : "";
                                                 break;
                                             case 'emergency_address_id':
-                                                $theCollection[$row][] = ($employee->emergencyContact->address!=null) ? $employee->emergencyContact->address->address_line_1.", ".$employee->emergencyContact->address->address_line_2.", ".$employee->emergencyContact->address->state.","
+                                                $theCollection[$row][] = isset($employee->emergencyContact->address) ? $employee->emergencyContact->address->address_line_1.", ".$employee->emergencyContact->address->address_line_2.", ".$employee->emergencyContact->address->state.","
                                                                         .$employee->emergencyContact->address->post_code.",".$employee->emergencyContact->address->city.",".ucwords($employee->emergencyContact->address->country) : "";
                                                 break;
                                             default:
-                                                $theCollection[$row][] = ($employee->emergencyContact->$fieldName) ? $employee->emergencyContact->$fieldName : "";
+                                                $theCollection[$row][] = isset($employee->emergencyContact->$fieldName) ? $employee->emergencyContact->$fieldName : "";
                                         }
                                 }
                                 
@@ -238,7 +239,7 @@ class DataReportController extends Controller
                                     if($employee->payment!=null && $employee->payment->payment_method=="Bank Transfer") {
                                         $employeeBankDetail = EmployeeBankDetail::where("employee_id",$employee->id)->where("active",1)->get()->first();
                                         if($fieldValue)
-                                        $theCollection[$row][] =  ($employeeBankDetail) ? $employeeBankDetail->$fieldName : "";
+                                        $theCollection[$row][] =  (null !=$employeeBankDetail) ? $employeeBankDetail->$fieldName : "";
                                     }
                                     
                                 }
