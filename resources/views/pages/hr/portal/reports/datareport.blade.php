@@ -86,7 +86,7 @@
                     <input type="hidden" name="labels[last_name]" value="Last Name">
                     <div class="singlefields relative mb-2">
                         <input id="s3" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employees][first_name]" value="1">
-                        <label class= "cursor-pointer ml-2" for="s3">First name</label>
+                        <label class= "cursor-pointer ml-2" for="s3">First Name(s)</label>
                     </div>
                     <input type="hidden" name="labels[first_name]" value="First Name">
                     
@@ -199,7 +199,7 @@
                 <div class="col-span-3">
                     <div class="singlefields relative mb-2">
                         <input id="s24" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employments][works_number]" value="1"> 
-                        <label class= "cursor-pointer ml-2" for="s24">Works Number</label>
+                        <label class= "cursor-pointer ml-2" for="s24">Work Number</label>
                     </div>
                     <input type="hidden" name="labels[works_number]" value="Works Number">
 
@@ -273,32 +273,32 @@
                         <label class= "cursor-pointer ml-2" for="s58">Work Permit Number</label>
                     </div>
                     <input type="hidden" name="labels[workpermit_number]" value="Permit Number">
-                </div>
-                <div class="col-span-3">
+
                     <div class="singlefields relative mb-2">
                         <input id="s59" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_eligibilites][workpermit_expire]" value="1"> 
                         <label class= "cursor-pointer ml-2" for="s59">Work Permit Expire Date</label>
                     </div>
                     <input type="hidden" name="labels[workpermit_expire]" value="Work Permit Expire Date">
+                </div>
+                <div class="col-span-3">
                     <div class="singlefields relative mb-2">
                         <input id="s60" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_eligibilites][document_type]" value="1"> 
                         <label class= "cursor-pointer ml-2" for="s60">Proof of ID Type</label>
                     </div>
                     <input type="hidden" name="labels[document_type]" value="Proof of ID Type">
-                </div>
-                <div class="col-span-3">
+
                     <div class="singlefields relative mb-2">
                         <input id="s61" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_eligibilites][doc_number]" value="1"> 
                         <label class= "cursor-pointer ml-2" for="s61">ID Number</label>
                     </div>
                     <input type="hidden" name="labels[doc_number]" value="ID Number">
-                </div>
-                <div class="col-span-3">
+
                     <div class="singlefields relative mb-2">
                         <input id="s62" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_eligibilites][doc_expire]" value="1"> 
                         <label class= "cursor-pointer ml-2" for="s62">Expiry Date</label>
                     </div>
                     <input type="hidden" name="labels[doc_expire]" value="Expiry Date">
+
                     <div class="singlefields relative mb-2">
                         <input id="s02" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employee_eligibilites][doc_issue_country]" value="1"> 
                         <label class= "cursor-pointer ml-2" for="s02">Issuing Country</label>

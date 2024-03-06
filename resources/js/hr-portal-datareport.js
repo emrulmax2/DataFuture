@@ -226,18 +226,6 @@ var starterListTable = (function () {
             document.body.appendChild(link);
             link.click();
 
-            // if (response.status == 200) {
-            //     successModal.show(); 
-            //     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-            //         $("#successModal .successModalTitle").html("Congratulation!" );
-            //         $("#successModal .successModalDesc").html('Applicant Note successfully stored.');
-            //         $("#successModal .successCloser").attr('data-action', 'NONE');
-            //     });  
-                
-            //     setTimeout(function(){
-            //         successModal.hide();
-            //     }, 2000);
-            // }
         }).catch(error => {
             document.querySelector('#saveNote').removeAttribute('disabled');
             document.querySelector("#saveNote svg").style.cssText = "display: none;";
