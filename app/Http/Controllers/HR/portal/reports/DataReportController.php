@@ -132,8 +132,8 @@ class DataReportController extends Controller
                                                     break;
                                             case 'address_id':
                                                 
-                                                $theCollection[$row][] = $employee->address->address_line_1.", ".$employee->address->address_line_2.", ".$employee->address->state.","
-                                                                        .$employee->address->post_code.",".$employee->address->city.",".ucwords($employee->address->country);
+                                                $theCollection[$row][] = ($employee->address) ? $employee->address->address_line_1.", ".$employee->address->address_line_2.", ".$employee->address->state.","
+                                                                        .$employee->address->post_code.",".$employee->address->city.",".ucwords($employee->address->country) : "";
                                                 break;
                                             default:
                                                 $theCollection[$row][] = ($employee->$fieldName) ? $employee->$fieldName : "";
