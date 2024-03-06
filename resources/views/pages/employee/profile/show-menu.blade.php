@@ -10,12 +10,13 @@
             Payment Settings
         </a>
     </li>
-    
+    @if(isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes')
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.holiday', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.holiday' ? 'active' : '' }}">
             Holidays
         </a>
     </li>
+    @endif
 
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.documents', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.documents' ? 'active' : '' }}">
