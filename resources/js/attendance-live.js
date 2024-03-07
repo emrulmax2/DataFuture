@@ -36,7 +36,7 @@ import Litepicker from "litepicker";
             $('.leaveTableLoader').addClass('active');
             axios({
                 method: "post",
-                url: route('hr.portal.live.attedance.ajax'),
+                url: route('attendance.live.attedance.ajax'),
                 data: {departement : departement, date : date},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -63,7 +63,7 @@ import Litepicker from "litepicker";
             $('.leaveTableLoader').addClass('active');
             axios({
                 method: "post",
-                url: route('hr.portal.live.attedance.ajax'),
+                url: route('attendance.live.attedance.ajax'),
                 data: {departement : departement, date : date},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {

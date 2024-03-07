@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\HR;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
@@ -13,15 +12,12 @@ use App\Models\Employment;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 
-class EmployeeAttendanceLiveController extends Controller
+class AttendanceLiveController extends Controller
 {
     public function index(){
-        return view('pages.hr.portal.live', [
-            'title' => 'HR Portal Live Attendance - LCC Data Future Managment',
-            'breadcrumbs' => [
-                ['label' => 'HR Portal', 'href' => route('hr.portal')],
-                ['label' => 'Live Attendance', 'href' => 'javascript:void(0);']
-            ],
+        return view('pages.attendance-live.index', [
+            'title' => 'Live Attendance - LCC Data Future Managment',
+            'breadcrumbs' => [],
             'departments' => Department::whereHas('employment', function($q){
                                 $q->whereHas('employee', function($sq){
                                     $sq->where('status', 1);
@@ -96,9 +92,6 @@ class EmployeeAttendanceLiveController extends Controller
                         $html .= '<div>';
                             $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
                             $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
-                        $html .= '</div>';
-                        $html .= '<div>';
-                            $html .= (isset($day['since']) && !empty($day['since']) ? '<span>'.$day['since'].'</span>' : '');
                         $html .= '</div>';
                     $html .= '</td>';
 
