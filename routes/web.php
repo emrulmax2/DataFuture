@@ -97,6 +97,7 @@ use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\AssessmentPlanController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\AttendanceLiveController;
 use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
@@ -197,6 +198,7 @@ use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
+use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -1270,7 +1272,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeAttendanceLiveController::class)->group(function(){
         Route::get('hr/portal/live', 'index')->name('hr.portal.live.attedance');
-        Route::get('hr/portal/live/list', 'list')->name('hr.portal.live.attedance.list');
+        Route::post('hr/portal/live/data', 'ajaxLiveData')->name('hr.portal.live.attedance.ajax');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -1278,6 +1280,8 @@ Route::middleware('auth')->group(function() {
         Route::get('/dashboard', 'index')->name('staff.dashboard');
         Route::get('/dashboard/list', 'list')->name('dashboard.staff.list');
         Route::post('/dashboard/fee-attendance', 'feeAttendance')->name('dashboard.feed.attendance');
+        
+        Route::get('/dashboard/internal-link/{id}', 'parentLinkBox')->name('dashboard.internal-link.parent');
     });
 
 
@@ -1530,6 +1534,16 @@ Route::middleware('auth')->group(function() {
             Route::get('term-type-list', 'list')->name('term-type.list');     
             Route::post('term-type/{id}/restore', 'restore')->name('term-type.restore');
         });
+
+        Route::resource('internal-link', InternalLinkController::class);
+
+        Route::controller(InternalLinkController::class)->group(function() {
+            Route::get('internal-link-list', 'list')->name('internal-link.list');     
+            Route::post('internal-link/{id}/restore', 'restore')->name('internal-link.restore');
+            Route::get('internal-link/{id}/parent', 'parentLinkBox')->name('internal-link.parent');
+            
+        });
+
     });
     Route::controller(AcademicYearController::class)->group(function() {
         Route::get('site-settings/academicyears', 'index')->name('academicyears'); 
@@ -2329,3 +2343,7 @@ Route::middleware('auth')->group(function() {
     });
 });
 
+Route::controller(AttendanceLiveController::class)->group(function(){
+    Route::get('live', 'index')->name('attendance.live'); 
+    Route::post('live/attendance-data', 'ajaxLiveData')->name('attendance.live.attedance.ajax');
+});

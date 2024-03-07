@@ -191,6 +191,13 @@
                                 <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
                             </div> 
                             <div class="col-span-12 sm:col-span-6">
+                                <label for="has_evening_and_weekend" class="form-label">Has Evening / Weekend</label>
+                                <div class="form-check form-switch">
+                                    <input id="has_evening_and_weekend" name="has_evening_and_weekend" class="form-check-input" value="1" type="checkbox">
+                                    <label class="form-check-label ml-3 hew_label" for="has_evening_and_weekend">No</label>
+                                </div>
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
                                 <label for="is_workplacement" class="form-label">Has Workplacement</label>
                                 <div class="form-check form-switch">
                                     <input id="is_workplacement" name="is_workplacement" class="form-check-input" value="1" type="checkbox">
@@ -315,6 +322,13 @@
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
                                 <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="edit_has_evening_and_weekend" class="form-label">Has Evening / Weekend</label>
+                                <div class="form-check form-switch">
+                                    <input id="edit_has_evening_and_weekend" name="has_evening_and_weekend" class="form-check-input" value="1" type="checkbox">
+                                    <label class="form-check-label ml-3 hew_label" for="edit_has_evening_and_weekend">No</label>
+                                </div>
                             </div> 
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="edit_is_workplacement" class="form-label">Workplacement</label>

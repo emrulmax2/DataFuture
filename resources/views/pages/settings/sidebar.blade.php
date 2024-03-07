@@ -231,6 +231,12 @@
                     </li>
                 </ul>
             </li>
+            
+            <li>
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'internal-link.index' ? 'active text-primary font-medium' : '' }}" href="{{ route('internal-link.index') }}">
+                    <i data-lucide="sliders" class="w-4 h-4 mr-2"></i> Internal Site Link
+                </a>
+            </li>
         </ul>
     </div>
 </div>

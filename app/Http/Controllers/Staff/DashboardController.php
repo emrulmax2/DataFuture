@@ -9,6 +9,7 @@ use App\Models\ApplicantTask;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\Employment;
+use App\Models\InternalLink;
 use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentTask;
@@ -54,6 +55,57 @@ class DashboardController extends Controller
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
+            'user' => $userData,
+            "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
+            'applicant' => Applicant::all()->count(),
+            'student' => Student::all()->count(),
+            'myPendingTask' => $this->getUserPendingTask(),
+            'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
+            'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
+            'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
+            'home_work_history_btns' => $this->getUserAttendanceLiveBtns(),
+            'internal_link_buttons' => $this->getInternalLinkBtns(),
+            'venue_ips' => $ips
+        ]);
+    }
+    public function parentLinkBox($id)
+    {
+        $userData = \Auth::guard('web')->user();
+        $taskListData = TaskList::with('applicant')->where('interview','yes')->get();
+        //$user = User::find($userData->id);
+        $TotalInterviews = 0;
+        $unfinishedInterviewCount = 0;
+        foreach ($taskListData as $task) {
+            
+            foreach($task->applicant as $applicant) {
+                $applicantTask = ApplicantTask::where("applicant_id",$applicant->id)->where("task_list_id",$task->id)->get()->first();
+                if($applicantTask->status=="Pending" || $applicantTask->status=="In Progress") {
+                    $TotalInterviews++;
+                } 
+                if($applicantTask->status=="In Progress"){
+                    $unfinishedInterviewCount++;
+                }
+            }
+        }
+        // foreach ($user->interviews as $interview) {
+        //     $ApplicantTask = ApplicantTask::find($interview->applicant_task_id);
+        //      if($ApplicantTask->status!="Completed") {
+        //          $unfinishedInterviewCount++;
+        //     }
+        // }
+
+        $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
+        $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
+        $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
+        $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
+
+        return view('pages.settings.internallink.dashboard.index', [
+            'title' => 'Internal Link - LCC Data Future Managment',
+            'subtitle' => '',
+            'breadcrumbs' => [
+                ['label' => 'Internal Site Link', 'href' => 'javascript:void(0);']
+            ],
+            'parents' => InternalLink::where('parent_id',$id)->get(),
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
             'applicant' => Applicant::all()->count(),
@@ -233,7 +285,26 @@ class DashboardController extends Controller
 
         return $html;
     }
+    public function getInternalLinkBtns(){
+        $user_id = auth()->user()->id;
+        $employee_id = auth()->user()->employee->id;
+        $today = date('Y-m-d');
+        $internalLinkList = InternalLink::whereNull("parent_id")->get();
 
+        $html = '';
+        foreach($internalLinkList as $link):
+            $parentLinkList = InternalLink::where("parent_id",$link->id)->get();
+            if($parentLinkList->count()<=0)
+            
+            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-12 mb-3" data-value="1">';
+            else 
+            $html .= '<a href="'.route('dashboard.internal-link.parent',$link->id).'" target="_blank" class="block col-span-12 mb-3" data-value="1">';
+                $html .= '<img class="block w-full h-24 shadow-md zoom-in rounded" src="'.$link->image.'">';
+            $html .= '</a>';
+        endforeach;
+
+        return $html;
+    }
     public function getUserAttendanceLiveHistory(){
         $user_id = auth()->user()->id;
         $employee_id = auth()->user()->employee->id;

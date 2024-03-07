@@ -22,6 +22,7 @@ class CourseCreation extends Model
         'fees',
         'reg_fees',
         'is_workplacement',
+        'has_evening_and_weekend',
         'created_by',
         'updated_by',
     ];

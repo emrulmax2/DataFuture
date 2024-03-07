@@ -84,6 +84,8 @@ export default defineConfig({
                 "resources/js/rooms.js",
                 "resources/js/documentsettings.js",
                 "resources/js/termtype.js",
+                "resources/js/internallink.js",
+                
                 
                 "resources/js/student-option.js",
                 "resources/js/title.js",
@@ -230,6 +232,7 @@ export default defineConfig({
                 'resources/js/staff-dashboard.js',
                 'resources/js/jquery-stopwatch.js',
                 'resources/js/employee-archive.js',
+                'resources/js/attendance-live.js',
                 
             ],
             refresh: true,
