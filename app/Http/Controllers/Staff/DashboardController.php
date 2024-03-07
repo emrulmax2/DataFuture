@@ -142,6 +142,7 @@ class DashboardController extends Controller
                 $last_action_label = 'No clock-in';
         }
         $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
+        $liveLast = EmployeeAttendanceLive::where('attendance_type', 4)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
         if(isset($employee->employment->id) && $employee->employment->id > 0):
             if($today == $last_date && (isset($live->id) && $live->id > 0)):
                 $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : strtotime(date('H:i:s')));
@@ -154,8 +155,10 @@ class DashboardController extends Controller
                     $html .= '</div>';
                     $html .= '<div class="sinceArea">';
                         $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">since</div>';
-                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.date('H:i A', strtotime($live->time)).'</div>';
-                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap clockedInFrom" id="clockedInFrom" data-starts="'.$duration_seconds.'">00:00</div>';
+                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.date('H:i A', strtotime($live->time)).(isset($liveLast->time) && !empty($liveLast->time) ? ' - '.date('H:i A', strtotime($liveLast->time)) : '').'</div>';
+                        if($last_action != 4):
+                            $html .= '<div class="text-slate-500 text-xs whitespace-nowrap clockedInFrom" id="clockedInFrom" data-starts="'.$duration_seconds.'">00:00</div>';
+                        endif;
                     $html .= '</div>';
                 $html .= '</div>';
             else:
@@ -215,11 +218,17 @@ class DashboardController extends Controller
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
             $html .= '</a>';
         elseif($loc == 4):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="1">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_In.png').'">';
-            $html .= '</a>';
+            $html .= '<div class="col-span-12">';
+                $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                    $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> It seems that you are already clocked out for the day.';
+                $html .= '</div>';
+            $html .= '</div>';
         else:
-            $html .= '';
+            $html .= '<div class="col-span-12">';
+                $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                    $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Something went wrong. Please Try Later.';
+                $html .= '</div>';
+            $html .= '</div>';
         endif;
 
         return $html;

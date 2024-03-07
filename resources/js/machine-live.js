@@ -73,11 +73,11 @@ import { createIcons, icons } from "lucide";
                         }else if(res.loc == '4'){
                             $buttonGroup.fadeIn('fast', function(){
                                 $form.find('.theMessage').remove();
-                                $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, what would you like to do?</div>')
+                                $form.prepend('<div class="text-white alert alert-danger theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> Hi &nbsp;<strong>'+res.name+'</strong>, It seems that you are already clocked out for the day.</div>')
                                 createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
 
                                 $actionButtons.fadeOut().attr('disabled', 'disabled');
-                                $buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
+                                //$buttonGroup.find('.btn-action.btn-type-1').fadeIn().removeAttr('disabled');
                                 $backButton.css({ display: 'inline-flex'}).removeAttr('disabled');
                             });
 
