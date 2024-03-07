@@ -191,6 +191,9 @@ var courseCreationListTable = (function () {
             $('#addCourseCreationModal .acc__input-error').html('');
             $('#addCourseCreationModal input:not([type="checkbox"]').val('');
             $('#addCourseCreationModal select').val('');
+            $('#addCourseCreationModal [name="has_evening_and_weekend"]').prop('checked', false);
+            $('#addCourseCreationModal .hew_label').text('No');
+
             $('#addCourseCreationModal [name="is_workplacement"]').prop('checked', false);
             $('#addCourseCreationModal .iwkp_label').text('No');
 
@@ -205,6 +208,9 @@ var courseCreationListTable = (function () {
             $('#editCourseCreationModal input:not([type="checkbox"]').val('');
             $('#editCourseCreationModal select').val('');
             $('#editCourseCreationModal input[name="id"]').val('0');
+            $('#editCourseCreationModal [name="has_evening_and_weekend"]').prop('checked', false);
+            $('#editCourseCreationModal .hew_label').text('No');
+            
             $('#editCourseCreationModal [name="is_workplacement"]').prop('checked', false);
             $('#editCourseCreationModal .iwkp_label').text('No');
 
@@ -304,6 +310,14 @@ var courseCreationListTable = (function () {
             }
         });
 
+        $('#has_evening_and_weekend').on('change', function(){
+            if($(this).prop('checked')){
+                $(this).siblings('label.hew_label').text('Yes');
+            }else{
+                $(this).siblings('label.hew_label').text('No');
+            }
+        });
+
         $('#edit_is_workplacement').on('change', function(){
             if($(this).prop('checked')){
                 $(this).siblings('label.iwkp_label').text('Yes');
@@ -315,6 +329,14 @@ var courseCreationListTable = (function () {
                 $('#editCourseCreationForm .requiredHoursWrap').fadeOut('fast', function(){
                     $('[name="required_hours"]', this).val('');
                 })
+            }
+        });
+
+        $('#edit_has_evening_and_weekend').on('change', function(){
+            if($(this).prop('checked')){
+                $(this).siblings('label.hew_label').text('Yes');
+            }else{
+                $(this).siblings('label.hew_label').text('No');
             }
         });
 
@@ -340,6 +362,13 @@ var courseCreationListTable = (function () {
                     $('#editCourseCreationModal input[name="fees"]').val(dataset.fees ? dataset.fees : '');
                     $('#editCourseCreationModal input[name="reg_fees"]').val(dataset.reg_fees ? dataset.reg_fees : '');
                     
+                    if(dataset.has_evening_and_weekend == 1){
+                        $('#editCourseCreationModal input[name="has_evening_and_weekend"]').prop('checked', true);
+                        $('#editCourseCreationModal .hew_label').text('Yes');
+                    }else{
+                        $('#editCourseCreationModal input[name="has_evening_and_weekend"]').prop('checked', false);
+                        $('#editCourseCreationModal .hew_label').text('No');
+                    }
                     if(dataset.is_workplacement == 1){
                         $('#editCourseCreationModal input[name="is_workplacement"]').prop('checked', true);
                         $('#editCourseCreationModal .iwkp_label').text('Yes');

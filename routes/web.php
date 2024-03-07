@@ -97,6 +97,7 @@ use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\AssessmentPlanController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
+use App\Http\Controllers\AttendanceLiveController;
 use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
@@ -1270,7 +1271,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeAttendanceLiveController::class)->group(function(){
         Route::get('hr/portal/live', 'index')->name('hr.portal.live.attedance');
-        Route::get('hr/portal/live/list', 'list')->name('hr.portal.live.attedance.list');
+        Route::post('hr/portal/live/data', 'ajaxLiveData')->name('hr.portal.live.attedance.ajax');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -2329,3 +2330,7 @@ Route::middleware('auth')->group(function() {
     });
 });
 
+Route::controller(AttendanceLiveController::class)->group(function(){
+    Route::get('live', 'index')->name('attendance.live'); 
+    Route::post('live/attendance-data', 'ajaxLiveData')->name('attendance.live.attedance.ajax');
+});

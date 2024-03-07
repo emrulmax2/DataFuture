@@ -230,6 +230,7 @@ export default defineConfig({
                 'resources/js/staff-dashboard.js',
                 'resources/js/jquery-stopwatch.js',
                 'resources/js/employee-archive.js',
+                'resources/js/attendance-live.js',
                 
             ],
             refresh: true,
