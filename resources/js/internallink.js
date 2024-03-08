@@ -410,9 +410,9 @@ var table = (function () {
                 
                 setTimeout(function(){
                     succModal.hide();
-                    // window.location.reload();
+                     window.location.reload();
                 }, 2000);
-                table.init();
+                //table.init();
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -528,7 +528,7 @@ var table = (function () {
                 table.init();
                 setTimeout(function(){
                     succModal.hide();
-                    // window.location.reload();
+                     window.location.reload();
                 }, 2000);
 
             }else{
