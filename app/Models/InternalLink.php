@@ -19,5 +19,13 @@ class InternalLink extends Model
         'updated_by',
     ];
     
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at']; 
+
+    public function children(){
+        return $this->hasMany(InternalLink::class, 'parent_id', 'id');
+    }
+
+    public function parent(){
+        return $this->belongsTo(InternalLink::class, 'parent_id');
+    }
 }

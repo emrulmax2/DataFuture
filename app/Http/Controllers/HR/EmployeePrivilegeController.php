@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Employment;
+use App\Models\InternalLink;
 use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,7 @@ class EmployeePrivilegeController extends Controller
             "employee" => $employee,
             "employment" => $employment,
             'priv' => $res,
+            'links' => InternalLink::whereNull('parent_id')->where('available_staff', 1)->where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
 

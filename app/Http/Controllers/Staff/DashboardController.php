@@ -68,54 +68,28 @@ class DashboardController extends Controller
             'venue_ips' => $ips
         ]);
     }
+
     public function parentLinkBox($id)
     {
         $userData = \Auth::guard('web')->user();
-        $taskListData = TaskList::with('applicant')->where('interview','yes')->get();
-        //$user = User::find($userData->id);
-        $TotalInterviews = 0;
-        $unfinishedInterviewCount = 0;
-        foreach ($taskListData as $task) {
-            
-            foreach($task->applicant as $applicant) {
-                $applicantTask = ApplicantTask::where("applicant_id",$applicant->id)->where("task_list_id",$task->id)->get()->first();
-                if($applicantTask->status=="Pending" || $applicantTask->status=="In Progress") {
-                    $TotalInterviews++;
-                } 
-                if($applicantTask->status=="In Progress"){
-                    $unfinishedInterviewCount++;
-                }
-            }
-        }
-        // foreach ($user->interviews as $interview) {
-        //     $ApplicantTask = ApplicantTask::find($interview->applicant_task_id);
-        //      if($ApplicantTask->status!="Completed") {
-        //          $unfinishedInterviewCount++;
-        //     }
-        // }
 
         $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
         $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
 
-        return view('pages.settings.internallink.dashboard.index', [
+        return view('pages.users.staffs.dashboard.internal-links', [
             'title' => 'Internal Link - LCC Data Future Managment',
             'subtitle' => '',
             'breadcrumbs' => [
                 ['label' => 'Internal Site Link', 'href' => 'javascript:void(0);']
             ],
-            'parents' => InternalLink::where('parent_id',$id)->get(),
+            'parents' => InternalLink::where('parent_id', $id)->get(),
             'user' => $userData,
-            "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
-            'applicant' => Applicant::all()->count(),
-            'student' => Student::all()->count(),
+            
             'myPendingTask' => $this->getUserPendingTask(),
-            'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
-            'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
-            'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
-            'home_work_history_btns' => $this->getUserAttendanceLiveBtns(),
-            'venue_ips' => $ips
+
+            'internal_link_buttons' => $this->getInternalChildLinkBtns($id),
         ]);
     }
 
@@ -285,26 +259,70 @@ class DashboardController extends Controller
 
         return $html;
     }
+
     public function getInternalLinkBtns(){
         $user_id = auth()->user()->id;
         $employee_id = auth()->user()->employee->id;
         $today = date('Y-m-d');
-        $internalLinkList = InternalLink::whereNull("parent_id")->get();
-
+        $parentLinkIds = UserPrivilege::where('user_id', $user_id)->where('employee_id', $employee_id)->where('category', 'parent_internal_links')->pluck('name')->unique()->toArray();
+        
         $html = '';
-        foreach($internalLinkList as $link):
-            $parentLinkList = InternalLink::where("parent_id",$link->id)->get();
-            if($parentLinkList->count()<=0)
-            
-            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
-            else 
-            $html .= '<a href="'.route('dashboard.internal-link.parent',$link->id).'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
-                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.$link->image.'">';
-            $html .= '</a>';
-        endforeach;
+        if(!empty($parentLinkIds)):
+            $parentLinks = InternalLink::whereIn('id', $parentLinkIds)->get();
+            if($parentLinks->count() > 0):
+                foreach($parentLinks as $link):
+                    if((empty($link->start_date) || empty($link->end_date)) || ((!empty($link->start_date) && !empty($link->end_date)) && ($link->start_date <= $today && $link->end_date >= $today))): 
+                        if(isset($link->children) && $link->children->count() > 0):
+                            $html .= '<a href="'.route('dashboard.internal-link.parent', $link->id).'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
+                        else:
+                            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
+                        endif;
+                            if(!empty($link->image)):
+                                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.$link->image.'">';
+                            else:
+                                $html .= '<span class="inline-flex w-full h-full shadow-md zoom-in rounded bg-primary text-white text-lg uppercase text-center items-center py-6 px-1">'.$link->name.'</span>';
+                            endif;
+                        $html .= '</a>';
+                    endif;
+                endforeach;
+            endif;
+        endif;
 
         return $html;
     }
+
+    public function getInternalChildLinkBtns($parent){
+        $user_id = auth()->user()->id;
+        $employee_id = auth()->user()->employee->id;
+        $today = date('Y-m-d');
+        $category = 'parent_child_'.$parent.'_links';
+        $childLinkIds = UserPrivilege::where('user_id', $user_id)->where('employee_id', $employee_id)->where('category', $category)->pluck('name')->unique()->toArray();
+        
+        $html = '';
+        if(!empty($childLinkIds)):
+            $childLinks = InternalLink::whereIn('id', $childLinkIds)->get();
+            if($childLinks->count() > 0):
+                foreach($childLinks as $link):
+                    if((empty($link->start_date) || empty($link->end_date)) || ((!empty($link->start_date) && !empty($link->end_date)) && ($link->start_date <= $today && $link->end_date >= $today))): 
+                        $html .= '<a href="'.(!empty($link->link) ? $link->link : 'javascript:void(0)').'" target="_blank" class="block col-span-2 mb-3">';
+                        if(!empty($link->image)):
+                            $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.$link->image.'">';
+                        else:
+                            $html .= '<span class="inline-flex w-full h-full shadow-md zoom-in rounded bg-primary text-white text-lg uppercase justify-center items-center py-6 px-6">'.$link->name.'</span>';
+                        endif;
+                        $html .= '</a>';
+                    endif;
+                endforeach;
+            else:
+                $html .= '<div class="col-span-12">';
+                    $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There no links found for this category.</div>';
+                $html .= '</div>';
+            endif;
+        endif;
+
+        return $html;
+    }
+
     public function getUserAttendanceLiveHistory(){
         $user_id = auth()->user()->id;
         $employee_id = auth()->user()->employee->id;
