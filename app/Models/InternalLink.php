@@ -25,7 +25,15 @@ class InternalLink extends Model
         'active'
     ];
     
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at']; 
+
+    public function children(){
+        return $this->hasMany(InternalLink::class, 'parent_id', 'id');
+    }
+
+    public function parent(){
+        return $this->belongsTo(InternalLink::class, 'parent_id');
+    }
 
     public function setStartDateAttribute($value) {  
         $this->attributes['start_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');

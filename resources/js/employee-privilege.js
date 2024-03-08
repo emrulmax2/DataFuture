@@ -93,4 +93,17 @@ import Litepicker from "litepicker";
         }
     })
     /* Login Date Range Toggle End */
+
+    /* Internal Links Section Start */
+    $('.parentPermissionItem').on('change', function(){
+        var $theChildWrap = $(this).parent('.form-check').siblings('.childrenPermissionWrap');
+        if($theChildWrap.length > 0){
+            if($(this).prop('checked')){
+                $('input[type="checkbox"]', $theChildWrap).removeAttr('disabled').prop('checked', false);
+            }else{
+                $('input[type="checkbox"]', $theChildWrap).prop('checked', false).attr('disabled', 'disabled');
+            }
+        }
+    })
+    /* Internal Links Section End */
 })();
