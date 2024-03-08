@@ -155,6 +155,47 @@
                 </div>
             </div>
         </div>
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Internal Links Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4">
+                    @if($links->count() > 0)
+                        @foreach($links as $lnk)
+                            <div class="col-span-12 mb-2">
+                                <div class="form-check form-switch">
+                                    <input {{ (isset($priv['parent_internal_links'][$lnk->id]) && $priv['parent_internal_links'][$lnk->id] == 1 ? 'checked' : '') }} id="permission_parent_internal_links_{{ $lnk->id }}" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[parent_internal_links][{{ $lnk->id }}]">
+                                    <label class="form-check-label ml-4" for="permission_parent_internal_links_{{ $lnk->id }}">{{ $lnk->name }}</label>
+                                </div>
+                                @if(isset($lnk->children) && $lnk->children->count() > 0)
+                                <div class="grid grid-cols-12 gap-4 pl-12 pt-3 childrenPermissionWrap">
+                                    @foreach($lnk->children as $clnk)
+                                        @php 
+                                            $childAttr = (isset($priv['parent_internal_links'][$lnk->id]) && $priv['parent_internal_links'][$lnk->id] == 1 ? '' : ' disabled ');
+                                            $childAttr .= (isset($priv['parent_internal_links'][$lnk->id]) && $priv['parent_internal_links'][$lnk->id] == 1) && (isset($priv['parent_child_'.$lnk->id.'_links'][$clnk->id]) && $priv['parent_child_'.$lnk->id.'_links'][$clnk->id] == 1) ? ' checked ' : '';
+                                        @endphp
+                                        <div class="col-span-12 sm:col-span-3">
+                                            <div class="form-check form-switch">
+                                                <input {{ $childAttr }} id="permission_child_internal_links_{{ $clnk->id }}" class="form-check-input" type="checkbox" value="1" name="permission[parent_child_{{$lnk->id}}_links][{{ $clnk->id }}]">
+                                                <label class="form-check-label ml-4" for="permission_child_internal_links_{{ $clnk->id }}">{{ $clnk->name }}</label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
     </form>
 
     <!-- BEGIN: Success Modal Content -->

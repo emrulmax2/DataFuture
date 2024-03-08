@@ -77,6 +77,12 @@ class InternalLinkController extends Controller
                         'parent_id' => $list->parent_id,
                         'link' => $list->link,
                         'deleted_at' => $list->deleted_at,
+                        'description' => $list->description,
+                        'start_date' => $list->start_date,
+                        'end_date' => $list->end_date,
+                        'available_staff' => $list->available_staff,
+                        'available_student' => $list->available_student,
+                        'active' => $list->active,
                         "_children"=> $childrens
                     ];
                 else 
@@ -88,6 +94,12 @@ class InternalLinkController extends Controller
                         'parent_id' => $list->parent_id,
                         'link' => $list->link,
                         'deleted_at' => $list->deleted_at,
+                        'description' => $list->description,
+                        'start_date' => $list->start_date,
+                        'end_date' => $list->end_date,
+                        'available_staff' => $list->available_staff,
+                        'available_student' => $list->available_student,
+                        'active' => $list->active,
                     ];
                 $i++;
             endforeach;
@@ -119,7 +131,7 @@ class InternalLinkController extends Controller
         $internalLink->save();
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/internallink/'.$internalLink->id, $imageName);
+        $path = $document->storeAs('public/internallink/'.$internalLink->id, $imageName,'local');
         $data = [];
 
         //$data['doc_type'] = $document->getClientOriginalExtension();
@@ -156,7 +168,7 @@ class InternalLinkController extends Controller
      */
     public function edit(InternalLink $internalLink)
     {
-        //
+        return response()->json($internalLink);
     }
 
     /**
@@ -174,7 +186,7 @@ class InternalLinkController extends Controller
         $document = $request->file('file');
 
         if($document) {
-            FacadesStorage::delete($internalLink->image);
+           // FacadesStorage::delete($internalLink->image);
             $imageName = time().'_'.$document->getClientOriginalName();
             $path = $document->storeAs('public/internallink/'.$internalLink->id, $imageName);
             $data = [];
