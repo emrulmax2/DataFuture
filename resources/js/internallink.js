@@ -1,3 +1,4 @@
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import xlsx from "xlsx";
 import { createElement, createIcons, icons,Minus,Plus } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -43,39 +44,97 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "80",
+                    headerSort:false
                 },
                 {
                     title: "Name",
-                    field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Image",
                     field: "image",
                     headerHozAlign: "left",
+                    width: "180",
                     formatter(cell, formatterParams) {    
                         var html = '<div class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image+'">';
                                 html += '</div>';
-                                // html += '<div class="inline-block relative" style="top: -5px;">';
-                                //     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().first_name+'</div>';
-                                //     html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
-                                // html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+((cell.getData().description != null) ? cell.getData().description : 'N/A')+'</div>';
+                                html += '</div>';
                             html += '</div>';
                         return html;
                     }, 
                 },
                 {
-                    title: "Parent Category",
-                    field: "parent_id",
-                    headerHozAlign: "left",
+                    title: "Active",
+                    field: "id",
+                    width: "180",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {    
+                        var html = '';
+                        console.log(cell.getData().active)
+                        if(cell.getData().active==1)
+                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
+                        else
+                            html += '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
+
+                                
+                        return html;
+                    },
                 },
+                
+                {
+                    title: "Available To",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {    
+                        var html = '';
+                        if(cell.getData().available_staff==1)
+                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0 my-2 mr-1">Staff</span>';
+                        if(cell.getData().available_student==1)
+                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Student</span>';
+                        if(cell.getData().available_student!=1 && cell.getData().available_staff!=1)
+                            html += '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">No One Assigned</span>';
+                                
+                        return html;
+                    },
+                },
+                
                 {
                     title: "Link",
                     field: "link",
                     headerHozAlign: "left",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    
+                },
+                {
+                    title: "Started To End Date",
+                    field: "id",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    download: false,
+                    formatter(cell, formatterParams) {    
+                        var html = '';
+
+                            html += '<span class=" inline-flex w-auto px-2  py-0 rounded-0 my-2 mr-1">'+cell.getData().start_date+' - '+cell.getData().end_date+'</span>';
+                        
+                                
+                        return html;
+                    },
                 },
                 {
                     title: "Actions",
@@ -196,13 +255,46 @@ var table = (function () {
 
         let confModalDelTitle = 'Are you sure?';
 
+        // let addEditor;
+        // if($("#addEditor").length > 0){
+        //     const el = document.getElementById('addEditor');
+        //     ClassicEditor.create(el).then(newEditor => {
+        //         addEditor = newEditor;
+        //     }).catch((error) => {
+        //         console.error(error);
+        //     });
+        // }
+
+        // let editEditor;
+        // if($("#editEditor").length > 0){
+        //     const el = document.getElementById('editEditor');
+        //     ClassicEditor.create(el).then(newEditor => {
+        //         editEditor = newEditor;
+        //     }).catch((error) => {
+        //         console.error(error);
+        //     });
+        // }
         const addModalEl = document.getElementById('uploadEmployeeDocumentModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#uploadEmployeeDocumentModal .acc__input-error').html('');
             $('#uploadEmployeeDocumentModal input').val('');
+            $('#uploadEmployeeDocumentModal select').val('');
+
+            // if($("#addEditor").length > 0){
+            //     addEditor.setData('');
+            // }
+        });
+
+        const editModalEl = document.getElementById('uploadEmployeeDocumentModalEdit')
+        editModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#uploadEmployeeDocumentModal .acc__input-error').html('');
+            $('#uploadEmployeeDocumentModal input').val('');
+            // if($("#editEditor").length > 0){
+            //     editEditor.setData('');
+            // }
         });
         
-        
+
 
 
 
@@ -220,10 +312,41 @@ var table = (function () {
             $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($(this).val());
         })
 
+        $('#uploadEmployeeDocumentModal [name="available_staff_status"]','#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="available_staff"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($(this).val());
+        })
 
-
-        const uploadEmployeeDocumentModalEl = document.getElementById('uploadEmployeeDocumentModal')
         
+        $('#uploadEmployeeDocumentModal [name="available_student_status"]','#uploadEmployeeDocumentModalEdit [name="available_student_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="available_student"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($(this).val());
+        })
+
+        
+        $('#uploadEmployeeDocumentModal [name="description_status"]','#uploadEmployeeDocumentModalEdit [name="description_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="description"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="description"]').val($(this).val());
+        })
+
+        
+        $('#uploadEmployeeDocumentModal [name="start_date_status"]','#uploadEmployeeDocumentModalEdit [name="start_date_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="start_date"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($(this).val());
+        })
+
+        
+        $('#uploadEmployeeDocumentModal [name="end_date_status"]','#uploadEmployeeDocumentModalEdit [name="end_date_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="end_date"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($(this).val());
+        })
+
+        
+        $('#uploadEmployeeDocumentModal [name="active_status"]','#uploadEmployeeDocumentModalEdit [name="active_status"]').on('keyup', function(){
+            $('#uploadEmployeeDocumentModal [name="active"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="active"]').val($(this).val());
+        })
+
     /* Start Dropzone */
     if($("#uploadDocumentForm").length > 0){
         
@@ -269,7 +392,7 @@ var table = (function () {
         });
 
         drzn1.on("complete", function(file) {
-            //drzn1.removeFile(file);
+            drzn1.removeFile(file);
         }); 
 
         drzn1.on('queuecomplete', function(){
@@ -314,6 +437,14 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModal [name="name"]').val($('#uploadEmployeeDocumentModal [name="name_status"]').val());
                     $('#uploadEmployeeDocumentModal [name="link"]').val($('#uploadEmployeeDocumentModal [name="link_status"]').val());
                     $('#uploadEmployeeDocumentModal [name="parent_id"]').val($('#uploadEmployeeDocumentModal [name="parent_category"]').val());
+                
+
+                    $('#uploadEmployeeDocumentModal [name="available_staff"]').val($('#uploadEmployeeDocumentModal [name="available_staff_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="available_student"]').val($('#uploadEmployeeDocumentModal [name="available_student_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="description"]').val($('#uploadEmployeeDocumentModal [name="description_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="start_date"]').val($('#uploadEmployeeDocumentModal [name="start_date_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="end_date"]').val($('#uploadEmployeeDocumentModal [name="end_date_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="active"]').val($('#uploadEmployeeDocumentModal [name="active_status"]').val());
 
                 drzn1.processQueue();
             }else{
@@ -358,31 +489,31 @@ var table = (function () {
         };
 
 
-        var drzn1 = new Dropzone('#uploadDocumentFormEdit', options);
+        var drzn2 = new Dropzone('#uploadDocumentFormEdit', options);
 
-        drzn1.on("maxfilesexceeded", (file) => {
+        drzn2.on("maxfilesexceeded", (file) => {
             $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
             $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
-            drzn1.removeFile(file);
+            drzn2.removeFile(file);
             setTimeout(function(){
                 $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
             }, 2000)
         });
 
-        drzn1.on("error", function(file, response){
+        drzn2.on("error", function(file, response){
             dzError = true;
         });
 
-        drzn1.on("success", function(file, response){
+        drzn2.on("success", function(file, response){
             //console.log(response);
             return file.previewElement.classList.add("dz-success");
         });
 
-        drzn1.on("complete", function(file) {
-            //drzn1.removeFile(file);
+        drzn2.on("complete", function(file) {
+            drzn2.removeFile(file);
         }); 
 
-        drzn1.on('queuecomplete', function(){
+        drzn2.on('queuecomplete', function(){
             $('#uploadEmpDocBtn').removeAttr('disabled');
             document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
 
@@ -414,36 +545,6 @@ var table = (function () {
             }
         })
 
-        $('#uploadEmpDocBtn').on('click', function(e){
-            e.preventDefault();
-            document.querySelector('#uploadEmpDocBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: inline-block;";
-            
-            if($('#uploadEmployeeDocumentModal [name="name_status"]').length > 0){
-                
-                    $('#uploadEmployeeDocumentModal [name="name"]').val($('#uploadEmployeeDocumentModal [name="name_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="link"]').val($('#uploadEmployeeDocumentModal [name="link_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="parent_id"]').val($('#uploadEmployeeDocumentModal [name="parent_category"]').val());
-
-                drzn1.processQueue();
-            }else{
-                $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-                $('#uploadEmployeeDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-
-                setTimeout(function(){
-                    $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-                    document.querySelector('#uploadEmpDocBtn').removeAttribute('disabled', 'disabled');
-                    document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
-                }, 2000)
-            }
-            
-        });
 
         $('#uploadEmpDocBtnEdit').on('click', function(e){
             e.preventDefault();
@@ -455,8 +556,15 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModalEdit [name="name"]').val($('#uploadEmployeeDocumentModalEdit [name="name_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="link"]').val($('#uploadEmployeeDocumentModalEdit [name="link_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val());
+                    
+                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="description"]').val($('#uploadEmployeeDocumentModalEdit [name="description_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="active"]').val($('#uploadEmployeeDocumentModalEdit [name="active_status"]').val());
 
-                drzn1.processQueue();
+                drzn2.processQueue();
             }else{
                 $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
                 $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
@@ -479,21 +587,65 @@ var table = (function () {
     /* End Dropzone */
 
         $("#awardingbodyTableId").on("click", ".edit_btn", function () {      
+
             let $editBtn = $(this);
-            let editId = $editBtn.attr("data-id");
+            let internalLink = $editBtn.attr("data-id");
             let name = $editBtn.attr("data-name");
             let link = $editBtn.attr("data-link");
             let parent = $editBtn.attr("data-parent");
-            let route = $editBtn.attr("data-route");
 
        
-            $('#uploadDocumentFormEdit [name="name"]').val(name);
-            $('#uploadEmployeeDocumentModalEdit [name="name_status"]').val(name);
-            $('#uploadDocumentFormEdit [name="link"]').val(link);
-            $('#uploadEmployeeDocumentModalEdit [name="link_status"]').val(link);
-            $('#uploadDocumentFormEdit [name="parent_id"]').val(parent);
-            $('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val(parent);
-            $('#uploadEmployeeDocumentModalEdit [name="id"]').val(editId);
+            
+
+            axios({
+                method: "get",
+                url: route("internal-link.edit", internalLink),
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                if (response.status == 200) {
+
+                    let dataset = response.data;
+                    $('#uploadDocumentFormEdit [name="name"]').val(dataset.name);
+                    $('#uploadEmployeeDocumentModalEdit [name="name_status"]').val(dataset.name);
+                    $('#uploadDocumentFormEdit [name="link"]').val(dataset.link? dataset.name : '');
+                    $('#uploadEmployeeDocumentModalEdit [name="link_status"]').val(dataset.link? dataset.link : '');
+                    $('#uploadDocumentFormEdit [name="parent_id"]').val(dataset.parent_id? dataset.parent_id : '');
+                    $('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val(dataset.parent_id? dataset.parent_id : '');
+                    $('#uploadEmployeeDocumentModalEdit [name="id"]').val(dataset.id);
+                    $('#uploadEmployeeDocumentModalEdit [name="description_status"]').val(dataset.description);
+                    $('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val(dataset.start_date);
+                    $('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val(dataset.end_date);
+                    if(dataset.available_staff)
+                        $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',true);
+                    else
+                        $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',false);
+                    if(dataset.available_student)
+                        $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',true);
+                    else
+                        $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',false);
+                    
+                    if(dataset.active)
+                        $('#uploadEmployeeDocumentModalEdit [name="active_status"]').prop('checked',true);
+                    else
+                        $('#uploadEmployeeDocumentModalEdit [name="active_status"]').prop('checked',false);
+
+                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val(dataset.available_student);
+                    $('#uploadEmployeeDocumentModalEdit [name="description"]').val(dataset.description);
+                    $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val(dataset.start_date);
+                    $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val(dataset.end_date);
+                    $('#uploadEmployeeDocumentModalEdit [name="active"]').val(dataset.active);
+                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val(dataset.active);
+                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val(dataset.active);
+
+
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+
+
         });
 
 
