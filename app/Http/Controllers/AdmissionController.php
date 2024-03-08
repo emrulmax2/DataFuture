@@ -481,7 +481,7 @@ class AdmissionController extends Controller
             'applied_received_fund' => $appliedReceivedFund,
             'fund_receipt' => $fundReceipt,
             'other_funding' => ($studentLoan == 'Others' && isset($request->other_funding) && !empty($request->other_funding) ? $request->other_funding : null),
-            'full_time' => (isset($request->full_time) && $request->full_time > 0 ? $request->full_time : 0),
+            'full_time' => ((isset($courseCreation->has_evening_and_weekend) && $courseCreation->has_evening_and_weekend == 1) && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),
             'updated_by' => auth()->user()->id
         ]);
         $changes = $proposedCourse->getDirty();

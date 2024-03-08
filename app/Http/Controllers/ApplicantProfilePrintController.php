@@ -262,10 +262,12 @@ class ApplicantProfilePrintController extends Controller
                         $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->other_funding) && $applicant->course->other_funding != '' ? $applicant->course->other_funding : '').'</td>';
                     $PDFHTML .= '</tr>';
                 endif;
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you applying for evening and weekend classes (Full Time)</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                $PDFHTML .= '</tr>';
+                if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1):
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you applying for evening and weekend classes (Full Time)</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                    $PDFHTML .= '</tr>';
+                endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Fee Eligibility</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->feeeligibility->elegibility->name) && isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id > 0 ? $applicant->feeeligibility->elegibility->name : '---').'</td>';
