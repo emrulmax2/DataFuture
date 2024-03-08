@@ -276,12 +276,14 @@
                                     </div>
                                 </div>
                             @endif
+                            @if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1)
                             <div class="col-span-12 sm:col-span-12">
                                 <div class="grid grid-cols-12 gap-0">
                                     <div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>
                                     <div class="col-span-8 font-medium">{!! (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
                                 </div>
                             </div>
+                            @endif
 
                         </div>
                     </div>

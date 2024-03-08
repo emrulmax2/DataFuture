@@ -292,18 +292,6 @@ var employmentHistoryTable = (function () {
             educationQualTable.init();
         }
 
-        // On submit filter form
-        /*$("#tabulatorFilterForm-EQ")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormEQ();
-                }
-            }
-        );*/
-
         // On click go button
         $("#tabulator-html-filter-go-EQ").on("click", function (event) {
             filterHTMLFormEQ();
@@ -325,18 +313,6 @@ var employmentHistoryTable = (function () {
         function filterHTMLFormEH() {
             employmentHistoryTable.init();
         }
-
-        // On submit filter form
-        /*$("#tabulatorFilterForm-EH")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormEH();
-                }
-            }
-        );*/
 
         // On click go button
         $("#tabulator-html-filter-go-EH").on("click", function (event) {
@@ -466,7 +442,8 @@ var employmentHistoryTable = (function () {
         }else{
             $('.form-wizard .wizard-fieldset.wizard-last-step .form-wizard-next-btn').attr('disabled', 'disabled');
         }
-    })
+    });
+
     $('.form-wizard-next-btn').on('click', function () {
         var parentFieldset = $(this).parents('.wizard-fieldset');
         var parentForm = $(this).parents('.wizard-step-form');
@@ -614,7 +591,18 @@ var employmentHistoryTable = (function () {
         });
     });
 
-    
+    $('#course_creation_id').on('change', function(e){
+        var has_ew = $('option:selected', this).attr('data-ew');
+        if(has_ew == 1){
+            $('.eveningWeekendWrap').fadeIn('fast', function(){
+                $('[name="full_time"]', this).prop('checked', false);
+            })
+        }else{
+            $('.eveningWeekendWrap').fadeOut('fast', function(){
+                $('[name="full_time"]', this).prop('checked', false);
+            })
+        }
+    })
 
     $('#disability_status').on('change', function(){
         if($('#disability_status').prop('checked')){
