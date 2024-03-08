@@ -15,7 +15,7 @@
 
 @section('subcontent')
     <div class="grid grid-cols-12 gap-6">       
-        <div class="col-span-12 2xl:col-span-9"> 
+        <div class="col-span-12 2xl:col-span-7"> 
             <div class="grid grid-cols-12 gap-6">
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8">
@@ -182,17 +182,30 @@
                 </div>
             </div>
         </div>
-        <div class="col-span-12 2xl:col-span-3">
+        <div class="col-span-12 2xl:col-span-2">
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
-                    <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
+                    <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-2">
                         @if(Auth::user() && Route::currentRouteName() == 'dashboard' && !empty($home_work_history_btns) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
-                        <div class="intro-x mt-7 mb-7">
+                        <div class="intro-x mt-6 mb-6">
                             <div class="grid grid-cols-12 gap-5 logBtns">
                                 {!! $home_work_history_btns !!}
                             </div>
                         </div>
                         @endif
+                        <div class="intro-x mt-6 mb-6">
+                            <div class="grid grid-cols-12 gap-5">
+                                {!! $internal_link_buttons !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        <div class="col-span-12 2xl:col-span-3">
+            <div class="2xl:border-l -mb-10 pb-10">
+                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
+                    <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-6">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Pending Tasks</h2>
                             <a href="{{ route('task.manager.all') }}" class="ml-auto text-primary truncate">Show More</a>
