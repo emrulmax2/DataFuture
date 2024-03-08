@@ -32,12 +32,13 @@ import Litepicker from "litepicker";
         if($('#liveAttendanceTable').length > 0){
             var departement = $('#liveAttendanceDept').val();
             var date = $('#liveAttendanceDate').val();
+            var emp = $('#liveAttendanceEmp').val();
 
             $('.leaveTableLoader').addClass('active');
             axios({
                 method: "post",
                 url: route('hr.portal.live.attedance.ajax'),
-                data: {departement : departement, date : date},
+                data: {departement : departement, date : date, emp : emp},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $('.leaveTableLoader').removeClass('active');
@@ -45,6 +46,12 @@ import Litepicker from "litepicker";
                     let res = response.data.res;
                     $('.theDateHolder').html(res.the_date);
                     $('#liveAttendanceTable tbody').html(res.htm);
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
@@ -59,12 +66,13 @@ import Litepicker from "litepicker";
         if($('#liveAttendanceTable').length > 0){
             var departement = $('#liveAttendanceDept').val();
             var date = $('#liveAttendanceDate').val();
+            var emp = $('#liveAttendanceEmp').val();
 
             $('.leaveTableLoader').addClass('active');
             axios({
                 method: "post",
                 url: route('hr.portal.live.attedance.ajax'),
-                data: {departement : departement, date : date},
+                data: {departement : departement, date : date, emp : emp},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $('.leaveTableLoader').removeClass('active');
@@ -72,6 +80,12 @@ import Litepicker from "litepicker";
                     let res = response.data.res;
                     $('.theDateHolder').html(res.the_date);
                     $('#liveAttendanceTable tbody').html(res.htm);
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
@@ -80,6 +94,38 @@ import Litepicker from "litepicker";
                 }
             });
         }
+    });
+
+    $('#liveAttendanceEmp').on('keyup', function(e){
+        var departement = $('#liveAttendanceDept').val();
+        var date = $('#liveAttendanceDate').val();
+        var emp = $('#liveAttendanceEmp').val();
+
+        $('.leaveTableLoader').addClass('active');
+        axios({
+            method: "post",
+            url: route('hr.portal.live.attedance.ajax'),
+            data: {departement : departement, date : date, emp : emp},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('.leaveTableLoader').removeClass('active');
+            if (response.status == 200) {
+                let res = response.data.res;
+                $('.theDateHolder').html(res.the_date);
+                $('#liveAttendanceTable tbody').html(res.htm);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        }).catch(error => {
+            $('.leaveTableLoader').removeClass('active');
+            if (error.response) {
+                console.log('error');
+            }
+        });
     });
 
 })();

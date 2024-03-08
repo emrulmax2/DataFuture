@@ -127,6 +127,15 @@ class InternalLinkController extends Controller
     {
         $internalLink = new InternalLink();
         $request->merge(['created_by'=>auth()->user()->id]);
+
+        if($request->input('start_date')=="") {
+            $request->request->remove('start_date');
+        }
+
+        if($request->input('end_date')=="") {
+            $request->request->remove('end_date');
+        }
+        
         $internalLink->fill($request->all());
         $internalLink->save();
         $document = $request->file('file');
@@ -182,6 +191,18 @@ class InternalLinkController extends Controller
     {
         $internalLink = InternalLink::find($request->id); 
         $request->merge(['updated_by'=>auth()->user()->id]);
+        
+        if($request->input('start_date')=="") {
+
+            $request->request->remove('start_date');
+
+        }
+
+        if($request->input('end_date')=="") {
+
+            $request->request->remove('end_date');
+
+        }
 
         $document = $request->file('file');
 

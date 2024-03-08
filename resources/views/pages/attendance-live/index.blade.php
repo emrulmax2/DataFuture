@@ -10,6 +10,10 @@
             <h2 class="text-lg font-medium mr-auto">Live Attendance of <span class="theDateHolder underline">{{ date('jS M, Y') }}</span></h2>
             <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                 <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
+                    <i data-lucide="users" class="hidden sm:block w-4 h-4 mr-2"></i>
+                    <input type="text" placeholder="Search..." name="employee_name" class="w-full form-control border-0 liveAttendanceEmp" id="liveAttendanceEmp" value="" style="max-width: 150px;"/>
+                </div>
+                <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
                     <i data-lucide="tags" class="hidden sm:block w-4 h-4 mr-2"></i>
                     <select name="department" class="w-full form-control border-0 liveAttendanceDept" id="liveAttendanceDept">
                         <option value="">All Department</option>
@@ -19,10 +23,6 @@
                             @endforeach
                         @endif
                     </select>
-                </div>
-                <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-0">
-                    <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
-                    <input type="text" name="class_date" class="w-full form-control border-0 liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}" style="max-width: 110px;"/>
                 </div>
             </div>
         </div>
