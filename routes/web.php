@@ -1535,13 +1535,15 @@ Route::middleware('auth')->group(function() {
             Route::post('term-type/{id}/restore', 'restore')->name('term-type.restore');
         });
 
-        Route::resource('internal-link', InternalLinkController::class);
+        Route::resource('internal-link', InternalLinkController::class,[
+            'except' => ['update']
+        ]);
 
         Route::controller(InternalLinkController::class)->group(function() {
             Route::get('internal-link-list', 'list')->name('internal-link.list');     
             Route::post('internal-link/{id}/restore', 'restore')->name('internal-link.restore');
             Route::get('internal-link/{id}/parent', 'parentLinkBox')->name('internal-link.parent');
-            
+            Route::post('internal-link-update', 'update')->name('internal-link.update');
         });
 
     });

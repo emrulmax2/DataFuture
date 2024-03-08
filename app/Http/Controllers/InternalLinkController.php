@@ -166,9 +166,35 @@ class InternalLinkController extends Controller
      * @param  \App\Models\InternalLink  $internalLink
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateInternalLinkRequest $request, InternalLink $internalLink)
+    public function update(UpdateInternalLinkRequest $request)
     {
-        //
+        $internalLink = InternalLink::find($request->id); 
+        $request->merge(['updated_by'=>auth()->user()->id]);
+
+        $document = $request->file('file');
+
+        if($document) {
+            FacadesStorage::delete($internalLink->image);
+            $imageName = time().'_'.$document->getClientOriginalName();
+            $path = $document->storeAs('public/internallink/'.$internalLink->id, $imageName);
+            $data = [];
+
+            //$data['doc_type'] = $document->getClientOriginalExtension();
+            
+            $data['image'] = FacadesStorage::disk('local')->url($path);
+            // $data['display_file_name'] = $document->getClientOriginalName();
+            // $data['current_file_name'] = $imageName;
+
+            $request->merge($data);
+            
+        }
+        $internalLink->fill($request->all());
+        $updated = $internalLink->save();
+
+        if($updated)
+            return response()->json(['message' => 'Data successfully uploaded.'], 200);
+        else
+            return response()->json(['message' => 'Data not uploaded'], 302);
     }
 
     /**

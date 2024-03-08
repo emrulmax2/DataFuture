@@ -162,71 +162,79 @@
         </div>
     </div>
     <!-- END: Add Modal -->
-    <!-- BEGIN: Edit Modal -->
-    <div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="editForm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Awarding Body</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="name" class="form-label">Awarding Body <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
+<!-- BEGIN: Add Modal -->
+<div id="uploadEmployeeDocumentModalEdit" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Site Link</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="mt-3">   
+                    <form method="post"  action="{{ route('internal-link.update') }}" class="dropzone bg-slate-100" id="uploadDocumentFormEdit" enctype="multipart/form-data">
+                        @csrf
+                        <div class="fallback">
+                            <input type="hidden" name="documents" type="file" />
                         </div>
-                        <div class="mt-3">
-                            <div class="form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_hesa">Is Hesa Code?</label>
-                                <input id="is_hesa" class="form-check-input" name="is_hesa" value="1" type="checkbox">
+                        <div class="dz-message" data-dz-message>
+                            <div class="text-lg font-medium">Drop Image here or click to upload.</div>
+                            <div class="text-slate-500">
+                                 Max file size should be 10MB.
                             </div>
                         </div>
-                        <div class="mt-3 hesa_code_area" style="display: none;">
-                            <label for="hesa_code" class="form-label">Hesa Code</label>
-                            <input id="hesa_code" type="text" name="hesa_code" class="form-control w-full">
-                            <div class="acc__input-error error-hesa_code text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="is_df">Is DF Code?</label>
-                                <input id="is_df" class="form-check-input" name="is_df" value="1" type="checkbox">
-                            </div>
-                        </div>
-                        <div class="mt-3 df_code_area" style="display: none;">
-                            <label for="df_code" class="form-label">DF Code</label>
-                            <input id="df_code" type="text" name="df_code" class="form-control w-full">
-                            <div class="acc__input-error error-df_code text-danger mt-2"></div>
-                        </div>
+                        <input type="hidden" name="name" id="nameValue" value=""/>
+                            <input type="hidden" name="parent_id" id="parentValue" value=""/>
+                            <input type="hidden" name="link" id="linkValue" value=""/>
+                            <input type="hidden" name="id" id="idValue" value=""/>
+                    </form> 
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="update" class="btn btn-primary w-auto">
-                            Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="id" value="0" />
+                    <div class="mt-3">       
+                        <label for="name_status" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input id="name_status" type="text" name="name_status" class="form-control w-full">
+                        <div id="error-name_status" class="name_status__input-error error-user text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">       
+                        <label for="link_status" class="form-label">Link </label>
+                        <input id="link_status" type="text" name="link_status" class="form-control w-full">
+                    </div>
+                    <div class="mt-3 mb-3">
+                        <label class="form-label">Parent Category</label>
+                        <select id="course-01" name="parent_category" class="form-select w-full" >
+                            <option value="">Please Select</option>
+                            @if(!empty($parents))
+                                @foreach($parents as $crs)
+                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
                     </div>
                 </div>
-            </form>
-        </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal"
+                        class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="button" id="uploadEmpDocBtnEdit" class="btn btn-primary w-auto">
+                        Save
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
     </div>
-    <!-- END: Edit Modal -->
+</div>
+<!-- END: Add Modal -->
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
