@@ -88,7 +88,7 @@ var table = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-name="' +cell.getData().name +'" data-link="' +cell.getData().link +'" data-parent="' +cell.getData().parent_id +'" data-tw-toggle="modal" data-tw-target="#uploadEmployeeDocumentModalEdit" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -188,6 +188,7 @@ var table = (function () {
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const uploadEmployeeDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModal"));
+        const uploadEmployeeDocumentModalEdit = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModalEdit"));
         
         const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
@@ -201,70 +202,25 @@ var table = (function () {
             $('#uploadEmployeeDocumentModal input').val('');
         });
         
-        const editModalEl = document.getElementById('editModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editModal .acc__input-error').html('');
-            $('#editModal input').val('');
-            $('#editModal input[name="id"]').val('0');
-        });
-
-        $('#addForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#addForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
-        })
         
-        $('#addForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#addForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
-        })
 
-        $('#editForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#editForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
-        })
-        
-        $('#editForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#editForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
-        })
-        $('#uploadEmployeeDocumentModal [name="name_status"]').on('keyup', function(){
+
+
+        $('#uploadEmployeeDocumentModal [name="name_status"]','#uploadEmployeeDocumentModalEdit [name="name_status"]').on('keyup', function(){
             $('#uploadEmployeeDocumentModal [name="name"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="name"]').val($(this).val());
         })
-        $('#uploadEmployeeDocumentModal [name="link_status"]').on('keyup', function(){
+        $('#uploadEmployeeDocumentModal [name="link_status"]','#uploadEmployeeDocumentModalEdit [name="link_status"]').on('keyup', function(){
             $('#uploadEmployeeDocumentModal [name="link"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="link"]').val($(this).val());
         })
 
-        $('#uploadEmployeeDocumentModal [name="parent_category"]').on('change', function(){
+        $('#uploadEmployeeDocumentModal [name="parent_category"]','#uploadEmployeeDocumentModalEdit [name="parent_category"]').on('change', function(){
             $('#uploadEmployeeDocumentModal [name="parent_id"]').val($(this).val());
+            $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($(this).val());
         })
+
+
 
         const uploadEmployeeDocumentModalEl = document.getElementById('uploadEmployeeDocumentModal')
         
@@ -331,8 +287,9 @@ var table = (function () {
                 
                 setTimeout(function(){
                     succModal.hide();
-                    window.location.reload();
+                    // window.location.reload();
                 }, 2000);
+                table.init();
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -378,165 +335,167 @@ var table = (function () {
             
         });
     }
-    /* End Dropzone */
-        // $('#addForm').on('submit', function(e){
-        //     const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
-        //     e.preventDefault();
-        //     const form = document.getElementById('addForm');
+    if($("#uploadDocumentFormEdit").length > 0){
         
-        //     document.querySelector('#save').setAttribute('disabled', 'disabled');
-        //     document.querySelector("#save svg").style.cssText ="display: inline-block;";
+        let dzError = false;
+        Dropzone.autoDiscover = false;
+        Dropzone.options.uploadDocumentFormEdit = {
+            autoProcessQueue: false,
+            maxFiles: 10,
+            maxFilesize: 20,
+            parallelUploads: 10,
+            acceptedFiles: ".jpeg,.jpg,.png,.gif,.svg",
+            addRemoveLinks: true,
+            thumbnailWidth: 100,
+            thumbnailHeight: 100,
+        };
 
-        //     let form_data = new FormData(form);
-        //     axios({
-        //         method: "post",
-        //         url: route('awardingbody.store'),
-        //         data: form_data,
-        //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        //     }).then(response => {
-        //         document.querySelector('#save').removeAttribute('disabled');
-        //         document.querySelector("#save svg").style.cssText = "display: none;";
+        let options = {
+            accept: (file, done) => {
+                console.log("Uploaded");
+                done();
+            },
+        };
+
+
+        var drzn1 = new Dropzone('#uploadDocumentFormEdit', options);
+
+        drzn1.on("maxfilesexceeded", (file) => {
+            $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
+            $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
+            drzn1.removeFile(file);
+            setTimeout(function(){
+                $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
+            }, 2000)
+        });
+
+        drzn1.on("error", function(file, response){
+            dzError = true;
+        });
+
+        drzn1.on("success", function(file, response){
+            //console.log(response);
+            return file.previewElement.classList.add("dz-success");
+        });
+
+        drzn1.on("complete", function(file) {
+            //drzn1.removeFile(file);
+        }); 
+
+        drzn1.on('queuecomplete', function(){
+            $('#uploadEmpDocBtn').removeAttr('disabled');
+            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
+
+            uploadEmployeeDocumentModalEdit.hide();
+            if(!dzError){
+                succModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Employee document successfully uploaded.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });      
+                table.init();
+                setTimeout(function(){
+                    succModal.hide();
+                    // window.location.reload();
+                }, 2000);
+
+            }else{
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!" );
+                    $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                    $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
+                });
+                setTimeout(function(){
+                    warningModal.hide();
+                    //window.location.reload();
+                }, 2000);
+            }
+        })
+
+        $('#uploadEmpDocBtn').on('click', function(e){
+            e.preventDefault();
+            document.querySelector('#uploadEmpDocBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: inline-block;";
+            
+            if($('#uploadEmployeeDocumentModal [name="name_status"]').length > 0){
                 
-        //         if (response.status == 200) {
-        //             document.querySelector('#save').removeAttribute('disabled');
-        //             document.querySelector("#save svg").style.cssText = "display: none;";
-        //             $('#addForm #name').val('');
-        //             addModal.hide();
-        //             succModal.show();
-        //             document.getElementById("successModal")
-        //                 .addEventListener("shown.tw.modal", function (event) {
-        //                     $("#successModal .successModalTitle").html(
-        //                         "Success!"
-        //                     );
-        //                     $("#successModal .successModalDesc").html('Awarding body successfully inserted');
-        //                 });                
-                        
-        //         }
-        //         table.init();
-        //     }).catch(error => {
-        //         document.querySelector('#save').removeAttribute('disabled');
-        //         document.querySelector("#save svg").style.cssText = "display: none;";
-        //         if (error.response) {
-        //             if (error.response.status == 422) {
-        //                 for (const [key, val] of Object.entries(error.response.data.errors)) {
-        //                     $(`#addForm .${key}`).addClass('border-danger')
-        //                     $(`#addForm  .error-${key}`).html(val)
-        //                 }
-        //                 $('#addForm #name').val('');
-        //             } else {
-        //                 console.log('error');
-        //             }
-        //         }
-        //     });
-        // });
+                    $('#uploadEmployeeDocumentModal [name="name"]').val($('#uploadEmployeeDocumentModal [name="name_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="link"]').val($('#uploadEmployeeDocumentModal [name="link_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="parent_id"]').val($('#uploadEmployeeDocumentModal [name="parent_category"]').val());
+
+                drzn1.processQueue();
+            }else{
+                $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
+                $('#uploadEmployeeDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                setTimeout(function(){
+                    $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
+                    document.querySelector('#uploadEmpDocBtn').removeAttribute('disabled', 'disabled');
+                    document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
+                }, 2000)
+            }
+            
+        });
+
+        $('#uploadEmpDocBtnEdit').on('click', function(e){
+            e.preventDefault();
+            document.querySelector('#uploadEmpDocBtnEdit').setAttribute('disabled', 'disabled');
+            document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText ="display: inline-block;";
+            
+            if($('#uploadEmployeeDocumentModalEdit [name="name_status"]').length > 0){
+                
+                    $('#uploadEmployeeDocumentModalEdit [name="name"]').val($('#uploadEmployeeDocumentModalEdit [name="name_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="link"]').val($('#uploadEmployeeDocumentModalEdit [name="link_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val());
+
+                drzn1.processQueue();
+            }else{
+                $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
+                $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                setTimeout(function(){
+                    $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
+                    document.querySelector('#uploadEmpDocBtnEdit').removeAttribute('disabled', 'disabled');
+                    document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText ="display: none;";
+                }, 2000)
+            }
+            
+        });
+    }
+    /* End Dropzone */
 
         $("#awardingbodyTableId").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+            let name = $editBtn.attr("data-name");
+            let link = $editBtn.attr("data-link");
+            let parent = $editBtn.attr("data-parent");
+            let route = $editBtn.attr("data-route");
 
-            axios({
-                method: "get",
-                url: route("awardingbody.edit", editId),
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
-            }).then((response) => {
-                if (response.status == 200) {
-                    let dataset = response.data;
-                    $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                    
-                    if(dataset.is_hesa == 1){
-                        document.querySelector('#editModal #is_hesa').checked = true;
-                        $('#editModal .hesa_code_area').fadeIn(500, function () {
-                            $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
-                        });
-                    }else{
-                        document.querySelector('#editModal #is_hesa').checked = false;
-                        $('#editModal .hesa_code_area').fadeOut(500, function () {
-                            $('#editModal input[name="hesa_code"]').val('');
-                        });
-                    }
-                    
-                    if(dataset.is_df == 1){
-                        document.querySelector('#editModal #is_df').checked = true;
-                        $('#editModal .df_code_area').fadeIn(500, function () {
-                            $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
-                        });
-                    }else{
-                        document.querySelector('#editModal #is_df').checked = false;
-                        $('#editModal .df_code_area').fadeOut(500, function () {
-                            $('#editModal input[name="df_code"]').val('');
-                        });
-                    }
-
-                    $('#editModal input[name="id"]').val(editId);
-                }
-            }).catch((error) => {
-                console.log(error);
-            });
+       
+            $('#uploadDocumentFormEdit [name="name"]').val(name);
+            $('#uploadEmployeeDocumentModalEdit [name="name_status"]').val(name);
+            $('#uploadDocumentFormEdit [name="link"]').val(link);
+            $('#uploadEmployeeDocumentModalEdit [name="link_status"]').val(link);
+            $('#uploadDocumentFormEdit [name="parent_id"]').val(parent);
+            $('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val(parent);
+            $('#uploadEmployeeDocumentModalEdit [name="id"]').val(editId);
         });
 
-        // Update Course Data
-        $("#editForm").on("submit", function (e) {
-            let editId = $('#editModal input[name="id"]').val();
-            const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
-            const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-
-            e.preventDefault();
-            const form = document.getElementById("editForm");
-
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
-
-            let form_data = new FormData(form);
-
-            axios({
-                method: "post",
-                url: route("awardingbody.update", editId),
-                data: form_data,
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
-            }).then((response) => {
-                if (response.status == 200) {
-                    document.querySelector("#update").removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText = "display: none;";
-                    editModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal")
-                        .addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html(
-                                "Success!"
-                            );
-                            $("#successModal .successModalDesc").html('Awarding body successfully updated');
-                        });
-                }
-                table.init();
-            }).catch((error) => {
-                document.querySelector("#update").removeAttribute("disabled");
-                document.querySelector("#update svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editForm .${key}`).addClass('border-danger')
-                            $(`#editForm  .error-${key}`).html(val)
-                        }
-                    }else if (error.response.status == 304) {
-                        editModal.hide();
-
-                        let message = error.response.statusText;
-                        succModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html("No Data Change!");
-                            $("#successModal .successModalDesc").html(message);
-                        });
-                    } else {
-                        console.log("error");
-                    }
-                }
-            });
-        });
 
         // Confirm Modal Action
         $('#confirmModal .agreeWith').on('click', function(){
@@ -554,7 +513,7 @@ var table = (function () {
             if(action == 'DELETE'){
                 axios({
                     method: 'delete',
-                    url: route('internal-link.destory', recordID),
+                    url: route('internal-link.destroy', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -564,7 +523,7 @@ var table = (function () {
                         succModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Awarding body successfully deleted!');
+                            $('#successModal .successModalDesc').html('Internal link  successfully deleted!');
                         });
                     }
                     table.init();
@@ -607,7 +566,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to delete this Awarding Body from applicant list? Please click on agree to continue.');
+                $('#confirmModal .confModDesc').html('Want to delete this Internal link  from applicant list? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
                 $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
             });
@@ -626,7 +585,7 @@ var table = (function () {
             confModal.show();
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to restore this Awarding Body from the trash? Please click on agree to continue.');
+                $('#confirmModal .confModDesc').html('Want to restore this Internal link from the trash? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });
