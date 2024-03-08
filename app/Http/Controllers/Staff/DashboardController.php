@@ -296,10 +296,10 @@ class DashboardController extends Controller
             $parentLinkList = InternalLink::where("parent_id",$link->id)->get();
             if($parentLinkList->count()<=0)
             
-            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-12 mb-3" data-value="1">';
+            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
             else 
-            $html .= '<a href="'.route('dashboard.internal-link.parent',$link->id).'" target="_blank" class="block col-span-12 mb-3" data-value="1">';
-                $html .= '<img class="block w-full h-24 shadow-md zoom-in rounded" src="'.$link->image.'">';
+            $html .= '<a href="'.route('dashboard.internal-link.parent',$link->id).'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
+                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.$link->image.'">';
             $html .= '</a>';
         endforeach;
 

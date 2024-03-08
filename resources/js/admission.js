@@ -430,7 +430,7 @@ var employmentHistoryTable = (function () {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
-        persist: false,
+        //persist: false,
         create: true,
         allowEmptyOption: true,
         onDelete: function (values) {
@@ -1665,6 +1665,19 @@ var employmentHistoryTable = (function () {
     if($('#editAdmissionCourseDetailsForm').length > 0){
         var course_creation_id = new TomSelect('#course_creation_id', tomOptions);
         var student_loan = new TomSelect('#student_loan', tomOptions);
+
+        $('#course_creation_id').on('change', function(e){
+            var has_ew = $('option:selected', this).attr('data-ew');
+            if(has_ew == 1){
+                $('.eveningWeekendWrap').fadeIn('fast', function(){
+                    $('[name="full_time"]', this).prop('checked', false);
+                })
+            }else{
+                $('.eveningWeekendWrap').fadeOut('fast', function(){
+                    $('[name="full_time"]', this).prop('checked', false);
+                })
+            }
+        })
 
         const editAdmissionCourseDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionCourseDetailsModal"));
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));

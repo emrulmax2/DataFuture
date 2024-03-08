@@ -157,7 +157,7 @@ class ApplicationController extends Controller
             'applied_received_fund' => $appliedReceivedFund,
             'fund_receipt' => $fundReceipt,
             'other_funding' => ($studentLoan == 'Others' && isset($request->other_funding) && !empty($request->other_funding) ? $request->other_funding : null),
-            'full_time' => (isset($request->full_time) && $request->full_time > 0 ? $request->full_time : 0),
+            'full_time' => ((isset($courseCreation->has_evening_and_weekend) && $courseCreation->has_evening_and_weekend == 1) && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),
             'created_by' => \Auth::guard('applicant')->user()->id,
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
@@ -487,12 +487,14 @@ class ApplicationController extends Controller
                                     $html .= '</div>';
                                 $html .= '</div>';
                             endif;
+                            if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1):
                             $html .= '<div class="col-span-12 sm:col-span-12">';
                                 $html .= '<div class="grid grid-cols-12 gap-0">';
                                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>';
                                     $html .= '<div class="col-span-8 font-medium">'.(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
                                 $html .= '</div>';
                             $html .= '</div>';
+                            endif;
 
                         $html .= '</div>';
                     $html .= '</div>';

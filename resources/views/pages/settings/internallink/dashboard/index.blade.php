@@ -25,8 +25,8 @@
                     </div>
                     <div class="grid grid-cols-12 gap-6">
                         @foreach($parents as $link)
-                            <a href="{{ $link->link }}" target="_blank" class="block col-span-3 mb-3" >
-                                <img class="block w-full h-24 shadow-md zoom-in rounded" src="{{ $link->image }}">
+                            <a href="{{ $link->link }}" target="_blank" class="block 2xl:col-span-2 xl:col-span-2 sm:col-span-3 col-span-6 mb-3" >
+                                <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ $link->image }}">
                             </a>
                         @endforeach
                     </div>

@@ -341,7 +341,7 @@
                                         <option value="" selected>Please Select</option>
                                         @if(!empty($courseCreationAvailibility))
                                             @foreach($courseCreationAvailibility as $ci)
-                                                <option {{ isset($apply->course->course_creation_id) && $apply->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
+                                                <option data-ew="{{ $ci->creation->has_evening_and_weekend }}" {{ isset($apply->course->course_creation_id) && $apply->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
                                             @endforeach 
                                         @endif 
                                     </select>
@@ -415,12 +415,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-8">
+                        <div class="col-span-12 sm:col-span-8 eveningWeekendWrap" style="display: {{ isset($apply->course->creation->has_evening_and_weekend) && $apply->course->creation->has_evening_and_weekend == 1 ? 'block' : 'none'}};">
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
                                 <div class="col-span-12 sm:col-span-6">
                                     <div class="form-check form-switch">
-                                        <input {{ isset($apply->course->full_time) && $apply->course->full_time == 1 ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
+                                        <input {{ (isset($apply->course->creation->has_evening_and_weekend) && $apply->course->creation->has_evening_and_weekend == 1) && (isset($apply->course->full_time) && $apply->course->full_time == 1) ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
                                         <label class="form-check-label" for="full_time">&nbsp;</label>
                                     </div>
                                     <div class="acc__input-error error-full_time text-danger mt-2"></div>
