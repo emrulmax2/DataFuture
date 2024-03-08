@@ -546,7 +546,8 @@ var table = (function () {
         })
 
 
-        $('#uploadEmpDocBtnEdit').on('click', function(e){
+        $('#uploadEmpDocBtnEdit').on('click', function(e) {
+
             e.preventDefault();
             document.querySelector('#uploadEmpDocBtnEdit').setAttribute('disabled', 'disabled');
             document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText ="display: inline-block;";
@@ -563,8 +564,52 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="active"]').val($('#uploadEmployeeDocumentModalEdit [name="active_status"]').val());
+                    
+                    if (drzn2.getQueuedFiles().length > 0) {                        
+                        drzn2.processQueue();  
+                     } else {    
+                        const form = document.getElementById('uploadDocumentFormEdit');
+                        let form_data = new FormData(form);
+                        axios({
+                            method: "post",
+                            url: route('internal-link.update'),
+                            data: form_data,
+                            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                        }).then(response => {
 
-                drzn2.processQueue();
+                            document.querySelector('#uploadEmpDocBtnEdit').removeAttribute('disabled');
+                            document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText = "display: none;";
+                            
+                            if (response.status == 200) {
+                                uploadEmployeeDocumentModalEdit.hide();
+                                succModal.show();
+                                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                                    $("#successModal .successModalTitle").html("Congratulation!" );
+                                    $("#successModal .successModalDesc").html('Employee document successfully uploaded.');
+                                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                                });      
+                                setTimeout(function(){
+                                    succModal.hide();
+                                    window.location.reload();
+                                }, 2000);
+                            }
+                        }).catch(error => {
+                            document.querySelector('#sendEmailBtn').removeAttribute('disabled');
+                            document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
+                            if (error.response) {
+                                if (error.response.status == 422) {
+                                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                                        $(`#sendEmailForm .${key}`).addClass('border-danger');
+                                        $(`#sendEmailForm  .error-${key}`).html(val);
+                                    }
+                                } else {
+                                    console.log('error');
+                                }
+                            }
+                        });
+                        
+                        
+                     }
             }else{
                 $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
                 $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
@@ -594,9 +639,6 @@ var table = (function () {
             let link = $editBtn.attr("data-link");
             let parent = $editBtn.attr("data-parent");
 
-       
-            
-
             axios({
                 method: "get",
                 url: route("internal-link.edit", internalLink),
@@ -604,6 +646,7 @@ var table = (function () {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
+
                 if (response.status == 200) {
 
                     let dataset = response.data;
@@ -639,7 +682,6 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val(dataset.active);
                     $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val(dataset.active);
 
-
                 }
             }).catch((error) => {
                 console.log(error);
@@ -650,7 +692,8 @@ var table = (function () {
 
 
         // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
+        $('#confirmModal .agreeWith').on('click', function() {
+
             const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
             document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
                 $('#confirmModal .agreeWith').attr('data-id', '0');
@@ -725,7 +768,8 @@ var table = (function () {
         });
 
         // Restore Course
-        $('#awardingbodyTableId').on('click', '.restore_btn', function(){
+        $('#awardingbodyTableId').on('click', '.restore_btn', function() {
+
             const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
             document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
                 $('#confirmModal .agreeWith').attr('data-id', '0');
@@ -733,14 +777,15 @@ var table = (function () {
             });
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
-
             confModal.show();
+
             document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Want to restore this Internal link from the trash? Please click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });
+
         });
     }
 })();
