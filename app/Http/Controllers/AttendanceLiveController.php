@@ -28,17 +28,18 @@ class AttendanceLiveController extends Controller
     }
 
     public function ajaxLiveData(Request $request){
+        $emp = (isset($request->emp) && $request->emp != '' ? $request->emp : '');
         $departement = (isset($request->departement) && $request->departement > 0 ? $request->departement : 0);
-        $theDate = (isset($request->date) && !empty($request->date) ? date('Y-m-d', strtotime($request->date)) : date('Y-m-d'));
+        $theDate = date('Y-m-d');
 
         $res = [];
         $res['the_date'] = date('jS M, Y', strtotime($theDate));
-        $res['htm'] = $this->getEmployeeLiveAttendanceTableHtml($departement, $theDate);
+        $res['htm'] = $this->getEmployeeLiveAttendanceTableHtml($departement, $theDate, $emp);
 
         return response()->json(['res' => $res], 200);
     }
 
-    public function getEmployeeLiveAttendanceTableHtml($department = 0, $theDate = ''){
+    public function getEmployeeLiveAttendanceTableHtml($department = 0, $theDate = '', $emp = ''){
         $theDate = (!empty($theDate) ? $theDate : date('Y-m-d'));
 
         $theDay = date('D', strtotime($theDate));
@@ -56,6 +57,11 @@ class AttendanceLiveController extends Controller
         if($department > 0):
             $query->whereHas('employment', function($q) use($department){
                 $q->where('department_id', $department);
+            });
+        endif;
+        if(!empty($emp)):
+            $query->where(function($q) use($emp){
+                $q->where('first_name', 'LIKE', '%'.$emp.'%')->orWhere('last_name', 'LIKE', '%'.$emp.'%');
             });
         endif;
         $Query= $query->get();
