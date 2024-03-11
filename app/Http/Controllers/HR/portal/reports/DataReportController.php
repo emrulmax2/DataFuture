@@ -113,6 +113,7 @@ class DataReportController extends Controller
                         foreach($data['tables'] as $keyTable => $table) {
                             
                             if($table=="Employee") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     if($fieldValue)
                                         switch($fieldName) {
@@ -144,6 +145,7 @@ class DataReportController extends Controller
                             }
                             
                             if($table=="Employment") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     if($fieldValue)
                                         switch($fieldName) {
@@ -181,6 +183,7 @@ class DataReportController extends Controller
                             }
 
                             if($table=="EmployeeEligibilites") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                             
                                     if($fieldValue)
@@ -206,6 +209,7 @@ class DataReportController extends Controller
                             
 
                             if($table=="EmployeeEmergencyContact") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     if($fieldValue)
                                         switch($fieldName) {
@@ -225,6 +229,7 @@ class DataReportController extends Controller
                             }
 
                             if($table=="EmployeePaymentSetting") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     
                                     if($fieldValue)
@@ -235,6 +240,7 @@ class DataReportController extends Controller
                             }
 
                             if($table=="EmployeeBankDetail") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     if($employee->payment!=null && $employee->payment->payment_method=="Bank Transfer") {
                                         $employeeBankDetail = EmployeeBankDetail::where("employee_id",$employee->id)->where("active",1)->get()->first();
@@ -248,6 +254,7 @@ class DataReportController extends Controller
                             }
                             $employeeWorkingPattern = "";
                             if($table=="EmployeeWorkingPattern") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
                                     
                                     $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->whereNull('end_to')->get()->first();
@@ -260,6 +267,7 @@ class DataReportController extends Controller
                             }
 
                             if($table=="EmployeeWorkingPatternPay") {
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
 
                                     $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->get()->first();
