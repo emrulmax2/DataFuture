@@ -130,13 +130,18 @@
             <!-- END: Login Info -->
             
             <!-- BEGIN: Login Form -->
-            <div class="h-screen xl:h-auto flex flex-col py-5 xl:py-0 my-10 xl:my-0 ">
-                <div class="mx-auto mb-10  block items-center xl:hidden">
-                    <a href="" class="-intro-x pt-5">
-                        <img alt="London Churchill College" class="w-48 mx-auto my-auto" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg" />
+            <div class="sm:h-screen xl:h-auto xl:flex py-5 xl:py-0 my-10 xl:my-0">
+                <div class="xl:hidden mb-10">
+                    <a href="" class="-intro-x flex-none items-center pt-5">
+                        {{-- <img alt="Icewall Tailwind HTML Admin Template" class="w-6" src="{{ asset('build/assets/images/logo.svg') }}">
+                        <span class="text-white text-lg ml-3">
+                            Applicant Login
+                        </span> --}}
+                        <img alt="London Churchill College" class="w-48" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg') }}">
                     </a>
+    
                 </div>
-                <div class="xl:my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto">
+                <div class="my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto">
                     <h2 class="intro-x font-bold text-2xl xl:text-3xl text-center ">Login</h2>
                     <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">A few more clicks to sign in to your account. Manage all your accounts in one place</div>
                     @if($env != "production") 
