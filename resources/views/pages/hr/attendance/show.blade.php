@@ -266,7 +266,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium">{{ $atten->clockin_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium">{{ $atten->clockin_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -286,7 +304,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium">{{ $atten->clockout_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium">{{ $atten->clockout_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -305,7 +341,7 @@
                                                         <td><span class="font-medium">{{ $atten->paid_break }}</span></td>
                                                     </tr>
                                                     <tr>
-                                                        <td><span class="font-medium text-slate-400">Un Paid</span></td>
+                                                        <td><span class="font-medium text-slate-400">Unpaid</span></td>
                                                         <td><span class="font-medium">{{ $atten->unpadi_break }}</span></td>
                                                     </tr>
                                                     <tr>
@@ -493,7 +529,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium {{ ($clockin == 1 ? 'text-danger' : '') }}">{{ $atten->clockin_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium {{ ($clockin == 1 ? 'text-danger' : '') }}">{{ $atten->clockin_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -513,7 +567,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium {{ ($clockout == 1 ? 'text-danger' : '') }}">{{ $atten->clockout_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium {{ ($clockout == 1 ? 'text-danger' : '') }}">{{ $atten->clockout_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -532,7 +604,7 @@
                                                         <td><span class="font-medium">{{ $atten->paid_break }}</span></td>
                                                     </tr>
                                                     <tr>
-                                                        <td><span class="font-medium text-slate-400">Un Paid</span></td>
+                                                        <td><span class="font-medium text-slate-400">Unpaid</span></td>
                                                         <td><span class="font-medium">{{ $atten->unpadi_break }}</span></td>
                                                     </tr>
                                                     <tr>
@@ -720,7 +792,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium {{ ($clockin == 1 ? 'text-danger' : '') }}">{{ $atten->clockin_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium {{ ($clockin == 1 ? 'text-danger' : '') }}">{{ $atten->clockin_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -740,7 +830,25 @@
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                        <td><span class="font-medium {{ ($clockout == 1 ? 'text-danger' : '') }}">{{ $atten->clockout_punch }}</span></td>
+                                                        <td>
+                                                            <span class="font-medium {{ ($clockout == 1 ? 'text-danger' : '') }}">{{ $atten->clockout_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">System</span></td>
@@ -759,7 +867,7 @@
                                                         <td><span class="font-medium">{{ $atten->paid_break }}</span></td>
                                                     </tr>
                                                     <tr>
-                                                        <td><span class="font-medium text-slate-400">Un Paid</span></td>
+                                                        <td><span class="font-medium text-slate-400">Unpaid</span></td>
                                                         <td><span class="font-medium">{{ $atten->unpadi_break }}</span></td>
                                                     </tr>
                                                     <tr>
