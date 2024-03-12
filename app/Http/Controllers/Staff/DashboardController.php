@@ -279,7 +279,9 @@ class DashboardController extends Controller
                         else:
                             $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 2xl:col-span-4 mb-3 relative" data-value="1">';
                         endif;
-                            $html .= '<h6 class="absolute text-sm w-full text-center uppercase text-white font-medium z-10 px-2" style="top: 50%; transform:translateY(-50%);">'.$link->name.'</h6>';
+                            if(empty($link->image)):
+                                $html .= '<h6 class="absolute text-sm w-full text-center uppercase text-white font-medium z-10 px-2" style="top: 50%; transform:translateY(-50%);">'.$link->name.'</h6>';
+                            endif;
                             $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.(!empty($link->image) ? $link->image : asset('build/assets/images/blan_logo.png')).'">';
                         $html .= '</a>';
                     endif;

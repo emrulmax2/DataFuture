@@ -64,6 +64,66 @@ class EmployeeAttendance extends Model
         return $this->belongsTo(EmployeeLeaveDay::class, 'employee_leave_day_id');
     }
 
+    public function getClockInLocationAttribute(){
+        $res = [];
+        $liveAttendance = EmployeeAttendanceLive::where('employee_id', $this->employee_id)->where('attendance_type', 1)
+                          ->where('date', $this->date)->orderBy('id', 'DESC')->get()->first();
+        if(isset($liveAttendance->id) && $liveAttendance->id > 0):
+            if(isset($liveAttendance->ip) && !empty($liveAttendance->ip)):
+                $venuIp = VenueIpAddress::where('ip', $liveAttendance->ip)->get()->first();
+                if(isset($venuIp->venue->name) && !empty($venuIp->venue->name)):
+                    $res['suc'] = 1;
+                    $res['ip'] = $venuIp->ip;
+                    $res['venue'] = $venuIp->venue->name;
+                else:
+                    $res['suc'] = 0;
+                    $res['ip'] = $liveAttendance->ip;
+                    $res['venue'] = '';
+                endif;
+            else:
+                $res['suc'] = 0;
+                $res['ip'] = '';
+                $res['venue'] = '';
+            endif;
+        else:
+            $res['suc'] = 2;
+            $res['ip'] = '';
+            $res['venue'] = '';
+        endif;
+
+        return $res;
+    }
+
+    public function getClockOutLocationAttribute(){
+        $res = [];
+        $liveAttendance = EmployeeAttendanceLive::where('employee_id', $this->employee_id)->where('attendance_type', 4)
+                          ->where('date', $this->date)->orderBy('id', 'DESC')->get()->first();
+        if(isset($liveAttendance->id) && $liveAttendance->id > 0):
+            if(isset($liveAttendance->ip) && !empty($liveAttendance->ip)):
+                $venuIp = VenueIpAddress::where('ip', $liveAttendance->ip)->get()->first();
+                if(isset($venuIp->venue->name) && !empty($venuIp->venue->name)):
+                    $res['suc'] = 1;
+                    $res['ip'] = $venuIp->ip;
+                    $res['venue'] = $venuIp->venue->name;
+                else:
+                    $res['suc'] = 0;
+                    $res['ip'] = $liveAttendance->ip;
+                    $res['venue'] = '';
+                endif;
+            else:
+                $res['suc'] = 0;
+                $res['ip'] = '';
+                $res['venue'] = '';
+            endif;
+        else:
+            $res['suc'] = 2;
+            $res['ip'] = '';
+            $res['venue'] = '';
+        endif;
+
+        return $res;
+    }
+
     public function getBreakTimeAttribute() {
         $minutes = (isset($this->attributes['total_break']) && $this->attributes['total_break'] > 0 ? $this->attributes['total_break'] : 0);
         $hours = (intval(trim($minutes)) / 60 >= 1) ? intval(intval(trim($minutes)) / 60) : '00';
