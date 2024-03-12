@@ -153,6 +153,7 @@
                             @endif 
                             <div class="acc__input-error error-disability_id text-danger mt-2"></div>
                         </div>
+                        <div class="col-span-12 sm:col-span-3"></div>
                         <div class="col-span-12 sm:col-span-3 disabilityAllowance" style="display: {{ !empty($ids) && isset($apply->other->disability_status) && $apply->other->disability_status == 1 ? 'block' : 'none' }};">
                             <label for="disability_id" class="form-label">Do You Claim Disabilities Allowance?</label>
                             <div class="form-check form-switch">

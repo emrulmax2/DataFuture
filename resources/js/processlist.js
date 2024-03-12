@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import Dropzone from "dropzone";
  
 ("use strict");
 var table = (function () {
@@ -31,6 +32,17 @@ var table = (function () {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div class="flex lg:justify-start items-center">';
+                            html += '<div class="intro-x w-10 h-10 image-fit mr-3">';
+                                html += '<img alt="'+cell.getData().name+'" class="rounded-full" src="'+cell.getData().image_url+'">';
+                            html += '</div>';
+                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
+                        html += '</div>';
+
+                        return html;
+                    }
                 },
                 {
                     title: "Phase",
@@ -161,11 +173,14 @@ var table = (function () {
         const addModalEl = document.getElementById('addProcessModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addProcessModal .acc__input-error').html('');
-            $('#editProcessModal input:not([type="radio"])').val('');
-            $('#editProcessModal select').val('');
-            $('#editProcessModal .autoFeedWrap').fadeOut('fast', function(){
-                $('#editProcessModal #auto_feed-no').prop('checked', true);
-            })
+            $('#addProcessModal input:not([type="radio"])').val('');
+            $('#addProcessModal select').val('');
+            $('#addProcessModal .autoFeedWrap').fadeOut('fast', function(){
+                $('#addProcessModal #auto_feed-no').prop('checked', true);
+            });
+
+            var placeholder = $('#addProcessModal .processImageAddShow').attr('data-placeholder');
+            $('#addProcessModal .processImageAddShow').attr('src', placeholder);
         });
         
         const editModalEl = document.getElementById('editProcessModal')
@@ -177,8 +192,19 @@ var table = (function () {
 
             $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
                 $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-            })
+            });
+
+            var placeholder = $('#editProcessModal .processImageEditShow').attr('data-placeholder');
+            $('#editProcessModal .processImageEditShow').attr('src', placeholder);
         });
+
+        $('#addProcessForm').on('change', '#processImageAdd', function(){
+            showPreview('processImageAdd', 'processImageAddShow')
+        })
+
+        $('#editProcessForm').on('change', '#processImageEdit', function(){
+            showPreview('processImageEdit', 'processImageEditShow')
+        })
 
         $('#addProcessForm [name="phase"]').on('change', function(e){
             var $phase = $(this);
@@ -219,6 +245,7 @@ var table = (function () {
             document.querySelector("#save svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
+            form_data.append('file', $('#addProcessForm input[name="photo"]')[0].files[0]); 
             axios({
                 method: "post",
                 url: route('processlist.store'),
@@ -275,8 +302,10 @@ var table = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
+                        let placeholder = $('#editProcessModal .processImageEditShow').attr('data-placeholder');
                         $('#editProcessModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         $('#editProcessModal select[name="phase"]').val(dataset.phase ? dataset.phase : '');
+                        $('#editProcessModal .processImageEditShow').attr('src', dataset.image_url ? dataset.image_url : placeholder);
 
                         $('#editProcessModal input[name="id"]').val(editId);
                         if(dataset.phase == 'Live'){
@@ -312,6 +341,7 @@ var table = (function () {
             document.querySelector('#update svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
+            form_data.append('file', $('#editProcessForm input[name="photo"]')[0].files[0]); 
 
             axios({
                 method: "post",
@@ -457,5 +487,16 @@ var table = (function () {
                 $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             });
         });
+
+        function showPreview(inputId, targetImageId) {
+            var src = document.getElementById(inputId);
+            var target = document.getElementById(targetImageId);
+            var title = document.getElementById('selected_image_title');
+            var fr = new FileReader();
+            fr.onload = function () {
+                target.src = fr.result;
+            }
+            fr.readAsDataURL(src.files[0]);
+        };
     }
 })();

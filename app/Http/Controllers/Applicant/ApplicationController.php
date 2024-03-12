@@ -15,6 +15,8 @@ use App\Models\KinsRelation;
 use App\Models\Semester;
 use App\Models\User;
 use App\Http\Requests\ApplicationPersonalDetailsRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\Address;
 use App\Models\Agent;
 use App\Models\AgentApplicationCheck;
@@ -26,13 +28,16 @@ use App\Models\ApplicantKin;
 use App\Models\ApplicantOtherDetail;
 use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantQualification;
+use App\Models\ComonSmtp;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
+use App\Models\Option;
 use App\Models\ReferralCode;
 use App\Models\SexIdentifier;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class ApplicationController extends Controller
 {
@@ -197,6 +202,21 @@ class ApplicationController extends Controller
     }
 
     public function storeApplicantSubmission(Request $request){
+        $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');
+        $siteName = (!empty($siteName) ? $siteName : 'London Churchill College');
+        $siteEmail = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_email')->value('value');
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  (!empty($siteName) ? $siteName : 'London Churchill College'),
+        ];
+
         $applicant_id = $request->applicant_id;
         Applicant::where('id', $applicant_id)->update([
             'status_id' => 2,
@@ -204,6 +224,7 @@ class ApplicationController extends Controller
             'submission_date' => date('Y-m-d'),
             'updated_by' => \Auth::guard('applicant')->user()->id,
         ]);
+
         if(auth('agent')->user()) {
             $agentData = Agent::find(auth('agent')->user()->id);
             
@@ -214,13 +235,56 @@ class ApplicationController extends Controller
             ]);
 
             $applicant = Applicant::find($applicant_id);
-            $application = AgentApplicationCheck::where("email",$applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
+            $application = AgentApplicationCheck::where("email", $applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
             $application->applicant_id = $applicant_id;
             $application->updated_by = auth('agent')->user()->id;
             $application->save();
             Auth::guard('applicant')->logout();
         }
         session(['applicantSubmission' => 'Application successfully submitted.']);
+
+        $theApplicant = Applicant::find($applicant_id);
+        if(isset($theApplicant->contact->mobile) && !empty($theApplicant->contact->mobile)):
+            $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
+            $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
+            $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+            $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference 
+                      number '.$theApplicant->application_no.' for all future correspondence.';
+            
+            if($active_api == 1 && !empty($textlocal_api)):
+                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                    'apikey' => $textlocal_api, 
+                    'message' => $sms, 
+                    'sender' => 'London Churchill College', 
+                    'numbers' => $theApplicant->contact->mobile
+                ]);
+            elseif($active_api == 2 && !empty($smseagle_api)):
+                $response = Http::withHeaders([
+                        'access-token' => $smseagle_api,
+                        'Content-Type' => 'application/json',
+                    ])->withoutVerifying()->withOptions([
+                        "verify" => false
+                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                        'to' => [$theApplicant->contact->mobile],
+                        'text' => $sms
+                    ]);
+            endif;
+        endif;
+        if(isset($commonSmtp->id) && $commonSmtp->id > 0):
+            $theApplicantEmail = (isset($theApplicant->users->email) && !empty($theApplicant->users->email) ? $theApplicant->users->email : '');
+            if(!empty($theApplicantEmail)):
+                $theSubject = 'Application confirmation email from ' . $siteName;
+                $message = '';
+                $message .= 'Dear '.$theApplicant->first_name.' '.$theApplicant->last_name.'<br /><br />';
+                $message .= 'Thank you for applying to study at '. $siteName .'. <br /><br />';
+                $message .= 'Please find your application reference number below. Please use this number for all future correspondence. <br /><br />';
+                $message .= '<span style="font-size: 40px;"><strong>'.$theApplicant->application_no.'</strong></span> <br /><br />';
+                $message .= 'Thank you, <br />'.$siteName;
+
+                UserMailerJob::dispatch($configuration, [$theApplicantEmail], new CommunicationSendMail($theSubject, $message, []));
+            endif;
+        endif;
+
         return response()->json(['message' => 'Application successfully submitted.'], 200);
     }
 

@@ -61,21 +61,11 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -92,7 +82,7 @@
 
     <!-- BEGIN: Add Modal -->
     <div id="addProcessModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog  modal-lg">
             <form method="POST" action="#" id="addProcessForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -102,32 +92,43 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <div>
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input id="name" type="text" name="name" class="form-control w-full">
-                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-4">
+                                <div class="w-40 h-40 flex-none image-fit relative">
+                                    <img alt="User Photo" class="rounded-full processImageAddShow" id="processImageAddShow" data-placeholder="{{ asset('build/assets/images/placeholders/200x200.jpg') }}" src="{{ asset('build/assets/images/placeholders/200x200.jpg') }}">
+                                    <label for="processImageAdd" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-3  cursor-pointer">
+                                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif" name="photo" class="absolute w-0 h-0 overflow-hidden opacity-0" id="processImageAdd"/>
+                                </div>
                             </div>
-                            <div class="mt-3">
-                                <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
-                                <select id="phase" name="phase" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    <option value="Applicant">Applicant</option>
-                                    <option value="Register">Register</option>
-                                    <option value="Live">Live</option>
-                                </select>
-                                <div class="acc__input-error error-phase text-danger mt-2"></div>
-                            </div>
-                            <div class="mt-3 autoFeedWrap" style="display: none;">
-                                <label for="auto_feed" class="form-label">Auto Feed</label>
-                                <div class="flex flex-col sm:flex-row">
-                                    <div class="form-check mr-3">
-                                        <input id="auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
-                                        <label class="form-check-label" for="auto_feed-yes">Yes</label>
-                                    </div>
-                                    <div class="form-check mr-2">
-                                        <input checked id="auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
-                                        <label class="form-check-label" for="auto_feed-no">No</label>
+                            <div class="col-span-8">
+                                <div>
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input id="name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
+                                    <select id="phase" name="phase" class="form-control w-full">
+                                        <option value="">Please Select</option>
+                                        <option value="Applicant">Applicant</option>
+                                        <option value="Register">Register</option>
+                                        <option value="Live">Live</option>
+                                    </select>
+                                    <div class="acc__input-error error-phase text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3 autoFeedWrap" style="display: none;">
+                                    <label for="auto_feed" class="form-label">Auto Feed</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
+                                            <label class="form-check-label" for="auto_feed-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
+                                            <label class="form-check-label" for="auto_feed-no">No</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -159,8 +160,8 @@
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
     <div id="editProcessModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="editProcessForm">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="editProcessForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Process</h2>
@@ -169,31 +170,44 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
-                            <select id="phase" name="phase" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="Applicant">Applicant</option>
-                                <option value="Register">Register</option>
-                                <option value="Live">Live</option>
-                            </select>
-                            <div class="acc__input-error error-phase text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 autoFeedWrap" style="display: none;">
-                            <label for="auto_feed" class="form-label">Auto Feed</label>
-                            <div class="flex flex-col sm:flex-row">
-                                <div class="form-check mr-3">
-                                    <input id="edit_auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
-                                    <label class="form-check-label" for="edit_auto_feed-yes">Yes</label>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-4">
+                                <div class="w-40 h-40 flex-none image-fit relative">
+                                    <img alt="User Photo" class="rounded-full processImageEditShow" id="processImageEditShow" data-placeholder="{{ asset('build/assets/images/placeholders/200x200.jpg') }}" src="{{ asset('build/assets/images/placeholders/200x200.jpg') }}">
+                                    <label for="processImageEdit" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-3  cursor-pointer">
+                                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif" name="photo" class="absolute w-0 h-0 overflow-hidden opacity-0" id="processImageEdit"/>
                                 </div>
-                                <div class="form-check mr-2">
-                                    <input checked id="edit_auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
-                                    <label class="form-check-label" for="edit_auto_feed-no">No</label>
+                            </div>
+                            <div class="col-span-8">
+                                <div>
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input id="name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
+                                    <select id="phase" name="phase" class="form-control w-full">
+                                        <option value="">Please Select</option>
+                                        <option value="Applicant">Applicant</option>
+                                        <option value="Register">Register</option>
+                                        <option value="Live">Live</option>
+                                    </select>
+                                    <div class="acc__input-error error-phase text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3 autoFeedWrap" style="display: none;">
+                                    <label for="auto_feed" class="form-label">Auto Feed</label>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="form-check mr-3">
+                                            <input id="edit_auto_feed-yes" class="form-check-input" type="radio" name="auto_feed" value="Yes">
+                                            <label class="form-check-label" for="edit_auto_feed-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check mr-2">
+                                            <input checked id="edit_auto_feed-no" class="form-check-input" type="radio" name="auto_feed" value="No">
+                                            <label class="form-check-label" for="edit_auto_feed-no">No</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

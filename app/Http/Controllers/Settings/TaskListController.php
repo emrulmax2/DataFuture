@@ -12,6 +12,8 @@ use App\Models\TaskListStatus;
 use App\Models\TaskListUser;
 use App\Models\TaskStatus;
 use App\Models\User;
+use Google\Service\Tasks\Resource\Tasklists;
+use Illuminate\Support\Facades\Storage;
 
 class TaskListController extends Controller
 {
@@ -107,6 +109,7 @@ class TaskListController extends Controller
                     'user' => $users,
                     'org_email' => $list->org_email,
                     'id_card' => $list->id_card,
+                    'image_url' => $list->image_url,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -133,6 +136,16 @@ class TaskListController extends Controller
         $tasklist = TaskList::create($request->all());
 
         if($tasklist):
+            if($request->hasFile('photo')):
+                $photo = $request->file('photo');
+                $imageName = 'Task_'.$tasklist->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
+                $path = $photo->storeAs('public/process/'.$request->process_list_id.'/tasks/'.$tasklist->id, $imageName, 'local');
+    
+                $processUpdate = TaskList::where('id', $tasklist->id)->update([
+                    'image' => $imageName,
+                    'image_path' => Storage::disk('local')->url($path)
+                ]);
+            endif;
             if(!empty($assigned_users)):
                 foreach($assigned_users as $user):
                     TaskListUser::create([
@@ -193,6 +206,7 @@ class TaskListController extends Controller
      */
     public function update(TaskListRequest $request){
         $pl_ID = $request->id;
+        $taskOldRos = TaskList::find($pl_ID);
         $assigned_users = $request->assigned_users;
         $status = $request->status;
         $task_statuses = (isset($request->task_statuses) && !empty($request->task_statuses) ? $request->task_statuses : []);
@@ -210,6 +224,25 @@ class TaskListController extends Controller
             'external_link_ref' => (isset($request->external_link) && $request->external_link == 1 && !empty($request->external_link_ref) ? $request->external_link_ref : ''),
             'updated_by' => auth()->user()->id
         ]);
+
+        
+        if($request->hasFile('photo')):
+            $photo = $request->file('photo');
+            $imageName = 'Task_'.$pl_ID.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
+            $path = $photo->storeAs('public/process/'.$request->process_list_id.'/tasks/'.$pl_ID, $imageName, 'local');
+
+            if(isset($taskOldRos->image) && !empty($taskOldRos->image)):
+                if (Storage::disk('local')->exists('public/process/'.$request->process_list_id.'/tasks/'.$taskOldRos->id.'/'.$taskOldRos->image)):
+                    Storage::disk('local')->delete('public/process/'.$request->process_list_id.'/tasks/'.$taskOldRos->id.'/'.$taskOldRos->image);
+                endif;
+            endif;
+            
+            $taskListUpdate = TaskList::where('id', $pl_ID)->update([
+                'image' => $imageName,
+                'image_path' => Storage::disk('local')->url($path)
+            ]);
+
+        endif;
 
         if(!empty($assigned_users)):
             TaskListUser::where('task_list_id', $pl_ID)->forceDelete();

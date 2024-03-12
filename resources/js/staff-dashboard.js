@@ -52,4 +52,21 @@
     });
     /* Home Work End */
 
+
+    /* Process BTN Toggle Start */
+    $('.processParents').on('click', function(e){
+        e.preventDefault();
+        var $process = $(this);
+        var  process_id = $process.attr('data-process');
+        
+        if($process.hasClass('active')){
+            $('.processTask.process_'+process_id+'_task').fadeOut();
+            $process.removeClass('active');
+        }else{
+            $('.processTask.process_'+process_id+'_task').fadeIn();
+            $process.addClass('active');
+        }
+    })
+    /* Process BTN Toggle END */
+
 })();

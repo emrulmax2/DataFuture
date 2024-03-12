@@ -36,9 +36,14 @@ var taskListTable = (function () {
                     field: "name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        var html = '<div>';
-                                html += '<span class="font-medium">'+cell.getData().processlist+'</span><br/>';
-                                html += '<span>'+cell.getData().name+'</span>';
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                    html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
+                                html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().processlist+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().name+'</div>';
+                                html += '</div>';
                             html += '</div>';
                         return html;
                     }
@@ -235,6 +240,9 @@ var taskListTable = (function () {
                 $('#addTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false)
             });
             assignedUserAdd.clear(true);
+
+            var placeholder = $('#addTaskModal .processImageAddShow').attr('data-placeholder');
+            $('#addTaskModal .processImageAddShow').attr('src', placeholder);
         });
         
         const editModalEl = document.getElementById('editTaskModal')
@@ -251,7 +259,18 @@ var taskListTable = (function () {
                 $('#editTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false)
             });
             assignedUserEdit.clear(true);
+
+            var placeholder = $('#editTaskModal .processImageEditShow').attr('data-placeholder');
+            $('#editTaskModal .processImageEditShow').attr('src', placeholder);
         });
+
+        $('#addTaskForm').on('change', '#processImageAdd', function(){
+            showPreview('processImageAdd', 'processImageAddShow')
+        })
+
+        $('#editTaskForm').on('change', '#processImageEdit', function(){
+            showPreview('processImageEdit', 'processImageEditShow')
+        })
 
         $('#addTaskForm input[name="external_link"]').on('change', function(){
             if($(this).prop('checked')){
@@ -309,6 +328,7 @@ var taskListTable = (function () {
             document.querySelector("#save svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
+            form_data.append('file', $('#addTaskForm input[name="photo"]')[0].files[0]); 
             axios({
                 method: "post",
                 url: route('tasklist.store'),
@@ -359,6 +379,8 @@ var taskListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
+                        let placeholder = $('#editTaskModal .processImageEditShow').attr('data-placeholder');
+                        $('#editTaskModal .processImageEditShow').attr('src', dataset.image_url ? dataset.image_url : placeholder);
                         $('#editTaskModal select[name="process_list_id"]').val(dataset.process_list_id ? dataset.process_list_id : '');
                         $('#editTaskModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         $('#editTaskModal input[name="short_description"]').val(dataset.short_description ? dataset.short_description : '');
@@ -441,6 +463,7 @@ var taskListTable = (function () {
             document.querySelector('#update svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
+            form_data.append('file', $('#editTaskForm input[name="photo"]')[0].files[0]);
 
             axios({
                 method: "post",
@@ -604,5 +627,16 @@ var taskListTable = (function () {
                 console.log(error)
             });
         });
+
+        function showPreview(inputId, targetImageId) {
+            var src = document.getElementById(inputId);
+            var target = document.getElementById(targetImageId);
+            var title = document.getElementById('selected_image_title');
+            var fr = new FileReader();
+            fr.onload = function () {
+                target.src = fr.result;
+            }
+            fr.readAsDataURL(src.files[0]);
+        };
     }
 })();

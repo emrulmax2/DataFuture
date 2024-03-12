@@ -15,7 +15,7 @@
 
 @section('subcontent')
     <div class="grid grid-cols-12 gap-6">       
-        <div class="col-span-12 2xl:col-span-7"> 
+        <div class="col-span-12 2xl:col-span-6"> 
             <div class="grid grid-cols-12 gap-6">
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8">
@@ -56,133 +56,11 @@
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MANAGER-logos.jpeg') }}">
                         </a>
                         @endif
-
-
-
-                        {{--
-                        <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
-                            <div class="report-box zoom-in">                               
-                                <div class="box flex  p-5 ">                                    
-                                    <div class="w-20 h-20 rounded-full overflow-hidden shadow-md image-fit zoom-in scale-110 my-4">
-                                        @if(Auth::guard('applicant')->check())
-                                            <img src="{{ asset('build/assets/images/avater.png') }}">
-                                        @elseif(Auth::guard('student')->check())
-                                            <img src="{{ asset('build/assets/images/avater.png') }}">
-                                        @elseif(Auth::guard('agent')->check())
-                                            <img src="{{ asset('build/assets/images/avater.png') }}">
-                                        @else
-                                            <img  alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
-                                        @endif
-                                    </div>
-                                    <div class="text-base text-slate-500 mt-1 text-right py-10 px-5 font-medium">My HR</div>                              
-                                </div>                               
-                            </div>        
-                        </a>
-                        
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
-                        <a href="{{ route('admission') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/applicant.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-xl font-bold">{{ $applicant }}</div>                                    
-                                            <div class="text-base text-slate-500 font-medium">Applicant</div> 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
-                        <a href="{{ route('student') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/student_2.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-xl font-bold">{{ $student }}</div>
-                                            <div class="text-base text-slate-500 font-medium">Live Student</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a> 
-                        @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
-                        <a href="{{ route('tutor-dashboard.show.new',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/tutor.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-base text-slate-500 font-medium">Tutor Dashboard</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
-                        <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
-                            <div class="report-box zoom-in">
-                                <div class="box p-5">
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/personal_tutor.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-base text-slate-500 font-medium">Personal Tutor Dashboard</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
-                        <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
-                            <div class="report-box zoom-in">                               
-                                <div class="box p-5">                                    
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/hr.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-base text-slate-500 font-medium">HR Portal</div>     
-                                        </div>
-                                    </div>                         
-                                </div>                               
-                            </div>        
-                        </a>
-                        @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
-                        <a href="{{ route('programme.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">                           
-                            <div class="report-box zoom-in">                               
-                                <div class="box p-5">                                    
-                                    <div class="flex justify-start items-center my-4">
-                                        <div class="w-20 h-20  image-fit">
-                                            <img src="{{ asset('build/assets/images/dash_icons/programme_2.png') }}">
-                                        </div>
-                                        <div class="ml-5">
-                                            <div class="text-base text-slate-500 font-medium">Programme Dashboard</div> 
-                                        </div>
-                                    </div>                          
-                                </div>                               
-                            </div>        
-                        </a>
-                        @endif --}}
-                        
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-span-12 2xl:col-span-2">
+        <div class="col-span-12 2xl:col-span-3">
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-2">
@@ -203,6 +81,41 @@
             </div>
         </div> 
         <div class="col-span-12 2xl:col-span-3">
+             <div class="2xl:border-l -mb-10 pb-10">
+                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
+                    <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-6">
+                        <div class="grid grid-cols-12 gap-5">
+                            @if(!empty($myPendingTask))
+                                @foreach($myPendingTask as $process_id => $process)
+                                    @if($process['outstanding_tasks'] > 0)
+                                        <a href="javascript:void(0);" class="block relative col-span-6 2xl:col-span-4 mb-3 processParents process_{{$process_id}}" data-process="{{$process_id}}">
+                                            @if(empty($process['image']))
+                                                <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">{{ $process['name'] }} </h6>
+                                            @endif
+                                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ (!empty($process['image']) ? $process['image_url'] : asset('build/assets/images/blan_logo.png')) }}" alt="{{ $process['name'] }}" />
+                                            <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $process['outstanding_tasks'] }}</span>
+                                        </a>
+                                        @if(isset($process['tasks']) && !empty($process['tasks']))
+                                            @foreach($process['tasks'] as $task_id => $pts)
+                                                <a href="{{ route('task.manager.show', $task_id) }}" class="intro-y block relative col-span-6 2xl:col-span-4 mb-3 processTask process_{{$process_id}}_task" style="display: none;">
+                                                    @if(empty($pts->image))
+                                                        <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">{{ $pts->name }} </h6>
+                                                    @endif
+                                                    <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ (!empty($pts->image) ? $pts->image_url : asset('build/assets/images/blan_logo.png')) }}" alt="{{ $pts->name }}" />
+                                                    <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $pts->pending_task }}</span>
+                                                </a>
+                                            @endforeach
+                                        @endif
+                                    @endif
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+             </div>
+            
+        </div>
+        {{--<div class="col-span-12 2xl:col-span-3">
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-6">
@@ -287,7 +200,7 @@
                     </div>
                 </div>
             </div>
-        </div> 
+        </div> --}}
     </div>
 
     <!-- BEGIN: Success Modal Content -->

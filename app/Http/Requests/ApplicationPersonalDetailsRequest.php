@@ -58,11 +58,11 @@ class ApplicationPersonalDetailsRequest extends FormRequest
             'ethnicity_id.required' => 'The Ethnicity field is required.',
             //'phone.required' => 'The Home Phone field is required.',
             'mobile.required' => 'The Mobile Phone field is required.',
-            'applicant_address.required' => 'The Applicant Address is required.',
-            'name.required' => 'The Kin Name field is required.',
-            'kins_relation_id.required' => 'The Kins Relation field is required.',
-            'kins_mobile.required' => 'The Kins Mobile field is required.',
-            'kin_address.required' => 'The Kins Address is required.',
+            'applicant_address.required' => 'Applicant Address is required.',
+            'name.required' => 'This field is required.',
+            'kins_relation_id.required' => 'This field is required.',
+            'kins_mobile.required' => 'This field is required.',
+            'kin_address.required' => 'Address is required.',
             'disability_id.required_if' => 'You have to select at least one Disability while Disability Status is turned on.',
         ];
     }
