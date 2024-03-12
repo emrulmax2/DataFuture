@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Applicant\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\ApplicantLoginRequest;
+use App\Models\Option;
 
 class LoginController extends Controller
 {
@@ -16,7 +17,8 @@ class LoginController extends Controller
     public function loginView()
     {
         return view('login.applicant', [
-            'layout' => 'login'
+            'layout' => 'login',
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
