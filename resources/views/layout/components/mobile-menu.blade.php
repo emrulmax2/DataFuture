@@ -1,4 +1,8 @@
 <!-- BEGIN: Mobile Menu -->
+@php
+$opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
+@endphp
+
 <div class="mobile-menu md:hidden">
     <div class="mobile-menu-bar">
         <a href="{{ url('/') }}" class="flex mr-auto">
