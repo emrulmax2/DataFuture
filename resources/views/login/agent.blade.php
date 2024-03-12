@@ -32,7 +32,7 @@
                             <span class="text-white text-lg ml-3">
                                 Applicant Login
                             </span> --}}
-                            <img alt="London Churchill College" class="w-48" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg') }}">
+                            <img alt="London Churchill College" class="w-48 mx-auto" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg') }}">
                         </a>
         
                     </div>
