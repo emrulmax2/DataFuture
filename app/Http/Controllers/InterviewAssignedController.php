@@ -28,7 +28,7 @@ class InterviewAssignedController extends Controller
             'tasklists' => TaskList::all(),
             'applicanttasks' => ApplicantTask::all(),
             'applicants' => Applicant::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 

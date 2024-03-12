@@ -231,7 +231,7 @@ class AdmissionController extends Controller
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
             'sexid' => SexIdentifier::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'instance' => CourseCreationInstance::all(),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),

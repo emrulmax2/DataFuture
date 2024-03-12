@@ -46,9 +46,9 @@ class PlanTreeController extends Controller
             'terms' => InstanceTerm::all(),
             'room' => Room::all(),
             'group' => Group::all(),
-            'tutor' => User::all(),
-            'ptutor' => User::all(),
-            'users' => User::all(),
+            'tutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'ptutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 

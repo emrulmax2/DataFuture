@@ -69,7 +69,7 @@ class ApplicationController extends Controller
             'disability' => Disability::all(),
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'sexid' => SexIdentifier::all(),
             'agentApplicant' => $checkedApplication,
             'applicant' => $applicantUser,

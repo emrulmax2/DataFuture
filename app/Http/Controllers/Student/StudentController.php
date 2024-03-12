@@ -249,7 +249,7 @@ class StudentController extends Controller
             'disability' => Disability::where('active', 1)->get(),
             'relations' => KinsRelation::where('active', 1)->get(),
             'bodies' => AwardingBody::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'instance' => CourseCreationInstance::all(),
             'documents' => DocumentSettings::where('live', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::where('active', 1)->get(),
