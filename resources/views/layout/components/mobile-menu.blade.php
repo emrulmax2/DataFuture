@@ -2,7 +2,7 @@
 <div class="mobile-menu md:hidden">
     <div class="mobile-menu-bar">
         <a href="{{ url('/') }}" class="flex mr-auto">
-            <img alt="London Churchill College" class="w-6" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+            <img alt="London Churchill College" class="w-24" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
         </a>
         <a href="javascript:;" class="mobile-menu-toggler">
             <i data-lucide="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90"></i>

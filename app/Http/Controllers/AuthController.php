@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Request\LoginRequest;
 use App\Http\Controllers\Controller;
+use App\Models\Option;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
@@ -21,6 +22,7 @@ class AuthController extends Controller
         return view('login.main', [
             'layout' => 'login',
             'env' => $env,
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 

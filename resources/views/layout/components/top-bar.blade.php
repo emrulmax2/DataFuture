@@ -1,6 +1,3 @@
-@php
-$opt = cache()->get('site_logo') ?? App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
-@endphp
 
 @if(Auth::guard('applicant')->check())
   

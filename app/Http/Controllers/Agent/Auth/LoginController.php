@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Agent\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\AgentLoginRequest;
+use App\Models\Option;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -17,7 +18,8 @@ class LoginController extends Controller
     public function loginView()
     {
         return view('login.agent', [
-            'layout' => 'login'
+            'layout' => 'login',
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
