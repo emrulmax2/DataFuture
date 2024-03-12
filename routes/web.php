@@ -15,7 +15,7 @@ use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Agent\AgentController;
-use App\Http\Controllers\Agent\AgentProfileController;
+use App\Http\Controllers\Agent\AgentMyAccountController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\CourseManagement\GroupController;
 use App\Http\Controllers\Settings\VenueController;
@@ -386,7 +386,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::get('application/show/{id}', 'show')->name('application.show');
         });
 
-        Route::controller(AgentProfileController::class)->group(function() {
+        Route::controller(AgentMyAccountController::class)->group(function() {
             Route::get('my-account', 'index')->name('account'); 
         });
 
