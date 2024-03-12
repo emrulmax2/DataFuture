@@ -103,6 +103,8 @@ class DashboardController extends Controller
                 foreach($assignedProcess as $prs):
                     $theProcess = ProcessList::find($prs);
                     $result[$prs]['name'] = $theProcess->name;
+                    $result[$prs]['image'] = $theProcess->image;
+                    $result[$prs]['image_url'] = $theProcess->image_url;
                     $result[$prs]['outstanding_tasks'] = 0;
                     $processTasks = TaskList::whereIn('id', $assignedTaskIds)->where('process_list_id', $prs)->orderBy('name', 'ASC')->get();
                     if(!empty($processTasks) && $processTasks->count() > 0):
@@ -222,25 +224,25 @@ class DashboardController extends Controller
 
         $html = '';
         if($loc == 0):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="1">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="1">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_In.png').'">';
             $html .= '</a>';
         elseif($loc == 1):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="2">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="2">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
             $html .= '</a>';
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="4">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="4">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
             $html .= '</a>';
         elseif($loc == 2):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="3">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="3">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Return.png').'">';
             $html .= '</a>';
         elseif($loc == 3):
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="2">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="2">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Break.png').'">';
             $html .= '</a>';
-            $html .= '<a href="javascript:void(0);" class="block col-span-6 attendance_action_btn" data-value="4">';
+            $html .= '<a href="javascript:void(0);" class="block col-span-6 2xl:col-span-4 attendance_action_btn" data-value="4">';
                 $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.asset('build/assets/images/hr/Clock_Out.png').'">';
             $html .= '</a>';
         elseif($loc == 4):
@@ -273,15 +275,12 @@ class DashboardController extends Controller
                 foreach($parentLinks as $link):
                     if((empty($link->start_date) || empty($link->end_date)) || ((!empty($link->start_date) && !empty($link->end_date)) && ($link->start_date <= $today && $link->end_date >= $today))): 
                         if(isset($link->children) && $link->children->count() > 0):
-                            $html .= '<a href="'.route('dashboard.internal-link.parent', $link->id).'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
+                            $html .= '<a href="'.route('dashboard.internal-link.parent', $link->id).'" target="_blank" class="block relative col-span-6 2xl:col-span-4 mb-3" data-value="1">';
                         else:
-                            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 mb-3" data-value="1">';
+                            $html .= '<a href="'.$link->link.'" target="_blank" class="block col-span-6 2xl:col-span-4 mb-3 relative" data-value="1">';
                         endif;
-                            if(!empty($link->image)):
-                                $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.$link->image.'">';
-                            else:
-                                $html .= '<span class="inline-flex w-full h-full shadow-md zoom-in rounded bg-primary text-white text-lg uppercase text-center items-center py-6 px-1">'.$link->name.'</span>';
-                            endif;
+                            $html .= '<h6 class="absolute text-sm w-full text-center uppercase text-white font-medium z-10 px-2" style="top: 50%; transform:translateY(-50%);">'.$link->name.'</h6>';
+                            $html .= '<img class="block w-full h-auto shadow-md zoom-in rounded" src="'.(!empty($link->image) ? $link->image : asset('build/assets/images/blan_logo.png')).'">';
                         $html .= '</a>';
                     endif;
                 endforeach;

@@ -72,21 +72,11 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -103,7 +93,7 @@
 
     <!-- BEGIN: Add Modal -->
     <div id="addTaskModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addTaskForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -113,144 +103,157 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="process_list_id" class="form-label">Permission <span class="text-danger">*</span></label>
-                            <select id="process_list_id" name="process_list_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($processlists))
-                                    @foreach($processlists as $pro)
-                                        <option value="{{ $pro->id }}">{{ $pro->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="short_description" class="form-label">Short Description</label>
-                            <input id="short_description" type="text" name="short_description" class="form-control w-full">
-                            <div class="acc__input-error error-short_description text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
-                            <select id="assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
-                                @if(!empty($users))
-                                    @foreach($users as $usr)
-                                        <option value="{{ $usr->id }}">{{ $usr->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-assigned_users text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="interview" class="form-label">Interview <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="interview-yes" class="form-check-input" type="radio" name="interview" value="Yes">
-                                            <label class="form-check-label" for="interview-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="interview-no" class="form-check-input" type="radio" name="interview" value="No">
-                                            <label class="form-check-label" for="interview-no">No</label>
-                                        </div>
-                                    </div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-4">
+                                <div class="w-40 h-40 flex-none image-fit relative">
+                                    <img alt="User Photo" class="rounded-full processImageAddShow" id="processImageAddShow" data-placeholder="{{ asset('build/assets/images/placeholders/200x200.jpg') }}" src="{{ asset('build/assets/images/placeholders/200x200.jpg') }}">
+                                    <label for="processImageAdd" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-3  cursor-pointer">
+                                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif" name="photo" class="absolute w-0 h-0 overflow-hidden opacity-0" id="processImageAdd"/>
                                 </div>
                             </div>
-                            <div class="col-span-12 sm:col-span-6">
+                            <div class="col-span-8">
                                 <div>
-                                    <label for="upload" class="form-label">Upload <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="upload-yes" class="form-check-input" type="radio" name="upload" value="Yes">
-                                            <label class="form-check-label" for="upload-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="upload-no" class="form-check-input" type="radio" name="upload" value="No">
-                                            <label class="form-check-label" for="upload-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="org_email" class="form-label">Organization Email</label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
-                                            <label class="form-check-label" for="org_email-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
-                                            <label class="form-check-label" for="org_email-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="id_card" class="form-label">ID Card</label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
-                                            <label class="form-check-label" for="id_card-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
-                                            <label class="form-check-label" for="id_card-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <div class="form-check form-switch">
-                                        <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
-                                        <input id="external_link" class="form-check-input" name="external_link" value="1" type="checkbox">
-                                    </div> 
-                                </div>
-                            </div>
-                            <div class="col-span-12">
-                                <div class="extarnalUrlWrap" style="display: none;">
-                                    <label for="external_link_ref" class="form-label">External URL <span class="text-danger">*</span></label>
-                                    <input id="external_link_ref" type="text" name="external_link_ref" class="form-control w-full">
-                                    <div class="acc__input-error error-external_link_ref text-danger mt-2"></div>
-                                </div>  
-                            </div>
-                            <div class="col-span-12">
-                                <div>
-                                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="status-yes" class="form-check-input" type="radio" name="status" value="Yes">
-                                            <label class="form-check-label" for="status-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="status-no" class="form-check-input" type="radio" name="status" value="No">
-                                            <label class="form-check-label" for="status-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12">
-                                <div class="taskStatusesWrap" style="display: none;">
-                                    <label for="upload" class="form-label">Task Statuses <span class="text-danger">*</span></label>
-                                    @if($taskStatus->count() > 0)
-                                        <div>
-                                            @foreach($taskStatus as $ts)
-                                                <div class="form-check mt-2">
-                                                    <input id="task-status-{{ $ts->id }}" class="form-check-input" type="checkbox" name="task_statuses[]" value="{{ $ts->id }}">
-                                                    <label class="form-check-label" for="task-status-{{ $ts->id }}">{{ $ts->name }}</label>
-                                                </div>
+                                    <label for="process_list_id" class="form-label">Permission <span class="text-danger">*</span></label>
+                                    <select id="process_list_id" name="process_list_id" class="form-control w-full">
+                                        <option value="">Please Select</option>
+                                        @if(!empty($processlists))
+                                            @foreach($processlists as $pro)
+                                                <option value="{{ $pro->id }}">{{ $pro->name }}</option>
                                             @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input id="name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="short_description" class="form-label">Short Description</label>
+                                    <input id="short_description" type="text" name="short_description" class="form-control w-full">
+                                    <div class="acc__input-error error-short_description text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
+                                    <select id="assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
+                                        @if(!empty($users))
+                                            @foreach($users as $usr)
+                                                <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-assigned_users text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3 grid grid-cols-12 gap-4">
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="interview" class="form-label">Interview <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="interview-yes" class="form-check-input" type="radio" name="interview" value="Yes">
+                                                    <label class="form-check-label" for="interview-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="interview-no" class="form-check-input" type="radio" name="interview" value="No">
+                                                    <label class="form-check-label" for="interview-no">No</label>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="acc__input-error error-task_statuses text-danger mt-2"></div>
-                                    @endif
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="upload" class="form-label">Upload <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="upload-yes" class="form-check-input" type="radio" name="upload" value="Yes">
+                                                    <label class="form-check-label" for="upload-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="upload-no" class="form-check-input" type="radio" name="upload" value="No">
+                                                    <label class="form-check-label" for="upload-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="org_email" class="form-label">Organization Email</label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
+                                                    <label class="form-check-label" for="org_email-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
+                                                    <label class="form-check-label" for="org_email-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="id_card" class="form-label">ID Card</label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
+                                                    <label class="form-check-label" for="id_card-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
+                                                    <label class="form-check-label" for="id_card-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
+                                                <input id="external_link" class="form-check-input" name="external_link" value="1" type="checkbox">
+                                            </div> 
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div class="extarnalUrlWrap" style="display: none;">
+                                            <label for="external_link_ref" class="form-label">External URL <span class="text-danger">*</span></label>
+                                            <input id="external_link_ref" type="text" name="external_link_ref" class="form-control w-full">
+                                            <div class="acc__input-error error-external_link_ref text-danger mt-2"></div>
+                                        </div>  
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div>
+                                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="status-yes" class="form-check-input" type="radio" name="status" value="Yes">
+                                                    <label class="form-check-label" for="status-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="status-no" class="form-check-input" type="radio" name="status" value="No">
+                                                    <label class="form-check-label" for="status-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div class="taskStatusesWrap" style="display: none;">
+                                            <label for="upload" class="form-label">Task Statuses <span class="text-danger">*</span></label>
+                                            @if($taskStatus->count() > 0)
+                                                <div>
+                                                    @foreach($taskStatus as $ts)
+                                                        <div class="form-check mt-2">
+                                                            <input id="task-status-{{ $ts->id }}" class="form-check-input" type="checkbox" name="task_statuses[]" value="{{ $ts->id }}">
+                                                            <label class="form-check-label" for="task-status-{{ $ts->id }}">{{ $ts->name }}</label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                <div class="acc__input-error error-task_statuses text-danger mt-2"></div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div> 
@@ -280,8 +283,8 @@
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
     <div id="editTaskModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="editTaskForm">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editTaskForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Edit Task</h2>
@@ -290,147 +293,160 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="process_list_id" class="form-label">Permission <span class="text-danger">*</span></label>
-                            <select id="process_list_id" name="process_list_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($processlists))
-                                    @foreach($processlists as $pro)
-                                        <option value="{{ $pro->id }}">{{ $pro->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_short_description" class="form-label">Short Description</label>
-                            <input id="edit_short_description" type="text" name="short_description" class="form-control w-full">
-                            <div class="acc__input-error error-short_description text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
-                            <select id="edit_assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
-                                @if(!empty($users))
-                                    @foreach($users as $usr)
-                                        <option value="{{ $usr->id }}">{{ $usr->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-edit_assigned_users text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-6">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-4">
+                                <div class="w-40 h-40 flex-none image-fit relative">
+                                    <img alt="User Photo" class="rounded-full processImageEditShow" id="processImageEditShow" data-placeholder="{{ asset('build/assets/images/placeholders/200x200.jpg') }}" src="{{ asset('build/assets/images/placeholders/200x200.jpg') }}">
+                                    <label for="processImageEdit" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-3  cursor-pointer">
+                                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif" name="photo" class="absolute w-0 h-0 overflow-hidden opacity-0" id="processImageEdit"/>
+                                </div>
+                            </div>
+                            <div class="col-span-8">
                                 <div>
-                                    <label for="edit_interview" class="form-label">Interview <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="edit_interview-yes" class="form-check-input" type="radio" name="interview" value="Yes">
-                                            <label class="form-check-label" for="edit_interview-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="edit_interview-no" class="form-check-input" type="radio" name="interview" value="No">
-                                            <label class="form-check-label" for="edit_interview-no">No</label>
+                                    <label for="process_list_id" class="form-label">Permission <span class="text-danger">*</span></label>
+                                    <select id="process_list_id" name="process_list_id" class="form-control w-full">
+                                        <option value="">Please Select</option>
+                                        @if(!empty($processlists))
+                                            @foreach($processlists as $pro)
+                                                <option value="{{ $pro->id }}">{{ $pro->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input id="name" type="text" name="name" class="form-control w-full">
+                                    <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="edit_short_description" class="form-label">Short Description</label>
+                                    <input id="edit_short_description" type="text" name="short_description" class="form-control w-full">
+                                    <div class="acc__input-error error-short_description text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="edit_assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
+                                    <select id="edit_assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
+                                        @if(!empty($users))
+                                            @foreach($users as $usr)
+                                                <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-edit_assigned_users text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3 grid grid-cols-12 gap-4">
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="edit_interview" class="form-label">Interview <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="edit_interview-yes" class="form-check-input" type="radio" name="interview" value="Yes">
+                                                    <label class="form-check-label" for="edit_interview-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="edit_interview-no" class="form-check-input" type="radio" name="interview" value="No">
+                                                    <label class="form-check-label" for="edit_interview-no">No</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="upload" class="form-label">Upload <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="edit_upload-yes" class="form-check-input" type="radio" name="upload" value="Yes">
-                                            <label class="form-check-label" for="edit_upload-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="edit_upload-no" class="form-check-input" type="radio" name="upload" value="No">
-                                            <label class="form-check-label" for="edit_upload-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="org_email" class="form-label">Organization Email</label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="edit_org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
-                                            <label class="form-check-label" for="edit_org_email-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="edit_org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
-                                            <label class="form-check-label" for="edit_org_email-no">No</label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="upload" class="form-label">Upload <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="edit_upload-yes" class="form-check-input" type="radio" name="upload" value="Yes">
+                                                    <label class="form-check-label" for="edit_upload-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="edit_upload-no" class="form-check-input" type="radio" name="upload" value="No">
+                                                    <label class="form-check-label" for="edit_upload-no">No</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <label for="id_card" class="form-label">ID Card</label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="edit_id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
-                                            <label class="form-check-label" for="edit_id_card-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="edit_id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
-                                            <label class="form-check-label" for="edit_id_card-no">No</label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="org_email" class="form-label">Organization Email</label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="edit_org_email-yes" class="form-check-input" type="radio" name="org_email" value="Yes">
+                                                    <label class="form-check-label" for="edit_org_email-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="edit_org_email-no" class="form-check-input" type="radio" name="org_email" value="No">
+                                                    <label class="form-check-label" for="edit_org_email-no">No</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-6">
-                                <div>
-                                    <div class="form-check form-switch">
-                                        <label class="form-check-label mr-3 ml-0" for="edit_external_link">External Link</label>
-                                        <input id="edit_external_link" class="form-check-input" name="external_link" value="1" type="checkbox">
-                                    </div> 
-                                </div>
-                            </div>
-                            <div class="col-span-12">
-                                <div class="extarnalUrlWrap" style="display: none;">
-                                    <label for="edit_external_link_ref" class="form-label">External URL <span class="text-danger">*</span></label>
-                                    <input id="edit_external_link_ref" type="text" name="external_link_ref" class="form-control w-full">
-                                    <div class="acc__input-error error-external_link_ref text-danger mt-2"></div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <label for="id_card" class="form-label">ID Card</label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="edit_id_card-yes" class="form-check-input" type="radio" name="id_card" value="Yes">
+                                                    <label class="form-check-label" for="edit_id_card-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="edit_id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
+                                                    <label class="form-check-label" for="edit_id_card-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div>
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label mr-3 ml-0" for="edit_external_link">External Link</label>
+                                                <input id="edit_external_link" class="form-check-input" name="external_link" value="1" type="checkbox">
+                                            </div> 
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div class="extarnalUrlWrap" style="display: none;">
+                                            <label for="edit_external_link_ref" class="form-label">External URL <span class="text-danger">*</span></label>
+                                            <input id="edit_external_link_ref" type="text" name="external_link_ref" class="form-control w-full">
+                                            <div class="acc__input-error error-external_link_ref text-danger mt-2"></div>
+                                        </div>  
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div>
+                                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="form-check mr-3">
+                                                    <input id="edit_status-yes" class="form-check-input" type="radio" name="status" value="Yes">
+                                                    <label class="form-check-label" for="edit_status-yes">Yes</label>
+                                                </div>
+                                                <div class="form-check mr-2">
+                                                    <input checked id="edit_status-no" class="form-check-input" type="radio" name="status" value="No">
+                                                    <label class="form-check-label" for="edit_status-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12">
+                                        <div class="taskStatusesWrap" style="display: none;">
+                                            <label for="upload" class="form-label">Task Statuses <span class="text-danger">*</span></label>
+                                            @if($taskStatus->count() > 0)
+                                                <div>
+                                                    @foreach($taskStatus as $ts)
+                                                        <div class="form-check mt-2">
+                                                            <input id="edit_task-status-{{ $ts->id }}" class="form-check-input" type="checkbox" name="task_statuses[]" value="{{ $ts->id }}">
+                                                            <label class="form-check-label" for="edit_task-status-{{ $ts->id }}">{{ $ts->name }}</label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                <div class="acc__input-error error-task_statuses text-danger mt-2"></div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>  
                             </div>
-                            <div class="col-span-12">
-                                <div>
-                                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="form-check mr-3">
-                                            <input id="edit_status-yes" class="form-check-input" type="radio" name="status" value="Yes">
-                                            <label class="form-check-label" for="edit_status-yes">Yes</label>
-                                        </div>
-                                        <div class="form-check mr-2">
-                                            <input checked id="edit_status-no" class="form-check-input" type="radio" name="status" value="No">
-                                            <label class="form-check-label" for="edit_status-no">No</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12">
-                                <div class="taskStatusesWrap" style="display: none;">
-                                    <label for="upload" class="form-label">Task Statuses <span class="text-danger">*</span></label>
-                                    @if($taskStatus->count() > 0)
-                                        <div>
-                                            @foreach($taskStatus as $ts)
-                                                <div class="form-check mt-2">
-                                                    <input id="edit_task-status-{{ $ts->id }}" class="form-check-input" type="checkbox" name="task_statuses[]" value="{{ $ts->id }}">
-                                                    <label class="form-check-label" for="edit_task-status-{{ $ts->id }}">{{ $ts->name }}</label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <div class="acc__input-error error-task_statuses text-danger mt-2"></div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>  
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal"

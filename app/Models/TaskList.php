@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\ProcessList;
+use Illuminate\Support\Facades\Storage;
 
 class TaskList extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $appends = ['image_url'];
 
     protected $fillable = [
         'process_list_id',
@@ -20,6 +23,10 @@ class TaskList extends Model
         'external_link',
         'external_link_ref',
         'status',
+        'image',
+        'image_path',
+        'org_email',
+        'id_card',
         'created_by',
         'updated_by',
     ];
@@ -30,6 +37,20 @@ class TaskList extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    /**
+     * The getter that return accessible URL for user photo.
+     *
+     * @var array
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->image !== null && Storage::disk('local')->exists('public/process/'.$this->process_list_id.'/tasks/'.$this->id.'/'.$this->image)) {
+            return Storage::disk('local')->url('public/process/'.$this->process_list_id.'/tasks/'.$this->id.'/'.$this->image);
+        } else {
+            return asset('build/assets/images/placeholders/200x200.jpg');
+        }
+    }
 
     public function processlist(){
         return $this->belongsTo(ProcessList::class, 'process_list_id');

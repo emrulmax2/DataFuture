@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProcessListRequest;
 use App\Http\Requests\ProcessListUpdateRequest;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessListController extends Controller
 {
@@ -68,6 +69,7 @@ class ProcessListController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'image_url' => $list->image_url,
                     'phase' => $list->phase.($list->phase == 'Live' && isset($list->auto_feed) && $list->auto_feed == 'Yes' ? ' (Auto)' : ''),
                     'deleted_at' => $list->deleted_at
                 ];
@@ -85,13 +87,23 @@ class ProcessListController extends Controller
      */
     public function store(ProcessListRequest $request)
     {
-        $data = ProcessList::create([
+        $process = ProcessList::create([
             'name' => $request->name,
             'phase' => $request->phase,
             'auto_feed' => ($request->phase == 'Live' && (isset($request->auto_feed) && !empty($request->auto_feed)) ? $request->auto_feed : 'No'),
             'created_by' => auth()->user()->id
         ]);
-        return response()->json($data);
+        if($process && $request->hasFile('photo')):
+            $photo = $request->file('photo');
+            $imageName = 'Process_'.$process->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
+            $path = $photo->storeAs('public/process/'.$process->id, $imageName, 'local');
+
+            $processUpdate = ProcessList::where('id', $process->id)->update([
+                'image' => $imageName,
+                'image_path' => Storage::disk('local')->url($path)
+            ]);
+        endif;
+        return response()->json($process);
     }
 
     /**
@@ -129,13 +141,31 @@ class ProcessListController extends Controller
      * @param  \App\Models\ProcessList  $processList
      * @return \Illuminate\Http\Response
      */
-    public function update(ProcessListUpdateRequest $request, ProcessList $dataId){      
+    public function update(ProcessListUpdateRequest $request, ProcessList $dataId){   
+        $processOldRow = ProcessList::find($request->id);   
         $data = ProcessList::where('id', $request->id)->update([
             'name' => $request->name,
             'phase' => $request->phase,
             'auto_feed' => ($request->phase == 'Live' && (isset($request->auto_feed) && !empty($request->auto_feed)) ? $request->auto_feed : 'No'),
             'updated_by' => auth()->user()->id
         ]);
+
+        if($request->hasFile('photo')):
+            $photo = $request->file('photo');
+            $imageName = 'Process_'.$request->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
+            $path = $photo->storeAs('public/process/'.$request->id, $imageName, 'local');
+            if(isset($processOldRow->image) && !empty($processOldRow->image)):
+                if (Storage::disk('local')->exists('public/process/'.$request->id.'/'.$processOldRow->image)):
+                    Storage::disk('local')->delete('public/process/'.$request->id.'/'.$processOldRow->image);
+                endif;
+            endif;
+            
+            $processUpdate = ProcessList::where('id', $request->id)->update([
+                'image' => $imageName,
+                'image_path' => Storage::disk('local')->url($path)
+            ]);
+
+        endif;
 
         if($data){
             return response()->json(['message' => 'Data updated'], 200);
