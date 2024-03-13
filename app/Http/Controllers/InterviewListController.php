@@ -51,7 +51,7 @@ class InterviewListController extends Controller
             'tasklists' => TaskList::all(),
             'applicanttasks' => ApplicantTask::all(),
             'applicants' => Applicant::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'semesters' => Semester::all(),
             'courses' => Course::all(),
             'academic' => AcademicYear::all(),
@@ -469,7 +469,7 @@ class InterviewListController extends Controller
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
             'disability' => Disability::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'interview' => ApplicantInterview::find($interview),
         ]);
 
@@ -489,7 +489,7 @@ class InterviewListController extends Controller
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
             'disability' => Disability::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'applicantTask' => ApplicantTask::find($applicant_task)
         ]);
 

@@ -41,8 +41,8 @@ class PlanController extends Controller
             'terms' => TermDeclaration::with('termType')->orderBy('id','DESC')->get(),
             'room' => Room::with('venue')->get(),
             'group' => Group::orderBy('id', 'ASC')->get(),
-            'tutor' => User::all(),
-            'ptutor' => User::all(),
+            'tutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'ptutor' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 
@@ -205,7 +205,7 @@ class PlanController extends Controller
         $allRooms = (!empty($room) ? Room::whereIn('id', $room)->get() : Room::all());
         $weekDays = [1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
         $groups = Group::all();
-        $users = User::all();
+        $users = User::where('active', 1)->orderBy('name', 'ASC')->get();
         
         $html = '';
         //$html .= implode(',', $days);
@@ -488,7 +488,7 @@ class PlanController extends Controller
         $groups = Group::find($group);
         $sameNameGroupIds = Group::where('term_declaration_id', $term)->where('course_id', $courseCreation->course_id)->where('name', $groups->name)
                             ->pluck('id')->unique()->toArray();
-        $users = User::all();
+        $users = User::where('active', 1)->orderBy('name', 'ASC')->get();
 
         $days = [ 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
         $rooms = Room::all();
@@ -666,7 +666,7 @@ class PlanController extends Controller
         $course = Course::find($course_id);
 
         $group = Group::find($group_id);
-        $users = User::all();
+        $users = User::where('active', 1)->orderBy('name', 'ASC')->get();
 
         $moduleCreations = ModuleCreation::where('instance_term_id', $instance_term_id)->orderBy('module_name', 'ASC')->get();
 

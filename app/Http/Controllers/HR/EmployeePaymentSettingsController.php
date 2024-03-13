@@ -32,7 +32,7 @@ class EmployeePaymentSettingsController extends Controller
             "employee" => $employee,
             "employment" => $employment,
             'schemes' => EmployeeInfoPenssionScheme::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'hourAuthIds' => EmployeeHourAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
             'holidayAuthIds' => EmployeeHolidayAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
             'numOfActivePattern' => EmployeeWorkingPattern::where('employee_id', $id)->whereNull('end_to')->get()->count()

@@ -27,7 +27,7 @@ class ApplicantInterviewListController extends Controller
             'applicanttasks' => ApplicantTask::all(),
             'applicants' => Applicant::all(),
             'applicantdocuments' => ApplicantDocument::all(),
-            'users' => User::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 
