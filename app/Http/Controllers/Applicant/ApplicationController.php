@@ -742,12 +742,16 @@ class ApplicationController extends Controller
     }
 
     public function show($id){
+        $applicant = Applicant::where('id', $id)->first();
+        if(\Auth::guard('applicant')->user()->id != $applicant->applicant_user_id):
+            redirect('applicant.dashboard');
+        endif;
         return view('pages.applicant.application.show', [
             'title' => 'Application View - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Application View', 'href' => 'javascript:void(0);']
             ],
-            'applicant' => Applicant::where('id', $id)->first(),
+            'applicant' => $applicant
         ]);
     }
 
