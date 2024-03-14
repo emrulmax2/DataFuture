@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\EmployeeAttendance;
+use App\Models\EmployeeAttendanceDayBreak;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLeaveDay;
@@ -86,7 +87,7 @@ class EmployeeAttendanceController extends Controller
         $theDate = date('Y-m-d', strtotime($request->theDate));
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
-        $employees = Employee::has('activePatterns')->where('status', 1)->orderBy('first_name', 'ASC')->get();
+        $employees = Employee::has('activePatterns')->where('id', 41)->where('status', 1)->orderBy('first_name', 'ASC')->get();
 
         foreach($employees as $employee):
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
@@ -394,11 +395,103 @@ class EmployeeAttendanceController extends Controller
                     /* End If clock Out not found */
 
                     /* Start Break Calculations */
-                    $total_break = 0;
+                    
                     $b = 1;
                     $b_start = '';
                     $break_details = '';
+
+                    $total_break = 0;
+                    $break_ids = [];
+                    $breakArray = [];
                     $count = (!empty($break_return) ? count($break_return) : 0);
+
+                    if(is_array($break_return) && !empty($break_return)):
+                        $bi = 1;
+                        $bik = 1;
+                        $br_issue = 0;
+                        foreach($break_return as $key => $time):
+                            if($bi % 2 == 0){
+                                if(strpos($key, 'return_') !== false){
+                                    if(!isset($breakArray[$bik]['start'])):
+                                        $breakArray[$bik]['start'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                    endif;
+
+                                    $breakArray[$bik]['end'] = $time;
+                                    $bik += 1;
+                                }else{
+                                    if(!isset($breakArray[$bik]['end'])):
+                                        $breakArray[$bik]['end'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                        $bik += 1;
+                                    endif;
+
+                                    $breakArray[$bik]['start'] = $time;
+
+                                    if($bi == $count){
+                                        $breakArray[$bik]['end'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                        $bik += 1;
+                                    }
+                                }
+                            }else{
+                                if(strpos($key, 'break_') !== false){
+                                    if(!isset($breakArray[$bik]['end']) && isset($breakArray[$bik]['start']) && $bik > 1):
+                                        $breakArray[$bik]['end'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                        $bik += 1;
+                                    endif;
+
+                                    $breakArray[$bik]['start'] = $time;
+
+                                    if($bi == $count){
+                                        $breakArray[$bik]['end'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                        $bik += 1;
+                                        $br_issue += 1;
+                                    }
+                                }else{
+                                    if(!isset($breakArray[$bik]['start'])):
+                                        $breakArray[$bik]['start'] = '00:00:00';
+                                        $issues += 1;
+                                        $issues_array['break_issue'] += 1;
+                                    endif;
+
+                                    $breakArray[$bik]['end'] = $time;
+                                    $bik += 1;
+                                }
+                            }
+                            $bi++;
+                        endforeach;
+                    endif;
+                    if(!empty($breakArray)):
+                        foreach($breakArray as $brks):
+                            $breakData = [];
+                            $breakData['employee_id'] = $employee_id;
+                            $breakData['date'] = $theDate;
+                            $breakData['start'] = (isset($brks['start']) && !empty($brks['start']) && $brks['end'] != '00:00:00' ? date('H:i', strtotime(strtr($brks['start'], '/', '-'))) : '00:00');
+                            $breakData['end'] = (isset($brks['end']) && !empty($brks['end']) && $brks['end'] != '00:00:00' ? date('H:i', strtotime(strtr($brks['end'], '/', '-'))) : '00:00');
+                            $breakData['created_by'] = auth()->user()->id;
+                            $breakData['total'] = 0;
+
+                            if((isset($brks['start']) && !empty($brks['start']) && $brks['start'] != '00:00:00') && (isset($brks['end']) && !empty($brks['end']) && $brks['end'] != '00:00:00')):
+                                $start = strtotime(date('H:i', strtotime(strtr($brks['start'], '/', '-'))));
+                                $end = strtotime(date('H:i', strtotime(strtr($brks['end'], '/', '-'))));
+                                $theBreakTotal = round(abs($start - $end) / 60, 2);
+                                $total_break += $theBreakTotal;
+                                $breakData['total'] = $theBreakTotal;
+                            endif;
+                            $theBreakRow = EmployeeAttendanceDayBreak::create($breakData);
+                            $break_ids[] = $theBreakRow->id;
+                        endforeach;
+                    endif;
+                    /*$rrr = [$breakArray, $break_return];
+                    return response()->json($rrr);
 
                     if(is_array($break_return) && !empty($break_return)):
                         $break_details .= '<ol class="return_list">';
@@ -435,15 +528,15 @@ class EmployeeAttendanceController extends Controller
                             $b++;
                         endforeach;
                         $break_details .= '</ol>';
-                    endif;
+                    endif;*/
+
                     $break = ($this->convertStringToMinute($paid_break) + $this->convertStringToMinute($unpaid_break));
-                                                                    
                     $actualBreak = 0;
                     if($break < $total_break):
                         $actualBreak = $total_break - $break;
                     endif;
 
-                    $data['break_details_html'] = $break_details;
+                    $data['break_details_html'] = '';//$break_details;
                     $data['total_break'] = $total_break;
                     /* End Break Calculations */
 
@@ -500,7 +593,10 @@ class EmployeeAttendanceController extends Controller
                     $data['status'] = 1; 
                     $data['created_by'] = auth()->user()->id;
                     
-                    EmployeeAttendance::create($data);
+                    $EmployeeAttendance = EmployeeAttendance::create($data);
+                    if($EmployeeAttendance->id && !empty($break_ids)):
+                        EmployeeAttendanceDayBreak::where('employee_id', $employee_id)->where('date', $theDate)->whereIn('id', $break_ids)->update(['employee_attendance_id' => $EmployeeAttendance->id]);
+                    endif;
                     if(isset($today_leave_id) && $today_leave_id > 0 && $leave_type > 0):
                         EmployeeLeaveDay::where('id', $today_leave_id)->update(['is_taken' => 1]);
                     endif;
@@ -660,68 +756,106 @@ class EmployeeAttendanceController extends Controller
         $rowID = $request->rowID;
         $attendance = EmployeeAttendance::find($rowID);
 
-        return response()->json(['res' => $attendance], 200);
+        $html = '';
+        if(isset($attendance->breaks) && $attendance->breaks->count() > 0):
+            $html .= '<div class="overflow-x-auto">';
+                $html .= '<table class="table table-bordered table-sm">';
+                    $html .= '<thead>';
+                        $html .= '<tr>';
+                            $html .= '<th class="whitespace-nowrap">#</th>';
+                            $html .= '<th class="whitespace-nowrap">Start</th>';
+                            $html .= '<th class="whitespace-nowrap">End</th>';
+                            $html .= '<th class="whitespace-nowrap">Duration</th>';
+                        $html .= '</tr>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                        $i = 1;
+                        $theDayTotal = 0;
+                        foreach($attendance->breaks as $brks):
+                            $html .= '<tr class="breakRow">';
+                                $html .= '<td>'.$i.'</td>';
+                                $html .= '<td><input value="'.$brks->start.'" type="text" class="form-control breakStart w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][start]"/></td>';
+                                $html .= '<td><input value="'.$brks->end.'" type="text" class="form-control breakEnd w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][end]"/></td>';
+                                $html .= '<td><input readonly value="'.$this->calculateHourMinute($brks->total).'" type="text" class="form-control breakRowTotal w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][total]"/></td>';
+                            $html .= '</tr>';
+                            $theDayTotal += $brks->total;
+                            $i++;
+                        endforeach;
+                    $html .= '</tbody>';
+                    $html .= '<tfoot>';
+                        $html .= '<tr>';
+                            $html .= '<td colspan="3"><strong>Day Total</strong></td>';
+                            $html .= '<td><input value="'.$this->calculateHourMinute($theDayTotal).'" type="text" class="form-control w-full breakGrandTotal" readonly name="total_break"/></td>';
+                        $html .= '</tr>';
+                    $html .= '</tfoot>';
+                $html .= '</table>';
+            $html .= '</div>';
+        else:
+            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!</div>';
+        endif;
+
+        return response()->json(['res' => $html], 200);
     }
 
     public function updateBreak(Request $request){
-        $rowID = $request->rowID;
-        $employeeAttendance = EmployeeAttendance::find($rowID);
-        $total_break = (isset($employeeAttendance->total_break) && $employeeAttendance->total_break > 0 ? $employeeAttendance->total_break : 0);
-        $total_work_hour = (isset($employeeAttendance->total_work_hour) && $employeeAttendance->total_work_hour > 0 ? $employeeAttendance->tottotal_work_hourl_break : 0);
-        $user_issues = (isset($employeeAttendance->user_issues) && $employeeAttendance->user_issues > 0 ? $employeeAttendance->user_issues : 0);
+        $attendance_id = $request->id;
+        $employeeAttendance = EmployeeAttendance::find($attendance_id);
+        $total_break = (isset($request->total_break) && !empty($request->total_break) && $request->total_break> 0 ?  $this->convertStringToMinute($request->total_break) : 0);
+        $breaks = (isset($request->breaks) && !empty($request->breaks) ? $request->breaks : []);
+        //return response()->json($breaks);
+
+        $grand_total = 0;
+        if(!empty($breaks)):
+            foreach($breaks as $attendance_id => $break):
+                foreach($break as $break_id => $brk):
+                    $total = (isset($brk['total']) && !empty($brk['total']) ? $this->convertStringToMinute($brk['total']) : 0);
+                    $grand_total += $total;
+
+                    $data = [];
+                    $data['start'] = (isset($brk['start']) && !empty($brk['start']) ? $brk['start'] : '00:00');
+                    $data['end'] = (isset($brk['end']) && !empty($brk['end']) ? $brk['end'] : '00:00');
+                    $data['total'] = $total;
+                    $data['updated_by'] = auth()->user()->id;
+
+                    EmployeeAttendanceDayBreak::where('id', $break_id)->update($data);
+                endforeach;
+            endforeach;
+        endif;
+        $actualBreakTaken = ($total_break == $grand_total ? $total_break : $grand_total);
+
         $isses_field = (isset($employeeAttendance->isses_field) && !empty($employeeAttendance->isses_field) ? unserialize(base64_decode($employeeAttendance->isses_field)) : []);
-        $break_return = (isset($isses_field['break_return']) && $isses_field['break_return'] == 1) ? 1 : 0;
-        if($user_issues > 0 && $break_return == 1):
+        $user_issues = (isset($employeeAttendance->user_issues) && $employeeAttendance->user_issues > 0 ? $employeeAttendance->user_issues : 0);
+        $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] == 1) ? 1 : 0;
+        if($user_issues > 0 && $break_issue == 1):
             $user_issues -= 1;
-            unset($isses_field['break_return']);
+            unset($isses_field['break_issue']);
         endif;
 
-        $break_hrml = $request->break_hrml;
-
-        $total_min = 0;
-        $breakTimes = (!empty($request->breakTimes) ? $request->breakTimes : []);
-        foreach($breakTimes as $brTimes):
-            $brTimesArr = (!empty($brTimes) ? explode('-', $brTimes) : []);
-            $startTime = (isset($brTimesArr[0]) && !empty($brTimesArr[0]) ? $brTimesArr[0] : '00:00');
-            $endTime = (isset($brTimesArr[1]) && !empty($brTimesArr[1]) ? $brTimesArr[1] : '00:00');
-
-            if($startTime != '00:00' && $endTime != '00:00'):
-                $bs = strtotime(date('H:i', strtotime(strtr($startTime, '/', '-'))));
-                $be = strtotime(date('H:i', strtotime(strtr($endTime, '/', '-'))));
-                $total_min += round(abs($bs - $be) / 60, 2);
-            endif;
-        endforeach;
+        $total_break = (isset($employeeAttendance->total_break) && $employeeAttendance->total_break > 0 ? $employeeAttendance->total_break : 0);
+        $total_work_hour = (isset($employeeAttendance->total_work_hour) && $employeeAttendance->total_work_hour > 0 ? $employeeAttendance->tottotal_work_hourl_break : 0);
         
         $paid_break = (!empty($employeeAttendance->paid_break) ? $this->convertStringToMinute($employeeAttendance->paid_break) : 0);
         $unpaid_break = (!empty($employeeAttendance->unpadi_break) ? $this->convertStringToMinute($employeeAttendance->unpadi_break) : 0);
         $allowedBreak = ($paid_break + $unpaid_break);
 
-        $data = [];
-        $new_total_break = $total_break + $total_min;                             
-        if($new_total_break > $allowedBreak){
-            if ($total_break > $allowedBreak) {
-                $deduct = ($total_break - $allowedBreak);
-                $prev_total_work_hour = ($total_work_hour + $deduct);
-                $new_total_work_hour = ($total_work_hour - $unpaid_break) - $deduct;
+        $data = [];                            
+        if($actualBreakTaken > $allowedBreak){
+            $deduct = ($actualBreakTaken - $allowedBreak);
+            $new_total_work_hour = ($total_work_hour - $unpaid_break) - $deduct;
+            $total_work_hour = ($new_total_work_hour > 0 ? $new_total_work_hour : $total_work_hour);
 
-                $data['total_work_hour'] = $new_total_work_hour;
-            }else{
-                $deduct = ($new_total_break - $allowedBreak);
-                $new_total_work_hour = ($total_work_hour - $deduct) - $unpaid_break;
-                
-                $data['total_work_hour'] = $new_total_work_hour;
-            }
-            $data['total_break'] = $new_total_break;
-            $data['break_details_html'] = $break_hrml;
+            $data['total_work_hour'] = $total_work_hour;
+            $data['total_break'] = $actualBreakTaken;
+            $data['break_details_html'] = '';
         }else{
-            $data['total_break'] = $new_total_break;
-            $data['break_details_html'] = $break_hrml;
+            $data['total_break'] = $actualBreakTaken;
+            $data['break_details_html'] = '';
         }
         $data['user_issues'] = $user_issues;
         $data['isses_field'] = base64_encode(serialize($isses_field));
 
-        EmployeeAttendance::where('id', $rowID)->update($data);
-
-        return response()->json(['res' => 'Break HTML successfully updated'], 200);
+        EmployeeAttendance::where('id', $attendance_id)->update($data); 
+        
+        return response()->json(['res' => $isses_field], 200);
     }
 }

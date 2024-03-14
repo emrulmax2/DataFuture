@@ -233,7 +233,7 @@
                                             $isses_field = (isset($atten->isses_field) && !empty($atten->isses_field) ? unserialize(base64_decode($atten->isses_field)) : []);
                                             $clockin = (isset($isses_field['clockin_system']) && $isses_field['clockin_system'] == 1) ? 1 : 0;
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
-                                            $break_return = (isset($isses_field['break_return']) && $isses_field['break_return'] == 1) ? 1 : 0;
+                                            $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
                                         <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox" rowspan="{{ ($atten->leave_status > 0 ? 2 : 0) }}">
@@ -347,8 +347,8 @@
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Taken</span></td>
                                                         <td>
-                                                            @if(!empty($atten->break_details_html))
-                                                                <a data-haserror="{{ $break_return }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
+                                                            @if(isset($atten->breaks) && $atten->breaks->count() > 0)
+                                                                <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
                                                             @else:
                                                                 <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
                                                             @endif
@@ -496,7 +496,7 @@
                                             $isses_field = (isset($atten->isses_field) && !empty($atten->isses_field) ? unserialize(base64_decode($atten->isses_field)) : []);
                                             $clockin = (isset($isses_field['clockin_system']) && $isses_field['clockin_system'] == 1) ? 1 : 0;
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
-                                            $break_return = (isset($isses_field['break_return']) && $isses_field['break_return'] == 1) ? 1 : 0;
+                                            $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
                                         <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
@@ -610,8 +610,8 @@
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Taken</span></td>
                                                         <td>
-                                                            @if(!empty($atten->break_details_html))
-                                                                <a data-haserror="{{ $break_return }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_return == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
+                                                            @if(isset($atten->breaks) && $atten->breaks->count() > 0)
+                                                                <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
                                                             @else:
                                                                 <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
                                                             @endif
@@ -759,7 +759,7 @@
                                             $isses_field = (isset($atten->isses_field) && !empty($atten->isses_field) ? unserialize(base64_decode($atten->isses_field)) : []);
                                             $clockin = (isset($isses_field['clockin_system']) && $isses_field['clockin_system'] == 1) ? 1 : 0;
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
-                                            $break_return = (isset($isses_field['break_return']) && $isses_field['break_return'] == 1) ? 1 : 0;
+                                            $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
                                         <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox">
@@ -873,8 +873,8 @@
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Taken</span></td>
                                                         <td>
-                                                            @if(!empty($atten->break_details_html))
-                                                                <a data-haserror="{{ $break_return }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_return == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
+                                                            @if(isset($atten->breaks) && $atten->breaks->count() > 0)
+                                                                <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
                                                             @else:
                                                                 <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
                                                             @endif
@@ -939,7 +939,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20">Cancel</button>
-                        <button type="submit" id="updateBreak" style="display: none;" class="btn btn-primary w-auto ml-1">     
+                        <button type="submit" id="updateBreak" class="btn btn-primary w-auto ml-1">     
                             Update Breaks                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">

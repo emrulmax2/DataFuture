@@ -457,7 +457,6 @@ var applicantInterviewLogTable = (function () {
 
         drzn.on("error", function(file, response){
             dzError = true;
-            alert('hier')
         });
 
         drzn.on("success", function(file, response){
