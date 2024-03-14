@@ -574,9 +574,9 @@
                             @if(isset($task->task->users) && !empty($task->task->users))
                                 @foreach($task->task->users as $userser)
                                     @if($loop->first)
-                                        <span style="font-family:Roboto-Medium">{{ $userser->user->name }}</span>
+                                        <span style="font-family:Roboto-Medium">{{ $userser->user->full_name }}</span>
                                     @elseif(!$loop->last)                               
-                                        <span style="font-family:Roboto-Medium">, {{ $userser->user->name }}</span>
+                                        <span style="font-family:Roboto-Medium">, {{ $userser->user->full_name }}</span>
                                         <div style="clear:both"></div>
                                     @endif
                                 @endforeach
@@ -626,11 +626,11 @@
                             @if(isset($task->task->users) && !empty($task->task->users))
                                 @foreach($task->task->users as $userser)
                                     @if($loop->first)                               
-                                        <span style="font-family:Roboto-Medium">{{ $userser->user->name }}</span>
+                                        <span style="font-family:Roboto-Medium">{{ $userser->user->full_name }}</span>
                                         
                                         
                                     @elseif(!$loop->last)                             
-                                        <span style="font-family:Roboto-Medium">, {{ $userser->user->name }}</span>
+                                        <span style="font-family:Roboto-Medium">, {{ $userser->user->full_name }}</span>
                                         <div style="clear:both"></div>
                              
                                     @endif

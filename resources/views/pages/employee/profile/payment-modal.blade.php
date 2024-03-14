@@ -68,7 +68,7 @@
                                 <option value="">Please Select</option>
                                 @if(!empty($users) && $users->count() > 0)
                                     @foreach($users as $usr)
-                                        <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                        <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -104,7 +104,7 @@
                                         <option value="">Please Select</option>
                                         @if(!empty($users) && $users->count() > 0)
                                             @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                                <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>
@@ -226,7 +226,7 @@
                                 <option value="">Please Select</option>
                                 @if(!empty($users) && $users->count() > 0)
                                     @foreach($users as $usr)
-                                        <option {{ (in_array($usr->id, $hourAuthIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                        <option {{ (in_array($usr->id, $hourAuthIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -262,7 +262,7 @@
                                         <option value="">Please Select</option>
                                         @if(!empty($users) && $users->count() > 0)
                                             @foreach($users as $usr)
-                                                <option {{ (in_array($usr->id, $holidayAuthIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                                <option {{ (in_array($usr->id, $holidayAuthIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>

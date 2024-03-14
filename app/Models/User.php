@@ -54,7 +54,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends = ['photo', 'photo_url', 'remote_access'];
+    protected $appends = ['photo', 'photo_url', 'remote_access', 'full_name'];
 
     /**
      * The getter that return accessible URL for user photo.
@@ -89,6 +89,9 @@ class User extends Authenticatable
         return $this->hasMany(ApplicantInterview::class);
     }
 
+    public function getFullNameAttribute(){
+        return (isset($this->employee->full_name) && !empty($this->employee->full_name) ? $this->employee->full_name : $this->name);
+    }
 
     public function employee(){
         return $this->hasOne(Employee::class, 'user_id', 'id')->latestOfMany();

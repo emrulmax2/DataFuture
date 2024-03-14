@@ -102,7 +102,7 @@
                 @foreach($processGroup as $proGroup)
                     <div class="accordion-item">
                         <div id="studentProcessAccordion-{{ $loop->index }}" class="accordion-header">
-                            <button class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentProcessAccordion-collapse-{{ $loop->index }}" aria-expanded="false" aria-controls="studentProcessAccordion-collapse-{{ $loop->index }}">
+                            <button class="processListAccordionBtn accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentProcessAccordion-collapse-{{ $loop->index }}" aria-expanded="false" aria-controls="studentProcessAccordion-collapse-{{ $loop->index }}">
                                 {{ $proGroup['name'] }} 
                                 @if($proGroup['pendingTask']->count() > 0)
                                     <span class="py-1 px-4 inline-flex rounded-full bg-warning text-sm font-semibold text-white ml-2 relative">{{ $proGroup['pendingTask']->count() }} Pendings</span>

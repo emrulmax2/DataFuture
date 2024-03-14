@@ -293,6 +293,7 @@ var applicantInterviewLogTable = (function () {
     const uploadTaskDocumentModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
     const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
     const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
+    const studentProcessAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#studentProcessAccordion"));
 
     const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
     document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
@@ -314,6 +315,19 @@ var applicantInterviewLogTable = (function () {
         $("#confirmModal .agreeWith").attr('data-status', 'none');
         $('#confirmModal button').removeAttr('disabled');
     });
+
+    $('#studentProcessAccordion .processListAccordionBtn').on('click', function(e){
+        var $thebtn = $(this);
+        var hash = $thebtn.attr('data-tw-target');
+        window.location.hash = hash;
+    });
+
+    $(window).on('load', function(){
+        if(window.location.hash){     
+            $('#studentProcessAccordion .processListAccordionBtn[data-tw-target="'+window.location.hash+'"]').removeClass('collapsed').attr('aria-expanded', 'true');
+            $('#studentProcessAccordion '+window.location.hash).addClass('show').show();
+        }
+    })
 
     
     $('#studentProcessListForm').on('submit', function(e){
@@ -445,6 +459,19 @@ var applicantInterviewLogTable = (function () {
 
 
         var drzn = new Dropzone('#uploadTaskDocumentForm', options);
+
+        drzn.on('addedfile', function(file){
+            if(file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)){
+                $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! One of your selected file name contain validation error & that file has been removed.</div>');
+                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
+                drzn.removeFile(file);
+
+                setTimeout(function(){
+                    $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                }, 5000)
+            }
+        });
 
         drzn.on("maxfilesexceeded", (file) => {
             $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
@@ -853,5 +880,7 @@ var applicantInterviewLogTable = (function () {
             console.log(error)
         });
     });
+
+
 
 })()

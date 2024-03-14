@@ -318,7 +318,7 @@
                             <select id="user" name="user" class="form-control w-full user__input">
                                 <option value="">Please Select</option>
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}">{{ $user->full_name }}</option>
                                 @endforeach    
                             </select>
                             <div id="error-user" class="user__input-error error-user text-danger mt-2"></div>

@@ -44,6 +44,13 @@
         width: 85%;
     }
 }
+.dropzone .dz-preview .dz-image img{
+    width: 100%;
+    height: auto;
+}
+.dropzone .dz-preview{
+    margin: 5px;
+}
 /* Core Setup Extended End */
 
 
