@@ -3,32 +3,168 @@
 @section('head')
     <title>Student Login London Churchill College</title>
 @endsection
-
+<style>
+    .gsi-material-button {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-appearance: none;
+    background-color: WHITE;
+    background-image: none;
+    border: 1px solid rgb(226, 232, 240);
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: rgb(30, 41, 59);
+    cursor: pointer;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 14px;
+    height: 40px;
+    letter-spacing: 0.25px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 12px;
+    position: relative;
+    text-align: center;
+    -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+    max-width: 400px;
+    min-width: min-content;
+    }
+    
+    .gsi-material-button .gsi-material-button-icon {
+    height: 20px;
+    margin-right: 12px;
+    min-width: 20px;
+    width: 20px;
+    }
+    
+    .gsi-material-button .gsi-material-button-content-wrapper {
+    -webkit-align-items: center;
+    align-items: center;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    }
+    
+    .gsi-material-button .gsi-material-button-contents {
+    -webkit-flex-grow: 0;
+    flex-grow: 0;
+    font-family: 'Roboto', arial, sans-serif;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    }
+    
+    .gsi-material-button .gsi-material-button-state {
+    -webkit-transition: opacity .218s;
+    transition: opacity .218s;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    }
+    
+    .gsi-material-button:disabled {
+    cursor: default;
+    background-color: #ffffff61;
+    border-color: #1f1f1f1f;
+    }
+    
+    .gsi-material-button:disabled .gsi-material-button-contents {
+    opacity: 38%;
+    }
+    
+    .gsi-material-button:disabled .gsi-material-button-icon {
+    opacity: 38%;
+    }
+    
+    .gsi-material-button:not(:disabled):active .gsi-material-button-state, 
+    .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 12%;
+    }
+    
+    .gsi-material-button:not(:disabled):hover {
+    -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+    }
+    
+    .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 8%;
+    }
+    
+</style>
 @section('content')
     <div class="container sm:px-10">
         <div class="block xl:grid grid-cols-2 gap-4">
             <!-- BEGIN: Login Info -->
             <div class="hidden xl:flex flex-col min-h-screen">
                 <a href="" class="-intro-x flex items-center pt-5">
-                    {{-- <img alt="Icewall Tailwind HTML Admin Template" class="w-6" src="{{ asset('build/assets/images/logo.svg') }}">
-                    <span class="text-white text-lg ml-3">
-                        Applicant Login
-                    </span> --}}
-                    <img alt="London Churchill College" class="w-48" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg" />
+                    {{-- <img alt="LCC Admin Panel" class="w-60" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg"> --}}
+                    <img alt="London Churchill College" class="w-48" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg') }}">
+                  
                 </a>
                 <div class="my-auto">
                     <img alt="Icewall Tailwind HTML Admin Template" class="-intro-x w-1/2 -mt-16" src="{{ asset('build/assets/images/illustration.svg') }}">
-                    <div class="-intro-x text-white font-medium text-4xl leading-tight mt-10">Fill up the credential to <br> sign in to your account.</div>
-                    {{-- <div class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">Manage all your e-commerce accounts in one place</div> --}}
+                    <div class="-intro-x text-white font-medium text-4xl leading-tight mt-10">A few more clicks to <br> sign in to your account.</div>
+                    <div class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">Manage all your accounts in one place</div>
                 </div>
             </div>
             <!-- END: Login Info -->
             <!-- BEGIN: Login Form -->
-            <div class="h-screen xl:h-auto flex py-5 xl:py-0 my-10 xl:my-0">
+            <div class="sm:h-screen xl:h-auto xl:flex py-5 xl:py-0 my-10 xl:my-0">
+                <div class="xl:hidden mb-10">
+                    <a href="" class="-intro-x flex-none items-center pt-5">
+                        {{-- <img alt="Icewall Tailwind HTML Admin Template" class="w-6" src="{{ asset('build/assets/images/logo.svg') }}">
+                        <span class="text-white text-lg ml-3">
+                            Applicant Login
+                        </span> --}}
+                        <img alt="London Churchill College" class="w-48  mx-auto" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg') }}">
+                    </a>
+    
+                </div>
                 <div class="my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto">
-                    <h2 class="intro-x font-bold text-2xl xl:text-3xl text-center xl:text-left">Sign In</h2>
-                    <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">A few more clicks to sign in to your account. Manage all your e-commerce accounts in one place</div>
+                    <h2 class="intro-x font-bold text-2xl xl:text-3xl text-center ">Student Login</h2>
+                    <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">A few more clicks to sign in to your account. Manage all your accounts in one place</div>
+                    @if(0) 
+                        <div class="intro-x mt-8">
+                            <form id="login-form">
+                                <input id="email" type="text" class="intro-x login__input form-control py-3 px-4 block" placeholder="Email" value="midone@left4code.com">
+                                <div id="error-email" class="login__input-error text-danger mt-2"></div>
+                                <input id="password" type="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password" value="password">
+                                <div id="error-password" class="login__input-error text-danger mt-2"></div>
+                            </form>
+                        </div>
+                        <div class="intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4">
+                            <div class="flex items-center mr-auto">
+                                <input id="remember-me" type="checkbox" class="form-check-input border mr-2">
+                                <label class="cursor-pointer select-none" for="remember-me">Remember me</label>
+                            </div>
+                            
+                        </div>
+                        <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
+                            <button id="btn-login" class="btn btn-primary py-3 px-4 w-full md:w-64 xl:mr-3 align-top">Login</button>
+                        </div>
 
+                        <div class="intro-x mt-4 text-center font-bold text-1xl">
+                            OR
+                        </div>
+                    @endif
                     <div class="flex items-center justify-center mt-5 intro-x  xl:mt-8 ">
                         <a href="{{ route('students.redirect.google') }}">
                             <button class="gsi-material-button" style="width:400px">
@@ -49,11 +185,14 @@
                             </button>
                         </a>
                     </div>
-                    <div class="intro-x mt-10 xl:mt-24 text-slate-600 dark:text-slate-500 text-center xl:text-left">
-                        By signin up, you agree to our <a class="text-primary dark:text-slate-200" href="">Terms and Conditions</a> & <a class="text-primary dark:text-slate-200" href="">Privacy Policy</a>
-                    </div>
+                    {{-- @if($env != "production") 
+                        <div class="intro-x mt-8 xl:mt-16 text-slate-600 dark:text-slate-500 text-center xl:text-left">
+                            By signin up, you agree to our <a class="text-primary dark:text-slate-200" href="">Terms and Conditions</a> & <a class="text-primary dark:text-slate-200" href="">Privacy Policy</a>
+                        </div>
+                    @endif --}}
                 </div>
             </div>
+            
             <!-- END: Login Form -->
         </div>
     </div>
