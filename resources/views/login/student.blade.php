@@ -198,25 +198,29 @@
     </div>
 
     
-    @if (session('verifySuccessMessage'))
-        <!-- BEGIN: Notification Content -->
-        <div id="success-notification-content" class="toastify-content hidden flex">
-            <i class="text-success" data-lucide="check-circle"></i>
-            <div class="ml-4 mr-4">
-                <div class="font-medium">Error Found!</div>
-                <div class="text-slate-500 mt-1">{{ session('verifySuccessMessage') }}</div>
-            </div>
+    @if (session('google'))
+    <!-- BEGIN: Notification Content -->
+    <div id="success-notification-content" class="toastify-content hidden ">
+        <i class="text-danger" data-lucide="x-octagon"></i>
+        <div class="ml-4 mr-4">
+            <div class="font-medium">No Linked Account Found!</div>
+            <div class="text-slate-500 mt-1">{{ session('google') }}</div>
         </div>
-        <!-- END: Notification Content -->
-        <!-- BEGIN: Notification Toggle -->
-        <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
-        <!-- END: Notification Toggle -->
+    </div>
+    <!-- END: Notification Content -->
+    <!-- BEGIN: Notification Toggle -->
+    <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+    <!-- END: Notification Toggle -->
     @endif
 @endsection
 
 @section('script')
     <script type="module">
         (function () {
+            if($('#success-notification-toggle').length>0) {
+                $("#success-notification-toggle").trigger('click')
+            }
+            
             async function login() {
                 // Reset state
                 $('#login-form').find('.login__input').removeClass('border-danger')
