@@ -64,6 +64,10 @@ class EmployeeAttendance extends Model
         return $this->belongsTo(EmployeeLeaveDay::class, 'employee_leave_day_id');
     }
 
+    public function breaks(){
+        return $this->hasMany(EmployeeAttendanceDayBreak::class, 'employee_attendance_id', 'id');
+    }
+
     public function getClockInLocationAttribute(){
         $res = [];
         $liveAttendance = EmployeeAttendanceLive::where('employee_id', $this->employee_id)->where('attendance_type', 1)

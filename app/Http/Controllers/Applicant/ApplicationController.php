@@ -153,10 +153,12 @@ class ApplicationController extends Controller
         $studentFinanceEngland = ($studentLoan == 'Student Loan' && isset($request->student_finance_england) && $request->student_finance_england > 0 ? $request->student_finance_england : null);
         $appliedReceivedFund = ($studentLoan == 'Student Loan' && isset($request->applied_received_fund) && $request->applied_received_fund > 0 ? $request->applied_received_fund : null);
         $fundReceipt = ($studentFinanceEngland == 1 && isset($request->fund_receipt) && $request->fund_receipt > 0 ? $request->fund_receipt : null);
+        $crsCrnInstance = CourseCreationInstance::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get()->first();
 
         $course = ApplicantProposedCourse::updateOrCreate(['applicant_id' => $applicant_id], [
             'course_creation_id' => $course_creation_id,
             'semester_id' => $courseCreation->semester_id,
+            'academic_year_id' => (isset($crsCrnInstance->academic_year_id) && $crsCrnInstance->academic_year_id > 0 ? $crsCrnInstance->academic_year_id : null),
             'student_loan' => $studentLoan,
             'student_finance_england' => $studentFinanceEngland,
             'applied_received_fund' => $appliedReceivedFund,
@@ -740,12 +742,16 @@ class ApplicationController extends Controller
     }
 
     public function show($id){
+        $applicant = Applicant::where('id', $id)->first();
+        if(\Auth::guard('applicant')->user()->id != $applicant->applicant_user_id):
+            redirect('applicant.dashboard');
+        endif;
         return view('pages.applicant.application.show', [
             'title' => 'Application View - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Application View', 'href' => 'javascript:void(0);']
             ],
-            'applicant' => Applicant::where('id', $id)->first(),
+            'applicant' => $applicant
         ]);
     }
 

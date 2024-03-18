@@ -62,7 +62,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($users))
                                         @foreach($users as $ur)
-                                            <option value="{{ $ur->id }}">{{ $ur->name }}</option>
+                                            <option value="{{ $ur->id }}">{{ $ur->full_name }}</option>
                                         @endforeach
                                     @endif
                                 </select>

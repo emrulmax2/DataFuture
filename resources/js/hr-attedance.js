@@ -245,18 +245,7 @@ var attendanceSyncListTable = (function () {
             $allBtn.attr('disabled', 'disabled');
             
             if (response.status == 200) {
-                /*attendanceSyncListTable.init();
-
-                var theDate = response.data.date;
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Congratulations!" );
-                    $("#successModal .successModalDesc").html('Employee attendance for the day '+theDate+' has been successfully syncronised.');
-                });   
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000)*/
+                //console.log(response.data);
                 
                 var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle w-4 h-4 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
                 $theBtn.removeClass('btn-success').addClass('btn-primary').html(svg+' Synchronised');

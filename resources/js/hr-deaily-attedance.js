@@ -468,30 +468,38 @@ import IMask from 'imask';
         }).then(response => {
             if (response.status == 200) {
                 let res = response.data.res;
-                $('#viewBreakModal .modal-body').html(res.break_details_html);
+                $('#viewBreakModal .modal-body').html(res);
                 $('#viewBreakModal input[name="id"]').val(rowID);
 
-                if (res.break_details_html != '') {
-                    $("#viewBreakModal .modal-body").find('.return_list li').each(function () {
-                        if ($(".edit_this", this).length > 0) {
-                            $(this).addClass('has_error');
-                        }
-                    });
-                }
+                createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
 
-                if($("#viewBreakModal .modal-body .edit_this").length > 0){
+                if($("#viewBreakModal .modal-body .timepicker").length > 0){
                     var maskOptions = {
                         mask: '00:00'
                     };
-                    $('#viewBreakModal input.edit_this').each(function(){
-                        var mask = IMask(this, maskOptions);
+                    $('#viewBreakModal input.timepicker').each(function(){
+                        var mask = IMask(this, {
+                            overwrite: true,
+                            autofix: true,
+                            mask: 'HH:MM',
+                            blocks: {
+                                HH: {
+                                    mask: IMask.MaskedRange,
+                                    placeholderChar: 'HH',
+                                    from: 0,
+                                    to: 23,
+                                    maxLength: 2
+                                },
+                                MM: {
+                                    mask: IMask.MaskedRange,
+                                    placeholderChar: 'MM',
+                                    from: 0,
+                                    to: 59,
+                                    maxLength: 2
+                                }
+                            }
+                        });
                     })
-                }
-
-                if(hasError == 1){
-                    $('#viewBreakModal #updateBreak').fadeIn();
-                }else{
-                    $('#viewBreakModal #updateBreak').fadeOut();
                 }
             }
         }).catch(error => {
@@ -501,46 +509,90 @@ import IMask from 'imask';
         });
     });
 
-    $("#viewBreakModal").on('click', '.return_list li.has_error span.re_br', function () {
-        $(this).siblings('.edit_this').fadeToggle();
+    $('#viewBreakModal').on('keyup change paste', '.breakStart, .breakEnd', function(){
+        var startTime = $(this).closest('tr.breakRow').find('.breakStart').val();
+        var endTime = $(this).closest('tr.breakRow').find('.breakEnd').val();
+
+        if (startTime.length == 5 && endTime.length == 5) {
+            var breakHourInSecond = (new Date(get_current_date() + " " + endTime + ':00').getTime() - new Date(get_current_date() + " " + startTime + ':00').getTime()) / 1000;
+            
+            var totalBreakHour = breakHourInSecond / 60;
+            totalBreakHour = hour_minute_formate(totalBreakHour);
+            $(this).closest('tr.breakRow').find('.breakRowTotal').val(totalBreakHour);
+        }else{
+            $(this).closest('tr.breakRow').find('.breakRowTotal').val('00:00');
+        }
+
+        calculateDayBreakTotal('#viewBreakModal')
     });
 
-    $('#viewBreakModal').on('keyup', '.return_list li.has_error .edit_this', function(){
-        var $theInput = $(this);
-        var theTime = $theInput.val();
-        if(theTime != '' && theTime.length == 5){
-            $theInput.siblings('.re_br').children('.ret').text(theTime);
-            $theInput.fadeOut();
+    function calculateDayBreakTotal(modalId){
+        var dayTotal = 0;
+        if($(modalId+' .breakRowTotal').length > 0){
+            $(modalId+' .breakRowTotal').each(function (e) {
+                var rowTotal = $(this).val();
+                if (rowTotal != '') {
+                    var time = rowTotal.split(':');
+                    var timeInMin = (parseInt(time[0], 10) * 60) + parseInt(time[1], 10);
+                    dayTotal += timeInMin;
+                }
+            });
+            $(modalId+' tfoot .breakGrandTotal').val(hour_minute_formate(dayTotal));
         }else{
-            $theInput.siblings('.re_br').children('.ret').text('00:00');
+            $(modalId+' tfoot .breakGrandTotal').val('00:00');
         }
-    });
+    }
+
+    function hour_minute_formate(total_min) {
+        var hours = Math.floor(total_min / 60);
+        if (hours < 10) {
+            hours = '0' + hours;
+        }
+        var minutes = total_min % 60;
+        if (minutes < 10) {
+            minutes = '0' + minutes;
+        }
+        return hours + ':' + minutes;
+    }
+
+    function get_current_date() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+
+        return today = mm + '/' + dd + '/' + yyyy;
+    }
 
     $('#viewBreakForm').on('submit', function(e){
         e.preventDefault();
         var $form = $(this);
         const form = document.getElementById('viewBreakForm');
 
-        $('#roomEditForm').find('input').removeClass('border-danger')
-        $('#roomEditForm').find('.acc__input-error').html('')
-
         document.querySelector('#updateBreak').setAttribute('disabled', 'disabled');
         document.querySelector('#updateBreak svg').style.cssText = 'display: inline-block;';
 
-        var rowID = $('#viewBreakModal input[name="id"]').val();
-        var breakTimes = [];
         var errors = 0;
-        var i = 1;
-        $('#viewBreakModal').find('.return_list li.has_error').each(function(){
-            var breakStart = $(this).find('.bre').text();
-            var breakEnd = $(this).find('.ret').text();
+        $('#viewBreakModal').find('.breakRow').each(function(){
+            var $breakStart = $(this).find('.breakStart');
+            var $breakEnd = $(this).find('.breakEnd');
+            var $breakRowTotal = $(this).find('.breakRowTotal');
 
-            breakTimes.push(breakStart+'-'+breakEnd);
-           
-            if(breakStart == '00:00' || breakEnd == '00:00'){
+            if(($breakStart.val() == '' || $breakStart.val() == '00:00') || ($breakEnd.val() == '' || $breakEnd.val() == '00:00') || $breakRowTotal.val() == ''){
                 errors += 1;
             }
         });
+        if($('#viewBreakModal .breakGrandTotal').val() == ''){
+            errors += 1;
+        }
         
         if(errors > 0){
             $form.find('.modError').remove();
@@ -551,14 +603,11 @@ import IMask from 'imask';
                 $form.find('.modError').remove();
             }, 2000);
         }else{
-            $('#viewBreakModal').find('.return_list li').removeClass('has_error');
-            $('#viewBreakModal').find('.return_list li .edit_this').remove();
-
-            var break_hrml = '<ol class="return_list">' + $('#viewBreakModal .return_list').html() + '</ol>';
+            let form_data = new FormData(form);
             axios({
                 method: "post",
                 url: route('hr.attendance.update.break'),
-                data: {rowID : rowID, breakTimes : breakTimes, break_hrml : break_hrml},
+                data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 document.querySelector('#updateBreak').removeAttribute('disabled');

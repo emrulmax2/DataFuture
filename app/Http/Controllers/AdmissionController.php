@@ -232,7 +232,7 @@ class AdmissionController extends Controller
             'bodies' => AwardingBody::all(),
             'sexid' => SexIdentifier::all(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'instance' => CourseCreationInstance::all(),
+            'instance' => CourseCreationInstance::all()->sortByDesc('id'),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all()
@@ -2321,15 +2321,18 @@ class AdmissionController extends Controller
             'created_by' => auth()->user()->id,
         ]);
         if($mobileVerification):
+            $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');
+            $siteName = (!empty($siteName) ? $siteName : 'London Churchill College');
             $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+            $message = 'London Churchill College requested you to verify your mobile number. Please use your verification code '.$verificationCode.' to verify.  Thank you.';
 
             if($active_api == 1 && !empty($textlocal_api)):
                 $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                     'apikey' => $textlocal_api, 
-                    'message' => 'Your verification code: '.$verificationCode, 
-                    'sender' => 'London Churchill College', 
+                    'message' => $message,
+                    'sender' => $siteName, 
                     'numbers' => $mobileNo
                 ]);
             elseif($active_api == 2 && !empty($smseagle_api)):
@@ -2340,7 +2343,7 @@ class AdmissionController extends Controller
                         "verify" => false
                     ])->post('https://79.171.153.104/api/v2/messages/sms', [
                         'to' => [$mobileNo],
-                        'text' => 'Your verification code: '.$verificationCode
+                        'text' => $message
                     ]);
                 //return response()->json(['Message' => $response->json()], 200);
             endif;

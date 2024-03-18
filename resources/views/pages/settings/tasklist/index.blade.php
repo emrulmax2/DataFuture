@@ -141,7 +141,7 @@
                                     <select id="assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
                                         @if(!empty($users))
                                             @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                                <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>
@@ -331,7 +331,7 @@
                                     <select id="edit_assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
                                         @if(!empty($users))
                                             @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ $usr->name }}</option>
+                                                <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>

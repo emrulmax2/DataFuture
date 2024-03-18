@@ -238,6 +238,19 @@ var studentUploadListTable = (function () {
 
         var drzn1 = new Dropzone('#uploadDocumentForm', options);
 
+        drzn1.on('addedfile', function(file){
+            if(file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)){
+                $('#uploadDocumentModal .modal-content .uploadError').remove();
+                $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! One of your selected file name contain validation error & that file has been removed.</div>');
+                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
+                drzn1.removeFile(file);
+
+                setTimeout(function(){
+                    $('#uploadDocumentModal .modal-content .uploadError').remove();
+                }, 5000)
+            }
+        });
+
         drzn1.on("maxfilesexceeded", (file) => {
             $('#uploadDocumentModal .modal-content .uploadError').remove();
             $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
@@ -296,13 +309,30 @@ var studentUploadListTable = (function () {
             document.querySelector('#uploadDocBtn').setAttribute('disabled', 'disabled');
             document.querySelector("#uploadDocBtn svg").style.cssText ="display: inline-block;";
             
-            if($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
-                var hardCopyChecked = $('#uploadDocumentModal [name="hard_copy_check_status"]:checked').val();
-                $('#uploadDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
-                drzn1.processQueue();
+            if(drzn1.files.length > 0){
+                if($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
+                    var hardCopyChecked = $('#uploadDocumentModal [name="hard_copy_check_status"]:checked').val();
+                    $('#uploadDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
+                    drzn1.processQueue();
+                }else{
+                    $('#uploadDocumentModal .modal-content .uploadError').remove();
+                    $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                    
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+
+                    setTimeout(function(){
+                        $('#uploadDocumentModal .modal-content .uploadError').remove();
+                        document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
+                        document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
+                    }, 2000)
+                }
             }else{
                 $('#uploadDocumentModal .modal-content .uploadError').remove();
-                $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                $('#uploadDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select at least one file.</div>');
                 
                 createIcons({
                     icons,
@@ -316,7 +346,6 @@ var studentUploadListTable = (function () {
                     document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
                 }, 2000)
             }
-            
         });
     }
     /* End Dropzone */

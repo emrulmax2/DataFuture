@@ -14,6 +14,7 @@ class ApplicantProposedCourse extends Model
         'applicant_id',
         'course_creation_id',
         'semester_id',
+        'academic_year_id',
         'student_loan',
         'student_finance_england',
         'fund_receipt',

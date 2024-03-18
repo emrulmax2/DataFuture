@@ -18,6 +18,19 @@
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 py-10 mt-5">
+        @if($applicant->status_id == 7)
+            <div class="alert alert-success-soft show flex justify-between items-center mb-10" role="alert">
+                <div class="flex items-center">
+                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> 
+                    <span>
+                        <strong>Contratulations!</strong>
+                        Your application has been accepted. To manage your student portal please login <a target="_blank" href="{{ route('students.login') }}">here</a>.
+                    </span>
+                </div>
+                <a href="{{ route('students.login') }}" target="_blank" class="btn btn-success text-white shadow-md">Login To Student Portal</a>
+            </div>
+        @endif
+
         <div id="applicantReviewAccordion" class="accordion">
             <div class="accordion-item mb-1">
                 <div id="applicantReviewAccordion-c-1" class="accordion-header">
