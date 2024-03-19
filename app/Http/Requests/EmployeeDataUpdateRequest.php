@@ -33,10 +33,7 @@ class EmployeeDataUpdateRequest extends FormRequest
             'nationality_id' => "required",
             'ethnicity_id' => "required",
             "user_id" => "required",
-            "mobile" => "required",
-
-            'status' => 'sometimes',
-            'ended_on' => 'required_unless:status,1',
+            "mobile" => "required"
         ];
     }
 
@@ -52,9 +49,7 @@ class EmployeeDataUpdateRequest extends FormRequest
             'nationality_id.required' => "This field is required.",
             'ethnicity_id.required' => "This field is required.",
             "user_id.required" => "This field is required.",
-            "mobile.required" => "This field is required.",
-
-            'ended_on.required_unless' => 'This field is required.',
+            "mobile.required" => "This field is required."
         ];
     }
 }

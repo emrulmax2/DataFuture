@@ -21,6 +21,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('visaexpired:cron')->weeklyOn(7, '23:20');
         $schedule->command('passportexpired:cron')->weeklyOn(7, '23:30');
         $schedule->command('employeeappraisal:cron')->weeklyOn(7, '23:40');
+
+        $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');//->everyMinute();
         
 
         // $schedule->command('passportexpiry:cron')->everyMinute();
@@ -28,6 +30,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('visaexpired:cron')->everyMinute();
         // $schedule->command('passportexpired:cron')->everyMinute();
         // $schedule->command('employeeappraisal:cron')->everyMinute();
+        //$schedule->command('employeestatusupdater:cron')->everyMinute();
     }
 
     /**
