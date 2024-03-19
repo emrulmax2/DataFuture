@@ -22,7 +22,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('passportexpired:cron')->weeklyOn(7, '23:30');
         $schedule->command('employeeappraisal:cron')->weeklyOn(7, '23:40');
 
-        $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');//->everyMinute();
+        $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');
         
 
         // $schedule->command('passportexpiry:cron')->everyMinute();

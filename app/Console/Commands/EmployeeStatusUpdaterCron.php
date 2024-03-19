@@ -31,17 +31,24 @@ class EmployeeStatusUpdaterCron extends Command
      */
     public function handle()
     {
-        $yesterday = Carbon::yesterday();
-        $employments = Employment::where('ended_on', $yesterday)->whereHas('employee', function($q){
+        $theDate = date('Y-m-d');
+
+        $employments = Employment::whereNotNull('ended_on')->whereHas('employee', function($q){
             $q->where('status', 1);
         })->get();
         if($employments->count() > 0):
             foreach($employments as $empt):
-                $employee_id = $empt->employee_id;
-                Employee::where('id', $employee_id)->update(['status' => 0]);
+                $ended_on = (isset($empt->ended_on) && !empty($empt->ended_on) ? date('Y-m-d', strtotime($empt->ended_on)) : '');
+                if(!empty($ended_on)):
+                    $expectedEnded = date('Y-m-d', strtotime($ended_on.'+4 days'));
+                    if($theDate == $expectedEnded):
+                        $employee_id = $empt->employee_id;
+                        Employee::where('id', $employee_id)->update(['status' => 0]);
 
-                if(isset($empt->employee->user_id) && $empt->employee->user_id > 0):
-                    User::where('id', $empt->employee->user_id)->update(['active' => 0]);
+                        if(isset($empt->employee->user_id) && $empt->employee->user_id > 0):
+                            User::where('id', $empt->employee->user_id)->update(['active' => 0]);
+                        endif;
+                    endif;
                 endif;
             endforeach;
         endif;
