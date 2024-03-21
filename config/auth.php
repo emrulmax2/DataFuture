@@ -52,11 +52,6 @@ return [
         'agent' => [
             'driver' => 'session',
             'provider' => 'agents',
-        ],
-
-        'machine' => [
-            'driver' => 'session',
-            'provider' => 'machines',
         ]
     ],
 
@@ -98,10 +93,6 @@ return [
             'model' => App\Models\AgentUser::class,
         ],
         
-        'machines' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\EmployeeAttendanceMachine::class,
-        ]
 
         // 'users' => [
         //     'driver' => 'database',

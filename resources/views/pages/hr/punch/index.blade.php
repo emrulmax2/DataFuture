@@ -1,11 +1,11 @@
-@extends('../layout/live')
+@extends('../layout/main')
 
 @section('head')
     <title>{{ $title }}</title>
 @endsection
 
 @section('content')
-    <div class="content content--top-nav machineLiveBody">
+<div class="content content--top-nav machineLiveBody">
         <div class="theCardWrap">
             <div class="grid grid-cols-12 gap-0 flex justify-between items-start mb-5">
                 <div class="col-span-4">
@@ -30,6 +30,7 @@
                         <div class="theLiveTime text-2xl font-bold text-center text-white" id="theLiveTime"></div>
                     </div>
                 </div>
+                @if($ip_check)
                 <form method="post" action="#" class="pt-2" id="liveAttendanceForm">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12">
@@ -105,6 +106,11 @@
                     </div>
                     <input type="hidden" name="attendance_type" value="0">
                 </form>
+                @else 
+                <div class="alert alert-danger-soft show flex items-center mt-2" role="alert">
+                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Sorry!</strong> you are not allowed to punch from outside the college. </span>
+                </div>
+                @endif
             </div>
         </div>
     </div>

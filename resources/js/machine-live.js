@@ -14,7 +14,7 @@ import { createIcons, icons } from "lucide";
             if(clock_in_no != ''){
                 axios({
                     method: "post",
-                    url: route('machine.get.attendance.history'),
+                    url: route('attendance.punch.get.history'),
                     data: {clockinno : clockinno},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
@@ -154,7 +154,7 @@ import { createIcons, icons } from "lucide";
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('machine.store.attendance'),
+            url: route('attendance.punch.store'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {

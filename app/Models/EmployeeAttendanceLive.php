@@ -15,7 +15,6 @@ class EmployeeAttendanceLive extends Model
         'attendance_type',
         'date',
         'time',
-        'employee_attendance_machine_id',
         'ip',
         'created_by',
         'updated_by'
@@ -23,7 +22,4 @@ class EmployeeAttendanceLive extends Model
 
     protected $dates = ['deleted_at'];
 
-    public function machine(){
-        return $this->belongsTo(EmployeeAttendanceMachine::class, 'employee_attendance_machine_id');
-    }
 }

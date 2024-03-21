@@ -429,7 +429,6 @@ class DashboardController extends Controller
         $data['attendance_type']    = $attendance_type;
         $data['date']               = $today;
         $data['time']               = $time;
-        $data['employee_attendance_machine_id'] = 0;
         $data['ip']                 = $user_ip;
         $data['created_by']         = $user_id;
         
