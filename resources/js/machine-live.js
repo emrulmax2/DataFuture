@@ -176,6 +176,12 @@ import { createIcons, icons } from "lucide";
                     $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
                     createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
                 }
+
+                setTimeout(function(){
+                    $backBtn.fadeOut().attr('disabled', 'disabled').fadeOut(function(){
+                        $form.find('.theMessage').fadeOut().remove();
+                    });
+                }, 2000);
             }
             
         }).catch(error => {
