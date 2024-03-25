@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('employee_attendance_punch_histories', function (Blueprint $table) {
-            $table->dropForeign('employee_attendance_machine_id');
+            $table->dropForeign(['employee_attendance_machine_id']);
             $table->dropColumn('employee_attendance_machine_id');
         });
     }
