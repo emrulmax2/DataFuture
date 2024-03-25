@@ -213,7 +213,6 @@ export default defineConfig({
                 'resources/js/course-creation-availability.js',
                 'resources/js/course-creation-datafuture.js',
                 'resources/js/course-creation-instance.js',
-                'resources/js/instance-term.js',
                 'resources/js/term-module-creation.js',
                 'resources/js/modulelevels.js',
                 'resources/js/groups.js',

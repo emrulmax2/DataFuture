@@ -137,6 +137,14 @@
                         <div class="col-span-8 font-medium">{{ (isset($employment->started_on) && !empty($employment->started_on) ? date('jS M, Y', strtotime($employment->started_on)) : '') }}</div>
                     </div>
                 </div>
+                @if(isset($employment->ended_on) && !empty($employment->ended_on))
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Ended on</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employment->ended_on) && !empty($employment->ended_on) ? date('jS M, Y', strtotime($employment->ended_on)) : '') }}</div>
+                    </div>
+                </div>
+                @endif
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Employee type</div>

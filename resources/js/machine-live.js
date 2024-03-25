@@ -14,7 +14,7 @@ import { createIcons, icons } from "lucide";
             if(clock_in_no != ''){
                 axios({
                     method: "post",
-                    url: route('machine.get.attendance.history'),
+                    url: route('attendance.punch.get.history'),
                     data: {clockinno : clockinno},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
@@ -154,7 +154,7 @@ import { createIcons, icons } from "lucide";
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('machine.store.attendance'),
+            url: route('attendance.punch.store'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
@@ -176,6 +176,12 @@ import { createIcons, icons } from "lucide";
                     $form.prepend('<div class="text-white alert alert-success theMessage show flex items-center mb-3 text-lg font-medium" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i><span>'+res.msg+'</span></div>')
                     createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide", });
                 }
+
+                setTimeout(function(){
+                    $backBtn.fadeOut().attr('disabled', 'disabled').fadeOut(function(){
+                        $form.find('.theMessage').fadeOut().remove();
+                    });
+                }, 2000);
             }
             
         }).catch(error => {

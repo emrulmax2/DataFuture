@@ -137,8 +137,6 @@ use App\Http\Controllers\HR\Reports\LengthServiceController;
 use App\Http\Controllers\HR\Reports\RecordCardController;
 use App\Http\Controllers\HR\Reports\TelephoneDirectoryController;
 
-use App\Http\Controllers\Machine\Auth\LoginController as MachineLoginController;
-use App\Http\Controllers\Machine\DashboardController as MachineDashboardController;
 use App\Http\Controllers\Personal_Tutor\DashboardController;
 use App\Http\Controllers\PlanContentUploadController;
 use App\Http\Controllers\PlanParticipantController;
@@ -197,12 +195,12 @@ use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
+use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
-use App\Http\Controllers\Settings\HrMachineController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
@@ -213,6 +211,7 @@ use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\WblProfileController;
+use App\Models\EmployeeAttendancePunchHistory;
 
 /*
 |--------------------------------------------------------------------------
@@ -237,21 +236,11 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::post('login', 'login')->name('login.check');
 });
 
-Route::prefix('/machine')->name('machine.')->group(function() {
-    Route::controller(MachineLoginController::class)->middleware('machine.loggedin')->group(function() {
-        Route::get('login', 'loginView')->name('login');
-        Route::post('login', 'login')->name('check');
-    });
 
-    Route::middleware('auth.machine')->group(function() {
-        Route::get('logout', [MachineLoginController::class, 'logout'])->name('logout');
-
-        Route::controller(MachineDashboardController::class)->group(function() {
-            Route::get('/live', 'index')->name('dashboard');
-            Route::post('/live/get-attendance-history', 'getAttendanceHistory')->name('get.attendance.history');
-            Route::post('/live/store-attendance', 'store')->name('store.attendance');
-        });
-    });
+Route::controller(EmployeeAttendancePunchController::class)->group(function(){
+    Route::get('punch', 'index')->name('attendance.punch');
+    Route::post('punch/get-attendance-history', 'getAttendanceHistory')->name('attendance.punch.get.history');
+    Route::post('punch/store-attendance', 'store')->name('attendance.punch.store');
 });
 
 // all applicant have a prefix route name applicant.* value
@@ -2326,17 +2315,6 @@ Route::middleware('auth')->group(function() {
     Route::controller(MyStaffController::class)->group(function(){
         Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
         
-    });
-    
-    Route::controller(HrMachineController::class)->group(function() {
-        Route::get('site-settings/hr-machine', 'index')->name('hr.machine'); 
-        Route::get('site-settings/hr-machine/list', 'list')->name('hr.machine.list');
-        Route::post('site-settings/hr-machine/store', 'store')->name('hr.machine.store');
-        Route::post('site-settings/hr-machine/edit', 'edit')->name('hr.machine.edit');
-        Route::post('site-settings/hr-machine/update', 'update')->name('hr.machine.update');
-
-        Route::delete('site-settings/hr-machine/destory/{id}', 'destroy')->name('hr.machine.destroy'); 
-        Route::post('site-settings/hr-machine/restore', 'restore')->name('hr.machine.restore'); 
     });
 
     Route::controller(EmployeeArchiveController::class)->group(function(){

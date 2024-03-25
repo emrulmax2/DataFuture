@@ -132,7 +132,7 @@ import { createIcons, icons } from "lucide";
         }
     });
 
-    $('#editAdmissionPersonalDetailsForm #status').on('change', function(){
+    /*$('#editAdmissionPersonalDetailsForm #status').on('change', function(){
         if($(this).prop('checked')){
             $('#editAdmissionPersonalDetailsForm .statusDisplay').text('Active').addClass('text-success').removeClass('text-danger');
             $('#editAdmissionPersonalDetailsForm .employmentEndedOn').fadeOut('fast', function(){
@@ -144,7 +144,7 @@ import { createIcons, icons } from "lucide";
                 $('#editAdmissionPersonalDetailsForm [name="ended_on"]').val('')
             })
         }
-    })
+    })*/
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editPersonalModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionPersonalDetailsModal"));

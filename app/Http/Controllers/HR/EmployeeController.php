@@ -412,15 +412,11 @@ class EmployeeController extends Controller
     {
         $employeeOldRow = Employee::find($request->id);
         $status = (isset($request->status) && $request->status > 0 ? 1 : 0);
-        if($status == 0){
-            $ended_on = (isset($request->ended_on) && !empty($request->ended_on) ? date('Y-m-d', strtotime($request->ended_on)) : date('Y-m-d'));
-        }else{
-            $ended_on = null;
-        }
+        $ended_on = (isset($request->ended_on) && !empty($request->ended_on) ? date('Y-m-d', strtotime($request->ended_on)) : null);
+
         $request->merge([
             'disability_status' => ($request->disability_status) ? "Yes" : "No",
-            'status' => $status,
-            'ended_on' => $ended_on
+            'status' => $status
         ]);
         $input = $request->all();
         $employee->fill($input);
@@ -442,9 +438,29 @@ class EmployeeController extends Controller
         endif;
 
         $employee->disability()->sync($request->disability_id);
+        $employment = Employment::where('employee_id', $request->id)->get()->first();
+        $endedOnOld = $employment->ended_on;
+        $employment->fill([
+            'ended_on' => $ended_on
+        ]);
+        $empTChanges = $employment->getDirty();
+        $employment->save();
+
+        if($employment->wasChanged() && !empty($empTChanges)):
+            $data = [];
+            $data['employee_id'] = $employee->id;
+            $data['table'] = 'employments';
+            $data['field_name'] = 'ended_on';
+            $data['field_value'] = $endedOnOld;
+            $data['field_new_value'] = $ended_on;
+            $data['created_by'] = auth()->user()->id;
+
+            EmployeeArchive::create($data);
+        endif;
+
 
         
-        if($employee->wasChanged())
+        if($employee->wasChanged() || $employment->wasChanged())
             return response()->json(["message"=>"updated"]);
         else
             return response()->json(["no update"]);

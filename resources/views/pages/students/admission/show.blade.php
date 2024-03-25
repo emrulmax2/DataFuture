@@ -10,7 +10,7 @@
         <h2 class="text-lg font-medium mr-auto">Application Ref No. <u><strong>{{ (isset($applicant->application_no) && !empty($applicant->application_no) ? $applicant->application_no : '---') }}</strong></u></h2>
         
         <div class="ml-auto flex justify-end">
-            <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2">Progress Bar</button>
+            <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2 hidden">Progress Bar</button>
             <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto">Download Pdf</a>
             <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
         </div>

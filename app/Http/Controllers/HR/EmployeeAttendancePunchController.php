@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Machine;
+namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeAttendanceLive;
@@ -9,15 +9,15 @@ use App\Models\Employment;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class EmployeeAttendancePunchController extends Controller
 {
-    public function index(){
-        $machineData = \Auth::guard('machine')->user();
-        
-        return view('pages.machine.index', [
-            'title' => 'Live Attendance - LCC Data Future Managment',
+    public function index(Request $request){
+        $venueIpAddresses = VenueIpAddress::pluck('ip')->unique()->toArray();
+        $requestIp = $request->getClientIp();
+        return view('pages.hr.punch.index', [
+            'title' => 'Live Attendance Punch - LCC Data Future Managment',
             'breadcrumbs' => [],
-            'user' => $machineData
+            'ip_check' => (!empty($venueIpAddresses) && in_array($requestIp, $venueIpAddresses) ? true : false)
         ]);
     }
 
@@ -47,9 +47,8 @@ class DashboardController extends Controller
             $dara['employee_id'] = $employee_id;
             $dara['date']       = date('Y-m-d');
             $dara['time']       = date('H:i:s');
-            $dara['employee_attendance_machine_id'] = \Auth::guard('machine')->user()->id;
             $dara['ip']         = $request->ip();
-            $dara['created_by'] = \Auth::guard('machine')->user()->id;
+            $dara['created_by'] = $employment->employee->user_id;
             
             EmployeeAttendancePunchHistory::create($dara);
         endif;
@@ -90,7 +89,6 @@ class DashboardController extends Controller
         $data['attendance_type'] = $attendance_type;
         $data['date'] = $today;
         $data['time'] = $time;
-        $data['employee_attendance_machine_id'] = \Auth::guard('machine')->user()->id;
         $data['ip'] = $request->ip();
         $data['created_by'] = $employee_id;
 

@@ -14,7 +14,6 @@ class EmployeeAttendancePunchHistory extends Model
         'employee_id',
         'date',
         'time',
-        'employee_attendance_machine_id',
         'ip',
         'created_by',
         'updated_by'
