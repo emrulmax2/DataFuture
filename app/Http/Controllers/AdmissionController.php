@@ -2247,7 +2247,8 @@ class AdmissionController extends Controller
                     'time' => $list->start_time.' - '.$list->end_time,
                     'result' => $list->interview_result,
                     'status' => $list->interview_status,
-                    'interviewer' => (isset($list->user->name) ? $list->user->name : '')
+                    'interviewer' => (isset($list->user->name) ? $list->user->name : ''),
+                    'file' => ($list->document) ? $list->document->path : ''
                 ];
                 $i++;
             endforeach;
