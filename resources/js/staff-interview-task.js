@@ -1,5 +1,7 @@
 import Dropzone from "dropzone";
 import { createIcons, icons } from "lucide";
+import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 
@@ -132,6 +134,8 @@ var employmentHistoryTable = (function () {
         },
     };
 })();
+
+//if(document.getElementById('educationQualTable').length > 0){
 var educationQualTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -237,6 +241,7 @@ var educationQualTable = (function () {
         },
     };
 })();
+//}
 
 const editModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
 const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -430,6 +435,19 @@ $(document).on("click", ".interview-end", function (e) {
     }
 
     if($('#employmentHistoryTable').length > 0){
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: false,
+            create: true,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+        
         if($('#employmentHistoryTable').hasClass('activeTable')){
             employmentHistoryTable.init();
         }
