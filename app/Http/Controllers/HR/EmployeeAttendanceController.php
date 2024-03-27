@@ -87,7 +87,7 @@ class EmployeeAttendanceController extends Controller
         $theDate = date('Y-m-d', strtotime($request->theDate));
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
-        $employees = Employee::has('activePatterns')->where('id', 41)->where('status', 1)->orderBy('first_name', 'ASC')->get();
+        $employees = Employee::has('activePatterns')->where('status', 1)->orderBy('first_name', 'ASC')->get();
 
         foreach($employees as $employee):
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
