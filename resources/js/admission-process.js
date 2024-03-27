@@ -234,6 +234,23 @@ var applicantInterviewLogTable = (function () {
                     title: "Interviewer",
                     field: "interviewer",
                     headerHozAlign: "left",
+                },
+                
+                {
+                    title: "Uploaded File",
+                    field: "file",
+                    headerSort: false,
+                    hozAlign: "left",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {                        
+                        var htms = "";
+                            htms += '<div>';
+                                if(cell.getData().file != ''){
+                                    htms += '<a href='+cell.getData().file+' class="font-medium whitespace-nowrap text-success">'+cell.getData().file+'</a>';
+                                }
+                            htms += '</div>';
+                        return htms;
+                    },
                 }
             ],
             renderComplete() {
