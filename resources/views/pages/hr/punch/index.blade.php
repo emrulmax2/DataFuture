@@ -107,7 +107,7 @@
                     <input type="hidden" name="attendance_type" value="0">
                 </form>
                 @else 
-                <div class="alert alert-danger-soft show flex items-center mt-2" role="alert">
+                <div class="alert alert-danger show flex items-center  mt-2" role="alert">
                     <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Sorry!</strong> you are not allowed to punch from outside the college. </span>
                 </div>
                 @endif
