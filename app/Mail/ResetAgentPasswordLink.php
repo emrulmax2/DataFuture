@@ -33,7 +33,7 @@ class ResetAgentPasswordLink extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Reset Password For London Churchill College Account',
+            subject: 'Agent Reset Password For London Churchill College Account',
             replyTo: [
                 new Address('no-reply@lcc.ac.uk', 'No Reply'),
             ],
