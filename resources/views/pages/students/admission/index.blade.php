@@ -75,6 +75,18 @@
                         </select>
                     </div>
                 </div>
+                <div class="col-span-3">
+                    <div class="flex">
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Agent</div>
+                        <select id="agents-ADM" name="agents[]" class="w-full tom-selects" multiple>
+                            @if(!empty($agents))
+                                @foreach($agents as $agt)
+                                    <option value="{{ $agt->agent_user_id }}">{{ (isset($agt->full_name) ? $agt->full_name : 'Unknown Agent') }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
                 <div class="col-span-12"></div>
                 <div class="col-span-6">
                     <button id="tabulator-html-filter-go-ADM" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>

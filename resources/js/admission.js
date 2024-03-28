@@ -17,10 +17,11 @@ var admissionListTable = (function () {
         let firstname = $("#firstname-ADM").val() != "" ? $("#firstname-ADM").val() : "";
         let lastname = $("#lastname-ADM").val() != "" ? $("#lastname-ADM").val() : "";
         let dob = $("#dob-ADM").val() != "" ? $("#dob-ADM").val() : "";
+        let agents = $("#agents-ADM").val() != "" ? $("#agents-ADM").val() : "";
 
         let tableContent = new Tabulator("#admissionListTable", {
             ajaxURL: route("admission.list"),
-            ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob},
+            ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob, agents: agents},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -478,6 +479,7 @@ var employmentHistoryTable = (function () {
         var semestersADM = new TomSelect('#semesters-ADM', multiTomOpt);
         var coursesADM = new TomSelect('#courses-ADM', multiTomOpt);
         var statusesADM = new TomSelect('#statuses-ADM', multiTomOpt);
+        var agentADM = new TomSelect('#agents-ADM', multiTomOpt);
 
         // Init Table
         admissionListTable.init();
@@ -509,6 +511,7 @@ var employmentHistoryTable = (function () {
             semestersADM.clear(true);
             coursesADM.clear(true);
             statusesADM.clear(true);
+            agentADM.clear(true);
 
             $("#refno-ADM").val('');
             $("#firstname-ADM").val('');
