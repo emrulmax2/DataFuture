@@ -7,7 +7,12 @@ use App\Models\Agent;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use App\Models\AgentUser;
+use App\Models\Applicant;
+use App\Models\CourseCreationInstance;
+use App\Models\InstanceTerm;
+use App\Models\Option;
 use App\Models\ReferralCode;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -86,6 +91,66 @@ class AgentController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    public function ApplicantionList(Request $request, $id){
+
+        
+        //dd($request->id);
+        $Agent = Agent::with('AgentUser')->where('id',$id)->get()->first(); 
+       
+       
+        
+        $query = Applicant::with('course')->where('agent_user_id', $Agent->AgentUser->id);
+        
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $query = $query->orderByRaw(implode(',', $sorts));
+
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        
+
+        $data = array();
+        if(!empty($Query)):
+            $i = 1;
+            $applicant = 0;
+            $student = 0;
+            foreach($Query as $list):
+
+                if(!isset($data[$list->course->semester->id]["ApplicantCount"])) {
+                    $data[$list->course->semester->id]["ApplicantCount"] = 0;
+                }
+                if(!isset($data[$list->course->semester->id]["StudentCount"])) {
+                    $data[$list->course->semester->id]["StudentCount"] = 0;
+                }
+                $data[$list->course->semester->id]["ApplicantCount"]++;
+                $studentData = Student::where("applicant_id",$list->id)->get()->first();
+                if($studentData)
+                    $data[$list->course->semester->id]["StudentCount"]++;
+
+                $data[$list->course->semester->id]['sl'] = $i;
+                $data[$list->course->semester->id]['term'] = $list->course->semester->name;
+                $data[$list->course->semester->id]['_children'][] = $list; 
+
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -112,6 +177,7 @@ class AgentController extends Controller
                 'email' => $request->input("email"),
                 'password' => $request->input("password"),
                 'active' => 1,
+                'created_by' => auth()->user()->id,
                 
         ]);
 
@@ -136,9 +202,21 @@ class AgentController extends Controller
      * @param  \App\Models\Agent  $agent
      * @return \Illuminate\Http\Response
      */
-    public function show(Agent $agent)
+    public function show(Agent $agent_user)
     {
-        //
+
+        $employee = $agent_user;
+        $userData = AgentUser::find($employee->agent_user_id);
+        $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
+
+        return view('pages.agent.profile.show',[
+            'title' => 'Welcome - LCC Data Future Managment',
+            'breadcrumbs' => [],
+            "user" => $userData,
+            "employee" => $employee,
+            "postcodeApi" => $PostCodeAPI,
+        ]);
+    
     }
 
     /**
@@ -167,19 +245,24 @@ class AgentController extends Controller
      */
     public function update(UpdateAgentRequest $request, Agent $agent_user)
     {
-
+        
         $request->request->add(['agent_user_id' => $agent_user->AgentUser->id]);
         $agenUser = AgentUser::find($agent_user->AgentUser->id);
+        
         $agenUser->email=$request->input('email');
         $agenUser->save();
+        $request->merge(['updated_by' => auth()->user()->id]);
         if($agenUser->wasChanged()) { 
 
             $agenUser->email_verified_at=null;
             $agenUser->save();
             event(new Registered($agenUser));
-        }
-        $request->request->add(['updated_by' => auth()->user()->id]);
 
+        } else {
+            $agenUser->fill($request->all());
+            $agenUser->save();
+        }
+        
         $agent_user->fill($request->all());
         $agent_user->save();
         

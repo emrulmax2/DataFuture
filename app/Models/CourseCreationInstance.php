@@ -54,4 +54,5 @@ class CourseCreationInstance extends Model
     public function terms(){
         return $this->hasMany(InstanceTerm::class, 'course_creation_instance_id', 'id');
     }
+
 }

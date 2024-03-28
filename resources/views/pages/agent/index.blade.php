@@ -110,7 +110,7 @@
                                     <input type="email" id="email" name="email" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Email">
                                     <div id="error-email" class="acc__input-error error-email text-danger mt-2"></div>
         
-                                    <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
+                                    <input type="password" autocomplete="off" id="password" name="password" autocomplete="off" class="password intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
                                     <div id="error-password" class="acc__input-error error-password text-danger mt-2"></div>
         
                                     <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
@@ -154,7 +154,7 @@
                                         </div>
                                     </div>
                                     <!-- END: Custom Tooltip Content -->
-                                    <input type="password" id="password_confirmation" name="password_confirmation" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
+                                    <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="off" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
                                     <div id="error-confirmation" class="acc__input-error error-password_confirmation  text-danger mt-2"></div>
                                 
                             </div>
@@ -197,40 +197,40 @@
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4">
                             <div class="intro-x col-span-6">
-                                <label for="first_name" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
-                                <input id="first_name" type="text" class="form-control rounded-none form-control " name="first_name" aria-label="default input example">
+                                <label for="first_name1" class="form-label inline-flex">First name <span class="text-danger">*</span></label>
+                                <input id="first_name1" type="text" class="form-control rounded-none form-control " name="first_name" aria-label="default input example">
                                 <div class="acc__input-error error-first_name text-danger mt-2"></div>
                             </div> 
                             <div class=" intro-x col-span-6">
-                                <label for="last_name" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
-                                <input id="last_name" type="text" class="form-control rounded-none form-control " name="last_name" aria-label="default input example">
+                                <label for="last_name1" class="form-label inline-flex">Last name <span class="text-danger">*</span></label>
+                                <input id="last_name1" type="text" class="form-control rounded-none form-control " name="last_name" aria-label="default input example">
                                 <div class="acc__input-error error-last_name text-danger mt-2"></div>
                             </div>
                             
                             <div class="intro-x col-span-6">
-                                <label for="code" class="form-label inline-flex">Refferel Code <span class="text-danger">*</span></label>
-                                <input id="code" type="text" class="form-control rounded-none form-control" value="{{ $unique }}" name="code" aria-label="default input example">
+                                <label for="code1" class="form-label inline-flex">Refferel Code <span class="text-danger">*</span></label>
+                                <input id="code1" type="text" class="form-control rounded-none form-control" value="{{ $unique }}" name="code" aria-label="default input example">
                                 <div class="acc__input-error error-code text-danger mt-2"></div>
                             </div>
                             <div class="intro-x col-span-6">
-                                <label for="organization" class="form-label inline-flex">Organization <span class="text-danger">*</span></label>
-                                <input id="organization" type="text" class="form-control rounded-none form-control" name="organization" aria-label="default input example">
+                                <label for="organization1" class="form-label inline-flex">Organization <span class="text-danger">*</span></label>
+                                <input id="organization1" type="text" class="form-control rounded-none form-control" name="organization" aria-label="default input example">
                                 <div class="acc__input-error error-organization text-danger mt-2"></div>
                             </div>
                             <div class="intro-x  col-span-12">
                                     <div class="inline-flex">
-                                    <input type="email" id="email" name="email" class="intro-x login__input form-control py-3 px-4 w-auto mt-4 " placeholder="Email"> <span id="verificationEmail" class="mt-4 font-medium items-center w-24 inline-flex text-danger intro-x"></span>
+                                    <input type="email" id="email1" name="email" class="intro-x login__input form-control py-3 px-4 w-auto mt-4 " placeholder="Email"> <span id="verificationEmail" class="mt-4 font-medium items-center w-24 inline-flex text-danger intro-x"></span>
                                     </div>
-                                    <div id="error-email" class="acc__input-error error-email text-danger mt-2"></div>
+                                    <div id="error-email1" class="acc__input-error error-email text-danger mt-2"></div>
         
-                                    <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
-                                    <div id="error-password" class="acc__input-error error-password text-danger mt-2"></div>
+                                    <input type="password" autocomplete="off" id="password1" name="password" autocomplete="off" class="password intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password">
+                                    <div id="error-password1" class="acc__input-error error-password text-danger mt-2"></div>
         
                                     <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
-                                        <div id="strength-1" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
-                                        <div id="strength-2" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
-                                        <div id="strength-3" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
-                                        <div id="strength-4" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-5" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-6" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-7" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                        <div id="strength-8" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
                                     </div>
                                     <!-- BEGIN: Custom Tooltip Toggle -->
                                     <a href="javascript:;" data-theme="light" data-tooltip="custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="What is a secure password?">What is a secure password?</a>
@@ -267,8 +267,8 @@
                                         </div>
                                     </div>
                                     <!-- END: Custom Tooltip Content -->
-                                    <input type="password" id="password_confirmation" name="password_confirmation" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
-                                    <div id="error-confirmation" class="acc__input-error error-password_confirmation  text-danger mt-2"></div>
+                                    <input type="password" id="password_confirmation1" name="password_confirmation" autocomplete="off" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
+                                    <div id="error-confirmation1" class="acc__input-error error-password_confirmation  text-danger mt-2"></div>
                                 
                             </div>
                         </div> 
@@ -338,5 +338,208 @@
     @endsection
 
 @section('script')
+    <script type="module">
+        (function () {
+
+            function checkPasswordStrength(password) {
+            // Initialize variables
+            let strength = 0;
+            let tips = "";
+            
+            //let lowUpperCase = document.querySelector(".low-upper-case i");
+
+            //let number = document.querySelector(".one-number i");
+            //let specialChar = document.querySelector(".one-special-char i");
+            //let eightChar = document.querySelector(".eight-character i");
+
+            //If password contains both lower and uppercase characters
+            if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
+                strength += 1;
+                //lowUpperCase.classList.remove('fa-circle');
+                //lowUpperCase.classList.add('fa-check');
+            } else {
+                //lowUpperCase.classList.add('fa-circle');
+                //lowUpperCase.classList.remove('fa-check');
+            }
+            //If it has numbers and characters
+            if (password.match(/([0-9])/)) {
+                strength += 1;
+                //number.classList.remove('fa-circle');
+                //number.classList.add('fa-check');
+            } else {
+                //number.classList.add('fa-circle');
+                //number.classList.remove('fa-check');
+            }
+            //If it has one special character
+            if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) {
+                strength += 1;
+                //specialChar.classList.remove('fa-circle');
+                //specialChar.classList.add('fa-check');
+            } else {
+                //specialChar.classList.add('fa-circle');
+                //specialChar.classList.remove('fa-check');
+            }
+            //If password is greater than 7
+            if (password.length > 7) {
+                strength += 1;
+                //eightChar.classList.remove('fa-circle');
+                //eightChar.classList.add('fa-check');
+            } else {
+                //eightChar.classList.add('fa-circle');
+                //eightChar.classList.remove('fa-check');   
+            }
+        
+            // Return results
+            if (strength < 2) {
+                return strength;
+            } else if (strength === 2) {
+                return strength;
+            } else if (strength === 3) {
+                return strength;
+            } else {
+                return strength;
+            }
+        }
+            $('.password').on('keyup', function(e) {
+                
+                let totalText = this.value
+                let strenghtTips = checkPasswordStrength(totalText)
+                console.log(strenghtTips)
+                const box1 = document.getElementById('strength-1');
+                const box2 = document.getElementById('strength-2');
+                const box3 = document.getElementById('strength-3');
+                const box4 = document.getElementById('strength-4');
+                const box5 = document.getElementById('strength-5');
+                const box6 = document.getElementById('strength-6');
+                const box7 = document.getElementById('strength-7');
+                const box8 = document.getElementById('strength-8');
+
+                switch (strenghtTips) {
+                    case 1:
+                            box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box1.classList.add('bg-danger');
+
+                            box5.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box5.classList.add('bg-danger');
+
+                            box2.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box3.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box6.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+
+                            box2.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box3.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box6.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.add('bg-slate-100','dark:bg-darkmode-800');
+
+                            break;
+                    case 2: 
+                            box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box1.classList.add('bg-danger');
+
+                            box5.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box5.classList.add('bg-danger');
+
+                            box2.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box2.classList.add('bg-warning'); 
+
+                            box6.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box6.classList.add('bg-warning');
+
+                            box3.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            
+                            box3.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            break;
+                    case 3: 
+                            box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box1.classList.add('bg-danger');
+
+                            box5.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box5.classList.add('bg-danger');
+
+                            box2.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box2.classList.add('bg-warning'); 
+
+                            box6.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box6.classList.add('bg-warning');
+
+                            box3.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box3.classList.add('bg-success'); 
+
+                            box7.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box7.classList.add('bg-success');
+
+
+                            box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            
+                            box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            break;
+                    case 4: 
+                    case 5: 
+                    case 6: 
+                    case 7: 
+                    case 8: 
+                    case 9: 
+                            box1.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box1.classList.add('bg-danger');
+
+                            box5.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box5.classList.add('bg-danger');
+
+                            box2.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box2.classList.add('bg-warning'); 
+
+                            box6.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box6.classList.add('bg-warning');
+
+                            box3.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box3.classList.add('bg-success'); 
+
+                            box7.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box7.classList.add('bg-success');
+
+                            box4.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box4.classList.add('bg-success');
+
+                            box8.classList.remove('bg-slate-100','dark:bg-darkmode-800')
+                            box8.classList.add('bg-success');
+
+                            break;
+                    default:
+                            box1.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box2.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box3.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box5.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box6.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.remove('bg-danger', 'bg-warning','bg-success','bg-slate-100','dark:bg-darkmode-800');
+                            
+                            box1.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box2.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box3.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box4.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box5.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box6.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box7.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            box8.classList.add('bg-slate-100','dark:bg-darkmode-800');
+                            break;
+                }
+            })
+        })()
+        
+    </script>
     @vite('resources/js/agent-crud.js')
 @endsection
