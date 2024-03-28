@@ -209,7 +209,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <table class="table table-sm table-bordered dailyAttendanceTable" id="issuedAttendance">
+                        <table class="table table-sm table-bordered dailyAttendanceTable" id="noIssuedAttendance">
                             <thead>
                                 <tr>
                                     <th class="whitespace-nowrap text-center inputCheckbox">
