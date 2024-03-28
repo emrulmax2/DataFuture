@@ -88,6 +88,7 @@ use App\Jobs\ProcessStudentEmail;
 
 
 use App\Models\AcademicYear;
+use App\Models\Agent;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
@@ -134,7 +135,8 @@ class AdmissionController extends Controller
             ],
             'semesters' => $semesters,
             'courses' => $courses,
-            'allStatuses' => $statuses
+            'allStatuses' => $statuses,
+            'agents' => Agent::orderBy('first_name', 'ASC')->get()
         ]);
     }
 
@@ -142,6 +144,7 @@ class AdmissionController extends Controller
         $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
+        $agents = (isset($request->agents) && !empty($request->agents) ? $request->agents : []);
         $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
         $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
         $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
@@ -177,6 +180,7 @@ class AdmissionController extends Controller
                 if(!empty($courses) && !empty($courseCreationId)): $qs->whereIn('course_creation_id', $courseCreationId); endif;
             });
         endif;
+        if(!empty($agents)): $query->whereIn('agent_user_id', $agents); endif;
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
