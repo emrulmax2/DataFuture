@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('employee_attendance_lives', function (Blueprint $table) {
-            //
+            $table->unsignedBigInteger('employee_attendance_machine_id')->nullable()->after('attendance_type');
         });
     }
 };

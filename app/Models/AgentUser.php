@@ -15,9 +15,11 @@ class AgentUser  extends Authenticatable  implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable,SoftDeletes;
 
+    protected $guarded = ['id'];
+
     protected $fillable = [
         'email',
-        'password','active'
+        'password','active','created_by','updated_by'
     ];
 
     /**
@@ -50,4 +52,6 @@ class AgentUser  extends Authenticatable  implements MustVerifyEmail
     public function  SendEmailVerificationNotification() {
         $this->notify(new VerifyEmailForAgent($this));
     }
+
+    
 }

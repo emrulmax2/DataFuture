@@ -2195,9 +2195,11 @@ Route::middleware('auth')->group(function() {
     Route::controller(AgentController::class)->group(function() {
 
         Route::post('agent-user/{agent_user}', 'update')->name('agent-user.update'); 
-        Route::get('agent-user-list', 'list')->name('agent-user.list'); 
+        Route::get('agent-user-list', 'list')->name('agent-user.list');
+        Route::get('agent-user-termlist/{id}', 'ApplicantionList')->name('agent-user.termlist'); 
         
         Route::post('agent-user/{agent_user}/restore', 'restore')->name('agent-user.restore');
+
 
     });
 

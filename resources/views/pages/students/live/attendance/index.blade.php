@@ -68,8 +68,7 @@
                         
                         $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
                         $end_time = date('h:i A', strtotime($end_time));  
-                        // if(!isset($planDetails[$termId][$moduleDetails]->tutor->employee))
-                        //     dd($planDetails[$termId][$moduleDetails]->tutor);
+                        
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
                         <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>

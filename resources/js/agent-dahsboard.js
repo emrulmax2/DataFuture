@@ -260,6 +260,14 @@ var applicantionCustonList = (function () {
     const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addDeteilsModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const confirmDeleteModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmDeleteModal"));
+
+    document.getElementById("addDeteilsModal").addEventListener("shown.tw.modal", function (event) {
+        $("#addDeteilsModal input[name=first_name]").val('');
+        $("#addDeteilsModal input[name=last_name]").val('');
+        $("#addDeteilsModal input[name=mobile]").val('');
+        $("#addDeteilsModal input[name=email]").val('');
+    });
+    
     $('.save').on('click', function(e){
         e.preventDefault();
 

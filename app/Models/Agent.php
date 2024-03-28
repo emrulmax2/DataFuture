@@ -16,11 +16,19 @@ class Agent extends Model
 
     protected $dates = ['deleted_at'];
     
+    public function title() {
+        return $this->belongsTo(Title::class);
+    }
+
     public function getFullNameAttribute() {
         return $this->first_name . ' ' . $this->last_name.'';
     }
 
     public function AgentUser() {
         return $this->belongsTo(AgentUser::class, 'agent_user_id');
+    }
+
+    public function address() {
+        return $this->belongsTo(Address::class, 'address_id');
     }
 }
