@@ -73,7 +73,7 @@
                                                                                 if(!empty($clockin_punch) && !empty($clockin_contract)):
                                                                                     $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
                                                                                     if($clockin_punch > $lastIn):
-                                                                                        $note[] = 'Late';
+                                                                                        $note[] = 'Late - '.$clockin_punch.' - '.$lastIn;
                                                                                     endif;
                                                                                 endif;
                                                                                 if(!empty($clockout_punch) && !empty($clockout_contract)):

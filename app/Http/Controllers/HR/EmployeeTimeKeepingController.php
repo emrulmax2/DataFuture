@@ -78,8 +78,10 @@ class EmployeeTimeKeepingController extends Controller
         $theMonthEnd = date('Y-m-t', strtotime($theDate));
         $attendances = EmployeeAttendance::where('employee_id', $employee_id)->whereBetween('date', [$theMonthStart, $theMonthEnd])->orderBy('date', 'ASC')->get();
 
-        $clockin = HrCondition::where('type', 'Clock In')->where('time_frame', 3)->get()->first();
-        $clockout = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
+        $clockinRow = HrCondition::where('type', 'Clock In')->where('time_frame', 3)->get()->first();
+        $clockoutRow = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
+        $clockin = (isset($clockinRow->minutes) && $clockinRow->minutes > 0 ? $clockinRow->minutes : 7);
+        $clockout = (isset($clockoutRow->minutes) && $clockoutRow->minutes > 0 ? $clockoutRow->minutes : 7);
 
         $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
         $LetterHeader = LetterHeaderFooter::where('for_staff', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();

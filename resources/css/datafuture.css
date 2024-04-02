@@ -1152,22 +1152,22 @@
 }
 .meetingTrainingBG,
 .leaveCalendarTable tbody tr td.meetingTrainingBG{
-    background: rgb(0 0 0);
+    background: rgb(98, 23, 8);
     color: #FFF;
 }
 .sickLeaveBG,
 .leaveCalendarTable tbody tr td.sickLeaveBG{
-    background: rgb(30 41 59);
+    background: rgb(185 28 28);
     color: #FFF;
 }
 .authoriseUnpaidBG,
 .leaveCalendarTable tbody tr td.authoriseUnpaidBG{
-    background: rgb(185 28 28);
+    background: rgb(132, 71, 255);
     color: #FFF;
 }
 .authorisedPaidBG,
 .leaveCalendarTable tbody tr td.authorisedPaidBG{
-    background: rgb(59 89 152);
+    background: rgb(13 148 136);
     color: #FFF;
 }
 .bankHolidayBG,
