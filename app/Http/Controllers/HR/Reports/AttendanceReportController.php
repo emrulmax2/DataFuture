@@ -101,10 +101,10 @@ class AttendanceReportController extends Controller
                                 $html .= '</td>';
                                 $html .= '<td>'.$this->calculateHourMinute($working_hours).'</td>';
                                 $html .= '<td>'.$this->calculateHourMinute($holiday_hours).'</td>';
-                                $html .= '<td>'.number_format($working_pays, 2).'</td>';
-                                $html .= '<td>'.number_format($holiday_pays, 2).'</td>';
+                                $html .= '<td>£'.number_format($working_pays, 2).'</td>';
+                                $html .= '<td>£'.number_format($holiday_pays, 2).'</td>';
                                 $html .= '<td>'.($sickDays ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '0 Days').'</td>';
-                                $html .= '<td>'.number_format(($working_pays + $holiday_pays), 2).'</td>';
+                                $html .= '<td>£'.number_format(($working_pays + $holiday_pays), 2).'</td>';
                             $html .= '</tr>';
                         endforeach;
                     $html .= '</tbody>';
@@ -173,7 +173,7 @@ class AttendanceReportController extends Controller
         $monthEnd = date('Y-m-t', strtotime($the_month));
 
         
-        $employeeLeaveIds = EmployeeLeave::where('employee_id', $employee_id)->where('status', 'Approved')->pluck('id')->unique()->to_array();
+        $employeeLeaveIds = EmployeeLeave::where('employee_id', $employee_id)->where('status', 'Approved')->pluck('id')->unique()->toArray();
         if(!empty($employeeLeaveIds)):
             $employee_leave_day = EmployeeLeaveDay::whereIn('employee_leave_id', $employeeLeaveIds)->where('leave_date', '>=', $monthStart)->where('leave_date', '<=', $monthEnd)
                         ->where('is_taken', 1)->orderBy('leave_date', 'ASC')->get();

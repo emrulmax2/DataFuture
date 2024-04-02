@@ -2326,7 +2326,7 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(AttendanceReportController::class)->group(function(){
         Route::get('hr/portal/reports/attendance', 'index')->name('hr.portal.reports.attendance');
-        Route::get('hr/portal/reports/attendance/generate', 'generateReport')->name('hr.portal.reports.attendance.generate');
+        Route::post('hr/portal/reports/attendance/generate', 'generateReport')->name('hr.portal.reports.attendance.generate');
     });
 });
 

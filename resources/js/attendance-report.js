@@ -47,7 +47,7 @@ import Litepicker from "litepicker";
             
             if (response.status == 200) {
                 var res = response.data.res;
-                $('.attendanceReportWrap').html(res.html);
+                $('.attendanceReportWrap').fadeIn().html(res.html);
                 createIcons({icons, "stroke-width": 1.5, nameAttr: "data-lucide"});    
             }
         }).catch(error => {

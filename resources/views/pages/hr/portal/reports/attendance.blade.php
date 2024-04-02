@@ -57,7 +57,7 @@
                 </div>
             </div>
         </form>
-        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap" style="display: none;"></div>
+        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap mt-7" style="display: none;"></div>
     </div>
 @endsection
 
