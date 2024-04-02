@@ -390,7 +390,7 @@ class EmployeePortalController extends Controller
         return $html;
     }
 
-    public function getCalendarBody($theDate, $department = 4, $employee = []){
+    public function getCalendarBody($theDate, $department = 0, $employee = []){
         $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
         if($department > 0):
             $query->whereHas('employment', function($q) use ($department){
