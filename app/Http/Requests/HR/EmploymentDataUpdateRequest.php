@@ -25,7 +25,7 @@ class EmploymentDataUpdateRequest extends FormRequest
     {
         return [
             'started_on' => "required|date_format:d-m-Y",
-            'punch_number' => "required|integer",
+            'punch_number' => "required",
             'site_location' => "required",
             'employee_work_type_id' => "required",
             'employee_job_title_id' => "required",
