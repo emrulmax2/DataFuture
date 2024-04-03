@@ -1171,9 +1171,14 @@
     color: #FFF;
 }
 .bankHolidayBG,
-.leaveCalendarTable tbody tr td.bankHolidayBG{
+.leaveCalendarTable tbody tr td.bankHolidayBG,
+.attendanceDetailsTable tbody tr.bhRow td{
     background: rgb(243, 110, 38);
     color: #FFF;
+}
+.attendanceDetailsTable tbody tr.nwRow td{
+    background: rgba(22, 78, 99, .2);
+    color: rgb(22 78 99);
 }
 .pendingDay,
 .leaveCalendarTable tbody tr td.pendingDay{

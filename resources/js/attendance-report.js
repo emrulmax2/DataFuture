@@ -1,8 +1,21 @@
-
+import TomSelect from "tom-select";
 import dayjs from "dayjs";
 import Litepicker from "litepicker";
 
 (function(){
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: true,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
     let dateOption = {
         autoApply: true,
         singleMode: true,
@@ -22,6 +35,18 @@ import Litepicker from "litepicker";
         element: document.getElementById('the_month'),
         ...dateOption
     });
+
+    let multiTomOpt = {
+        ...tomOptions,
+        plugins: {
+            ...tomOptions.plugins,
+            remove_button: {
+                title: "Remove this item",
+            },
+        }
+    };
+    var departmentID = new TomSelect('#department_id', tomOptions);
+    var employeeID = new TomSelect('#employee_id', multiTomOpt);
 
 
     $('#attendanceReportForm').on('submit', function(e){

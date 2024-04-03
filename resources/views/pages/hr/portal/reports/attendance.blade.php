@@ -6,9 +6,9 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Attendance Report</h2>
+        <h2 class="text-lg font-medium mr-auto">Employee Attendance Report's Details</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to List</a>
+            <a href="{{ route('hr.portal.reports.attendance.generate') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Report</a>
         </div>
     </div>
     <div class="intro-y box p-5 mt-5">
@@ -20,8 +20,8 @@
                 </div>
                 <div class="col-span-3">
                     <label class="form-label">Department</label>
-                    <select id="department_id" name="department_id" class="w-full lccTom lcc-tom-select form-control">     
-                        <option value="" selected>Please Select</option>             
+                    <select id="department_id" name="department_id" class="w-full tom-selects">     
+                        <option value="">Please Select</option>             
                         @foreach($departments as $si)
                             <option {{ isset($employment->department_id) && $employment->department_id == $si->id }} value="{{ $si->id }}">{{ $si->name }}</option>             
                         @endforeach
@@ -29,8 +29,8 @@
                 </div>
                 <div class="col-span-3">
                     <label class="form-label">Employee</label>
-                    <select id="employee_id" name="employee_id" class="w-full lccTom lcc-tom-select form-control">     
-                        <option value="" selected>All Employee</option>             
+                    <select id="employee_id" name="employee_id[]" class="w-full tom-selects" multiple>     
+                        <option value="">All Employee</option>             
                         @foreach($employees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>             
                         @endforeach

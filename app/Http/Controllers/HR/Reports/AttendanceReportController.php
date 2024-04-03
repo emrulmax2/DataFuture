@@ -34,12 +34,12 @@ class AttendanceReportController extends Controller
     public function generateReport(Request $request){
         $the_month = (isset($request->the_month) && !empty($request->the_month) ? '01-'.$request->the_month : '');
         $department_id = (isset($request->department_id) && $request->department_id > 0 ? $request->department_id : 0);
-        $employee_id = (isset($request->employee_id) && $request->employee_id > 0 ? $request->employee_id : 0);
+        $employee_id = (isset($request->employee_id) && !empty($request->employee_id) ? $request->employee_id : []);
 
         $res = [];
         if(!empty($the_month)):
             $query = Employee::has('activePatterns')->where('status', 1);
-            if($employee_id > 0) : $query->where('id', $employee_id); endif;
+            if(!empty($employee_id)) : $query->whereIn('id', $employee_id); endif;
             if($department_id > 0):
                 $query->whereHas('employment', function($q) use($department_id){
                     $q->where('department_id', $department_id);
@@ -86,7 +86,7 @@ class AttendanceReportController extends Controller
                             $html .= '<tr>';
                                 $html .= '<td>';
                                     $html .= '<div>';
-                                        $html .= '<a href="#" class="font-medium whitespace-nowrap">'.$emp->full_name.'</a>';
+                                        $html .= '<a href="'.route('hr.portal.reports.attendance.show', [$emp->id, strtotime($the_month)]).'" class="font-medium text-primary whitespace-nowrap underline">'.$emp->full_name.'</a>';
                                         if(isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name)):
                                             $html .= ' - <span>'.$emp->employment->employeeJobTitle->name.'</span>';
                                         endif;
@@ -264,5 +264,76 @@ class AttendanceReportController extends Controller
     public function calculateHoursPayment($minutes, $rates){
         $amount = ($minutes / 60) * $rates;
         return $amount;
+    }
+
+    public function show($employee_id, $date){
+        return view('pages.hr.portal.reports.attendance-show', [
+            'title' => 'Employee Attendance Report Details - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'HR Portal', 'href' => route('hr.portal')],
+                ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],
+                ['label' => 'Attendance', 'href' => route('hr.portal.reports.attendance.generate')],
+                ['label' => 'Details', 'href' => 'javascript:void(0);'],
+            ],
+            'employee' => Employee::find($employee_id),
+            'date' => date('Y-m-d', $date),
+            'attendance' => $this->getEmployeeMonthlyAttendanceDetails($employee_id, $date)
+        ]);
+    }
+
+    public function getEmployeeMonthlyAttendanceDetails($employee_id, $date){
+        $employee = Employee::find($employee_id);
+        $monthStart = date('Y-m', $date).'-01';
+        $monthEnd = date('Y-m-t', $date);
+        $lastDate = date('t', $date);
+
+        $bhAutoBook = (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? true : false);
+        $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $monthEnd)->where('end_date', '>=', $monthStart)->where('active', 1)
+                         ->get()->first();
+        $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                         ->orderBy('id', 'DESC')->get()->first();
+        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+
+        $html = '';
+        for($i = 1; $i <= $lastDate; $i++):
+            $today = date('Y-m', $date).($i < 10 ? '-0'.$i : '-'.$i);
+            $D = date('D', strtotime($today));
+            $N = date('N', strtotime($today));
+            $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
+            $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
+            $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
+            $todayAttendance = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->where(function($q){
+                                    $q->whereNotNull('clockin_system')->where('clockin_system', '!=', '00:00');
+                                })->get()->first();
+            $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
+            $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
+
+            $dayClass = '';
+            $dayHour = '';
+            if(!$isWorkingDay && !isset($todayAttendance->id)):
+                $dayClass .= ' nwRow ';
+                $dayHour = 0;
+            elseif($isWorkingDay && (isset($todayAttendance->id) && $todayAttendance->id > 0)):
+                $dayClass .= ' wkRow expandRow ';
+                $dayHour = $todayWorkingHour;
+            elseif(!$isWorkingDay && (isset($todayAttendance->id) && $todayAttendance->id > 0)):
+                $dayClass .= ' ovRow expandRow ';
+                $dayHour = $todayWorkingHour;
+            elseif($bhAutoBook && (isset($todayBankHoliday->id) && $todayBankHoliday->id > 0)):
+                $dayClass .= ' bhRow expandRow ';
+                $dayHour = $todayContractedHour;
+            endif;
+
+            $html .= '<tr class="'.$dayClass.'">';
+                $html .= '<td class="font-medium whitespace-nowrap w-1/5">'.date('l, jS F', strtotime($today)).'</td>';
+                $html .= '<td class="w-2/5">';
+                    $html .= ($isWorkingDay ? $todayPattern->total : '&nbsp;');
+                $html .= '</td>';
+                $html .= '<td class="w-2/5">'.($isWorkingDay ? $this->calculateHourMinute($dayHour) : '').'</td>';
+            $html .= '</tr>';
+        endfor;
+
+        return $html;
     }
 }
