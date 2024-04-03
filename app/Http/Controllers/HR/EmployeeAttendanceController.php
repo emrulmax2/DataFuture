@@ -73,7 +73,7 @@ class EmployeeAttendanceController extends Controller
             ],
             'date' => $date,
             'theDate' => date('D jS F, Y', $date),
-            'issues' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('user_issues', '>', 0)->orderBy('id', 'ASC')->get(),
+            'issues' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('user_issues', '>', 0)->where('overtime_status', '!=', 1)->orderBy('id', 'ASC')->get(),
             'absents' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('leave_status', '>', 1)->orderBy('id', 'ASC')->get(),
             'overtime' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('overtime_status', 1)->orderBy('id', 'ASC')->get(),
             'noissues' => EmployeeAttendance::where('date', date('Y-m-d', $date))
@@ -206,7 +206,7 @@ class EmployeeAttendanceController extends Controller
                             endif;
 
                             if($clocks->time != ''):
-                                if($n_dif != '' && ($n_dif > 0 && $n_dif <= $this->getConditionSet('Clock In', 1, 'time', 0))):
+                                if($n_dif != '' && ($n_dif > 0 && $n_dif <= $this->getConditionSet('Clock In', 1, 'minutes', 0))):
                                     $notify = ($this->getConditionSet('Clock In', 1, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock In', 1, 'notify', 0) == 1){
                                         $issues += 1;
@@ -220,11 +220,11 @@ class EmployeeAttendanceController extends Controller
                                         $value = date('H:i', strtotime($clocks->time));
                                     }
                                     $system_work_start = $value;
-                                elseif($n_dif != '' && $n_dif > $this->getConditionSet('Clock In', 1, 'time', 0)):
+                                elseif($n_dif != '' && $n_dif > $this->getConditionSet('Clock In', 1, 'minutes', 0)):
                                     $system_work_start = date('H:i', strtotime($clocks->time));
                                     $issues += 1;
                                     $issues_array['clockin_system'] = 1;
-                                elseif($p_dif != '' && $p_dif > 0 && $p_dif <= $this->getConditionSet('Clock In', 2, 'time', 0)):
+                                elseif($p_dif != '' && $p_dif > 0 && $p_dif <= $this->getConditionSet('Clock In', 2, 'minutes', 0)):
                                     $notify = ($this->getConditionSet('Clock In', 2, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock In', 2, 'notify', 0) == 1){
                                         $issues += 1;
@@ -238,7 +238,7 @@ class EmployeeAttendanceController extends Controller
                                         $value = date('H:i', strtotime($clocks->time));
                                     }
                                     $system_work_start = $value;
-                                elseif($p_dif != '' && $p_dif > $this->getConditionSet('Clock In', 3, 'time', 0)):
+                                elseif($p_dif != '' && $p_dif > $this->getConditionSet('Clock In', 3, 'minutes', 0)):
                                     $notify = ($this->getConditionSet('Clock In', 3, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock In', 3, 'notify', 0) == 1){
                                         $issues += 1;
@@ -294,7 +294,7 @@ class EmployeeAttendanceController extends Controller
                             endif;
 
                             if($clocks->time != ''):
-                                if($en_dif != '' && $en_dif > 0 && $en_dif <= $this->getConditionSet('Clock Out', 1, 'time', 0)):
+                                if($en_dif != '' && $en_dif > 0 && $en_dif <= $this->getConditionSet('Clock Out', 1, 'minutes', 0)):
                                     $notify = ($this->getConditionSet('Clock Out', 1, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock Out', 1, 'notify', 0) == 1){
                                         $issues += 1;
@@ -308,11 +308,11 @@ class EmployeeAttendanceController extends Controller
                                         $value = date('H:i', strtotime($clocks->time));
                                     }
                                     $system_work_end = $value;
-                                elseif($en_dif != '' && $en_dif > $this->getConditionSet('Clock Out', 1, 'time', 0)):
+                                elseif($en_dif != '' && $en_dif > $this->getConditionSet('Clock Out', 1, 'minutes', 0)):
                                     $system_work_end = date('H:i', strtotime($clocks->time));
                                     $issues += 1;
                                     $issues_array['clockout_system'] = 1;
-                                elseif($ep_dif != '' && $ep_dif > 0 && $ep_dif <= $this->getConditionSet('Clock Out', 2, 'time', 0)):
+                                elseif($ep_dif != '' && $ep_dif > 0 && $ep_dif <= $this->getConditionSet('Clock Out', 2, 'minutes', 0)):
                                     $notify = ($this->getConditionSet('Clock Out', 2, 'notify', 0) == 1) ? 'notfy_input' : '';
                                     if($this->getConditionSet('Clock Out', 2, 'notify', 0) == 1){
                                         $issues += 1;
@@ -326,7 +326,7 @@ class EmployeeAttendanceController extends Controller
                                         $value = date('H:i', strtotime($clocks->time));
                                     }
                                     $system_work_end = $value;
-                                elseif($ep_dif != '' && $ep_dif > $this->getConditionSet('Clock Out', 2, 'time', 0)):
+                                elseif($ep_dif != '' && $ep_dif > $this->getConditionSet('Clock Out', 2, 'minutes', 0)):
                                     $system_work_end = date('H:i', strtotime($clocks->time));
                                     $issues += 1;
                                     $issues_array['clockout_system'] = 1;

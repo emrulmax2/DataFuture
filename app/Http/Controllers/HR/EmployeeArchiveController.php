@@ -39,6 +39,13 @@ class EmployeeArchiveController extends Controller
             $query->orWhere('field_value','LIKE','%'.$queryStr.'%');
             $query->orWhere('field_new_value','LIKE','%'.$queryStr.'%');
         endif;
+        $query->where(function($q){
+            $q->where('field_name', '!=', 'updated_by')->where('field_name', '!=', 'created_by')->where('field_name', '!=', 'created_at')
+                ->where('field_name', '!=', 'updated_at');
+        });
+        $query->where(function($q){
+            $q->whereNotNull('field_new_value')->whereNotNull('field_value');
+        });
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);

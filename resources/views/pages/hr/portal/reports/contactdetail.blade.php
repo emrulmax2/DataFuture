@@ -1,6 +1,3 @@
-@php
-    //dd($dataList);
-@endphp
 @extends('../layout/' . $layout)
 
 @section('subhead')

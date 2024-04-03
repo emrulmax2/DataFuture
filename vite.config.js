@@ -232,6 +232,7 @@ export default defineConfig({
                 'resources/js/jquery-stopwatch.js',
                 'resources/js/employee-archive.js',
                 'resources/js/attendance-live.js',
+                'resources/js/attendance-report.js',
                 
             ],
             refresh: true,

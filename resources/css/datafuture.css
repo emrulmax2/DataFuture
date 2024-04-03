@@ -1152,28 +1152,33 @@
 }
 .meetingTrainingBG,
 .leaveCalendarTable tbody tr td.meetingTrainingBG{
-    background: rgb(0 0 0);
+    background: rgb(98, 23, 8);
     color: #FFF;
 }
 .sickLeaveBG,
 .leaveCalendarTable tbody tr td.sickLeaveBG{
-    background: rgb(30 41 59);
+    background: rgb(185 28 28);
     color: #FFF;
 }
 .authoriseUnpaidBG,
 .leaveCalendarTable tbody tr td.authoriseUnpaidBG{
-    background: rgb(185 28 28);
+    background: rgb(132, 71, 255);
     color: #FFF;
 }
 .authorisedPaidBG,
 .leaveCalendarTable tbody tr td.authorisedPaidBG{
-    background: rgb(59 89 152);
+    background: rgb(13 148 136);
     color: #FFF;
 }
 .bankHolidayBG,
-.leaveCalendarTable tbody tr td.bankHolidayBG{
+.leaveCalendarTable tbody tr td.bankHolidayBG,
+.attendanceDetailsTable tbody tr.bhRow td{
     background: rgb(243, 110, 38);
     color: #FFF;
+}
+.attendanceDetailsTable tbody tr.nwRow td{
+    background: rgba(22, 78, 99, .2);
+    color: rgb(22 78 99);
 }
 .pendingDay,
 .leaveCalendarTable tbody tr td.pendingDay{

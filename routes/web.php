@@ -197,6 +197,7 @@ use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
+use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -1161,7 +1162,6 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmploymentReportController::class)->group(function(){
         Route::get('hr/portal/reports/list', 'employmentReportlist')->name('hr.portal.employment.reports.list');
-        //Route::get('hr/portal/employment-reports/birthdaylist', 'show')->name('hr.portal.employment.reports.birthdaylist'); 
     });
 
     Route::controller(BirthdayReportController::class)->group(function(){
@@ -2322,6 +2322,12 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeArchiveController::class)->group(function(){
         Route::get('employee-profile/archive/{id}', 'index')->name('employee.archive'); 
         Route::get('employee-profile/archive-list', 'list')->name('employee.archive.list'); 
+    });          
+    
+    Route::controller(AttendanceReportController::class)->group(function(){
+        Route::get('hr/portal/reports/attendance', 'index')->name('hr.portal.reports.attendance');
+        Route::post('hr/portal/reports/attendance/generate', 'generateReport')->name('hr.portal.reports.attendance.generate');
+        Route::get('hr/portal/reports/attendance/show/{id}/{date}', 'show')->name('hr.portal.reports.attendance.show');
     });
 });
 
