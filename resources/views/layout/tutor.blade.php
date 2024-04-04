@@ -9,7 +9,7 @@
                 <div></div>
             </div>
         </div>
-        XXXX
+        
         @yield('content')
         {{--
             @include('../layout/components/dark-mode-switcher')

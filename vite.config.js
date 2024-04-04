@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     server: {
-        origin: "http://sms.lcc.ac.uk",
+        origin: "http://127.0.0.1",
     },
     plugins: [
         viteStaticCopy({
