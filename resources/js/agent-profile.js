@@ -24,8 +24,8 @@ var agentTableId = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#ID",
-                    field: "id",
+                    title: "Serial",
+                    field: "sl",
                     width: "180",
                 },
                 ,
