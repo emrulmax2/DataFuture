@@ -99,7 +99,7 @@ class AgentController extends Controller
        
        
         
-        $query = Applicant::with('course')->where('agent_user_id', $Agent->AgentUser->id);
+        $query = Applicant::with(['course','contact','sexid'])->where('agent_user_id', $Agent->AgentUser->id);
         
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -144,7 +144,14 @@ class AgentController extends Controller
 
                 $data[$list->course->semester->id]['sl'] = $i;
                 $data[$list->course->semester->id]['term'] = $list->course->semester->name;
-                $data[$list->course->semester->id]['_children'][] = $list; 
+                $data[$list->course->semester->id]['_children'][] = [
+                    "id" =>($studentData) ? $studentData->id : $list->id,
+                    "name" => ($studentData) ?  $studentData->full_name : $list->full_name,
+                    "status" => ($studentData) ? "Student" : "Applicant",
+                    "gender" => ($studentData) ? $studentData->sexid->name : $list->sexid->name,
+                    "mobile" =>($studentData) ?  ( ($studentData->contact) ? $studentData->contact->mobile:"" ) : ( ($list->contact) ? $list->contact->mobile : "" ),
+                    "ref_no" => ($studentData) ? $studentData->registration_no : $list->application_no,
+                ];
 
                 $i++;
             endforeach;

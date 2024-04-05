@@ -10,6 +10,7 @@ use App\Models\EmployeeLeaveDay;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\Employment;
+use App\Models\HrHolidayYear;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 
@@ -227,5 +228,159 @@ class EmployeeAttendanceLiveController extends Controller
         $res['since'] = $since;
 
         return $res;
+    }
+
+
+    public function add(){
+        return view('pages.hr.portal.live-add', [
+            'title' => 'HR Portal Add Live Attendance - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'HR Portal', 'href' => route('hr.portal')],
+                ['label' => 'Live', 'href' => route('hr.portal.live.attedance')],
+                ['label' => 'Add Attendance', 'href' => 'javascript:void(0);']
+            ],
+            'employee' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
+        ]);
+    }
+
+    public function getDayAttendanceData(Request $request){
+        $employee_id = $request->employee_id;
+        $theDate = (isset($request->theDate) && !empty($request->theDate) ? date('Y-m-d', strtotime($request->theDate)) : date('Y-m-d'));
+        $D = date('D', strtotime($theDate));
+        $N = date('N', strtotime($theDate));
+
+        $employee = Employee::find($employee_id);
+        $bhAutoBook = (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? true : false);
+        $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $theDate)->where('end_date', '>=', $theDate)->where('active', 1)
+                         ->get()->first();
+        $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                         ->orderBy('id', 'DESC')->get()->first();
+        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+        $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
+        $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
+        $patternStart = (isset($todayPattern->start) && !empty($todayPattern->start) ? $todayPattern->start : 'NWD');
+        $patternEnd = (isset($todayPattern->end) && !empty($todayPattern->end) ? $todayPattern->end : 'NWD');
+
+        $todaysClockIn = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 1)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
+        $todaysClockInTime = (isset($todaysClockIn->time) && !empty($todaysClockIn->time) ? date('H:i', strtotime($todaysClockIn->time)) : '');
+        $todaysClockOut = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 4)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
+        $todaysClockOutTime = (isset($todaysClockOut->time) && !empty($todaysClockOut->time) ? date('H:i', strtotime($todaysClockOut->time)) : '');
+
+        $todaysBreak = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 2)->where('date', $theDate)->get();
+        $todaysReturn = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 3)->where('date', $theDate)->get();
+
+        $todaysLastBreak = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 2)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
+        $lastBreak = (isset($todaysLastBreak->time) && !empty($todaysLastBreak->time) && ($todaysBreak->count() > $todaysReturn->count()) ? date('H:i', strtotime($todaysLastBreak->time)) : '');
+
+        $html = '';
+        $html .= '<tr class="employeeAttendanceRow" id="employeeAttendanceRow_'.$employee_id.'">';
+            $html .= '<td>';
+                $html .= '<div class="font-medium text-primary whitespace-nowrap">'.$employee->full_name.'</div>';
+                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'; 
+                    $html .= (isset($employee->employment->employeeJobTitle->name) && !empty($employee->employment->employeeJobTitle->name) ? $employee->employment->employeeJobTitle->name : '');
+                $html .= '</div>';
+            $html .= '</td>';
+            $html .= '<td>';
+                $html .= '<table class="table table-sm">';
+                    $html .= '<tr>';
+                        $html .= '<td class="font-medium text-primary whitespace-nowrap bg-slate-200 w-30">'.$patternStart.'</td>';
+                        $html .= '<td class="attendanceFormCtrlTd">';
+                            $html .= '<input type="text" name="attendance['.$employee_id.'][clockin]" value="'.$todaysClockInTime.'" placeholder="00:00" class="form-control clockMask"/>';
+                        $html .= '</td>';
+                    $html .= '</tr>';
+                $html .= '</table>';
+            $html .= '</td>';
+            $html .= '<td>';
+                $html .= '<table class="table table-sm">';
+                    $html .= '<tr>';
+                        $html .= '<td class="attendanceFormCtrlTd">';
+                            $html .= '<input type="text" name="attendance['.$employee_id.']['.(empty($lastBreak) ? 'break' : 'exist_break').']" value="'.$lastBreak.'" placeholder="00:00" class="form-control clockMask"/>';
+                        $html .= '</td>';
+                        $html .= '<td class="attendanceFormCtrlTd">';
+                            $html .= '<input type="text" name="attendance['.$employee_id.'][return]" value="" placeholder="00:00" class="form-control clockMask"/>';
+                        $html .= '</td>';
+                    $html .= '</tr>';
+                $html .= '</table>';
+            $html .= '</td>';
+            $html .= '<td>';
+                $html .= '<table class="table table-sm">';
+                    $html .= '<tr>';
+                        $html .= '<td class="font-medium text-primary whitespace-nowrap bg-slate-200 w-30">'.$patternEnd.'</td>';
+                        $html .= '<td class="attendanceFormCtrlTd">';
+                            $html .= '<input type="text" name="attendance['.$employee_id.'][clockout]" value="'.$todaysClockOutTime.'" placeholder="00:00" class="form-control clockMask"/>';
+                        $html .= '</td>';
+                    $html .= '</tr>';
+                $html .= '</table>';
+            $html .= '</td>';
+        $html .= '</tr>';
+
+        return response()->json(['res' => $html], 200);
+    }
+
+
+    public function feeAttendanceLive(Request $request){
+        $theDate = (isset($request->the_date) ? date('Y-m-d', strtotime($request->the_date)) : '');
+        $employees = (isset($request->employees) && !empty($request->employees) ? $request->employees : []);
+        $attendance = (isset($request->attendance) && !empty($request->attendance) ? $request->attendance : []);
+        $currentEmployee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $currentEmployeeId = (isset($currentEmployee->id) ? $currentEmployee->id : auth()->user()->id);
+
+        if(!empty($employees) && !empty($attendance) && !empty($theDate)):
+            foreach($employees as $emp):
+                $empAtten = (isset($attendance[$emp]) && !empty($attendance[$emp]) ? $attendance[$emp] : []);
+                if(!empty($empAtten)):
+                    $todaysClockIn = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 1)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
+                    $todaysClockOut = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 4)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
+                    if(!isset($todaysClockIn->id) && (isset($empAtten['clockin']) && !empty($empAtten['clockin']))):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 1;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['clockin'].':00';
+                        $data['ip'] = $request->getClientIp();
+                        $data['created_by'] = $currentEmployeeId;
+
+                        EmployeeAttendanceLive::create($data);
+                    endif;
+                    if(isset($empAtten['break']) && !empty($empAtten['break'])):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 2;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['break'].':00';
+                        $data['ip'] = $request->getClientIp();
+                        $data['created_by'] = $currentEmployeeId;
+
+                        EmployeeAttendanceLive::create($data);
+                    endif;
+                    if(isset($empAtten['return']) && !empty($empAtten['return'])):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 3;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['return'].':00';
+                        $data['ip'] = $request->getClientIp();
+                        $data['created_by'] = $currentEmployeeId;
+
+                        EmployeeAttendanceLive::create($data);
+                    endif;
+                    if(!isset($todaysClockOut->id) && (isset($empAtten['clockout']) && !empty($empAtten['clockout']))):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 4;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['clockout'].':00';
+                        $data['ip'] = $request->getClientIp();
+                        $data['created_by'] = $currentEmployeeId;
+
+                        EmployeeAttendanceLive::create($data);
+                    endif;
+                endif;
+            endforeach;
+            return response()->json(['res' => 1], 200);
+        else:
+            return response()->json(['res' => 2], 200);
+        endif;
     }
 }

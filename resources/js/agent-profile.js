@@ -22,17 +22,22 @@ var agentTableId = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            columnDefaults:{
+            resizable:true,
+            },
             columns: [
                 {
                     title: "Serial",
                     field: "sl",
                     width: "180",
+                    headerSort: false,
                 },
                 ,
                 {
                     title: "Term Name",
                     field: "term",
                     headerHozAlign: "left",
+                    headerSort: false,
                 },
                 {
                     title: "Total Applicants",
@@ -50,9 +55,60 @@ var agentTableId = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
+                    headerSort: false,
                     
                 },
             ],
+            rowFormatter:function(row){
+                //create and style holder elements
+               var holderEl = document.createElement("div");
+               var tableEl = document.createElement("div");
+        
+               holderEl.style.boxSizing = "border-box";
+               //holderEl.style.padding = "10px 30px 10px 10px";
+               //holderEl.style.borderTop = "1px solid #333";
+               //holderEl.style.borderBotom = "1px solid #333";
+               
+        
+               //tableEl.style.border = "1px solid #333";
+        
+               holderEl.appendChild(tableEl);
+        
+               row.getElement().appendChild(holderEl);
+        
+               var subTable = new Tabulator(tableEl, {
+                   layout:"fitColumns",
+                   pagination: "local",
+                   paginationSize: 10,
+                   paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+                   data:row.getData()._children,
+                   columns:[
+                   {title:"Name", field:"name"},
+                   {title:"Gender", field:"gender"},
+                   {title:"Status", field:"status"},
+                   {title:"Mobile", field:"mobile"},
+                    {
+                        title: "Actions",
+                        field: "id",
+                        headerSort: false,
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        width: "180",
+                        download: false,
+                        formatter(cell, formatterParams) {                        
+                            var btns = "";
+                            if (cell.getData().status == "Applicant") {
+                                btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            } else {
+                                btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            }
+                            
+                            return btns;
+                        },
+                    },
+                   ]
+               })
+            },
             renderComplete() {
                 createIcons({
                     icons,
