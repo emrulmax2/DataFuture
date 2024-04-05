@@ -233,6 +233,7 @@ export default defineConfig({
                 'resources/js/employee-archive.js',
                 'resources/js/attendance-live.js',
                 'resources/js/attendance-report.js',
+                'resources/js/hr-add-live-attendance.js',
                 
             ],
             refresh: true,

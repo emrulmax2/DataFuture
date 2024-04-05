@@ -1262,6 +1262,9 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeAttendanceLiveController::class)->group(function(){
         Route::get('hr/portal/live', 'index')->name('hr.portal.live.attedance');
         Route::post('hr/portal/live/data', 'ajaxLiveData')->name('hr.portal.live.attedance.ajax');
+        Route::get('hr/portal/live/add', 'add')->name('hr.portal.live.attedance.add');
+        Route::post('hr/portal/live/get-day-data', 'getDayAttendanceData')->name('hr.portal.live.attedance.get.day.data');
+        Route::post('hr/portal/live/feed-live-attendance', 'feeAttendanceLive')->name('hr.portal.live.attedance.fee.data');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {

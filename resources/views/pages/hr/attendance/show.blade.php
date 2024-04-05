@@ -234,6 +234,14 @@
                                             $clockin = (isset($isses_field['clockin_system']) && $isses_field['clockin_system'] == 1) ? 1 : 0;
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
                                             $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
+
+                                            $clockin_punch = (isset($atten->clockin_punch) && !empty($atten->clockin_punch) ? $atten->clockin_punch : '');
+                                            $clockin_system = (isset($atten->clockin_system) && !empty($atten->clockin_system) ? $atten->clockin_system : '');
+                                            $clockout_punch = (isset($atten->clockout_punch) && !empty($atten->clockout_punch) ? $atten->clockout_punch : '');
+                                            $clockout_system = (isset($atten->clockout_system) && !empty($atten->clockout_system) ? $atten->clockout_system : '');
+                                            $total_work_hour = (isset($atten->total_work_hour) && !empty($atten->total_work_hour) ? $atten->total_work_hour : 0);
+
+                                            $isOnlyLeave = (empty($clockin_punch) && empty($clockin_system) && empty($clockout_punch) && empty($clockout_system) && $total_work_hour == 0 ? true : false);
                                         @endphp
                                         <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>

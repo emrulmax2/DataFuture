@@ -304,13 +304,17 @@ class AttendanceReportController extends Controller
             $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
             $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
             $todayAttendance = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->where(function($q){
-                                    $q->whereNotNull('clockin_system')->where('clockin_system', '!=', '00:00');
+                                    $q->whereNotNull('clockin_system')->where('clockin_system', '!=', '00:00')->where('clockin_system', '!=', '');
                                 })->get()->first();
+            $todayLeave = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->whereIn('leave_status', [1, 2, 3, 4, 5])->get()->first();
+            
             $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
             $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
 
             $dayClass = '';
             $dayHour = '';
+            $dayLeaveType = 0;
+            $dayLeaveHour = 0;
             if(!$isWorkingDay && !isset($todayAttendance->id)):
                 $dayClass .= ' nwRow ';
                 $dayHour = 0;
@@ -323,6 +327,27 @@ class AttendanceReportController extends Controller
             elseif($bhAutoBook && (isset($todayBankHoliday->id) && $todayBankHoliday->id > 0)):
                 $dayClass .= ' bhRow expandRow ';
                 $dayHour = $todayContractedHour;
+            endif;
+
+            if(isset($todayLeave->id) && $todayLeave->id > 0):
+                $dayHour = (isset($todayLeave->leaveDay->hour) && $todayLeave->leaveDay->hour > 0 ? $todayLeave->leaveDay->hour : (isset($todayLeave->leave_hour) && $todayLeave->leave_hour > 0 ? $todayLeave->leave_hour : 0));
+                switch($todayLeave->leave_status):
+                    case 1:
+                        $dayClass .= 'hvRow expandRow';
+                        break;
+                    case 2:
+                        $dayClass .= 'mtRow expandRow';
+                        break;
+                    case 3:
+                        $dayClass .= 'slRow expandRow';
+                        break;
+                    case 4:
+                        $dayClass .= 'auRow expandRow';
+                        break;
+                    case 5:
+                        $dayClass .= 'apRow expandRow';
+                        break;
+                endswitch;
             endif;
 
             $html .= '<tr class="'.$dayClass.'">';
