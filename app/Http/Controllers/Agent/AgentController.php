@@ -149,6 +149,7 @@ class AgentController extends Controller
                 $i++;
             endforeach;
         endif;
+        $data = array_values($data);
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
     /**
