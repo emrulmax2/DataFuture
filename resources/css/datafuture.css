@@ -1146,27 +1146,32 @@
     font-size: 12px;
 }
 .holidayVacationBG,
-.leaveCalendarTable tbody tr td.holidayVacationBG{
+.leaveCalendarTable tbody tr td.holidayVacationBG,
+.attendanceDetailsTable tbody tr.hvRow td{
     background: rgb(0 119 181);
     color: #FFF;
 }
 .meetingTrainingBG,
-.leaveCalendarTable tbody tr td.meetingTrainingBG{
+.leaveCalendarTable tbody tr td.meetingTrainingBG,
+.attendanceDetailsTable tbody tr.mtRow td{
     background: rgb(98, 23, 8);
     color: #FFF;
 }
 .sickLeaveBG,
-.leaveCalendarTable tbody tr td.sickLeaveBG{
+.leaveCalendarTable tbody tr td.sickLeaveBG,
+.attendanceDetailsTable tbody tr.slRow td{
     background: rgb(185 28 28);
     color: #FFF;
 }
 .authoriseUnpaidBG,
-.leaveCalendarTable tbody tr td.authoriseUnpaidBG{
+.leaveCalendarTable tbody tr td.authoriseUnpaidBG,
+.attendanceDetailsTable tbody tr.auRow td{
     background: rgb(132, 71, 255);
     color: #FFF;
 }
 .authorisedPaidBG,
-.leaveCalendarTable tbody tr td.authorisedPaidBG{
+.leaveCalendarTable tbody tr td.authorisedPaidBG,
+.attendanceDetailsTable tbody tr.apRow td{
     background: rgb(13 148 136);
     color: #FFF;
 }
@@ -1602,4 +1607,14 @@ input[type=number] {
 .attendance_action_btn.disabled{
     cursor: not-allowed;
     opacity: .7;
+}
+
+
+.table.table-sm td.attendanceFormCtrlTd{
+    padding: 0;
+}
+.table.table-sm td.attendanceFormCtrlTd .form-control{
+    border-radius: 0;
+    border: none;
+    height: 100%;
 }
