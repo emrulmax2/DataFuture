@@ -1448,6 +1448,23 @@ var employeePatternListTable = (function () {
         }
     });
 
+    $('#editEmployeePatternPayModal [name="contracted_hour"], #editEmployeePatternPayModal [name="salary"]').on('keyup', function(){
+        var contractedHour = $('#editEmployeePatternPayModal [name="contracted_hour"]').val();
+        var salary = $('#editEmployeePatternPayModal [name="salary"]').val();
+
+        if(contractedHour.length == 5 && salary > 0){
+            var hrmnArray = contractedHour.split(':');
+            var hr = parseInt(hrmnArray[0], 10);
+            var mn = parseInt(hrmnArray[1], 10) / 60;
+            var hrmn = (hr + mn);
+
+            var hrRate = (salary / 52 / hrmn);
+            $('#editEmployeePatternPayModal [name="hourly_rate"]').val(hrRate.toFixed(2));
+        }else{
+            $('#editEmployeePatternPayModal [name="hourly_rate"]').val('');
+        }
+    });
+
     $('#addEmployeePatternPayForm').on('submit', function(e){
         e.preventDefault();
         var $form = $(this);

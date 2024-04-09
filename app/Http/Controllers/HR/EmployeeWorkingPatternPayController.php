@@ -94,7 +94,7 @@ class EmployeeWorkingPatternPayController extends Controller
         $employee_id = $request->employee_id;
         $payId = $request->id;
         $employee_working_pattern_id = $request->employee_working_pattern_id;
-        $patternPayOld = EmployeeWorkingPatternPay::find('id', $payId);
+        $patternPayOld = EmployeeWorkingPatternPay::find($payId);
 
         $salary = (isset($request->salary) ? $request->salary : 0);
         $hourlyRate = (isset($request->hourly_rate) ? $request->hourly_rate : 0);

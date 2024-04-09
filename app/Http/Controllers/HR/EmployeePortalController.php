@@ -575,6 +575,7 @@ class EmployeePortalController extends Controller
             $data['leave_date'] = $date;
             $data['hour'] = $minutes;
             $data['status'] = 'Active';
+            $data['was_absent_day'] = 1;
             $data['created_by'] = auth()->user()->id;
             EmployeeLeaveDay::create($data);
 
