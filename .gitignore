@@ -20,5 +20,5 @@ composer.lock
 composer.lock
 pnpm-lock.yaml
 *.lock
-composer.lock
+
 pnpm-lock.yaml
