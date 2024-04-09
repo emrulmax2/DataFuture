@@ -26,13 +26,13 @@
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Date</th>
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Contract Start</th>
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Contract End</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap text-right border-b-0 uppercase">Action</th>
+                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap text-right border-b-0 uppercase">Reason</th>
                 </tr>
             </thead>
             <tbody>
                 @if(!empty($absents))
                     @foreach($absents  as $employee_id => $absent)
-                    <tr class="absentTodayTr cursor-pointer">
+                    <tr class="absentTodayTr cursor-pointer" data-emloyee="{{ $employee_id }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
                         <td class="px-5 py-3 dark:border-darkmode-300 w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
                             <div class="flex">
                                 <div class="image-fit zoom-in h-10 w-10">
@@ -58,9 +58,7 @@
                             <span class="font-medium">{{ $absent['end'] }}</span>
                         </td>
                         <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-right shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-                            <button type="button" class="absentTodayBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1" data-emloyee="{{ $employee_id }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
-                                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                            </button>
+                            
                         </td>
                     </tr>
                     @endforeach

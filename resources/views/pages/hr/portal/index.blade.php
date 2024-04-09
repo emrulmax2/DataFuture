@@ -148,7 +148,7 @@
                                         <div class="ml-4 mr-auto">
                                             <div class="font-medium uppercase">{{ $absent['full_name'] }}</div>
                                             <div class="mt-0.5 text-xs text-slate-500">
-                                                {{ $absent['date'] }}
+                                                {{ $absent['start'].' - '.$absent['end'] }}
                                             </div>
                                         </div>
                                         <div class="text-danger">

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 class EmployeeAbsentTodayController extends Controller
 {
     public function index($date){
+        $theDate = date('Y-m-d', $date);
         return view('pages.hr.portal.absent-today', [
             'title' => 'HR Portal Absent Today - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -23,8 +24,8 @@ class EmployeeAbsentTodayController extends Controller
             ],
             'date' => $date,
             'absents' => $this->getAbsentEmployees($date),
-            'yesterday' => Carbon::yesterday()->format('Y-m-d'),
-            'tomorrow' => Carbon::tomorrow()->format('Y-m-d')
+            'yesterday' => date('Y-m-d', strtotime($theDate .' -1 day')),
+            'tomorrow' => date('Y-m-d', strtotime($theDate .' +1 day'))
         ]);
     }
 

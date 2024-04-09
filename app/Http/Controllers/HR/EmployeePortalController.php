@@ -95,6 +95,8 @@ class EmployeePortalController extends Controller
                         $res[$employee_id]['date'] =  date('jS M, Y', strtotime($theDate));
                         $res[$employee_id]['hourMinute'] =  $patternDay->total;
                         $res[$employee_id]['minute'] =  $this->convertStringToMinute($patternDay->total);
+                        $res[$employee_id]['start'] =  (isset($patternDay->start) ? $patternDay->start : '00:00');
+                        $res[$employee_id]['end'] =  (isset($patternDay->end) ? $patternDay->end : '00:00');
 
                         $row += 1;
                     endif;
