@@ -86,7 +86,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($activeEmployees))
                                         @foreach($activeEmployees as $aemp)
-                                            <option value="{{ $aemp->id }}">{{ $aemp->first_name.' '.$aemp->last_name }}</option>
+                                            <option value="{{ $aemp->id }}">{{ $aemp->full_name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -97,7 +97,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($activeEmployees))
                                         @foreach($activeEmployees as $aemp)
-                                            <option value="{{ $aemp->id }}">{{ $aemp->first_name.' '.$aemp->last_name }}</option>
+                                            <option value="{{ $aemp->id }}">{{ $aemp->full_name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
