@@ -36,6 +36,7 @@ export default defineConfig({
                 "resources/js/applicant-dahsboard.js",
                 "resources/js/agent-dahsboard.js",
                 "resources/js/agent-crud.js",
+                "resources/js/agent-profile.js",
                 "resources/js/bankholiday.js",
                 "resources/js/permissioncategory.js",
                 "resources/js/department.js",
@@ -193,14 +194,10 @@ export default defineConfig({
                 'resources/js/hr-portal-telephonedirectory.js',
                 'resources/js/hr-portal-recordcard.js',
                 'resources/js/hr-portal-datareport.js',
-                
-
                 'resources/js/df-field-category.js',
                 'resources/js/df-field.js',
-
                 'resources/js/venue-datafuture.js',
                 'resources/js/employee-time-keeping.js',
-
                 'resources/js/course-management.js',
                 'resources/js/semester.js',
                 'resources/js/term-declaration.js',
@@ -219,8 +216,6 @@ export default defineConfig({
                 'resources/js/plans-date-list.js',
                 'resources/js/task-manager.js',
                 'resources/js/admission-communication.js',
-
-
                 'resources/js/unsigned.js',
                 'resources/js/assign.js',
                 'resources/js/student-slc-coc.js',

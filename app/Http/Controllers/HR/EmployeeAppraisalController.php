@@ -59,6 +59,7 @@ class EmployeeAppraisalController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $dueOn = date('Y-m-d', strtotime($list->due_on));
+                $completed_on = (isset($list->completed_on) && !empty($list->completed_on) ? date('Y-m-d', strtotime($list->completed_on)) : '');
                 $data[] = [
                     'id' => $list->id,
                     'employee_id' => $list->employee_id,
@@ -71,7 +72,7 @@ class EmployeeAppraisalController extends Controller
                     'total_score' => $list->total_score,
                     'promotion_consideration' => $list->promotion_consideration,
                     'notes' => $list->notes,
-                    'status' => ($dueOn < date('Y-m-d') ? 2 : 1),
+                    'status' => (!empty($completed_on) && $completed_on <=  date('Y-m-d') ? 3 : ($dueOn < date('Y-m-d') ? 2 : 1)),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;

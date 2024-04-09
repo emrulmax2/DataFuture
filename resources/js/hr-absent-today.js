@@ -29,7 +29,7 @@ import TomSelect from "tom-select";
     });
 
 
-    $('.absentTodayBtn').on('click', function(e){
+    $('.absentTodayTr').on('click', function(e){
         e.preventDefault();
         var $this = $(this);
         var employee = $this.attr('data-emloyee');

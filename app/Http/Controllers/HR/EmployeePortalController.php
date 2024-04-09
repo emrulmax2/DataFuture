@@ -95,6 +95,8 @@ class EmployeePortalController extends Controller
                         $res[$employee_id]['date'] =  date('jS M, Y', strtotime($theDate));
                         $res[$employee_id]['hourMinute'] =  $patternDay->total;
                         $res[$employee_id]['minute'] =  $this->convertStringToMinute($patternDay->total);
+                        $res[$employee_id]['start'] =  (isset($patternDay->start) ? $patternDay->start : '00:00');
+                        $res[$employee_id]['end'] =  (isset($patternDay->end) ? $patternDay->end : '00:00');
 
                         $row += 1;
                     endif;
@@ -175,6 +177,7 @@ class EmployeePortalController extends Controller
                             break;
                         endswitch;
                     endif;
+                $createdAt = (isset($list->created_at) && !empty($list->created_at) ? $list->created_at : '');
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -191,6 +194,7 @@ class EmployeePortalController extends Controller
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => (isset($list->leave->approved->employee->full_name) && !empty($list->leave->approved->employee->full_name) ? $list->leave->approved->employee->full_name : ''),
                     'approved_at' => (isset($list->leave->approved_at) && !empty($list->leave->approved_at) ? date('jS M, Y', strtotime($list->leave->approved_at)) : ''),
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
                 ];
                 $i++;
             endforeach;
@@ -218,6 +222,7 @@ class EmployeePortalController extends Controller
                             break;
                         endswitch;
                     endif;
+                $createdAt = (isset($list->created_at) && !empty($list->created_at) ? $list->created_at : '');
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -233,7 +238,8 @@ class EmployeePortalController extends Controller
                     'type' => 'rejected',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => '',
-                    'approved_at' => ''
+                    'approved_at' => '',
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
                 ];
                 $i++;
             endforeach;
@@ -249,6 +255,7 @@ class EmployeePortalController extends Controller
                         $leaveDays += 1;
                     endforeach;
                 endif;
+                $createdAt = (isset($list->created_at) && !empty($list->created_at) ? $list->created_at : '');
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -264,7 +271,8 @@ class EmployeePortalController extends Controller
                     'type' => 'pending',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => '',
-                    'approved_at' => ''
+                    'approved_at' => '',
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
                 ];
                 $i++;
             endforeach;

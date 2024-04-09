@@ -28,7 +28,9 @@
                 <input type="text" name="class_date" class="w-full form-control border-0 liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}" style="max-width: 110px;"/>
             </div>
             <a href="{{ route('hr.portal.leave.calendar') }}" class="add_btn btn btn-success text-white shadow-md mr-2">Planner</a>
+            @if(isset(auth()->user()->priv()['add_attendance']) && auth()->user()->priv()['add_attendance'] == 1)
             <a href="{{ route('hr.portal.live.attedance.add') }}" class="btn btn-primary shadow-md mr-0">Add Attendance</a>
+            @endif
             {{--<a href="{{ route('hr.portal') }}" class="add_btn btn btn-primary shadow-md mr-0">Back To Portal</a>--}}
         </div>
     </div>

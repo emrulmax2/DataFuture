@@ -211,7 +211,12 @@ var employeeListTable = (function () {
                         $("#successModal .successModalTitle").html( "Congratulations!" );
                         $("#successModal .successModalDesc").html('Absent details successfully updated .');
                         $("#successModal .successCloser").attr('data-action', 'RELOAD');
-                });     
+                }); 
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000)
             }
         }).catch(error => {
             document.querySelector('#updateAbsent').removeAttribute('disabled');

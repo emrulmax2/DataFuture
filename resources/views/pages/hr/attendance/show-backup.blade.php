@@ -58,7 +58,7 @@
                             <tbody>
                                 @if(!empty($absents) && $absents->count() > 0)
                                     @foreach($absents as $atten)
-                                        <tr class="attendanceRow attendanceSyncRow attendanceAbsentRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceAbsentRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox">
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
@@ -243,290 +243,195 @@
 
                                             $isOnlyLeave = (empty($clockin_punch) && empty($clockout_punch) && $total_work_hour == 0 && $atten->leave_status > 0 ? true : false);
                                         @endphp
-                                        @if($isOnlyLeave)
-                                            <tr class="onlyLeaveRow attendanceSyncRow onlyLeaveRow_{{ $atten->id }}" id="onlyLeaveRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
-                                                <td class="text-center inputCheckbox">
-                                                    <div class="form-check m-0 justify-center">
-                                                        <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="m-0 font-medium block">
-                                                        {{ (isset($atten->employee->title->name) && !empty($atten->employee->title->name) ? $atten->employee->title->name : '') }}
-                                                        {{ (isset($atten->employee->first_name) && !empty($atten->employee->first_name) ? ' '.$atten->employee->first_name : '') }}
-                                                        {{ (isset($atten->employee->last_name) && !empty($atten->employee->last_name) ? ' '.$atten->employee->last_name : '') }}
+                                        <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                            <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
+                                                <div class="form-check m-0 justify-center">
+                                                    <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
+                                                </div>
+                                            </td>
+                                            <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
+                                                <span class="m-0 font-medium block">
+                                                    {{ (isset($atten->employee->title->name) && !empty($atten->employee->title->name) ? $atten->employee->title->name : '') }}
+                                                    {{ (isset($atten->employee->first_name) && !empty($atten->employee->first_name) ? ' '.$atten->employee->first_name : '') }}
+                                                    {{ (isset($atten->employee->last_name) && !empty($atten->employee->last_name) ? ' '.$atten->employee->last_name : '') }}
+                                                </span>
+                                                @if(isset($atten->employee->employment->employeeJobTitle->name) && !empty($atten->employee->employment->employeeJobTitle->name))
+                                                    <span class="m-0 font-medium text-slate-400 block">
+                                                        {{ $atten->employee->employment->employeeJobTitle->name }}
                                                     </span>
-                                                    @if(isset($atten->employee->employment->employeeJobTitle->name) && !empty($atten->employee->employment->employeeJobTitle->name))
-                                                        <span class="m-0 font-medium text-slate-400 block">
-                                                            {{ $atten->employee->employment->employeeJobTitle->name }}
-                                                        </span>
-                                                    @endif
-                                                    @if(isset($atten->pay->hourly_rate) && !empty($atten->pay->hourly_rate))
-                                                        <span class="m-0 font-medium block">
-                                                            £{{ $atten->pay->hourly_rate }}
-                                                        </span>
-                                                    @endif
-
-                                                    <input name="attendance[{{ $atten->id }}][clockin_system]" value="{{ $atten->clockin_system }}" 
-                                                                    type="hidden" 
-                                                                    class="clockin_system rounded-0 time form-control w-full"/>
-                                                    <input name="attendance[{{ $atten->id }}][clockout_system]" value="{{ $atten->clockout_system }}" 
-                                                                    type="hidden" 
-                                                                    class="clockout_system time rounded-0 form-control w-full"/>
-                                                    <input type="hidden" class="paid_break" name="attendance[{{ $atten->id }}][paid_break]" value="{{ $atten->paid_break }}"/>
-                                                    <input type="hidden" class="unpadi_break" name="attendance[{{ $atten->id }}][unpadi_break]" value="{{ $atten->unpadi_break }}"/>
-                                                    <input type="hidden" class="total_break" name="attendance[{{ $atten->id }}][total_break]" value="{{ (!empty($atten->total_break) ? $atten->total_break : 0) }}"/>
-                                                    <input type="hidden" class="allowed_br" name="attendance[{{ $atten->id }}][allowed_br]" value="{{ $atten->allowed_break }}"/>
-                                                    <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][adjustment]" value="{{ $atten->adjustment }}" type="hidden" placeholder="+/-00:00" class="adjustment rounded-0 form-control w-full"/>
-                                                    
-                                                    <input type="hidden" class="total_work_hour" name="attendance[{{ $atten->id }}][total_work_hour]" data-prev="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}" value="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}"/>
-                                                </td>
-                                                <td colspan="3" class="bg-slate-100">
-                                                    @if($atten->employee_leave_day_id > 0)
-                                                        @php 
-                                                            $leaveName = '';
-                                                            switch($atten->leave_status):
-                                                                case 1:
-                                                                    $leaveName = 'Holiday / Vacation';
-                                                                    break;
-                                                                case 2:
-                                                                    $leaveName = 'Meeting / Training';
-                                                                    break;
-                                                                case 3:
-                                                                    $leaveName = 'Sick Leave';
-                                                                    break;
-                                                                case 4:
-                                                                    $leaveName = 'Authorised Unpaid';
-                                                                    break;
-                                                                case 5:
-                                                                    $leaveName = 'Authorised Paid';
-                                                                    break;
-                                                            endswitch
-                                                        @endphp
-                                                        @if($atten->leave_status == 1)
-                                                            @php 
-                                                                $leaveNote = (isset($atten->leaveDay->leave->note) && !empty($atten->leaveDay->leave->note) ? $atten->leaveDay->leave->note : '');
-                                                                $leaveHour = (isset($atten->leave_hour) && $atten->leave_hour > 0 ? $atten->leave_hour : 0);
-                                                                $hours = (intval(trim($leaveHour)) / 60 >= 1) ? intval(intval(trim($leaveHour)) / 60) : '00';
-                                                                $mins = (intval(trim($leaveHour)) % 60 != 0) ? intval(trim($leaveHour)) % 60 : '00';
-                                                            
-                                                                $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                $hourMins .= ':';
-                                                                $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                            @endphp
-                                                            <p class="leaveAttendance font-medium">{{ $leaveName }} found for this day.</p>
-                                                        @else
-                                                            <p class="leaveAttendance font-medium">{{ $leaveName }} {{ (!empty($leaveNote) ? ': '.$leaveNote : '') }}</p>
-                                                        @endif
-                                                    @endif
-                                                </td>
-                                                <td class="bg-slate-100">
-                                                    <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][leave_adjustment]" value="{{ $atten->leave_adjustment }}" type="text" placeholder="+/-00:00" class="leave_adjustment rounded-0 form-control w-full"/>
-                                                </td>
-                                                <td class="bg-slate-100">
-                                                    <span class="leave_hour_text font-medium">{{ $atten->leaves_hour }}</span>
-                                                    <input type="hidden" class="leave_hour" name="attendance[{{ $atten->id }}][leave_hour]" data-prev="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}" value="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}"/>
-                                                    <input type="hidden" class="leave_status" name="attendance[{{ $atten->id }}][leave_status]" value="{{ ($atten->leave_status > 0 ? $atten->leave_status : 0) }}"/>
-                                                </td>
-                                                <td>
-                                                    <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
-                                                    <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                                    <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
-                                                    <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
-                                                    <input type="hidden" class="isOnlyLeave" name="attendance[{{ $atten->id }}][only_leave]" value="1"/>
-                                                </td>
-                                            </tr>
-                                        @else
-                                            <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
-                                                <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
-                                                    <div class="form-check m-0 justify-center">
-                                                        <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
-                                                    </div>
-                                                </td>
-                                                <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
+                                                @endif
+                                                @if(isset($atten->pay->hourly_rate) && !empty($atten->pay->hourly_rate))
                                                     <span class="m-0 font-medium block">
-                                                        {{ (isset($atten->employee->title->name) && !empty($atten->employee->title->name) ? $atten->employee->title->name : '') }}
-                                                        {{ (isset($atten->employee->first_name) && !empty($atten->employee->first_name) ? ' '.$atten->employee->first_name : '') }}
-                                                        {{ (isset($atten->employee->last_name) && !empty($atten->employee->last_name) ? ' '.$atten->employee->last_name : '') }}
+                                                        £{{ $atten->pay->hourly_rate }}
                                                     </span>
-                                                    @if(isset($atten->employee->employment->employeeJobTitle->name) && !empty($atten->employee->employment->employeeJobTitle->name))
-                                                        <span class="m-0 font-medium text-slate-400 block">
-                                                            {{ $atten->employee->employment->employeeJobTitle->name }}
-                                                        </span>
-                                                    @endif
-                                                    @if(isset($atten->pay->hourly_rate) && !empty($atten->pay->hourly_rate))
-                                                        <span class="m-0 font-medium block">
-                                                            £{{ $atten->pay->hourly_rate }}
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <table class="table table-borderless">
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Contract</span></td>
-                                                            <td><span class="font-medium">{{ $atten->clockin_contract }}</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                            <td>
-                                                                <span class="font-medium">{{ $atten->clockin_punch }}</span>
-                                                                @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
-                                                                    <br/>
-                                                                    @if($atten->clock_in_location['suc'] == 0)
-                                                                        <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
-                                                                        </span>
-                                                                    @elseif($atten->clock_in_location['suc'] == 2)
-                                                                        <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            Punch Not Found 
-                                                                        </span>
-                                                                    @else
-                                                                        <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            {{ $atten->clock_in_location['venue'] }}
-                                                                        </span>
-                                                                    @endif
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Contract</span></td>
+                                                        <td><span class="font-medium">{{ $atten->clockin_contract }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Punch</span></td>
+                                                        <td>
+                                                            <span class="font-medium">{{ $atten->clockin_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
                                                                 @endif
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">System</span></td>
-                                                            <td>
-                                                                <input name="attendance[{{ $atten->id }}][clockin_system]" value="{{ $atten->clockin_system }}" 
-                                                                    type="text" 
-                                                                    class="clockin_system rounded-0 time form-control w-full"/>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                <td>
-                                                    <table class="table table-borderless">
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Contract</span></td>
-                                                            <td><span class="font-medium">{{ $atten->clockout_contract }}</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Punch</span></td>
-                                                            <td>
-                                                                <span class="font-medium">{{ $atten->clockout_punch }}</span>
-                                                                @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
-                                                                    <br/>
-                                                                    @if($atten->clock_in_location['suc'] == 0)
-                                                                        <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
-                                                                        </span>
-                                                                    @elseif($atten->clock_in_location['suc'] == 2)
-                                                                        <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            Punch Not Found 
-                                                                        </span>
-                                                                    @else
-                                                                        <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
-                                                                            {{ $atten->clock_in_location['venue'] }}
-                                                                        </span>
-                                                                    @endif
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">System</span></td>
+                                                        <td>
+                                                            <input name="attendance[{{ $atten->id }}][clockin_system]" value="{{ $atten->clockin_system }}" 
+                                                                type="text" 
+                                                                class="clockin_system rounded-0 time form-control w-full"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Contract</span></td>
+                                                        <td><span class="font-medium">{{ $atten->clockout_contract }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Punch</span></td>
+                                                        <td>
+                                                            <span class="font-medium">{{ $atten->clockout_punch }}</span>
+                                                            @if(isset($atten->clock_in_location) && !empty($atten->clock_in_location))
+                                                                <br/>
+                                                                @if($atten->clock_in_location['suc'] == 0)
+                                                                    <span class="text-white bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Away {{ (isset($atten->clock_in_location['ip']) && !empty($atten->clock_in_location['ip']) ? '('.$atten->clock_in_location['ip'].')' : '') }}
+                                                                    </span>
+                                                                @elseif($atten->clock_in_location['suc'] == 2)
+                                                                    <span class="text-white bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        Punch Not Found 
+                                                                    </span>
+                                                                @else
+                                                                    <span class="text-white bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">
+                                                                        {{ $atten->clock_in_location['venue'] }}
+                                                                    </span>
                                                                 @endif
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">System</span></td>
-                                                            <td>
-                                                                <input name="attendance[{{ $atten->id }}][clockout_system]" value="{{ $atten->clockout_system }}" 
-                                                                    type="text" 
-                                                                    class="clockout_system time rounded-0 form-control w-full"/>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                <td>
-                                                    <table class="table table-borderless">
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Paid</span></td>
-                                                            <td><span class="font-medium">{{ $atten->paid_break }}</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Unpaid</span></td>
-                                                            <td><span class="font-medium">{{ $atten->unpadi_break }}</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><span class="font-medium text-slate-400">Taken</span></td>
-                                                            <td>
-                                                                @if(isset($atten->breaks) && $atten->breaks->count() > 0)
-                                                                    <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
-                                                                @else:
-                                                                    <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                    <input type="hidden" class="paid_break" name="attendance[{{ $atten->id }}][paid_break]" value="{{ $atten->paid_break }}"/>
-                                                    <input type="hidden" class="unpadi_break" name="attendance[{{ $atten->id }}][unpadi_break]" value="{{ $atten->unpadi_break }}"/>
-                                                    <input type="hidden" class="total_break" name="attendance[{{ $atten->id }}][total_break]" value="{{ (!empty($atten->total_break) ? $atten->total_break : 0) }}"/>
-                                                    <input type="hidden" class="allowed_br" name="attendance[{{ $atten->id }}][allowed_br]" value="{{ $atten->allowed_break }}"/>
-                                                </td>
-                                                <td>
-                                                    <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][adjustment]" value="{{ $atten->adjustment }}" type="text" placeholder="+/-00:00" class="adjustment rounded-0 form-control w-full"/>
-                                                </td>
-                                                <td>
-                                                    <span class="total_work_hour_text font-medium">{{ $atten->work_hour }}</span>
-                                                    <input type="hidden" class="total_work_hour" name="attendance[{{ $atten->id }}][total_work_hour]" data-prev="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}" value="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}"/>
-                                                </td>
-                                                <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
-                                                    <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
-                                                    <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                                    <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
-                                                    <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
-                                                </td>
-                                            </tr>
-                                            @if($atten->leave_status > 0)
-                                            <tr class="attendanceLeaveRow attendanceLeaveRow_{{ $atten->id }} bg-slate-100" id="attendanceLeaveRow_{{ $atten->id }}">
-                                                <td colspan="3">
-                                                    @if($atten->employee_leave_day_id > 0)
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">System</span></td>
+                                                        <td>
+                                                            <input name="attendance[{{ $atten->id }}][clockout_system]" value="{{ $atten->clockout_system }}" 
+                                                                type="text" 
+                                                                class="clockout_system time rounded-0 form-control w-full"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Paid</span></td>
+                                                        <td><span class="font-medium">{{ $atten->paid_break }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Unpaid</span></td>
+                                                        <td><span class="font-medium">{{ $atten->unpadi_break }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="font-medium text-slate-400">Taken</span></td>
+                                                        <td>
+                                                            @if(isset($atten->breaks) && $atten->breaks->count() > 0)
+                                                                <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
+                                                            @else:
+                                                                <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <input type="hidden" class="paid_break" name="attendance[{{ $atten->id }}][paid_break]" value="{{ $atten->paid_break }}"/>
+                                                <input type="hidden" class="unpadi_break" name="attendance[{{ $atten->id }}][unpadi_break]" value="{{ $atten->unpadi_break }}"/>
+                                                <input type="hidden" class="total_break" name="attendance[{{ $atten->id }}][total_break]" value="{{ (!empty($atten->total_break) ? $atten->total_break : 0) }}"/>
+                                                <input type="hidden" class="allowed_br" name="attendance[{{ $atten->id }}][allowed_br]" value="{{ $atten->allowed_break }}"/>
+                                            </td>
+                                            <td>
+                                                <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][adjustment]" value="{{ $atten->adjustment }}" type="text" placeholder="+/-00:00" class="adjustment rounded-0 form-control w-full"/>
+                                            </td>
+                                            <td>
+                                                <span class="total_work_hour_text font-medium">{{ $atten->work_hour }}</span>
+                                                <input type="hidden" class="total_work_hour" name="attendance[{{ $atten->id }}][total_work_hour]" data-prev="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}" value="{{ ($atten->total_work_hour > 0 ? $atten->total_work_hour : 0) }}"/>
+                                            </td>
+                                            <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
+                                                <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
+                                                <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
+                                                <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
+                                            </td>
+                                        </tr>
+                                        @if($atten->leave_status > 0)
+                                        <tr class="attendanceLeaveRow attendanceLeaveRow_{{ $atten->id }} bg-slate-100" id="attendanceLeaveRow_{{ $atten->id }}">
+                                            <td colspan="3">
+                                                @if($atten->employee_leave_day_id > 0)
+                                                    @php 
+                                                        $leaveName = '';
+                                                        switch($atten->leave_status):
+                                                            case 1:
+                                                                $leaveName = 'Holiday / Vacation';
+                                                                break;
+                                                            case 2:
+                                                                $leaveName = 'Meeting / Training';
+                                                                break;
+                                                            case 3:
+                                                                $leaveName = 'Sick Leave';
+                                                                break;
+                                                            case 4:
+                                                                $leaveName = 'Authorised Unpaid';
+                                                                break;
+                                                            case 5:
+                                                                $leaveName = 'Authorised Paid';
+                                                                break;
+                                                        endswitch
+                                                    @endphp
+                                                    @if($atten->leave_status == 1)
                                                         @php 
-                                                            $leaveName = '';
-                                                            switch($atten->leave_status):
-                                                                case 1:
-                                                                    $leaveName = 'Holiday / Vacation';
-                                                                    break;
-                                                                case 2:
-                                                                    $leaveName = 'Meeting / Training';
-                                                                    break;
-                                                                case 3:
-                                                                    $leaveName = 'Sick Leave';
-                                                                    break;
-                                                                case 4:
-                                                                    $leaveName = 'Authorised Unpaid';
-                                                                    break;
-                                                                case 5:
-                                                                    $leaveName = 'Authorised Paid';
-                                                                    break;
-                                                            endswitch
+                                                            $leaveNote = (isset($atten->leaveDay->leave->note) && !empty($atten->leaveDay->leave->note) ? $atten->leaveDay->leave->note : '');
+                                                            $leaveHour = (isset($atten->leave_hour) && $atten->leave_hour > 0 ? $atten->leave_hour : 0);
+                                                            $hours = (intval(trim($leaveHour)) / 60 >= 1) ? intval(intval(trim($leaveHour)) / 60) : '00';
+                                                            $mins = (intval(trim($leaveHour)) % 60 != 0) ? intval(trim($leaveHour)) % 60 : '00';
+                                                        
+                                                            $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
+                                                            $hourMins .= ':';
+                                                            $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
                                                         @endphp
-                                                        @if($atten->leave_status == 1)
-                                                            @php 
-                                                                $leaveNote = (isset($atten->leaveDay->leave->note) && !empty($atten->leaveDay->leave->note) ? $atten->leaveDay->leave->note : '');
-                                                                $leaveHour = (isset($atten->leave_hour) && $atten->leave_hour > 0 ? $atten->leave_hour : 0);
-                                                                $hours = (intval(trim($leaveHour)) / 60 >= 1) ? intval(intval(trim($leaveHour)) / 60) : '00';
-                                                                $mins = (intval(trim($leaveHour)) % 60 != 0) ? intval(trim($leaveHour)) % 60 : '00';
-                                                            
-                                                                $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                $hourMins .= ':';
-                                                                $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                            @endphp
-                                                            <p class="leaveAttendance font-medium">{{ $leaveName }} found for this day.</p>
-                                                        @else
-                                                            <p class="leaveAttendance font-medium">{{ $leaveName }} {{ (!empty($leaveNote) ? ': '.$leaveNote : '') }}</p>
-                                                        @endif
+                                                        <p class="leaveAttendance font-medium">{{ $leaveName }} found for this day.</p>
+                                                    @else
+                                                        <p class="leaveAttendance font-medium">{{ $leaveName }} {{ (!empty($leaveNote) ? ': '.$leaveNote : '') }}</p>
                                                     @endif
-                                                </td>
-                                                <td>
-                                                    <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][leave_adjustment]" value="{{ $atten->leave_adjustment }}" type="text" placeholder="+/-00:00" class="leave_adjustment rounded-0 form-control w-full"/>
-                                                </td>
-                                                <td>
-                                                    <span class="leave_hour_text font-medium">{{ $atten->leaves_hour }}</span>
-                                                    <input type="hidden" class="leave_hour" name="attendance[{{ $atten->id }}][leave_hour]" data-prev="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}" value="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}"/>
-                                                    <input type="hidden" class="leave_status" name="attendance[{{ $atten->id }}][leave_status]" value="{{ ($atten->leave_status > 0 ? $atten->leave_status : 0) }}"/>
-                                                </td>
-                                            </tr>
-                                            @endif
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <input data-id="{{ $atten->id }}" name="attendance[{{ $atten->id }}][leave_adjustment]" value="{{ $atten->leave_adjustment }}" type="text" placeholder="+/-00:00" class="leave_adjustment rounded-0 form-control w-full"/>
+                                            </td>
+                                            <td>
+                                                <span class="leave_hour_text font-medium">{{ $atten->leaves_hour }}</span>
+                                                <input type="hidden" class="leave_hour" name="attendance[{{ $atten->id }}][leave_hour]" data-prev="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}" value="{{ ($atten->leave_hour > 0 ? $atten->leave_hour : 0) }}"/>
+                                                <input type="hidden" class="leave_status" name="attendance[{{ $atten->id }}][leave_status]" value="{{ ($atten->leave_status > 0 ? $atten->leave_status : 0) }}"/>
+                                            </td>
+                                        </tr>
                                         @endif
                                         <tr class="attendanceNoteRow attendanceNoteRow_{{ $atten->id }}" id="attendanceNoteRow_{{ $atten->id }}" style="display: none;">
                                             <td colspan="8">
@@ -601,7 +506,7 @@
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
                                             $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
-                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
@@ -713,7 +618,11 @@
                                                     <tr>
                                                         <td><span class="font-medium text-slate-400">Taken</span></td>
                                                         <td>
-                                                            <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
+                                                            @if(isset($atten->breaks) && $atten->breaks->count() > 0)
+                                                                <a data-haserror="{{ $break_issue }}" data-id="{{ $atten->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewBreakModal" class="view_break font-medium {{ ($break_issue == 1 ? 'text-danger' : 'text-primary') }}"><u>{{ $atten->break_time }}</u></a>
+                                                            @else:
+                                                                <a href="javascript:void(0);" class="view_break font-medium text-primary"><u>{{ $atten->break_time }}</u></a>
+                                                            @endif
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -860,7 +769,7 @@
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
                                             $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
-                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox">
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
