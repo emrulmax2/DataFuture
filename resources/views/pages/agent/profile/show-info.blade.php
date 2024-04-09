@@ -5,7 +5,7 @@
             <div class="ml-5">
                 <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg"></div>
                 <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->organization }}</div>
-                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->title->name.' '.$employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
+                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->first_name }} <span class="font-black">{{ $employee->last_name }}</span></div>
                 <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-warning ">Code : {{ $employee->code }}</span></div>
                 <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium {{ $employee->AgentUser->active == 1 ? 'text-success' : 'text-danger' }}">{{ ($employee->AgentUser->active == 1 ? 'Active' : 'Inactive') }}</span></div>
                 
