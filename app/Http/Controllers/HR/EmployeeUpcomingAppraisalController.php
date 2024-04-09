@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\EmployeeAppraisal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class EmployeeUpcomingAppraisalController extends Controller
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Upcoming Appraisal', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'activeEmployees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
         ]);
     }
 
