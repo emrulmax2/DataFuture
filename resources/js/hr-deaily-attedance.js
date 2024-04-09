@@ -33,11 +33,23 @@ import IMask from 'imask';
         })
     }
 
-    $('.dailyAttendanceTable .editRowNote').on('click', function(e){
+    $('.dailyAttendanceTable .attendanceRow .editRowNote').on('click', function(e){
         e.preventDefault();
         var $theBtn = $(this);
         var dataID = $theBtn.attr('data-id');
         var $parentTr = $theBtn.closest('tr.attendanceRow');
+        var $theTable = $parentTr.closest('.dailyAttendanceTable');
+        var theTableID = $theTable.attr('id');
+        var $noteTr = $('#'+theTableID+' tr#attendanceNoteRow_'+dataID);
+
+        $noteTr.fadeToggle();
+    });
+
+    $('.dailyAttendanceTable .onlyLeaveRow .editRowNote').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var dataID = $theBtn.attr('data-id');
+        var $parentTr = $theBtn.closest('tr.onlyLeaveRow');
         var $theTable = $parentTr.closest('.dailyAttendanceTable');
         var theTableID = $theTable.attr('id');
         var $noteTr = $('#'+theTableID+' tr#attendanceNoteRow_'+dataID);
@@ -142,7 +154,7 @@ import IMask from 'imask';
         }
     });
 
-    $('.dailyAttendanceTable .leave_adjustment').on('keyup', function(){
+    $('.dailyAttendanceTable .attendanceLeaveRow .leave_adjustment').on('keyup', function(){
         var $changedInput = $(this);
         var $parentTr = $changedInput.closest('tr.attendanceLeaveRow');
         var $theTable = $parentTr.closest('.dailyAttendanceTable');
@@ -179,7 +191,46 @@ import IMask from 'imask';
             $leave_hour.val(new_leave_hour).attr('data-prev', new_leave_hour);
             $theTr.find('.leave_hour_text').text(convertMinuteToHourMinute(new_leave_hour));
         }
-    })
+    });
+
+    $('.dailyAttendanceTable .onlyLeaveRow .leave_adjustment').on('keyup', function(){
+        var $changedInput = $(this);
+        var $parentTr = $changedInput.closest('tr.onlyLeaveRow');
+        var $theTable = $parentTr.closest('.dailyAttendanceTable');
+        var theTableID = $theTable.attr('id');
+        var rowID = $changedInput.attr('data-id');
+        var $theTr = $('#'+theTableID+' #onlyLeaveRow_'+rowID);
+        
+        var $leave_adjustment = $theTr.find('.leave_adjustment');
+        var leave_adjustment = $leave_adjustment.val();
+
+        if(leave_adjustment.length == 6){
+            var $leave_hour = $theTr.find('.leave_hour');
+            var leave_hour = parseInt($leave_hour.attr('data-prev'), 10);
+
+            var total_leave_adjustment = 0;
+            var leaveAdjustmentOperator = 0;
+            if (leave_adjustment.indexOf('-') != -1) {
+                leave_adjustment = leave_adjustment.replace('-', '');
+                total_leave_adjustment = stringToMinute(leave_adjustment);
+                leaveAdjustmentOperator = 1;
+            } else if (leave_adjustment.indexOf('+') != -1) {
+                leave_adjustment = leave_adjustment.replace('+', '');
+                total_leave_adjustment = stringToMinute(leave_adjustment);
+                leaveAdjustmentOperator = 2;
+            }
+
+            var new_leave_hour = leave_hour;
+            if(total_leave_adjustment > 0 && leaveAdjustmentOperator == 1){
+                new_leave_hour = (leave_hour - total_leave_adjustment);
+            }else if(total_leave_adjustment > 0 && leaveAdjustmentOperator == 2){
+                new_leave_hour = (leave_hour + total_leave_adjustment);
+            }
+
+            $leave_hour.val(new_leave_hour).attr('data-prev', new_leave_hour);
+            $theTr.find('.leave_hour_text').text(convertMinuteToHourMinute(new_leave_hour));
+        }
+    });
 
 
     $('.dailyAttendanceTable .absent_adjustment').on('keyup', function(){
@@ -366,11 +417,11 @@ import IMask from 'imask';
         e.preventDefault;
         var $theBtn = $(this);
         var rowID = $theBtn.attr('data-id');
-        var $parentTr = $theBtn.closest('tr.attendanceRow');
+        var $parentTr = $theBtn.closest('tr.attendanceSyncRow');
         var $theTable = $parentTr.closest('.dailyAttendanceTable');
         var theTableID = $theTable.attr('id');
 
-        var $theTr = $('#'+theTableID+' #attendanceRow_'+rowID);
+        var $theTr = ($parentTr.hasClass('onlyLeaveRow') ? $('#'+theTableID+' #onlyLeaveRow_'+rowID) : $('#'+theTableID+' #attendanceRow_'+rowID));
         var $theNoteTr = $('#'+theTableID+' #attendanceNoteRow_'+rowID);
 
         $theTable.find('button.saveRow').attr('disabled', 'disabled');
@@ -396,18 +447,19 @@ import IMask from 'imask';
             leaveAdjustment = $leaveAdjustment.val();
         }
         
-        if((clockIn.length == 5 && clockOut.length == 5 && adjustment.length == 6) || ($theTr.hasClass('attendanceAbsentRow') && absentAdjustment.length == 6)){
+        if((clockIn.length == 5 && clockOut.length == 5 && adjustment.length == 6) || ($theTr.hasClass('attendanceAbsentRow') && absentAdjustment.length == 6) || $theTr.hasClass('onlyLeaveRow')){
             let rowData = $theTr.find('input').serialize();
             let rowNote = $theNoteTr.find('textarea').val();
             let leaveData = '';
-                if($('#'+theTableID+' #attendanceLeaveRow_'+rowID).length > 0){
-                    var $theLeaveTr = $('#'+theTableID+' #attendanceLeaveRow_'+rowID);
-                    leaveData = $theLeaveTr.find('input').serialize();
-                }
+            let isLeaveRow = ($theTr.hasClass('onlyLeaveRow') ? true : false);
+            if($('#'+theTableID+' #attendanceLeaveRow_'+rowID).length > 0){
+                var $theLeaveTr = $('#'+theTableID+' #attendanceLeaveRow_'+rowID);
+                leaveData = $theLeaveTr.find('input').serialize();
+            }
             axios({
                 method: "post",
                 url: route('hr.attendance.update'),
-                data: {rowData : rowData, rowNote : rowNote, leaveData : leaveData},
+                data: {rowData : rowData, rowNote : rowNote, leaveData : leaveData, isLeaveRow : isLeaveRow},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $theTable.find('button.saveRow').removeAttr('disabled');

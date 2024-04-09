@@ -1135,7 +1135,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeAttendanceController::class)->group(function(){
         Route::get('hr/attendance', 'index')->name('hr.attendance');
-        Route::get('hr/attendance/list', 'list')->name('hr.attendance.sync.list'); 
+        Route::post('hr/attendance/list-html', 'getListHtml')->name('hr.attendance.sync.listhtml'); 
         Route::post('hr/attendance/syncronise', 'syncronise')->name('hr.attendance.sync');
         Route::get('hr/attendance/show/{date}', 'show')->name('hr.attendance.show');
         Route::post('hr/attendance/update', 'update')->name('hr.attendance.update');

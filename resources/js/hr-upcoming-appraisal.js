@@ -69,14 +69,14 @@ var upcomingAppraisalListTable = (function () {
                     field: "total_score",
                     headerHozAlign: "left",
                 },
-                {
+                /*{
                     title: "Promotion Consideration",
                     field: "promotion_consideration",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return (cell.getData().promotion_consideration == 1 ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>');
                     }
-                },
+                },*/
                 {
                     title: "Promotion",
                     field: "promotion_consideration",
@@ -90,7 +90,11 @@ var upcomingAppraisalListTable = (function () {
                     field: "status",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return (cell.getData().promotion_consideration == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due</span>');
+                        if(cell.getData().status == 3){
+                            return '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Completed</span>';
+                        }else{
+                            return (cell.getData().status == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due</span>');
+                        }
                     }
                 },
                 {

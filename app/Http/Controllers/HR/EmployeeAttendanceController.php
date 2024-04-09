@@ -17,46 +17,106 @@ use Illuminate\Http\Request;
 
 class EmployeeAttendanceController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
         return view('pages.hr.attendance.index', [
             'title' => 'HR Attendance - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'HR Monthly Attendance', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'html_table' => $this->listHtml(date('d-m-Y'))
         ]);
     }
 
-    public function list(Request $request){
-        $attendanceDate = (isset($request->attendanceDate) && !empty($request->attendanceDate) ? date('Y-m-d', strtotime('01-'.$request->attendanceDate)) : date('Y-m-d'));
-        
-        $total_rows = date('t', strtotime($attendanceDate));
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 31));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+    public function getListHtml(Request $request){
+        $queryDate = (isset($request->queryDate) && !empty($request->queryDate) ? date('Y-m-d', strtotime('01-'.$request->queryDate)) : date('Y-m-d'));
+        $html = $this->listHtml($queryDate);
 
-        $data = array();
+        return response()->json(['res' => $html], 200);
+    }
 
+    public function listHtml($attendanceDate){
+        $html = '';
         $month = date('m', strtotime($attendanceDate));
         $year = date('Y', strtotime($attendanceDate));
         for($i = 1; $i <= date('t', strtotime($attendanceDate)); $i++):
             $todayDate = $year.'-'.$month.'-'.($i < 10 ? '0'.$i: $i);
-            $data[] = [
-                'sl' => $i,
-                'date' => date('Y-m-d', strtotime($todayDate)),
-                'dateUnix' => strtotime($todayDate),
-                'theDate' => date('D jS M, Y', strtotime($todayDate)),
-                'synchronise' => $this->isSynchronised($todayDate),
-                'issues' => EmployeeAttendance::where('date', $todayDate)->where('user_issues', '>', 0)->get()->count(),
-                'absents' => EmployeeAttendance::where('date', $todayDate)->where('leave_status', '>', 1)->get()->count(),
-                'overtime' => EmployeeAttendance::where('date', $todayDate)->where('overtime_status', 1)->get()->count(),
-                'pendings' => EmployeeAttendance::where('date', $todayDate)->whereNull('updated_by')->get()->count(),
-                'allRows' => EmployeeAttendance::where('date', $todayDate)->get()->count(),
-            ];
+            $isSyncronised = $this->isSynchronised($todayDate);
+            $theUrl = $isSyncronised == 1 ? route('hr.attendance.show',strtotime($todayDate)) : 'javascript:void(0);';
+            
+            $issues = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('user_issues', '>', 0)->get()->count() : 0);
+            $absents = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('leave_status', '>', 1)->get()->count() : 0);
+            $overtime = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('overtime_status', 1)->get()->count() : 0);
+            $pendings = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->whereNull('updated_by')->get()->count() : 0);
+            $allRows = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->get()->count() : 0);
+            $html .= '<tr>';
+                $html .= '<td>'.date('D jS M, Y', strtotime($todayDate)).'</td>';
+                $html .= '<td>';
+                    if($isSyncronised == 1):
+                        $html .= '<button class="btn btn-sm btn-primary rounded-0 w-auto text-white" type="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle w-4 h-4 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    Synchronised
+                                </button>';
+                    else:
+                        $html .= '<button type="button"
+                                    data-date="'.$todayDate.'"
+                                    class="btn btn-sm btn-success text-white rounded-0 w-auto syncroniseAttendance">
+                                    Synchronise
+                                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                        stroke="white" class="w-4 h-4 ml-2">
+                                        <g fill="none" fill-rule="evenodd">
+                                            <g transform="translate(1 1)" stroke-width="4">
+                                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </button>';
+                    endif;
+                $html .= '</td>';
+
+                $html .= '<td>';
+                    if($issues > 0):
+                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$issues.' Issues</a>';
+                    else:
+                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Issues</a>';
+                    endif;
+                $html .= '</td>';
+
+                $html .= '<td>';
+                    if($absents > 0):
+                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$absents.' Absents</a>';
+                    else:
+                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Absents</a>';
+                    endif;
+                $html .= '</td>';
+
+                $html .= '<td>';
+                    if($overtime > 0):
+                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$overtime.' Overtime</a>';
+                    else:
+                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Overtime</a>';
+                    endif;
+                $html .= '</td>';
+                $html .= '<td>';
+                    if($pendings > 0):
+                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$pendings.' Pendings</a>';
+                    else:
+                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Pendings</a>';
+                    endif;
+                $html .= '</td>';
+                $html .= '<td>';
+                    if($allRows > 0):
+                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$allRows.' Attendances</a>';
+                    else:
+                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Attendances</a>';
+                    endif;
+                $html .= '</td>';
+            $html .= '</tr>';
         endfor;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return $html;
     }
 
     public function isSynchronised($theDate){
@@ -404,6 +464,7 @@ class EmployeeAttendanceController extends Controller
                     $break_ids = [];
                     $breakArray = [];
                     $count = (!empty($break_return) ? count($break_return) : 0);
+                    $break_issue_count = 0;
 
                     if(is_array($break_return) && !empty($break_return)):
                         $bi = 1;
@@ -415,7 +476,7 @@ class EmployeeAttendanceController extends Controller
                                     if(!isset($breakArray[$bik]['start'])):
                                         $breakArray[$bik]['start'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                     endif;
 
                                     $breakArray[$bik]['end'] = $time;
@@ -424,7 +485,7 @@ class EmployeeAttendanceController extends Controller
                                     if(!isset($breakArray[$bik]['end'])):
                                         $breakArray[$bik]['end'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                         $bik += 1;
                                     endif;
 
@@ -433,7 +494,7 @@ class EmployeeAttendanceController extends Controller
                                     if($bi == $count){
                                         $breakArray[$bik]['end'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                         $bik += 1;
                                     }
                                 }
@@ -442,7 +503,7 @@ class EmployeeAttendanceController extends Controller
                                     if(!isset($breakArray[$bik]['end']) && isset($breakArray[$bik]['start']) && $bik > 1):
                                         $breakArray[$bik]['end'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                         $bik += 1;
                                     endif;
 
@@ -451,7 +512,7 @@ class EmployeeAttendanceController extends Controller
                                     if($bi == $count){
                                         $breakArray[$bik]['end'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                         $bik += 1;
                                         $br_issue += 1;
                                     }
@@ -459,7 +520,7 @@ class EmployeeAttendanceController extends Controller
                                     if(!isset($breakArray[$bik]['start'])):
                                         $breakArray[$bik]['start'] = '00:00:00';
                                         $issues += 1;
-                                        $issues_array['break_issue'] += 1;
+                                        $break_issue_count += 1;
                                     endif;
 
                                     $breakArray[$bik]['end'] = $time;
@@ -531,11 +592,19 @@ class EmployeeAttendanceController extends Controller
                     endif;*/
 
                     $break = ($this->convertStringToMinute($paid_break) + $this->convertStringToMinute($unpaid_break));
+                    $unpaidBreakMinute = $this->convertStringToMinute($unpaid_break);
                     $actualBreak = 0;
                     if($break < $total_break):
                         $actualBreak = $total_break - $break;
                     endif;
+                    $break_issue_count += ($total_break == 0 && $unpaidBreakMinute > 0 ? 1 : 0);
+                    $issues += ($total_break == 0 && $unpaidBreakMinute > 0 ? 1 : 0);
+                    $break_issue_count += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($unpaidBreakMinute - $total_break) > 15 ? 1 : 0);
+                    $issues += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($unpaidBreakMinute - $total_break) > 15 ? 1 : 0);
 
+                    if($break_issue_count > 0):
+                        $issues_array['break_issue'] = $break_issue_count;
+                    endif;
                     $data['break_details_html'] = '';//$break_details;
                     $data['total_break'] = $total_break;
                     /* End Break Calculations */
@@ -672,8 +741,11 @@ class EmployeeAttendanceController extends Controller
 
         $rowNote = (isset($request->rowNote) && !empty($request->rowNote) ? $request->rowNote : null);
 
-        parse_str($request->leaveData, $leaveData);
+        if(!empty($request->leaveData)):
+            parse_str($request->leaveData, $leaveData);
+        endif;
         $leave = (isset($leaveData['attendance']) && !empty($leaveData['attendance']) ? $leaveData['attendance'] : []);
+        $isLeaveRow = (isset($request->isLeaveRow) && $request->isLeaveRow ? true : false);
 
         if(!empty($attendance)):
             foreach($attendance as $attenid => $atten):
@@ -696,7 +768,7 @@ class EmployeeAttendanceController extends Controller
                     $data['leave_adjustment'] = $leave[$attenid]['leave_adjustment'];
                     $data['leave_hour'] = $leave[$attenid]['leave_hour'];
                     $data['leave_status'] = $leave[$attenid]['leave_status'];
-                elseif(isset($atten['leave_status']) && $atten['leave_status'] > 0):
+                elseif((isset($atten['leave_status']) && $atten['leave_status'] > 0) || ($isLeaveRow && isset($atten['leave_status']) && $atten['leave_status'] > 0)):
                     $data['leave_adjustment'] = $atten['leave_adjustment'];
                     $data['leave_hour'] = $atten['leave_hour'];
                     $data['leave_status'] = $atten['leave_status'];
@@ -723,6 +795,7 @@ class EmployeeAttendanceController extends Controller
                 if(isset($atten['id']) && $atten['id'] > 0):
                     $attendance_id = $atten['attendance_id'];
                     $leave_status = (isset($atten['leave_status']) && $atten['leave_status'] > 0 ? $atten['leave_status'] : 0);
+                    $isOnlyLeave = (isset($atten['only_leave']) && $atten['only_leave'] == 1 ? true : false);
                     $data = [];
                     $data['adjustment'] = $atten['adjustment'];
                     $data['clockin_system'] = $atten['clockin_system'];
@@ -737,7 +810,7 @@ class EmployeeAttendanceController extends Controller
                     $data['leave_status'] = $leave_status;
                     $data['updated_by'] = auth()->user()->id;
 
-                    if(isset($atten['leave_status']) &&  $atten['leave_status'] > 0):
+                    if((isset($atten['leave_status']) &&  $atten['leave_status'] > 0) || $isOnlyLeave):
                         $data['leave_adjustment'] = $atten['leave_adjustment'];
                         $data['leave_hour'] = $atten['leave_hour'];
                     endif;
@@ -755,22 +828,22 @@ class EmployeeAttendanceController extends Controller
     public function edit(Request $request){
         $rowID = $request->rowID;
         $attendance = EmployeeAttendance::find($rowID);
+        $theDayTotal = 0;
 
         $html = '';
-        if(isset($attendance->breaks) && $attendance->breaks->count() > 0):
-            $html .= '<div class="overflow-x-auto">';
-                $html .= '<table class="table table-bordered table-sm">';
-                    $html .= '<thead>';
-                        $html .= '<tr>';
-                            $html .= '<th class="whitespace-nowrap">#</th>';
-                            $html .= '<th class="whitespace-nowrap">Start</th>';
-                            $html .= '<th class="whitespace-nowrap">End</th>';
-                            $html .= '<th class="whitespace-nowrap">Duration</th>';
-                        $html .= '</tr>';
-                    $html .= '</thead>';
-                    $html .= '<tbody>';
+        $html .= '<div class="overflow-x-auto">';
+            $html .= '<table class="table table-bordered table-sm">';
+                $html .= '<thead>';
+                    $html .= '<tr>';
+                        $html .= '<th class="whitespace-nowrap">#</th>';
+                        $html .= '<th class="whitespace-nowrap">Start</th>';
+                        $html .= '<th class="whitespace-nowrap">End</th>';
+                        $html .= '<th class="whitespace-nowrap">Duration</th>';
+                    $html .= '</tr>';
+                $html .= '</thead>';
+                $html .= '<tbody>';
+                    if(isset($attendance->breaks) && $attendance->breaks->count() > 0):
                         $i = 1;
-                        $theDayTotal = 0;
                         foreach($attendance->breaks as $brks):
                             $html .= '<tr class="breakRow">';
                                 $html .= '<td>'.$i.'</td>';
@@ -781,18 +854,23 @@ class EmployeeAttendanceController extends Controller
                             $theDayTotal += $brks->total;
                             $i++;
                         endforeach;
-                    $html .= '</tbody>';
-                    $html .= '<tfoot>';
-                        $html .= '<tr>';
-                            $html .= '<td colspan="3"><strong>Day Total</strong></td>';
-                            $html .= '<td><input value="'.$this->calculateHourMinute($theDayTotal).'" type="text" class="form-control w-full breakGrandTotal" readonly name="total_break"/></td>';
+                    else:
+                        $html .= '<tr class="breakRow">';
+                            $html .= '<td>1</td>';
+                            $html .= '<td><input value="" type="text" class="form-control breakStart w-full timepicker" name="newBreaks['.$rowID.'][start]"/></td>';
+                            $html .= '<td><input value="" type="text" class="form-control breakEnd w-full timepicker" name="newBreaks['.$rowID.'][end]"/></td>';
+                            $html .= '<td><input readonly value="" type="text" class="form-control breakRowTotal w-full timepicker" name="newBreaks['.$rowID.'][total]"/></td>';
                         $html .= '</tr>';
-                    $html .= '</tfoot>';
-                $html .= '</table>';
-            $html .= '</div>';
-        else:
-            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!</div>';
-        endif;
+                    endif;
+                $html .= '</tbody>';
+                $html .= '<tfoot>';
+                    $html .= '<tr>';
+                        $html .= '<td colspan="3"><strong>Day Total</strong></td>';
+                        $html .= '<td><input value="'.$this->calculateHourMinute($theDayTotal).'" type="text" class="form-control w-full breakGrandTotal" readonly name="total_break"/></td>';
+                    $html .= '</tr>';
+                $html .= '</tfoot>';
+            $html .= '</table>';
+        $html .= '</div>';
 
         return response()->json(['res' => $html], 200);
     }
@@ -802,6 +880,7 @@ class EmployeeAttendanceController extends Controller
         $employeeAttendance = EmployeeAttendance::find($attendance_id);
         $total_break = (isset($request->total_break) && !empty($request->total_break) && $request->total_break> 0 ?  $this->convertStringToMinute($request->total_break) : 0);
         $breaks = (isset($request->breaks) && !empty($request->breaks) ? $request->breaks : []);
+        $newBreaks = (isset($request->newBreaks) && !empty($request->newBreaks) ? $request->newBreaks : []);
         //return response()->json($breaks);
 
         $grand_total = 0;
@@ -820,6 +899,23 @@ class EmployeeAttendanceController extends Controller
                     EmployeeAttendanceDayBreak::where('id', $break_id)->update($data);
                 endforeach;
             endforeach;
+        elseif(!empty($newBreaks)):
+            $brk = (isset($newBreaks[$attendance_id]) && !empty($newBreaks[$attendance_id]) ? $newBreaks[$attendance_id] : []);
+            if(!empty($brk)):
+                $total = (isset($brk['total']) && !empty($brk['total']) ? $this->convertStringToMinute($brk['total']) : 0);
+                $grand_total += $total;
+
+                $data = [];
+                $data['employee_attendance_id'] = $attendance_id;
+                $data['employee_id'] = $employeeAttendance->employee_id;
+                $data['date'] = (isset($employeeAttendance->date) && !empty($employeeAttendance->date) ? date('Y-m-d', strtotime($employeeAttendance->date)) : null);
+                $data['start'] = (isset($brk['start']) && !empty($brk['start']) ? $brk['start'] : '00:00');
+                $data['end'] = (isset($brk['end']) && !empty($brk['end']) ? $brk['end'] : '00:00');
+                $data['total'] = $total;
+                $data['created_by'] = auth()->user()->id;
+
+                EmployeeAttendanceDayBreak::create($data);
+            endif;
         endif;
         $actualBreakTaken = ($total_break == $grand_total ? $total_break : $grand_total);
 

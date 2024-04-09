@@ -7,201 +7,7 @@ import IMask from 'imask';
 import dayjs from "dayjs";
 import Litepicker from "litepicker";
 
-var attendanceSyncListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let attendanceDate = $("#queryDate").val() != "" ? $("#queryDate").val() : "";
-
-        let tableContent = new Tabulator("#attendanceSyncListTable", {
-            ajaxURL: route("hr.attendance.sync.list"),
-            ajaxParams: { attendanceDate: attendanceDate },
-            ajaxFiltering: false,
-            ajaxSorting: false,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 31,
-            paginationSizeSelector: [31],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "Date",
-                    field: "theDate",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Synchronise",
-                    field: "synchronise",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        if(cell.getData().synchronise == 1){
-                            return '<button class="btn btn-sm btn-primary rounded-0 w-auto text-white" type="button">\
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle w-4 h-4 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>\
-                                Synchronised\
-                            </button>';
-                        }else{
-                            return '<button type="button"\
-                                        data-date="'+cell.getData().date+'"\
-                                        class="btn btn-sm btn-success text-white rounded-0 w-auto syncroniseAttendance">\
-                                        Synchronise\
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
-                                            stroke="white" class="w-4 h-4 ml-2">\
-                                            <g fill="none" fill-rule="evenodd">\
-                                                <g transform="translate(1 1)" stroke-width="4">\
-                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
-                                                    <path d="M36 18c0-9.94-8.06-18-18-18">\
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"\
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
-                                                    </path>\
-                                                </g>\
-                                            </g>\
-                                        </svg>\
-                                    </button>';
-                        }
-                    }
-                },
-                {
-                    title: "Issues",
-                    field: "issues",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var theUrl = cell.getData().synchronise == 1 ? route('hr.attendance.show', cell.getData().dateUnix) : 'javascript:void(0);';
-                        if(cell.getData().issues > 0){
-                            return '<a href="'+theUrl+'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'+cell.getData().issues+' Issues</a>';
-                        }else{
-                            return '<a href="'+theUrl+'" class="btn btn-sm btn-success text-white rounded-0">0 Issues</a>';
-                        }
-                    }
-                },
-                {
-                    title: "Absents",
-                    field: "absents",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var theUrl = cell.getData().synchronise == 1 ? route('hr.attendance.show', cell.getData().dateUnix) : 'javascript:void(0);';
-                        if(cell.getData().absents > 0){
-                            return '<a href="'+theUrl+'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'+cell.getData().absents+' Absents</a>';
-                        }else{
-                            return '<a href="'+theUrl+'" class="btn btn-sm btn-success text-white rounded-0">0 Absents</a>';
-                        }
-                    }
-                },
-                {
-                    title: "Overtime",
-                    field: "overtime",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var theUrl = cell.getData().synchronise == 1 ? route('hr.attendance.show', cell.getData().dateUnix) : 'javascript:void(0);';
-                        if(cell.getData().overtime > 0){
-                            return '<a href="'+theUrl+'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'+cell.getData().overtime+' Overtime</a>';
-                        }else{
-                            return '<a href="'+theUrl+'" class="btn btn-sm btn-success text-white rounded-0">0 Overtime</a>';
-                        }
-                    }
-                },
-                {
-                    title: "Pendings",
-                    field: "pendings",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var theUrl = cell.getData().synchronise == 1 ? route('hr.attendance.show', cell.getData().dateUnix) : 'javascript:void(0);';
-                        if(cell.getData().pendings > 0){
-                            return '<a href="'+theUrl+'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'+cell.getData().pendings+' Pendings</a>';
-                        }else{
-                            return '<a href="'+theUrl+'" class="btn btn-sm btn-success text-white rounded-0">0 Pendings</a>';
-                        }
-                    }
-                },
-                {
-                    title: "Actions",
-                    field: "allRows",
-                    hozAlign: "left",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var theUrl = cell.getData().synchronise == 1 ? route('hr.attendance.show', cell.getData().dateUnix) : 'javascript:void(0);';
-                        if(cell.getData().allRows > 0){
-                            return '<a href="'+theUrl+'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'+cell.getData().allRows+' Attendances</a>';
-                        }else{
-                            return '<a href="'+theUrl+'" class="btn btn-sm btn-success text-white rounded-0">0 Attendances</a>';
-                        }
-                    }
-                }
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-            },
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Title Details",
-            });
-        });
-
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
-        });
-    };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
-
 (function(){
-    if ($("#attendanceSyncListTable").length) {
-        attendanceSyncListTable.init();
-        
-        // Filter function
-        function filterTitleHTMLForm() {
-            attendanceSyncListTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterTitleHTMLForm();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#queryDate").val($('#queryDate').attr('data-org'));
-            filterTitleHTMLForm();
-        });
-
-    }
-
-
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
 
@@ -224,6 +30,39 @@ var attendanceSyncListTable = (function () {
         element: document.getElementById('queryDate'),
         ...dateOption
     });
+
+    $('#filterMonthAttenForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('filterMonthAttenForm');
+
+        document.querySelector('#filterMonthAtten').setAttribute('disabled', 'disabled');
+        document.querySelector('#filterMonthAtten svg').style.cssText = 'display: inline-block;';
+        document.querySelector('.leaveTableLoader').classList.add('active');
+
+        let form_data = new FormData(form);
+        axios({
+            method: "POST",
+            url: route('hr.attendance.sync.listhtml'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#filterMonthAtten').removeAttribute('disabled');
+            document.querySelector('#filterMonthAtten svg').style.cssText = 'display: none;';
+            document.querySelector('.leaveTableLoader').classList.remove('active');
+            
+            if (response.status == 200) {
+                var res = response.data.res;
+                $('#attendanceSyncListTable table tbody').html(res);
+            } 
+        }).catch(error => {
+            document.querySelector('#filterMonthAtten').removeAttribute('disabled');
+            document.querySelector('#filterMonthAtten svg').style.cssText = 'display: none;';
+            document.querySelector('.leaveTableLoader').classList.remove('active');
+            if(error.response){
+                console.log('error');
+            }
+        });
+    })
 
 
     $('#attendanceSyncListTable').on('click', '.syncroniseAttendance', function(e){

@@ -48,6 +48,14 @@ var manageHolidayListTable = (function () {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '';
+                        html += '<div class="block relative">';
+                            html += '<div class="whitespace-nowrap">'+cell.getData().status+'</div>';
+                            html += '<div class="font-medium text-xs whitespace-nowrap">'+cell.getData().hour+'</div>';
+                        html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Start Date",
@@ -65,9 +73,10 @@ var manageHolidayListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Hour",
-                    field: "hour",
+                    title: "Request Made",
+                    field: "created_at",
                     headerHozAlign: "left",
+                    visible: (type == 'pending' ? true : false),
                 },
                 {
                     title: "Approved By",

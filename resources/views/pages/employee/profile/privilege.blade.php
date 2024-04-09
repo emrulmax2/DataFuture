@@ -159,6 +159,27 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
+                    <div class="font-medium text-base">HR Portal Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['add_attendance']) && $priv['hr_portal']['add_attendance'] == 1 ? 'checked' : '') }} id="permission_hr_portal_1" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][add_attendance]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_1">Add Attendance</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
                     <div class="font-medium text-base">Internal Links Privileges</div>
                 </div>
                 <div class="col-span-6 text-right relative">
