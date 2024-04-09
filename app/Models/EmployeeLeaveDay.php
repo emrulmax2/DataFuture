@@ -19,6 +19,7 @@ class EmployeeLeaveDay extends Model
         'is_fraction',
         'status',
         'is_taken',
+        'was_absent_day',
         'created_by',
         'updated_by',
     ];

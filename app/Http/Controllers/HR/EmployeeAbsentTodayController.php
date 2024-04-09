@@ -42,12 +42,34 @@ class EmployeeAbsentTodayController extends Controller
                 $employee_id = $employee->id;
                 $employeeLeaveDay = EmployeeLeaveDay::where('status', 'Active')
                                     ->where('leave_date', $theDate)
+                                    ->where('was_absent_day', '!=', 1)
                                     ->whereHas('leave', function($q) use($employee_id){
                                         $q->where('employee_id', $employee_id)->where('status', 'Approved');
                                     })
                                     ->get()->first();
                 $leave_status = (isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0 && isset($employeeLeaveDay->leave->status) && $employeeLeaveDay->leave->status == 'Approved' ? true : false);
-
+                $absentLeave = EmployeeLeaveDay::where('status', 'Active')
+                                    ->where('leave_date', $theDate)
+                                    ->where('was_absent_day', 1)
+                                    ->whereHas('leave', function($q) use($employee_id){
+                                        $q->where('employee_id', $employee_id)->where('status', 'Approved');
+                                    })
+                                    ->get()->first();
+                $absentLeaveType = '';
+                if(isset($absentLeave->leave->leave_type) && $absentLeave->leave->leave_type > 0):
+                    switch ($absentLeave->leave->leave_type):
+                        case 3:
+                            $absentLeaveType = 'Sick Leave';
+                            break;
+                        case 4:
+                            $absentLeaveType = 'Authorised Unpaid';
+                            break;
+                        case 5:
+                            $absentLeaveType = 'Authorised Paid';
+                            break;
+                    endswitch;
+                endif;
+                $absentReason = (isset($absentLeave->leave->approver_note) && !empty($absentLeave->leave->approver_note) ? $absentLeave->leave->approver_note : '');
                 $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)
                                          ->where('effective_from', '<=', $theDate)
                                          ->where(function($query) use($theDate){
@@ -69,6 +91,8 @@ class EmployeeAbsentTodayController extends Controller
                         $res[$employee_id]['end'] =  $patternDay->end;
                         $res[$employee_id]['day_id'] =  $patternDay->id;
                         $res[$employee_id]['pattern_id'] =  $patternDay->employee_working_pattern_id;
+                        $res[$employee_id]['reason'] =  $absentReason;
+                        $res[$employee_id]['reason_type'] =  $absentLeaveType;
                     endif;
                 endif;
             endif;

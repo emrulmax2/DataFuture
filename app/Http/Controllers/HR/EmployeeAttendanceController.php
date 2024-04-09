@@ -599,8 +599,8 @@ class EmployeeAttendanceController extends Controller
                     endif;
                     $break_issue_count += ($total_break == 0 && $unpaidBreakMinute > 0 ? 1 : 0);
                     $issues += ($total_break == 0 && $unpaidBreakMinute > 0 ? 1 : 0);
-                    $break_issue_count += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($unpaidBreakMinute - $total_break) > 15 ? 1 : 0);
-                    $issues += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($unpaidBreakMinute - $total_break) > 15 ? 1 : 0);
+                    $break_issue_count += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($total_break - $unpaidBreakMinute) > 15 ? 1 : 0);
+                    $issues += ($unpaidBreakMinute > 0 && $total_break > $unpaidBreakMinute && ($total_break - $unpaidBreakMinute) > 15 ? 1 : 0);
 
                     if($break_issue_count > 0):
                         $issues_array['break_issue'] = $break_issue_count;

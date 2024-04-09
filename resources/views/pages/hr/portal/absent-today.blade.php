@@ -58,7 +58,8 @@
                             <span class="font-medium">{{ $absent['end'] }}</span>
                         </td>
                         <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-right shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-                            
+                            {{ $absent['reason_type'] }}<br/>
+                            {{ $absent['reason'] }}
                         </td>
                     </tr>
                     @endforeach
