@@ -154,7 +154,7 @@ class AttendanceLiveController extends Controller
                     $statusClass = 'text-success';
                     break;
                 case 2:
-                    $statusLabel = 'UnUnauthorised Absent';
+                    $statusLabel = 'Unauthorised Absent';
                     $statusClass = 'text-success';
                     break;
                 case 3: 
