@@ -97,7 +97,7 @@
         </div>
         <div class="flex justify-start items-center pt-5 labelsBtnsGroup">
             <span class="inline-flex px-3 py-1 font-medium holidayVacationBG mr-1">Holiday / Vacation</span>
-            <span class="inline-flex px-3 py-1 font-medium meetingTrainingBG mr-1">Authorised Absent</span>
+            <span class="inline-flex px-3 py-1 font-medium meetingTrainingBG mr-1">Unauthorised Absent</span>
             <span class="inline-flex px-3 py-1 font-medium sickLeaveBG mr-1">Sick Leave</span>
             <span class="inline-flex px-3 py-1 font-medium authoriseUnpaidBG mr-1">Authorise Unpaid</span>
             <span class="inline-flex px-3 py-1 font-medium authorisedPaidBG mr-1">Authorise Paid</span>

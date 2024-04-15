@@ -59,7 +59,7 @@ class EmployeeAbsentTodayController extends Controller
                 if(isset($absentLeave->leave->leave_type) && $absentLeave->leave->leave_type > 0):
                     switch ($absentLeave->leave->leave_type):
                         case 2:
-                            $absentLeaveType = 'Authorised Absent';
+                            $absentLeaveType = 'Unauthorised Absent';
                             break;
                         case 3:
                             $absentLeaveType = 'Sick Leave';

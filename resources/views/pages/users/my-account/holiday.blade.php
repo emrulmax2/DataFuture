@@ -123,7 +123,7 @@
                                                                                                             Holiday / Vacation
                                                                                                             @break
                                                                                                         @case(2)
-                                                                                                            Authorised Absent
+                                                                                                            Unauthorised Absent
                                                                                                             @break
                                                                                                         @case(3)
                                                                                                             Sick Leave
@@ -172,7 +172,7 @@
                                                                                                         Holiday / Vacation
                                                                                                         @break
                                                                                                     @case(2)
-                                                                                                        Authorised Absent
+                                                                                                        Unauthorised Absent
                                                                                                         @break
                                                                                                     @case(3)
                                                                                                         Sick Leave
@@ -266,7 +266,7 @@
                                                                                                                 Holiday / Vacation
                                                                                                                 @break
                                                                                                             @case(2)
-                                                                                                                Authorised Absent
+                                                                                                                Unauthorised Absent
                                                                                                                 @break
                                                                                                             @case(3)
                                                                                                                 Sick Leave
