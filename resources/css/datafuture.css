@@ -1618,3 +1618,6 @@ input[type=number] {
     border: none;
     height: 100%;
 }
+.table.dailyAttendanceTable tr.attendanceRowUpdated{
+    background: rgba(25, 135, 84, .1);   
+}
