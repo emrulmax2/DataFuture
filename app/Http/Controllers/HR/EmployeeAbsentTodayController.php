@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 class EmployeeAbsentTodayController extends Controller
 {
     public function index($date){
+        $date = (!empty($date) ? strtotime($date) : strtotime(date('Y-m-d')));
         $theDate = date('Y-m-d', $date);
         return view('pages.hr.portal.absent-today', [
             'title' => 'HR Portal Absent Today - LCC Data Future Managment',
