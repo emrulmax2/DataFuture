@@ -114,9 +114,9 @@
                                                             $hourMins .= ':';
                                                             $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
                                                         @endphp
-                                                        <p class="leaveAttendance">Holiday found for this day {{ $hourMins }} Hours.</p>
+                                                        <p class="leaveAttendance">Holiday found for this day {{ $hourMins }} Hours. {{ (isset($atten->leaveDay->leave->note) && !empty($atten->leaveDay->leave->note) ? ' - '.$atten->leaveDay->leave->note : '') }}</p>
                                                     @else
-                                                        <p class="leaveAttendance">{{ $leaveName }} {{ (!empty($leaveNote) ? ': '.$leaveNote : '') }}</p>
+                                                        <p class="leaveAttendance">{{ $leaveName }} {{ (isset($atten->leaveDay->leave->note) && !empty($atten->leaveDay->leave->note) ? ' - '.$atten->leaveDay->leave->note : '') }}</p>
                                                     @endif
                                                     <input type="hidden" name="attendance[{{ $atten->id }}][leave_status]" value="{{ $atten->leave_status }}"/>
                                                 @else

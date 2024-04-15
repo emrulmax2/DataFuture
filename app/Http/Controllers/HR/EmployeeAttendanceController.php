@@ -650,7 +650,7 @@ class EmployeeAttendanceController extends Controller
                     $data['leave_status'] = $leave_type;
                     $data['leave_hour'] = ($leave_type > 0) ? $total_mints_day : 0;
                     $data['leave_adjustment'] = '+00:00';
-                    $data['note'] = (isset($leave_note) && !empty($leave_note) ? $leave_note : '');
+                    $data['note'] = '';
                     $data['user_issues'] = 0;
                     $data['isses_field'] = '';
                     $data['overtime_status'] = 0;
