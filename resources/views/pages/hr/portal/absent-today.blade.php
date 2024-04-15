@@ -7,14 +7,18 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Absent Employees of <u>{{ date('jS M, Y', $date)}}</u></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.absent.employee', strtotime($yesterday)) }}" class="transition duration-200 border shadow-sm justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed !box !box flex items-center text-slate-600 dark:text-slate-300">
+            {{--<a href="{{ route('hr.portal.absent.employee', strtotime($yesterday)) }}" class="transition duration-200 border shadow-sm justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed !box !box flex items-center text-slate-600 dark:text-slate-300">
                 <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
                 Prev Day
             </a>
             <a href="{{ route('hr.portal.absent.employee', strtotime($tomorrow)) }}" class="transition duration-200 border shadow-sm justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed !box !box ml-3 flex items-center text-slate-600 dark:text-slate-300">
                 Next Day
                 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-            </a>
+            </a>--}}
+            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
+                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
+                <input type="text" readonly name="class_date" class="w-full h-full form-control border-0 absentAttendanceDate" id="absentAttendanceDate" value="{{ date('d-m-Y', $date) }}" style="max-width: 110px;"/>
+            </div>
         </div>
     </div>
     <div class="intro-y mt-8 overflow-auto sm:mt-0 lg:overflow-visible">

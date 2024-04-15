@@ -3,6 +3,9 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import IMask from 'imask';
+
+import dayjs from "dayjs";
+import Litepicker from "litepicker";
  
 
 (function(){
@@ -39,6 +42,31 @@ import IMask from 'imask';
             var mask = IMask(this, maskOptions);
         })
     }
+
+    let dateOption = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: false,
+        inlineMode: false,
+        format: "DD-MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+    const absentAttendanceDate = new Litepicker({
+        element: document.getElementById('absentAttendanceDate'),
+        ...dateOption
+    });
+
+    absentAttendanceDate.on('selected', (date) => {
+        var theDate = date.getTime() / 1000; //year+'-'+(month < 10 ? '0'+month : month)+'-'+(day < 10 ? '0'+day : day); 
+        window.location.href = route('hr.portal.absent.employee', $('#absentAttendanceDate').val());
+    });
 
 
     $('.absentTodayTr').on('click', function(e){
