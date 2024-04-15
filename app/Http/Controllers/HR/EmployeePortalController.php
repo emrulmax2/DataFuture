@@ -164,7 +164,7 @@ class EmployeePortalController extends Controller
                             $status .= 'Holiday / Vacation';
                             break;
                         case(2):
-                            $status .= 'Meeting / Training';
+                            $status .= 'Authorised Absent';
                             break;
                         case(3):
                             $status .= 'Sick Leave';
@@ -209,7 +209,7 @@ class EmployeePortalController extends Controller
                             $status .= 'Holiday / Vacation';
                             break;
                         case(2):
-                            $status .= 'Meeting / Training';
+                            $status .= 'Authorised Absent';
                             break;
                         case(3):
                             $status .= 'Sick Leave';
@@ -479,8 +479,8 @@ class EmployeePortalController extends Controller
                                         $class .= ' holidayVacationBG';
                                         break;
                                     case 2:
-                                        $label = 'M';
-                                        $title = 'Meeting / Training';
+                                        $label = 'A';
+                                        $title = 'Authorised Absent';
                                         $class .= ' meetingTrainingBG';
                                         break;
                                     case 3:
@@ -543,16 +543,17 @@ class EmployeePortalController extends Controller
         $date = $request->date;
         $employee_id = $request->employee_id;
         $minutes = $request->minutes;
+        $leave_day_id = (isset($request->leave_day_id) && $request->leave_day_id > 0 ? $request->leave_day_id : 0);
 
         $leave_type = $request->leave_type;
-        $hour = $request->hour;
+        $hour = (isset($request->hour) && !empty($request->hour) ? $this->convertStringToMinute($request->hour) : 0);
         $note = $request->note;
 
         $HrHolidayYears = HrHolidayYear::where('start_date', '<=', $date)->where('end_date', '>=', $date)->where('active', 1)->get()->first();
         $holidayYearId = (isset($HrHolidayYears->id) && $HrHolidayYears->id > 0 ? $HrHolidayYears->id : 0);
         $activePatternId = $this->employeePossibleActivePattern($employee_id, $holidayYearId);
 
-        if($holidayYearId > 0 && $activePatternId > 0):
+        if($holidayYearId > 0 && $activePatternId > 0 && $leave_day_id == 0):
             $data = [];
             $data['employee_id'] = $employee_id;
             $data['hr_holiday_year_id'] = $holidayYearId;
@@ -573,11 +574,27 @@ class EmployeePortalController extends Controller
             $data = [];
             $data['employee_leave_id'] = $employeeLeave->id;
             $data['leave_date'] = $date;
-            $data['hour'] = $minutes;
+            $data['hour'] = ($hour > 0 && $leave_type == 5 ? $hour : 0);
             $data['status'] = 'Active';
             $data['was_absent_day'] = 1;
             $data['created_by'] = auth()->user()->id;
             EmployeeLeaveDay::create($data);
+
+            return response()->json(['res' => 'success'], 200);
+        elseif($leave_day_id > 0):
+            $leave_day = EmployeeLeaveDay::find($leave_day_id);
+            $leave_id = $leave_day->leave->id;
+
+            $data = [];
+            $data['leave_type'] = $leave_type;
+            $data['note'] = $note;
+            $data['updated_by'] = auth()->user()->id;
+            EmployeeLeave::where('id', $leave_id)->update($data);
+
+            $data = [];
+            $data['hour'] = ($hour > 0 && $leave_type == 5 ? $hour : 0);
+            $data['updated_by'] = auth()->user()->id;
+            EmployeeLeaveDay::where('id', $leave_day_id)->update($data);
 
             return response()->json(['res' => 'success'], 200);
         else:
@@ -635,7 +652,7 @@ class EmployeePortalController extends Controller
                 $leave_type = 'Holiday / Vacation';
                 break;
             case 2:
-                $leave_type = 'Meeting / Training';
+                $leave_type = 'Authorised Absent';
                 break;
             case 3:
                 $leave_type = 'Sick Leave';

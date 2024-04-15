@@ -90,7 +90,7 @@
                                                                 $leaveName = 'Holiday / Vacation';
                                                                 break;
                                                             case 2:
-                                                                $leaveName = 'Meeting / Training';
+                                                                $leaveName = 'Authorised Absent';
                                                                 break;
                                                             case 3:
                                                                 $leaveName = 'Sick Leave';
@@ -118,11 +118,12 @@
                                                     @else
                                                         <p class="leaveAttendance">{{ $leaveName }} {{ (!empty($leaveNote) ? ': '.$leaveNote : '') }}</p>
                                                     @endif
+                                                    <input type="hidden" name="attendance[{{ $atten->id }}][leave_status]" value="{{ $atten->leave_status }}"/>
                                                 @else
                                                     <div class="flex flex-col sm:flex-row m-0">
                                                         <div class="form-check mr-5">
                                                             <input {{ ($atten->leave_status == 2 ? 'checked' : '') }} id="leave_status_2" class="form-check-input" type="radio" name="attendance[{{ $atten->id }}][leave_status]" value="2">
-                                                            <label class="form-check-label" for="leave_status_2">Meeting / Training</label>
+                                                            <label class="form-check-label" for="leave_status_2">Authorised Absent</label>
                                                         </div>
                                                         <div class="form-check mr-5">
                                                             <input {{ ($atten->leave_status == 3 ? 'checked' : '') }} id="leave_status_3" class="form-check-input" type="radio" name="attendance[{{ $atten->id }}][leave_status]" value="3">
@@ -290,7 +291,7 @@
                                                                     $leaveName = 'Holiday / Vacation';
                                                                     break;
                                                                 case 2:
-                                                                    $leaveName = 'Meeting / Training';
+                                                                    $leaveName = 'Authorised Absent';
                                                                     break;
                                                                 case 3:
                                                                     $leaveName = 'Sick Leave';
@@ -487,7 +488,7 @@
                                                                     $leaveName = 'Holiday / Vacation';
                                                                     break;
                                                                 case 2:
-                                                                    $leaveName = 'Meeting / Training';
+                                                                    $leaveName = 'Authorised Absent';
                                                                     break;
                                                                 case 3:
                                                                     $leaveName = 'Sick Leave';
@@ -747,7 +748,7 @@
                                                                 $leaveName = 'Holiday / Vacation';
                                                                 break;
                                                             case 2:
-                                                                $leaveName = 'Meeting / Training';
+                                                                $leaveName = 'Authorised Absent';
                                                                 break;
                                                             case 3:
                                                                 $leaveName = 'Sick Leave';

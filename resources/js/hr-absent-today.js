@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import IMask from 'imask';
  
 
 (function(){
@@ -16,6 +17,8 @@ import TomSelect from "tom-select";
 
         $('#absentUpdateModal input[name="employee_id"]').val('0');
         $('#absentUpdateModal input[name="minutes"]').val('0');
+
+        $('#absentUpdateModal input[name="leave_day_id"]').val('0');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -28,6 +31,15 @@ import TomSelect from "tom-select";
         }
     });
 
+    if($('.timeMask').length > 0){
+        var maskOptions = {
+            mask: '00:00'
+        };
+        $('.timeMask').each(function(){
+            var mask = IMask(this, maskOptions);
+        })
+    }
+
 
     $('.absentTodayTr').on('click', function(e){
         e.preventDefault();
@@ -35,11 +47,42 @@ import TomSelect from "tom-select";
         var employee = $this.attr('data-emloyee');
         var minute = $this.attr('data-minute');
         var hourminute = $this.attr('data-hour-min');
+        
+        var leavetype = $this.attr('data-leavetype');
+        var leavedayid = $this.attr('data-leavedayid');
+        var leavedayminute = $this.attr('data-leavedayminute');
+        var leavedayhourminute = $this.attr('data-leavedayhourminute');
+        var leavenote = $this.attr('data-leavenote');
 
         absentUpdateModal.show();
-        $('#absentUpdateForm input[name="hour"]').val(hourminute);
-        $('#absentUpdateForm input[name="employee_id"]').val(employee)
-        $('#absentUpdateForm input[name="minutes"]').val(minute)
+        $('#absentUpdateForm input[name="employee_id"]').val(employee);
+
+        if(leavedayid > 0){
+            $('#absentUpdateForm [name="leave_day_id"]').val(leavedayid);
+            $('#absentUpdateForm [name="leave_type"]').val(leavetype);
+            $('#absentUpdateForm input[name="hour"]').val(leavedayhourminute);
+            $('#absentUpdateForm input[name="minutes"]').val(leavedayminute);
+            $('#absentUpdateForm [name="note"]').val(leavenote);
+            if(leavetype == 5){
+                $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', leavedayhourminute).removeAttr('readonly');
+            }else{
+                $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', hourminute).attr('readonly', 'readonly');
+            }
+        }else{
+            $('#absentUpdateForm [name="leave_day_id"]').val(0);
+            $('#absentUpdateForm [name="leave_type"]').val('');
+            $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', hourminute).attr('readonly', 'readonly');
+            $('#absentUpdateForm input[name="minutes"]').val(minute)
+            $('#absentUpdateForm [name="note"]').val('');
+        }
+    });
+
+    $('#absentUpdateForm [name="leave_type"]').on('change', function(){
+        if($(this).val() == 5){
+            $('#absentUpdateForm input[name="hour"]').val($('#absentUpdateForm input[name="hour"]').attr('data-todayhour')).removeAttr('readonly');
+        }else{
+            $('#absentUpdateForm input[name="hour"]').val('00:00').attr('readonly', 'readonly');
+        }
     });
 
     $('#absentUpdateForm').on('submit', function(e){

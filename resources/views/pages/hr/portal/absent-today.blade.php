@@ -32,7 +32,16 @@
             <tbody>
                 @if(!empty($absents))
                     @foreach($absents  as $employee_id => $absent)
-                    <tr class="absentTodayTr cursor-pointer" data-emloyee="{{ $employee_id }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
+                    <tr class="absentTodayTr cursor-pointer" 
+                        data-emloyee="{{ $employee_id }}" 
+                        data-minute="{{ $absent['minute'] }}"  
+                        data-hour-min="{{ $absent['hourMinute'] }}" 
+                        data-leavetype="{{ $absent['leave_type'] }}" 
+                        data-leavedayid="{{ $absent['leave_day_id'] }}" 
+                        data-leavedayminute="{{ $absent['leave_day_minute'] }}" 
+                        data-leavedayhourminute="{{ $absent['leave_day_hour_minute'] }}" 
+                        data-leavenote="{{ $absent['leave_note'] }}" 
+                    >
                         <td class="px-5 py-3 dark:border-darkmode-300 w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
                             <div class="flex">
                                 <div class="image-fit zoom-in h-10 w-10">
@@ -91,6 +100,7 @@
                             <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
                             <select id="leave_type" name="leave_type" class="form-control w-full">
                                 <option value="">Please Select</option>
+                                <option value="2">Authorised Absent</option>
                                 <option value="3">Sick Leave</option>
                                 <option value="4">Authorised Unpaid</option>
                                 <option value="5">Authorised Paid</option>
@@ -99,7 +109,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
-                            <input type="text" readonly id="hour" name="hour" placeholder="00:00" class="form-control w-full">
+                            <input type="text" readonly id="hour" data-todayhour="00:00" value="00:00" name="hour" placeholder="00:00" class="form-control timeMask w-full">
                             <div class="acc__input-error error-hour text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
@@ -129,6 +139,7 @@
                         <input type="hidden" name="date" value="{{ date('Y-m-d', $date) }}"/>
                         <input type="hidden" name="employee_id" value="0"/>
                         <input type="hidden" name="minutes" value="0"/>
+                        <input type="hidden" name="leave_day_id" value="0"/>
                     </div>
                 </div>
             </form>

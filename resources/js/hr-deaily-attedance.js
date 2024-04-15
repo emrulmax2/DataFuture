@@ -467,6 +467,7 @@ import IMask from 'imask';
                 $theTr.find('.text-danger').removeClass('text-danger');
 
                 if (response.status == 200) {
+                    console.log(response.data);
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Congratulations!');

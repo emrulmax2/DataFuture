@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import IMask from 'imask';
 
 ("use strict");
 var employeeListTable = (function () {
@@ -155,6 +156,7 @@ var employeeListTable = (function () {
 
         $('#absentUpdateModal input[name="employee_id"]').html('0');
         $('#absentUpdateModal input[name="minutes"]').html('0');
+        $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', '00:00').val('00:00').attr('readonly', 'readonly');
     });
 
     const empNewLeaveRequestModalEl = document.getElementById('empNewLeaveRequestModal')
@@ -173,6 +175,15 @@ var employeeListTable = (function () {
         }
     });
 
+    if($('.timeMask').length > 0){
+        var maskOptions = {
+            mask: '00:00'
+        };
+        $('.timeMask').each(function(){
+            var mask = IMask(this, maskOptions);
+        })
+    }
+
 
     $('.absentToday').on('click', function(e){
         e.preventDefault();
@@ -181,9 +192,17 @@ var employeeListTable = (function () {
         var minute = $this.attr('data-minute');
         var hourminute = $this.attr('data-hour-min');
 
-        $('#absentUpdateForm input[name="hour"]').val(hourminute);
+        //$('#absentUpdateForm input[name="hour"]').val(hourminute);
+        $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', hourminute);
         $('#absentUpdateForm input[name="employee_id"]').val(employee)
         $('#absentUpdateForm input[name="minutes"]').val(minute)
+    });
+    $('#absentUpdateForm [name="leave_type"]').on('change', function(){
+        if($(this).val() == 5){
+            $('#absentUpdateForm input[name="hour"]').val($('#absentUpdateForm input[name="hour"]').attr('data-todayhour')).removeAttr('readonly');
+        }else{
+            $('#absentUpdateForm input[name="hour"]').val('00:00').attr('readonly', 'readonly');
+        }
     });
 
     $('#absentUpdateForm').on('submit', function(e){
