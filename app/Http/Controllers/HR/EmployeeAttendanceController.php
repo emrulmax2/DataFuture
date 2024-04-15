@@ -43,7 +43,7 @@ class EmployeeAttendanceController extends Controller
             $isSyncronised = $this->isSynchronised($todayDate);
             $theUrl = $isSyncronised == 1 ? route('hr.attendance.show',strtotime($todayDate)) : 'javascript:void(0);';
             
-            $issues = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('user_issues', '>', 0)->get()->count() : 0);
+            $issues = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('user_issues', '>', 0)->where('overtime_status', '!=', 1)->get()->count() : 0);
             $absents = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('leave_status', '>', 1)->get()->count() : 0);
             $overtime = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('overtime_status', 1)->get()->count() : 0);
             $pendings = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->whereNull('updated_by')->get()->count() : 0);

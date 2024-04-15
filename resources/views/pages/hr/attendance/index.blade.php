@@ -35,6 +35,7 @@
                             </g>
                         </svg>
                     </button>
+                    <button type="button" id="generateReport" class="btn btn-success text-white w-auto ml-2">Generage Report</button>
                 </div>
             </form>
         </div>

@@ -31,10 +31,10 @@ import Litepicker from "litepicker";
         },
     };
 
-    const theMonth = new Litepicker({
+    /*const theMonth = new Litepicker({
         element: document.getElementById('the_month'),
         ...dateOption
-    });
+    });*/
 
     let multiTomOpt = {
         ...tomOptions,
@@ -48,7 +48,6 @@ import Litepicker from "litepicker";
     var departmentID = new TomSelect('#department_id', tomOptions);
     var employeeID = new TomSelect('#employee_id', multiTomOpt);
 
-
     $('#attendanceReportForm').on('submit', function(e){
         e.preventDefault();
         const form = document.getElementById('attendanceReportForm');
@@ -61,7 +60,7 @@ import Litepicker from "litepicker";
         let form_data = new FormData(form);
         axios({
             method: "post",
-            url: route('hr.portal.reports.attendance.generate'),
+            url: route('hr.portal.reports.attendance.filter'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {

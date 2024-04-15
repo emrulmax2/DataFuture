@@ -31,6 +31,16 @@ import Litepicker from "litepicker";
         ...dateOption
     });
 
+    $('#generateReport').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theSiblings = $('#filterMonthAtten');
+        var $theDate = $('#filterMonthAttenForm #queryDate');
+
+        var theDate = $theDate.val();
+        window.location.href = route('hr.portal.reports.attendance', theDate);
+    })
+
     $('#filterMonthAttenForm').on('submit', function(e){
         e.preventDefault();
         const form = document.getElementById('filterMonthAttenForm');

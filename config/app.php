@@ -70,7 +70,7 @@ return [
     */
 
     //'timezone' => 'Asia/Dhaka',
-    'timezone' => env('TIME_ZONE', 'UTC'),
+    'timezone' => env('TIME_ZONE', 'Europe/London'),
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
