@@ -73,7 +73,7 @@ class EmployeeAbsentTodayController extends Controller
                             break;
                     endswitch;
                 endif;
-                $absentReason = (isset($absentLeave->leave->approver_note) && !empty($absentLeave->leave->approver_note) ? $absentLeave->leave->approver_note : '');
+                $absentReason = (isset($absentLeave->leave->note) && !empty($absentLeave->leave->note) ? $absentLeave->leave->note : '');
                 $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)
                                          ->where('effective_from', '<=', $theDate)
                                          ->where(function($query) use($theDate){
