@@ -375,6 +375,11 @@ import IMask from 'imask';
                         $('#successModal .successModalDesc').html('All selected attendance rows are successfully updated.');
                         $('#successModal .successCloser').attr('data-action', 'RELOAD');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 500);
                 }
             }).catch(error => {
                 $theBtn.removeAttr('disabled');
@@ -467,13 +472,18 @@ import IMask from 'imask';
                 $theTr.find('.text-danger').removeClass('text-danger');
 
                 if (response.status == 200) {
-                    console.log(response.data);
+
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Congratulations!');
                         $('#successModal .successModalDesc').html('The attendance row has been successfully updated.');
                         $('#successModal .successCloser').attr('data-action', 'RELOAD');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 500);
                 }
             }).catch(error => {
                 $theTable.find('button.saveRow').removeAttr('disabled');

@@ -17,8 +17,8 @@ use Illuminate\Http\Request;
 
 class AttendanceReportController extends Controller
 {
-    public function index(Request $request){
-        $departments = Department::all();
+    public function index($date){
+        $theDate = (!empty($date) ? date('Y-m-d', strtotime('01-'.$date)) : date('Y-m-d'));
         return view('pages.hr.portal.reports.attendance', [
             'title' => 'Attendance Report - LCC Data Future Managment',
             'breadcrumbs' => [
@@ -26,16 +26,23 @@ class AttendanceReportController extends Controller
                 ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
-            'departments' => $departments,
+            'departments' => Department::all(),
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
+            'theDate' => $theDate,
+            'reportHtml' => $this->generateReport($theDate)
         ]);
     }
 
-    public function generateReport(Request $request){
-        $the_month = (isset($request->the_month) && !empty($request->the_month) ? '01-'.$request->the_month : '');
-        $department_id = (isset($request->department_id) && $request->department_id > 0 ? $request->department_id : 0);
+    public function filterReport(Request $request){
+        $the_date = (isset($request->the_date) && !empty($request->the_date) ? date('Y-m-d', strtotime($request->the_date)) : date('Y-m-d'));
+        $department_id = (isset($request->department_id) && !empty($request->department_id) ? $request->department_id : 0);
         $employee_id = (isset($request->employee_id) && !empty($request->employee_id) ? $request->employee_id : []);
 
+        $res = $this->generateReport($the_date, $department_id, $employee_id);
+        return response()->json(['res' => $res], 200);
+    }
+
+    public function generateReport($the_month, $department_id = 0, $employee_id = []){
         $res = [];
         if(!empty($the_month)):
             $query = Employee::has('activePatterns')->where('status', 1);
@@ -121,7 +128,7 @@ class AttendanceReportController extends Controller
             $res['html'] = '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> The date can not be empty.</div>';
         endif;
 
-        return response()->json(['res' => $res], 200);
+        return $res;
     }
 
     public function getEmployeeActivePatternsActivePayRate($employee_id){

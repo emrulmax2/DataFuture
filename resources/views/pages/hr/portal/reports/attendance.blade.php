@@ -6,18 +6,18 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Employee Attendance Report's Details</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+        <h2 class="text-lg font-medium mr-auto">Attendance Report's Of <u>{{ date('F, Y', strtotime($theDate))}}</u></h2>
+        {{--<div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.portal.reports.attendance.generate') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Report</a>
-        </div>
+        </div>--}}
     </div>
     <div class="intro-y box p-5 mt-5">
         <form id="attendanceReportForm" method="post" action="#">
             <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-3">
+                {{--<div class="col-span-3">
                     <label class="form-label">Month <span class="text-danger">*</span></label>
                     <input readonly type="text" id="the_month" name="the_month" placeholder="MM-YYYY" value="{{ date('m-Y') }}" class="w-full form-control"/>                    
-                </div>
+                </div>--}}
                 <div class="col-span-3">
                     <label class="form-label">Department</label>
                     <select id="department_id" name="department_id" class="w-full tom-selects">     
@@ -36,9 +36,10 @@
                         @endforeach
                     </select> 
                 </div>
-                <div class="col-span-3 text-right mt-7">
+                <div class="col-span-6 text-right mt-7">
+                    <input type="hidden" value="{{ date('Y-m-d', strtotime($theDate)) }}" name="the_date"/>
                     <button type="submit" id="generateReport" class="btn btn-primary w-auto">     
-                        Generate Report                      
+                        Filter Report                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
@@ -57,7 +58,9 @@
                 </div>
             </div>
         </form>
-        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap mt-7" style="display: none;"></div>
+        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap mt-7" style="display: {{ (isset($reportHtml['html']) && !empty($reportHtml['html']) ? 'block' : 'none') }};">
+            {!! (isset($reportHtml['html']) && !empty($reportHtml['html']) ? $reportHtml['html'] : '') !!}
+        </div>
     </div>
 @endsection
 

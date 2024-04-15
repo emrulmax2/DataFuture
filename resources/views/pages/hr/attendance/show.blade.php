@@ -338,7 +338,7 @@
                                                 </td>
                                             </tr>
                                         @else
-                                            <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                            <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }} {{ (isset($atten->updated_by) && $atten->updated_by > 0 ? 'attendanceRowUpdated' : '') }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                                 <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                     <div class="form-check m-0 justify-center">
                                                         <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
