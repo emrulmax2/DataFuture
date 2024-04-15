@@ -58,7 +58,7 @@
                             <tbody>
                                 @if(!empty($absents) && $absents->count() > 0)
                                     @foreach($absents as $atten)
-                                        <tr class="attendanceRow attendanceSyncRow attendanceAbsentRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceSyncRow attendanceAbsentRow attendanceRow_{{ $atten->id }} {{ (isset($atten->updated_by) && $atten->updated_by > 0 ? 'attendanceRowUpdated' : '') }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox">
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
@@ -245,7 +245,7 @@
                                             $isOnlyLeave = (empty($clockin_punch) && empty($clockout_punch) && $total_work_hour == 0 && $atten->leave_status > 0 ? true : false);
                                         @endphp
                                         @if($isOnlyLeave)
-                                            <tr class="onlyLeaveRow attendanceSyncRow onlyLeaveRow_{{ $atten->id }}" id="onlyLeaveRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                            <tr class="onlyLeaveRow attendanceSyncRow onlyLeaveRow_{{ $atten->id }} {{ (isset($atten->updated_by) && $atten->updated_by > 0 ? 'attendanceRowUpdated' : '') }}" id="onlyLeaveRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                                 <td class="text-center inputCheckbox">
                                                     <div class="form-check m-0 justify-center">
                                                         <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
@@ -602,7 +602,7 @@
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
                                             $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
-                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }} {{ (isset($atten->updated_by) && $atten->updated_by > 0 ? 'attendanceRowUpdated' : '') }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox" {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
@@ -861,7 +861,7 @@
                                             $clockout = (isset($isses_field['clockout_system']) && $isses_field['clockout_system'] == 1) ? 1 : 0;
                                             $break_issue = (isset($isses_field['break_issue']) && $isses_field['break_issue'] > 0) ? 1 : 0;
                                         @endphp
-                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
+                                        <tr class="attendanceRow attendanceSyncRow attendanceRow_{{ $atten->id }}  {{ (isset($atten->updated_by) && $atten->updated_by > 0 ? 'attendanceRowUpdated' : '') }}" id="attendanceRow_{{ $atten->id }}" data-id="{{ $atten->id }}">
                                             <td class="text-center inputCheckbox">
                                                 <div class="form-check m-0 justify-center">
                                                     <input  class="form-check-input employee_attendance_id m-0" type="checkbox" name="attendance[{{ $atten->id }}][id]" value="{{ $atten->id }}"/>
