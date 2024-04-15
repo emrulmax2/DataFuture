@@ -437,7 +437,7 @@ class UserHolidayController extends Controller
                         $html .= '<option selected="selected" value="1">Holiday / Vacation</option>';
                         break;
                     case 2:
-                        $html .= '<option value="2">Authorised Absent</option>';
+                        $html .= '<option value="2">Unauthorised Absent</option>';
                         break;
                     case 3:
                         $html .= '<option value="3">Sick Leave</option>';
@@ -740,7 +740,7 @@ class UserHolidayController extends Controller
     }
 
     public function employeeAjaxLeaveLimit(Request $request){
-        $LeaveTypes = [1 => 'Holiday / Vacation', 2 => 'Authorised Absent', 3 => 'Sick Leave', 4 => 'Authorised Unpaid', 5 => 'Authorised Paid'];
+        $LeaveTypes = [1 => 'Holiday / Vacation', 2 => 'Unauthorised Absent', 3 => 'Sick Leave', 4 => 'Authorised Unpaid', 5 => 'Authorised Paid'];
 
         $employee_id = $request->EmployeeId;
         $year_id = $request->LeaveYear;

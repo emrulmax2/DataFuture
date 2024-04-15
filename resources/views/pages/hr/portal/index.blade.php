@@ -360,7 +360,7 @@
                             <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
                             <select id="leave_type" name="leave_type" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option value="2">Authorised Absent</option>
+                                <option value="2">Unauthorised Absent</option>
                                 <option value="3">Sick Leave</option>
                                 <option value="4">Authorised Unpaid</option>
                                 <option value="5">Authorised Paid</option>

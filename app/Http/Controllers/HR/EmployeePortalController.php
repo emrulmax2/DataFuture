@@ -164,7 +164,7 @@ class EmployeePortalController extends Controller
                             $status .= 'Holiday / Vacation';
                             break;
                         case(2):
-                            $status .= 'Authorised Absent';
+                            $status .= 'Unauthorised Absent';
                             break;
                         case(3):
                             $status .= 'Sick Leave';
@@ -209,7 +209,7 @@ class EmployeePortalController extends Controller
                             $status .= 'Holiday / Vacation';
                             break;
                         case(2):
-                            $status .= 'Authorised Absent';
+                            $status .= 'Unauthorised Absent';
                             break;
                         case(3):
                             $status .= 'Sick Leave';
@@ -480,7 +480,7 @@ class EmployeePortalController extends Controller
                                         break;
                                     case 2:
                                         $label = 'A';
-                                        $title = 'Authorised Absent';
+                                        $title = 'Unauthorised Absent';
                                         $class .= ' meetingTrainingBG';
                                         break;
                                     case 3:
@@ -652,7 +652,7 @@ class EmployeePortalController extends Controller
                 $leave_type = 'Holiday / Vacation';
                 break;
             case 2:
-                $leave_type = 'Authorised Absent';
+                $leave_type = 'Unauthorised Absent';
                 break;
             case 3:
                 $leave_type = 'Sick Leave';

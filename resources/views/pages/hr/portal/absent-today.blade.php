@@ -23,9 +23,9 @@
                 <tr>
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Image</th>
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Name</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Date</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Contract Start</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Contract End</th>
+                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Date</th>
+                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Contract</th>
+                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Authorised Hour</th>
                     <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap text-right border-b-0 uppercase">Reason</th>
                 </tr>
             </thead>
@@ -57,14 +57,15 @@
                                 {{ $absent['designation'] }}
                             </div>
                         </td>
-                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-left shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
                             <span class="font-medium">{{ $absent['the_date'] }}</span>
                         </td>
-                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-left shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-                            <span class="font-medium">{{ $absent['start'] }}</span>
+                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+                            <span class="font-medium">{{ $absent['start'].' - '.$absent['end'] }}</span><br/>
+                            <span class="font-medium">{{ '('.$absent['hourMinute'].')' }}</span>
                         </td>
-                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-left shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-                            <span class="font-medium">{{ $absent['end'] }}</span>
+                        <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+                            <span class="font-medium">{{ (!empty($absent['leave_day_id']) && $absent['leave_day_id'] > 0 ? $absent['leave_day_hour_minute'] : '') }}</span>
                         </td>
                         <td class="px-5 py-3 dark:border-darkmode-300 border-b-0 bg-white text-right shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
                             {{ $absent['reason_type'] }}<br/>
@@ -100,7 +101,7 @@
                             <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
                             <select id="leave_type" name="leave_type" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option value="2">Authorised Absent</option>
+                                <option value="2">Unauthorised Absent</option>
                                 <option value="3">Sick Leave</option>
                                 <option value="4">Authorised Unpaid</option>
                                 <option value="5">Authorised Paid</option>
