@@ -160,7 +160,7 @@
                                                                                                         Holiday / Vacation
                                                                                                         @break
                                                                                                     @case(2)
-                                                                                                        Meeting / Training
+                                                                                                        Authorised Absent
                                                                                                         @break
                                                                                                     @case(3)
                                                                                                         Sick Leave
@@ -208,7 +208,7 @@
                                                                                                         Holiday / Vacation
                                                                                                         @break
                                                                                                     @case(2)
-                                                                                                        Meeting / Training
+                                                                                                        Authorised Absent
                                                                                                         @break
                                                                                                     @case(3)
                                                                                                         Sick Leave
@@ -304,7 +304,7 @@
                                                                                                                 Holiday / Vacation
                                                                                                                 @break
                                                                                                             @case(2)
-                                                                                                                Meeting / Training
+                                                                                                                Authorised Absent
                                                                                                                 @break
                                                                                                             @case(3)
                                                                                                                 Sick Leave

@@ -205,11 +205,14 @@ class EmployeeAttendanceController extends Controller
 
                 $total_hours_day    = $total_hour;
                 $total_mints_day    = $this->convertStringToMinute($total_hour);
+                $leave_note         = '';
                 if(!empty($employeeLeaveDay) && isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0):
                     $is_leave_day   = 1;
                     $today_leave_id = $employeeLeaveDay->id;
+                    $leave_note = (isset($employeeLeaveDay->leave->note) && !empty($employeeLeaveDay->leave->note) ? $employeeLeaveDay->leave->note : '');
                     $todayHour = ($total_hour != '00:00' && $total_hour != '') ? $this->convertStringToMinute($total_hour) : 0;
-                    $leaveHour = ($employeeLeaveDay->hour > 0 ? $employeeLeaveDay->hour : $this->convertStringToMinute($total_hour));
+                    //$leaveHour = ($employeeLeaveDay->hour > 0 ? $employeeLeaveDay->hour : $this->convertStringToMinute($total_hour));
+                    $leaveHour = ($employeeLeaveDay->hour > 0 ? $employeeLeaveDay->hour : 0);
                     
                     $leave_day_hours = $leaveHour;
 
@@ -551,45 +554,6 @@ class EmployeeAttendanceController extends Controller
                             $break_ids[] = $theBreakRow->id;
                         endforeach;
                     endif;
-                    /*$rrr = [$breakArray, $break_return];
-                    return response()->json($rrr);
-
-                    if(is_array($break_return) && !empty($break_return)):
-                        $break_details .= '<ol class="return_list">';
-                        foreach($break_return as $key => $time):
-                            if($b % 2 == 0){
-                                if(strpos($key, 'return_') !== false){
-                                    $bs = strtotime($b_start);
-                                    $be = strtotime(date('H:i', strtotime(strtr($time, '/', '-'))));
-                                    $total_break += round(abs($bs - $be) / 60,2);
-                                    $break_details .= ' - <span class="ret">'.date('H:i', strtotime(strtr($time, '/', '-'))).'</span></span></li>';
-                                }else{
-                                    $break_details .= ' - <span class="ret">00:00</span></span><br/><input type="text" value="00:00" class="form-control edit_this"/></li>';
-                                    $b_start = date('H:i', strtotime(strtr($time, '/', '-')));
-                                    $break_details .= '<li><span class="re_br"><span class="bre">'.$b_start.'</span>';
-                                    $issues += 1;
-                                    $issues_array['break_return'] = 1;
-                                }
-                            }else{
-                                if(strpos($key, 'break_') !== false){
-                                    $b_start = date('H:i', strtotime(strtr($time, '/', '-')));
-                                    $break_details .= '<li><span class="re_br"><span class="bre">'.$b_start.'</span>';
-                                    if($b == $count){
-                                        $break_details .= ' - <span class="ret">00:00</span></span><br/><input type="text" value="00:00" class="form-control edit_this"/></li>';
-                                        $issues += 1;
-                                        $issues_array['break_return'] = 1;
-                                    }
-                                }else{
-                                    $bs = strtotime($b_start);
-                                    $be = strtotime(date('H:i', strtotime(strtr($time, '/', '-'))));
-                                    $total_break += round(abs($bs - $be) / 60, 2);
-                                    $break_details .= ' - '.date('H:i', strtotime(strtr($time, '/', '-'))).'</span></li>';
-                                }
-                            }
-                            $b++;
-                        endforeach;
-                        $break_details .= '</ol>';
-                    endif;*/
 
                     $break = ($this->convertStringToMinute($paid_break) + $this->convertStringToMinute($unpaid_break));
                     $unpaidBreakMinute = $this->convertStringToMinute($unpaid_break);
@@ -777,6 +741,7 @@ class EmployeeAttendanceController extends Controller
                     $data['leave_status'] = $leave_status;
                 endif;
 
+                //return response()->json($data);
                 EmployeeAttendance::where('id', $attendance_id)->update($data);
             endforeach;
 

@@ -58,6 +58,9 @@ class EmployeeAbsentTodayController extends Controller
                 $absentLeaveType = '';
                 if(isset($absentLeave->leave->leave_type) && $absentLeave->leave->leave_type > 0):
                     switch ($absentLeave->leave->leave_type):
+                        case 2:
+                            $absentLeaveType = 'Authorised Absent';
+                            break;
                         case 3:
                             $absentLeaveType = 'Sick Leave';
                             break;
@@ -93,6 +96,11 @@ class EmployeeAbsentTodayController extends Controller
                         $res[$employee_id]['pattern_id'] =  $patternDay->employee_working_pattern_id;
                         $res[$employee_id]['reason'] =  $absentReason;
                         $res[$employee_id]['reason_type'] =  $absentLeaveType;
+                        $res[$employee_id]['leave_type'] =  (isset($absentLeave->leave->leave_type) && $absentLeave->leave->leave_type > 0 ? $absentLeave->leave->leave_type : 0);
+                        $res[$employee_id]['leave_note'] =  (isset($absentLeave->leave->note) && $absentLeave->leave->note != '' ? $absentLeave->leave->note : '');
+                        $res[$employee_id]['leave_day_id'] =  (isset($absentLeave->id) && $absentLeave->id > 0 ? $absentLeave->id : 0);
+                        $res[$employee_id]['leave_day_minute'] =  (isset($absentLeave->hour) && $absentLeave->hour > 0 ? $absentLeave->hour : 0);
+                        $res[$employee_id]['leave_day_hour_minute'] =  (isset($absentLeave->hour) && $absentLeave->hour > 0 ? $this->calculateHourMinute($absentLeave->hour) : '00:00');
                     endif;
                 endif;
             endif;

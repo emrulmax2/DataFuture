@@ -53,7 +53,7 @@
                             </div>
                             <div class="col-span-4">
                                 <div class="form-check form-switch m-0">
-                                    <label class="form-check-label m-0 mr-5" for="leave_option_2">Meeting / Training</label>
+                                    <label class="form-check-label m-0 mr-5" for="leave_option_2">Authorised Absent</label>
                                     <input {{ ( in_array(2, $leaveOptions) ? 'checked' : '') }} id="leave_option_2" name="leave_options[]" class="form-check-input" value="2" type="checkbox">
                                 </div>
                             </div>

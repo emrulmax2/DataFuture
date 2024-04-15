@@ -360,6 +360,7 @@
                             <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
                             <select id="leave_type" name="leave_type" class="form-control w-full">
                                 <option value="">Please Select</option>
+                                <option value="2">Authorised Absent</option>
                                 <option value="3">Sick Leave</option>
                                 <option value="4">Authorised Unpaid</option>
                                 <option value="5">Authorised Paid</option>
@@ -368,7 +369,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
-                            <input type="text" readonly id="hour" name="hour" placeholder="00:00" class="form-control w-full">
+                            <input type="text" readonly id="hour" data-todayhour="00:00" value="00:00" name="hour" placeholder="00:00" class="form-control timeMask w-full">
                             <div class="acc__input-error error-hour text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
