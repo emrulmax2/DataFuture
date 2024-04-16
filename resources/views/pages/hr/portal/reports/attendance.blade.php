@@ -13,22 +13,14 @@
     </div>
     <div class="intro-y box p-5 mt-5">
         <form id="attendanceReportForm" method="post" action="#">
+            @csrf
             <div class="grid grid-cols-12 gap-4">
                 {{--<div class="col-span-3">
                     <label class="form-label">Month <span class="text-danger">*</span></label>
                     <input readonly type="text" id="the_month" name="the_month" placeholder="MM-YYYY" value="{{ date('m-Y') }}" class="w-full form-control"/>                    
                 </div>--}}
                 <div class="col-span-3">
-                    <label class="form-label">Department</label>
-                    <select id="department_id" name="department_id" class="w-full tom-selects">     
-                        <option value="">Please Select</option>             
-                        @foreach($departments as $si)
-                            <option {{ isset($employment->department_id) && $employment->department_id == $si->id }} value="{{ $si->id }}">{{ $si->name }}</option>             
-                        @endforeach
-                    </select> 
-                </div>
-                <div class="col-span-3">
-                    <label class="form-label">Employee</label>
+                    <label class="form-label">Filter by Employee</label>
                     <select id="employee_id" name="employee_id[]" class="w-full tom-selects" multiple>     
                         <option value="">All Employee</option>             
                         @foreach($employees as $emp)
@@ -36,29 +28,13 @@
                         @endforeach
                     </select> 
                 </div>
-                <div class="col-span-6 text-right mt-7">
-                    <input type="hidden" value="{{ date('Y-m-d', strtotime($theDate)) }}" name="the_date"/>
-                    <button type="submit" id="generateReport" class="btn btn-primary w-auto">     
-                        Filter Report                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <button id="downloadExcel" type="button" class="btn btn-success text-white w-auto mt-2 sm:mt-0 sm:ml-1" >Download Excel</button>
-                    <button id="resetForm" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                <div class="col-span-9 text-right mt-7">
+                    <input type="hidden" value="{{ date('Y-m-d', strtotime($theDate)) }}" id="the_date" name="the_date"/>
+                    <a id="downloadExcel" href="{{ route('hr.portal.reports.attendance.export', date('Y-m-d', strtotime($theDate))) }}" class="btn btn-success text-white w-auto mt-2 sm:mt-0 sm:ml-1" >Download Excel</a>
                 </div>
             </div>
         </form>
-        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap mt-7" style="display: {{ (isset($reportHtml['html']) && !empty($reportHtml['html']) ? 'block' : 'none') }};">
+        <div class="overflow-x-auto scrollbar-hidden attendanceReportWrap mt-7" style="display: {{ (isset($reportHtml['html']) && !empty($reportHtml['html']) ? 'block;' : 'none;') }}">
             {!! (isset($reportHtml['html']) && !empty($reportHtml['html']) ? $reportHtml['html'] : '') !!}
         </div>
     </div>

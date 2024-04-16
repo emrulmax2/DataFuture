@@ -1181,9 +1181,15 @@
     background: rgb(243, 110, 38);
     color: #FFF;
 }
+.overTimeBG,
+.leaveCalendarTable tbody tr td.overTimeBG,
+.attendanceDetailsTable tbody tr.ovRow td{
+    background: rgb(244, 169, 113);
+    color: #FFF;
+}
 .attendanceDetailsTable tbody tr.nwRow td{
-    background: rgba(22, 78, 99, .2);
-    color: rgb(22 78 99);
+    background: rgba(22, 78, 99, .05);
+    /* color: rgb(22 78 99); */
 }
 .pendingDay,
 .leaveCalendarTable tbody tr td.pendingDay{
@@ -1620,4 +1626,14 @@ input[type=number] {
 }
 .table.dailyAttendanceTable tr.attendanceRowUpdated{
     background: rgba(25, 135, 84, .1);   
+}
+
+#employeeAttendanceDetailsTable.table tbody tr.expandableRow{
+    display: none;
+}
+#employeeAttendanceDetailsTable.table tbody tr.expandRow{
+    cursor: pointer;
+}
+#employeeAttendanceDetailsTable.table tbody tr.nwRow{
+    cursor: not-allowed;
 }
