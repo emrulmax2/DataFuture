@@ -19,6 +19,7 @@ class EmployeeDocuments extends Model
         'path',
         'display_file_name',
         'current_file_name',
+        'type',
         'created_by',
         'updated_by',
     ];

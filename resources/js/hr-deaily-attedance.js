@@ -33,6 +33,19 @@ import IMask from 'imask';
         })
     }
 
+    $('#attendanceAccordion .attedanceAccordionBTN').on('click', function(e){
+        var $thebtn = $(this);
+        var hash = $thebtn.attr('data-tw-target');
+        window.location.hash = hash;
+    });
+
+    $(window).on('load', function(){
+        if(window.location.hash){     
+            $('#attendanceAccordion .attedanceAccordionBTN[data-tw-target="'+window.location.hash+'"]').removeClass('collapsed').attr('aria-expanded', 'true');
+            $('#attendanceAccordion '+window.location.hash).addClass('show').show();
+        }
+    });
+
     $('.dailyAttendanceTable .attendanceRow .editRowNote').on('click', function(e){
         e.preventDefault();
         var $theBtn = $(this);

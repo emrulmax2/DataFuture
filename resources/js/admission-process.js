@@ -344,7 +344,7 @@ var applicantInterviewLogTable = (function () {
             $('#studentProcessAccordion .processListAccordionBtn[data-tw-target="'+window.location.hash+'"]').removeClass('collapsed').attr('aria-expanded', 'true');
             $('#studentProcessAccordion '+window.location.hash).addClass('show').show();
         }
-    })
+    });
 
     
     $('#studentProcessListForm').on('submit', function(e){

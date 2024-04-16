@@ -15,7 +15,7 @@
         <div id="attendanceAccordion" class="accordion">
             <div class="accordion-item">
                 <div id="attendanceAccordion-absents" class="accordion-header">
-                    <button class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-absents" aria-expanded="false" aria-controls="attendanceAccordion-collapse-absents">
+                    <button class="accordion-button collapsed relative w-full text-lg font-semibold attedanceAccordionBTN" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-absents" aria-expanded="false" aria-controls="attendanceAccordion-collapse-absents">
                         Absents <strong>{{ ($absents->count() > 0 ? '('.$absents->count().')' : '' )}}</strong>
                         <span class="accordionCollaps"></span>
                     </button>
@@ -185,7 +185,7 @@
             </div>
             <div class="accordion-item"> 
                 <div id="attendanceAccordion-noissues" class="accordion-header">
-                    <button class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-noissues" aria-expanded="false" aria-controls="attendanceAccordion-collapse-noissues">
+                    <button class="accordion-button collapsed relative w-full text-lg font-semibold attedanceAccordionBTN" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-noissues" aria-expanded="false" aria-controls="attendanceAccordion-collapse-noissues">
                         No Issues <strong>{{ ($noissues->count() > 0 ? '('.$noissues->count().')' : '' )}}</strong>
                         <span class="accordionCollaps"></span>
                     </button>
@@ -551,7 +551,7 @@
             </div>
             <div class="accordion-item">
                 <div id="attendanceAccordion-issues" class="accordion-header">
-                    <button class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-issues" aria-expanded="false" aria-controls="attendanceAccordion-collapse-issues">
+                    <button class="accordion-button collapsed relative w-full text-lg font-semibold attedanceAccordionBTN" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-issues" aria-expanded="false" aria-controls="attendanceAccordion-collapse-issues">
                         Issues <strong>{{ ($issues->count() > 0 ? '('.$issues->count().')' : '' )}}</strong>
                         <span class="accordionCollaps"></span>
                     </button>
@@ -810,7 +810,7 @@
             </div>
             <div class="accordion-item">
                 <div id="attendanceAccordion-notinschedule" class="accordion-header">
-                    <button class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-notinschedule" aria-expanded="false" aria-controls="attendanceAccordion-collapse-notinschedule">
+                    <button class="accordion-button collapsed relative w-full text-lg font-semibold attedanceAccordionBTN" type="button" data-tw-toggle="collapse" data-tw-target="#attendanceAccordion-collapse-notinschedule" aria-expanded="false" aria-controls="attendanceAccordion-collapse-notinschedule">
                         Not In Schedule <strong>{{ ($overtime->count() > 0 ? '('.$overtime->count().')' : '' )}}</strong>
                         <span class="accordionCollaps"></span>
                     </button>

@@ -2331,6 +2331,7 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/attendance/list/{date}', 'index')->name('hr.portal.reports.attendance');
         Route::post('hr/portal/reports/attendance/filter', 'filterReport')->name('hr.portal.reports.attendance.filter');
         Route::get('hr/portal/reports/attendance/show/{id}/{date}', 'show')->name('hr.portal.reports.attendance.show');
+        Route::get('hr/portal/reports/attendance/export/{date}', 'exportExcel')->name('hr.portal.reports.attendance.export');
     });
 });
 

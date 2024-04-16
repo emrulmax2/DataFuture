@@ -45,29 +45,21 @@ import Litepicker from "litepicker";
             },
         }
     };
-    var departmentID = new TomSelect('#department_id', tomOptions);
     var employeeID = new TomSelect('#employee_id', multiTomOpt);
 
-    $('#attendanceReportForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('attendanceReportForm');
+    $('#attendanceReportForm #employee_id').on('change', function(e){
+        let employee_id = $(this).val();
+        let the_date = $('#attendanceReportForm #the_date').val();
         
-        document.querySelector('#resetForm').setAttribute('disabled', 'disabled');
         document.querySelector('#downloadExcel').setAttribute('disabled', 'disabled');
-        document.querySelector('#generateReport').setAttribute('disabled', 'disabled');
-        document.querySelector("#generateReport svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
         axios({
             method: "post",
             url: route('hr.portal.reports.attendance.filter'),
-            data: form_data,
+            data: {the_date : the_date, employee_id : employee_id},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#resetForm').removeAttribute('disabled');
             document.querySelector('#downloadExcel').removeAttribute('disabled');
-            document.querySelector('#generateReport').removeAttribute('disabled');
-            document.querySelector("#generateReport svg").style.cssText = "display: none;";
             
             if (response.status == 200) {
                 var res = response.data.res;
@@ -75,10 +67,7 @@ import Litepicker from "litepicker";
                 createIcons({icons, "stroke-width": 1.5, nameAttr: "data-lucide"});    
             }
         }).catch(error => {
-            document.querySelector('#resetForm').removeAttribute('disabled');
             document.querySelector('#downloadExcel').removeAttribute('disabled');
-            document.querySelector('#generateReport').removeAttribute('disabled');
-            document.querySelector("#generateReport svg").style.cssText = "display: none;";
             if (error.response) {
                 console.log('error');
             }
