@@ -539,10 +539,11 @@ class AttendanceReportController extends Controller
 
     public function generateReportArray($the_month){
         $theCollection = [];
+        $theCollection[1][] = 'Work Number';
+        $theCollection[1][] = 'NI Number';
         $theCollection[1][] = 'Name';
         $theCollection[1][] = 'Position';
-        $theCollection[1][] = 'NI Number';
-        $theCollection[1][] = 'Work Number';
+        $theCollection[1][] = 'Employee/Contractor';
         $theCollection[1][] = 'Rate';
         $theCollection[1][] = 'Working Hour';
         $theCollection[1][] = 'Holiday Hour';
@@ -583,10 +584,11 @@ class AttendanceReportController extends Controller
 
                     $grossPay = $working_pays + $holiday_pays;
 
+                    $theCollection[$row][] = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : '');
+                    $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
                     $theCollection[$row][] = $emp->full_name;
                     $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
-                    $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
-                    $theCollection[$row][] = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : '');
+                    $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
                     $theCollection[$row][] = '£'.number_format($payRate, 2);
                     $theCollection[$row][] = $this->calculateHourMinute($working_hours);
                     $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
