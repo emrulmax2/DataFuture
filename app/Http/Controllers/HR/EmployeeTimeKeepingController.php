@@ -5,7 +5,11 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\EmployeeAttendance;
+use App\Models\EmployeeWorkingPattern;
+use App\Models\EmployeeWorkingPatternDetail;
+use App\Models\EmployeeWorkingPatternPay;
 use App\Models\Employment;
+use App\Models\HrBankHoliday;
 use App\Models\HrCondition;
 use App\Models\HrHolidayYear;
 use App\Models\LetterHeaderFooter;
@@ -24,7 +28,7 @@ class EmployeeTimeKeepingController extends Controller
         $clockin = HrCondition::where('type', 'Clock In')->where('time_frame', 3)->get()->first();
         $clockout = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
         
-        return view('pages.employee.profile.time-keeper',[
+        return view('pages.employee.profile.time-keeper', [
             'title' => 'Welcome - LCC Data Future Managment',
             'breadcrumbs' => [],
             "employee" => $employee,
@@ -34,6 +38,7 @@ class EmployeeTimeKeepingController extends Controller
             'clockout' => (isset($clockout->minutes) && $clockout->minutes > 0 ? $clockout->minutes : 7),
         ]);
     }
+
 
     public function getEmployeeTimeKeepingData($employee_id){
         $attendanceStarts = EmployeeAttendance::where('employee_id', $employee_id)->orderBy('date', 'ASC')->get()->first();
@@ -59,7 +64,7 @@ class EmployeeTimeKeepingController extends Controller
                         $attendances = EmployeeAttendance::where('employee_id', $employee_id)->whereBetween('date', [$theMonthStart, $theMonthEnd])->orderBy('date', 'ASC')->get();
                         if($attendances->count() > 0):
                             $res[$year->id]['month'][date('n', strtotime($theMonthStart))]['start_date'] = $theMonthStart;
-                            $res[$year->id]['month'][date('n', strtotime($theMonthStart))]['attendances'] = $attendances;
+                            $res[$year->id]['month'][date('n', strtotime($theMonthStart))]['attendances'] =  $attendances;
                         endif;
 
                         $theEnd = strtotime("-1 month", $theEnd);
@@ -71,22 +76,273 @@ class EmployeeTimeKeepingController extends Controller
         return $res;
     }
 
-    public function downloadPdf($employee_id, $theDate){
-        $employee = Employee::find($employee_id);
+    public function generateRecored(Request $request){
+        $employee_id = $request->employee_id;
+        $holiday_year = $request->holiday_year;
+        $the_date = (isset($request->the_date) && !empty($request->the_date) ? date('Y-m-d', strtotime($request->the_date)) : date('Y-m-d'));
 
-        $theMonthStart = date('Y-m', strtotime($theDate)).'-01';
-        $theMonthEnd = date('Y-m-t', strtotime($theDate));
-        $attendances = EmployeeAttendance::where('employee_id', $employee_id)->whereBetween('date', [$theMonthStart, $theMonthEnd])->orderBy('date', 'ASC')->get();
+        $res = $this->getEmployeeMonthlyAttendanceDetails($employee_id, $the_date, $holiday_year);
+
+        return response()->json(['res' => $res], 200);
+    }
+
+    public function getEmployeeMonthlyAttendanceDetails($employee_id, $date, $holiday_year){
+        $employee = Employee::find($employee_id);
+        $monthStart = date('Y-m-d', strtotime($date));
+        $monthEnd = date('Y-m-t', strtotime($date));
+        $lastDate = date('t', strtotime($date));
 
         $clockinRow = HrCondition::where('type', 'Clock In')->where('time_frame', 3)->get()->first();
-        $clockoutRow = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
         $clockin = (isset($clockinRow->minutes) && $clockinRow->minutes > 0 ? $clockinRow->minutes : 7);
+        $clockoutRow = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
         $clockout = (isset($clockoutRow->minutes) && $clockoutRow->minutes > 0 ? $clockoutRow->minutes : 7);
+
+        $bhAutoBook = (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? true : false);
+        $hrHolidayYear = HrHolidayYear::find($holiday_year);
+        $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                         ->orderBy('id', 'DESC')->get()->first();
+        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+        $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
+
+        $html = '';
+        $workingHoursTotal = $holidayHoursTotal = $monthTotalPay = 0;
+        for($i = 1; $i <= $lastDate; $i++):
+            $today = date('Y-m', strtotime($date)).($i < 10 ? '-0'.$i : '-'.$i);
+            $D = date('D', strtotime($today));
+            $N = date('N', strtotime($today));
+            $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
+            $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
+            $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
+            $todayAttendance = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->where(function($q){
+                                    $q->whereNotNull('clockin_system')->where('clockin_system', '!=', '00:00')->where('clockin_system', '!=', '');
+                                })->get()->first();
+            $isClockedIn = (isset($todayAttendance->id) && $todayAttendance->id > 0 ? true : false);
+            $todayLeave = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $today)->whereIn('leave_status', [1, 2, 3, 4, 5])->get()->first();
+            $isLeaveDay = (isset($todayLeave->id) && $todayLeave->id > 0 ? true : false);
+            
+            $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
+            $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
+            $isBankHoliday = (isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
+
+            $note = [];
+            $clockin_punch = (isset($todayAttendance->clockin_punch) && !empty($todayAttendance->clockin_punch) && $todayAttendance->clockin_punch != '00:00' ? $todayAttendance->clockin_punch.':00' : '');
+            $clockin_contract = (isset($todayAttendance->clockin_contract) && !empty($todayAttendance->clockin_contract) && $todayAttendance->clockin_contract != '00:00' ? $todayAttendance->clockin_contract.':00' : '');
+            $clockin_system = (isset($todayAttendance->clockin_system) && !empty($todayAttendance->clockin_system) && $todayAttendance->clockin_system != '00:00' ? $todayAttendance->clockin_system.':00' : '');
+            
+            $clockout_punch = (isset($todayAttendance->clockout_punch) && !empty($todayAttendance->clockout_punch) && $todayAttendance->clockout_punch != '00:00' ? $todayAttendance->clockout_punch.':00' : '');
+            $clockout_contract = (isset($todayAttendance->clockout_contract) && !empty($todayAttendance->clockout_contract) && $todayAttendance->clockout_contract != '00:00' ? $todayAttendance->clockout_contract.':00' : '');
+            $clockout_system = (isset($todayAttendance->clockout_system) && !empty($todayAttendance->clockout_system) && $todayAttendance->clockout_system != '00:00' ? $todayAttendance->clockout_system.':00' : '');
+
+            if((isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0) && ($todayAttendance->leave_status == 0 || empty($todayAttendance->leave_status)) && $todayAttendance->overtime_status != 1):
+                if(!empty($clockin_punch) && !empty($clockin_contract)):
+                    $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
+                    if($clockin_punch > $lastIn):
+                        $note[] = 'Late';
+                    endif;
+                endif;
+                if(!empty($clockout_punch) && !empty($clockout_contract)):
+                    $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
+                    if($clockout_punch < $earlyLeave):
+                        $note[] = 'Leave Early';
+                    endif;
+                elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                    $note[] = 'Clock Out Not Found';
+                endif;
+                if(empty($todayAttendance->total_break) || $todayAttendance->total_break == 0):
+                    $note[] = 'Break Not Found';
+                endif;
+            elseif((isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0) && (!empty($todayAttendance->clockin_punch) && $todayAttendance->clockin_punch != '00:00') && ($todayAttendance->leave_status == 1 && !empty($todayAttendance->leave_status)) && $todayAttendance->overtime_status != 1):
+                if(!empty($clockin_punch) && !empty($clockin_contract)):
+                    $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
+                    if($clockin_punch > $lastIn):
+                        $note[] = 'Late';
+                    endif;
+                endif;
+                if(!empty($clockout_punch) && !empty($clockout_contract)):
+                    $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
+                    if($clockout_punch < $earlyLeave):
+                        $note[] = 'Leave Early';
+                    endif;
+                elseif(empty($clockout_punch) && !empty($clockout_contract)):
+                    $note[] = 'Clock Out Not Found';
+                endif;
+                if(empty($todayAttendance->total_break) || $todayAttendance->total_break == 0):
+                    $note[] = 'Break Not Found';
+                endif;
+                if($todayAttendance->leave_status == 1):
+                    $note[] = (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note) ? ': '.$todayLeave->leaveDay->leave->note : '');
+                endif;
+            elseif($isLeaveDay && !$isClockedIn && $todayLeave->leave_status == 1 && (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note))):
+                $note[] = $todayLeave->leaveDay->leave->note;
+            elseif($isLeaveDay && !$isClockedIn && $todayLeave->leave_status == 2 && (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note))):
+                $note[] = $todayLeave->leaveDay->leave->note;
+            elseif($isLeaveDay && !$isClockedIn && $todayLeave->leave_status == 5 && (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note))):
+                $note[] = $todayLeave->leaveDay->leave->note;
+            elseif($isLeaveDay && !$isClockedIn && $todayLeave->leave_status == 4 && (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note))):
+                $note[] = $todayLeave->leaveDay->leave->note;
+            elseif($isLeaveDay && !$isClockedIn && $todayLeave->leave_status == 3 && (isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note))):
+                $note[] = $todayLeave->leaveDay->leave->note;
+            elseif(isset($todayAttendance->leave_status) && $todayAttendance->overtime_status = 1):
+                $note[] = 'Overtime';
+            elseif($isWorkingDay && $isBankHoliday && $bhAutoBook && (isset($todayBankHoliday->name) && !empty($todayBankHoliday->name))):
+                $note[] = $todayBankHoliday->name;
+            endif;
+
+            $dayClass = '';
+            $dayHour = 0;
+            $holidayHour = 0;
+            $dayStatus = '';
+            if(!$isWorkingDay && !$isClockedIn):
+                $dayClass .= ' nwRow ';
+                $dayStatus = 'Not in Schedule';
+                $dayHour += 0;
+            elseif($isWorkingDay && $isClockedIn):
+                $dayClass .= ' wkRow ';
+                $dayStatus = 'Working';
+                $dayHour += $todayWorkingHour;
+                $workingHoursTotal += $dayHour;
+            elseif(!$isWorkingDay && $isClockedIn):
+                $dayClass .= ' ovRow ';
+                $dayStatus = 'Overtime';
+                $dayHour += $todayWorkingHour;
+                $workingHoursTotal += $dayHour;
+            elseif($bhAutoBook && $isBankHoliday):
+                $dayClass .= ' bhRow ';
+                $dayStatus = 'Bank Holiday';
+                $holidayHour += $todayContractedHour;
+                $holidayHoursTotal += $todayContractedHour;
+            endif;
+
+            if(isset($todayLeave->id) && $todayLeave->id > 0):
+                $leaveHour = (isset($todayLeave->leaveDay->hour) && $todayLeave->leaveDay->hour > 0 ? $todayLeave->leaveDay->hour : (isset($todayLeave->leave_hour) && $todayLeave->leave_hour > 0 ? $todayLeave->leave_hour : 0));
+                switch($todayLeave->leave_status):
+                    case 1:
+                        $dayClass .= 'hvRow';
+                        $dayStatus = 'Holiday Vacation';
+                        $holidayHour += $leaveHour;
+                        $holidayHoursTotal += $leaveHour;
+                        break;
+                    case 2:
+                        $dayClass .= 'mtRow';
+                        $dayStatus = 'Unauthorised Absent';
+                        break;
+                    case 3:
+                        $dayClass .= 'slRow';
+                        $dayStatus = 'Sick';
+                        break;
+                    case 4:
+                        $dayClass .= 'auRow';
+                        $dayStatus = 'Authorise Unpaid';
+                        break;
+                    case 5:
+                        $dayClass .= 'apRow';
+                        $dayStatus = 'Authorise Paid';
+                        $dayHour += $leaveHour; 
+                        $workingHoursTotal += $leaveHour;
+                        break;
+                endswitch;
+            endif;
+
+            $html .= '<tr class="'.$dayClass.'">';
+                $html .= '<td class="font-medium whitespace-nowrap">';
+                    $html .= date('l, jS F', strtotime($today));
+                    if($isWorkingDay && !$isLeaveDay && !$isBankHoliday && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
+                        $html .= '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')';
+                    endif;
+                $html .= '</td>';
+                $html .= '<td>';
+                    $html .= ($isWorkingDay ? $todayPattern->total : '&nbsp;');
+                $html .= '</td>';
+                $html .= '<td>'.$dayStatus.'</td>';
+                $html .= '<td>';
+                    $html .= ($dayHour > 0 || $holidayHour > 0 ? '£'.number_format($payRate, 2) : '');
+                $html .= '</td>';
+                $html .= '<td>';
+                    $html .= ($dayHour > 0 ? $this->calculateHourMinute($dayHour) : '');
+                $html .= '</td>';
+                $html .= '<td>';
+                    $html .= ($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '');
+                $html .= '</td>';
+                $html .= '<td>';
+                    $totalHourToday = ($dayHour + $holidayHour);
+                    $todaysPay = $this->calculateHoursPayment($totalHourToday, $payRate);
+                    $monthTotalPay += $todaysPay;
+                    $html .= ($todaysPay > 0 ? '£'.number_format($todaysPay, 2) : '');
+                $html .= '</td>';
+                $html .= '<td>';
+                    if(isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 && $isClockedIn):
+                        $html .= 'A: '.$todayAttendance->clockin_punch.' - '.$todayAttendance->clockout_punch.'<br/>';
+                        $html .= 'S: '.$todayAttendance->clockin_system.' - '.$todayAttendance->clockout_system;
+                    endif;
+                $html .= '</td>';
+                $html .= '<td>';
+                    $html .= ($isClockedIn && (isset($todayAttendance->break_time) && !empty($todayAttendance->break_time)) ? $todayAttendance->break_time : '');
+                $html .= '</td>';
+                $html .= '<td>';
+                    $html .= implode(', ', $note);
+                $html .= '</td>';
+            $html .= '</tr>';
+        endfor;
+
+        $res = [];
+        $res['workingHourTotal'] = ($workingHoursTotal > 0 ? $this->calculateHourMinute($workingHoursTotal) : '00:00');
+        $res['holidayHourTotal'] = ($holidayHoursTotal > 0 ? $this->calculateHourMinute($holidayHoursTotal) : '00:00');
+        $res['monthTotalPay'] = ($monthTotalPay > 0 ? '£'.number_format($monthTotalPay, 2) : '£0.00');
+        $res['html'] = $html;
+        return $res;
+    }
+
+    public function getEmployeeActivePatternsActivePayRate($employee_id){
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                                ->orderBy('id', 'DESC')->get()->first();
+        if(isset($activePattern->id) && $activePattern->id > 0):
+            $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $activePattern->id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+            if(isset($activePay->id) && $activePay->id > 0):
+                return (isset($activePay->hourly_rate) && $activePay->hourly_rate > 0 ? $activePay->hourly_rate : 0);
+            else:
+                return 0;
+            endif;
+        else:
+            return 0;
+        endif;
+    }
+
+    public function convertStringToMinute($string){
+        $min = 0;
+        $str = explode(':', $string);
+
+        $min += (isset($str[0]) && $str[0] != '') ? $str[0] * 60 : 0;
+        $min += (isset($str[1]) && $str[1] != '') ? $str[1] : 0;
+
+        return $min;
+    }
+
+    function calculateHourMinute($minutes){
+        $hours = (intval(trim($minutes)) / 60 >= 1) ? intval(intval(trim($minutes)) / 60) : '00';
+        $mins = (intval(trim($minutes)) % 60 != 0) ? intval(trim($minutes)) % 60 : '00';
+     
+        $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
+        $hourMins .= ':';
+        $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
+        
+        return $hourMins;
+    }
+
+    public function calculateHoursPayment($minutes, $rates){
+        $amount = ($minutes / 60) * $rates;
+        return $amount;
+    }
+
+    public function downloadPdf($employee_id, $the_date, $holiday_year){
+        $employee = Employee::find($employee_id);
+
+        $res = $this->getEmployeeMonthlyAttendanceDetails($employee_id, $the_date, $holiday_year);
 
         $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
         $LetterHeader = LetterHeaderFooter::where('for_staff', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
         $LetterFooter = LetterHeaderFooter::where('for_staff', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get()->first();
-        $PDF_title = $employee->full_name.' Time Recored for the Month '.date('F Y', strtotime($theDate));
+        $PDF_title = $employee->full_name.' Time Recored for the Month '.date('F Y', strtotime($the_date));
 
         $PDFHTML = '';
         $PDFHTML .= '<html>';
@@ -112,10 +368,10 @@ class EmployeeTimeKeepingController extends Controller
                                 .mb-20{margin-bottom: 20px;}
                                 .mb-15{margin-bottom: 15px;}
                                 .text-justify{text-align: justify;}
-                                .font-medium{ font-weight: 500; }
+                                .font-medium{ font-weight: bold; }
                             
                                 .table {width: 100%; text-align: left; text-indent: 0; border-color: inherit; border-collapse: collapse;}
-                                .table th {font-family: Tahoma, sans-serif; border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: 500;}
+                                .table th {font-family: Tahoma, sans-serif; border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: bold;}
                                 .table td {border-style: solid;border-color: #e5e7eb; border-bottom-width: 1px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;}
 
                                 .table.table-bordered th, .table.table-bordered td {border-left-width: 1px;border-right-width: 1px;border-top-width: 1px;}
@@ -123,13 +379,14 @@ class EmployeeTimeKeepingController extends Controller
                                 .table.table-sm th {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
                                 .table.table-sm td {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
 
-                                .timeKeepingRow{ cursor: pointer; }
-                                .timeKeepingRow_1{ background: rgb(0 119 181); color: #FFF;}
-                                .timeKeepingRow_2{ background: rgb(0 0 0); color: #FFF;}
-                                .timeKeepingRow_3{ background: rgb(30 41 59); color: #FFF;}
-                                .timeKeepingRow_4{ background: rgb(185 28 28); color: #FFF;}
-                                .timeKeepingRow_5{ background: rgb(59 89 152); color: #FFF;}
-                                .timeKeepingRow_ov{ background: rgb(217 119 6); color: #FFF;}
+                                .attendanceDetailsTable tbody tr.hvRow td{background: rgb(0 119 181);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.mtRow td{background: rgb(98, 23, 8);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.slRow td{background: rgb(185 28 28);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.auRow td{background: rgb(132, 71, 255);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.apRow td{background: rgb(13 148 136);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.bhRow td{background: rgb(243, 110, 38);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.ovRow td{background: rgb(244, 169, 113);color: #FFF;}
+                                .attendanceDetailsTable tbody tr.nwRow td{background: rgba(22, 78, 99, .05);}
                             </style>';
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
@@ -165,118 +422,36 @@ class EmployeeTimeKeepingController extends Controller
                     $PDFHTML .= '<table class="mb-15" style="width: 100%;">';
                         $PDFHTML .= '<tr>';
                             $PDFHTML .= '<td><span class="tableTitle">'.$employee->full_name.'</span></td>';
-                            $PDFHTML .= '<td class="text-right"><span class="tableTitle">'.date('F Y', strtotime($theMonthStart)).'</span></td>';
+                            $PDFHTML .= '<td class="text-right"><span class="tableTitle">'.date('F Y', strtotime($the_date)).'</span></td>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</table>';
-                    $PDFHTML .= '<table class="table table-sm table-bordered">';
+                    $PDFHTML .= '<table class="table table-sm table-bordered attendanceDetailsTable">';
                         $PDFHTML .= '<thead>';
                             $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<th class="text-left">Date</th>';
-                                $PDFHTML .= '<th class="text-left">Status</th>';
-                                $PDFHTML .= '<th class="text-left">Note</th>';
-                                $PDFHTML .= '<th class="text-left">Clock In - Out</th>';
-                                $PDFHTML .= '<th class="text-left">Break</th>';
+                                $PDFHTML .= '<th>Date</th>';
+                                $PDFHTML .= '<th>Contracted Hour</th>';
+                                $PDFHTML .= '<th>Status</th>';
+                                $PDFHTML .= '<th>Rate</th>';
+                                $PDFHTML .= '<th>Working Hour</th>';
+                                $PDFHTML .= '<th>Holiday Hour</th>';
+                                $PDFHTML .= '<th>Pay</th>';
+                                $PDFHTML .= '<th>Clock In - Out</th>';
+                                $PDFHTML .= '<th>Break</th>';
+                                $PDFHTML .= '<th>Note</th>';
                             $PDFHTML .= '</tr>';
                         $PDFHTML .= '</thead>';
                         $PDFHTML .= '<tbody>';
-                            foreach($attendances as $attn):
-                                $note = [];
-                                $clockin_punch = (isset($attn->clockin_punch) && !empty($attn->clockin_punch) && $attn->clockin_punch != '00:00' ? $attn->clockin_punch.':00' : '');
-                                $clockin_contract = (isset($attn->clockin_contract) && !empty($attn->clockin_contract) && $attn->clockin_contract != '00:00' ? $attn->clockin_contract.':00' : '');
-                                $clockin_system = (isset($attn->clockin_system) && !empty($attn->clockin_system) && $attn->clockin_system != '00:00' ? $attn->clockin_system.':00' : '');
-                                
-                                $clockout_punch = (isset($attn->clockout_punch) && !empty($attn->clockout_punch) && $attn->clockout_punch != '00:00' ? $attn->clockout_punch.':00' : '');
-                                $clockout_contract = (isset($attn->clockout_contract) && !empty($attn->clockout_contract) && $attn->clockout_contract != '00:00' ? $attn->clockout_contract.':00' : '');
-                                $clockout_system = (isset($attn->clockout_system) && !empty($attn->clockout_system) && $attn->clockout_system != '00:00' ? $attn->clockout_system.':00' : '');
-                                if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status)) && $attn->overtime_status != 1):
-                                    if(!empty($clockin_punch) && !empty($clockin_contract)):
-                                        $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
-                                        if($clockin_punch > $lastIn):
-                                            $note[] = 'Late';
-                                        endif;
-                                    endif;
-                                    if(!empty($clockout_punch) && !empty($clockout_contract)):
-                                        $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
-                                        if($clockout_punch < $earlyLeave):
-                                            $note[] = 'Leave Early';
-                                        endif;
-                                    elseif(empty($clockout_punch) && !empty($clockout_contract)):
-                                        $note[] = 'Clock Out Not Found';
-                                    endif;
-                                    if(empty($attn->total_break) || $attn->total_break == 0):
-                                        $note[] = 'Break Not Found';
-                                    endif;
-                                elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && (($attn->leave_status == 1 || $attn->leave_status == 2) && !empty($attn->leave_status)) && $attn->overtime_status != 1):
-                                    if(!empty($clockin_punch) && !empty($clockin_contract)):
-                                        $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
-                                        if($clockin_punch > $lastIn):
-                                            $note[] = 'Late';
-                                        endif;
-                                    endif;
-                                    if(!empty($clockout_punch) && !empty($clockout_contract)):
-                                        $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
-                                        if($clockout_punch < $earlyLeave):
-                                            $note[] = 'Leave Early';
-                                        endif;
-                                    elseif(empty($clockout_punch) && !empty($clockout_contract)):
-                                        $note[] = 'Clock Out Not Found';
-                                    endif;
-                                    if(empty($attn->total_break) || $attn->total_break == 0):
-                                        $note[] = 'Break Not Found';
-                                    endif;
-                                    if($attn->leave_status == 1 || $attn->leave_status == 2):
-                                        $note[] = 'Holiday';
-                                    endif;
-                                elseif(($attn->leave_status == 1 || $attn->leave_status == 2) && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00')):
-                                    $note[] = 'Holiday';
-                                elseif($attn->leave_status == 5):
-                                    $note[] = 'Authorised Paid';
-                                elseif($attn->leave_status == 4):
-                                    $note[] = 'Absent';
-                                elseif($attn->leave_status == 3):
-                                    $note[] = 'Sick';
-                                elseif($attn->overtime_status = 1):
-                                    $note[] = 'Overtime';
-                                endif;
-
-                                $PDFHTML .= '<tr class="timeKeepingRow timeKeepingRow_'.($attn->leave_status > 0 ? $attn->leave_status : ($attn->overtime_status == 1 ? 'ov' : 0)).'" data-id="'.$attn->id.'">';
-                                    $PDFHTML .= '<td>';
-                                        $PDFHTML .= '<strong>'.date('jS F, Y, l', strtotime($attn->date)).'</strong><br/>';
-                                        $PDFHTML .= '<strong>'.$attn->clockin_contract.' - '.$attn->clockout_contract.'</strong>';
-                                    $PDFHTML .= '</td>';
-                                    $PDFHTML .= '<td>';
-                                        if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status))):
-                                            $PDFHTML .= 'Worked: '.$attn->work_hour;
-                                        elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && (($attn->leave_status == 1 || $attn->leave_status == 2) && !empty($attn->leave_status))):
-                                            $PDFHTML .= 'Worked: '.$attn->work_hour.'<br/>';
-                                            $PDFHTML .= 'Holiday: '.$attn->leaves_hour;
-                                        elseif(($attn->leave_status == 1 || $attn->leave_status == 2) && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00')):
-                                            $PDFHTML .= 'Holiday: '.$attn->leaves_hour;
-                                        elseif($attn->leave_status == 5):
-                                            $PDFHTML .= 'Authorised Paid: '.$attn->leave_hour;
-                                        elseif($attn->leave_status == 4):
-                                            $PDFHTML .= 'Absent';
-                                        elseif($attn->leave_status == 3):
-                                            $PDFHTML .= 'Sick';
-                                        endif;
-                                    $PDFHTML .= '</td>';
-                                    $PDFHTML .= '<td>';
-                                        $PDFHTML .=implode(', ', $note);
-                                    $PDFHTML .= '</td>';
-                                    $PDFHTML .= '<td>';
-                                        if($attn->total_work_hour > 0 && ($attn->clockin_punch != '' && $attn->clockin_punch != '00:00')):
-                                            $PDFHTML .= 'A: '.$attn->clockin_punch.' - '.$attn->clockout_punch.'<br/>';
-                                            $PDFHTML .= 'S: '.$attn->clockin_system.' - '.$attn->clockout_system;
-                                        endif;
-                                    $PDFHTML .= '</td>';
-                                    $PDFHTML .= '<td>';
-                                        if((!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && $attn->total_work_hour > 0):
-                                            $PDFHTML .= $attn->break_time;
-                                        endif;
-                                    $PDFHTML .= '</td>';
-                                $PDFHTML .= '</tr>';
-                            endforeach;
+                            $PDFHTML .= (isset($res['html']) && !empty($res['html']) ? $res['html'] : '');
                         $PDFHTML .= '</tbody>';
+                        $PDFHTML .= '<tfoot>';
+                            $PDFHTML .= '<tr>';
+                                $PDFHTML .= '<th colspan="4"></th>';
+                                $PDFHTML .= '<th>'.(isset($res['workingHourTotal']) ? $res['workingHourTotal'] : '00:00').'</th>';
+                                $PDFHTML .= '<th>'.(isset($res['holidayHourTotal']) ? $res['holidayHourTotal'] : '00:00').'</th>';
+                                $PDFHTML .= '<th>'.(isset($res['monthTotalPay']) ? $res['monthTotalPay'] : '£0.00').'</th>';
+                                $PDFHTML .= '<th colspan="3"></th>';
+                            $PDFHTML .= '</tr>';
+                        $PDFHTML .= '</tfoot>';
                     $PDFHTML .= '</table>';
                 $PDFHTML .= '</div>';
                 /*PDF BODY END*/
@@ -286,7 +461,7 @@ class EmployeeTimeKeepingController extends Controller
 
         $fileName = str_replace(' ', '_', $PDF_title).'.pdf';
         $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
-            ->setPaper('a4', 'portrait')
+            ->setPaper('a4', 'landscape')//portrait
             ->setWarnings(false);
         return $pdf->download($fileName);
     }

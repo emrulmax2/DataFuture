@@ -28,7 +28,9 @@ class AttendanceReportController extends Controller
                 ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
-            'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
+            'employees' => Employee::where('status', 1)->whereHas('payment', function($q){
+                                $q->where('subject_to_clockin', 'Yes');
+                            })->orderBy('first_name', 'ASC')->get(),
             'theDate' => $theDate,
             'reportHtml' => $this->generateReport($theDate)
         ]);
@@ -45,7 +47,9 @@ class AttendanceReportController extends Controller
     public function generateReport($the_month, $employee_id = []){
         $res = [];
         if(!empty($the_month)):
-            $query = Employee::has('activePatterns')->where('status', 1);
+            $query = Employee::has('activePatterns')->where('status', 1)->whereHas('payment', function($q){
+                        $q->where('subject_to_clockin', 'Yes');
+                    });
             if(!empty($employee_id)) : $query->whereIn('id', $employee_id); endif;
             $employees = $query->orderBy('first_name', 'ASC')->get();
             if($employees->count() > 0):

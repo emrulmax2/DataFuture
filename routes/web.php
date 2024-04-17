@@ -95,6 +95,7 @@ use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\AssessmentPlanController;
+use App\Http\Controllers\AssessmentTypeController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\AttendanceLiveController;
@@ -202,6 +203,8 @@ use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\Settings\AccBankController;
+use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
@@ -1526,6 +1529,13 @@ Route::middleware('auth')->group(function() {
             Route::get('term-type-list', 'list')->name('term-type.list');     
             Route::post('term-type/{id}/restore', 'restore')->name('term-type.restore');
         });
+        
+        Route::resource('assessment-type', AssessmentTypeController::class);
+
+        Route::controller(AssessmentTypeController::class)->group(function() {
+            Route::get('assessment-type-list', 'list')->name('assessment-type.list');     
+            Route::post('assessment-type/{id}/restore', 'restore')->name('assessment-type.restore');
+        });
 
         Route::resource('internal-link', InternalLinkController::class,[
             'except' => ['update']
@@ -2179,7 +2189,8 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeTimeKeepingController::class)->group(function(){
         Route::get('employee-profile/time-keeper/{id}', 'index')->name('employee.time.keeper'); 
-        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
+        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}/{year}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
+        Route::post('employee-profile/time-keeper/generate-recored', 'generateRecored')->name('employee.time.keeper.generate.recored'); 
     });
 
     // GET............agent-user....................agent-user.index.............App\Http\Controllers\Agent\AgentController@index
@@ -2332,6 +2343,30 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/portal/reports/attendance/filter', 'filterReport')->name('hr.portal.reports.attendance.filter');
         Route::get('hr/portal/reports/attendance/show/{id}/{date}', 'show')->name('hr.portal.reports.attendance.show');
         Route::get('hr/portal/reports/attendance/export/{date}', 'exportExcel')->name('hr.portal.reports.attendance.export');
+    });
+
+    Route::controller(AccMethodController::class)->group(function() {
+        Route::get('site-settings/methods', 'index')->name('site.settings.methods'); 
+        Route::get('site-settings/methods/list', 'list')->name('site.settings.methods.list'); 
+        Route::post('site-settings/methods/store', 'store')->name('site.settings.methods.store');
+        Route::post('site-settings/methods/edit', 'edit')->name('site.settings.methods.edit');
+        Route::post('site-settings/methods/update', 'update')->name('site.settings.methods.update');
+
+        Route::delete('site-settings/methods/delete/{id}', 'destroy')->name('site.settings.methods.destory');
+        Route::post('site-settings/methods/restore/{id}', 'restore')->name('site.settings.methods.restore');
+        Route::post('site-settings/methods/update-status/{id}', 'updateStatus')->name('site.settings.methods.update.status');
+    });
+
+    Route::controller(AccBankController::class)->group(function() {
+        Route::get('site-settings/banks', 'index')->name('site.settings.banks'); 
+        Route::get('site-settings/banks/list', 'list')->name('site.settings.banks.list'); 
+        Route::post('site-settings/banks/store', 'store')->name('site.settings.banks.store');
+        Route::post('site-settings/banks/edit', 'edit')->name('site.settings.banks.edit');
+        Route::post('site-settings/banks/update', 'update')->name('site.settings.banks.update');
+
+        Route::delete('site-settings/banks/delete/{id}', 'destroy')->name('site.settings.banks.destory');
+        Route::post('site-settings/banks/restore/{id}', 'restore')->name('site.settings.banks.restore');
+        Route::post('site-settings/banks/update-status/{id}', 'updateStatus')->name('site.settings.banks.update.status');
     });
 });
 

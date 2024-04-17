@@ -85,6 +85,7 @@ export default defineConfig({
                 "resources/js/rooms.js",
                 "resources/js/documentsettings.js",
                 "resources/js/termtype.js",
+                "resources/js/assessmenttype.js",
                 "resources/js/internallink.js",
                 
                 
@@ -230,6 +231,8 @@ export default defineConfig({
                 'resources/js/attendance-report.js',
                 'resources/js/hr-add-live-attendance.js',
                 'resources/js/attendance-report-details.js',
+                'resources/js/acc-methods.js',
+                'resources/js/acc-banks.js',
                 
             ],
             refresh: true,

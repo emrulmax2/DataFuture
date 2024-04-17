@@ -52,7 +52,11 @@ import Litepicker from "litepicker";
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html('Employee privilege successfully stored into the DB.');
                 });                
-                    
+                  
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000)
             }
         }).catch(error => {
             $('#employeePrivilegeForm').find('button[type="submit"]').each(function(){
