@@ -87,7 +87,7 @@
                                                                                 if(empty($attn->total_break) || $attn->total_break == 0):
                                                                                     $note[] = 'Break Not Found';
                                                                                 endif;
-                                                                            elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && (($attn->leave_status == 1 || $attn->leave_status == 2) && !empty($attn->leave_status)) && $attn->overtime_status != 1):
+                                                                            elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && ($attn->leave_status == 1 && !empty($attn->leave_status)) && $attn->overtime_status != 1):
                                                                                 if(!empty($clockin_punch) && !empty($clockin_contract)):
                                                                                     $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
                                                                                     if($clockin_punch > $lastIn):
@@ -105,17 +105,19 @@
                                                                                 if(empty($attn->total_break) || $attn->total_break == 0):
                                                                                     $note[] = 'Break Not Found';
                                                                                 endif;
-                                                                                if($attn->leave_status == 1 || $attn->leave_status == 2):
-                                                                                    $note[] = 'Holiday';
+                                                                                if($attn->leave_status == 1):
+                                                                                    $note[] = 'Holiday / Vacation'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
                                                                                 endif;
-                                                                            elseif(($attn->leave_status == 1 || $attn->leave_status == 2) && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00')):
-                                                                                $note[] = 'Holiday';
+                                                                            elseif($attn->leave_status == 1 && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00')):
+                                                                                $note[] = 'Holiday / Vacation'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
+                                                                            elseif($attn->leave_status == 2):
+                                                                                $note[] = 'Unauthorised Absent'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
                                                                             elseif($attn->leave_status == 5):
-                                                                                $note[] = 'Authorised Paid';
+                                                                                $note[] = 'Authorised Paid'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
                                                                             elseif($attn->leave_status == 4):
-                                                                                $note[] = 'Absent';
+                                                                                $note[] = 'Authorised Unpaid'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
                                                                             elseif($attn->leave_status == 3):
-                                                                                $note[] = 'Sick';
+                                                                                $note[] = 'Sick'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
                                                                             elseif($attn->overtime_status = 1):
                                                                                 $note[] = 'Overtime';
                                                                             endif;
@@ -123,22 +125,24 @@
                                                                         <tr class="timeKeepingRow timeKeepingRow_{{ ($attn->leave_status > 0 ? $attn->leave_status : ($attn->overtime_status == 1 ? 'ov' : 0)) }}" data-id="{{ $attn->id }}">
                                                                             <td class="font-medium w-72">
                                                                                 {{ date('jS F, Y, l', strtotime($attn->date)) }}<br/>
-                                                                                {{ $attn->clockin_contract.' - '.$attn->clockout_contract }}
+                                                                                {{ (isset($attn->clockin_contract) && !empty($attn->clockin_contract) ? $attn->clockin_contract : '').(isset($attn->clockout_contract) && !empty($attn->clockout_contract) ? ' - '.$attn->clockout_contract : '') }}
                                                                             </td>
                                                                             <td>
                                                                                 @if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status)))
                                                                                     Worked: {{ $attn->work_hour }}
-                                                                                @elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && (($attn->leave_status == 1 || $attn->leave_status == 2) && !empty($attn->leave_status)))
+                                                                                @elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && ($attn->leave_status == 1) && !empty($attn->leave_status)))
                                                                                     Worked: {{ $attn->work_hour }}<br/>
                                                                                     Holiday: {{ $attn->leaves_hour }}
-                                                                                @elseif(($attn->leave_status == 1 || $attn->leave_status == 2) && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00'))
+                                                                                @elseif($attn->leave_status == 1 && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00'))
                                                                                     Holiday: {{ $attn->leaves_hour }}
                                                                                 @elseif($attn->leave_status == 5)
-                                                                                    Authorised Paid: {{ $attn->leave_hour }}
+                                                                                    Authorised Paid: {{ $attn->leaves_hour }}
                                                                                 @elseif($attn->leave_status == 4)
-                                                                                    Absent
+                                                                                    Authorise Unpaid
                                                                                 @elseif($attn->leave_status == 3)
                                                                                     Sick
+                                                                                @elseif($attn->leave_status == 2)
+                                                                                    Unauthorised Absent
                                                                                 @endif
                                                                             </td>
                                                                             <td>
