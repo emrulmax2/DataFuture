@@ -161,10 +161,10 @@ class AttendanceReportController extends Controller
         $monthEnd = date('Y-m-t', strtotime($the_month));
 
         $attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)
-                       ->whereIn('leave_status', [2, 5])->orderBy('date', 'ASC')->get();
+                       ->where('leave_status', 5)->orderBy('date', 'ASC')->get();
 
         if($attendances->count() > 0):
-            return ['working_days' => $attendances->count(), 'working_hours' => $attendances->sum('total_work_hour')];
+            return ['working_days' => $attendances->count(), 'working_hours' => $attendances->sum('leave_hour')];
         else:
             return ['working_days' => 0, 'working_hours' => 0];
         endif;
@@ -174,11 +174,22 @@ class AttendanceReportController extends Controller
         $monthStart = date('Y-m-d', strtotime($the_month));
         $monthEnd = date('Y-m-t', strtotime($the_month));
 
+        $attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)
+                       ->where('leave_status', 1)->orderBy('date', 'ASC')->get();
+
+        if($attendances->count() > 0):
+            return ['holiday_days' => $attendances->count(), 'holiday_hours' => $attendances->sum('leave_hour')];
+        else:
+            return ['holiday_days' => 0, 'holiday_hours' => 0];
+        endif;
+
         
-        $employeeLeaveIds = EmployeeLeave::where('employee_id', $employee_id)->where('status', 'Approved')->pluck('id')->unique()->toArray();
+        /*$employeeLeaveIds = EmployeeLeave::where('employee_id', $employee_id)->where('status', 'Approved')->pluck('id')->unique()->toArray();
         if(!empty($employeeLeaveIds)):
             $employee_leave_day = EmployeeLeaveDay::whereIn('employee_leave_id', $employeeLeaveIds)->where('leave_date', '>=', $monthStart)->where('leave_date', '<=', $monthEnd)
-                        ->where('is_taken', 1)->orderBy('leave_date', 'ASC')->get();
+                        ->where('is_taken', 1)->whereHas('leave', function($q){
+                            $q->where('leave_type', 1);
+                        })->orderBy('leave_date', 'ASC')->get();
 
             if($employee_leave_day->count() > 0):
                 return ['holiday_days' => $employee_leave_day->count(), 'holiday_hours' => $employee_leave_day->sum('hour')];
@@ -187,7 +198,7 @@ class AttendanceReportController extends Controller
             endif;
         else:
             return ['holiday_days' => 0, 'holiday_hours' => 0];
-        endif;
+        endif;*/
     }
 
     public function getEmployeeCurrentMonthBankHolidayDetails($employee_id, $the_month){
