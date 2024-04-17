@@ -2179,7 +2179,8 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(EmployeeTimeKeepingController::class)->group(function(){
         Route::get('employee-profile/time-keeper/{id}', 'index')->name('employee.time.keeper'); 
-        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
+        Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}/{year}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
+        Route::post('employee-profile/time-keeper/generate-recored', 'generateRecored')->name('employee.time.keeper.generate.recored'); 
     });
 
     // GET............agent-user....................agent-user.index.............App\Http\Controllers\Agent\AgentController@index

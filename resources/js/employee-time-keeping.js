@@ -37,4 +37,38 @@
             $lcc_month_accordion_body.slideDown();
         }
     });
+
+    $('.lccEmpTimeKeepingBtn').on('click', function(e){
+        let $theBtn = $(this);
+        if(!$theBtn.hasClass('dataLoaded')){
+            let target = $theBtn.attr('data-target');
+            let theDate = $theBtn.attr('data-date');
+            let theEmployee = $theBtn.attr('data-employee');
+            let theYear = $theBtn.attr('data-year');
+
+            axios({
+                method: "post",
+                url: route("employee.time.keeper.generate.recored"),
+                data: {employee_id : theEmployee, the_date : theDate, holiday_year : theYear},
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                if (response.status == 200) {
+                    $theBtn.addClass('dataLoaded');
+                    let res = response.data.res;
+                    
+                    $(target+' .attendanceDetailsTable tbody').html(res.html);
+                    $(target+' .attendanceDetailsTable tfoot .tfootTotalWorkingHour').html(res.workingHourTotal);
+                    $(target+' .attendanceDetailsTable tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
+                    $(target+' .attendanceDetailsTable tfoot .tfootTotalPay').html(res.monthTotalPay);
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log("error");
+                }
+            });
+        }
+    })
 })();

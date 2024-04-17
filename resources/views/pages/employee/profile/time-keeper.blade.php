@@ -36,18 +36,55 @@
                                     <div id="employeeMonthAttendances_{{ $year_id }}" class="employee_month_attendance_accordion">
                                         @foreach($year['month'] as $key => $month)
                                             <div class="lcc_month_accordion_item mb-1">
-                                                <button class="lcc_month_accordion_button relative w-full text-lg font-semibold bg-slate-100 p-5 text-left" type="button" data-target="#employeeTKMonth_{{ $year_id }}_{{ $key }}">
+                                                <button data-year="{{ $year_id }}" data-employee="{{ $employee->id }}" data-date="{{ $month['start_date'] }}" class="lcc_month_accordion_button lccEmpTimeKeepingBtn relative w-full text-lg font-semibold bg-slate-100 p-5 text-left" type="button" data-target="#employeeTKMonth_{{ $year_id }}_{{ $key }}">
                                                     {{ date('F Y', strtotime($month['start_date'])) }} 
                                                     <span class="accordionCollaps"></span>
                                                 </button>
                                                 <div id="employeeTKMonth_{{ $year_id }}_{{ $key }}" class="lcc_month_accordion_body text-slate-600 dark:text-slate-500 leading-relaxed p-5" style="display: none;">
-                                                    @if(!empty($month['attendances']) && $month['attendances']->count() > 0)
+                                                    @if(!empty($month['attendances']))
                                                         <div class="grid grid-cols-12 gap-0">
                                                             <div class="col-span-12 text-right mb-5">
-                                                                <a href="{{ route('employee.time.keeper.download.pdf', [$employee->id, $month['start_date']]) }}" class="btn btn-success text-white"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                                                <a href="{{ route('employee.time.keeper.download.pdf', [$employee->id, $month['start_date'], $year_id]) }}" class="btn btn-success text-white"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
                                                             </div>
                                                         </div>
                                                         <div class="overflow-x-auto">
+                                                            <table class="table table-bordered attendanceDetailsTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th class="whitespace-nowrap">Date</th>
+                                                                        <th class="whitespace-nowrap">Contracted Hour</th>
+                                                                        <th class="whitespace-nowrap">Status</th>
+                                                                        <th class="whitespace-nowrap">Rate</th>
+                                                                        <th class="whitespace-nowrap">Working Hour</th>
+                                                                        <th class="whitespace-nowrap">Holiday Hour</th>
+                                                                        <th class="whitespace-nowrap">Pay</th>
+                                                                        <th class="whitespace-nowrap">Clock In - Out</th>
+                                                                        <th class="whitespace-nowrap">Break</th>
+                                                                        <th class="whitespace-nowrap">Note</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td colspan="10">
+                                                                            <div class="flex flex-col justify-center items-center">
+                                                                                <i data-loading-icon="tail-spin" class="w-20 h-20"></i>
+                                                                                <div class="text-center font-medium mt-2">Loading...</div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th colspan="4"></th>
+                                                                        <th class="tfootTotalWorkingHour"></th>
+                                                                        <th class="tfootTotalHolidayHour"></th>
+                                                                        <th class="tfootTotalPay"></th>
+                                                                        <th colspan="3"></th>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                        {{--<div class="overflow-x-auto">
                                                             <table class="table table-bordered table-sm">
                                                                 <thead>
                                                                     <tr>
@@ -163,7 +200,7 @@
                                                                     @endforeach
                                                                 </tbody>
                                                             </table>
-                                                        </div>
+                                                        </div>--}}
                                                     @endif
                                                 </div>
                                             </div>  
