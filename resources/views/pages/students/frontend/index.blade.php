@@ -30,151 +30,147 @@
                     <button class="w-10 h-10 rounded-full btn text-slate-500 bg-slate-100 dark:bg-darkmode-400 dark:border-darkmode-400">3</button>
                     <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Consent and Finish</div>
                 </li>
-                {{-- <li class="intro-x lg:text-center flex items-center mt-5 lg:mt-0 lg:block flex-1 z-10 form-wizard-step-item">
-                    <button class="w-10 h-10 rounded-full btn text-slate-500 bg-slate-100 dark:bg-darkmode-400 dark:border-darkmode-400">4</button>
-                    <div class="lg:w-32 text-base lg:mt-3 ml-3 lg:mx-auto text-slate-600 dark:text-slate-400">Finalize your Profile</div>
-                </li> --}}
+                
             </ul>
         </div>
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400 show"> 
             <form method="post" action="#" id="appicantFormStep_1" class="wizard-step-form">
             <div class="font-medium text-base">Profile Information</div>
-            <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-4" class="form-label inline-flex">Nationality <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-4" name="nationality" class="w-full  lccTom lcc-tom-select">
-                        
-                        @foreach($countries as $country)
-                            <option {{ ($studentData["nationality"] == $country->id  ? "selected":"") }} value="{{ $country->id }}">{{ $country->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="nationality-tooltip" class="relative flex items-center py-1">
-                            <div class="text-slate-500 dark:text-slate-400">Please specify your nationality or the country of which you are a citizen.</div>
+                <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-4" class="form-label inline-flex">Nationality <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-4" name="nationality" class="w-full  lccTom lcc-tom-select">
+                            
+                            @foreach($countries as $country)
+                                <option {{ ($studentData["nationality"] == $country->id  ? "selected":"") }} value="{{ $country->id }}">{{ $country->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="nationality-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Please specify your nationality or the country of which you are a citizen.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-4" class="form-label inline-flex">Country of Birth <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#country-birth-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-5" name="birth_country" class="w-full  lccTom lcc-tom-select">
-                        @foreach($countries as $country)
-                            <option  {{ ($studentData["nationality"] == $country->id  ? "selected":"") }}  value="{{ $country->id }}">{{ $country->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="country-birth-tooltip" class="relative flex items-center py-1">
-                            <div class="text-slate-500 dark:text-slate-400">Please specify your nationality or the country of which you are a citizen.</div>
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-4" class="form-label inline-flex">Country of Birth <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#country-birth-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-5" name="birth_country" class="w-full  lccTom lcc-tom-select">
+                            @foreach($countries as $country)
+                                <option  {{ ($studentData["nationality"] == $country->id  ? "selected":"") }}  value="{{ $country->id }}">{{ $country->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="country-birth-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Please specify your nationality or the country of which you are a citizen.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
 
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-4" class="form-label inline-flex">Ethnicity <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#ethnicity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-6" name="ethnicity" class="w-full  lccTom lcc-tom-select">
-                        
-                        @foreach($ethnicities as $ethnicity)
-                            <option {{ ($studentData["ethnicity"] == $ethnicity->id  ? "selected":"") }}  value="{{ $ethnicity->id }}">{{ $ethnicity->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="ethnicity-tooltip" class="relative flex items-center py-1">
-                            <div class="text-slate-500 dark:text-slate-400">Please select your ethnicity or ethnic background from the options below. This information is used for statistical purposes and will remain confidential.</div>
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-4" class="form-label inline-flex">Ethnicity <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#ethnicity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-6" name="ethnicity" class="w-full  lccTom lcc-tom-select">
+                            
+                            @foreach($ethnicities as $ethnicity)
+                                <option {{ ($studentData["ethnicity"] == $ethnicity->id  ? "selected":"") }}  value="{{ $ethnicity->id }}">{{ $ethnicity->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="ethnicity-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Please select your ethnicity or ethnic background from the options below. This information is used for statistical purposes and will remain confidential.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-3" name="religion" class="w-full  lccTom lcc-tom-select">
-                        @foreach($religions as $religion)
-                            <option {{ ($studentData["religion"] == $religion->id  ? "selected":"") }} value="{{ $religion->id }}">{{ $religion->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="religion-belief-tooltip" class="relative flex items-center py-1">
-                            <div class="text-slate-500 dark:text-slate-400">Religious belief based on your own self-assessment.</div>
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-3" name="religion" class="w-full  lccTom lcc-tom-select">
+                            @foreach($religions as $religion)
+                                <option {{ ($studentData["religion"] == $religion->id  ? "selected":"") }} value="{{ $religion->id }}">{{ $religion->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="religion-belief-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Religious belief based on your own self-assessment.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
 
-                <div class="intro-y col-span-12 sm:col-span-6 ">
-                    <label for="input-wizard-1" class="form-label inline-flex">Sexual Orientation <i data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-1" name="sexual_orientation" class="w-full lccTom lcc-tom-select" >
-                        @foreach($sexualOrientations as $sexualOrientation)
-                            <option value="{{ $sexualOrientation->id }}">{{ $sexualOrientation->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="custom-content-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Sexual orientation based on your own self-assessment.</div>
+                    <div class="intro-y col-span-12 sm:col-span-6 ">
+                        <label for="input-wizard-1" class="form-label inline-flex">Sexual Orientation <i data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-1" name="sexual_orientation" class="w-full lccTom lcc-tom-select" >
+                            @foreach($sexualOrientations as $sexualOrientation)
+                                <option value="{{ $sexualOrientation->id }}">{{ $sexualOrientation->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="custom-content-tooltip" class="relative flex items-center py-1">
+                                    <div class="text-slate-500 dark:text-slate-400">Sexual orientation based on your own self-assessment.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
-                
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-2" class="form-label inline-flex">Gender identity <i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-2" name="gender" class="w-full  lccTom lcc-tom-select">
-                        @foreach($genderIdentities as $genderIdentity)
-                            <option value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="gender-identity-tooltip" class="relative flex items-center py-1">
-                                <div class="text-slate-500 dark:text-slate-400">Gender Identity based on your own self-assessment, is your gender identity is the same as the gender originally assigned to them at birth.</div>
+                    
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-2" class="form-label inline-flex">Gender identity <i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-2" name="gender" class="w-full  lccTom lcc-tom-select">
+                            @foreach($genderIdentities as $genderIdentity)
+                                <option value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="gender-identity-tooltip" class="relative flex items-center py-1">
+                                    <div class="text-slate-500 dark:text-slate-400">Gender Identity based on your own self-assessment, is your gender identity is the same as the gender originally assigned to them at birth.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
-                <div class="intro-y col-span-12 sm:col-span-6">
-                    <label for="input-wizard-4" class="form-label inline-flex">Sex identifier/Gender <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#gender-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                    <select id="data-7" name="sex_identifier_id" class="w-full  lccTom lcc-tom-select">
-                        @foreach($sexIdentifiers as $sexIdentifier)
-                            <option {{ ($studentData["sex_identifier_id"] == $sexIdentifier->id  ? "selected":"") }}  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
-                        @endforeach
-                    </select>
-                    <!-- BEGIN: Custom Tooltip Content -->
-                    <div class="tooltip-content">
-                        <div id="gender-tooltip" class="relative flex items-center py-1">
-                            <div class="text-slate-500 dark:text-slate-400">Please select the option that best represents your gender identity.</div>
+                    <div class="intro-y col-span-12 sm:col-span-6">
+                        <label for="input-wizard-4" class="form-label inline-flex">Sex identifier/Gender <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#gender-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <select id="data-7" name="sex_identifier_id" class="w-full  lccTom lcc-tom-select">
+                            @foreach($sexIdentifiers as $sexIdentifier)
+                                <option {{ ($studentData["sex_identifier_id"] == $sexIdentifier->id  ? "selected":"") }}  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
+                            @endforeach
+                        </select>
+                        <!-- BEGIN: Custom Tooltip Content -->
+                        <div class="tooltip-content">
+                            <div id="gender-tooltip" class="relative flex items-center py-1">
+                                <div class="text-slate-500 dark:text-slate-400">Please select the option that best represents your gender identity.</div>
+                            </div>
                         </div>
+                        <!-- END: Custom Tooltip Content -->
                     </div>
-                    <!-- END: Custom Tooltip Content -->
-                </div>
-                <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
-                    <button type="button" class="btn btn-primary w-auto form-wizard-next-btn">
-                        Save &amp; Continue
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 svg_2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
+                    <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
+                        <button type="button" class="btn btn-primary w-auto form-wizard-next-btn">
+                            Save &amp; Continue
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2 svg_2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
                                 </g>
-                            </g>
-                        </svg>
-                    </button>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
             </form>
         </fieldset>
         <fieldset class="wizard-fieldset px-5 sm:px-20 mt-10 pt-10 border-t border-slate-200/60 dark:border-darkmode-400">
             <form method="post" action="#" id="appicantFormStep_2" class="wizard-step-form">
-                <div class="grid grid-cols-12 gap-x-4">    
-                    <div id="currentAdressQuestion" class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
+                <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">    
+                    <div id="currentAdressQuestion"  class="col-span-12">
                         <div class="col-span-12">
                                 <div class="intro-y col-span-12 py-1">
                                     <label for="input-wizard-4" class="form-label inline-flex mr-2">When you submitted your application, you supplied us with the address {{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 }}, {{ $studentData["current_address"]->post_code }}, {{ $studentData["current_address"]->city }}, {{ $studentData["current_address"]->country }}. Is this the address where you will be residing during your study term?</label>
@@ -183,7 +179,7 @@
                                 </div>
                         </div>
                     </div>
-                    <div id="currentAddress" class="hidden">
+                    <div id="currentAddress" class="hidden col-span-12">
                         <div class="font-medium text-base">
                             <label for="input-wizard-4" class="form-label inline-flex">Term Time Address/Correspondence Address<i data-theme="light" data-tooltip-content="#address-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
 
@@ -238,7 +234,7 @@
                         
                         <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
                             <label for="input-wizard-4" class="form-label inline-flex">Please Select your current accomodation type <span class="text-danger">*</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                            <select id="data-4" name="term_time_accommodation_type_id" class="w-auto lccTom lcc-tom-select ">
+                            <select id="data-4" name="term_time_accommodation_type_id" class=" w-full lccTom lcc-tom-select ">
                                 
                                 @foreach($termTimeAccomadtionTypes as $termTimeAccomadtionType)
                                     <option {{ ($studentData["term_time_accommodation_type_id"] == $termTimeAccomadtionType->id  ? "selected":"") }} value="{{ $termTimeAccomadtionType->id }}">{{ $termTimeAccomadtionType->name }}</option>              
@@ -253,7 +249,7 @@
                             <!-- END: Custom Tooltip Content -->
                         </div>
                     </div>
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400 col-span-12"></div>
                     <div id="askPermanentAdress" class="col-span-12 hidden">
                         <div class="col-span-12">
                                 <div class="intro-y col-span-12 py-1">

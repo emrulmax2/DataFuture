@@ -243,8 +243,11 @@ class DashboardController extends Controller
         $eLearningActivites = ELearningActivitySetting::all();
         $planDateWiseContent = [];
         foreach($planDates as $classDate) {
+
             $content = PlanContent::where("plans_date_list_id", $classDate->id)->get();
+
             foreach($content as $singleContent){
+                
                 $uploads = PlanContentUpload::where("plan_content_id",$singleContent->id)->get();
     
                 $planDateWiseContent[$classDate->id] = (object) [

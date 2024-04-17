@@ -85,6 +85,7 @@ export default defineConfig({
                 "resources/js/rooms.js",
                 "resources/js/documentsettings.js",
                 "resources/js/termtype.js",
+                "resources/js/assessmenttype.js",
                 "resources/js/internallink.js",
                 
                 

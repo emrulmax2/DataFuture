@@ -95,6 +95,7 @@ use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
 use App\Http\Controllers\ApplicantProfilePrintController;
 use App\Http\Controllers\AssessmentPlanController;
+use App\Http\Controllers\AssessmentTypeController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\AttendanceLiveController;
@@ -1525,6 +1526,13 @@ Route::middleware('auth')->group(function() {
         Route::controller(TermTypeController::class)->group(function() {
             Route::get('term-type-list', 'list')->name('term-type.list');     
             Route::post('term-type/{id}/restore', 'restore')->name('term-type.restore');
+        });
+        
+        Route::resource('assessment-type', AssessmentTypeController::class);
+
+        Route::controller(AssessmentTypeController::class)->group(function() {
+            Route::get('assessment-type-list', 'list')->name('assessment-type.list');     
+            Route::post('assessment-type/{id}/restore', 'restore')->name('assessment-type.restore');
         });
 
         Route::resource('internal-link', InternalLinkController::class,[
