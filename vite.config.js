@@ -231,6 +231,8 @@ export default defineConfig({
                 'resources/js/attendance-report.js',
                 'resources/js/hr-add-live-attendance.js',
                 'resources/js/attendance-report-details.js',
+                'resources/js/acc-methods.js',
+                'resources/js/acc-banks.js',
                 
             ],
             refresh: true,

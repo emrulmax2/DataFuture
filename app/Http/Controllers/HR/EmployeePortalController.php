@@ -461,8 +461,8 @@ class EmployeePortalController extends Controller
                                     ->where('el.status', '!=', 'Canceled')
                                     ->where('el.employee_id', $employee_id)
                                     ->get()->first();
-                            if(!empty($leaveday) && (isset($leaveday->id) && $leaveday->id > 0) > 0 && $day_Status > 0):
-                                $dataAttr .= ' data-leaveday-id="'.$leaveday->id.'" data-employee="'.$employee_id.'" data-date="'.$date.'"';
+                            if(!empty($leaveday) && (isset($leaveday->eld_id) && $leaveday->eld_id > 0) > 0 && $day_Status > 0):
+                                $dataAttr .= ' data-leaveday-id="'.$leaveday->eld_id.'" data-employee="'.$employee_id.'" data-date="'.$date.'"';
                                 $class .= ' view_leave';
                             endif;
 
