@@ -68,51 +68,65 @@ class AttendanceReportController extends Controller
                         $html .= '</tr>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
+                        $TBHTML = '';
                         foreach($employees as $emp):
-                            $payRate = $this->getEmployeeActivePatternsActivePayRate($emp->id);
-                            $workDetails = $this->getEmployeeCurrentMonthWorkDetails($emp->id, $the_month);
-                            $meetingAuthPaid = $this->getEmployeeCurrentMonthExtraWorkingDetails($emp->id, $the_month);
-                            $holidayDetails = $this->getEmployeeCurrentMonthHolidayDetails($emp->id, $the_month);
-                            $bankHolidayDetails = $this->getEmployeeCurrentMonthBankHolidayDetails($emp->id, $the_month);
-                            $sickDays = $this->getEmployeeCurrentMonthSickDays($emp->id, $the_month);
-                            
-                            $working_days = (isset($workDetails['working_days']) ? $workDetails['working_days'] : 0); 
-                            $working_days += (isset($meetingAuthPaid['working_days']) ? $meetingAuthPaid['working_days'] : 0);
+                            if($this->employeeHasSyncdAttendance($emp->id, $the_month)):
+                                $payRate = $this->getEmployeeActivePatternsActivePayRate($emp->id);
+                                $workDetails = $this->getEmployeeCurrentMonthWorkDetails($emp->id, $the_month);
+                                $meetingAuthPaid = $this->getEmployeeCurrentMonthExtraWorkingDetails($emp->id, $the_month);
+                                $holidayDetails = $this->getEmployeeCurrentMonthHolidayDetails($emp->id, $the_month);
+                                $bankHolidayDetails = $this->getEmployeeCurrentMonthBankHolidayDetails($emp->id, $the_month);
+                                $sickDays = $this->getEmployeeCurrentMonthSickDays($emp->id, $the_month);
+                                
+                                $working_days = (isset($workDetails['working_days']) ? $workDetails['working_days'] : 0); 
+                                $working_days += (isset($meetingAuthPaid['working_days']) ? $meetingAuthPaid['working_days'] : 0);
 
-                            $working_hours = (isset($workDetails['working_hours']) ? $workDetails['working_hours'] : 0); 
-                            $working_hours += (isset($meetingAuthPaid['working_hours']) ? $meetingAuthPaid['working_hours'] : 0); 
-                            $working_pays = $this->calculateHoursPayment($working_hours, $payRate);
+                                $working_hours = (isset($workDetails['working_hours']) ? $workDetails['working_hours'] : 0); 
+                                $working_hours += (isset($meetingAuthPaid['working_hours']) ? $meetingAuthPaid['working_hours'] : 0); 
+                                $working_pays = $this->calculateHoursPayment($working_hours, $payRate);
 
-                            $holiday_days = (isset($holidayDetails['holiday_days']) ? $holidayDetails['holiday_days'] : 0);
-                            $holiday_days += (isset($bankHolidayDetails['bank_holiday_days']) ? $bankHolidayDetails['bank_holiday_days'] : 0);
+                                $holiday_days = (isset($holidayDetails['holiday_days']) ? $holidayDetails['holiday_days'] : 0);
+                                $holiday_days += (isset($bankHolidayDetails['bank_holiday_days']) ? $bankHolidayDetails['bank_holiday_days'] : 0);
 
-                            $holiday_hours = (isset($holidayDetails['holiday_hours']) ? $holidayDetails['holiday_hours'] : 0);
-                            $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
-                            $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
-                            $html .= '<tr>';
-                                $html .= '<td>';
-                                    $html .= '<div>';
-                                        $html .= '<a href="'.route('hr.portal.reports.attendance.show', [$emp->id, date('m-Y', strtotime($the_month))]).'" class="font-medium text-primary whitespace-nowrap underline">'.$emp->full_name.'</a>';
-                                        if(isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name)):
-                                            $html .= ' - <span>'.$emp->employment->employeeJobTitle->name.'</span>';
-                                        endif;
-                                    $html .= '</div>';
-                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'; 
-                                        $html .= (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
-                                        $html .= (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? ' - '.$emp->employment->works_number : '');
-                                    $html .= '</div>';
-                                $html .= '</td>';
-                                $html .= '<td>';
-                                    $html .= '£'.number_format($payRate, 2);
-                                $html .= '</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($working_hours).'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($holiday_hours).'</td>';
-                                $html .= '<td>£'.number_format($working_pays, 2).'</td>';
-                                $html .= '<td>£'.number_format($holiday_pays, 2).'</td>';
-                                $html .= '<td>'.($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '').'</td>';
-                                $html .= '<td>£'.number_format(($working_pays + $holiday_pays), 2).'</td>';
-                            $html .= '</tr>';
+                                $holiday_hours = (isset($holidayDetails['holiday_hours']) ? $holidayDetails['holiday_hours'] : 0);
+                                $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
+                                $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
+                                $TBHTML .= '<tr>';
+                                    $TBHTML .= '<td>';
+                                        $TBHTML .= '<div>';
+                                            $TBHTML .= '<a href="'.route('hr.portal.reports.attendance.show', [$emp->id, date('m-Y', strtotime($the_month))]).'" class="font-medium text-primary whitespace-nowrap underline">'.$emp->full_name.'</a>';
+                                            if(isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name)):
+                                                $TBHTML .= ' - <span>'.$emp->employment->employeeJobTitle->name.'</span>';
+                                            endif;
+                                        $TBHTML .= '</div>';
+                                        $TBHTML .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'; 
+                                            $TBHTML .= (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
+                                            $TBHTML .= (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? ' - '.$emp->employment->works_number : '');
+                                        $TBHTML .= '</div>';
+                                    $TBHTML .= '</td>';
+                                    $TBHTML .= '<td>';
+                                        $TBHTML .= '£'.number_format($payRate, 2);
+                                    $TBHTML .= '</td>';
+                                    $TBHTML .= '<td>'.$this->calculateHourMinute($working_hours).'</td>';
+                                    $TBHTML .= '<td>'.$this->calculateHourMinute($holiday_hours).'</td>';
+                                    $TBHTML .= '<td>£'.number_format($working_pays, 2).'</td>';
+                                    $TBHTML .= '<td>£'.number_format($holiday_pays, 2).'</td>';
+                                    $TBHTML .= '<td>'.($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '').'</td>';
+                                    $TBHTML .= '<td>£'.number_format(($working_pays + $holiday_pays), 2).'</td>';
+                                $TBHTML .= '</tr>';
+                            endif;
                         endforeach;
+                        if(!empty($TBHTML)):
+                            $html .= $TBHTML;
+                        else:
+                            $html .= '<tr>';
+                                $html .= '<td colspan="8">';
+                                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Employee attendance data not found
+                                              </div>';
+                                $html .= '</td>';
+                            $html .= '</tr>';
+                        endif;
                     $html .= '</tbody>';
                 $html .= '</table>';
 
@@ -128,6 +142,16 @@ class AttendanceReportController extends Controller
         endif;
 
         return $res;
+    }
+
+    public function employeeHasSyncdAttendance($employee_id, $the_month){
+        $monthStart = date('Y-m-d', strtotime($the_month));
+        $monthEnd = date('Y-m-t', strtotime($the_month));
+
+        $attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)
+                       ->get()->count();
+
+        return ($attendances > 0 ? true : false);
     }
 
     public function getEmployeeActivePatternsActivePayRate($employee_id){

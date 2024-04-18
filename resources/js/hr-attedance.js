@@ -9,6 +9,14 @@ import Litepicker from "litepicker";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+
+    const confirmModalEl = document.getElementById('confirmModal')
+    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#confirmModal .confModDesc').html('');
+        $('#confirmModal .agreeWith').attr('data-date', '').attr('data-action', 'none');
+    });
 
 
     let dateOption = {
@@ -63,6 +71,7 @@ import Litepicker from "litepicker";
             if (response.status == 200) {
                 var res = response.data.res;
                 $('#attendanceSyncListTable table tbody').html(res);
+                createIcons({icons, "stroke-width": 1.5, nameAttr: "data-lucide"}); 
             } 
         }).catch(error => {
             document.querySelector('#filterMonthAtten').removeAttribute('disabled');
@@ -110,5 +119,71 @@ import Litepicker from "litepicker";
             }
         });
 
+    });
+
+    // Delete All Sync Data
+    $('#attendanceSyncListTable').on('click', '.deleteAllSyncd', function(){
+        let $theBtn = $(this);
+        let theDate = $theBtn.attr('data-date');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to delete all attendance for the day?  If yes, the please click on agree btn.');
+            $('#confirmModal .agreeWith').attr('data-date', theDate);
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETESYNCD');
+        });
+    });
+
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+
+        let $agreeBTN = $(this);
+        let theDate = $agreeBTN.attr('data-date');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'DELETESYNCD'){
+            axios({
+                method: 'delete',
+                url: route('hr.attendance.destroy.all'),
+                data: {theDate : theDate},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let suc = response.data.suc;
+                    let msg = response.data.msg;
+
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    if(suc == 2){
+                        warningModal.show();
+                        document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                            $('#warningModal .warningModalTitle').html('Oops!');
+                            $('#warningModal .warningModalDesc').html(msg);
+                        });
+
+                        setTimeout(function(){
+                            warningModal.hide();
+                            $('#filterMonthAttenForm').trigger('submit');
+                        }, 500)
+                    }else{
+                        successModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Done!');
+                            $('#successModal .successModalDesc').html(msg);
+                        });
+
+                        setTimeout(function(){
+                            successModal.hide();
+                            $('#filterMonthAttenForm').trigger('submit');
+                        }, 500)
+                    }
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
     });
 })();
