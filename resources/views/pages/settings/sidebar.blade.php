@@ -239,10 +239,10 @@
             </li>
 
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'site.settings.category' || Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="landmark" class="w-4 h-4 mr-2"></i> Account Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'site.settings.category' || Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'block' : 'none' }};">
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'site.settings.methods' ? 'active text-primary font-medium' : '' }}" href="{{ route('site.settings.methods') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Methods
@@ -254,7 +254,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'df.fields' ? 'active text-primary font-medium' : '' }}" href="{{ route('df.fields') }}">
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'site.settings.category' ? 'active text-primary font-medium' : '' }}" href="{{ route('site.settings.category') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Categories
                         </a>
                     </li>

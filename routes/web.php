@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounts\SummaryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -204,6 +205,7 @@ use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Settings\AccBankController;
+use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
@@ -2369,6 +2371,20 @@ Route::middleware('auth')->group(function() {
         Route::delete('site-settings/banks/delete/{id}', 'destroy')->name('site.settings.banks.destory');
         Route::post('site-settings/banks/restore/{id}', 'restore')->name('site.settings.banks.restore');
         Route::post('site-settings/banks/update-status/{id}', 'updateStatus')->name('site.settings.banks.update.status');
+    });
+
+    Route::controller(AccCategoryController::class)->group(function() {
+        Route::get('site-settings/category', 'index')->name('site.settings.category'); 
+        Route::post('site-settings/category/filter-dropdown', 'filterDropdown')->name('site.settings.category.filter.dropdown'); 
+        Route::post('site-settings/category/store', 'store')->name('site.settings.category.store');
+        Route::post('site-settings/category/edit', 'edit')->name('site.settings.category.edit');
+        Route::post('site-settings/category/update', 'update')->name('site.settings.category.update');
+
+        Route::delete('site-settings/category/delete/{id}', 'destroy')->name('site.settings.category.destory');
+    });
+
+    Route::controller(SummaryController::class)->group(function() {
+        Route::get('accounts', 'index')->name('accounts'); 
     });
 });
 

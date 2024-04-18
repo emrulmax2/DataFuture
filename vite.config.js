@@ -233,6 +233,7 @@ export default defineConfig({
                 'resources/js/attendance-report-details.js',
                 'resources/js/acc-methods.js',
                 'resources/js/acc-banks.js',
+                'resources/js/acc-category.js',
                 
             ],
             refresh: true,

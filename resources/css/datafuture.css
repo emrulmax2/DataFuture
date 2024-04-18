@@ -1637,3 +1637,30 @@ input[type=number] {
 #employeeAttendanceDetailsTable.table tbody tr.nwRow{
     cursor: not-allowed;
 }
+
+.table.tbl_catagoryType tbody tr td span{
+    display: block;
+    padding-left: 20px;
+    position: relative;
+}
+.table.tbl_catagoryType tbody tr td span::before{
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #000;
+    left: 0;
+    top: 5px;
+}
+.table.tbl_catagoryType tbody tr td.firstColumnLevel_2 span {
+    margin-left: 20px;
+}
+.table.tbl_catagoryType tbody tr td.firstColumnLevel_3 span {
+    margin-left: 40px;
+}
+.table.tbl_catagoryType tbody tr td.firstColumnLevel_4 span {
+    margin-left: 60px;
+}
+.table.tbl_catagoryType tbody tr td.firstColumnLevel_4 span {
+    margin-left: 80px;
+}

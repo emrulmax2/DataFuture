@@ -15,6 +15,7 @@ class AccCategory extends Model
         'category_name',
         'trans_type',
         'status',
+        'audit_status',
         'created_by',
         'updated_by',
     ];
@@ -27,7 +28,7 @@ class AccCategory extends Model
     protected $dates = ['deleted_at'];
 
     public function childrens(){
-        return $this->hasMany('App\Models\Category', 'parent_id', 'id');
+        return $this->hasMany(AccCategory::class, 'parent_id', 'id');
     }
 
     public function childrenRecursive(){
