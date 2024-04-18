@@ -1145,6 +1145,8 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/attendance/update-all', 'updateAll')->name('hr.attendance.update.all');
         Route::post('hr/attendance/edit', 'edit')->name('hr.attendance.edit');
         Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');
+
+        Route::delete('hr/attendance/delete', 'destroy')->name('hr.attendance.destroy.all');
     });
 
     Route::controller(EmployeePortalController::class)->group(function(){

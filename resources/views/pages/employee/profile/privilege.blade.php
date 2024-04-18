@@ -173,6 +173,12 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_1">Add Attendance</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['del_attendance']) && $priv['hr_portal']['del_attendance'] == 1 ? 'checked' : '') }} id="permission_hr_portal_2" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][del_attendance]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_2">Delete Attendance</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

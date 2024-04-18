@@ -110,6 +110,9 @@ class EmployeeAttendanceController extends Controller
                 $html .= '<td>';
                     if($allRows > 0):
                         $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$allRows.' Attendances</a>';
+                        if(isset(auth()->user()->priv()['del_attendance']) && auth()->user()->priv()['del_attendance'] == 1):
+                            $html .= '<button data-date="'.date('Y-m-d', strtotime($todayDate)).'" class="deleteAllSyncd btn btn-sm btn-danger text-white rounded-0 ml-1 relative" style="top: 4px;" type="button"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+                        endif;
                     else:
                         $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Attendances</a>';
                     endif;
@@ -918,5 +921,20 @@ class EmployeeAttendanceController extends Controller
         EmployeeAttendance::where('id', $attendance_id)->update($data); 
         
         return response()->json(['res' => $isses_field], 200);
+    }
+
+
+    public function destroy(Request $request){
+        $theDate = (isset($request->theDate) && !empty($request->theDate) ? date('Y-m-d', strtotime($request->theDate)) : '');
+        if(!empty($theDate)):
+            $leaveDayIds = EmployeeAttendance::where('date', $theDate)->pluck('employee_leave_day_id')->unique()->toArray();
+            $empAttendance = EmployeeAttendance::where('date', $theDate)->forceDelete();
+            if(!empty($leaveDayIds)):
+                $leaveDays = EmployeeLeaveDay::whereIn('id', $leaveDayIds)->update(['is_taken' => 0]);
+            endif;
+            return response()->json(['suc' => 1, 'msg' => 'Employee attendance of <strong>'.date('jS F, Y').'</strong> successfully deleted.'], 200);
+        else:
+            return response()->json(['suc' => 2, 'msg' => 'Something went wrong. Please try later.'], 200);
+        endif;
     }
 }
