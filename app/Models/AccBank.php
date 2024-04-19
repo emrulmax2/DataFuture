@@ -27,8 +27,8 @@ class AccBank extends Model
 
     public function getImageUrlAttribute()
     {
-        if ($this->bank_image !== null && Storage::disk('local')->exists('public/banks/'.$this->id.'/'.$this->bank_image)) {
-            return Storage::disk('local')->url('public/banks/'.$this->id.'/'.$this->bank_image);
+        if ($this->bank_image !== null && $this->bank_image != '' && Storage::disk('local')->exists('public/banks/'.$this->bank_image)) {
+            return Storage::disk('local')->url('public/banks/'.$this->bank_image);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }

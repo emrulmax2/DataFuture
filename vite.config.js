@@ -234,7 +234,9 @@ export default defineConfig({
                 'resources/js/acc-methods.js',
                 'resources/js/acc-banks.js',
                 'resources/js/acc-category.js',
+                'resources/js/accounts.js',
                 'resources/js/accounts-summary.js',
+                'resources/js/accounts-storage.js',
                 
             ],
             refresh: true,

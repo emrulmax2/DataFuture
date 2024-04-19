@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -2389,6 +2390,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SummaryController::class)->group(function() {
         Route::get('accounts', 'index')->name('accounts'); 
+    });
+
+    Route::controller(StorageController::class)->group(function() {
+        Route::get('accounts/storage/{id}', 'index')->name('accounts.storage'); 
     });
 });
 
