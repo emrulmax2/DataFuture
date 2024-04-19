@@ -22,6 +22,7 @@ import Litepicker from "litepicker";
         $('#absentUpdateModal input[name="minutes"]').val('0');
 
         $('#absentUpdateModal input[name="leave_day_id"]').val('0');
+        $('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -82,9 +83,26 @@ import Litepicker from "litepicker";
         var leavedayhourminute = $this.attr('data-leavedayhourminute');
         var leavenote = $this.attr('data-leavenote');
 
+        var pendingleave = $this.attr('data-pendingleave');
+        var pendingleavemsg = $this.attr('data-pendingleavemsg');
+
         absentUpdateModal.show();
         $('#absentUpdateForm input[name="employee_id"]').val(employee);
 
+        if(pendingleave == 1){
+            document.querySelector('#updateAbsent').setAttribute('disabled', 'disabled');
+            $('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
+            $('#absentUpdateForm .modal-body').prepend('<div class="alert formLeaveError alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-4"></i><div>'+pendingleavemsg+'</div></div>');
+
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        }else{
+            $('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
+            document.querySelector('#updateAbsent').removeAttribute('disabled');
+        }
         if(leavedayid > 0){
             $('#absentUpdateForm [name="leave_day_id"]').val(leavedayid);
             $('#absentUpdateForm [name="leave_type"]').val(leavetype);

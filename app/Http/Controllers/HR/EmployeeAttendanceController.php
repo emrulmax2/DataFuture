@@ -148,9 +148,18 @@ class EmployeeAttendanceController extends Controller
 
     public function syncronise(Request $request){
         $theDate = date('Y-m-d', strtotime($request->theDate));
+        $syncronised = $this->syncroniseAttendanceData($theDate);
+        return response()->json(['res' => 'Employee attendance successfully sincronised.', 'date' => date('D jS M', strtotime($theDate)), 'url' => url('hr/attendance/show/'.strtotime($theDate))], 200);
+    }
+
+    public function syncroniseAttendanceData($theDate, $employee_id = 0){
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
-        $employees = Employee::has('activePatterns')->where('status', 1)->orderBy('first_name', 'ASC')->get();
+        if($employee_id > 0):
+            $employees = Employee::where('id', $employee_id)->where('status', 1)->orderBy('first_name', 'ASC')->get();
+        else:
+            $employees = Employee::has('activePatterns')->where('status', 1)->orderBy('first_name', 'ASC')->get();
+        endif;
 
         foreach($employees as $employee):
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
@@ -668,7 +677,7 @@ class EmployeeAttendanceController extends Controller
             endif;
         endforeach;
 
-        return response()->json(['res' => 'Employee attendance successfully sincronised.', 'date' => date('D jS M', strtotime($theDate)), 'url' => url('hr/attendance/show/'.strtotime($theDate))], 200);
+        return 1;
     }
 
     public function convertStringToMinute($string){
@@ -936,5 +945,27 @@ class EmployeeAttendanceController extends Controller
         else:
             return response()->json(['suc' => 2, 'msg' => 'Something went wrong. Please try later.'], 200);
         endif;
+    }
+
+    public function reSyncronise(Request $request){
+        $employee_id = $request->employee_id;
+        $the_date = date('Y-m-d', strtotime($request->the_date));
+
+        $empLeaveDay = EmployeeLeaveDay::where('leave_date', $the_date)->where('was_absent_day', 1)
+                        ->whereHas('leave', function($q) use($employee_id, $the_date){
+                            $q->where('employee_id', $employee_id)->where('from_date', $the_date)->where('to_date', $the_date)
+                                ->whereIn('leave_type', [2, 3, 4, 5]);
+                        })->get()->first();
+        if(isset($empLeaveDay->id) && $empLeaveDay->id > 0):
+            $leave_day_id = $empLeaveDay->id;
+            $leave_id = $empLeaveDay->leave->id;
+            EmployeeLeaveDay::where('id', $leave_day_id)->forceDelete();
+            EmployeeLeave::where('id', $leave_id)->forceDelete();
+        endif;
+
+        $deleteAttendance = EmployeeAttendance::where('employee_id', $employee_id)->where('date', $the_date)->forceDelete();
+        $syncronised = $this->syncroniseAttendanceData($the_date, $employee_id);
+
+        return response()->json(['res' => 1], 200);
     }
 }

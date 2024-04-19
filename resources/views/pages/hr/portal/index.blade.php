@@ -140,7 +140,7 @@
                     <div class="mt-5">
                         @if(!empty($absentToday))
                             @foreach($absentToday as $employee_id => $absent)
-                                <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday" data-emloyee="{{ $employee_id }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
+                                <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday" data-emloyee="{{ $employee_id }}" data-date="{{ $absent['the_date'] }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
                                     <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
                                         <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
                                             <img src="{{ $absent['photo_url'] }}" alt="{{ $absent['full_name'] }}">
@@ -368,7 +368,7 @@
                             <div class="acc__input-error error-leave_type text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="hour" class="form-label">Contracted Hour <span class="text-danger">*</span></label>
+                            <label for="hour" class="form-label">Hour <span class="text-danger">*</span></label>
                             <input type="text" readonly id="hour" data-todayhour="00:00" value="00:00" name="hour" placeholder="00:00" class="form-control timeMask w-full">
                             <div class="acc__input-error error-hour text-danger mt-2"></div>
                         </div>
@@ -380,7 +380,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateAbsent" class="btn btn-primary w-auto">
+                        <button disabled type="submit" id="updateAbsent" class="btn btn-primary w-auto">
                             Save
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
