@@ -56,6 +56,12 @@ class EmployeeAbsentTodayController extends Controller
                                         $q->where('employee_id', $employee_id)->where('status', 'Approved');
                                     })
                                     ->get()->first();
+                $pendingLeave = EmployeeLeaveDay::where('status', 'Active')
+                                    ->where('leave_date', $theDate)
+                                    ->whereHas('leave', function($q) use($employee_id){
+                                        $q->where('employee_id', $employee_id)->where('status', 'Pending');
+                                    })
+                                    ->get()->first();
                 $absentLeaveType = '';
                 if(isset($absentLeave->leave->leave_type) && $absentLeave->leave->leave_type > 0):
                     switch ($absentLeave->leave->leave_type):
@@ -89,6 +95,7 @@ class EmployeeAbsentTodayController extends Controller
                         $res[$employee_id]['full_name'] = $employee->full_name;
                         $res[$employee_id]['designation'] = (isset($employee->employment->employeeJobTitle->name) ? $employee->employment->employeeJobTitle->name : '');
                         $res[$employee_id]['the_date'] =  date('jS M, Y', strtotime($theDate));
+                        $res[$employee_id]['date'] =  date('Y-m-d', strtotime($theDate));
                         $res[$employee_id]['hourMinute'] =  $patternDay->total;
                         $res[$employee_id]['minute'] =  $this->convertStringToMinute($patternDay->total);
                         $res[$employee_id]['start'] =  $patternDay->start;
@@ -102,6 +109,9 @@ class EmployeeAbsentTodayController extends Controller
                         $res[$employee_id]['leave_day_id'] =  (isset($absentLeave->id) && $absentLeave->id > 0 ? $absentLeave->id : 0);
                         $res[$employee_id]['leave_day_minute'] =  (isset($absentLeave->hour) && $absentLeave->hour > 0 ? $absentLeave->hour : 0);
                         $res[$employee_id]['leave_day_hour_minute'] =  (isset($absentLeave->hour) && $absentLeave->hour > 0 ? $this->calculateHourMinute($absentLeave->hour) : '00:00');
+
+                        $res[$employee_id]['has_peinding_leave'] =  (isset($pendingLeave->id) && $pendingLeave->id > 0 ? true : false);
+                        $res[$employee_id]['has_peinding_msg'] =  (isset($pendingLeave->id) && $pendingLeave->id > 0 ? '<strong>Oops!</strong> A Pending leave found for the day '.date('jS M, Y', strtotime($theDate)).'. Please take a action on that pending leave first.' : '');
                     endif;
                 endif;
             endif;

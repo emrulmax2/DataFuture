@@ -159,6 +159,9 @@
 
                                                 <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                 <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                <button data-id="{{ $atten->employee_id }}" data-date="{{ date('Y-m-d', strtotime($atten->date)) }}" type="button" class="reSyncRow btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1">
+                                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                                </button>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
                                             </td>
@@ -332,6 +335,9 @@
                                                 <td>
                                                     <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                     <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                    <button data-id="{{ $atten->employee_id }}" data-date="{{ date('Y-m-d', strtotime($atten->date)) }}" type="button" class="reSyncRow btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1">
+                                                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                                    </button>
                                                     <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
                                                     <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
                                                     <input type="hidden" class="isOnlyLeave" name="attendance[{{ $atten->id }}][only_leave]" value="1"/>
@@ -473,6 +479,9 @@
                                                 <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                     <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                     <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                    <button data-id="{{ $atten->employee_id }}" data-date="{{ date('Y-m-d', strtotime($atten->date)) }}" type="button" class="reSyncRow btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1">
+                                                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                                    </button>
                                                     <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
                                                     <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
                                                 </td>
@@ -733,6 +742,9 @@
                                             <td {{ ($atten->leave_status > 0 ? 'rowspan=2' : '') }}>
                                                 <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                 <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                <button data-id="{{ $atten->employee_id }}" data-date="{{ date('Y-m-d', strtotime($atten->date)) }}" type="button" class="reSyncRow btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1">
+                                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                                </button>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
                                             </td>
@@ -996,6 +1008,9 @@
                                             <td>
                                                 <button data-id="{{ $atten->id }}" type="button" class="editRowNote btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="scroll-text" class="w-4 h-4"></i></button>
                                                 <button data-id="{{ $atten->id }}" type="button" class="saveRow btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                                <button data-id="{{ $atten->employee_id }}" data-date="{{ date('Y-m-d', strtotime($atten->date)) }}" type="button" class="reSyncRow btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1">
+                                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                                </button>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][attendance_id]" value="{{ $atten->id }}"/>
                                                 <input type="hidden" name="attendance[{{ $atten->id }}][user_issues]" value="{{ $atten->user_issues }}"/>
                                             </td>
@@ -1099,6 +1114,26 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
+
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="confirmModal" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-date="" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')

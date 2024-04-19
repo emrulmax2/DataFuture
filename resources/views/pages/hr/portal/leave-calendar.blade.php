@@ -123,7 +123,7 @@
                     <div class="leaveDetailsModalContent" style="display: none;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Close</button>
                 </div>
             </div>
         </div>

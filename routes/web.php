@@ -1149,6 +1149,8 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/attendance/update-break', 'updateBreak')->name('hr.attendance.update.break');
 
         Route::delete('hr/attendance/delete', 'destroy')->name('hr.attendance.destroy.all');
+        
+        Route::post('hr/attendance/resyncronise', 'reSyncronise')->name('hr.attendance.re.sync');
     });
 
     Route::controller(EmployeePortalController::class)->group(function(){
@@ -1164,6 +1166,8 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports', 'employmentReportShow')->name('hr.portal.employment.reports.show');
 
         Route::post('hr/portal/get-leave-day-details', 'getLeaveDayDetails')->name('hr.portal.get.leave.day.details');
+
+        Route::post('hr/portal/absent-employe-pending-leave', 'checkIfisPendingLeaveExist')->name('hr.portal.check.pending.leave');
         
     });     
 

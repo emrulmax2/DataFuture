@@ -93,6 +93,7 @@ class EmployeePortalController extends Controller
                         $res[$employee_id]['photo_url'] = $employee->photo_url;
                         $res[$employee_id]['full_name'] = $employee->full_name;
                         $res[$employee_id]['date'] =  date('jS M, Y', strtotime($theDate));
+                        $res[$employee_id]['the_date'] =  date('Y-m-d', strtotime($theDate));
                         $res[$employee_id]['hourMinute'] =  $patternDay->total;
                         $res[$employee_id]['minute'] =  $this->convertStringToMinute($patternDay->total);
                         $res[$employee_id]['start'] =  (isset($patternDay->start) ? $patternDay->start : '00:00');
@@ -689,5 +690,26 @@ class EmployeePortalController extends Controller
         $html .= '</div>';
 
         return response()->json(['htm' => $html, 'title' => $title], 200);
+    }
+
+    public function checkIfisPendingLeaveExist(Request $request){
+        $employee = $request->employee;
+        $the_date = date('Y-m-d', strtotime($request->the_date));
+
+        $leaveIds = EmployeeLeave::where(function($q) use($the_date){
+            $q->where('from_date', '<=', $the_date)->where('to_date', '>=', $the_date);
+        })->where('employee_id', $employee)->whereIn('status', ['Approved', 'Pending'])->pluck('id')->unique()->toArray();
+
+        
+        if(!empty($leaveIds)):
+            $leaveDay = EmployeeLeaveDay::whereIn('employee_leave_id', $leaveIds)->where('leave_date', $the_date)->where('status', 'Active')->where('is_taken', '0')->get()->count();
+            if($leaveDay > 0):
+                return response()->json(['suc' => 2, 'msg' => '<strong>Oops!</strong> A Pending leave found for the day '.date('jS F, Y', strtotime($the_date)).'. Please take a action on that pending leave first.'], 200);
+            else:
+                return response()->json(['suc' => 1, 'msg' => ''], 200);
+            endif;
+        else:
+            return response()->json(['suc' => 1, 'msg' => ''], 200);
+        endif;
     }
 }

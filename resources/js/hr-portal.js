@@ -157,6 +157,7 @@ var employeeListTable = (function () {
         $('#absentUpdateModal input[name="employee_id"]').html('0');
         $('#absentUpdateModal input[name="minutes"]').html('0');
         $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', '00:00').val('00:00').attr('readonly', 'readonly');
+        $('#absentUpdateModal .modal-body').find('.formLeaveError').remove();
     });
 
     const empNewLeaveRequestModalEl = document.getElementById('empNewLeaveRequestModal')
@@ -191,11 +192,48 @@ var employeeListTable = (function () {
         var employee = $this.attr('data-emloyee');
         var minute = $this.attr('data-minute');
         var hourminute = $this.attr('data-hour-min');
+        var the_date = $this.attr('data-date');
 
-        //$('#absentUpdateForm input[name="hour"]').val(hourminute);
-        $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', hourminute);
-        $('#absentUpdateForm input[name="employee_id"]').val(employee)
-        $('#absentUpdateForm input[name="minutes"]').val(minute)
+        axios({
+            method: "post",
+            url: route('hr.portal.check.pending.leave'),
+            data: {employee : employee, the_date : the_date},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            
+            
+            if (response.status == 200) {
+                let suc = response.data.suc;
+                let msg = response.data.msg;
+
+                if(suc == 2){
+                    $('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
+                    $('#absentUpdateForm .modal-body').prepend('<div class="alert formLeaveError alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-4"></i><div>'+msg+'</div></div>');
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }else{
+                    $('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
+                    document.querySelector('#updateAbsent').removeAttribute('disabled');
+                }
+                
+                //$('#absentUpdateForm input[name="hour"]').val(hourminute);
+                $('#absentUpdateForm input[name="hour"]').attr('data-todayhour', hourminute);
+                $('#absentUpdateForm input[name="employee_id"]').val(employee)
+                $('#absentUpdateForm input[name="minutes"]').val(minute);
+
+                setTimeout(function(){
+                    //$('#absentUpdateForm .modal-body').find('.formLeaveError').remove();
+                }, 5000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateAbsent').removeAttribute('disabled');
+            if (error.response) {
+                console.log('error');
+            }
+        });
     });
     $('#absentUpdateForm [name="leave_type"]').on('change', function(){
         if($(this).val() == 5){

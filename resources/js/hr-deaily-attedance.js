@@ -8,11 +8,18 @@ import IMask from 'imask';
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const viewBreakModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewBreakModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 
     const viewBreakModalEl = document.getElementById('viewBreakModal')
     viewBreakModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#viewBreakModal .modal-body').html('');
         $('#viewBreakModal input[name="id"]').val('0');
+    });
+
+    const confirmModalEl = document.getElementById('confirmModal')
+    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#confirmModal button').removeAttr('disabled');
+        $('#confirmModal .agreeWith').attr('data-id', '0').attr('data-date', '');
     });
 
     $(document).on('click', '.successCloser', function(e){
@@ -330,14 +337,18 @@ import IMask from 'imask';
         if($theCheck.prop('checked')){
             $theTable.find('.employee_attendance_id').prop('checked', true);
             $('.saveAllRow[data-table="#'+theID+'"]').fadeIn();
+            $theTable.find('.reSyncRow').css({display: 'inline-flex'});
         }else{
             $theTable.find('.employee_attendance_id').prop('checked', false);
             $('.saveAllRow[data-table="#'+theID+'"]').fadeOut();
+            $theTable.find('.reSyncRow').css({display: 'none'});
         }
     });
 
     $('.employee_attendance_id').on('change', function(){
+        var $theCheckbox = $(this);
         var $theTable = $(this).closest('.dailyAttendanceTable');
+        var $theTr = $(this).closest('tr.attendanceSyncRow');
         var theID = $theTable.attr('id');
 
         var allCheckBox = $theTable.find('tbody .employee_attendance_id').length;
@@ -354,6 +365,12 @@ import IMask from 'imask';
             $theTable.find('.checkAll').prop('checked', false);
         }else{
             $theTable.find('.checkAll').prop('checked', true);
+        }
+
+        if($theCheckbox.prop('checked', true)){
+            $theTr.find('.reSyncRow').css({display: 'inline-flex'});
+        }else{
+            $theTr.find('.reSyncRow').css({display: 'none'});
         }
     });
 
@@ -709,4 +726,58 @@ import IMask from 'imask';
             });
         }
     });
+
+
+    $('.dailyAttendanceTable').on('click', '.reSyncRow', function(e){
+        e.preventDefault();
+        let $theSyncBtn = $(this);
+        let employee_id = $theSyncBtn.attr('data-id');
+        let the_date = $theSyncBtn.attr('data-date');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want re-sync this employee\'s attendance data?');
+            $('#confirmModal .agreeWith').attr('data-id', employee_id).attr('data-date', the_date);
+        });
+    });
+
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+        let $theSyncBtn = $(this);
+        let employee_id = $theSyncBtn.attr('data-id');
+        let the_date = $theSyncBtn.attr('data-date');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+
+        axios({
+            method: "post",
+            url: route('hr.attendance.re.sync'),
+            data: {employee_id : employee_id, the_date : the_date},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('#confirmModal button').removeAttr('disabled');
+            
+            if (response.status == 200) {
+                successModal.show();
+                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                    $('#successModal .successModalTitle').html('Congratulations!');
+                    $('#successModal .successModalDesc').html('Employee attendance data successfully re-sync.');
+                    $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                });
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                })
+            }
+            
+        }).catch(error => {
+            $('#confirmModal button').removeAttr('disabled');
+
+            if(error.response){
+                console.log('error');
+            }
+        });
+    })
 })()
