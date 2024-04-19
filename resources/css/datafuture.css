@@ -1664,3 +1664,8 @@ input[type=number] {
 .table.tbl_catagoryType tbody tr td.firstColumnLevel_4 span {
     margin-left: 80px;
 }
+
+
+.reSyncRow{
+    display: none;
+}

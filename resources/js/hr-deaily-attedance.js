@@ -337,14 +337,18 @@ import IMask from 'imask';
         if($theCheck.prop('checked')){
             $theTable.find('.employee_attendance_id').prop('checked', true);
             $('.saveAllRow[data-table="#'+theID+'"]').fadeIn();
+            $theTable.find('.reSyncRow').css({display: 'inline-flex'});
         }else{
             $theTable.find('.employee_attendance_id').prop('checked', false);
             $('.saveAllRow[data-table="#'+theID+'"]').fadeOut();
+            $theTable.find('.reSyncRow').css({display: 'none'});
         }
     });
 
     $('.employee_attendance_id').on('change', function(){
+        var $theCheckbox = $(this);
         var $theTable = $(this).closest('.dailyAttendanceTable');
+        var $theTr = $(this).closest('tr.attendanceSyncRow');
         var theID = $theTable.attr('id');
 
         var allCheckBox = $theTable.find('tbody .employee_attendance_id').length;
@@ -361,6 +365,12 @@ import IMask from 'imask';
             $theTable.find('.checkAll').prop('checked', false);
         }else{
             $theTable.find('.checkAll').prop('checked', true);
+        }
+
+        if($theCheckbox.prop('checked', true)){
+            $theTr.find('.reSyncRow').css({display: 'inline-flex'});
+        }else{
+            $theTr.find('.reSyncRow').css({display: 'none'});
         }
     });
 
