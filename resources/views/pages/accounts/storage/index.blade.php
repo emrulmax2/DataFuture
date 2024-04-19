@@ -18,6 +18,24 @@
             </div>
             <div class="intro-y box p-5 mt-5">
                 <div class="grid grid-cols-12 gap-4">
+
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-2">
+                        <input type="text" placeholder="DD-MM-YYYY" value="{{ date('d-m-Y') }}" class="w-full form-control datepicker" name="transaction_date" data-format="DD-MM-YYYY" data-single-mode="true" />
+                    </div>
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-6">
+                        <input type="text" placeholder="Details" class="w-full form-control" name="detail" />
+                    </div>
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-4">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
+                                <input type="number" step="any" placeholder="Withdrawl" name="expense" class="form-control w-full text-right"/>
+                            </div>
+                            <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
+                                <input type="number" step="any" placeholder="Deposit" name="income" class="form-control w-full text-right"/>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-span-12 sm:col-span-3 lg:col-span-2">
                         <select class="w-full form-control" name="trans_type">
                             <option value="0">Income</option>
@@ -25,39 +43,27 @@
                             <option value="2">Transfer</option>
                         </select>
                     </div>
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-4">
+                        <select class="w-full form-control" name="acc_category_id">
+                            <option value="">Please Select Category</option>
+                        </select>
+                    </div>
                     <div class="col-span-12 sm:col-span-3 lg:col-span-2">
                         <input type="text" placeholder="INV0001" class="w-full form-control" name="invoice_no" />
                     </div>
-                    <div class="col-span-12 sm:col-span-6 lg:col-span-8"></div>
-                    <div class="col-span-12 sm:col-span-3 lg:col-span-2">
-                        <input type="text" placeholder="DD-MM-YYYY" value="{{ date('d-m-Y') }}" class="w-full form-control datepicker" name="transaction_date" data-format="DD-MM-YYYY" data-single-mode="true" />
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-4"></div>
+
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-2"></div>
+                    <div class="col-span-12 sm:col-span-6 lg:col-span-6">
+                        <input type="text" class="w-full form-control" name="description" placeholder="Descriptions"/>
                     </div>
-                    <div class="col-span-12 sm:col-span-3 lg:col-span-6">
-                        <input type="text" placeholder="Details" class="w-full form-control" name="detail" />
-                        <div class="grid grid-cols-12 gap-4 pt-4">
-                            <div class="col-span-12 sm:col-span-12 lg:col-span-6">
-                                <select class="w-full form-control" name="acc_category_id">
-                                    <option value="">Please Select Category</option>
-                                </select>
-                            </div>
-                            <div class="col-span-12 sm:col-span-12 lg:col-span-6">
-                                <select class="w-full form-control" name="acc_method_id">
-                                    <option value="">Please Select Method</option>
-                                </select>
-                            </div>
+                    
+                    
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-4 text-right">
+                        <div class="form-check inline-flex mr-5">
+                            <input id="checkbox-switch-1" class="form-check-input" type="checkbox" value="">
                         </div>
-                    </div>
-                    <div class="col-span-12 sm:col-span-3 lg:col-span-4">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
-                                <label class="form-label">Expense</label>
-                                <input type="number" step="any" placeholder="Expense" name="expense" class="form-control w-full text-right"/>
-                            </div>
-                            <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
-                                <label class="form-label">Income</label>
-                                <input type="number" step="any" placeholder="Income" name="income" class="form-control w-full text-right"/>
-                            </div>
-                        </div>
+                        <button type="submit" class="btn btn-success text-white w-auto">Save</button>
                     </div>
                 </div>
             </div>
