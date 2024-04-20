@@ -7,30 +7,9 @@
 @section('subcontent')
     <div class="grid grid-cols-12 gap-6">
         <div class="col-span-12 xl:col-span-3 2xl:col-span-3 relative z-10">
-            <div class="2xl:border-r h-full pb-10 intro-y 2xl:pr-6 pt-6">
-                <ul class="accountsMenu">
-                    <li class="mb-2">
-                        <a href="{{ route('accounts') }}" class="text-lg font-medium truncate flex justify-start items-center"><i data-lucide="sliders-horizontal" class="w-5 h-5 mr-4"></i> Summary</a>
-                    </li>
-                    <li class="mb-2 hasDropdown">
-                        <a href="javascript:void(0);" class="text-lg font-medium truncate flex justify-start items-center"><i data-lucide="landmark" class="w-5 h-5 mr-4"></i> Bank / Storages</a>
-                        <div class="mt-3 accDropDown" style="padding-left: 37px; display: none;">
-                            @foreach (array_slice($fakers, 0, 4) as $faker)
-                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
-                                        <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
-                                    </div>
-                                    <div class="ml-4 mr-auto">
-                                        <div class="font-medium">{{ $faker['users'][0]['name'] }}</div>
-                                        <div class="text-slate-500 text-xs mt-0.5">{{ $faker['dates'][0] }}</div>
-                                    </div>
-                                    <div class="py-1 px-2 rounded-full text-xs bg-success text-white cursor-pointer font-medium">137 Sales</div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </li>
-                </ul>
-            </div>
+            <!-- BEGIN: Profile Info -->
+            @include('pages.accounts.sidebar')
+            <!-- END: Profile Info -->
         </div>
         <div class="col-span-12 xl:col-span-9 2xl:col-span-9 z-10 pt-6">
             <div class="-mb-6 intro-y">
@@ -238,5 +217,6 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/accounts.js')
     @vite('resources/js/accounts-summary.js')
 @endsection

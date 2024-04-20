@@ -1669,3 +1669,6 @@ input[type=number] {
 .reSyncRow{
     display: none;
 }
+.accDropDown .bankItem.active{
+    background: rgba(13, 148, 136, .2);
+}

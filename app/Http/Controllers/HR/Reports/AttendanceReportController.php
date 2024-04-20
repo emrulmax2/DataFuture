@@ -583,62 +583,66 @@ class AttendanceReportController extends Controller
         $theCollection[1][] = 'Name';
         $theCollection[1][] = 'Position';
         $theCollection[1][] = 'Employee/Contractor';
-        $theCollection[1][] = 'Rate';
+        $theCollection[1][] = 'Rate (£)';
         $theCollection[1][] = 'Working Hour';
         $theCollection[1][] = 'Holiday Hour';
-        $theCollection[1][] = 'Working Pay';
-        $theCollection[1][] = 'Holiday Pay';
+        $theCollection[1][] = 'Working Pay (£)';
+        $theCollection[1][] = 'Holiday Pay (£)';
         $theCollection[1][] = 'Sick/SSP';
-        $theCollection[1][] = 'Other Pay';
-        $theCollection[1][] = 'Gross Pay';
+        $theCollection[1][] = 'Other Pay (£)';
+        $theCollection[1][] = 'Gross Pay (£)';
         $theCollection[1][] = 'Note';
 
         if(!empty($the_month)):
-            $query = Employee::has('activePatterns')->where('status', 1);
+            $query = Employee::has('activePatterns')->where('status', 1)->whereHas('payment', function($q){
+                $q->where('subject_to_clockin', 'Yes');
+            });
             $employees = $query->orderBy('first_name', 'ASC')->get();
 
             $row = 2;
             if($employees->count() > 0):
                 foreach($employees as $emp):
-                    $payRate = $this->getEmployeeActivePatternsActivePayRate($emp->id);
-                    $workDetails = $this->getEmployeeCurrentMonthWorkDetails($emp->id, $the_month);
-                    $meetingAuthPaid = $this->getEmployeeCurrentMonthExtraWorkingDetails($emp->id, $the_month);
-                    $holidayDetails = $this->getEmployeeCurrentMonthHolidayDetails($emp->id, $the_month);
-                    $bankHolidayDetails = $this->getEmployeeCurrentMonthBankHolidayDetails($emp->id, $the_month);
-                    $sickDays = $this->getEmployeeCurrentMonthSickDays($emp->id, $the_month);
-                    
-                    $working_days = (isset($workDetails['working_days']) ? $workDetails['working_days'] : 0); 
-                    $working_days += (isset($meetingAuthPaid['working_days']) ? $meetingAuthPaid['working_days'] : 0);
+                    if($this->employeeHasSyncdAttendance($emp->id, $the_month)):
+                        $payRate = $this->getEmployeeActivePatternsActivePayRate($emp->id);
+                        $workDetails = $this->getEmployeeCurrentMonthWorkDetails($emp->id, $the_month);
+                        $meetingAuthPaid = $this->getEmployeeCurrentMonthExtraWorkingDetails($emp->id, $the_month);
+                        $holidayDetails = $this->getEmployeeCurrentMonthHolidayDetails($emp->id, $the_month);
+                        $bankHolidayDetails = $this->getEmployeeCurrentMonthBankHolidayDetails($emp->id, $the_month);
+                        $sickDays = $this->getEmployeeCurrentMonthSickDays($emp->id, $the_month);
+                        
+                        $working_days = (isset($workDetails['working_days']) ? $workDetails['working_days'] : 0); 
+                        $working_days += (isset($meetingAuthPaid['working_days']) ? $meetingAuthPaid['working_days'] : 0);
 
-                    $working_hours = (isset($workDetails['working_hours']) ? $workDetails['working_hours'] : 0); 
-                    $working_hours += (isset($meetingAuthPaid['working_hours']) ? $meetingAuthPaid['working_hours'] : 0); 
-                    $working_pays = $this->calculateHoursPayment($working_hours, $payRate);
+                        $working_hours = (isset($workDetails['working_hours']) ? $workDetails['working_hours'] : 0); 
+                        $working_hours += (isset($meetingAuthPaid['working_hours']) ? $meetingAuthPaid['working_hours'] : 0); 
+                        $working_pays = $this->calculateHoursPayment($working_hours, $payRate);
 
-                    $holiday_days = (isset($holidayDetails['holiday_days']) ? $holidayDetails['holiday_days'] : 0);
-                    $holiday_days += (isset($bankHolidayDetails['bank_holiday_days']) ? $bankHolidayDetails['bank_holiday_days'] : 0);
+                        $holiday_days = (isset($holidayDetails['holiday_days']) ? $holidayDetails['holiday_days'] : 0);
+                        $holiday_days += (isset($bankHolidayDetails['bank_holiday_days']) ? $bankHolidayDetails['bank_holiday_days'] : 0);
 
-                    $holiday_hours = (isset($holidayDetails['holiday_hours']) ? $holidayDetails['holiday_hours'] : 0);
-                    $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
-                    $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
+                        $holiday_hours = (isset($holidayDetails['holiday_hours']) ? $holidayDetails['holiday_hours'] : 0);
+                        $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
+                        $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
 
-                    $grossPay = $working_pays + $holiday_pays;
+                        $grossPay = $working_pays + $holiday_pays;
 
-                    $theCollection[$row][] = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : '');
-                    $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
-                    $theCollection[$row][] = $emp->full_name;
-                    $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
-                    $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
-                    $theCollection[$row][] = '£'.number_format($payRate, 2);
-                    $theCollection[$row][] = $this->calculateHourMinute($working_hours);
-                    $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
-                    $theCollection[$row][] = '£'.number_format($working_pays, 2);
-                    $theCollection[$row][] = '£'.number_format($holiday_pays, 2);
-                    $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
-                    $theCollection[$row][] = '';
-                    $theCollection[$row][] = '£'.number_format($grossPay, 2);
-                    $theCollection[$row][] = '';
-                    
-                    $row++;
+                        $theCollection[$row][] = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : '');
+                        $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
+                        $theCollection[$row][] = $emp->full_name;
+                        $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
+                        $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
+                        $theCollection[$row][] = number_format($payRate, 2);
+                        $theCollection[$row][] = $this->calculateHourMinute($working_hours);
+                        $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
+                        $theCollection[$row][] = number_format($working_pays, 2);
+                        $theCollection[$row][] = number_format($holiday_pays, 2);
+                        $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
+                        $theCollection[$row][] = '';
+                        $theCollection[$row][] = number_format($grossPay, 2);
+                        $theCollection[$row][] = '';
+                        
+                        $row++;
+                    endif;
                 endforeach;
             endif;
         endif;

@@ -87,7 +87,7 @@ class AccBankController extends Controller
         if($request->hasFile('photo') && $bank->id):
             $photo = $request->file('photo');
             $imageName = 'Bank_'.$bank->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-            $path = $photo->storeAs('public/banks/'.$bank->id, $imageName, 'local');
+            $path = $photo->storeAs('public/banks', $imageName, 'local');
 
             $bankUpdate = AccBank::where('id', $bank->id)->update([
                 'bank_image' => $imageName
@@ -116,10 +116,10 @@ class AccBankController extends Controller
 
         if($request->hasFile('photo')):
             $imageName = 'Bank_'.$request->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-            $path = $request->file('photo')->storeAs('public/banks/'.$request->id, $imageName, 'local');
+            $path = $request->file('photo')->storeAs('public/banks', $imageName, 'local');
             if(isset($bankOldRow->bank_image) && !empty($bankOldRow->bank_image)):
-                if (Storage::disk('local')->exists('public/banks/'.$request->id.'/'.$bankOldRow->bank_image)):
-                    Storage::disk('local')->delete('public/banks/'.$request->id.'/'.$bankOldRow->bank_image);
+                if (Storage::disk('local')->exists('public/banks/'.$bankOldRow->bank_image)):
+                    Storage::disk('local')->delete('public/banks/'.$bankOldRow->bank_image);
                 endif;
             endif;
             
