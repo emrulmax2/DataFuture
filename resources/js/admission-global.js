@@ -269,6 +269,14 @@ import Dropzone from "dropzone";
                         if(statusidID==7) {
                             statusConfirmModal.hide();
                             statusStudentProgressModal.show();
+
+                            setTimeout(function(){
+                                let inProgress = $('#progressBarModal input#progress').val();
+                                if(inProgress==100) {
+                                    statusStudentProgressModal.hide();
+                                    location.reload();
+                                }
+                            }, 2000);
                         } else {   
                         statusConfirmModal.hide();
                         window.location.reload();
