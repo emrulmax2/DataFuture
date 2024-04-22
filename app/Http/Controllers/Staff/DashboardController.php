@@ -69,6 +69,11 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getAccountDashBoard()
+    {
+        return view('pages.accounting.dashboard.index');
+    }
+
     public function parentLinkBox($id)
     {
         $userData = \Auth::guard('web')->user();
