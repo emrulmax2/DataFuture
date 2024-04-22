@@ -26,12 +26,13 @@ const app = {
         },
         getUploadProgrss() {
             let self = this;
+            
             //let statusId = self.getAttribute('data-statusid');
             self.checkIfIdPresent();
             //console.log(statusId);
             //Get progress data
             let statsThis = document.getElementById("statusAgreement");
-            console.log(statsThis);
+           
             let progressResponse = setInterval(() => {
                 window.axios.get(route("admission.progress.data"),{
                     params: {
@@ -46,6 +47,7 @@ const app = {
 
                     if(pendingJobs==0){
                         self.progressPercentage = 100;
+                        
                     } else{
                         self.progressPercentage = parseInt(completedJobs/totalJobs * 100).toFixed(0);
                     }
@@ -58,11 +60,14 @@ const app = {
                 })
             }, 1000);
 
-        }
+        },
+        
     },
     created() {
+        
         this.getUploadProgrss();
     },
+    
 }
 createApp(app).mount("#app");
 

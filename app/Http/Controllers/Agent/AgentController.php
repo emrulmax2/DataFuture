@@ -273,8 +273,17 @@ class AgentController extends Controller
         
         $agent_user->fill($request->all());
         $agent_user->save();
+
+        //$request->request->remove('email');
+        //$request->request->add(['email' => $request->input('contact_email')]);
+        //$request->request->remove('contact_email');
+
+        $agent= Agent::where("agent_user_id",$agent_user->AgentUser->id)->get()->first();
+
+        $agent->fill($request->all());
+        $agent->save();
         
-        if($agenUser->wasChanged() || $agent_user->wasChanged()){
+        if($agenUser->wasChanged() || $agent_user->wasChanged() || $agent->wasChanged()){
             return response()->json(['message' => 'Data updated'], 200);
         }else{
             return response()->json(['message' => 'something went wrong'], 422);

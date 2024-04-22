@@ -42,26 +42,18 @@
                     </button>
                     <div class="dropdown-menu w-40">
                         <ul class="dropdown-content">
+                            
                             <li>
                                 <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                 </a>
                             </li>
-                            {{-- <li>
-                                <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                </a>
-                            </li> --}}
+
                             <li>
                                 <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                 </a>
                             </li>
-                            {{-- <li>
-                                <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                </a>
-                            </li> --}}
                         </ul>
                     </div>
                 </div>

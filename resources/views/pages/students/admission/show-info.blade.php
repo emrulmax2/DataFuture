@@ -244,13 +244,15 @@
             <form method="POST" action="#" id="" enctype="multipart/form-data">
                 <div  class="modal-content">
                     <div class="modal-header border-0" >
-                        <h2 class="font-medium text-xl mr-auto">@{{ progress }}  ....</h2>
+                        <h2 v-if="progressPercentage<100" class="font-medium text-xl mr-auto">@{{ progress }}  ....</h2>
+                        <h2 v-else-if="progressPercentage==100"class="font-medium text-xl mr-auto">@{{ progress }} Done</h2>
                         
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-6 h-6 text-slate-400"></i>
                         </a>
                     </div>
                     <input id="batchId" type="hidden" value="" />
+                    <input id="progress" type="hidden" :value="progressPercentage" />
                     <div class="modal-body">
                         <div>
                             <div class="progress h-3 mt-1">
