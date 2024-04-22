@@ -210,15 +210,16 @@ function checkPasswordStrength(password) {
     }
     }
 (function () {
+    
+    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
     if($('#agentTableId').length > 0){
         // Init Table
         agentTableId.init();
-
-
         //const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         //const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 
-
+    }
     /*Address Modal*/
     if($('#addressModal').length > 0){
         const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
@@ -303,6 +304,61 @@ function checkPasswordStrength(password) {
         });
     }
 
+    // Update Course Data
+    $("#editModalForm").on("submit", function (e) {
 
-    }
+        e.preventDefault();
+        let editId = $('#editModal input[name="id"]').val();
+
+        const form = document.getElementById("editModalForm");
+
+        document.querySelector('#update').setAttribute('disabled', 'disabled');
+        document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+
+        let form_data = new FormData(form);
+
+        axios({
+            method: "post",
+            url: route("agent-user.update", editId),
+            data: form_data,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                document.querySelector("#update").removeAttribute("disabled");
+                document.querySelector("#update svg").style.cssText = "display: none;";
+                editModal.hide();
+
+                succModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulations!");
+                    $("#successModal .successModalDesc").html('Data successfully updated.');
+                });
+                location.reload();
+            }
+        }).catch((error) => {
+            document.querySelector("#update").removeAttribute("disabled");
+            document.querySelector("#update svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editForm .${key}`).addClass('border-danger')
+                        $(`#editForm  .error-${key}`).html(val)
+                    }
+                }else if (error.response.status == 304) {
+                    editModal.hide();
+
+                    let message = error.response.statusText;
+                    succModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Oops!");
+                        $("#successModal .successModalDesc").html(message);
+                    });
+                } else {
+                    console.log("error");
+                }
+            }
+        });
+    });
 })()

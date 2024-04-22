@@ -67,7 +67,56 @@
     </div>
 </div>
 <!-- END: Address Modal -->
-
+<!-- BEGIN: Edit Modal -->
+<div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="editModalForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Contact</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="intro-x col-span-12">
+                             <label for="email1" class="form-label inline-flex">Email (use for login)<span class="text-danger">*</span></label>
+                                <input type="email" id="email1" name="email" value="{{ $user->email }}" class="form-control rounded-none " placeholder="Email"> 
+                                <div id="error-email1" class="acc__input-error error-email text-danger mt-2"></div>
+                        </div>
+                        <div class="intro-x col-span-12">
+                            <label for="mobile" class="form-label inline-flex">Mobile <span class="text-danger">*</span></label>
+                            <input id="mobile" type="text" class="form-control rounded-none form-control" value="{{ $employee->mobile }}" name="mobile" aria-label="default input example">
+                            <div class="acc__input-error error-mobile text-danger mt-2"></div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="update" class="btn btn-primary w-auto">
+                        Update
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="id" value="{{ $user->id }}" />
+                    
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Modal -->
 <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
