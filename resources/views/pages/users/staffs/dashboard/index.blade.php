@@ -58,11 +58,11 @@
                         @endif
 
                         
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
+                        {{-- @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
                         <a href="{{ route('staff.dashboard.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/ACCOUNT-logos.jpg') }}">
                         </a>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
             </div>
