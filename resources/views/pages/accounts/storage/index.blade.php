@@ -28,24 +28,47 @@
                     <div class="col-span-12 sm:col-span-3 lg:col-span-4">
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
-                                <input type="number" step="any" placeholder="Withdrawl" name="expense" class="form-control w-full text-right"/>
+                                <input readonly type="number" step="any" placeholder="Withdrawl" id="expense" name="expense" class="form-control w-full text-right"/>
                             </div>
                             <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
-                                <input type="number" step="any" placeholder="Deposit" name="income" class="form-control w-full text-right"/>
+                                <input type="number" step="any" placeholder="Deposit" id="income" name="income" class="form-control w-full text-right"/>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-span-12 sm:col-span-3 lg:col-span-2">
-                        <select class="w-full form-control" name="trans_type">
+                        <select class="w-full form-control" id="trans_type" name="trans_type">
                             <option value="0">Income</option>
                             <option value="1">Expense</option>
                             <option value="2">Transfer</option>
                         </select>
                     </div>
                     <div class="col-span-12 sm:col-span-3 lg:col-span-4">
-                        <select class="w-full form-control" name="acc_category_id">
+                        <select class="w-full form-control" id="acc_category_id_in" name="acc_category_id_in">
                             <option value="">Please Select Category</option>
+                            @if(!empty($in_categories))
+                                @foreach($in_categories as $cat)
+                                    <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <select class="w-full form-control" id="acc_category_id_out" name="acc_category_id_out" style="display: none;">
+                            <option value="">Please Select Category</option>
+                            @if(!empty($out_categories))
+                                @foreach($out_categories as $cat)
+                                    <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <select class="w-full form-control" id="acc_bank_id" name="acc_bank_id" style="display: none;">
+                            <option value="">Please Select Storage</option>
+                            @if(!empty($banks))
+                                @foreach($banks as $bnk)
+                                    @if($bnk->id != $bank->id)
+                                    <option value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
+                                    @endif
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                     <div class="col-span-12 sm:col-span-3 lg:col-span-2">
@@ -59,8 +82,8 @@
                     </div>
                     
                     
-                    <div class="col-span-12 sm:col-span-3 lg:col-span-4 text-right">
-                        <div class="form-check inline-flex mr-5">
+                    <div class="col-span-12 sm:col-span-3 lg:col-span-4 text-right flex items-center justify-end">
+                        <div class="form-check inline-flex mr-3">
                             <input id="checkbox-switch-1" class="form-check-input" type="checkbox" value="">
                         </div>
                         <button type="submit" class="btn btn-success text-white w-auto">Save</button>

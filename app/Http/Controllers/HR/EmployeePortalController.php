@@ -132,10 +132,10 @@ class EmployeePortalController extends Controller
         
         if($type == 'approved'):
             $approvedLeaveIds = EmployeeLeave::where('hr_holiday_year_id', $yearid)->where('status', 'Approved')->pluck('id')->toArray();
-            $query = EmployeeLeaveDay::whereIn('employee_leave_id', $approvedLeaveIds)->where('status', 'Active');
+            $query = EmployeeLeaveDay::orderBy('updated_at', 'DESC')->whereIn('employee_leave_id', $approvedLeaveIds)->where('status', 'Active');
         elseif($type == 'rejected'):
             $rejectedLeaveIds = EmployeeLeave::where('hr_holiday_year_id', $yearid)->where('status', '!=', 'Pending')->pluck('id')->toArray();
-            $query = EmployeeLeaveDay::whereIn('employee_leave_id', $rejectedLeaveIds)->where('status', 'In Active');
+            $query = EmployeeLeaveDay::orderBy('updated_at', 'DESC')->whereIn('employee_leave_id', $rejectedLeaveIds)->where('status', 'In Active');
         else:
             $query = EmployeeLeave::where('status', 'Pending')->where('hr_holiday_year_id', $yearid);
         endif;
@@ -238,9 +238,9 @@ class EmployeePortalController extends Controller
                     'hour' => $this->calculateHourMinute($list->hour),
                     'type' => 'rejected',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
-                    'approved_by' => '',
-                    'approved_at' => '',
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
+                    'approved_by' => (isset($list->uuser->employee->full_name) && !empty($list->uuser->employee->full_name) ? $list->uuser->employee->full_name : ''),
+                    'approved_at' => (isset($list->updated_at) && !empty($list->updated_at) ? date('jS M, Y', strtotime($list->updated_at)) : ''),
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
                 ];
                 $i++;
             endforeach;
