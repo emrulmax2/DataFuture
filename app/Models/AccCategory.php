@@ -35,4 +35,24 @@ class AccCategory extends Model
         return $this->childrens()->with('childrenRecursive');
     }
 
+    public function transactions(){
+        return $this->hasMany(AccTransaction::class, 'acc_category_id', 'id')->where('parent', 0);
+    }
+
+    public function incomes(){
+        return $this->hasMany(AccTransaction::class, 'acc_category_id', 'id')->where('transaction_type', 0)->where('parent', 0);
+    }
+
+    public function expenses(){
+        return $this->hasMany(AccTransaction::class, 'acc_category_id', 'id')->where('transaction_type', 1)->where('parent', 0);
+    }
+
+    public function deposits(){
+        return $this->hasMany(AccTransaction::class, 'acc_category_id', 'id')->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0);
+    }
+
+    public function withdrawls(){
+        return $this->hasMany(AccTransaction::class, 'acc_category_id', 'id')->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0);
+    }
+
 }

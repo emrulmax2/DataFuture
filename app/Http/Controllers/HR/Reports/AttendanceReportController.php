@@ -631,14 +631,14 @@ class AttendanceReportController extends Controller
                         $theCollection[$row][] = $emp->full_name;
                         $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
                         $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
-                        $theCollection[$row][] = number_format($payRate, 2);
+                        $theCollection[$row][] = number_format($payRate, 2, ',', '');
                         $theCollection[$row][] = $this->calculateHourMinute($working_hours);
                         $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
-                        $theCollection[$row][] = number_format($working_pays, 2);
-                        $theCollection[$row][] = number_format($holiday_pays, 2);
+                        $theCollection[$row][] = number_format($working_pays, 2, ',', '');
+                        $theCollection[$row][] = number_format($holiday_pays, 2, ',', '');
                         $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
                         $theCollection[$row][] = '';
-                        $theCollection[$row][] = number_format($grossPay, 2);
+                        $theCollection[$row][] = number_format($grossPay, 2, ',', '');
                         $theCollection[$row][] = '';
                         
                         $row++;

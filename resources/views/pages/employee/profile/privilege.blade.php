@@ -179,6 +179,12 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_2">Delete Attendance</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['privilege_menu']) && $priv['hr_portal']['privilege_menu'] == 1 ? 'checked' : '') }} id="permission_hr_portal_3" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][privilege_menu]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_3">Privilege Menu</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,6 +229,38 @@
                 </div>
             </div>
         </div>
+
+        
+        <div class="intro-y box p-5 mt-5 {{ (in_array(auth()->user()->id, [1, 7, 8]) ? '' : 'magicBox') }}">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Accounts Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['acc_privilege']['access_account']) && $priv['acc_privilege']['access_account'] == 1 ? 'checked' : '') }} id="permission_acc_privilege_1" class="form-check-input" type="checkbox" value="1" name="permission[acc_privilege][access_account]">
+                            <label class="form-check-label ml-4" for="permission_acc_privilege_1">Account's Privilege</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3 accountsUserTypeWrap" style="display: {{ (isset($priv['acc_privilege']['access_account']) && $priv['acc_privilege']['access_account'] == 1 ? 'block' : 'none') }};">
+                        <select id="permission_acc_privilege_2" name="permission[acc_privilege][access_account_type]" class="form-control w-auto">
+                            <option value="">Please Select</option>
+                            <option {{ (isset($priv['acc_privilege']['access_account_type']) && $priv['acc_privilege']['access_account_type'] == 1 ? 'selected' : '') }} value="1">Admin</option>
+                            <option {{ (isset($priv['acc_privilege']['access_account_type']) && $priv['acc_privilege']['access_account_type'] == 2 ? 'selected' : '') }} value="2">User</option>
+                            <option {{ (isset($priv['acc_privilege']['access_account_type']) && $priv['acc_privilege']['access_account_type'] == 3 ? 'selected' : '') }} value="3">Audit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </form>
 
     <!-- BEGIN: Success Modal Content -->

@@ -11,7 +11,7 @@ class AccBank extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'balance'];
 
     protected $fillable = [
         'bank_name',
@@ -48,4 +48,46 @@ class AccBank extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function incomes(){
+        if(!empty($this->opening_date)):
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 0)->where('parent', 0);
+        else:
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 0)->where('parent', 0);
+        endif;
+    }
+
+    public function expenses(){
+        if(!empty($this->opening_date)):
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 1)->where('parent', 0);
+        else:
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 1)->where('parent', 0);
+        endif;
+    }
+
+    public function deposits(){
+        if(!empty($this->opening_date)):
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('transfer_type', 0);
+        else:
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('transfer_type', 0);
+        endif;
+    }
+
+    public function withdrawls(){
+        if(!empty($this->opening_date)):
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('transfer_type', 1);
+        else:
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('transfer_type', 1);
+        endif;
+    }
+
+    public function getBalanceAttribute(){
+        $openingBalance = (isset($this->opening_balance) && $this->opening_balance > 0 ? $this->opening_balance : 0);
+        $incomes = $this->incomes()->sum('transaction_amount');
+        $deposits = $this->deposits()->sum('transaction_amount');
+        $expenses = $this->expenses()->sum('transaction_amount');
+        $withdrawls = $this->withdrawls()->sum('transaction_amount');
+
+        return (($openingBalance + $incomes + $deposits) - ($expenses + $withdrawls));
+    }
 }
