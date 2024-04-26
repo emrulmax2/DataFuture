@@ -264,6 +264,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
         Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
         Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
+        Route::post('change-password', 'submitChangePasswordForm')->name('change.password.post');
     
     });
 
@@ -342,6 +343,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
         Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
         Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
+        
     
     });
 
@@ -359,6 +361,11 @@ Route::prefix('/agent')->name('agent.')->group(function() {
 
         Route::get('logout', [AgentLoginController::class, 'logout'])->name('logout');
 
+        Route::controller(AgentForgetPasswordController::class)->group(function() {
+
+            Route::post('change-password', 'submitChangePasswordForm')->name('change.password.post');
+            
+        });
         Route::controller(AgentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
@@ -2219,6 +2226,8 @@ Route::middleware('auth')->group(function() {
     Route::controller(AgentController::class)->group(function() {
 
         Route::post('agent-user/{agent_user}', 'update')->name('agent-user.update'); 
+        Route::post('agent-user/{agent_user}/address', 'addressUpdate')->name('agent-user.address.store'); 
+        
         Route::get('agent-user-list', 'list')->name('agent-user.list');
         Route::get('agent-user-termlist/{id}', 'ApplicantionList')->name('agent-user.termlist'); 
         

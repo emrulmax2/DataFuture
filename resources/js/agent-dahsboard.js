@@ -576,4 +576,5 @@ var applicantionCustonList = (function () {
         });
         
     })
+
 })();

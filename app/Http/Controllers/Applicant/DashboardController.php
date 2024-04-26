@@ -10,12 +10,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $userData = \Auth::guard('applicant')->user();
         
+        $userData = \Auth::guard('applicant')->user();
+        $applicant = Applicant::with('status')->orderBy('id','DESC')->where('applicant_user_id', $userData->id)->get()->first();
         return view('pages.applicant.index', [
             'title' => 'Applicant Dashboard - LCC Data Future Managment',
             'breadcrumbs' => [],
-            'user' => $userData
+            'user' => $userData,
+            'applicant' => $applicant,
         ]);
     }
 

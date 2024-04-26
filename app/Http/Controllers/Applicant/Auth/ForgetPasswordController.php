@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Applicant\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\AgentForgetPasswordRequest;
+use App\Http\Request\ApplicantChangePasswordUpdateRequest;
 use App\Http\Request\ApplicantForgetPasswordRequest;
 use App\Http\Request\ApplicantForgetPasswordUpdateRequest;
 use App\Mail\ResetPasswordLink;
@@ -101,6 +102,21 @@ class ForgetPasswordController extends Controller
   
           return response()->json(['Password Updated'],200);
       }
+      public function submitChangePasswordForm(ApplicantChangePasswordUpdateRequest $request) {
 
+        $updatePassword = ApplicantUser::where([
+                                'password' => $request->old_password, 
+                                'id' => $request->id
+                              ])
+                              ->first();
+  
+          if(!$updatePassword){
+            return response()->json(['Invalid Old Password!'],422);
+          }
+
+        ApplicantUser::where('email', $updatePassword->email)
+                      ->update(['password' => Hash::make($request->password)]);
+        return response()->json(['Password Updated'],200);
+      }
 
 }

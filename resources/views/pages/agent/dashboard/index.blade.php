@@ -227,8 +227,8 @@
         <div id="success-notification-content" class="toastify-content hidden">
             <i class="text-success" data-lucide="check-circle"></i>
             <div class="ml-4 mr-4">
-                <div class="font-medium">Email Sent!</div>
-                <div class="text-slate-500 mt-1">{{ session('verifymessage') }}</div>
+                <div id="title-notification" class="font-medium">Email Sent!</div>
+                <div id="title-context" class="text-slate-500 mt-1">{{ session('verifymessage') }}</div>
             </div>
         </div>
         <!-- END: Notification Content -->
@@ -276,6 +276,56 @@
             if($('#success-notification-toggle').length>0) {
                 $("#success-notification-toggle").trigger('click')
             }
+        async function resetForm() {
+                // Reset state
+                $('#AgentChangePasswordModalForm').find('.login__input').removeClass('border-danger')
+                $('#AgentChangePasswordModalForm').find('.login__input-error').html('')
+
+                // Post form
+                let myform = document.getElementById("AgentChangePasswordModalForm");
+                let formData = new FormData(myform);
+                // Loading state
+                $('#btn-changepassword').html('<i data-loading-icon="oval" data-color="white" class="w-5 h-5 mx-auto"></i>')
+                tailwind.svgLoader()
+                await helper.delay(500)
+
+                axios.post(route('agent.change.password.post'), formData).then(res => {
+                    
+                    $("#title-notification").html("Password Changed!");
+                    $("#title-context").html("Password Changed Successfully");
+
+                    $("#success-notification-toggle").trigger('click')
+                    $('#btn-changepassword').html('Update Passwored')
+
+                }).catch(err => {
+                    $('#btn-changepassword').find('.login__input').removeClass('border-danger')
+                    $('#btn-changepassword').find('.login__input-error').html('')
+                    $('#btn-changepassword').html('Update Passwored')
+                    if (err.response.data.message != 'Password Could not Updated.') {
+                        for (const [key, val] of Object.entries(err.response.data.errors)) {
+                            $(`#${key}`).addClass('border-danger')
+                            $(`#error-${key}`).html(val)
+                        }
+                    } else {
+                        
+                        $(`#password`).addClass('border-danger')
+                        $(`#error-password`).html(err.response.data.message)
+                    }
+                })
+            }
+
+            $('#AgentChangePasswordModalForm').on('keyup', function(e) {
+                if (e.keyCode === 13) {
+                    resetForm()
+                }
+            })
+
+            $('#btn-changepassword').on('click', function() {
+                alert("its working")
+            })
+
+            
+
         })()
     </script>
     @vite('resources/js/agent-dahsboard.js')
