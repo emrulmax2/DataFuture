@@ -276,7 +276,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     /**
     * Verification Routes
     */
-    Route::controller(AgentVerificationController::class)->group(function() {
+    Route::controller(VerificationController::class)->group(function() {
         
         //Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
@@ -346,16 +346,16 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         
     
     });
-
-    /**
-    * Verification Routes
-    */
-    Route::controller(VerificationController::class)->group(function() {
-        
-        //Route::get('email/verify', 'show')->name('verification.notice');
-        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
-        
-    });
+        /**
+        * Verification Routes
+        */
+        Route::controller(AgentVerificationController::class)->group(function() {
+            
+            //Route::get('email/verify', 'show')->name('verification.notice');
+            Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+            
+        });
+    
 
     Route::middleware('auth.agent')->group(function() {
 
