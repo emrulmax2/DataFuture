@@ -60,3 +60,4 @@ import "./dark-mode-switcher";
 //all Form Data                                // Added on 05.12.22
 import "./common";
 import "./admission-global";
+import "./password-strength";

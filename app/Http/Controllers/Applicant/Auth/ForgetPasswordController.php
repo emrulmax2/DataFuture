@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Applicant\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\AgentForgetPasswordRequest;
+use App\Http\Request\ApplicantChangePasswordUpdateRequest;
+use App\Http\Request\ApplicantForgetPasswordRequest;
 use App\Http\Request\ApplicantForgetPasswordUpdateRequest;
 use App\Mail\ResetPasswordLink;
 use App\Models\AgentUser;
+use App\Models\ApplicantUser;
 use Illuminate\Http\Response;
 use DB; 
 use Carbon\Carbon; 
@@ -36,11 +39,11 @@ class ForgetPasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function submitForgetPasswordForm(AgentForgetPasswordRequest $request)
+    public function submitForgetPasswordForm(ApplicantForgetPasswordRequest $request)
     {
        
 
-        $applicantUser = AgentUser::where('email',$request->email)->get()->first();
+        $applicantUser = ApplicantUser::where('email',$request->email)->get()->first();
         $token = base64_encode($request->email);
         if($applicantUser) {
 
@@ -92,13 +95,28 @@ class ForgetPasswordController extends Controller
             return back()->withInput()->with('error', 'Invalid token!');
           }
   
-          AgentUser::where('email', $updatePassword->email)
+          ApplicantUser::where('email', $updatePassword->email)
                       ->update(['password' => Hash::make($request->password)]);
  
           DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();
   
           return response()->json(['Password Updated'],200);
       }
+      public function submitChangePasswordForm(ApplicantChangePasswordUpdateRequest $request) {
 
+        $updatePassword = ApplicantUser::where([
+                                'password' => $request->old_password, 
+                                'id' => $request->id
+                              ])
+                              ->first();
+  
+          if(!$updatePassword){
+            return response()->json(['Invalid Old Password!'],422);
+          }
+
+        ApplicantUser::where('email', $updatePassword->email)
+                      ->update(['password' => Hash::make($request->password)]);
+        return response()->json(['Password Updated'],200);
+      }
 
 }

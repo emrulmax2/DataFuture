@@ -16,12 +16,37 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
 <div class="top-bar-boxed {{ isset($class) ? $class : '' }} h-[70px] md:h-[65px] z-[51] border-b border-white/[0.08] mt-12 md:mt-0 -mx-3 sm:-mx-8 md:-mx-0 px-3 md:border-b-0 relative md:fixed md:inset-x-0 md:top-0 sm:px-8 md:px-10 md:pt-10 md:bg-gradient-to-b md:from-slate-100 md:to-transparent dark:md:from-darkmode-700">
     <div class="h-full flex items-center">
         <!-- BEGIN: Logo -->
-        <a href="{{ url('/') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
-            <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-            {{-- <span class="logo__text text-white text-lg ml-3">
-                Enigma
-            </span> --}}
-        </a>
+
+        @if(Auth::guard('applicant')->check())
+            <a href="{{ route('applicant.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+                <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                {{-- <span class="logo__text text-white text-lg ml-3">
+                    Enigma
+                </span> --}}
+            </a>
+        @elseif(Auth::guard('student')->check())
+            <a href="{{ route('students.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+                <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                {{-- <span class="logo__text text-white text-lg ml-3">
+                    Enigma
+                </span> --}}
+            </a>
+        @elseif(Auth::guard('agent')->check())
+            <a href="{{ route('agent.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+                <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                {{-- <span class="logo__text text-white text-lg ml-3">
+                    Enigma
+                </span> --}}
+            </a>
+        @else
+            <a href="{{ url('/') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+                <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                {{-- <span class="logo__text text-white text-lg ml-3">
+                    Enigma
+                </span> --}}
+            </a>
+        @endif
+        
         <!-- END: Logo -->
         <!-- BEGIN: Breadcrumb -->
         <nav aria-label="breadcrumb" class="-intro-x h-[45px] mr-auto">
@@ -165,10 +190,92 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                     @if(Auth::guard('agent')->check())
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>
-                        <a href="{{ route('agent.account') }}" class="dropdown-item hover:bg-white/5">
-                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> Profile
+                        <a href="javascript:void()" data-tw-toggle="modal" data-tw-target="#changePasswordModal" class="dropdown-item hover:bg-white/5">
+                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> Change Password
                         </a>
                     </li>
+
+                    <!-- BEGIN: Edit Modal -->
+                    <div id="changePasswordModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form method="POST" action="#" id="AgentChangePasswordModalForm" enctype="multipart/form-data">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="font-medium text-base mr-auto">Change Password</h2>
+                                        <a data-tw-dismiss="modal" href="javascript:;">
+                                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                                        </a>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="grid grid-cols-12 gap-4">
+                                            <div class="p-5 col-span-12">
+                                                <div class="border-b pb-5">
+                                                    <input id="oldpassword" type="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Old Password">
+                                                    <div id="error-oldpassword" class="login__input-error text-danger mt-2"></div>
+                                                </div>
+
+                                                <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="New Password">
+                                                <div id="error-password" class="login__input-error text-danger mt-2"></div>
+
+                                                <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
+                                                    <div id="strength-1" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                                    <div id="strength-2" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                                    <div id="strength-3" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                                    <div id="strength-4" class="col-span-3 h-full rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                                                </div>
+                                                <!-- BEGIN: Custom Tooltip Toggle -->
+                                                <a href="javascript:;" data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="What is a secure password?">What is a secure password?</a>
+                                                <!-- END: Custom Tooltip Toggle -->
+                                                <!-- BEGIN: Custom Tooltip Content -->
+                                                <div class="tooltip-content">
+                                                    <div id="custom-content-tooltip" class="relative flex items-center py-1">
+                                                        <ul class="list-disc mt-5 ml-4 text-md dark:text-slate-400">
+                                                            <li class="">
+                                                                <span class="low-upper-case">
+                                                                    <i class="fas fa-circle" aria-hidden="true"></i>
+                                                                    &nbsp;Lowercase &amp; Uppercase
+                                                                </span>
+                                                            </li>
+                                                            <li class="">
+                                                                <span class="one-number">
+                                                                    <i class="fas fa-circle" aria-hidden="true"></i>
+                                                                    &nbsp;Number (0-9)
+                                                                </span> 
+                                                            </li>
+                                                            <li class="">
+                                                                <span class="one-special-char">
+                                                                    <i class="fas fa-circle" aria-hidden="true"></i>
+                                                                    &nbsp;Special Character (!@#$%^&*)
+                                                                </span>
+                                                            </li>
+                                                            <li class="">
+                                                                <span class="eight-character">
+                                                                    <i class="fas fa-circle" aria-hidden="true"></i>
+                                                                    &nbsp;Atleast 8 Character
+                                                                </span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- END: Custom Tooltip Content -->
+                                                <input type="password" id="password_confirmation" name="password_confirmation" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Password Confirmation">
+                                                <div id="error-confirmation" class="login__input-error text-danger mt-2"></div>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                                        <button type="submit" id="btn-changepassword" class="btn btn-primary w-auto">
+                                            Update Password
+                                        </button>
+                                        <input type="hidden" name="id" value="{{ $user->id }}" />
+                                        
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- END: Edit Modal -->
                     @elseif(Auth::guard('student')->check())
                     <li><hr class="dropdown-divider border-white/[0.08]"></li>
                     <li>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Agent\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Request\AgentChangePasswordUpdateRequest;
 use App\Http\Request\AgentForgetPasswordRequest;
 use App\Http\Request\AgentForgetPasswordUpdateRequest;
 use App\Mail\ResetAgentPasswordLink;
@@ -99,6 +100,23 @@ class ForgetPasswordController extends Controller
           DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();
   
           return response()->json(['Password Updated'],200);
+      }
+
+      public function submitChangePasswordForm(AgentChangePasswordUpdateRequest $request) {
+
+        $updatePassword = AgentUser::where([
+                                'password' => $request->old_password, 
+                                'id' => $request->id
+                              ])
+                              ->first();
+  
+          if(!$updatePassword){
+            return response()->json(['Invalid Old Password!'],422);
+          }
+
+          AgentUser::where('email', $updatePassword->email)
+                      ->update(['password' => Hash::make($request->password)]);
+        return response()->json(['Password Updated'],200);
       }
 
 
