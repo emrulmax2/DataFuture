@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounts\AccCsvTransactionController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
 use Illuminate\Support\Facades\Route;
@@ -2400,10 +2401,27 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SummaryController::class)->group(function() {
         Route::get('accounts', 'index')->name('accounts'); 
+        Route::post('accounts/search', 'search')->name('accounts.search'); 
+        Route::get('accounts/report/{start}/{end}', 'report')->name('accounts.report'); 
+        Route::post('accounts/report-details', 'reportDetails')->name('accounts.report.details'); 
     });
 
     Route::controller(StorageController::class)->group(function() {
-        Route::get('accounts/storage/{id}', 'index')->name('accounts.storage'); 
+        Route::get('accounts/storage/transactions/{id}', 'index')->name('accounts.storage'); 
+        Route::post('accounts/storage/store', 'store')->name('accounts.storage.trans.store'); 
+        Route::get('accounts/storage/list', 'list')->name('accounts.storage.trans.list'); 
+        Route::post('accounts/storage/edit', 'edit')->name('accounts.storage.trans.edit'); 
+        Route::post('accounts/storage/update', 'update')->name('accounts.storage.trans.update'); 
+
+        Route::get('accounts/storage/export/{querystr}/{storage_id}', 'export')->name('accounts.storage.trans.export'); 
+
+        Route::delete('accounts/storage/delete/{id}', 'destroy')->name('accounts.storage.trans.destroy');
+    });
+
+    Route::controller(AccCsvTransactionController::class)->group(function() {
+        Route::get('accounts/csv/transactions/{bank}/{csv?}', 'index')->name('accounts.csv.transactions'); 
+        Route::post('accounts/csv/store', 'csvStore')->name('accounts.csv.store'); 
+        Route::post('accounts/csv/update', 'csvUpdate')->name('accounts.csv.update'); 
     });
 });
 

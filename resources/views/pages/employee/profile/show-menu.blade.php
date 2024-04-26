@@ -35,12 +35,13 @@
             Appraisal
         </a>
     </li>
-
+    @if((isset(auth()->user()->priv()['privilege_menu']) && auth()->user()->priv()['privilege_menu'] == 1) || in_array(auth()->user()->id, [1, 7]))
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.privilege', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.privilege' ? 'active' : '' }}">
             Privilege
         </a>
     </li>
+    @endif
 
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.time.keeper', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.time.keeper' ? 'active' : '' }}">

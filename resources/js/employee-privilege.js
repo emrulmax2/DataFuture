@@ -110,4 +110,18 @@ import Litepicker from "litepicker";
         }
     })
     /* Internal Links Section End */
+
+    /* Accounts Section Start */
+    $('#permission_acc_privilege_1').on('change', function(){
+        if($(this).prop('checked')){
+            $('.accountsUserTypeWrap').fadeIn('fast', function(){
+                $('#permission_acc_privilege_2').val('');
+            })
+        }else{
+            $('.accountsUserTypeWrap').fadeOut('fast', function(){
+                $('#permission_acc_privilege_2').val('');
+            })
+        }
+    })
+    /* Accounts Section End */
 })();

@@ -237,6 +237,8 @@ export default defineConfig({
                 'resources/js/accounts.js',
                 'resources/js/accounts-summary.js',
                 'resources/js/accounts-storage.js',
+                'resources/js/accounts-report.js',
+                'resources/js/accounts-csv.js',
                 
             ],
             refresh: true,

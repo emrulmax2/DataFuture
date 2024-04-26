@@ -1672,3 +1672,36 @@ input[type=number] {
 .accDropDown .bankItem.active{
     background: rgba(13, 148, 136, .2);
 }
+.addTransactionToggle svg{
+    stroke-width: 3px !important;
+}
+.addTransactionToggle svg.theMinus{
+    display: none;
+}
+.addTransactionToggle.active svg.thePlus{
+    display: none;
+}
+.addTransactionToggle.active svg.theMinus{
+    display: inline-block;
+}
+
+.report-chart:before{
+    display: none !important;
+}
+
+.table.table-xsm th,
+.table.table-xsm td{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+.magicBox{
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
