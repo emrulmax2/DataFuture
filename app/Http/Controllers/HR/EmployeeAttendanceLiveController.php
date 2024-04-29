@@ -332,12 +332,18 @@ class EmployeeAttendanceLiveController extends Controller
                 if(!empty($empAtten)):
                     $todaysClockIn = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 1)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
                     $todaysClockOut = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 4)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
-                    if(!isset($todaysClockIn->id) && (isset($empAtten['clockin']) && !empty($empAtten['clockin']))):
-                        $data = [];
-                        $data['employee_id'] = $emp;
-                        $data['attendance_type'] = 1;
-                        $data['date'] = $theDate;
-                        $data['time'] = $empAtten['clockin'].':00';
+                    
+                    $data = [];
+                    $data['employee_id'] = $emp;
+                    $data['attendance_type'] = 1;
+                    $data['date'] = $theDate;
+                    $data['time'] = $empAtten['clockin'].':00';
+                    if(isset($todaysClockIn->id) && ($todaysClockIn->id > 0)):
+                        $data['updated_by'] = $currentEmployeeId;
+                        $data['updated_at'] = date('Y-m-d H:i:s');
+
+                        EmployeeAttendanceLive::where('id', $todaysClockIn->id)->update($data);
+                    else:
                         $data['ip'] = $request->getClientIp();
                         $data['created_by'] = $currentEmployeeId;
 
@@ -365,12 +371,18 @@ class EmployeeAttendanceLiveController extends Controller
 
                         EmployeeAttendanceLive::create($data);
                     endif;
-                    if(!isset($todaysClockOut->id) && (isset($empAtten['clockout']) && !empty($empAtten['clockout']))):
-                        $data = [];
-                        $data['employee_id'] = $emp;
-                        $data['attendance_type'] = 4;
-                        $data['date'] = $theDate;
-                        $data['time'] = $empAtten['clockout'].':00';
+
+                    $data = [];
+                    $data['employee_id'] = $emp;
+                    $data['attendance_type'] = 4;
+                    $data['date'] = $theDate;
+                    $data['time'] = $empAtten['clockout'].':00';
+                    if(isset($todaysClockOut->id) && ($todaysClockOut->id > 0)):
+                        $data['updated_by'] = $currentEmployeeId;
+                        $data['updated_at'] = date('Y-m-d H:i:s');
+
+                        EmployeeAttendanceLive::where('id', $todaysClockOut->id)->update($data);
+                    else:
                         $data['ip'] = $request->getClientIp();
                         $data['created_by'] = $currentEmployeeId;
 
