@@ -40,7 +40,7 @@ class StorageController extends Controller
         $detail = (isset($request->detail) && !empty($request->detail) ? $request->detail : null);
         $expense = (isset($request->expense) && $request->expense > 0 ? $request->expense : 0);
         $income = (isset($request->income) && $request->income > 0 ? $request->income : 0);
-
+        
         $trans_type = (isset($request->trans_type) && $request->trans_type > 0 ? $request->trans_type : 0);
         $acc_category_id_in = (isset($request->acc_category_id_in) && $request->acc_category_id_in > 0 ? $request->acc_category_id_in : null);
         $acc_category_id_out = (isset($request->acc_category_id_out) && $request->acc_category_id_out > 0 ? $request->acc_category_id_out : null);
@@ -271,7 +271,7 @@ class StorageController extends Controller
 
     public function edit(Request $request){
         $transaction_id = $request->transaction_id;
-        $transaction = AccTransaction::where('id', $transaction_id)->exclude(['doc_url'])->get()->first();
+        $transaction = AccTransaction::find($transaction_id);
         $transaction['transaction_date_2'] = (isset($transaction->transaction_date_2) && !empty($transaction->transaction_date_2) ? date('d-m-Y', strtotime($transaction->transaction_date_2)) : date('d-m-Y'));
         $transaction['invoice_date'] = (isset($transaction->invoice_date) && !empty($transaction->invoice_date) ? date('d-m-Y', strtotime($transaction->invoice_date)) : date('d-m-Y'));
 

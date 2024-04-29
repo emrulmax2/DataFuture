@@ -11,7 +11,7 @@ class AccTransaction extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $appends = ['doc_url'];
+    //protected $appends = ['doc_url'];
 
     protected $fillable = [
         'transaction_code',
