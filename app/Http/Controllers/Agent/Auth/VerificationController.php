@@ -48,7 +48,7 @@ class VerificationController extends Controller
             return redirect('/agent/dashboard')->with('verifymessage', 'Your Email Address Verified');
         else:
             $request->autofill();
-            return redirect('/agent/login')->with('verifymessage', 'Your email address has been verified');
+            return redirect('/agent/login')->with('verifymessage', 'Your Email Address Verified');
         endif;
     }
 

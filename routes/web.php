@@ -219,6 +219,7 @@ use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\WblProfileController;
+use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
 
 /*
@@ -396,7 +397,16 @@ Route::prefix('/agent')->name('agent.')->group(function() {
 
      
     });
+
+
 });
+Route::post('/agent/email/verification-notification', function (Request $request) {
+    $id = Auth::guard('agent')->user()->id;
+    $user = AgentUser::find($id);
+    $user->sendEmailVerificationNotification();
+    return back()->with('verifymessage', 'Verification link sent!');
+
+})->middleware(['auth.agent', 'throttle:6,1'])->name('agent.verification.send');
 
 // all student have a prefix route name student.* value
 Route::prefix('/students')->name('students.')->group(function() {
