@@ -135,5 +135,4 @@
     @vite('resources/js/course-creation-availability.js')
     @vite('resources/js/course-creation-datafuture.js')
     @vite('resources/js/course-creation-instance.js')
-    @vite('resources/js/instance-term.js')
 @endsection
