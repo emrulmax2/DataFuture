@@ -28,10 +28,18 @@ var storageTransList = (function () {
                     width: '160',
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';
-                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().transaction_date_2+'</div>';
+                                html += '<div class="font-medium whitespace-nowrap">';
+                                    if(cell.getData().can_eidt == 1){
+                                        html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="editTransaction text-success underline">';
+                                    }
+                                        html += cell.getData().transaction_date_2;
+                                    if(cell.getData().can_eidt == 1){
+                                        html += '</a>';
+                                    }
+                                html += '</div>';
                                 html += '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5 flex justify-start items-center">';
-                                    if(cell.getData().doc_url){
-                                        html += '<a href="'+cell.getData().doc_url+'" class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
+                                    if(cell.getData().doc_url == 1){
+                                        html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="downloadDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                     }
                                     html += cell.getData().transaction_code;
                                 html += '</div>';
@@ -135,78 +143,15 @@ var storageTransList = (function () {
                     nameAttr: "data-lucide",
                 });
             },
-            rowDblClick:function(e, row){
+            /*rowDblClick:function(e, row){
                 var transaction_id = row.getData().id;
                 var transaction_type = row.getData().transaction_type;
                 var can_eidt = row.getData().can_eidt;
 
                 if(can_eidt == 1){
-                    axios({
-                        method: "post",
-                        url: route('accounts.storage.trans.edit'),
-                        data: {transaction_id : transaction_id},
-                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                    }).then(response => {
-                        if (response.status == 200){
-                            let row = response.data.res;
-                            
-                            $('#addTransactionToggle').addClass('active');
-                            $('#storageTransactionForm').fadeIn('fast', function(){
-                                $('#storageTransactionForm #transaction_date').val(row.transaction_date_2);
-                                $('#storageTransactionForm #detail').val(row.detail);
-                                $('#storageTransactionForm #trans_type').val(row.transaction_type);
-
-                                $('#storageTransactionForm #deleteTransaction').fadeIn().attr('data-id', row.id)
-                                if(row.transaction_type == 0){
-                                    $('#expense').val('').attr('readonly', 'readonly');
-                                    $('#income').val(row.transaction_amount).removeAttr('readonly');
-
-                                    $('#acc_category_id_in').fadeIn().val(row.acc_category_id);
-                                    $('#acc_category_id_out').fadeOut().val('');
-                                    $('#acc_bank_id').fadeOut().val('');
-
-                                    $('#storeTransaction').fadeIn();
-                                }else if(row.transaction_type == 1){
-                                    $('#income').val('').attr('readonly', 'readonly');
-                                    $('#expense').val(row.transaction_amount).removeAttr('readonly');
-
-                                    $('#acc_category_id_in').fadeOut().val('');
-                                    $('#acc_category_id_out').fadeIn().val(row.acc_category_id);
-                                    $('#acc_bank_id').fadeOut().val('');
-
-                                    $('#storeTransaction').fadeIn();
-                                }else if(row.transaction_type == 2){
-                                    if(row.transfer_type == 0){
-                                        $('#expense').val('').removeAttr('readonly');
-                                        $('#income').val(row.transaction_amount).removeAttr('readonly');
-                                    }else if(row.transfer_type == 1){
-                                        $('#income').val('').removeAttr('readonly');
-                                        $('#expense').val(row.transaction_amount).removeAttr('readonly');
-                                    }
-                                    $('#acc_category_id_in').fadeOut().val('');
-                                    $('#acc_category_id_out').fadeOut().val('');
-                                    $('#acc_bank_id').fadeIn().val(row.transfer_bank_id);
-
-                                    $('#storeTransaction').fadeOut();
-                                }
-                                $('#storageTransactionForm #invoice_no').val(row.invoice_no);
-                                $('#storageTransactionForm #invoice_date').val(row.invoice_date);
-                                $('#storageTransactionForm #description').val(row.description);
-                                if(row.audit_status == 1){
-                                    $('#storageTransactionForm #audit_status').prop('checked', true);
-                                }else{
-                                    $('#storageTransactionForm #audit_status').prop('checked', false);
-                                }
-                                $('#storageTransactionForm #transaction_id').val(row.id);
-                            });
-                        } 
-                    }).catch(error => {
-                        if(error.response){
-                            console.log('error');
-                        }
-                    });
+                    
                 }
-            }
+            }*/
         });
 
         // Redraw table onresize
@@ -339,7 +284,7 @@ var storageTransList = (function () {
             $('#storageTransactionForm').fadeOut('fast', function(){
                 $('#storageTransactionForm input:not([type="checkbox"]):not("#transaction_date"):not([type="file"])').val('');
                 $('#transaction_document').val('');
-                $('#storageTransactionForm input[type="checkbox"]').prop('checked', false);
+                $('#storageTransactionForm input[type="checkbox"]').prop('checked', true);
                 $('#trans_type').val('0');
                 $('#acc_category_id_out, #acc_bank_id').val('').fadeOut();
                 $('#acc_category_id_in').fadeIn().val('');
@@ -347,6 +292,7 @@ var storageTransList = (function () {
                 $('#income').removeAttr('readonly').val('');
                 $('#expense').attr('readonly', 'readonly').val('');
                 $('#storageTransactionForm #transaction_id').val('0');
+                $('#storageTransactionForm #deleteTransaction').fadeOut().attr('data-id', '0')
             })
         }else{
             $theBtn.addClass('active');
@@ -466,6 +412,109 @@ var storageTransList = (function () {
                 console.log(error)
             });
         }
-    })
+    });
+
+    $('#storageTransList').on('click', '.editTransaction', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('accounts.storage.trans.edit'),
+            data: {transaction_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let row = response.data.res;
+
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                
+                $('#addTransactionToggle').addClass('active');
+                $('#storageTransactionForm').fadeIn('fast', function(){
+                    $('#storageTransactionForm #transaction_date').val(row.transaction_date_2);
+                    $('#storageTransactionForm #detail').val(row.detail);
+                    $('#storageTransactionForm #trans_type').val(row.transaction_type);
+
+                    $('#storageTransactionForm #deleteTransaction').fadeIn().attr('data-id', row.id)
+                    if(row.transaction_type == 0){
+                        $('#expense').val('').attr('readonly', 'readonly');
+                        $('#income').val(row.transaction_amount).removeAttr('readonly');
+
+                        $('#acc_category_id_in').fadeIn().val(row.acc_category_id);
+                        $('#acc_category_id_out').fadeOut().val('');
+                        $('#acc_bank_id').fadeOut().val('');
+
+                        $('#storeTransaction').fadeIn();
+                    }else if(row.transaction_type == 1){
+                        $('#income').val('').attr('readonly', 'readonly');
+                        $('#expense').val(row.transaction_amount).removeAttr('readonly');
+
+                        $('#acc_category_id_in').fadeOut().val('');
+                        $('#acc_category_id_out').fadeIn().val(row.acc_category_id);
+                        $('#acc_bank_id').fadeOut().val('');
+
+                        $('#storeTransaction').fadeIn();
+                    }else if(row.transaction_type == 2){
+                        if(row.transfer_type == 0){
+                            $('#expense').val('').removeAttr('readonly');
+                            $('#income').val(row.transaction_amount).removeAttr('readonly');
+                        }else if(row.transfer_type == 1){
+                            $('#income').val('').removeAttr('readonly');
+                            $('#expense').val(row.transaction_amount).removeAttr('readonly');
+                        }
+                        $('#acc_category_id_in').fadeOut().val('');
+                        $('#acc_category_id_out').fadeOut().val('');
+                        $('#acc_bank_id').fadeIn().val(row.transfer_bank_id);
+
+                        $('#storeTransaction').fadeOut();
+                    }
+                    $('#storageTransactionForm #invoice_no').val(row.invoice_no);
+                    $('#storageTransactionForm #invoice_date').val(row.invoice_date);
+                    $('#storageTransactionForm #description').val(row.description);
+                    if(row.audit_status == 1){
+                        $('#storageTransactionForm #audit_status').prop('checked', true);
+                    }else{
+                        $('#storageTransactionForm #audit_status').prop('checked', false);
+                    }
+                    $('#storageTransactionForm #transaction_id').val(row.id);
+                });
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
+
+    $('#storageTransList').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+        
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: 'post',
+            url: route('accounts.storage.get.download.link'),
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                let res = response.data.res;
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            }
+        }).catch(error =>{
+            $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+            console.log(error)
+        });
+    });
 
 })()
