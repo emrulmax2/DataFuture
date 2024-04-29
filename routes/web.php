@@ -64,7 +64,7 @@ use App\Http\Controllers\Agent\Auth\ForgetPasswordController as AgentForgetPassw
 use App\Http\Controllers\Agent\Frontend\ApplicationCheckController;
 use App\Http\Controllers\Agent\Frontend\ApplicationController as FrontendApplicationController;
 use App\Http\Controllers\Agent\Frontend\DashboardController as AgentDashboardController;
-use App\Http\Controllers\Applicant\Auth\VerificationController as AgentVerificationController;
+use App\Http\Controllers\Agent\Auth\VerificationController as AgentVerificationController;
 
 use App\Http\Controllers\Applicant\Auth\LoginController;
 use App\Http\Controllers\Applicant\Auth\RegisterController;
@@ -347,15 +347,15 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         
     
     });
-        /**
-        * Verification Routes
-        */
-        Route::controller(AgentVerificationController::class)->group(function() {
-            
-            //Route::get('email/verify', 'show')->name('verification.notice');
-            Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
-            
-        });
+    /**
+    * Verification Routes
+    */
+    Route::controller(AgentVerificationController::class)->group(function() {
+        
+        //Route::get('email/verify', 'show')->name('verification.notice');
+        Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
+        
+    });
     
 
     Route::middleware('auth.agent')->group(function() {

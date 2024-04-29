@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Agent\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Request\Agent\EmailVerificationRequest;
+use App\Http\Request\AgentEmailVerificationRequest;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Events\Verified;
@@ -41,7 +42,7 @@ class VerificationController extends Controller
                         ]);
     }
 
-    public function verify(EmailVerificationRequest $request) {
+    public function verify(AgentEmailVerificationRequest $request) {
         if(!is_null(Auth::guard('agent')->user())):
             $request->fulfill();
             return redirect('/agent/dashboard')->with('verifymessage', 'Your Email Address Verified');

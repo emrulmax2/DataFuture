@@ -268,7 +268,16 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                                         <button type="submit" id="btn-changepassword" class="btn btn-primary w-auto">
                                             Update Password
                                         </button>
-                                        <input type="hidden" name="id" value="{{ $user->id }}" />
+                                        
+                                        @if(Auth::guard('agent')->check())
+                                            <input type="hidden" name="id" value="{{ auth('agent')->user()->id }}" />
+                                        @elseif(Auth::guard('applicant')->check())
+                                            <input type="hidden" name="id" value="{{ auth('applicant')->user()->id }}" />
+                                        @elseif(Auth::guard('student')->check())
+                                            <input type="hidden" name="id" value="{{ auth('student')->user()->id }}" />
+                                        @else
+                                            <input type="hidden" name="id" value="{{ auth()->user()->id }}" />
+                                        @endif
                                         
                                     </div>
                                 </div>
