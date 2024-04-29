@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Agent;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,11 +25,12 @@ class UpdateAgentRequest extends FormRequest
      */
     public function rules()
     {
+        $agentUserId = Agent::find($this->id)->agent_user_id;
         return [
 
             'password' => 'string|min:8|confirmed',
             //'email' => Rule::unique('agent_users')->ignore($this->id),
-            'email' => 'unique:agent_users,email,'.$this->id
+            'email' => 'unique:agent_users,email,'. $agentUserId
 
         ];
     }
