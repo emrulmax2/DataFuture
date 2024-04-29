@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class StorageController extends Controller
 {
     public function index($bank){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $csvfiles = AccCsvFile::where('acc_bank_id', $bank)->pluck('id')->unique()->toArray();
         return view('pages.accounts.storage.index', [
             'title' => 'Accounts Storage - LCC Data Future Managment',
@@ -25,7 +26,7 @@ class StorageController extends Controller
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Storage', 'href' => 'javascript:void(0);']
             ],
-            'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
             'bank' => AccBank::find($bank),
             'in_categories' => $this->catTreeInc(0, 0),
             'out_categories' => $this->catTreeExp(0, 1),
@@ -108,6 +109,7 @@ class StorageController extends Controller
     }
 
     public function list(Request $request){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $queryStr = (isset($request->queryStr) && !empty($request->queryStr) ? $request->queryStr : '');
         $storage = (isset($request->storage) && $request->storage > 0 ? $request->storage : 0);
         $bank = AccBank::find($storage);
@@ -120,12 +122,12 @@ class StorageController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AccTransaction::orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0);
+        $query = AccTransaction::orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
         if(!empty($openingDate)):
             $query->where('transaction_date_2', '>=', $openingDate);
         endif;
         if(!empty($queryStr)):
-            $categoryIds = AccCategory::where('category_name', 'LIKE', '%'.$queryStr.'%')->pluck('id')->unique()->toArray();
+            $categoryIds = AccCategory::where('category_name', 'LIKE', '%'.$queryStr.'%')->whereIn('audit_status', $audit_status)->pluck('id')->unique()->toArray();
             $query->where(function($q) use($queryStr, $categoryIds){
                 $q->orWhere('detail','LIKE','%'.$queryStr.'%')
                     ->orWhere('description','LIKE','%'.$queryStr.'%')
@@ -188,7 +190,7 @@ class StorageController extends Controller
                     'out' => (!empty($out) && $out > 0 ? '£'.number_format($out, 2) : ''),
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.number_format($balance, 2) : '-£'.number_format(str_replace('-', '', $balance), 1)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'doc_url' => (isset($list->doc_url) && !empty($list->doc_url) ? $list->doc_url : ''),
+                    'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? 1 : 0),
                     'can_eidt' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
                 ];
                 $i++;
@@ -198,23 +200,24 @@ class StorageController extends Controller
     }
 
     public function getBalance($storage, $transaction_id){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $bank = AccBank::find($storage);
         $openingDate = (isset($bank->opening_date) && !empty($bank->opening_date) ? date('Y-m-d', strtotime($bank->opening_date)) : '');
         $openingBalance = (isset($bank->opening_balance) && $bank->opening_balance > 0 ? $bank->opening_balance : 0);
 
-        $inQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 0)->where('parent', 0)->orderBy('id', 'DESC');
+        $inQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $inQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $incomes = $inQuery->get()->sum('transaction_amount');
 
-        $exQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 1)->where('parent', 0)->orderBy('id', 'DESC');
+        $exQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $exQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $empenses = $exQuery->get()->sum('transaction_amount');
 
-        $dpQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0)->orderBy('id', 'DESC');
+        $dpQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $dpQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $deposit = $dpQuery->get()->sum('transaction_amount');
 
-        $wdQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0)->orderBy('id', 'DESC');
+        $wdQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $wdQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $withdrawl = $wdQuery->get()->sum('transaction_amount');
 
@@ -222,11 +225,12 @@ class StorageController extends Controller
     }
 
     public function catTreeInc($id = 0, $type = 0){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         static $categs = array ();
         static $level = 0;
         $level ++;
 
-        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->orderBy('category_name', 'ASC')->get();
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         if($categories):
             foreach ($categories as $cat):
@@ -243,11 +247,12 @@ class StorageController extends Controller
     }
 
     public function catTreeExp($id = 0, $type = 1){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         static $categs = array ();
         static $level = 0;
         $level ++;
 
-        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->orderBy('category_name', 'ASC')->get();
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         if($categories):
             foreach ($categories as $cat):
@@ -367,6 +372,7 @@ class StorageController extends Controller
     }
 
     public function export($querystr, $storage_id){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $storage = AccBank::find($storage_id);
         $openingDate = (isset($storage->opening_date) && !empty($storage->opening_date) ? date('Y-m-d', strtotime($storage->opening_date)) : '');
         $openingBalance = (isset($storage->opening_balance) && $storage->opening_balance > 0 ? $storage->opening_balance : 0);
@@ -383,12 +389,12 @@ class StorageController extends Controller
         $theCollection[1][] = 'Withdrawl (£)';
         $theCollection[1][] = 'Deposit (£)';
 
-        $query = AccTransaction::orderBy('transaction_date_2', 'DESC')->where('acc_bank_id', $storage_id)->where('parent', 0);
+        $query = AccTransaction::orderBy('transaction_date_2', 'DESC')->where('acc_bank_id', $storage_id)->where('parent', 0)->whereIn('audit_status', $audit_status);
         if(!empty($openingDate)):
             $query->where('transaction_date_2', '>=', $openingDate);
         endif;
         if(!empty($querystr)):
-            $categoryIds = AccCategory::where('category_name', 'LIKE', '%'.$querystr.'%')->pluck('id')->unique()->toArray();
+            $categoryIds = AccCategory::where('category_name', 'LIKE', '%'.$querystr.'%')->whereIn('audit_status', $audit_status)->pluck('id')->unique()->toArray();
             $query->where(function($q) use($querystr, $categoryIds){
                 $q->orWhere('detail','LIKE','%'.$querystr.'%')
                     ->orWhere('description','LIKE','%'.$querystr.'%')
@@ -438,5 +444,12 @@ class StorageController extends Controller
         endif;
 
         return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $storage->bank_name).'_transactions.xlsx');
+    }
+
+    public function downloadLink(Request $request){
+        $trans = AccTransaction::find($request->row_id);
+        $document = (isset($trans->doc_url) && !empty($trans->doc_url) ? $trans->doc_url : '');
+
+        return response()->json(['res' => $document], 200);
     }
 }

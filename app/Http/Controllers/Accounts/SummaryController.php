@@ -11,18 +11,20 @@ use Illuminate\Http\Request;
 class SummaryController extends Controller
 {
     public function index(){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         return view('pages.accounts.summary', [
             'title' => 'Accounts - LCC Data Future Managment',
             'breadcrumbs' => [
                 ['label' => 'Accounts Summary', 'href' => 'javascript:void(0);']
             ],
-            'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
-            'categories' => AccCategory::orderBy('category_name', 'ASC')->where('status', 1)->get(),
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
+            'categories' => AccCategory::orderBy('category_name', 'ASC')->whereIn('audit_status', $audit_status)->where('status', 1)->get(),
             'chartData' => $this->chartData()
         ]);
     }
 
     public function search(Request $request){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $theRangeDate = (!empty($request->theRangeDate) && strlen($request->theRangeDate) == 23 ? explode(' - ', $request->theRangeDate) : []);
         $theQueryText = (!empty($request->theQueryText) ? $request->theQueryText : '');
         $theMinAmount = ($request->theMinAmount != '' ? $request->theMinAmount : 0);
@@ -36,7 +38,7 @@ class SummaryController extends Controller
         if(!empty($summary_storages)):
             $banksids = $summary_storages;
         else:
-            $query = AccTransaction::orderBy('id', 'desc')->where('parent', 0);
+            $query = AccTransaction::orderBy('id', 'desc')->where('parent', 0)->whereIn('audit_status', $audit_status);
             if($theMinAmount > 0): $query->where('transaction_amount', '>=', $theMinAmount); endif;
             if($theMaxAmount > 0): $query->where('transaction_amount', '<=', $theMaxAmount); endif;
             if(!empty($startDate) && $endDate):
@@ -59,10 +61,10 @@ class SummaryController extends Controller
 
         $HTML = '';
         if(!empty($banksids)):
-            $banks = AccBank::whereIn('id', $banksids)->where('status', 1)->orderBy('bank_name', 'ASC')->get();
+            $banks = AccBank::whereIn('id', $banksids)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get();
             if(!empty($banks)):
                 foreach($banks as $bank):
-                    $query = AccTransaction::orderBy('id', 'desc')->where('parent', 0);
+                    $query = AccTransaction::orderBy('id', 'desc')->where('parent', 0)->whereIn('audit_status', $audit_status);
                     if($theMinAmount > 0): $query->where('transaction_amount', '>=', $theMinAmount); endif;
                     if($theMaxAmount > 0): $query->where('transaction_amount', '<=', $theMaxAmount); endif;
                     if(!empty($startDate) && $endDate):
@@ -163,6 +165,7 @@ class SummaryController extends Controller
     }
 
     public function chartData(){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $thisMonth = date('Y-m').'-01';
         $months = [];
         $months[] = $thisMonth;
@@ -180,8 +183,8 @@ class SummaryController extends Controller
                 $monthStart = date('Y-m-01', strtotime($month));
                 $monthEnd = date('Y-m-t', strtotime($month));
 
-                $incomes = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 0)->where('parent', 0)->sum('transaction_amount');
-                $expense = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 1)->where('parent', 0)->sum('transaction_amount');
+                $incomes = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+                $expense = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
                 //$deposit = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0)->sum('transaction_amount');
                 //$withdrawl = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0)->sum('transaction_amount');
 
@@ -214,12 +217,13 @@ class SummaryController extends Controller
     }
 
     public function inflowReport($startDate, $endDate){
-        $categories = AccCategory::where('trans_type', 0)->where('status', 1)->orderBy('category_name', 'ASC')->get();
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        $categories = AccCategory::where('trans_type', 0)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         $res = [];
         if(!empty($categories)):
             foreach($categories as $cat):
-                $inflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $cat->id)->get();
+                $inflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $cat->id)->whereIn('audit_status', $audit_status)->get();
                 if($inflows->count() > 0):
                     $res[$cat->id]['name'] = $cat->category_name;
                     $res[$cat->id]['no_of'] = $inflows->count();
@@ -232,7 +236,8 @@ class SummaryController extends Controller
     }
 
     public function outflowReport($startDate, $endDate){
-        $parentCategories = AccCategory::where('trans_type', 1)->where('status', 1)->where('parent_id', 0)->orderBy('category_name', 'ASC')->get();
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        $parentCategories = AccCategory::where('trans_type', 1)->where('status', 1)->where('parent_id', 0)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         $res = [];
         if($parentCategories->count() > 0):
@@ -241,7 +246,7 @@ class SummaryController extends Controller
                 $exist = 0;
                 if(!empty($childCategories)):
                     foreach($childCategories as $ccat):
-                        $outflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $ccat['id'])->get();
+                        $outflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $ccat['id'])->whereIn('audit_status', $audit_status)->get();
                         if($outflows->count() > 0):
                             $res[$pcat->id]['childs'][$ccat['id']]['name'] = $ccat['name'];
                             $res[$pcat->id]['childs'][$ccat['id']]['no_of'] = $outflows->count();
@@ -250,7 +255,7 @@ class SummaryController extends Controller
                         endif;
                     endforeach;
                 endif;
-                $ownTransaction = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->get();
+                $ownTransaction = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
                 if($ownTransaction->count() > 0):
                     $res[$pcat->id]['childs'][$pcat->id]['name'] = $pcat->category_name;
                     $res[$pcat->id]['childs'][$pcat->id]['no_of'] = $ownTransaction->count();
@@ -267,12 +272,13 @@ class SummaryController extends Controller
     }
 
     public function outflowChildCategories($parent_id){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         static $exps = array ();
 	    static $levs = 0;
         static $cnt = 0;
 	    $levs ++;
 
-        $categories = AccCategory::where('parent_id', $parent_id)->where('trans_type', 1)->orderBy('category_name', 'ASC')->get();
+        $categories = AccCategory::where('parent_id', $parent_id)->where('trans_type', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
         if($categories->count() > 0):
             foreach($categories as $cat):
                 $exps[$cnt]['id'] = $cat->id;
@@ -297,11 +303,12 @@ class SummaryController extends Controller
     }
 
     public function reportDetails(Request $request){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $category_id = $request->category_id;
         $start_date = date('Y-m-d', strtotime($request->start_date));
         $end_date = date('Y-m-d', strtotime($request->end_date));
 
-        $transactions = AccTransaction::whereBetween('transaction_date_2', [$start_date, $end_date])->where('parent', 0)->where('acc_category_id', $category_id)->get();
+        $transactions = AccTransaction::whereBetween('transaction_date_2', [$start_date, $end_date])->where('parent', 0)->where('acc_category_id', $category_id)->whereIn('audit_status', $audit_status)->get();
         $subTotal = 0;
 
         $html = '';
