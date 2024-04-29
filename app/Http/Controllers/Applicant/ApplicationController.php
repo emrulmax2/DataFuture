@@ -250,8 +250,7 @@ class ApplicationController extends Controller
             $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
-            $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference 
-                      number '.$theApplicant->application_no.' for all future correspondence.';
+            $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference number '.$theApplicant->application_no.' for all future correspondence.';
             
             if($active_api == 1 && !empty($textlocal_api)):
                 $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
