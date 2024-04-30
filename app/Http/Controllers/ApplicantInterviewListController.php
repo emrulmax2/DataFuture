@@ -101,11 +101,11 @@ class ApplicantInterviewListController extends Controller
 
             $document = $request->file('file');
             $imageName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/interviewresult/'.$applicantInterviewData->applicant_id, $imageName, 'google');
+            $path = $document->storeAs('public/interviewresult/'.$applicantInterviewData->applicant_id, $imageName, 's3');
             $data = [];
             $data['applicant_id'] = $applicantInterviewData->applicant_id;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = Storage::disk('google')->url($path);
+            $data['path'] = Storage::disk('s3')->url($path);
             $data['display_file_name'] = $imageName;
             $data['current_file_name'] = $imageName;
             $data['created_by'] = auth()->user()->id;

@@ -42,8 +42,8 @@ class AccTransaction extends Model
 
 
     public function getDocUrlAttribute(){
-        if($this->transaction_doc_name !== null && $this->transaction_doc_name != '' && Storage::disk('google')->exists('public/transactions/'.$this->transaction_doc_name)) {
-            return Storage::disk('google')->url('public/transactions/'.$this->transaction_doc_name);
+        if($this->transaction_doc_name !== null && $this->transaction_doc_name != '' && Storage::disk('s3')->exists('public/transactions/'.$this->transaction_doc_name)) {
+            return Storage::disk('s3')->url('public/transactions/'.$this->transaction_doc_name);
         }else{
             return '';
         }
