@@ -145,7 +145,11 @@
                         </div>
                     </div>
                     @php 
-                        $outflowTotal += $outflowCatTotal;
+                        if($outflowCatTotal >= 0):
+                            $outflowTotal += $outflowCatTotal;
+                        else:
+                            $outflowTotal -= str_replace('_', '', $outflowCatTotal);
+                        endif;
                     @endphp
                 @endforeach
             @endif
