@@ -200,13 +200,13 @@
             <!-- END: Login Form -->
         </div>
     </div>
-    @if (session('s3'))
+    @if (session('google'))
     <!-- BEGIN: Notification Content -->
     <div id="success-notification-content" class="toastify-content hidden ">
         <i class="text-danger" data-lucide="x-octagon"></i>
         <div class="ml-4 mr-4">
             <div class="font-medium">No Linked Account Found!</div>
-            <div class="text-slate-500 mt-1">{{ session('s3') }}</div>
+            <div class="text-slate-500 mt-1">{{ session('google') }}</div>
         </div>
     </div>
     <!-- END: Notification Content -->
