@@ -28,13 +28,13 @@ class NoteController extends Controller
             if($request->hasFile('document')):
                 $document = $request->file('document');
                 $documentName = time().'_'.$document->getClientOriginalName();
-                $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 'google');
+                $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
 
                 $data = [];
                 $data['student_id'] = $student_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
-                $data['path'] = Storage::disk('google')->url($path);
+                $data['path'] = Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -92,7 +92,7 @@ class NoteController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->student_document_id) && isset($list->document)):
-                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$list->document->current_file_name) : '');
+                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$list->document->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -122,7 +122,7 @@ class NoteController extends Controller
                 $html .= $note->note;
             $html .= '</div>';
             if(isset($note->student_document_id) && isset($note->document)):
-                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$note->document->current_file_name) : '');
+                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$note->document->current_file_name) : '');
                 if(!empty($docURL)):
                     $btns .= '<a download href="'.$docURL.'" class="btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
                 endif;
@@ -142,8 +142,8 @@ class NoteController extends Controller
         $student = Student::find($theNote->student_id);
         $studentApplicantId = $student->applicant_id;
         $docURL = '';
-        if(isset($theNote->student_document_id) && isset($theNote->document) && Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name)):
-            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name) : '');
+        if(isset($theNote->student_document_id) && isset($theNote->document) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name)):
+            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name) : '');
         endif;
         $theNote['docURL'] = $docURL;
 
@@ -167,8 +167,8 @@ class NoteController extends Controller
         ]);
         if($request->hasFile('document')):
             if($studentDocumentId > 0 && isset($oleNote->document->current_file_name) && !empty($oleNote->document->current_file_name)):
-                if (Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name)):
-                    Storage::disk('google')->delete('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name);
+                if (Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name)):
+                    Storage::disk('s3')->delete('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name);
                 endif;
 
                 $ad = StudentDocument::where('id', $studentDocumentId)->forceDelete();
@@ -176,13 +176,13 @@ class NoteController extends Controller
 
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 'google');
+            $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
 
             $data = [];
             $data['student_id'] = $student_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = Storage::disk('google')->url($path);
+            $data['path'] = Storage::disk('s3')->url($path);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
             $data['created_by'] = auth()->user()->id;

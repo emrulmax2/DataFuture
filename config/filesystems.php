@@ -56,8 +56,8 @@ return [
             'throw' => false,
         ],
 
-        'google' => [
-            'driver' => 'google',
+        's3' => [
+            'driver' => 's3',
             'clientId' => env('GOOGLE_DRIVE_CLIENT_ID'),
             'clientSecret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
             'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),

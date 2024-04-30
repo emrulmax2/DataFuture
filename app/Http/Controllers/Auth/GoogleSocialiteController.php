@@ -14,7 +14,7 @@ class GoogleSocialiteController extends Controller
     public function redirectToGoogle()
     {
         config(['services.google.redirect' => env('GOOGLE_REDIRECT_URL')]);
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('s3')->redirect();
     }
         /**
      * Create a new controller instance.
@@ -25,7 +25,7 @@ class GoogleSocialiteController extends Controller
     {
         try {
             config(['services.google.redirect' => env('GOOGLE_REDIRECT_URL')]);
-            $user = Socialite::driver('google')->user();
+            $user = Socialite::driver('s3')->user();
             
             $finduser = User::where('social_id', $user->id)->first();
       
@@ -45,7 +45,7 @@ class GoogleSocialiteController extends Controller
                 $finduser = User::find($finduser->id);
                 
                 $finduser->social_id=$user->id;
-                $finduser->social_type='google';
+                $finduser->social_type='s3';
                 $finduser->save();
                 
                 Auth::login($finduser);
@@ -58,7 +58,7 @@ class GoogleSocialiteController extends Controller
      
         } catch (Exception $e) {
 
-             return redirect('login')->with('google', "Your email not linked with google account");  
+             return redirect('login')->with('s3', "Your email not linked with google account");  
         }
     }
 }
