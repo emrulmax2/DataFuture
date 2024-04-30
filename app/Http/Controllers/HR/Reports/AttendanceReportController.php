@@ -601,7 +601,11 @@ class AttendanceReportController extends Controller
         $theCollection[1][] = 'Note';
 
         if(!empty($the_month)):
-            $query = Employee::has('activePatterns')->where('status', 1)->whereHas('payment', function($q){
+            $monthStart = date('Y-m-01', strtotime($the_month));
+            $monthEnd = date('Y-m-t', strtotime($the_month));
+            $attendEmployees = EmployeeAttendance::where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)->pluck('employee_id')->unique()->toArray();
+
+            $query = Employee::has('activePatterns')->whereIn('id', $attendEmployees)->whereHas('payment', function($q){
                 $q->where('subject_to_clockin', 'Yes');
             });
             $employees = $query->orderBy('first_name', 'ASC')->get();
