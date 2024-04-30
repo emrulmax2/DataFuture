@@ -38,8 +38,8 @@ class StorageController extends Controller
         $storage_id = $request->storage_id;
         $transaction_date = (isset($request->transaction_date) && !empty($request->transaction_date) ? date('Y-m-d', strtotime($request->transaction_date)) : date('Y-m-d'));
         $detail = (isset($request->detail) && !empty($request->detail) ? $request->detail : null);
-        $expense = (isset($request->expense) && $request->expense > 0 ? $request->expense : 0);
-        $income = (isset($request->income) && $request->income > 0 ? $request->income : 0);
+        $expense = (isset($request->expense) && $request->expense != '' ? $request->expense : '');
+        $income = (isset($request->income) && $request->income != '' ? $request->income : '');
         
         $trans_type = (isset($request->trans_type) && $request->trans_type > 0 ? $request->trans_type : 0);
         $acc_category_id_in = (isset($request->acc_category_id_in) && $request->acc_category_id_in > 0 ? $request->acc_category_id_in : null);
@@ -54,7 +54,8 @@ class StorageController extends Controller
         $transaction_code = (isset($lastRow->transaction_code)) ? str_replace('TC', '', $lastRow->transaction_code) : '00000';
         $transaction_code = 'TC'.($transaction_code + 1);
 
-        $transfer_type = ($expense > 0 ? 1 : 0);
+        $flow = (!empty($expense) && $expense > 0 ? 1 : 0);
+        $transaction_amount = ($flow == 1 ? $expense : $income);
 
         $data = [];
         $data['transaction_code'] = $transaction_code;
@@ -65,13 +66,13 @@ class StorageController extends Controller
         $data['acc_category_id'] = ($trans_type == 1 ? $acc_category_id_out : ($trans_type == 0 ? $acc_category_id_in : null));
         $data['acc_bank_id'] = $storage_id;
         $data['transaction_type'] = $trans_type;
+        $data['flow'] = $flow;
         $data['detail'] = $detail;
         $data['description'] = $description;
-        $data['transaction_amount'] = ($trans_type == 1 ? $expense : ($trans_type == 0 ? $income : ($transfer_type == 1 ? $expense : ($transfer_type == 0 ? $income : 0))));
+        $data['transaction_amount'] = $transaction_amount;
         $data['audit_status'] = $audit_status;
         if($trans_type == 2):
-            $data['transfer_type'] = $transfer_type;
-            $data['transfer_bank_id'] = $transfer_bank_id;
+            $data['transfer_bank_id'] = ($transfer_bank_id > 0 ? $transfer_bank_id : null);
         endif;
         $data['created_by'] = auth()->user()->id;
 
@@ -95,13 +96,13 @@ class StorageController extends Controller
             $data['transaction_code'] = $transaction_code;
             unset($data['acc_bank_id']);
             $data['acc_bank_id'] = $transfer_bank_id;
+            unset($data['flow']);
+            $data['flow'] = ($flow == 1 ? 0 : 1);
             $data['transfer_id'] = $transaction->id;
-            unset($data['transfer_type']);
-            $data['transfer_type'] = ($transfer_type == 1 ? 0 : 1);
             unset($data['transfer_bank_id']);
             $data['transfer_bank_id'] = $storage_id;
             unset($data['transaction_amount']);
-            $data['transaction_amount'] = ($transfer_type == 1 ? $expense : ($transfer_type == 0 ? $income : 0));
+            $data['transaction_amount'] = $transaction_amount;
 
             $trnfTrans = AccTransaction::create($data);
         endif;
@@ -163,11 +164,10 @@ class StorageController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $trans_type = ($list->transaction_type > 0 ? $list->transaction_type : 0);
-                $transfer_type = ($list->transfer_type == 0 ? 0 : ($list->transfer_type == 1 ? 1 : ''));
-                $in = ($trans_type == 0 ? $list->transaction_amount : ($trans_type == 2 && $transfer_type == 0 ? $list->transaction_amount : ''));
-                $out = ($trans_type == 1 ? $list->transaction_amount : ($trans_type == 2 && $transfer_type == 1 ? $list->transaction_amount : ''));
-
+                $transaction_type = ($list->transaction_type > 0 ? $list->transaction_type : 0);
+                $flow = (isset($list->flow) && $list->flow != '' ? $list->flow : 0);
+                $transaction_amount = (isset($list->transaction_amount) && $list->transaction_amount > 0 ? $list->transaction_amount : 0);
+                
                 $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id) : '');
 
                 $data[] = [
@@ -183,12 +183,11 @@ class StorageController extends Controller
                     'acc_bank_id' => ($list->acc_bank_id > 0 ? $list->acc_bank_id : ''),
                     'bank_name' => (isset($list->bank->bank_name) && !empty($list->bank->bank_name) ? $list->bank->bank_name : ''),
                     'audit_status' => ($list->audit_status > 0 ? $list->audit_status : '0'),
-                    'transaction_type' => $trans_type,
-                    'transfer_type' => ($list->transfer_type == 0 ? 'in' : ($list->transfer_type == 1 ? 'out' : '')),
+                    'transaction_type' => $transaction_type,
+                    'flow' => $flow,
                     'transfer_bank_id' => ($list->transfer_bank_id > 0 ? $list->transfer_bank_id : ''),
                     'transfer_bank_name' => (isset($list->tbank->bank_name) && !empty($list->tbank->bank_name) ? $list->tbank->bank_name : ''),
-                    'in' => (!empty($in) && $in > 0 ? '£'.number_format($in, 2) : ''),
-                    'out' => (!empty($out) && $out > 0 ? '£'.number_format($out, 2) : ''),
+                    'transaction_amount' => ($transaction_amount > 0 ? '£'.number_format($transaction_amount, 2) : ''),
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.number_format($balance, 2) : '-£'.number_format(str_replace('-', '', $balance), 1)) : ''),
                     'deleted_at' => $list->deleted_at,
                     'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? 1 : 0),
@@ -206,23 +205,15 @@ class StorageController extends Controller
         $openingDate = (isset($bank->opening_date) && !empty($bank->opening_date) ? date('Y-m-d', strtotime($bank->opening_date)) : '');
         $openingBalance = (isset($bank->opening_balance) && $bank->opening_balance > 0 ? $bank->opening_balance : 0);
 
-        $inQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
+        $inQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('flow', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $inQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $incomes = $inQuery->get()->sum('transaction_amount');
 
-        $exQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
+        $exQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('flow', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $exQuery->where('transaction_date_2', '>=', $openingDate); endif;
         $empenses = $exQuery->get()->sum('transaction_amount');
 
-        $dpQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
-        if(!empty($openingDate)): $dpQuery->where('transaction_date_2', '>=', $openingDate); endif;
-        $deposit = $dpQuery->get()->sum('transaction_amount');
-
-        $wdQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
-        if(!empty($openingDate)): $wdQuery->where('transaction_date_2', '>=', $openingDate); endif;
-        $withdrawl = $wdQuery->get()->sum('transaction_amount');
-
-        return (($openingBalance + $incomes + $deposit) - ($empenses + $withdrawl));
+        return (($openingBalance + $incomes) - $empenses);
     }
 
     public function catTreeInc($id = 0, $type = 0){
@@ -283,10 +274,11 @@ class StorageController extends Controller
         $storage_id = $request->storage_id;
         $oleTransaction = AccTransaction::find($transaction_id);
 
+        $expense = (isset($request->expense) && $request->expense > 0 ? $request->expense : '');
+        $income = (isset($request->income) && $request->income > 0 ? $request->income : '');
+
         $transaction_date = (isset($request->transaction_date) && !empty($request->transaction_date) ? date('Y-m-d', strtotime($request->transaction_date)) : date('Y-m-d'));
         $detail = (isset($request->detail) && !empty($request->detail) ? $request->detail : null);
-        $expense = (isset($request->expense) && $request->expense > 0 ? $request->expense : 0);
-        $income = (isset($request->income) && $request->income > 0 ? $request->income : 0);
         $trans_type = (isset($request->trans_type) && $request->trans_type > 0 ? $request->trans_type : 0);
         $acc_category_id_in = (isset($request->acc_category_id_in) && $request->acc_category_id_in > 0 ? $request->acc_category_id_in : null);
         $acc_category_id_out = (isset($request->acc_category_id_out) && $request->acc_category_id_out > 0 ? $request->acc_category_id_out : null);
@@ -296,7 +288,8 @@ class StorageController extends Controller
         $description = (isset($request->description) && !empty($request->description) ? $request->description : null);
         $audit_status = (isset($request->audit_status) && $request->audit_status > 0 ? $request->audit_status : 0);
 
-        $transfer_type = ($expense > 0 ? 1 : 0);
+        $flow = (!empty($expense) && $expense > 0 ? 1 : 0);
+        $transaction_amount = ($flow == 1 ? $expense : $income);
 
         $data = [];
         $data['transaction_date'] = strtotime($transaction_date);
@@ -306,13 +299,13 @@ class StorageController extends Controller
         $data['acc_category_id'] = ($trans_type == 1 ? $acc_category_id_out : ($trans_type == 0 ? $acc_category_id_in : null));
         $data['acc_bank_id'] = $storage_id;
         $data['transaction_type'] = $trans_type;
+        $data['flow'] = $flow;
         $data['detail'] = $detail;
         $data['description'] = $description;
-        $data['transaction_amount'] = ($trans_type == 1 ? $expense : ($trans_type == 0 ? $income : ($trans_type == 2 && $transfer_type == 1 ? $expense : ($trans_type == 2 && $transfer_type == 0 ? $income : 0))));
+        $data['transaction_amount'] = $transaction_amount;
         $data['audit_status'] = $audit_status;
         if($trans_type == 2):
-            $data['transfer_type'] = $transfer_type;
-            $data['transfer_bank_id'] = $transfer_bank_id;
+            $data['transfer_bank_id'] = ($transfer_bank_id > 0 ? $transfer_bank_id : null);
         endif;
         $data['updated_by'] = auth()->user()->id;
 
@@ -343,12 +336,12 @@ class StorageController extends Controller
             unset($data['acc_bank_id']);
             $data['acc_bank_id'] = $transfer_bank_id;
             $data['transfer_id'] = $transaction_id;
-            unset($data['transfer_type']);
-            $data['transfer_type'] = ($transfer_type == 1 ? 0 : 1);
+            unset($data['flow']);
+            $data['flow'] = ($flow == 1 ? 0 : 1);
             unset($data['transfer_bank_id']);
             $data['transfer_bank_id'] = $storage_id;
             unset($data['transaction_amount']);
-            $data['transaction_amount'] = ($transfer_type == 1 ? $expense : ($transfer_type == 0 ? $income : 0));
+            $data['transaction_amount'] = $transaction_amount;
 
             $trnfTrans = AccTransaction::create($data);
         endif;
@@ -414,19 +407,18 @@ class StorageController extends Controller
         if(!empty($transactions)):
             foreach($transactions as $trns):
                 $trans_type = ($trns->transaction_type > 0 ? $trns->transaction_type : 0);
-                $transfer_type = ($trns->transfer_type == 0 ? 0 : ($trns->transfer_type == 1 ? 1 : ''));
-                $in = ($trans_type == 0 ? $trns->transaction_amount : ($trans_type == 2 && $transfer_type == 0 ? $trns->transaction_amount : ''));
-                $out = ($trans_type == 1 ? $trns->transaction_amount : ($trans_type == 2 && $transfer_type == 1 ? $trns->transaction_amount : ''));
+                $flow = ($trns->flow == 1 ? 1 : 0);
+                $transaction_amount = (isset($trns->transaction_amount) && $trns->transaction_amount > 0 ? $trns->transaction_amount : 0);
 
                 $category_html = '';
-                if($trns->transfer_bank_id > 0 && $trns->transfer_type != ''):
-                    if($trns->transfer_type == 0):
+                if($trns->transfer_bank_id > 0 && $trns->transaction_type == 2):
+                    if($flow == 0):
                         $category_html .= '-> ';
-                    elseif($trns->transfer_type == 1):
+                    elseif($flow == 1):
                         $category_html .= '<- ';
                     endif;
                     $category_html .= (isset($trns->tbank->bank_name) ? $trns->tbank->bank_name : '');
-                elseif($trns->acc_category_id > 0):
+                elseif($trns->acc_category_id > 0 && $trns->transaction_type != 2):
                     $category_html .= (isset($trns->category->category_name) ? $trns->category->category_name : '');
                 endif;
 
@@ -437,8 +429,8 @@ class StorageController extends Controller
                 $theCollection[$row][] = $trns->detail;
                 $theCollection[$row][] = $trns->description;
                 $theCollection[$row][] = $category_html;
-                $theCollection[$row][] = (!empty($out) && $out > 0 ? number_format($out, 2, '.', '') : '');
-                $theCollection[$row][] = (!empty($in) && $in > 0 ? number_format($in, 2, '.', '') : '');
+                $theCollection[$row][] = ($flow == 1 ? number_format($transaction_amount, 2, '.', '') : '');
+                $theCollection[$row][] = ($flow != 1 ? number_format($transaction_amount, 2, '.', '') : '');
 
                 $row++;
             endforeach;

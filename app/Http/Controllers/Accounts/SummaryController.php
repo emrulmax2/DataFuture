@@ -92,8 +92,8 @@ class SummaryController extends Controller
                                         $HTML .= '<div class="block relative">';
                                             $HTML .= '<div class="font-medium whitespace-nowrap">'.date('jS F, Y', strtotime($bt->transaction_date_2)).'</div>';
                                             $HTML .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5 flex justify-start items-center">';
-                                                if($bt->doc_url != ''):
-                                                    $HTML .= '<a href="'.$bt->doc_url.'" class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
+                                                if($bt->transaction_doc_name != ''):
+                                                    $HTML .= '<a href="javascript:void(0);" data-id="'.$bt->id.'" class="text-success mr-2 downloadDoc" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                                 endif;
                                                 $HTML .= $bt->transaction_code;
                                             $HTML .= '</div>';
@@ -117,9 +117,9 @@ class SummaryController extends Controller
                                         if($bt->transaction_type == 2):
                                             $HTML .= '<div class="relative">';
                                                 $HTML .= '<div class="font-medium whitespace-normal">';
-                                                    if($bt->transfer_type == 0):
+                                                    if($bt->flow == 0):
                                                         $HTML .= '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-right" class="w-3 h-3"></i></span>';
-                                                    elseif($bt->transfer_type == 1):
+                                                    elseif($bt->flow == 1):
                                                         $HTML .= '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-left" class="w-3 h-3"></i></span>';
                                                     endif;
                                                     $HTML .= (isset($bt->tbank->bank_name) ? $bt->tbank->bank_name : '');
@@ -132,14 +132,14 @@ class SummaryController extends Controller
                                         endif;
                                     $HTML .= '</td>';
                                     $HTML .= '<td class="w-40">';
-                                        if($bt->transaction_type == 1 || ($bt->transaction_type == 2 && $bt->transfer_type == 1)):
+                                        if($bt->flow == 1):
                                             $HTML .= '<div class="block relative">';
                                                 $HTML .= '<div class="font-medium whitespace-nowrap">£'.number_format($bt->transaction_amount, 2).'</div>';
                                             $HTML .= '</div>';
                                         endif;
                                     $HTML .= '</td>';
                                     $HTML .= '<td class="w-40">';
-                                        if($bt->transaction_type == 0 || ($bt->transaction_type == 2 && $bt->transfer_type == 0)):
+                                        if($bt->flow == 0):
                                             $HTML .= '<div class="block relative">';
                                                 $HTML .= '<div class="font-medium whitespace-nowrap">£'.number_format($bt->transaction_amount, 2).'</div>';
                                             $HTML .= '</div>';
@@ -183,8 +183,8 @@ class SummaryController extends Controller
                 $monthStart = date('Y-m-01', strtotime($month));
                 $monthEnd = date('Y-m-t', strtotime($month));
 
-                $incomes = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
-                $expense = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+                $incomes = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->whereNot('transaction_type', 2)->where('flow', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+                $expense = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->whereNotIn('acc_category_id', [41, 42])->whereNot('transaction_type', 2)->where('flow', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->sum('transaction_amount');
                 //$deposit = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->where('transaction_type', 2)->where('transfer_type', 0)->where('parent', 0)->sum('transaction_amount');
                 //$withdrawl = AccTransaction::whereBetween('transaction_date_2', [$monthStart, $monthEnd])->where('transaction_type', 2)->where('transfer_type', 1)->where('parent', 0)->sum('transaction_amount');
 
@@ -223,11 +223,14 @@ class SummaryController extends Controller
         $res = [];
         if(!empty($categories)):
             foreach($categories as $cat):
-                $inflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $cat->id)->whereIn('audit_status', $audit_status)->get();
-                if($inflows->count() > 0):
+                $inflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 0)->where('acc_category_id', $cat->id)->whereIn('audit_status', $audit_status)->get();
+                $outflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 1)->where('acc_category_id', $cat->id)->whereIn('audit_status', $audit_status)->get();
+                if($inflows->count() > 0 || $outflows->count() > 0):
+                    $inf = $inflows->sum('transaction_amount');
+                    $otf = $outflows->sum('transaction_amount');
                     $res[$cat->id]['name'] = $cat->category_name;
-                    $res[$cat->id]['no_of'] = $inflows->count();
-                    $res[$cat->id]['sub_total'] = $inflows->sum('transaction_amount');
+                    $res[$cat->id]['no_of'] = $inflows->count() + $outflows->count();
+                    $res[$cat->id]['sub_total'] = ($inf - $otf);
                 endif;
             endforeach;
         endif;
@@ -246,20 +249,26 @@ class SummaryController extends Controller
                 $exist = 0;
                 if(!empty($childCategories)):
                     foreach($childCategories as $ccat):
-                        $outflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $ccat['id'])->whereIn('audit_status', $audit_status)->get();
-                        if($outflows->count() > 0):
+                        $inflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 0)->where('acc_category_id', $ccat['id'])->whereIn('audit_status', $audit_status)->get();
+                        $outflows = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 1)->where('acc_category_id', $ccat['id'])->whereIn('audit_status', $audit_status)->get();
+                        if($inflows->count() > 0 || $outflows->count() > 0):
+                            $inf = $inflows->sum('transaction_amount');
+                            $otf = $outflows->sum('transaction_amount');
                             $res[$pcat->id]['childs'][$ccat['id']]['name'] = $ccat['name'];
-                            $res[$pcat->id]['childs'][$ccat['id']]['no_of'] = $outflows->count();
-                            $res[$pcat->id]['childs'][$ccat['id']]['sub_total'] = $outflows->sum('transaction_amount');
+                            $res[$pcat->id]['childs'][$ccat['id']]['no_of'] = $outflows->count() + $inflows->count();
+                            $res[$pcat->id]['childs'][$ccat['id']]['sub_total'] = ($inf - $otf);
                             $exist += 1;
                         endif;
                     endforeach;
                 endif;
-                $ownTransaction = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
-                if($ownTransaction->count() > 0):
+                $ownInflow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
+                $ownOutfolow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
+                if($ownInflow->count() > 0 || $ownOutfolow->count() > 0):
+                    $inf = $ownInflow->sum('transaction_amount');
+                    $otf = $ownOutfolow->sum('transaction_amount');
                     $res[$pcat->id]['childs'][$pcat->id]['name'] = $pcat->category_name;
-                    $res[$pcat->id]['childs'][$pcat->id]['no_of'] = $ownTransaction->count();
-                    $res[$pcat->id]['childs'][$pcat->id]['sub_total'] = $ownTransaction->sum('transaction_amount');
+                    $res[$pcat->id]['childs'][$pcat->id]['no_of'] = $ownInflow->count() + $ownOutfolow->count();
+                    $res[$pcat->id]['childs'][$pcat->id]['sub_total'] = ($inf - $otf);
                     $exist += 1;
                 endif;
                 if($exist > 0):
@@ -321,7 +330,8 @@ class SummaryController extends Controller
                     $html .= '<th>Storage</th>';
                     $html .= '<th>Details</th>';
                     $html .= '<th>Description</th>';
-                    $html .= '<th class="text-right">Sub Total</th>';
+                    $html .= '<th class="text-right">Withdrawl</th>';
+                    $html .= '<th class="text-right">Deposit</th>';
                 $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
@@ -334,13 +344,18 @@ class SummaryController extends Controller
                             $html .= '<td>'.(isset($trns->bank->bank_name) ? $trns->bank->bank_name : '').'</td>';
                             $html .= '<td>'.$trns->detail.'</td>';
                             $html .= '<td>'.$trns->description.'</td>';
-                            $html .= '<td class="text-right">£'.number_format($trns->transaction_amount, 2).'</td>';
+                            $html .= '<td class="text-right">'.($trns->flow == 1 ? '£'.number_format($trns->transaction_amount, 2) : '').'</td>';
+                            $html .= '<td class="text-right">'.($trns->flow != 1 ? '£'.number_format($trns->transaction_amount, 2) : '').'</td>';
                         $html .= '</tr>';
-                        $subTotal += $trns->transaction_amount;
+                        if($trns->flow == 1):
+                            $subTotal -= $trns->transaction_amount;
+                        else:
+                            $subTotal += $trns->transaction_amount;
+                        endif;
                     endforeach;
                 else:
                     $html .= '<tr>';
-                        $html .= '<td colspan="7">';
+                        $html .= '<td colspan="8">';
                             $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
                                 $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Transactions not found';
                             $html .= '</div>';
@@ -352,7 +367,7 @@ class SummaryController extends Controller
                 $html .= '<tfoot>';
                     $html .= '<tr>';
                         $html .= '<th colspan="6">Sub Total</th>';
-                        $html .= '<th class="text-right">£'.number_format($subTotal, 2).'</th>';
+                        $html .= '<th colspan="2" class="text-right">'.($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)).'</th>';
                     $html .= '</tr>';
                 $html .= '</tfoot>';
             endif;

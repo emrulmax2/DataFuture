@@ -50,20 +50,30 @@
         validateRow(tr_id);
     })
 
-    $('.rowAmount').on('keyup paste change', function(){
+    $('.rowExpense').on('keyup paste change', function(){
         let $theTr = $(this).closest('tr.transaction_row');
         let tr_id = $theTr.attr('id');
 
+        $theTr.find('.rowIncome').val('');
+        validateRow(tr_id);
+    })
+
+    $('.rowIncome').on('keyup paste change', function(){
+        let $theTr = $(this).closest('tr.transaction_row');
+        let tr_id = $theTr.attr('id');
+
+        $theTr.find('.rowExpense').val('');
         validateRow(tr_id);
     })
 
     function validateRow(row_id){
         let $theTr = $('#'+row_id);
         var transaction_type = $theTr.find('.transaction_type').val();
-        var rowAmount = $theTr.find('.rowAmount').val();
+        var rowExpense = $theTr.find('.rowExpense').val();
+        var rowIncome = $theTr.find('.rowIncome').val();
 
         let errors = 0;
-        if(rowAmount == ''){
+        if(rowExpense == '' && rowIncome == ''){
             errors += 1;
         }
         if(transaction_type == 2 && $theTr.find('.trans_storage').val() == ''){

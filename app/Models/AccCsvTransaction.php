@@ -16,6 +16,7 @@ class AccCsvTransaction extends Model
         'description',
         'amount',
         'transaction_type',
+        'flow',
         'created_by',
         'updated_by',
     ];
