@@ -333,21 +333,23 @@ class EmployeeAttendanceLiveController extends Controller
                     $todaysClockIn = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 1)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
                     $todaysClockOut = EmployeeAttendanceLive::where('employee_id', $emp)->where('attendance_type', 4)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
                     
-                    $data = [];
-                    $data['employee_id'] = $emp;
-                    $data['attendance_type'] = 1;
-                    $data['date'] = $theDate;
-                    $data['time'] = $empAtten['clockin'].':00';
-                    if(isset($todaysClockIn->id) && ($todaysClockIn->id > 0)):
-                        $data['updated_by'] = $currentEmployeeId;
-                        $data['updated_at'] = date('Y-m-d H:i:s');
+                    if(isset($empAtten['clockin']) && !empty($empAtten['clockin'])):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 1;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['clockin'].':00';
+                        if(isset($todaysClockIn->id) && ($todaysClockIn->id > 0)):
+                            $data['updated_by'] = $currentEmployeeId;
+                            $data['updated_at'] = date('Y-m-d H:i:s');
 
-                        EmployeeAttendanceLive::where('id', $todaysClockIn->id)->update($data);
-                    else:
-                        $data['ip'] = $request->getClientIp();
-                        $data['created_by'] = $currentEmployeeId;
+                            EmployeeAttendanceLive::where('id', $todaysClockIn->id)->update($data);
+                        else:
+                            $data['ip'] = $request->getClientIp();
+                            $data['created_by'] = $currentEmployeeId;
 
-                        EmployeeAttendanceLive::create($data);
+                            EmployeeAttendanceLive::create($data);
+                        endif;
                     endif;
                     if(isset($empAtten['break']) && !empty($empAtten['break'])):
                         $data = [];
@@ -372,21 +374,23 @@ class EmployeeAttendanceLiveController extends Controller
                         EmployeeAttendanceLive::create($data);
                     endif;
 
-                    $data = [];
-                    $data['employee_id'] = $emp;
-                    $data['attendance_type'] = 4;
-                    $data['date'] = $theDate;
-                    $data['time'] = $empAtten['clockout'].':00';
-                    if(isset($todaysClockOut->id) && ($todaysClockOut->id > 0)):
-                        $data['updated_by'] = $currentEmployeeId;
-                        $data['updated_at'] = date('Y-m-d H:i:s');
+                    if(isset($empAtten['clockout']) && !empty($empAtten['clockout'])):
+                        $data = [];
+                        $data['employee_id'] = $emp;
+                        $data['attendance_type'] = 4;
+                        $data['date'] = $theDate;
+                        $data['time'] = $empAtten['clockout'].':00';
+                        if(isset($todaysClockOut->id) && ($todaysClockOut->id > 0)):
+                            $data['updated_by'] = $currentEmployeeId;
+                            $data['updated_at'] = date('Y-m-d H:i:s');
 
-                        EmployeeAttendanceLive::where('id', $todaysClockOut->id)->update($data);
-                    else:
-                        $data['ip'] = $request->getClientIp();
-                        $data['created_by'] = $currentEmployeeId;
+                            EmployeeAttendanceLive::where('id', $todaysClockOut->id)->update($data);
+                        else:
+                            $data['ip'] = $request->getClientIp();
+                            $data['created_by'] = $currentEmployeeId;
 
-                        EmployeeAttendanceLive::create($data);
+                            EmployeeAttendanceLive::create($data);
+                        endif;
                     endif;
                 endif;
             endforeach;
