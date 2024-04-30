@@ -47,10 +47,17 @@ class AttendanceReportController extends Controller
     public function generateReport($the_month, $employee_id = []){
         $res = [];
         if(!empty($the_month)):
-            $query = Employee::has('activePatterns')->where('status', 1)->whereHas('payment', function($q){
+            $monthStart = date('Y-m-01', strtotime($the_month));
+            $monthEnd = date('Y-m-t', strtotime($the_month));
+            $attendEmployees = EmployeeAttendance::where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)->pluck('employee_id')->unique()->toArray();
+            $query = Employee::has('activePatterns')->whereHas('payment', function($q){
                         $q->where('subject_to_clockin', 'Yes');
                     });
-            if(!empty($employee_id)) : $query->whereIn('id', $employee_id); endif;
+            if(!empty($employee_id)): 
+                $query->whereIn('id', $employee_id); 
+            elseif(!empty($attendEmployees)):  
+                $query->whereIn('id', $attendEmployees); 
+            endif;
             $employees = $query->orderBy('first_name', 'ASC')->get();
             if($employees->count() > 0):
                 $html = '';
@@ -631,14 +638,14 @@ class AttendanceReportController extends Controller
                         $theCollection[$row][] = $emp->full_name;
                         $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
                         $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
-                        $theCollection[$row][] = number_format($payRate, 2, ',', '');
+                        $theCollection[$row][] = number_format($payRate, 2, '.', '');
                         $theCollection[$row][] = $this->calculateHourMinute($working_hours);
                         $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
-                        $theCollection[$row][] = number_format($working_pays, 2, ',', '');
-                        $theCollection[$row][] = number_format($holiday_pays, 2, ',', '');
+                        $theCollection[$row][] = number_format($working_pays, 2, '.', '');
+                        $theCollection[$row][] = number_format($holiday_pays, 2, '.', '');
                         $theCollection[$row][] = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
                         $theCollection[$row][] = '';
-                        $theCollection[$row][] = number_format($grossPay, 2, ',', '');
+                        $theCollection[$row][] = number_format($grossPay, 2, '.', '');
                         $theCollection[$row][] = '';
                         
                         $row++;
