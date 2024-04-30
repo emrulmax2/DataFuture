@@ -75,13 +75,13 @@ class EmailController extends Controller
                 $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
-                    $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 'google');
+                    $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
 
                     $data = [];
                     $data['student_id'] = $student_id;
                     $data['hard_copy_check'] = 0;
                     $data['doc_type'] = $document->getClientOriginalExtension();
-                    $data['path'] = Storage::disk('google')->url($path);
+                    $data['path'] = Storage::disk('s3')->url($path);
                     $data['display_file_name'] = $documentName;
                     $data['current_file_name'] = $documentName;
                     $data['created_by'] = auth()->user()->id;
@@ -98,7 +98,7 @@ class EmailController extends Controller
                             "pathinfo" => $path,
                             "nameinfo" => $document->getClientOriginalName(),
                             "mimeinfo" => $document->getMimeType(),
-                            'disk'     => 'google'      
+                            'disk'     => 's3'      
                         ];
                         $docCounter++;
                     endif;
@@ -228,8 +228,8 @@ class EmailController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
                     foreach($mail->documents as $doc):
-                        if(Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name)):
-                            $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        if(Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name)):
+                            $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
                         endif;
                     endforeach;
                 $html .= '</div>';

@@ -66,7 +66,7 @@ class EmployeeArchiveController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->employee_document_id) && isset($list->document)):
-                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('google')->url('public/employees/notes/'.$list->document->current_file_name) : '');
+                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('s3')->url('public/employees/notes/'.$list->document->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
