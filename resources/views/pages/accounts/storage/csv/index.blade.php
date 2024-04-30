@@ -56,7 +56,8 @@
                                     <th>Details</th>
                                     <th>Description</th>
                                     <th>Category</th>
-                                    <th class="text-right">Amount</th>
+                                    <th class="text-right">Withdrawl</th>
+                                    <th class="text-right">Deposit</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                             </thead>
@@ -97,12 +98,13 @@
                                                     <option value="">Storage</option>
                                                     @if(!empty($banks))
                                                         @foreach($banks as $bnk)
-                                                            <option value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
+                                                            <option {{ ($bank->id == $bnk->id ? 'disabled' : '') }} value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
                                                         @endforeach
                                                     @endif
                                                 </select>
                                             </td>
-                                            <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_amount" class="w-24 form-control rowAmount text-right" value="{{ $trns->amount }}"/></td>
+                                            <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_expense" class="w-24 form-control rowExpense text-right" value="{{ ($trns->flow == 1 ? $trns->amount : '') }}"/></td>
+                                            <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_income" class="w-24 form-control rowIncome text-right" value="{{ ($trns->flow == 0 ? $trns->amount : '') }}"/></td>
                                             <td>
                                                 <div class="flex justify-end items-center relative">
                                                     <div class="form-check inline-flex mr-2">

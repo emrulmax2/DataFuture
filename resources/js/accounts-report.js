@@ -4,8 +4,8 @@ import { createIcons, icons } from "lucide";
     let pickerOptions = {
         autoApply: true,
         singleMode: false,
-        numberOfColumns: 2,
-        numberOfMonths: 2,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
         showWeekNumbers: true,
         format: "DD-MM-YYYY",
         dropdowns: {

@@ -4,7 +4,7 @@
             <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
                 <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
                     <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
-                        <img alt="London Churchill College" class="rounded-full" src="{{ (isset($student->photo) && !empty($student->photo) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$student->photo) ? Storage::disk('s3')->url('public/applicants/'.$student->applicant_id.'/'.$student->photo) : asset('build/assets/images/avater.png')) }}">
+                        <img alt="London Churchill College" class="rounded-full" src="{{ (isset($student->photo) && !empty($student->photo) && Storage::disk('google')->exists('public/applicants/'.$student->applicant_id.'/'.$student->photo) ? Storage::disk('google')->url('public/applicants/'.$student->applicant_id.'/'.$student->photo) : asset('build/assets/images/avater.png')) }}">
                         <div class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
                             <i class="w-4 h-4 text-white" data-lucide="camera"></i>
                         </div>
@@ -102,7 +102,7 @@
                             {{-- <table class="table ">
                                 <tr>
                                     <td> --}}
-                                        <a class="inline-flex items-center justify-center cursor-pointer" target="_blank" href="{{   Storage::disk('s3')->url('public/interviewresult/'.$applicant->id."/".$interview->document->current_file_name)   }}"><i data-lucide="paperclip" class="w-4 h-4 mr-2"></i>{{ $interview->document->current_file_name }}</a>
+                                        <a class="inline-flex items-center justify-center cursor-pointer" target="_blank" href="{{   Storage::disk('google')->url('public/interviewresult/'.$applicant->id."/".$interview->document->current_file_name)   }}"><i data-lucide="paperclip" class="w-4 h-4 mr-2"></i>{{ $interview->document->current_file_name }}</a>
                                     {{-- </td>
                                     <td> --}}
                                         <a class="inline-flex items-center justify-center cursor-pointer" data-tw-toggle="modal" data-tw-target="#confirmModal"><i data-lucide="delete" class="w-5 h-5 ml-2 text-danger "></i></a>

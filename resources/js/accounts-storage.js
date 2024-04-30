@@ -73,12 +73,12 @@ var storageTransList = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '';
-                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transfer_type != ''){
+                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type !== '2'){
                             html += '<div class="relative">';
                                 html += '<div class="font-medium whitespace-normal">';
-                                    if(cell.getData().transfer_type == 'in'){
+                                    if(cell.getData().flow == '0'){
                                         html += '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-right" class="w-3 h-3"></i></span>';
-                                    }else if(cell.getData().transfer_type == 'out'){
+                                    }else if(cell.getData().flow == '1'){
                                         html += '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-left" class="w-3 h-3"></i></span>';
                                     }
                                     html += cell.getData().transfer_bank_name
@@ -100,9 +100,12 @@ var storageTransList = (function () {
                     headerSort: false,
                     width: '140',
                     formatter(cell, formatterParams) { 
-                        var html = '<div class="block relative">';
-                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().out+'</div>';
+                        var html = '';
+                        if(cell.getData().flow == 1){
+                            html = '<div class="block relative">';
+                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().transaction_amount+'</div>';
                             html += '</div>';
+                        }
                         return html;
                     }
                 },
@@ -114,9 +117,12 @@ var storageTransList = (function () {
                     headerSort: false,
                     width: '140',
                     formatter(cell, formatterParams) { 
-                        var html = '<div class="block relative">';
-                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().in+'</div>';
+                        var html = '';
+                        if(cell.getData().flow != 1){
+                            html = '<div class="block relative">';
+                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().transaction_amount+'</div>';
                             html += '</div>';
+                        }
                         return html;
                     }
                 },
@@ -142,16 +148,7 @@ var storageTransList = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-            },
-            /*rowDblClick:function(e, row){
-                var transaction_id = row.getData().id;
-                var transaction_type = row.getData().transaction_type;
-                var can_eidt = row.getData().can_eidt;
-
-                if(can_eidt == 1){
-                    
-                }
-            }*/
+            }
         });
 
         // Redraw table onresize
@@ -239,16 +236,10 @@ var storageTransList = (function () {
 
 
     $('#income').on('keyup paste change', function(){
-        let trans_type = $('#trans_type').val();
-        if(trans_type == 2){
-            $('#expense').val('');
-        }
+        $('#expense').val('');
     });
     $('#expense').on('keyup paste change', function(){
-        let trans_type = $('#trans_type').val();
-        if(trans_type == 2){
-            $('#income').val('');
-        }
+        $('#income').val('');
     });
 
     $('#trans_type').on('change', function(e){
@@ -259,19 +250,14 @@ var storageTransList = (function () {
             $('#acc_category_id_in, #acc_category_id_out').val('').fadeOut('fast', function(){
                 $('#acc_bank_id').fadeIn().val('');
             });
-            $('#expense, #income').removeAttr('readonly').val('');
         }else if(trans_type == 1){
             $('#acc_category_id_in, #acc_bank_id').val('').fadeOut('fast', function(){
                 $('#acc_category_id_out').fadeIn().val('');
             });
-            $('#expense').removeAttr('readonly').val('');
-            $('#income').attr('readonly', 'readonly').val('');
         }else{
             $('#acc_category_id_out, #acc_bank_id').val('').fadeOut('fast', function(){
                 $('#acc_category_id_in').fadeIn().val('');
             });
-            $('#income').removeAttr('readonly').val('');
-            $('#expense').attr('readonly', 'readonly').val('');
         }
     });
 
@@ -289,8 +275,8 @@ var storageTransList = (function () {
                 $('#acc_category_id_out, #acc_bank_id').val('').fadeOut();
                 $('#acc_category_id_in').fadeIn().val('');
 
-                $('#income').removeAttr('readonly').val('');
-                $('#expense').attr('readonly', 'readonly').val('');
+                $('#income').val('');
+                $('#expense').val('');
                 $('#storageTransactionForm #transaction_id').val('0');
                 $('#storageTransactionForm #deleteTransaction').fadeOut().attr('data-id', '0')
             })
@@ -440,8 +426,8 @@ var storageTransList = (function () {
 
                     $('#storageTransactionForm #deleteTransaction').fadeIn().attr('data-id', row.id)
                     if(row.transaction_type == 0){
-                        $('#expense').val('').attr('readonly', 'readonly');
-                        $('#income').val(row.transaction_amount).removeAttr('readonly');
+                        $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
+                        $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
                         $('#acc_category_id_in').fadeIn().val(row.acc_category_id);
                         $('#acc_category_id_out').fadeOut().val('');
@@ -449,8 +435,8 @@ var storageTransList = (function () {
 
                         $('#storeTransaction').fadeIn();
                     }else if(row.transaction_type == 1){
-                        $('#income').val('').attr('readonly', 'readonly');
-                        $('#expense').val(row.transaction_amount).removeAttr('readonly');
+                        $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
+                        $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
                         $('#acc_category_id_in').fadeOut().val('');
                         $('#acc_category_id_out').fadeIn().val(row.acc_category_id);
@@ -458,13 +444,9 @@ var storageTransList = (function () {
 
                         $('#storeTransaction').fadeIn();
                     }else if(row.transaction_type == 2){
-                        if(row.transfer_type == 0){
-                            $('#expense').val('').removeAttr('readonly');
-                            $('#income').val(row.transaction_amount).removeAttr('readonly');
-                        }else if(row.transfer_type == 1){
-                            $('#income').val('').removeAttr('readonly');
-                            $('#expense').val(row.transaction_amount).removeAttr('readonly');
-                        }
+                        $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
+                        $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
+
                         $('#acc_category_id_in').fadeOut().val('');
                         $('#acc_category_id_out').fadeOut().val('');
                         $('#acc_bank_id').fadeIn().val(row.transfer_bank_id);

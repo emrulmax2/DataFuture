@@ -63,6 +63,7 @@ class AccCsvTransactionController extends Controller
                         foreach($csvData as $row):
                             if($i > 1):
                                 $transaction_type = (isset($row[3]) && $row[3] >= 0 ? 0 : 1);
+                                $flow = $transaction_type;
                                 $trans_amount =  (isset($row[3]) && !empty($row[3]) ? str_replace('-', '', $row[3]) : '0.00');
                                 $data = [];
                                 $data['acc_csv_file_id'] = $accCsvFile->id;
@@ -70,6 +71,7 @@ class AccCsvTransactionController extends Controller
                                 $data['description'] = (isset($row[2]) && !empty($row[2]) ? $row[2] : null);
                                 $data['amount'] = $trans_amount;
                                 $data['transaction_type'] = $transaction_type;
+                                $data['flow'] = $flow;
                                 $data['created_by'] = auth()->user()->id;
 
                                 AccCsvTransaction::create($data);
@@ -143,6 +145,12 @@ class AccCsvTransactionController extends Controller
         $transid = $request->acc_csv_transaction_id;
         $csvTrans = AccCsvTransaction::find($transid);
 
+        $expense = (isset($request->expense) && $request->expense > 0 ? $request->expense : 0);
+        $income = (isset($request->income) && $request->income > 0 ? $request->income : 0);
+
+        $flow = (!empty($expense) && $expense > 0 ? 1 : 0);
+        $transaction_amount = ($flow == 1 ? $expense : $income);
+
         $transaction_date = (isset($request->transdate) && !empty($request->transdate) ? date('Y-m-d', strtotime($request->transdate)) : date('Y-m-d'));
         $invoice_no = (isset($request->invoiceno) && !empty($request->invoiceno) ? $request->invoiceno : null);
         $invoice_date = (isset($request->invoicedate) && !empty($request->invoicedate) ? date('Y-m-d', strtotime($request->invoicedate)) : null);
@@ -151,7 +159,6 @@ class AccCsvTransactionController extends Controller
         $acc_category_id_in = (isset($request->inccategory) && $request->inccategory > 0 ? $request->inccategory : null);
         $acc_category_id_out = (isset($request->expcategory) && $request->expcategory > 0 ? $request->expcategory : null);
         $transfer_bank_id = (isset($request->transstorage) && $request->transstorage > 0 ? $request->transstorage : null);
-        $amount = (isset($request->amount) && $request->amount > 0 ? $request->amount : 0);
         $audit_status = (isset($request->auditstatus) && $request->auditstatus > 0 ? $request->auditstatus : 0);
         $trans_type = (isset($request->transactiontype) && $request->transactiontype > 0 ? $request->transactiontype : 0);
 
@@ -170,12 +177,12 @@ class AccCsvTransactionController extends Controller
         $data['acc_category_id'] = ($trans_type == 1 ? $acc_category_id_out : ($trans_type == 0 ? $acc_category_id_in : null));
         $data['acc_bank_id'] = $csvFile->acc_bank_id;
         $data['transaction_type'] = $trans_type;
+        $data['flow'] = $flow;
         $data['detail'] = $detail;
         $data['description'] = $description;
-        $data['transaction_amount'] = $amount;
+        $data['transaction_amount'] = $transaction_amount;
         $data['audit_status'] = $audit_status;
         if($trans_type == 2):
-            $data['transfer_type'] = $transfer_type;
             $data['transfer_bank_id'] = $transfer_bank_id;
         endif;
         $data['created_by'] = auth()->user()->id;
@@ -184,7 +191,7 @@ class AccCsvTransactionController extends Controller
         if($request->hasFile('document')):
             $document = $request->file('document');
             $documentName = $transaction_code.'.' . $document->getClientOriginalExtension();
-            $path = $document->storeAs('public/transactions', $documentName, 's3');
+            $path = $document->storeAs('public/transactions', $documentName, 'google');
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
                 'transaction_doc_name' => $documentName
@@ -203,12 +210,12 @@ class AccCsvTransactionController extends Controller
                 unset($data['acc_bank_id']);
                 $data['acc_bank_id'] = $transfer_bank_id;
                 $data['transfer_id'] = $transaction->id;
-                unset($data['transfer_type']);
-                $data['transfer_type'] = ($transfer_type == 1 ? 0 : 1);
+                unset($data['flow']);
+                $data['flow'] = ($flow == 1 ? 0 : 1);
                 unset($data['transfer_bank_id']);
                 $data['transfer_bank_id'] = $csvFile->acc_bank_id;
                 unset($data['transaction_amount']);
-                $data['transaction_amount'] = $amount;
+                $data['transaction_amount'] = $transaction_amount;
 
                 $trnfTrans = AccTransaction::create($data);
             endif;

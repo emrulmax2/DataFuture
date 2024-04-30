@@ -150,14 +150,14 @@ class LetterController extends Controller
                 ->setPaper('a4', 'portrait')
                 ->setWarnings(false);
             $content = $pdf->output();
-            Storage::disk('s3')->put('public/applicants/'.$studentApplicantId.'/'.$fileName, $content );
+            Storage::disk('google')->put('public/applicants/'.$studentApplicantId.'/'.$fileName, $content );
 
 
             $data = [];
             $data['student_id'] = $student_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$fileName);
+            $data['path'] = Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$fileName);
             $data['display_file_name'] = $letter_title;
             $data['current_file_name'] = $fileName;
             $data['created_by'] = auth()->user()->id;
@@ -176,8 +176,8 @@ class LetterController extends Controller
                 $signatory = Signatory::find($signatory_id);
                 $signatoryHTML .= '<p>';
                     $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
-                    if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('s3')->exists('public/signatories/'.$signatory->signature)):
-                        $signatureImage = Storage::disk('s3')->url('public/signatories/'.$signatory->signature);
+                    if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('google')->exists('public/signatories/'.$signatory->signature)):
+                        $signatureImage = Storage::disk('google')->url('public/signatories/'.$signatory->signature);
                         $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
                     endif;
                     $signatoryHTML .= $signatory->signatory_name.'<br/>';
@@ -201,7 +201,7 @@ class LetterController extends Controller
                     "pathinfo" => 'public/applicants/'.$studentApplicantId.'/'.$fileName,
                     "nameinfo" => $fileName,
                     "mimeinfo" => 'application/pdf',
-                    "disk" => 's3'
+                    "disk" => 'google'
                 ];
             else:
                 $emailHTML .= $letter_body;
@@ -279,7 +279,7 @@ class LetterController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->current_file_name)):
-                    $docURL = (!empty($list->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) : '');
+                    $docURL = (!empty($list->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) ? Storage::disk('google')->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,

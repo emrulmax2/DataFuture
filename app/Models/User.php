@@ -63,8 +63,8 @@ class User extends Authenticatable
      */
     public function getPhotoUrlAttribute()
     {
-        if ($this->photo !== null && Storage::disk('s3')->exists('public/users/'.$this->id.'/'.$this->photo)) {
-            return Storage::disk('s3')->url('public/users/'.$this->id.'/'.$this->photo);
+        if ($this->photo !== null && Storage::disk('google')->exists('public/users/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('google')->url('public/users/'.$this->id.'/'.$this->photo);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }

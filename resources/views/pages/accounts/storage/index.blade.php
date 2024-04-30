@@ -53,7 +53,7 @@
                         <div class="col-span-12 sm:col-span-3 lg:col-span-4">
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
-                                    <input readonly type="number" step="any" placeholder="Withdrawl" id="expense" name="expense" class="form-control w-full text-right"/>
+                                    <input type="number" step="any" placeholder="Withdrawl" id="expense" name="expense" class="form-control w-full text-right"/>
                                 </div>
                                 <div class="col-span-12 sm:col-span-12 lg:col-span-6 text-right">
                                     <input type="number" step="any" placeholder="Deposit" id="income" name="income" class="form-control w-full text-right"/>

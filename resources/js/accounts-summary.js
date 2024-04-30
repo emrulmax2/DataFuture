@@ -41,6 +41,9 @@ import Litepicker from "litepicker";
     summary_categories.on('change', function(){
         summaryResultGenerator();
     });
+    summary_storages.on('change', function(){
+        summaryResultGenerator();
+    });
 
     $('#advanceSearchToggle').on('click', function(e){
         e.preventDefault();
@@ -63,8 +66,8 @@ import Litepicker from "litepicker";
     let pickerOptions = {
         autoApply: true,
         singleMode: false,
-        numberOfColumns: 2,
-        numberOfMonths: 2,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
         showWeekNumbers: true,
         format: "DD-MM-YYYY",
         dropdowns: {
@@ -225,4 +228,32 @@ import Litepicker from "litepicker";
             });
         }
     }
+
+
+    $('.summarySearchResultWrap').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+        
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: 'post',
+            url: route('accounts.storage.get.download.link'),
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                let res = response.data.res;
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            }
+        }).catch(error =>{
+            $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+            console.log(error)
+        });
+    });
 })()

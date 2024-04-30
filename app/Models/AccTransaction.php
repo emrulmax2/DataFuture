@@ -26,6 +26,7 @@ class AccTransaction extends Model
         'acc_bank_id',
         'acc_method_id',
         'transaction_type',
+        'flow',
         'detail',
         'description',
         'new_description',
@@ -34,7 +35,6 @@ class AccTransaction extends Model
         'parent',
         'audit_status',
         'transfer_id',
-        'transfer_type',
         'transfer_bank_id',
         'created_by',
         'updated_by',
@@ -42,8 +42,8 @@ class AccTransaction extends Model
 
 
     public function getDocUrlAttribute(){
-        if($this->transaction_doc_name !== null && $this->transaction_doc_name != '' && Storage::disk('s3')->exists('public/transactions/'.$this->transaction_doc_name)) {
-            return Storage::disk('s3')->url('public/transactions/'.$this->transaction_doc_name);
+        if($this->transaction_doc_name !== null && $this->transaction_doc_name != '' && Storage::disk('google')->exists('public/transactions/'.$this->transaction_doc_name)) {
+            return Storage::disk('google')->url('public/transactions/'.$this->transaction_doc_name);
         }else{
             return '';
         }

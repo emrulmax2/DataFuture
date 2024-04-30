@@ -52,36 +52,36 @@ class AccBank extends Model
     public function incomes(){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 0)->where('parent', 0)->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 0)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 0)->whereNot('transaction_type', 2)->where('parent', 0)->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function expenses(){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 1)->where('parent', 0)->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 1)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 1)->whereNot('transaction_type', 2)->where('parent', 0)->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function deposits(){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('transfer_type', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 0)->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('transfer_type', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 0)->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function withdrawls(){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('transfer_type', 1)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 1)->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('transfer_type', 1)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 1)->whereIn('audit_status', $audit_status);
         endif;
     }
 

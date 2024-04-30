@@ -15,7 +15,7 @@
                             <div class="ml-4 mr-auto">
                                 <div class="font-medium">{{ $bnk->bank_name }}</div>
                             </div>
-                            <div class="py-1 px-2 rounded-full text-xs bg-{{ ($bnk->balance < 0 ? 'danger' : 'success') }} text-white cursor-pointer font-medium">{{ '£'.number_format($bnk->balance, 2) }}</div>
+                            <div class="py-1 px-2 rounded-full text-xs bg-{{ ($bnk->balance < 0 ? 'danger' : 'success') }} text-white cursor-pointer font-medium">{{ ($bnk->balance >= 0 ? '£'.number_format($bnk->balance, 2) : '-£'.number_format(str_replace('-', '', $bnk->balance), 2)) }}</div>
                         </a>
                     @endforeach
                 @endif

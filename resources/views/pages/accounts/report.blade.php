@@ -43,7 +43,11 @@
                         <tbody>
                             @foreach($inflows as $category_id => $inf)
                                 @php
-                                    $inflowTotal += $inf['sub_total'];
+                                    if($inf['sub_total'] >= 0):
+                                        $inflowTotal += $inf['sub_total'];
+                                    else:
+                                        $inflowTotal += $inf['sub_total'];
+                                    endif;
                                 @endphp
                                 <tr class="tr_{{ $category_id }}">
                                     <td class="text-left">
@@ -62,7 +66,7 @@
                                         </a>
                                     </td>
                                     <td class="w-44 text-left">{{ $inf['no_of'] }}</td>
-                                    <td class="w-52 text-right"><strong>{{ '£'.number_format($inf['sub_total'], 2) }}</strong></td>
+                                    <td class="w-52 text-right"><strong>{{ ($inf['sub_total'] >= 0 ? '£'.number_format($inf['sub_total'], 2) : '-£'.number_format(str_replace('-', '', $inf['sub_total']), 2) ) }}</strong></td>
                                 </tr>
                                 <tr class="dt_{{ $category_id }}" style="display: none;">
                                     <td class="data_td" colspan="100%">
@@ -74,7 +78,7 @@
                         <tfoot>
                             <tr>
                                 <th colspan="2" class="text-left">Sub Total</th>
-                                <th class="w-52 text-right">{{ '£'.number_format($inflowTotal, 2) }}</th>
+                                <th class="w-52 text-right">{{ ($inflowTotal >= 0 ? '£'.number_format($inflowTotal, 2) : '-£'.number_format(str_replace('-', '', $inflowTotal), 2) ) }}</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -122,7 +126,7 @@
                                                 </a>
                                             </td>
                                             <td class="w-44 text-left">{{ $inf['no_of'] }}</td>
-                                            <td class="w-52 text-right"><strong>{{ '£'.number_format($inf['sub_total'], 2) }}</strong></td>
+                                            <td class="w-52 text-right"><strong>{{ ($inf['sub_total'] >= 0 ? '£'.number_format($inf['sub_total'], 2) : '-£'.number_format(str_replace('-', '', $inf['sub_total']), 2) ) }}</strong></td>
                                         </tr>
                                         <tr class="dt_{{ $category_id }}" style="display: none;">
                                             <td class="data_td" colspan="100%">
@@ -134,7 +138,7 @@
                                 <tfoot>
                                     <tr>
                                         <th colspan="2" class="text-left">Sub Total</th>
-                                        <th class="w-52 text-right">{{ '£'.number_format($outflowCatTotal, 2) }}</th>
+                                        <th class="w-52 text-right">{{ ($outflowCatTotal >= 0 ? '£'.number_format($outflowCatTotal, 2) : '-£'.number_format(str_replace('-', '', $outflowCatTotal), 2) ) }}</th>
                                     </tr>
                                 </tfoot>
                             </table>
