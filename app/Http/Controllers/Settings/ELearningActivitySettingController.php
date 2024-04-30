@@ -60,8 +60,8 @@ class ELearningActivitySettingController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                if ($list->logo !== null && Storage::disk('s3')->exists('public/activity/'.$list->logo)) {
-                    $logoUrl = Storage::disk('s3')->url('public/activity/'.$list->logo);
+                if ($list->logo !== null && Storage::disk('google')->exists('public/activity/'.$list->logo)) {
+                    $logoUrl = Storage::disk('google')->url('public/activity/'.$list->logo);
                 } else {
                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                 }
@@ -97,7 +97,7 @@ class ELearningActivitySettingController extends Controller
             if($request->hasFile('logo')):
                 $logo = $request->file('logo');
                 $imageName = 'activity_'.$eLearning->id.'_'.time() . '.' . $logo->getClientOriginalExtension();
-                $path = $logo->storeAs('public/activity', $imageName, 's3');
+                $path = $logo->storeAs('public/activity', $imageName, 'google');
 
                 $activityUpdate = ELearningActivitySetting::where('id', $eLearning->id)->update([
                     'logo' => $imageName
@@ -110,8 +110,8 @@ class ELearningActivitySettingController extends Controller
     public function edit(Request $request){
         $id = $request->editid;
         $rowData = ELearningActivitySetting::find($id);
-        if ($rowData->logo !== null && Storage::disk('s3')->exists('public/activity/'.$rowData->logo)) {
-            $logoUrl = Storage::disk('s3')->url('public/activity/'.$rowData->logo);
+        if ($rowData->logo !== null && Storage::disk('google')->exists('public/activity/'.$rowData->logo)) {
+            $logoUrl = Storage::disk('google')->url('public/activity/'.$rowData->logo);
         } else {
             $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
         }
@@ -140,11 +140,11 @@ class ELearningActivitySettingController extends Controller
         if($request->hasFile('logo')):
             $logo = $request->file('logo');
             $imageName = 'activity_'.$request->id.'_'.time() . '.' . $logo->getClientOriginalExtension();
-            $path = $logo->storeAs('public/activity', $imageName, 's3');
+            $path = $logo->storeAs('public/activity', $imageName, 'google');
             
             if(isset($oldRow->logo) && !empty($oldRow->logo)):
-                if (Storage::disk('s3')->exists('public/activity/'.$oldRow->logo)):
-                    Storage::disk('s3')->delete('public/activity/'.$oldRow->logo);
+                if (Storage::disk('google')->exists('public/activity/'.$oldRow->logo)):
+                    Storage::disk('google')->delete('public/activity/'.$oldRow->logo);
                 endif;
             endif;
 

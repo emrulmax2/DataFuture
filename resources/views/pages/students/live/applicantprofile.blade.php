@@ -481,7 +481,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $notes['created_by'] }}</td>
-                                <td><a target="_blank" href="{{ Storage::disk('s3')->url('public/applicants/' . $notes['applicant_id'].'/'.$notes['document_link']) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a></td>
+                                <td><a target="_blank" href="{{ Storage::disk('google')->url('public/applicants/' . $notes['applicant_id'].'/'.$notes['document_link']) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a></td>
                             </tr>
                             @endforeach 
                         </tbody>
@@ -557,12 +557,12 @@
                             @if(isset($task->documents) && !empty($task->documents))
                                 @foreach($task->documents as $tdoc)
                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                        @if(Storage::disk('s3')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
-                                            <a target="_blank" href="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" alt="{{ $task->task->name }}"></a>
+                                        @if(Storage::disk('google')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                            <a target="_blank" href="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" alt="{{ $task->task->name }}"></a>
                                         @endif
                                     @else
-                                        @if(Storage::disk('s3')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
-                                            <a target="_blank" href="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a>
+                                        @if(Storage::disk('google')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                            <a target="_blank" href="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a>
                                         @endif
                                     @endif
                                 @endforeach
@@ -609,12 +609,12 @@
                             @if(isset($task->documents) && !empty($task->documents))
                                 @foreach($task->documents as $tdoc)
                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
-                                        @if(Storage::disk('s3')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
-                                            <a target="_blank" href="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" alt="{{ $task->task->name }}"></a>
+                                        @if(Storage::disk('google')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                            <a target="_blank" href="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}" alt="{{ $task->task->name }}"></a>
                                         @endif
                                     @else
-                                        @if(Storage::disk('s3')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
-                                            <a target="_blank" href="{{ Storage::disk('s3')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a>
+                                        @if(Storage::disk('google')->exists('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name))
+                                            <a target="_blank" href="{{ Storage::disk('google')->url('public/applicants/' . $tdoc->applicant_id.'/'.$tdoc->current_file_name) }}"><img style="width: 30px; height: 30px; border-radius: 6px; margin-top:10px;" src="{{ public_path('build/assets/images/fileicon.png') }}"></a>
                                         @endif
                                     @endif
                                 @endforeach    

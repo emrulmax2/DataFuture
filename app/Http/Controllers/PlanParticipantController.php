@@ -58,7 +58,7 @@ class PlanParticipantController extends Controller
                     'sl' => $i,
                     'name' => (isset($list->user->employee) && !empty($list->user->employee)) ? $list->user->employee->title->name." ".$list->user->employee->first_name . " ". $list->user->employee->last_name : $list->user->name,
                     'type' => $list->type,
-                    'images' => (isset($list->user->photo) && !empty($list->user->photo) && Storage::disk('s3')->exists('public/users/'.$list->user->id.'/'.$list->user->photo) ? Storage::disk('s3')->url('public/users/'.$list->user->id.'/'.$list->user->photo) : asset('build/assets/images/avater.png')),
+                    'images' => (isset($list->user->photo) && !empty($list->user->photo) && Storage::disk('google')->exists('public/users/'.$list->user->id.'/'.$list->user->photo) ? Storage::disk('google')->url('public/users/'.$list->user->id.'/'.$list->user->photo) : asset('build/assets/images/avater.png')),
                     'status' => '',
                     'deleted_at' => $list->deleted_at,
                 ];

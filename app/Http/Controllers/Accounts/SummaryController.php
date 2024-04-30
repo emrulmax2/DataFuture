@@ -261,8 +261,8 @@ class SummaryController extends Controller
                         endif;
                     endforeach;
                 endif;
-                $ownInflow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
-                $ownOutfolow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
+                $ownInflow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 0)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
+                $ownOutfolow = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('flow', 1)->where('acc_category_id', $pcat->id)->whereIn('audit_status', $audit_status)->get();
                 if($ownInflow->count() > 0 || $ownOutfolow->count() > 0):
                     $inf = $ownInflow->sum('transaction_amount');
                     $otf = $ownOutfolow->sum('transaction_amount');
