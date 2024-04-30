@@ -150,8 +150,8 @@ class SlcAttendanceController extends Controller
                     if(!empty($cocDocs) && $cocDocs->count() > 0):
                         foreach($cocDocs as $cdc):
                             $doc = StudentDocument::find($cdc->student_document_id);
-                            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name)):
-                                Storage::disk('google')->delete('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name);
+                            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name)):
+                                Storage::disk('s3')->delete('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name);
                             endif;
                             StudentDocument::where('id', $cdc->student_document_id)->forceDelete();
                         endforeach;

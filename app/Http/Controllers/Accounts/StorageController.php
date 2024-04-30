@@ -80,7 +80,7 @@ class StorageController extends Controller
         if($transaction->id && $request->hasFile('document')):
             $document = $request->file('document');
             $documentName = $transaction_code.'.' . $document->getClientOriginalExtension();
-            $path = $document->storeAs('public/transactions', $documentName, 'google');
+            $path = $document->storeAs('public/transactions', $documentName, 's3');
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
                 'transaction_doc_name' => $documentName
@@ -312,14 +312,14 @@ class StorageController extends Controller
         $transaction = AccTransaction::where('id', $transaction_id)->update($data);
         if($request->hasFile('document')):
             if(isset($oleTransaction->transaction_doc_name) && !empty($oleTransaction->transaction_doc_name)):
-                if (Storage::disk('google')->exists('public/transactions/'.$oleTransaction->transaction_doc_name)):
-                    Storage::disk('google')->delete('public/transactions/'.$oleTransaction->transaction_doc_name);
+                if (Storage::disk('s3')->exists('public/transactions/'.$oleTransaction->transaction_doc_name)):
+                    Storage::disk('s3')->delete('public/transactions/'.$oleTransaction->transaction_doc_name);
                 endif;
             endif;
 
             $document = $request->file('document');
             $documentName = $oleTransaction->transaction_code.'.' . $document->getClientOriginalExtension();
-            $path = $document->storeAs('public/transactions', $documentName, 'google');
+            $path = $document->storeAs('public/transactions', $documentName, 's3');
 
             $userUpdate = AccTransaction::where('id', $transaction_id)->update([
                 'transaction_doc_name' => $documentName

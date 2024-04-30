@@ -239,14 +239,14 @@ class EmployeeAppraisalCron extends Command
                 ->setPaper('a4', 'portrait')
                 ->setWarnings(false);
             $content = $pdf->output();
-            Storage::disk('google')->put('public/reports/'.$fileName, $content );
+            Storage::disk('s3')->put('public/reports/'.$fileName, $content );
 
             $attachmentFiles = [];
             $attachmentFiles[] = [
                 "pathinfo" => 'public/reports/'.$fileName,
                 "nameinfo" => $fileName,
                 "mimeinfo" => 'application/pdf',
-                "disk" => 'google'
+                "disk" => 's3'
             ];
 
             UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($PDF_title, $MAILBODY, $attachmentFiles));
