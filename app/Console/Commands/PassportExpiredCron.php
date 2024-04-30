@@ -241,14 +241,14 @@ class PassportExpiredCron extends Command
                     ->setPaper('a4', 'portrait')
                     ->setWarnings(false);
                 $content = $pdf->output();
-                Storage::disk('s3')->put('public/employees/'.$employee_id.'/documents/'.$fileName, $content );
+                Storage::disk('google')->put('public/employees/'.$employee_id.'/documents/'.$fileName, $content );
 
                 $data = [];
                 $data['employee_id'] = $employee_id;
                 $data['document_setting_id'] = 6;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = 'pdf';
-                $data['path'] = Storage::disk('s3')->url('public/employees/'.$employee_id.'/documents/'.$fileName);
+                $data['path'] = Storage::disk('google')->url('public/employees/'.$employee_id.'/documents/'.$fileName);
                 $data['display_file_name'] = 'Passport Expiry';
                 $data['current_file_name'] = $fileName;
                 $data['type'] = 2;
@@ -261,7 +261,7 @@ class PassportExpiredCron extends Command
                     "pathinfo" => 'public/employees/'.$employee_id.'/documents/'.$fileName,
                     "nameinfo" => $fileName,
                     "mimeinfo" => 'application/pdf',
-                    "disk" => 's3'
+                    "disk" => 'google'
                 ];
 
                 UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($PDF_title, $MAILBODY, $attachmentFiles));

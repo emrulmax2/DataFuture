@@ -21,13 +21,13 @@ class UploadController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 's3');
+        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 'google');
         $data = [];
         $data['student_id'] = $student_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = Storage::disk('s3')->url($path);
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : $imageName);
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;
@@ -75,8 +75,8 @@ class UploadController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name)):
-                    $disk = Storage::disk('s3');
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name)):
+                    $disk = Storage::disk('google');
                     $url = $disk->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name);
                 endif;
                 $data[] = [

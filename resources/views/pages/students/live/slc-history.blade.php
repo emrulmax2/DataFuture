@@ -194,8 +194,8 @@
                                                                     <span class="dropdown-item">
                                                                         <i data-lucide="check-check" class="w-4 h-4 mr-2"></i> {{ $doc->display_file_name }}
                                                                         <span class="ml-auto inline-flex justify-end items-center">
-                                                                            @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name))
-                                                                            <a href="{{ Storage::disk('s3')->url('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
+                                                                            @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name))
+                                                                            <a href="{{ Storage::disk('google')->url('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
                                                                             @endif
                                                                             <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
                                                                         </span>
