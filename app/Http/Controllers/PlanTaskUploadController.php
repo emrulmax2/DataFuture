@@ -45,14 +45,14 @@ class PlanTaskUploadController extends Controller
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
         
-        $path = $document->storeAs('public/plans/plan_task/'.$planTask->id, $imageName, 's3');
+        $path = $document->storeAs('public/plans/plan_task/'.$planTask->id, $imageName, 'google');
         
         $data = [];
         $data['user_id'] = auth()->user()->id;
         $data['plan_task_id'] = $planTask->id;
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['disk_type'] = 's3';
-        $data['path'] = Storage::disk('s3')->url($path);
+        $data['disk_type'] = 'google';
+        $data['path'] = Storage::disk('google')->url($path);
         $data['display_file_name'] = $document->getClientOriginalName();
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;

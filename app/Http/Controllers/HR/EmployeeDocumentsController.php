@@ -67,8 +67,8 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
-                    $disk = Storage::disk('s3');
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
+                    $disk = Storage::disk('google');
                     $url = $disk->url('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name);
                 endif;
                 $data[] = [
@@ -125,8 +125,8 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
-                    $disk = Storage::disk('s3');
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('google')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
+                    $disk = Storage::disk('google');
                     $url = $disk->url('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name);
                 endif;
                 $data[] = [
@@ -154,7 +154,7 @@ class EmployeeDocumentsController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 's3');
+        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 'google');
         $displayName = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name.(!empty($display_file_name) ? ' - '.$display_file_name : '') : (!empty($display_file_name) ? $display_file_name : $imageName));
         
         $data = [];
@@ -162,7 +162,7 @@ class EmployeeDocumentsController extends Controller
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = Storage::disk('s3')->url($path);
+        $data['path'] = Storage::disk('google')->url($path);
         
         $data['display_file_name'] = $displayName;
         $data['current_file_name'] = $imageName;
