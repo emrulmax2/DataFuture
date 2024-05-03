@@ -73,7 +73,7 @@ var storageTransList = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '';
-                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type !== '2'){
+                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type == '2'){
                             html += '<div class="relative">';
                                 html += '<div class="font-medium whitespace-normal">';
                                     if(cell.getData().flow == '0'){
@@ -132,7 +132,7 @@ var storageTransList = (function () {
                     headerHozAlign: "right",
                     hozAlign: "right",
                     headerSort: false,
-                    width: '140',
+                    //width: '140',
                     visible: (queryStr == '' ? true : false),
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';

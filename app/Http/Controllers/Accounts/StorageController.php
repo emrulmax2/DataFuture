@@ -168,7 +168,7 @@ class StorageController extends Controller
                 $flow = (isset($list->flow) && $list->flow != '' ? $list->flow : 0);
                 $transaction_amount = (isset($list->transaction_amount) && $list->transaction_amount > 0 ? $list->transaction_amount : 0);
                 
-                $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id) : '');
+                $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id) : 0);
 
                 $data[] = [
                     'id' => $list->id,
@@ -188,7 +188,7 @@ class StorageController extends Controller
                     'transfer_bank_id' => ($list->transfer_bank_id > 0 ? $list->transfer_bank_id : ''),
                     'transfer_bank_name' => (isset($list->tbank->bank_name) && !empty($list->tbank->bank_name) ? $list->tbank->bank_name : ''),
                     'transaction_amount' => ($transaction_amount > 0 ? '£'.number_format($transaction_amount, 2) : ''),
-                    'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.number_format($balance, 2) : '-£'.number_format(str_replace('-', '', $balance), 1)) : ''),
+                    'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.$balance : '-£'.str_replace('-', '', $balance)) : ''),
                     'deleted_at' => $list->deleted_at,
                     'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? 1 : 0),
                     'can_eidt' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
@@ -207,13 +207,14 @@ class StorageController extends Controller
 
         $inQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('flow', 0)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $inQuery->where('transaction_date_2', '>=', $openingDate); endif;
-        $incomes = $inQuery->get()->sum('transaction_amount');
+        $incomes = (float) $inQuery->get()->sum('transaction_amount');
 
         $exQuery = AccTransaction::where('id', '<=', $transaction_id)->where('acc_bank_id', $storage)->where('flow', 1)->where('parent', 0)->whereIn('audit_status', $audit_status)->orderBy('id', 'DESC');
         if(!empty($openingDate)): $exQuery->where('transaction_date_2', '>=', $openingDate); endif;
-        $empenses = $exQuery->get()->sum('transaction_amount');
+        $expenses = (float) $exQuery->get()->sum('transaction_amount');
 
-        return (($openingBalance + $incomes) - $empenses);
+        $balance = ((float) $openingBalance + (float) $incomes) - (float) $expenses;
+        return number_format($balance, 2);
     }
 
     public function catTreeInc($id = 0, $type = 0){
