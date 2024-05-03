@@ -46,8 +46,8 @@
                                 @foreach ($planTasks as $task) 
                                 
                                 @php
-                                if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
-                                    $logoUrl = Storage::disk('s3')->url('public/activity/'.$task->task->logo);
+                                if ($task->task->logo !== null && Storage::disk('google')->exists('public/activity/'.$task->task->logo)) {
+                                    $logoUrl = Storage::disk('google')->url('public/activity/'.$task->task->logo);
                                 } else {
                                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                 }
@@ -74,10 +74,10 @@
                                             <div class="flex">
                                                 @if(($task->taskUploads))
                                                     @foreach($task->taskUploads as $upload)
-                                                        <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
+                                                        <a target="_blank" href="{{ Storage::disk('google')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
                                                             
                                                             @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
-                                                                <img alt="{{ display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
+                                                                <img alt="{{ display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('google')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
                                                             @else
                                                                 <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">             
                                                             @endif   
@@ -179,8 +179,8 @@
                                 @foreach ($moduleContent->task  as $task) 
                                 
                                     @php
-                                    if ($task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->logo)) {
-                                        $logoUrl = Storage::disk('s3')->url('public/activity/'.$task->logo);
+                                    if ($task->logo !== null && Storage::disk('google')->exists('public/activity/'.$task->logo)) {
+                                        $logoUrl = Storage::disk('google')->url('public/activity/'.$task->logo);
                                     } else {
                                         $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                     }
@@ -205,11 +205,11 @@
                                                     @if(($moduleContent->taskUploads))
                                                             
                                                         @foreach($moduleContent->taskUploads as $upload)
-                                                        <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
+                                                        <a target="_blank" href="{{ Storage::disk('google')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
                                                             {{-- <div class="w-10 h-10 image-fit zoom-in"> --}}
                                                                 @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
                                                                     
-                                                                        <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
+                                                                        <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('google')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
                                                                     
                                                                     @else
                                                                         <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">

@@ -40,13 +40,13 @@ class SlcCocController extends Controller
         if($slcCoc && $request->hasFile('document')):
             foreach($request->file('document') as $file):
                 $documentName = 'COC_'.$student->applicant_id.'_'.time().'.'.$file->extension();
-                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 's3');
+                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 'google');
 
                 $data = [];
                 $data['student_id'] = $studen_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $file->getClientOriginalExtension();
-                $data['path'] = Storage::disk('s3')->url($path);
+                $data['path'] = Storage::disk('google')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -94,13 +94,13 @@ class SlcCocController extends Controller
         if($request->hasFile('document')):
             foreach($request->file('document') as $file):
                 $documentName = 'COC_'.$student->applicant_id.'_'.time().'.'.$file->extension();
-                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 's3');
+                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 'google');
 
                 $data = [];
                 $data['student_id'] = $studen_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $file->getClientOriginalExtension();
-                $data['path'] = Storage::disk('s3')->url($path);
+                $data['path'] = Storage::disk('google')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -130,8 +130,8 @@ class SlcCocController extends Controller
 
         $slcDocuments = SlcCocDocument::where('student_id', $student_id)->where('student_document_id', $coc_id)->where('student_document_id', $document_id)->forceDelete();
         if(isset($doc->id) && $doc->id > 0):
-            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name)):
-                Storage::disk('s3')->delete('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name);
+            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('google')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name)):
+                Storage::disk('google')->delete('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name);
             endif;
             StudentDocument::where('id', $document_id)->forceDelete();
         endif;
