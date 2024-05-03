@@ -51,14 +51,14 @@ class EmployeeNotesController extends Controller
                 $documentName = time().'_'.$document->getClientOriginalName();
                 //$path = $document->storeAs('public/employees/notes/', $documentName);
 
-                $path = $document->storeAs('public/employees/notes/', $documentName, 'google');
+                $path = $document->storeAs('public/employees/notes/', $documentName, 's3');
 
                 $data = [];
                 $data['employee_id'] = $employee_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
                 //$data['path'] = asset('public/employees/notes/'.$documentName);
-                $data['path'] = Storage::disk('google')->url($path);
+                $data['path'] = Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -116,7 +116,7 @@ class EmployeeNotesController extends Controller
             foreach($Query as $list):
                 $docURL = '';
                 if(isset($list->employee_document_id) && isset($list->document)):
-                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('google')->url('public/employees/notes/'.$list->document->current_file_name) : '');
+                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('s3')->url('public/employees/notes/'.$list->document->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -151,7 +151,7 @@ class EmployeeNotesController extends Controller
                 $html .= $note->note;
             $html .= '</div>';
             if(isset($note->student_document_id) && isset($note->document)):
-                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? Storage::disk('google')->url('public/employees/notes/'.$note->document->current_file_name) : '');
+                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? Storage::disk('s3')->url('public/employees/notes/'.$note->document->current_file_name) : '');
                 //$docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? asset('storage/employees/notes/'.$note->document->current_file_name) : '');
                 if(!empty($docURL)):
                     $btns .= '<a download href="'.$docURL.'" class="btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
@@ -177,8 +177,8 @@ class EmployeeNotesController extends Controller
         $theNote = EmployeeNotes::find($noteId);
         
         $docURL = '';                               
-        if(isset($theNote->employee_document_id) && isset($theNote->document) && Storage::disk('google')->exists('public/employees/notes/'.$theNote->document->current_file_name)):
-            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('google')->url('public/employees/notes/'.$theNote->document->current_file_name) : '');
+        if(isset($theNote->employee_document_id) && isset($theNote->document) && Storage::disk('s3')->exists('public/employees/notes/'.$theNote->document->current_file_name)):
+            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('s3')->url('public/employees/notes/'.$theNote->document->current_file_name) : '');
         endif;
         // if(isset($theNote->employee_document_id) && isset($theNote->document) && asset('/storage/employees/notes/'.$theNote->document->current_file_name)):
         //     $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? asset('/storage/employees/notes/'.$theNote->document->current_file_name) : '');
@@ -210,8 +210,8 @@ class EmployeeNotesController extends Controller
         ]);
         if($request->hasFile('document')):
             if($employeeDocumentId > 0 && isset($oleNote->document->current_file_name) && !empty($oleNote->document->current_file_name)):
-                if (Storage::disk('google')->exists('public/employees/notes/'.$oleNote->document->current_file_name)):
-                    Storage::disk('google')->delete('public/employees/notes/'.$oleNote->document->current_file_name);
+                if (Storage::disk('s3')->exists('public/employees/notes/'.$oleNote->document->current_file_name)):
+                    Storage::disk('s3')->delete('public/employees/notes/'.$oleNote->document->current_file_name);
                 endif;
                 // if (asset('storage/employees/notes/'.$oleNote->document->current_file_name)):
                 //     Storage::delete(asset('storage/employees/notes/'.$oleNote->document->current_file_name));
@@ -222,7 +222,7 @@ class EmployeeNotesController extends Controller
 
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/employees/notes/', $documentName, 'google');
+            $path = $document->storeAs('public/employees/notes/', $documentName, 's3');
             //$path = $document->storeAs('public/employees/notes/', $documentName);
 
             $data = [];

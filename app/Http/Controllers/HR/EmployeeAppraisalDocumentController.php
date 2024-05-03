@@ -70,8 +70,8 @@ class EmployeeAppraisalDocumentController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->document->current_file_name) && !empty($list->document->current_file_name) && Storage::disk('google')->exists('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name)):
-                    $disk = Storage::disk('google');
+                if(isset($list->document->current_file_name) && !empty($list->document->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name)):
+                    $disk = Storage::disk('s3');
                     $url = $disk->url('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name);
                 endif;
                 $data[] = [
@@ -98,13 +98,13 @@ class EmployeeAppraisalDocumentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 'google');
+        $path = $document->storeAs('public/employees/'.$employee_id.'/documents', $imageName, 's3');
         $data = [];
         $data['employee_id'] = $employee_id;
         $data['document_setting_id'] = null;
         $data['hard_copy_check'] = $hard_copy_check;
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = Storage::disk('google')->url($path);
+        $data['path'] = Storage::disk('s3')->url($path);
         $data['display_file_name'] = $display_file_name;
         $data['current_file_name'] = $imageName;
         $data['created_by'] = auth()->user()->id;

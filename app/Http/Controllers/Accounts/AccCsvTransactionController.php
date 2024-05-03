@@ -193,8 +193,8 @@ class AccCsvTransactionController extends Controller
         if($request->hasFile('document')):
             $document = $request->file('document');
             $documentName = $transaction_code.'.'.$document->getClientOriginalExtension();
-            $path = $document->storeAs('public/transactions', $documentName, 'google');
-            $docURL = Storage::disk('google')->url($path);
+            $path = $document->storeAs('public/transactions', $documentName, 's3');
+            $docURL = Storage::disk('s3')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
                 'transaction_doc_name' => $documentName,
