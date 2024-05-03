@@ -73,7 +73,7 @@ var storageTransList = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '';
-                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type !== '2'){
+                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type == '2'){
                             html += '<div class="relative">';
                                 html += '<div class="font-medium whitespace-normal">';
                                     if(cell.getData().flow == '0'){
