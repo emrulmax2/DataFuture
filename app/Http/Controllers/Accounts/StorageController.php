@@ -190,7 +190,7 @@ class StorageController extends Controller
                     'transaction_amount' => ($transaction_amount > 0 ? '£'.number_format($transaction_amount, 2) : ''),
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.$balance : '-£'.str_replace('-', '', $balance)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? 1 : 0),
+                    'doc_url' => (isset($list->transaction_doc_url) && !empty($list->transaction_doc_url) ? $list->transaction_doc_url : ''),
                     'can_eidt' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
                 ];
                 $i++;
@@ -440,11 +440,30 @@ class StorageController extends Controller
         return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $storage->bank_name).'_transactions.xlsx');
     }
 
-    public function downloadLink(Request $request){
-        $trans = AccTransaction::find($request->row_id);
+    public function updateDocumentUrl(){
+        $ids = [];
+        $transactions = AccTransaction::whereNotNull('transaction_doc_name')->whereNull('transaction_doc_url')->orderBy('id', 'DESC')->take(100)->get();
+        if($transactions->count() > 0):
+            foreach($transactions as $trns):
+                if((isset($trns->transaction_doc_name) && !empty($trns->transaction_doc_name))):
+                    if(Storage::disk('google')->exists('public/transactions/'.$trns->transaction_doc_name)):
+                        $data = [];
+                        $data['transaction_doc_url'] = Storage::disk('google')->url('public/transactions/'.$trns->transaction_doc_name);
+                        AccTransaction::where('id', $trns->id)->update($data);
+                    else:
+                        $data = [];
+                        $data['transaction_doc_name'] = null;
+                        $data['transaction_doc_url'] = null;
 
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/transactions/'.$trans->transaction_doc_name, now()->addMinutes(5));
+                        AccTransaction::where('id', $trns->id)->update($data);
+                    endif;
+                endif;
+            endforeach;
 
-        return response()->json(['res' => $tmpURL], 200);
+            $transactions = AccTransaction::whereNotNull('transaction_doc_name')->whereNull('transaction_doc_url')->orderBy('id', 'DESC')->get()->count();
+            return '<a href="'.route('accounts.storage.update.doc.url').'">Reload '.$transactions.' more available</a>';
+        else:
+            return '<a href="'.route('accounts').'">Back To Dashboard</a>';
+        endif;
     }
 }

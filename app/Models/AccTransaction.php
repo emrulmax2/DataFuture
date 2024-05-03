@@ -32,6 +32,7 @@ class AccTransaction extends Model
         'new_description',
         'transaction_amount',
         'transaction_doc_name',
+        'transaction_doc_url',
         'parent',
         'audit_status',
         'transfer_id',

@@ -2426,7 +2426,8 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/storage/export/{querystr}/{storage_id}', 'export')->name('accounts.storage.trans.export'); 
 
         Route::delete('accounts/storage/delete/{id}', 'destroy')->name('accounts.storage.trans.destroy');
-        Route::post('accounts/storage/doument-download-link', 'downloadLink')->name('accounts.storage.get.download.link');
+
+        Route::get('accounts/storage/update-document-url', 'updateDocumentUrl')->name('accounts.storage.update.doc.url');
     });
 
     Route::controller(AccCsvTransactionController::class)->group(function() {
