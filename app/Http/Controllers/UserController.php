@@ -127,7 +127,7 @@ class UserController extends Controller
             if($request->hasFile('photo')):
                 $photo = $request->file('photo');
                 $imageName = 'Avatar_'.$user->id.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-                $path = $photo->storeAs('public/users/'.$user->id, $imageName, 's3');
+                $path = $photo->storeAs('public/users/'.$user->id, $imageName, 'google');
 
                 $userUpdate = User::where('id', $user->id)->update([
                     'photo' => $imageName
@@ -209,10 +209,10 @@ class UserController extends Controller
         if($request->hasFile('photo')):
 
             $imageName = 'Avatar_'.$userID.'_'.time() . '.' . $request->photo->getClientOriginalExtension();
-            $path = $request->file('photo')->storeAs('public/users/'.$userID, $imageName, 's3');
+            $path = $request->file('photo')->storeAs('public/users/'.$userID, $imageName, 'google');
             if(isset($userOldRow->photo) && !empty($userOldRow->photo)):
-                if (Storage::disk('s3')->exists('public/users/'.$userID.'/'.$userOldRow->photo)):
-                    Storage::disk('s3')->delete('public/users/'.$userID.'/'.$userOldRow->photo);
+                if (Storage::disk('google')->exists('public/users/'.$userID.'/'.$userOldRow->photo)):
+                    Storage::disk('google')->delete('public/users/'.$userID.'/'.$userOldRow->photo);
                 endif;
             endif;
             $newImageName = $imageName;
