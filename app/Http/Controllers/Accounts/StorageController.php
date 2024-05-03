@@ -457,9 +457,9 @@ class StorageController extends Controller
         if($transactions->count() > 0):
             foreach($transactions as $trns):
                 if((isset($trns->transaction_doc_name) && !empty($trns->transaction_doc_name))):
-                    if(Storage::disk('google')->exists('public/transactions/'.$trns->transaction_doc_name)):
+                    if(Storage::disk('s3')->exists('public/transactions/'.$trns->transaction_doc_name)):
                         $data = [];
-                        $data['transaction_doc_url'] = Storage::disk('google')->url('public/transactions/'.$trns->transaction_doc_name);
+                        $data['transaction_doc_url'] = Storage::disk('s3')->url('public/transactions/'.$trns->transaction_doc_name);
                         AccTransaction::where('id', $trns->id)->update($data);
                     else:
                         $data = [];
