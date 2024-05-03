@@ -228,7 +228,7 @@ class ApplicationController extends Controller
         ]);
 
         if(auth('agent')->user()) {
-            $agentData = Agent::find(auth('agent')->user()->id);
+            $agentData = Agent::where('agent_user_id',auth('agent')->user()->id)->get()->first();
             
             $ref = Applicant::where('id', $applicant_id)->update([
                 'referral_code' => $agentData->code,

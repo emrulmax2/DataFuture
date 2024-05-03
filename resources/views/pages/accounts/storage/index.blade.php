@@ -31,7 +31,7 @@
                     <h2 class="font-medium text-lg mr-auto">
                         <strong><u>{{ $bank->bank_name }}</u></strong> 
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3]))
-                        {!! ($csf_trans > 0 ? '<a href="'.route('accounts.csv.transactions', $bank->id).'" class="text-primary underline">('.$csf_trans.')</a>' : '') !!}
+                        {!! ($csf_trans > 0 && isset($csv_file->id) && $csv_file->id > 0 ? '<a href="'.route('accounts.csv.transactions', [$bank->id, $csv_file->id]).'" class="text-primary underline">('.$csf_trans.')</a>' : '') !!}
                         @endif
                     </h2>
                 </div>
