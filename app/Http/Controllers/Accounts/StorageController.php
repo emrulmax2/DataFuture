@@ -30,7 +30,8 @@ class StorageController extends Controller
             'bank' => AccBank::find($bank),
             'in_categories' => $this->catTreeInc(0, 0),
             'out_categories' => $this->catTreeExp(0, 1),
-            'csf_trans' => (!empty($csvfiles) ? AccCsvTransaction::whereIn('acc_csv_file_id', $csvfiles)->get()->count() : 0)
+            'csf_trans' => (!empty($csvfiles) ? AccCsvTransaction::whereIn('acc_csv_file_id', $csvfiles)->get()->count() : 0),
+            'csv_file' => AccCsvFile::where('acc_bank_id', $bank)->get()->first()
         ]);
     }
 
@@ -77,13 +78,17 @@ class StorageController extends Controller
         $data['created_by'] = auth()->user()->id;
 
         $transaction = AccTransaction::create($data);
+        $documentName = null;
+        $docURL = null;
         if($transaction->id && $request->hasFile('document')):
             $document = $request->file('document');
             $documentName = $transaction_code.'.' . $document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 'google');
+            $docURL = Storage::disk('google')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
-                'transaction_doc_name' => $documentName
+                'transaction_doc_name' => $documentName,
+                'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -103,6 +108,8 @@ class StorageController extends Controller
             $data['transfer_bank_id'] = $storage_id;
             unset($data['transaction_amount']);
             $data['transaction_amount'] = $transaction_amount;
+            $data['transaction_doc_name'] = $documentName;
+            $data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
         endif;
@@ -311,19 +318,21 @@ class StorageController extends Controller
         $data['updated_by'] = auth()->user()->id;
 
         $transaction = AccTransaction::where('id', $transaction_id)->update($data);
+        $docURL = null;
+        $documentName = null;
         if($request->hasFile('document')):
-            if(isset($oleTransaction->transaction_doc_name) && !empty($oleTransaction->transaction_doc_name)):
-                if (Storage::disk('google')->exists('public/transactions/'.$oleTransaction->transaction_doc_name)):
-                    Storage::disk('google')->delete('public/transactions/'.$oleTransaction->transaction_doc_name);
-                endif;
+            if(isset($oleTransaction->transaction_doc_url) && !empty($oleTransaction->transaction_doc_url) && !empty($oleTransaction->transaction_doc_name)):
+                Storage::disk('google')->delete('public/transactions/'.$oleTransaction->transaction_doc_name);
             endif;
 
             $document = $request->file('document');
             $documentName = $oleTransaction->transaction_code.'.' . $document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 'google');
+            $docURL = Storage::disk('google')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction_id)->update([
-                'transaction_doc_name' => $documentName
+                'transaction_doc_name' => $documentName,
+                'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -343,6 +352,8 @@ class StorageController extends Controller
             $data['transfer_bank_id'] = $storage_id;
             unset($data['transaction_amount']);
             $data['transaction_amount'] = $transaction_amount;
+            $data['transaction_doc_name'] = $documentName;
+            $data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
         endif;

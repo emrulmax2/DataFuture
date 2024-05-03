@@ -41,15 +41,6 @@ class AccTransaction extends Model
         'updated_by',
     ];
 
-
-    public function getDocUrlAttribute(){
-        if($this->transaction_doc_name !== null && $this->transaction_doc_name != '' && Storage::disk('google')->exists('public/transactions/'.$this->transaction_doc_name)) {
-            return Storage::disk('google')->url('public/transactions/'.$this->transaction_doc_name);
-        }else{
-            return '';
-        }
-    }
-
     /**
      * The attributes that should be mutated to dates.
      *
