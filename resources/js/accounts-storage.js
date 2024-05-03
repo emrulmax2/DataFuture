@@ -73,12 +73,12 @@ var storageTransList = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '';
-                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type == '2'){
+                        if(cell.getData().transfer_bank_id > 0 && cell.getData().transaction_type == 2){
                             html += '<div class="relative">';
                                 html += '<div class="font-medium whitespace-normal">';
-                                    if(cell.getData().flow == '0'){
+                                    if(cell.getData().flow == 0){
                                         html += '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-right" class="w-3 h-3"></i></span>';
-                                    }else if(cell.getData().flow == '1'){
+                                    }else if(cell.getData().flow == 1){
                                         html += '<span class="btn btn-linkedin p-0 rounded-0 mr-2"><i data-lucide="arrow-left" class="w-3 h-3"></i></span>';
                                     }
                                     html += cell.getData().transfer_bank_name
