@@ -132,7 +132,7 @@ var storageTransList = (function () {
                     headerHozAlign: "right",
                     hozAlign: "right",
                     headerSort: false,
-                    width: '140',
+                    //width: '140',
                     visible: (queryStr == '' ? true : false),
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';
