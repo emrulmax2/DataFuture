@@ -188,13 +188,17 @@ class AccCsvTransactionController extends Controller
         $data['created_by'] = auth()->user()->id;
 
         $transaction = AccTransaction::create($data);
+        $docURL = null;
+        $documentName = null;
         if($request->hasFile('document')):
             $document = $request->file('document');
-            $documentName = $transaction_code.'.' . $document->getClientOriginalExtension();
+            $documentName = $transaction_code.'.'.$document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 'google');
+            $docURL = Storage::disk('google')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
-                'transaction_doc_name' => $documentName
+                'transaction_doc_name' => $documentName,
+                'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -216,6 +220,8 @@ class AccCsvTransactionController extends Controller
                 $data['transfer_bank_id'] = $csvFile->acc_bank_id;
                 unset($data['transaction_amount']);
                 $data['transaction_amount'] = $transaction_amount;
+                $data['transaction_doc_name'] = $documentName;
+                $data['transaction_doc_url'] = $docURL;
 
                 $trnfTrans = AccTransaction::create($data);
             endif;
