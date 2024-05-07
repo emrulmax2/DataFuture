@@ -204,6 +204,7 @@ class ApplicationController extends Controller
     }
 
     public function storeApplicantSubmission(Request $request){
+
         $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');
         $siteName = (!empty($siteName) ? $siteName : 'London Churchill College');
         $siteEmail = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_email')->value('value');
@@ -228,7 +229,8 @@ class ApplicationController extends Controller
         ]);
 
         if(auth('agent')->user()) {
-            $agentData = Agent::where('agent_user_id',auth('agent')->user()->id)->get()->first();
+            $agentUserId = auth('agent')->user()->id;
+            $agentData = Agent::where('agent_user_id',)->get()->first();
             
             $ref = Applicant::where('id', $applicant_id)->update([
                 'referral_code' => $agentData->code,
@@ -237,7 +239,12 @@ class ApplicationController extends Controller
             ]);
 
             $applicant = Applicant::find($applicant_id);
-            $application = AgentApplicationCheck::where("email", $applicant->users->email)->where("mobile",$applicant->users->phone)->get()->first();
+            $application = AgentApplicationCheck::where('agent_user_id',$agentUserId)
+                                ->where("email", $applicant->users->email)
+                                ->where("mobile",$applicant->users->phone)
+                                ->orderBy('id', 'desc')
+                                ->get()
+                                ->first();
             $application->applicant_id = $applicant_id;
             $application->updated_by = auth('agent')->user()->id;
             $application->save();
