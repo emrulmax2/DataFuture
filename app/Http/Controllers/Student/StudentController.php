@@ -60,6 +60,7 @@ use App\Models\StudentArchive;
 use App\Models\StudentConsent;
 use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
+use App\Models\StudentDocument;
 use App\Models\StudentProposedCourse;
 use App\Models\Title;
 use App\Models\User;
@@ -866,5 +867,14 @@ class StudentController extends Controller
             'work_hours' => StudentWorkPlacement::where('student_id', $student_id)->sum('hours'),
             'placement' => StudentWorkPlacement::all()
         ]);
+    }
+
+    public function studentDocumentDownload(Request $request){ 
+        $row_id = $request->row_id;
+
+        $studentDoc = StudentDocument::find($row_id);
+        $applicant_id = $studentDoc->student->applicant_id;
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

@@ -71,8 +71,8 @@ var applicantNotesListTable = (function () {
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        if(cell.getData().url != ''){
-                            btns +='<a target="_blank" href="'+cell.getData().url+'" download class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                        if(cell.getData().applicant_document_id > 0){
+                            btns +='<a  href="javascript:void(0);" data-id="'+cell.getData().applicant_document_id+'" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
                         }
                         if (cell.getData().deleted_at == null) {
                             btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
@@ -501,5 +501,62 @@ var applicantNotesListTable = (function () {
         }
     });
 
+    $('#applicantNotesListTable').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('admission.document.download'), 
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
+
+    $('#viewNoteModal').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('admission.document.download'), 
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
 
 })();

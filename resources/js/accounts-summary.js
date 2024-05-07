@@ -239,7 +239,7 @@ import Litepicker from "litepicker";
 
         axios({
             method: 'post',
-            url: route('accounts.storage.get.download.link'),
+            url: route('accounts.storage.trans.download.link'),
             data: {row_id : row_id},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {

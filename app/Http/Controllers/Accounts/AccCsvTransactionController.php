@@ -194,11 +194,11 @@ class AccCsvTransactionController extends Controller
             $document = $request->file('document');
             $documentName = $transaction_code.'.'.$document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 's3');
-            $docURL = Storage::disk('s3')->url($path);
+            //$docURL = Storage::disk('s3')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
                 'transaction_doc_name' => $documentName,
-                'transaction_doc_url' => $docURL,
+                //'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -221,7 +221,7 @@ class AccCsvTransactionController extends Controller
                 unset($data['transaction_amount']);
                 $data['transaction_amount'] = $transaction_amount;
                 $data['transaction_doc_name'] = $documentName;
-                $data['transaction_doc_url'] = $docURL;
+                //$data['transaction_doc_url'] = $docURL;
 
                 $trnfTrans = AccTransaction::create($data);
             endif;
