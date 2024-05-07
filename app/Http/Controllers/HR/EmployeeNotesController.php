@@ -58,7 +58,7 @@ class EmployeeNotesController extends Controller
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
                 //$data['path'] = asset('public/employees/notes/'.$documentName);
-                $data['path'] = Storage::disk('s3')->url($path);
+                $data['path'] = null; //Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
@@ -123,7 +123,8 @@ class EmployeeNotesController extends Controller
                     'sl' => $i,
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
-                    'url' => $docURL,
+                    'url' => (isset($list->employee_document_id) && $list->employee_document_id > 0 && (isset($list->document->current_file_name) && !empty($list->document->current_file_name)) ? $list->current_file_name : ''),
+                    'employee_document_id' => (isset($list->employee_document_id) && $list->employee_document_id > 0 && (isset($list->document->current_file_name) && !empty($list->document->current_file_name)) ? $list->employee_document_id : 0),
                     //'url' => isset($list->document) ? asset('storage/employees/notes/'.$list->document->current_file_name) : null,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
@@ -229,7 +230,7 @@ class EmployeeNotesController extends Controller
             $data['employee_id'] = $employee_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = Storage::disk('public')->url($path);
+            $data['path'] = null; //Storage::disk('public')->url($path);
             //$data['path'] = asset('public/employees/notes/'.$documentName);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
@@ -274,5 +275,13 @@ class EmployeeNotesController extends Controller
             EmployeeDocuments::where('id', $employeeDocumentID)->withTrashed()->restore();
         endif;
         return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function downloadUrl(Request $request){
+        $row_id = $request->row_id;
+
+        $empDoc = EmployeeDocuments::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/notes/'.$empDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

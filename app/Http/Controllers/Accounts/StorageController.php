@@ -84,11 +84,11 @@ class StorageController extends Controller
             $document = $request->file('document');
             $documentName = $transaction_code.'.' . $document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 's3');
-            $docURL = Storage::disk('s3')->url($path);
+            //$docURL = Storage::disk('s3')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction->id)->update([
                 'transaction_doc_name' => $documentName,
-                'transaction_doc_url' => $docURL,
+                //'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -109,7 +109,7 @@ class StorageController extends Controller
             unset($data['transaction_amount']);
             $data['transaction_amount'] = $transaction_amount;
             $data['transaction_doc_name'] = $documentName;
-            $data['transaction_doc_url'] = $docURL;
+            //$data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
         endif;
@@ -197,7 +197,7 @@ class StorageController extends Controller
                     'transaction_amount' => ($transaction_amount > 0 ? '£'.number_format($transaction_amount, 2) : ''),
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.$balance : '-£'.str_replace('-', '', $balance)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'doc_url' => (isset($list->transaction_doc_url) && !empty($list->transaction_doc_url) ? $list->transaction_doc_url : ''),
+                    'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? $list->transaction_doc_name : ''),
                     'can_eidt' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
                 ];
                 $i++;
@@ -328,11 +328,11 @@ class StorageController extends Controller
             $document = $request->file('document');
             $documentName = $oleTransaction->transaction_code.'.' . $document->getClientOriginalExtension();
             $path = $document->storeAs('public/transactions', $documentName, 's3');
-            $docURL = Storage::disk('s3')->url($path);
+            //$docURL = Storage::disk('s3')->url($path);
 
             $userUpdate = AccTransaction::where('id', $transaction_id)->update([
                 'transaction_doc_name' => $documentName,
-                'transaction_doc_url' => $docURL,
+                //'transaction_doc_url' => $docURL,
             ]);
         endif;
 
@@ -353,7 +353,7 @@ class StorageController extends Controller
             unset($data['transaction_amount']);
             $data['transaction_amount'] = $transaction_amount;
             $data['transaction_doc_name'] = $documentName;
-            $data['transaction_doc_url'] = $docURL;
+            //$data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
         endif;
@@ -476,5 +476,11 @@ class StorageController extends Controller
         else:
             return '<a href="'.route('accounts').'">Back To Dashboard</a>';
         endif;
+    }
+
+    public function documentDownloadUrl(Request $request){
+        $trans = AccTransaction::find($request->row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/transactions/'.$trans->transaction_doc_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

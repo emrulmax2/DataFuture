@@ -1118,6 +1118,8 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/documents-upload/communication-list', 'communicationList')->name('employee.documents.communication.list');
         Route::delete('employee-profile/documents/uploads-destroy', 'destroy')->name('employee.documents.destory.uploads');
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
+        
+        Route::post('employee-profile/documents/download-url', 'downloadUrl')->name('employee.documents.download.url');
     });
 
     Route::controller(EmployeeNotesController::class)->group(function(){
@@ -1130,6 +1132,8 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/update-note', 'update')->name('employee.update.note');
         Route::delete('employee-profile/destory-note', 'destroy')->name('employee.destory.note');
         Route::post('employee-profile/restore-note', 'restore')->name('employee.restore.note');
+
+        Route::post('employee-profile/download-note-doc', 'downloadUrl')->name('employee.note.download.url');
     });
 
     Route::controller(EmployeeAppraisalController::class)->group(function(){
@@ -2428,6 +2432,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('accounts/storage/delete/{id}', 'destroy')->name('accounts.storage.trans.destroy');
 
         Route::get('accounts/storage/update-document-url', 'updateDocumentUrl')->name('accounts.storage.update.doc.url');
+        Route::post('accounts/storage/trans-document-download-url', 'documentDownloadUrl')->name('accounts.storage.trans.download.link');
     });
 
     Route::controller(AccCsvTransactionController::class)->group(function() {

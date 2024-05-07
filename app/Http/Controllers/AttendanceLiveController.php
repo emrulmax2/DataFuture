@@ -46,11 +46,16 @@ class AttendanceLiveController extends Controller
         $theDayNum = date('N', strtotime($theDate));
         $time = date('H:i');
 
-        $employeeHasPattern = EmployeeWorkingPattern::where('effective_from', '<=', $theDate)
+        /*$employeeHasPattern = EmployeeWorkingPattern::where('effective_from', '<=', $theDate)
                               ->where(function($query) use($theDate){
                                     $query->whereNull('end_to')->orWhere('end_to', '>=', $theDate);
                               })->whereHas('patterns', function($query) use($theDayNum){
                                     $query->where('day', $theDayNum);
+                              })->pluck('employee_id')->unique()->toArray();*/
+
+        $employeeHasPattern = EmployeeWorkingPattern::where('effective_from', '<=', $theDate)
+                              ->where(function($query) use($theDate){
+                                    $query->whereNull('end_to')->orWhere('end_to', '>=', $theDate);
                               })->pluck('employee_id')->unique()->toArray();
 
         $query = Employee::whereIn('id', $employeeHasPattern)->where('status', 1)->orderBy('first_name', 'ASC');
@@ -72,36 +77,38 @@ class AttendanceLiveController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $day = $this->getTheDayStatusWithSchedule($list->id, $theDate);
-                $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
-                $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
+                if($day['feed_status']):
+                    $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
+                    $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
 
-                $html .= '<tr>';
+                    $html .= '<tr>';
 
-                    $html .= '<td class="w-2/5">';
-                        $html .= '<a href="javascript:void(0);" class="block">';
-                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
+                        $html .= '<td class="w-2/5">';
+                            $html .= '<a href="javascript:void(0);" class="block">';
+                                $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                    $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
+                                $html .= '</div>';
+                                $html .= '<div class="inline-block relative" style="top: -5px;">';
+                                    $html .= '<div class="font-medium whitespace-nowrap">'.$list->full_name.'</div>';
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
+                                $html .= '</div>';
+                            $html .= '</a>';
+                        $html .= '</td>';
+
+                        $html .= '<td class="text-center w-1/5">';
+                            $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
+                            $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
+                        $html .= '</td>';
+
+                        $html .= '<td class="text-left w-2/5">';
+                            $html .= '<div>';
+                                $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
+                                $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
                             $html .= '</div>';
-                            $html .= '<div class="inline-block relative" style="top: -5px;">';
-                                $html .= '<div class="font-medium whitespace-nowrap">'.$list->full_name.'</div>';
-                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
-                            $html .= '</div>';
-                        $html .= '</a>';
-                    $html .= '</td>';
+                        $html .= '</td>';
 
-                    $html .= '<td class="text-center w-1/5">';
-                        $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
-                        $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
-                    $html .= '</td>';
-
-                    $html .= '<td class="text-left w-2/5">';
-                        $html .= '<div>';
-                            $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
-                            $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
-                        $html .= '</div>';
-                    $html .= '</td>';
-
-                $html .= '</tr>';
+                    $html .= '</tr>';
+                endif;
 
                 $i++;
             endforeach;
@@ -146,6 +153,7 @@ class AttendanceLiveController extends Controller
                             ->whereHas('leave', function($q) use($employee_id){
                                 $q->where('employee_id', $employee_id)->where('status', 'Approved');
                             })->get()->first();
+        $leaveStatus = (isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0 ? true : false);
         if(isset($employeeLeaveDay->id) && $employeeLeaveDay->id > 0):
             $leave_type = (isset($employeeLeaveDay->leave->leave_type) && $employeeLeaveDay->leave->leave_type > 0 ? $employeeLeaveDay->leave->leave_type : 0);
             switch ($leave_type){
@@ -211,8 +219,10 @@ class AttendanceLiveController extends Controller
             endif;
         endif;
 
+        $overtimeStatus = (!$dayStatus && $todaysAttendances->count() > 0 ? 1 : 0);
         $res = [];
-        $res['overtime_status'] = (!$dayStatus && $todaysAttendances->count > 0 ? 1 : 0);
+        $res['feed_status'] = ($dayStatus || $leaveStatus || $overtimeStatus ? true : false);
+        $res['overtime_status'] = $overtimeStatus;
         $res['schedule'] = $schedule;
         $res['where'] = $where;
         $res['label'] = $statusLabel;
