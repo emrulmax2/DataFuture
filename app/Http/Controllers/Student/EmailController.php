@@ -103,9 +103,9 @@ class EmailController extends Controller
                         $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration, $student->users->email, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+                UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
             else:
-                UserMailerJob::dispatch($configuration, $student->users->email, new CommunicationSendMail($request->subject, $MAILHTML, []));
+                UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($request->subject, $MAILHTML, []));
             endif;
             return response()->json(['message' => 'Email successfully sent to Student'], 200);
         else:
@@ -228,8 +228,8 @@ class EmailController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
                     foreach($mail->documents as $doc):
-                        if(Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name)):
-                            $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        if(isset($doc->current_file_name) && !empty($doc->current_file_name)):
+                            $html .= '<a data-id="'.$doc->id.'" class="downloadDoc mb-1 text-primary font-medium flex justify-start items-center" href="javascript:void(0);"><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
                         endif;
                     endforeach;
                 $html .= '</div>';

@@ -697,6 +697,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
 
         Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
+
+        Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -960,6 +962,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('admission/send-mobile-verification-code','sendMobileVerificationCode')->name('admission.send.mobile.verification.code');
         Route::post('admission/send-mobile-verify-code','verifyMobileVerificationCode')->name('admission.mobile.verify.code');
+
+        Route::post('admission/download-document', 'admissionDocumentDownload')->name('admission.document.download');
         
     });
 

@@ -91,15 +91,15 @@ class NoteController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $docURL = '';
-                if(isset($list->student_document_id) && isset($list->document)):
+                /*if(isset($list->student_document_id) && isset($list->document)):
                     $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$list->document->current_file_name) : '');
-                endif;
+                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
-                    'url' => $docURL,
+                    'student_document_id' => (isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? $list->student_document_id : 0),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -121,11 +121,8 @@ class NoteController extends Controller
             $html .= '<div>';
                 $html .= $note->note;
             $html .= '</div>';
-            if(isset($note->student_document_id) && isset($note->document)):
-                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$note->document->current_file_name) : '');
-                if(!empty($docURL)):
-                    $btns .= '<a download href="'.$docURL.'" class="btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
-                endif;
+            if(isset($note->student_document_id) && $note->student_document_id > 0 && isset($note->document->current_file_name) && !empty($note->document->current_file_name)):
+                $btns .= '<a data-id="'.$note->student_document_id.'" href="javascript:void(0);" class="downloadDoc btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
             endif;
         else:
             $html .= '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
