@@ -14,26 +14,26 @@
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12">
                             <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" autocomplete="off" class="form-control w-full uppercase inputUppercase" name="address_line_1">
+                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" autocomplete="off" class="form-control w-full uppercase inputUppercase" name="student_address_address_line_1">
                             <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12">
                             <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" autocomplete="off" class="form-control w-full uppercase inputUppercase" name="address_line_2">
+                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" autocomplete="off" class="form-control w-full uppercase inputUppercase" name="student_address_address_line_2">
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full uppercase inputUppercase" name="city">
+                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full uppercase inputUppercase" name="student_address_city">
                             <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full uppercase inputUppercase" name="post_code">
+                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full uppercase inputUppercase" name="student_address_postal_zip_code">
                             <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full uppercase inputUppercase" name="country">
+                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full uppercase inputUppercase" name="student_address_country">
                             <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
                         </div>
                         <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key={{ $postcodeApi }}" />
@@ -57,10 +57,9 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="place" value=""/>
-                    <input type="hidden" name="address_id" value="0"/>
+
                     <input type="hidden" id="agentId" name="id" value="{{ $employee->id }}"/>
-                    <input type="hidden" name="type" value=""/>
+                    
                 </div>
             </div>
         </form>

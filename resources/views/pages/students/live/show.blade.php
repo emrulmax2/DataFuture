@@ -343,9 +343,9 @@
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0 mb-3">
-                        <div class="col-span-4 text-slate-500 font-medium">Personal Email</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Login Email</div>
                         <div class="col-span-8 font-medium">
-                            {{ $student->users->email }}
+                            {{ $student->users->email }} 
                             @if ($student->users->email_verified_at == NULL)
                                 <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
                             @else
@@ -355,6 +355,17 @@
                                 @else
                                     <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
                                 @endif --}}
+                                <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-4 text-slate-500 font-medium">Personal Email</div>
+                        <div class="col-span-8 font-medium">
+                            {{ $student->contact->personal_email }}
+                            @if ($student->contact->personal_email_verification == 0)
+                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
+                            @else
                                 <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
                             @endif
                         </div>

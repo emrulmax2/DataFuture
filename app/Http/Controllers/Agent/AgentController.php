@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddressRequest;
 use App\Models\Agent;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
+use App\Models\Address;
 use App\Models\AgentUser;
 use App\Models\Applicant;
 use App\Models\CourseCreationInstance;
@@ -291,6 +293,71 @@ class AgentController extends Controller
 
     }
 
+    public function addressUpdate(AddressRequest $request, Agent $agent_user) {
+        $address_id = $request->address_id;
+        $address_line_1 = $request->student_address_address_line_1;
+        $address_line_2 = (isset($request->student_address_address_line_2) && !empty($request->student_address_address_line_2) ? $request->student_address_address_line_2 : null);
+        $state = (isset($request->student_address_state_province_region) && !empty($request->student_address_state_province_region) ? $request->student_address_state_province_region : null);
+        $city = $request->student_address_city;
+        $post_code = $request->student_address_postal_zip_code;
+        $country = $request->student_address_country;
+
+        $res = [];
+        $data = [];
+        $data['address_line_1'] = $address_line_1;
+        $data['address_line_2'] = $address_line_2;
+        $data['state'] = $state;
+        $data['post_code'] = $post_code;
+        $data['city'] = $city;
+        $data['country'] = $country;
+        $data['active'] = 1;
+        if(!is_null(\Auth::guard('student')->user())):
+            $data['student_user_id'] = auth('student')->user()->id;
+        else:
+            $data['created_by'] = auth()->user()->id;
+        endif;
+
+        if($address_id > 0){
+            $theAddr = Address::find($address_id);
+            if(
+                $address_line_1 == $theAddr->address_line_1 && $address_line_2 == $theAddr->address_line_2 && 
+                $state == $theAddr->state && $city == $theAddr->city && $post_code == $theAddr->post_code && 
+                $country == $theAddr->country
+            ):
+                $res['id'] = $address_id;
+            else:
+                $updateData = [];
+                $updateData['active'] = 0;
+                if(!is_null(\Auth::guard('student')->user())):
+                    $updateData['student_user_id'] = auth('student')->user()->id;
+                else:
+                    $updateData['updated_by'] = auth()->user()->id;
+                endif;
+                Address::where('id', $address_id)->update($updateData);
+
+                $address = Address::create($data);
+                $insertId = $address->id;
+
+                $res['id'] = $insertId;
+            endif;
+        }else{
+            $address = Address::create($data);
+            $insertId = $address->id;
+
+            $res['id'] = $insertId;
+        }
+
+        $agent= Agent::where("agent_user_id",$agent_user->AgentUser->id)->get()->first();
+
+        $agent->address_id=$res['id'];
+        $agent->save();
+        if($agent->wasChanged()){
+            return response()->json(['message' => 'Data updated'], 200);
+        }else{
+            return response()->json(['message' => 'something went wrong'], 422);
+        }
+
+    }
     /**
      * Remove the specified resource from storage.
      *
