@@ -86,7 +86,6 @@ class UploadController extends Controller
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
                     'current_file_name'=> $list->current_file_name,
-                    'url' => $url,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at

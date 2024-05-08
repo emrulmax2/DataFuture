@@ -67,16 +67,16 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
+                /*if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
                     $disk = Storage::disk('s3');
                     $url = $disk->url('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name);
-                endif;
+                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'display_file_name' => (!empty($list->display_file_name) ? $list->display_file_name : 'Unknown'),
                     'hard_copy_check' => $list->hard_copy_check,    
-                    'url' => $url,
+                    'url' => (isset($list->current_file_name) && !empty($list->current_file_name) ? $list->current_file_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -125,16 +125,16 @@ class EmployeeDocumentsController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
+                /*if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name)):
                     $disk = Storage::disk('s3');
                     $url = $disk->url('public/employees/'.$list->employee_id.'/documents/'.$list->current_file_name);
-                endif;
+                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'display_file_name' => (!empty($list->display_file_name) ? $list->display_file_name : 'Unknown'),
                     'hard_copy_check' => $list->hard_copy_check,    
-                    'url' => $url,
+                    'url' => (isset($list->current_file_name) && !empty($list->current_file_name) ? $list->current_file_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -162,7 +162,7 @@ class EmployeeDocumentsController extends Controller
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
-        $data['path'] = Storage::disk('s3')->url($path);
+        $data['path'] = null; //Storage::disk('s3')->url($path);
         
         $data['display_file_name'] = $displayName;
         $data['current_file_name'] = $imageName;
@@ -194,5 +194,13 @@ class EmployeeDocumentsController extends Controller
         $data = EmployeeDocuments::where('id', $recordid)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function downloadUrl(Request $request){
+        $row_id = $request->row_id;
+
+        $empDoc = EmployeeDocuments::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

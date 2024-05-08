@@ -39,7 +39,7 @@ var storageTransList = (function () {
                                 html += '</div>';
                                 html += '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5 flex justify-start items-center">';
                                     if(cell.getData().doc_url != ''){
-                                        html += '<a href="'+cell.getData().doc_url+'" target="_blank" class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
+                                        html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                     }
                                     html += cell.getData().transaction_code;
                                 html += '</div>';
@@ -463,6 +463,35 @@ var storageTransList = (function () {
                     }
                     $('#storageTransactionForm #transaction_id').val(row.id);
                 });
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
+
+    $('#storageTransList').on('click', '.downloadTransDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('accounts.storage.trans.download.link'),
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
             } 
         }).catch(error => {
             if(error.response){

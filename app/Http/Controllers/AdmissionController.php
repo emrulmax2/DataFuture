@@ -1142,7 +1142,7 @@ class AdmissionController extends Controller
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
                     'current_file_name'=> $list->current_file_name,
-                    'url' => ($list->path) ?? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name),
+                    //'url' => ($list->path) ?? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -1256,14 +1256,14 @@ class AdmissionController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $docURL = '';
-                if(isset($list->applicant_document_id) && isset($list->document)):
+                /*if(isset($list->applicant_document_id) && isset($list->document)):
                     $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name)  && Storage::diske('s3')->exists('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->document->current_file_name) : '');
-                endif;
+                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
-                    'url' => $docURL,
+                    'applicant_document_id' => (isset($list->applicant_document_id) && $list->applicant_document_id ? $list->applicant_document_id : 0),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -1283,11 +1283,9 @@ class AdmissionController extends Controller
             $html .= '<div>';
                 $html .= $note->note;
             $html .= '</div>';
-            if(isset($note->applicant_document_id) && isset($note->document)):
-                $docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) : '');
-                if(!empty($docURL)):
-                    $btns .= '<a download href="'.$docURL.'" class="btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
-                endif;
+            if(isset($note->applicant_document_id) && $note->applicant_document_id > 0 && isset($note->document->current_file_name) && !empty($note->document->current_file_name)):
+                //$docURL = (isset($note->document->current_file_name) && !empty($note->document->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$note->applicant_id.'/'.$note->document->current_file_name) : '');
+                $btns .= '<a data-id="'.$note->applicant_document_id.'" href="javascript:void(0);" class="downloadDoc btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
             endif;
         else:
             $html .= '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
@@ -1633,7 +1631,7 @@ class AdmissionController extends Controller
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
             ];
-            UserMailerJob::dispatch($configuration, $applicant->users->email, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+            UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
 
             return response()->json(['message' => 'Letter successfully generated and distributed.'], 200);
         else:
@@ -1690,16 +1688,16 @@ class AdmissionController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $docURL = '';
-                if(isset($list->applicant_document_id) && $list->applicant_document_id > 0 && isset($list->current_file_name)):
+                /*if(isset($list->applicant_document_id) && $list->applicant_document_id > 0 && isset($list->current_file_name)):
                     $docURL = (!empty($list->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$list->applicant_id.'/'.$list->current_file_name) : '');
-                endif;
+                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'letter_type' => $list->letter_type,
                     'letter_title' => $list->letter_title,
                     'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
-                    'docurl' => $docURL,
+                    'docurl' => (isset($list->applicant_document_id) && $list->applicant_document_id > 0 ? $list->applicant_document_id : 0),
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -1812,9 +1810,9 @@ class AdmissionController extends Controller
                         $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration,$Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo))->now();
+                UserMailerJob::dispatch($configuration,[$Applicant->users->email], new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo))->now();
             else:
-                UserMailerJob::dispatch($configuration, $Applicant->users->email, new CommunicationSendMail($request->subject, $MAILHTML, []))->now();
+                UserMailerJob::dispatch($configuration, [$Applicant->users->email], new CommunicationSendMail($request->subject, $MAILHTML, []))->now();
             endif;
             return response()->json(['message' => 'Email successfully sent to Applicant'], 200);
         else:
@@ -2032,7 +2030,7 @@ class AdmissionController extends Controller
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
                     foreach($mail->documents as $doc):
-                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center" href="'.Storage::disk('s3')->url('public/applicants/'.$doc->applicant_id.'/'.$doc->current_file_name).'" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
+                        $html .= '<a target="_blank" class="mb-1 text-primary font-medium flex justify-start items-center downloadDoc" data-id="'.$doc->id.'" href="javascript:void(0);" download><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
                     endforeach;
                 $html .= '</div>';
             endif;
@@ -2373,6 +2371,14 @@ class AdmissionController extends Controller
         else:
             return response()->json(['suc' => 2], 200);
         endif;
+    }
+
+    public function admissionDocumentDownload(Request $request){
+        $row_id = $request->row_id;
+
+        $applicantDoc = ApplicantDocument::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantDoc->applicant_id.'/'.$applicantDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 
 }

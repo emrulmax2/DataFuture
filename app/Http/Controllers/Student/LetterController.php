@@ -219,7 +219,7 @@ class LetterController extends Controller
                 'from_name'    =>  'London Churchill College',
             ];
 
-            UserMailerJob::dispatch($configuration, $student->users->email, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+            UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
 
             return response()->json(['message' => 'Letter successfully generated and distributed.'], 200);
         else:
@@ -287,7 +287,7 @@ class LetterController extends Controller
                     'letter_type' => $list->letter_type,
                     'letter_title' => $list->letter_title,
                     'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
-                    'docurl' => $docURL,
+                    'student_document_id' => (isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->current_file_name) && !empty($list->current_file_name) ? $list->student_document_id : 0),
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
