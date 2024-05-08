@@ -218,7 +218,7 @@
         </div>
     </div>
     
-
+  
  
 
 
@@ -227,7 +227,7 @@
         <div id="success-notification-content" class="toastify-content hidden">
             <i class="text-success" data-lucide="check-circle"></i>
             <div class="ml-4 mr-4">
-                <div id="title-notification" class="font-medium">Email Sent!</div>
+                <div id="title-notification" class="font-medium"> @if(session('sessiontitle')) {{ session('sessiontitle') }} @else Email Sent! @endif </div>
                 <div id="title-context" class="text-slate-500 mt-1">{{ session('verifymessage') }}</div>
             </div>
         </div>
@@ -280,7 +280,7 @@
                 // Reset state
                 $('#AgentChangePasswordModalForm').find('.login__input').removeClass('border-danger')
                 $('#AgentChangePasswordModalForm').find('.login__input-error').html('')
-
+            
                 // Post form
                 let myform = document.getElementById("AgentChangePasswordModalForm");
                 let formData = new FormData(myform);
@@ -291,10 +291,10 @@
 
                 axios.post(route('agent.change.password.post'), formData).then(res => {
                     
-                    $("#title-notification").html("Password Changed!");
-                    $("#title-context").html("Password Changed Successfully");
+                    // $("#title-notification").html("Password Changed!");
+                    // $("#title-context").html("Password Changed Successfully");
 
-                    $("#success-notification-toggle").trigger('click')
+                    // $("#success-notification-toggle").trigger('click')
                     $('#btn-changepassword').html('Update Passwored')
 
                 }).catch(err => {
@@ -316,12 +316,13 @@
 
             $('#AgentChangePasswordModalForm').on('keyup', function(e) {
                 if (e.keyCode === 13) {
+                    e.preventDefault();
                     resetForm()
                 }
             })
 
             $('#btn-changepassword').on('click', function() {
-                alert("its working")
+                resetForm()
             })
 
             

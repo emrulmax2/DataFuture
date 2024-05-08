@@ -210,8 +210,8 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                                         <div class="grid grid-cols-12 gap-4">
                                             <div class="p-5 col-span-12">
                                                 <div class="border-b pb-5">
-                                                    <input id="oldpassword" type="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Old Password">
-                                                    <div id="error-oldpassword" class="login__input-error text-danger mt-2"></div>
+                                                    <input id="old_password" type="password" name="old_password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="Old Password">
+                                                    <div id="error-old_password" class="login__input-error text-danger mt-2"></div>
                                                 </div>
 
                                                 <input type="password" autocomplete="off" id="password" name="password" class="intro-x login__input form-control py-3 px-4 block mt-4" placeholder="New Password">
@@ -265,7 +265,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                                        <button type="submit" id="btn-changepassword" class="btn btn-primary w-auto">
+                                        <button type="button" id="btn-changepassword" class="btn btn-primary w-auto">
                                             Update Password
                                         </button>
                                         
