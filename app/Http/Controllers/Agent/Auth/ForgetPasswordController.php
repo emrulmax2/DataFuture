@@ -104,19 +104,14 @@ class ForgetPasswordController extends Controller
 
       public function submitChangePasswordForm(AgentChangePasswordUpdateRequest $request) {
 
-        $updatePassword = AgentUser::where([
-                                'password' => $request->old_password, 
-                                'id' => $request->id
-                              ])
-                              ->first();
-  
-          if(!$updatePassword){
-            return response()->json(['Invalid Old Password!'],422);
-          }
+        $user = AgentUser::find($request->id);
+        $user->password = Hash::make($request->password);
+        $user->save();
 
-          AgentUser::where('email', $updatePassword->email)
-                      ->update(['password' => Hash::make($request->password)]);
-        return response()->json(['Password Updated'],200);
+        if($user->wasChanged())
+          return redirect(route('agent.dashboard'))->with('verifymessage', 'Password Updated!')->with('sessiontitle','Password Changed');
+        else
+          return response()->json(['Invalid Old Password!'],422);
       }
 
 
