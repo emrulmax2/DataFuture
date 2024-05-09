@@ -66,6 +66,22 @@
                             @endforeach
                         </div>
                     </div><!--end of intro-->
+                    @else
+                    <div class="intro-y  mt-12 sm:mt-5">
+                        <div id="TermBox">
+                            <a href="javascript:void()" target="_blank" style="inline-block">
+                                <div id="moduleset-0" class="intro-y module-details_0 ">
+                                    <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
+                                        <div class="ml-4 mr-auto">
+                                            <div class="font-medium">No Module Available</div>
+                                            <div class="text-slate-500 text-xs mt-0.5"></div>
+                                        </div>
+                                        {{-- <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">N/A</div> --}}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div><!--end of intro-->
                     @endif
                 </div>
                 <!-- END: Sales Report -->
