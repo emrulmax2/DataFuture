@@ -12,9 +12,11 @@
                 @include('pages.students.frontend.dashboard.show-info')
                 <!-- END: Show-Info Report -->
                 <!-- BEGIN: Sales Report -->
+
                 <div class="col-span-12 lg:col-span-6 mt-8">
                     <div class="intro-y flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
+                        @if($termList)
                         <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
                             <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
@@ -32,7 +34,9 @@
                                 </ul>
                             </div>
                         </div>
+                        @endif
                     </div>
+                    @if($termList)
                     <div class="intro-y  mt-12 sm:mt-5">
                         <div id="TermBox">
                             @foreach($data as $termId => $termModuleList)
@@ -62,6 +66,7 @@
                             @endforeach
                         </div>
                     </div><!--end of intro-->
+                    @endif
                 </div>
                 <!-- END: Sales Report -->
                 <!-- BEGIN: Weekly Top Seller -->
