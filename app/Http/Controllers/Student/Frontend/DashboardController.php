@@ -89,9 +89,13 @@ class DashboardController extends Controller
             ]);
         else:
             $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
-             
-             $dataBox = $this->moduleList();
+            $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
             
+            if($studentAssigned)
+             $dataBox = $this->moduleList();
+            else {
+                $dataBox = ["termList" =>[],"data" => [],"currenTerm" => [] ];
+            }
             return view('pages.students.frontend.dashboard.index', [
                 'title' => 'Live Students - LCC Data Future Managment',
                 'breadcrumbs' => [
