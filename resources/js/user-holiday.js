@@ -511,7 +511,7 @@ import 'litepicker/dist/plugins/multiselect';
                 let form_data = new FormData(form);
                 axios({
                     method: "POST",
-                    url: route('employee.holiday.update.leave'),
+                    url: route('user.account.staff.update.leave'),
                     data: form_data,
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
@@ -524,7 +524,7 @@ import 'litepicker/dist/plugins/multiselect';
                         successModal.show();
                         document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                             $('#successModal .successModalTitle').html('Congratulations!');
-                            $('#successModal .successModalDesc').html('Employee leave request successfully updated.');
+                            $('#successModal .successModalDesc').html('Leave request supervisor suggestion successfully udpated.');
                             $('#successModal .successCloser').attr('data-action', 'RELOAD');
                         });
 

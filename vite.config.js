@@ -239,6 +239,11 @@ export default defineConfig({
                 'resources/js/accounts-storage.js',
                 'resources/js/accounts-report.js',
                 'resources/js/accounts-csv.js',
+
+                'resources/js/document-role-and-permission.js',
+                'resources/js/file-manager.js',
+                'resources/js/communication-template.js',
+                'resources/js/user-team-holiday.js',
                 
             ],
             refresh: true,

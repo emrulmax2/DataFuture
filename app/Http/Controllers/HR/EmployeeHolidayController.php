@@ -1133,12 +1133,12 @@ class EmployeeHolidayController extends Controller
                             $html .= '<td>'.$this->calculateHourMinute($leaveDay->hour).'</td>';
                             $html .= '<td>';
                                 $html .= '<div class="form-check m-0 justify-center">';
-                                    $html .= '<input class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="Active">';
+                                    $html .= '<input '.(isset($leaveDay->supervision_status) && $leaveDay->supervision_status == 1 ? 'checked' : '').' class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="Active">';
                                 $html .= '</div>';
                             $html .= '</td>';
                             $html .= '<td>';
                                 $html .= '<div class="form-check m-0 justify-center">';
-                                    $html .= '<input class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="In Active">';
+                                    $html .= '<input '.(isset($leaveDay->supervision_status) && $leaveDay->supervision_status == 2 ? 'checked' : '').' class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="In Active">';
                                 $html .= '</div>';
                             $html .= '</td>';
                         $html .= '</tr>';

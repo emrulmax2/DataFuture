@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 
@@ -29,6 +31,7 @@ use App\Models\CourseModule;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\EmailTemplate;
+use App\Models\EmailVerificationCode;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
 use App\Models\Grade;
@@ -876,5 +879,62 @@ class StudentController extends Controller
         $applicant_id = $studentDoc->student->applicant_id;
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
+    }
+
+    public function sendEmailVerificationCode(Request $request){
+        $student_id = $request->student_id;
+        $personal_email = $request->personal_email;
+        $student = Student::find($student_id);
+
+        $verificationCode = rand(100000, 999999);
+        $emailVerification = EmailVerificationCode::create([
+            'student_id' => $student_id,
+            'email' => $personal_email,
+            'code' => $verificationCode,
+            'status' => 0,
+            'created_by' => auth()->user()->id,
+        ]);
+        if($emailVerification):
+            $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+            $configuration = [
+                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+                
+                'from_email'    => 'no-reply@lcc.ac.uk',
+                'from_name'    =>  'London Churchill College',
+            ];
+
+            $MAILBODY = 'Dear '.$student->full_name.'<br/><br/>';
+            $MAILBODY .= 'Your personal email address has been changed. Here is the verification code for new email address.<br/><br/>';
+            $MAILBODY .= '<h1 style="font-size: 40px; font-weight: bold; margin: 0;">'.$verificationCode.'</h1><br/><br/>';
+            $MAILBODY .= 'Best regards,<br/>';
+            $MAILBODY .= 'London Churchill College';
+
+            UserMailerJob::dispatch($configuration, [$personal_email], new CommunicationSendMail('Email Verification Code', $MAILBODY, []));
+
+            return response()->json(['Message' => 'Verification code successfully send to the email address.'], 200);
+        else:
+            return response()->json(['Message' => 'Something went wrong. Please try later'], 422);
+        endif;
+    }
+
+    public function verifyEmailVerificationCode(Request $request){
+        $student_id = $request->student_id;
+        $code = $request->code;
+        $email = $request->email;
+
+        $studentCodes = EmailVerificationCode::where('student_id', $student_id)->where('email', $email)
+                            ->where('code', $code)->where('status', '!=', 1)->orderBy('id', 'DESC')->get()->first();
+        if(isset($studentCodes->id) && $studentCodes->id > 0):
+            EmailVerificationCode::where('id', $studentCodes->id)->update(['status' => 1]);
+            //StudentContact::where('student_id', $student_id)->update(['personal_email_verification' => 1]);
+
+            return response()->json(['suc' => 1], 200);
+        else:
+            return response()->json(['suc' => 2], 200);
+        endif;
     }
 }

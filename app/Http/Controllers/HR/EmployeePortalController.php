@@ -34,7 +34,7 @@ class EmployeePortalController extends Controller
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => 'javascript:void(0);']
             ],
-            'pendingLeaves' => EmployeeLeave::where('status', 'Pending')->orderBy('id', 'ASC')->skip(0)->take(5)->get(),
+            'pendingLeaves' => EmployeeLeave::where('status', 'Pending')->orderBy('id', 'DESC')->skip(0)->take(5)->get(),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
             'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query){
                               $query->where('status', 'Approved')->where('leave_type', 1);

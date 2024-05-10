@@ -349,12 +349,6 @@
                             @if ($student->users->email_verified_at == NULL)
                                 <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
                             @else
-                                {{--@if(isset($tempEmail->applicant_id) && $tempEmail->applicant_id > 0 && (isset($tempEmail->status) && $tempEmail->status == 'Pending'))
-                                    <span class="btn inline-flex btn-warning px-2 ml-2 py-0 text-white rounded-0">Awaiting Verification</span><br/>
-                                    <span>({{ $tempEmail->email }})</span>
-                                @else
-                                    <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                                @endif --}}
                                 <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
                             @endif
                         </div>
@@ -373,7 +367,7 @@
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-4 text-slate-500 font-medium">Institutional Email</div>
                         <div class="col-span-8 font-medium">
-                            ---
+                            {{ $student->contact->institutional_email }}
                         </div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">

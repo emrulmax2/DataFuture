@@ -284,7 +284,7 @@
 
 <!-- BEGIN: Edit Contact Details Modal -->
 <div id="editAdmissionContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <form method="POST" action="#" id="editAdmissionContactDetailsForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
@@ -295,24 +295,54 @@
                 </div>
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4 gap-y-5">
-                        <div class="col-span-12 sm:col-span-6">
+                        {{--<div class="col-span-12 sm:col-span-6">
                             <label for="personal_email" class="form-label">Personal Email <span class="text-danger">*</span></label>
                             <input value="{{ (isset($student->contact->personal_email) && !empty($student->contact->personal_email) ? $student->contact->personal_email : '') }}" type="text" placeholder="Email" id="email" class="form-control" name="personal_email">
                             <div class="acc__input-error error-personal_email text-danger mt-2"></div>
+                        </div>--}}
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="personal_email" class="form-label">Personal Email <span class="text-danger">*</span></label>
+                            <div class="validationGroup">
+                                <input value="{{ isset($student->contact->personal_email) ? $student->contact->personal_email : '' }}" data-org="{{ isset($student->contact->personal_email) ? $student->contact->personal_email : '' }}" id="personal_email" name="personal_email" type="text" class="form-control w-full"  placeholder="Personal Email">
+                                <button id="sendEmailVerifiCode" 
+                                    data-student-id="{{ isset($student->id) && $student->id > 0 ? $student->id : 0 }}" 
+                                    class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($student->contact->personal_email_verification) && !empty($student->contact->personal_email_verification) && $student->contact->personal_email_verification == 1 ? 'btn-primary verified' : 'btn-danger' }}"
+                                    
+                                    {{ isset($student->contact->personal_email_verification) && $student->contact->personal_email_verification == 1 ? 'readonly' : '' }}
+                                    >
+                                    @if(isset($student->contact->personal_email_verification) && $student->contact->personal_email_verification == 1)
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified
+                                    @else
+                                        <i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code
+                                    @endif 
+                                </button>
+                                <input type="hidden" class="personal_email_verification" name="personal_email_verification" value="{{ isset($student->contact->personal_email_verification) && $student->contact->personal_email_verification > 0 ? $student->contact->personal_email_verification : 0 }}" data-org="{{ isset($student->contact->personal_email_verification) && $student->contact->personal_email_verification > 0 ? $student->contact->personal_email_verification : 0 }}" />
+                            </div>
+                            <div class="acc__input-error error-email text-danger mt-2"></div>
+                            <div class="acc__input-error error-personal_email_verification text-danger mt-2"></div>
                         </div>
+                        <div class="col-span-12 sm:col-span-6 emailVerifyCodeGroup" style="display: none;">
+                            <label for="pemail_mobile" class="form-label">Email Verification Code <span class="text-danger">*</span></label>
+                            <div class="validationGroup">
+                                <input value="" id="email_verification_code" name="email_verification_code" type="text" class="form-control w-full"  placeholder="Verification Code">
+                                <button id="verifyEmail" data-student-id="{{ isset($student->id) && $student->id > 0 ? $student->id : 0 }}" class="btn w-auto mr-0 mb-0 absolute h-full  btn-primary" >
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verify
+                                </button>
+                            </div>
+                            <div class="acc__input-error error-email_verification_error text-danger mt-2"></div>
+                        </div>
+
                         <div class="col-span-12 sm:col-span-6">
                             <label for="institutional_email" class="form-label">Institutional Email <span class="text-danger">*</span></label>
-                            <input readonly value="{{ isset($student->users->email) && !empty($student->users->email) && (isset($student->contact->personal_email) && !empty($student->contact->personal_email)) ? $student->users->email : '' }}" type="text" placeholder="lcc000001@lcc.ac.uk" id="org_email" class="form-control" name="org_email">
+                            <div class="input-group">
+                                <input readonly value="{{ isset($student->contact->institutional_email) && !empty($student->contact->institutional_email) ? $student->contact->institutional_email : '' }}" type="text" placeholder="lcc000001@lcc.ac.uk" id="org_email" class="form-control" name="org_email">
+                                <div id="editInstEmail" class="input-group-text cursor-pointer"><i data-lucide="pencil-line" class="w-4 h-4"></i></div>
+                            </div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="phone" class="form-label">Home Phone</label>
                             <input value="{{ isset($student->contact->home) ? $student->contact->home : '' }}" type="text" placeholder="Home Phone" id="phone" class="form-control" name="phone">
                         </div>
-                        {{--<div class="col-span-12 sm:col-span-6">
-                            <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
-                            <input value="{{ isset($student->contact->mobile) ? $student->contact->mobile : '' }}" data-original="{{ isset($student->contact->mobile) ? $student->contact->mobile : '' }}" type="text" placeholder="Mobile Phone" id="mobile" class="form-control" name="mobile">
-                            <div class="acc__input-error error-mobile text-danger mt-2"></div>
-                        </div>--}}
                         <div class="col-span-12 sm:col-span-6">
                             <label for="mobile" class="form-label">Mobile Phone <span class="text-danger">*</span></label>
                             <div class="validationGroup">
@@ -431,7 +461,7 @@
                             endif;
                         @endphp
                         <div class="col-span-12 sm:col-span-6 addressWrap" id="permanentAddressWrap">
-                            <label for="address_line_1" class="form-label">Permanent Address <span class="text-danger">*</span></label>
+                            <label for="address_line_1" class="form-label">Permanent Address</label>
                             <div class="addresses mb-2">
                                 @if($permanent_address_id > 0)
                                     {!! $address2 !!}
@@ -460,7 +490,7 @@
                                 </select>
                             </div>
                             <div class="mt-3">
-                                <label for="permanent_post_code" class="form-label">Permanent Postcode <span class="text-danger">*</span></label>
+                                <label for="permanent_post_code" class="form-label">Permanent Postcode</label>
                                 <input value="{{ isset($student->contact->permanent_post_code) ? $student->contact->permanent_post_code : '' }}" type="text" placeholder="Post Code" class="form-control" name="permanent_post_code">
                                 <div class="acc__input-error error-permanent_post_code text-danger mt-2"></div>
                             </div>

@@ -9,6 +9,7 @@ use App\Http\Requests\StudentContactDetailsRequest;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentContact;
+use App\Models\StudentUser;
 
 class ContactDetailController extends Controller
 {
@@ -23,6 +24,9 @@ class ContactDetailController extends Controller
         $contact->fill([
             'home' => $request->phone,
             'mobile' => $request->mobile,
+            'personal_email_verification' => $request->personal_email_verification,
+            'personal_email' => $request->personal_email,
+            'institutional_email' => $request->org_email,
             'term_time_address_id' => (isset($request->term_time_address_id) && $request->term_time_address_id > 0 ? $request->term_time_address_id : null),
             'term_time_accommodation_type_id' => (isset($request->term_time_accommodation_type_id) && $request->term_time_accommodation_type_id > 0 ? $request->term_time_accommodation_type_id : null),
             'term_time_post_code' => (isset($request->term_time_post_code) && !empty($request->term_time_post_code) ? $request->term_time_post_code : null),
@@ -34,19 +38,9 @@ class ContactDetailController extends Controller
         $changes = $contact->getDirty();
         $contact->save();
 
-        /*if($applicant->users->email != $email):
-            $tempEmail = ApplicantTemporaryEmail::create([
-                'applicant_id' => $applicant_id,
-                'email' => $email,
-                'status' => 'Pending',
-                'created_by' => auth()->user()->id
-            ]);
-            if($tempEmail):
-                $applicantName = $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name;
-                $url = route('varify.temp.email', $applicant_id);
-                Mail::to($email)->send(new ApplicantTempEmailVerification($applicantName, $applicant->users->email, $email, $url));
-            endif;
-        endif;*/
+        if(isset($student->users->email) && $student->users->email != $request->org_email && $student->student_user_id > 0):
+            StudentUser::where('id', $student->student_user_id)->update(['email' => $request->org_email]);
+        endif;
 
         if($contact->wasChanged() && !empty($changes)):
             foreach($changes as $field => $value):

@@ -275,6 +275,7 @@ class PendingTaskManagerController extends Controller
 
         if(!empty($ids)):
             $theCollection = [];
+            $theCollection[1][] = 'Student ID';
             $theCollection[1][] = 'First Name';
             $theCollection[1][] = 'Last Name';
             $theCollection[1][] = 'Email Address';
@@ -292,8 +293,10 @@ class PendingTaskManagerController extends Controller
                     if($studentUserEmail != $orgEmail):
                         $studentContact = $studentContactOld = StudentContact::find($student->contact->id);
                         $studentContact->fill([
-                            'personal_email' => $studentUserEmail, 
-                            'personal_email_verification' => $studentUserEmailVerifiedA
+                            //'personal_email' => $studentUserEmail, 
+                            //'personal_email_verification' => $studentUserEmailVerifiedA,
+                            'institutional_email' => $orgEmail, 
+                            'institutional_email_verification' => 1,
                         ]);
                         $changes = $studentContact->getDirty();
                         $studentContact->save();
@@ -333,6 +336,7 @@ class PendingTaskManagerController extends Controller
                         endif;
 
                         /* Excel Data Array */
+                        $theCollection[$row][] = $student->registration_no;
                         $theCollection[$row][] = $student->first_name;
                         $theCollection[$row][] = $student->last_name;
                         $theCollection[$row][] = $orgEmail;
@@ -373,7 +377,7 @@ class PendingTaskManagerController extends Controller
                 if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
                     $mailTo[] = $student->contact->personal_email;
                 endif;
-                $mailTo[] = 'limon@churchill.ac';
+                //$mailTo[] = 'limon@churchill.ac';
 
                 $theEmailTask = TaskList::where('org_email', 'Yes')->orderBy('id', 'DESC')->get()->first();
                 $theStudentTask = StudentTask::where('task_list_id', $theEmailTask->id)->where('student_id', $student->id)->where('status', 'Pending')->get()->first();
