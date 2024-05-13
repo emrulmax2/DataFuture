@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-        <div class="p-5 pt-0"> 
+        <div class="p-5 pt-0" id="myTeamHolidayWrap"> 
             {!! $teamHolidays !!}
         </div>
     </div>

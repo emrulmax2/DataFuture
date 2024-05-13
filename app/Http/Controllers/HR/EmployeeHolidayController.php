@@ -126,6 +126,7 @@ class EmployeeHolidayController extends Controller
                             $pattern['requestedLeaves'] = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year->id)
                                                           ->where('employee_working_pattern_id', $pattern->id)
                                                           ->where('status', 'Pending')
+                                                          ->where('leave_type', 1)
                                                           ->where('to_date', '<=', $ped)
                                                           ->orderBy('from_date', 'ASC')
                                                           ->get();
@@ -638,6 +639,7 @@ class EmployeeHolidayController extends Controller
         $employee_leave_ids = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year_id)
                               ->where('employee_working_pattern_id', $pattern_id)
                               ->where('status', 'Approved')
+                              ->where('leave_type', 1)
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
             return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->where('is_taken', '!=', 1)->orderBy('leave_date', 'ASC')->get();
@@ -650,6 +652,7 @@ class EmployeeHolidayController extends Controller
         $employee_leave_ids = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year_id)
                               ->where('employee_working_pattern_id', $pattern_id)
                               ->where('status', 'Approved')
+                              ->where('leave_type', 1)
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
             return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'Active')->where('is_taken', 1)->orderBy('leave_date', 'ASC')->get();
@@ -662,6 +665,7 @@ class EmployeeHolidayController extends Controller
         $employee_leave_ids = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year_id)
                               ->where('employee_working_pattern_id', $pattern_id)
                               ->where('status', '!=', 'Pending')
+                              ->where('leave_type', 1)
                               ->pluck('id')->toArray();
         if(!empty($employee_leave_ids)):
             return EmployeeLeaveDay::whereIn('employee_leave_id', $employee_leave_ids)->where('status', 'In Active')->orderBy('leave_date', 'ASC')->get();

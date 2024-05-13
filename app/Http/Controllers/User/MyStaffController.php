@@ -166,14 +166,26 @@ class MyStaffController extends Controller
             'employment' => $employment,
             'holiday_years' => HrHolidayYear::where('active', 1)->orderBy('end_date', 'DESC')->get(),
             'runningHolidayYear' => $runningHolidayYear,
-            'teamHolidays' => $this->myStaffHolidays($auth_emp_ids, $runningHolidayYear)
+            'teamHolidays' => $this->myStaffHolidays($runningHolidayYear, $auth_emp_ids)
         ]);
     }
 
-    public function myStaffHolidays($employee_ids = [], $year){
+    public function ajaxTeamHoliday(Request $request){
+        $holiday_year = $request->holiday_year;
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+
+        $hour_auth_ids = EmployeeHourAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+        $holiday_auth_ids = EmployeeHolidayAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+        $auth_emp_ids = array_unique(array_merge($hour_auth_ids, $holiday_auth_ids));
+
+        $html = $this->myStaffHolidays($holiday_year, $auth_emp_ids);
+        return response()->json(['res' => $html], 200);
+    }
+
+    public function myStaffHolidays($year, $employee_ids = []){
         $html = '';
         if(!empty($employee_ids)):
-            $html .= '<table class="table table-bordered table-sm">';
+            $html .= '<table class="table table-bordered" id="myStaffHolidayTable">';
                 $html .= '<thead>';
                     $html .= '<tr>';
                         $html .= '<th>Name</th>';
@@ -192,17 +204,23 @@ class MyStaffController extends Controller
                         $employee = Employee::find($employee_id);
                         if(isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes'):
                             $stats = $this->employeeLeaveStatistics($employee_id, $year);
-                            $html .= '<tr>';
-                                $html .= '<td>'.$stats['pattern_id'].' - '.$employee->full_name.'</td>';
-                                $html .= '<td>'.$stats['start_end'].'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($stats['opening_balance']).'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($stats['booked']).'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($stats['taken']).'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($stats['requested']).'</td>';
-                                $html .= '<td>'.$this->calculateHourMinute($stats['bank_holiday']).'</td>';
-                                $html .= '<td>'.($stats['adjustment_opt'] == 2 ? '-' : '+').''.$this->calculateHourMinute($stats['adjustment']).'</td>';
-                                $html .= '<td>'.$stats['balacne_left'].'</td>';
-                            $html .= '</tr>';
+                            if(!empty($stats)):
+                                $s = 1;
+                                foreach($stats as $pattern_id => $sts):
+                                    $html .= '<tr class="'.(isset($sts['active']) && $sts['active'] == 1 ? 'activePatternRow' : '').'">';
+                                        $html .= '<td class="'.(count($stats) > 1 && $s == 1 ? ' ParentRowHasChild ' : '').($s == 1 ? ' ParentRowColumn ' : ' ChildRowColumn ').'">'.($s == 1 ? '<strong>'.$employee->full_name.'</strong>' : '').'</td>';
+                                        $html .= '<td>'.date('jS F, Y', strtotime($sts['start_date'])).' - '.date('jS F, Y', strtotime($sts['end_date'])).'</td>';
+                                        $html .= '<td>'.$this->calculateHourMinute($sts['opening_balance']).'</td>';
+                                        $html .= '<td>'.$this->calculateHourMinute($sts['booked']).'</td>';
+                                        $html .= '<td>'.$this->calculateHourMinute($sts['taken']).'</td>';
+                                        $html .= '<td>'.$this->calculateHourMinute($sts['requested']).'</td>';
+                                        $html .= '<td>'.$this->calculateHourMinute($sts['bank_holiday']).'</td>';
+                                        $html .= '<td>'.($sts['adjustment_opt'] == 2 ? '-' : '+').''.$this->calculateHourMinute($sts['adjustment']).'</td>';
+                                        $html .= '<td>'.$sts['balacne_left'].'</td>';
+                                    $html .= '</tr>';
+                                    $s++;
+                                endforeach;
+                            endif;
                         endif;
                     endforeach;
                 $html .= '</tbody>';
@@ -227,8 +245,8 @@ class MyStaffController extends Controller
         $year_start = (isset($holidayYear->start_date) && !empty($holidayYear->start_date) ? date('Y-m-d', strtotime($holidayYear->start_date)) : '');
         $year_end = (isset($holidayYear->end_date) && !empty($holidayYear->end_date) ? date('Y-m-d', strtotime($holidayYear->end_date)) : '');
 
-        $pattern_id = 0;
-        $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
+        $pattern_ids = [];
+        $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->orderBy('id', 'ASC')->get();
         if(!empty($patternRes) && $patternRes->count() > 0):
             foreach($patternRes as $ptr):
                 $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
@@ -238,63 +256,71 @@ class MyStaffController extends Controller
                     || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
                     || ($end_to == '' && $effective_from < $year_end)
                 ):
-                    $pattern_id = $ptr->id;
+                    $pattern_ids[] = $ptr->id;
                 endif;
             endforeach;
         endif;
 
-        if($pattern_id > 0):
-            $pattern = EmployeeWorkingPattern::find($pattern_id);
-            $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
-            $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
+        $res = [];
+        if(!empty($pattern_ids)):
+            foreach($pattern_ids as $pattern_id):
+                $pattern = EmployeeWorkingPattern::find($pattern_id);
+                $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
+                $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
-            $sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
-            $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
+                $sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
+                $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
 
-            $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
-            $adjustmentOpt = (isset($adjustmentArr['opt']) && !empty($adjustmentArr['opt']) && $adjustmentArr['opt'] > 0 ? $adjustmentArr['opt'] : 1);
-            $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
-            $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
-            
-            $taken_holiday = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $leaveTaken = $taken_holiday['taken'];
-            $leaveBooked = $taken_holiday['booked'];
-            $leaveRequested = $taken_holiday['requested'];
-            $totalTaken = $taken_holiday['totalTaken'];
+                $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
+                $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
+                $adjustmentOpt = (isset($adjustmentArr['opt']) && !empty($adjustmentArr['opt']) && $adjustmentArr['opt'] > 0 ? $adjustmentArr['opt'] : 1);
+                $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
+                $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $sd, $ed);
+                $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
+                
+                $taken_holiday = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $sd, $ed);
+                $leaveTaken = $taken_holiday['taken'];
+                $leaveBooked = $taken_holiday['booked'];
+                $leaveRequested = $taken_holiday['requested'];
+                $totalTaken = $taken_holiday['totalTaken'];
 
 
-            $openingBalance = $holiday_entitlement;
-            $balance = (($holiday_entitlement - $totalTaken) > 0 ? ($holiday_entitlement - $totalTaken) : ($holiday_entitlement - $totalTaken));
-            if($adjustmentOpt == 1):
-                $balance = $balance + $adjustmentHour;
-                $openingBalance = $holiday_entitlement + $adjustmentHour;
-            elseif($adjustmentOpt == 2):
-                $balance = $balance - $adjustmentHour;
-                $openingBalance = $holiday_entitlement - $adjustmentHour;
-            endif;
+                $openingBalance = $holiday_entitlement;
+                $balance = (($holiday_entitlement - $totalTaken) > 0 ? ($holiday_entitlement - $totalTaken) : ($holiday_entitlement - $totalTaken));
+                if($adjustmentOpt == 1):
+                    $balance = $balance + $adjustmentHour;
+                    $openingBalance = $holiday_entitlement + $adjustmentHour;
+                elseif($adjustmentOpt == 2):
+                    $balance = $balance - $adjustmentHour;
+                    $openingBalance = $holiday_entitlement - $adjustmentHour;
+                endif;
 
-            if($bank_holiday > $balance){
-                $balance_left = ($bank_holiday - $balance);
-                $balance_left = '-'.$this->calculateHourMinute($balance_left);
-            }else{
-                $balance_left = ($balance - $bank_holiday);
-                $balance_left = $this->calculateHourMinute($balance_left);
-            }
+                if($bank_holiday > $balance){
+                    $balance_left = ($bank_holiday - $balance);
+                    $balance_left = '-'.$this->calculateHourMinute($balance_left);
+                }else{
+                    $balance_left = ($balance - $bank_holiday);
+                    $balance_left = $this->calculateHourMinute($balance_left);
+                }
 
-            $taken_holiday['adjustment_opt'] = $adjustmentOpt;
-            $taken_holiday['adjustment'] = $adjustmentHour;
-            $taken_holiday['bank_holiday'] = $bank_holiday;
-            $taken_holiday['opening_balance'] = $openingBalance;
-            $taken_holiday['balacne_left'] = $balance_left;
-            $taken_holiday['pattern_id'] = $pattern_id;
-            $taken_holiday['start_end'] = date('d-m-Y', strtotime($effective_from)).' - '.(!empty($end_to) ? date('d-m-d', strtotime($end_to)) : date('d-m-Y', strtotime($ed)));
-            
-            return $taken_holiday;
-        else:
-            return false;
+                $res[$pattern_id]['taken'] = $taken_holiday['taken'];
+                $res[$pattern_id]['booked'] = $taken_holiday['booked'];
+                $res[$pattern_id]['requested'] = $taken_holiday['requested'];
+                $res[$pattern_id]['totalTaken'] = $taken_holiday['totalTaken'];
+
+                $res[$pattern_id]['adjustment_opt'] = $adjustmentOpt;
+                $res[$pattern_id]['adjustment'] = $adjustmentHour;
+                $res[$pattern_id]['bank_holiday'] = $bank_holiday;
+                $res[$pattern_id]['opening_balance'] = $openingBalance;
+                $res[$pattern_id]['balacne_left'] = $balance_left;
+                $res[$pattern_id]['pattern_id'] = $pattern_id;
+                $res[$pattern_id]['start_date'] = date('d-m-Y', strtotime($sd));
+                $res[$pattern_id]['end_date'] = date('d-m-Y', strtotime($ed));
+                $res[$pattern_id]['active'] = (isset($pattern->active) && $pattern->active > 0 ? $pattern->active : 0);
+            endforeach;
         endif;
+                
+        return $res;
     }
 
     public function employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $psd, $ped){

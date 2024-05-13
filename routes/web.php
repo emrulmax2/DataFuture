@@ -2376,6 +2376,7 @@ Route::middleware('auth')->group(function() {
         Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
         Route::post('my-account/staffs/update-leave', 'staffsUpdateLeave')->name('user.account.staff.update.leave'); 
         Route::get('my-account/staffs/team-holiday', 'myTeamHoliday')->name('user.account.staff.team.holiday'); 
+        Route::post('my-account/staffs/ajax-team-holiday', 'ajaxTeamHoliday')->name('user.account.staff.team.holiday.ajax'); 
     });
 
     Route::controller(EmployeeArchiveController::class)->group(function(){
