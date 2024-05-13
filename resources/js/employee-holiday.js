@@ -410,7 +410,7 @@ import 'litepicker/dist/plugins/multiselect';
 
         var emptyLeave = 0;
         $('.leaveDatesHours', $form).each(function(){
-            if($(this).val() == '00:00' || $(this).val() == ''){
+            if(($(this).val() == '00:00' || $(this).val() == '') && (LeaveType == 1 || LeaveType == 5)){
                 emptyLeave += 1;
             }
         })

@@ -67,7 +67,7 @@ class EmployeeHolidayController extends Controller
                         $query->whereNull('end_to')->orWhere('end_to', '>=', $today);
                     })->where('effective_from', '<=', $today)->where('active', 1)->orderBy('effective_from', 'ASC')->get(),
             'activePattern' => $this->employeePossibleActivePattern($id),
-            'leaveOptionTypes' => $this->employeeLeaveOptionTypes($id),
+            'leaveOptionTypes' => $this->employeeLeaveOptionTypes($id, true),
             'calendarOptions' => [
                 'startDate' => $this->employeeLeaveStartDate($id, 0, 0),
                 'endDate' => (isset($hrHolidayYear->end_date) && !empty($hrHolidayYear->end_date) ? date('Y-m-d', strtotime($hrHolidayYear->end_date)) : 'unknown'),
@@ -437,13 +437,13 @@ class EmployeeHolidayController extends Controller
         return $pattern;
     }
 
-    public function employeeLeaveOptionTypes($employee_id){
+    public function employeeLeaveOptionTypes($employee_id, $getAll = false){
         $today = date('Y-m-d');
         $hrHolidayYears = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
         
         $html = '';
         $html .= '<option value="">Select Leave Type</option>';
-        if(isset($hrHolidayYears->leaveOption) && $hrHolidayYears->leaveOption->count() > 0){
+        if((isset($hrHolidayYears->leaveOption) && $hrHolidayYears->leaveOption->count() > 0) && !$getAll){
             foreach($hrHolidayYears->leaveOption as $lvo):
                 switch ($lvo->leave_option) {
                     case 1:
@@ -461,8 +461,22 @@ class EmployeeHolidayController extends Controller
                     case 5:
                         $html .= '<option value="5">Authorised Paid</option>';
                         break;
+                    case 6:
+                        $html .= '<option value="6">Maternity Leave</option>';
+                        break;
+                    case 7:
+                        $html .= '<option value="7">Paternity Leave</option>';
+                        break;
                 }
             endforeach;
+        }elseif($getAll){
+            $html .= '<option selected="selected" value="1">Holiday / Vacation</option>';
+            $html .= '<option value="2">Unauthorised Absent</option>';
+            $html .= '<option value="3">Sick Leave</option>';
+            $html .= '<option value="4">Authorised Unpaid</option>';
+            $html .= '<option value="5">Authorised Paid</option>';
+            $html .= '<option value="6">Maternity Leave</option>';
+            $html .= '<option value="7">Paternity Leave</option>';
         }else{
             $html .= '<option selected="selected" value="1">Holiday / Vacation</option>';
         }
@@ -755,7 +769,7 @@ class EmployeeHolidayController extends Controller
     }
 
     public function employeeAjaxLeaveLimit(Request $request){
-        $LeaveTypes = [1 => 'Holiday / Vacation', 2 => 'Unauthorised Absent', 3 => 'Sick Leave', 4 => 'Authorised Unpaid', 5 => 'Authorised Paid'];
+        $LeaveTypes = [1 => 'Holiday / Vacation', 2 => 'Unauthorised Absent', 3 => 'Sick Leave', 4 => 'Authorised Unpaid', 5 => 'Authorised Paid', 6 => 'Maternity Leave', 7 => 'Paternity Leave'];
 
         $employee_id = $request->EmployeeId;
         $year_id = $request->LeaveYear;
@@ -789,9 +803,15 @@ class EmployeeHolidayController extends Controller
         $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
         $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $psd, $ped);
         $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
-        $taken_holiday = 0;
+        //$taken_holiday = 0;
 
-        $balance = (($holiday_entitlement - $taken_holiday) > 0 ? ($holiday_entitlement - $taken_holiday) : ($holiday_entitlement - $taken_holiday));
+        $existingLeaveHours = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $psd, $ped);
+        $leave_taken = $existingLeaveHours['taken'];
+        $leave_booked = $existingLeaveHours['booked'];
+        $leave_requested = $existingLeaveHours['requested'];
+        $total_taken = $existingLeaveHours['totalTaken'];
+
+        $balance = (($holiday_entitlement - $total_taken) > 0 ? ($holiday_entitlement - $total_taken) : ($holiday_entitlement - $total_taken));
         if($adjustmentOpt == 1):
             $balance = $balance + $adjustmentHour;
         elseif($adjustmentOpt == 2):
@@ -805,7 +825,7 @@ class EmployeeHolidayController extends Controller
         }
 
 
-        if($balance_left > 0):
+        if($balance_left > 0 || $LeaveType != 1):
             $bookedHours = 0;
             $fractionFound = false;
             $leaveDayHtml = '';
@@ -832,27 +852,27 @@ class EmployeeHolidayController extends Controller
                     $leaveDayHtml .= '</td>';
                     $leaveDayHtml .= '<td>';
                         $leaveDayHtml .= '<div class="form-check m-0 justify-center">';
-                            $leaveDayHtml .= '<input '.($todayIsFraction ? 'checked' : '').' name="leave['.$i.'][fraction]" id="live_fraction_'.strtotime($theDate).'" class="form-check-input m-0 fractionIndicator" type="checkbox" value="1">';
+                            $leaveDayHtml .= '<input '.($LeaveType != 1 && $LeaveType != 5 ? 'disabled' : '').' '.($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5) ? 'checked' : '').' name="leave['.$i.'][fraction]" id="live_fraction_'.strtotime($theDate).'" class="form-check-input m-0 fractionIndicator" type="checkbox" value="1">';
                         $leaveDayHtml .= '</div>';
                     $leaveDayHtml .= '</td>';
                     $leaveDayHtml .= '<td>';
                         $leaveDayHtml .= '<input type="text" 
                                             class="form-control w-full leaveDatesHours timeMask" 
                                             name="leave['.$i.'][hours]"
-                                            '.($todayIsFraction ? '' : 'readonly').'
+                                            '.($todayIsFraction  && ($LeaveType == 1 || $LeaveType == 5) ? '' : 'readonly').'
                                             data-daymax="'.$todayHours.'"
                                             data-maxhour="'.($todayIsFraction ? $todaysFractionHour : $todayHours).'" 
-                                            value="'.($todayIsFraction ? $this->calculateHourMinute($todaysFractionHour) : $this->calculateHourMinute($todayHours)).'"/>';
+                                            value="'.($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5) ? $this->calculateHourMinute($todaysFractionHour) : ($LeaveType == 1 || $LeaveType == 5 ? $this->calculateHourMinute($todayHours) : '00:00')).'"/>';
                     $leaveDayHtml .= '</td>';
                 $leaveDayHtml .= '</tr>';
 
-                $bookedHours += ($todayIsFraction ? $todaysFractionHour : $todayHours);
+                $bookedHours += ($LeaveType == 1 || $LeaveType == 5 ? ($todayIsFraction ? $todaysFractionHour : $todayHours) : 0);
                 $dayCount += 1;
                 $i++;
             endforeach;
 
             $res = [];
-            if($bookedHours > $balance_left):
+            if($bookedHours > $balance_left && $LeaveType == 1):
                 $res['suc'] = 2;
                 $res['html'] = '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong> You do not have sufficient allowance to book holidays.</span></div>';
             else:
@@ -860,7 +880,15 @@ class EmployeeHolidayController extends Controller
                 $html = '';
                 $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
                     $html .= '<div class="col-span-12">';
-                        $html .= '<div class="notes p-5 border"><strong>Please check and confirm the following:</strong><br>'.$this->calculateHourMinute($bookedHours).' HOURS will be removed from the staff members account.</div>';
+                        $html .= '<div class="notes p-5 border"><strong>Please check and confirm the following:</strong><br>';
+                            if($LeaveType == 1):
+                                $html .= $this->calculateHourMinute($bookedHours).' HOURS will be removed from the staff members account.';
+                            elseif($LeaveType == 5):
+                                $html .= $this->calculateHourMinute($bookedHours).' HOURS will be counted as Authorised Paid.';
+                            else:
+                                $html .= '00:00 Hours will be counted as '.$LeaveTypeName;
+                            endif;
+                        $html .= '</div>';
                     $html .= '</div>';
                 $html .= '</div>';
                 $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
@@ -896,7 +924,7 @@ class EmployeeHolidayController extends Controller
                         $html .= '<label class="font-medium block pt-2">Allowance Left</label>';
                     $html .= '</div>';
                     $html .= '<div class="col-span-12 sm:col-span-8">';
-                        $html .= '<div class="font-medium text-right balanceLeft">'.$this->calculateHourMinute(($balance_left - $bookedHours)).'</div>';
+                        $html .= '<div class="font-medium text-right balanceLeft">'.($LeaveType == 1 ? $this->calculateHourMinute(($balance_left - $bookedHours)) : $this->calculateHourMinute($balance_left)).'</div>';
                     $html .= '</div>';
                 $html .= '</div>';
                 $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
@@ -908,9 +936,9 @@ class EmployeeHolidayController extends Controller
                     $html .= '</div>';
                 $html .= '</div>';
 
-                $html .= '<input type="hidden" name="booked_hours" value="'.$bookedHours.'"/>';
+                $html .= '<input type="hidden" name="booked_hours" value="'.($LeaveType == 1 || $LeaveType == 5 ? $bookedHours : 0).'"/>';
                 $html .= '<input type="hidden" name="booked_days" value="'.$dayCount.'"/>';
-                $html .= '<input type="hidden" name="is_fraction_found" value="'.($fractionFound ? 1 : 0).'"/>';
+                $html .= '<input type="hidden" name="is_fraction_found" value="'.($fractionFound && ($LeaveType == 1 || $LeaveType) ? 1 : 0).'"/>';
                 $html .= '<input type="hidden" name="balance_left" value="'.$balance_left.'"/>';
 
                 $res['html'] = $html;
@@ -965,8 +993,12 @@ class EmployeeHolidayController extends Controller
         $leaveData['employee_working_pattern_id'] = $pattern_id;
         $leaveData['leave_type'] = $leave_type;
         $leaveData['note'] = $note;
-        $leaveData['status'] = 'Pending';
+        $leaveData['status'] = ($leave_type == 1 ? 'Pending' : 'Approved');
         $leaveData['created_by'] = auth()->user()->id;
+        if($leave_type > 1):
+            $leaveData['approved_by'] = auth()->user()->id;
+            $leaveData['approved_at'] = date('Y-m-d H:i:s');
+        endif;
 
         if(!empty($leaves) && isset($commonSmtp->id) && $commonSmtp->id > 0):
             $empLeaves = EmployeeLeave::create($leaveData);
@@ -992,6 +1024,7 @@ class EmployeeHolidayController extends Controller
                     $leaveDaysData['hour'] = $leave_hour;
                     $leaveDaysData['is_fraction'] = $isFraction;
                     $leaveDaysData['status'] = 'Active';
+                    $leaveDaysData['was_absent_day'] = ($leave_type == 1 ? 0 : 1);
                     $leaveDaysData['created_by'] = auth()->user()->id;
                     EmployeeLeaveDay::create($leaveDaysData);
 
@@ -1009,7 +1042,7 @@ class EmployeeHolidayController extends Controller
                 $leaveUpdateData['is_fraction'] = ($fractionCount > 0 ? 1 : 0);
 
                 EmployeeLeave::where('id', $empLeaves->id)->update($leaveUpdateData);
-                if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
+                if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0 && $leave_type == 1):
                     foreach($employee->holidayAuth as $authUsers):
                         $approver = User::find($authUsers->user_id);
                         $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');
@@ -1062,7 +1095,7 @@ class EmployeeHolidayController extends Controller
                     endforeach;
                 endif;
 
-                if(!empty($employee_emails)):
+                if(!empty($employee_emails) && $leave_type == 1):
                     $message2 = 'Dear '.$employeeName.',<br/><br/>';
                     $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
                     $message2 .= '<a href="'.url('/').'">Click Here</a><br/><br/>';

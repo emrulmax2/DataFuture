@@ -18,8 +18,29 @@
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request</h2>
-                {{--<a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>--}}
+                {{--<a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>
                 <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
+                <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Staff Holidays</a>--}}
+
+                <div class="dropdown ml-auto">
+                    <a class="dropdown-toggle w-5 h-5 block -mr-2" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
+                        <i data-lucide="more-vertical" class="w-5 h-5 text-slate-500"></i>
+                    </a>
+                    <div class="dropdown-menu w-48">
+                        <ul class="dropdown-content">
+                            <li>
+                                <a href="{{ route('hr.portal.leave.calendar') }}" class="dropdown-item">
+                                    <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Leave Calendar
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('user.account.staff.team.holiday') }}" class="dropdown-item">
+                                    <i data-lucide="calendar-x" class="w-4 h-4 mr-2"></i> My Staff Holidays
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="mt-5">
                 @if($pendingLeaves->count() > 0)
