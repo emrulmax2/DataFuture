@@ -49,6 +49,10 @@ class EmployeeLeave extends Model
         return $this->hasMany(EmployeeLeaveDay::class, 'employee_leave_id', 'id');
     }
 
+    public function supervisedDays(){
+        return $this->hasMany(EmployeeLeaveDay::class, 'employee_leave_id', 'id')->whereIn('supervision_status', [1,2]);
+    }
+
     public function approved(){
         return $this->belongsTo(User::class, 'approved_by');
     }

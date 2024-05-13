@@ -198,6 +198,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\Filemanager\FilemanagerController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
@@ -209,6 +210,8 @@ use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Settings\AccBankController;
 use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
+use App\Http\Controllers\Settings\CommunicationTemplateController;
+use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
@@ -699,6 +702,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
 
         Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
+
+        Route::post('student/send-email-verification-code','sendEmailVerificationCode')->name('student.send.email.verification.code');
+        Route::post('student/send-email-verify-code','verifyEmailVerificationCode')->name('student.email.verify.code');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -2368,7 +2374,9 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(MyStaffController::class)->group(function(){
         Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
-        
+        Route::post('my-account/staffs/update-leave', 'staffsUpdateLeave')->name('user.account.staff.update.leave'); 
+        Route::get('my-account/staffs/team-holiday', 'myTeamHoliday')->name('user.account.staff.team.holiday'); 
+        Route::post('my-account/staffs/ajax-team-holiday', 'ajaxTeamHoliday')->name('user.account.staff.team.holiday.ajax'); 
     });
 
     Route::controller(EmployeeArchiveController::class)->group(function(){
@@ -2443,6 +2451,33 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/csv/transactions/{bank}/{csv?}', 'index')->name('accounts.csv.transactions'); 
         Route::post('accounts/csv/store', 'csvStore')->name('accounts.csv.store'); 
         Route::post('accounts/csv/update', 'csvUpdate')->name('accounts.csv.update'); 
+    });
+
+    Route::controller(DocumentRoleAndPermissionController::class)->group(function() {
+        Route::get('site-settings/documents-role-and-permission', 'index')->name('site.settings.doc.role.permission'); 
+        Route::post('site-settings/documents-role-and-permission/store', 'store')->name('site.settings.doc.role.permission.store');
+        Route::get('site-settings/documents-role-and-permission/list', 'list')->name('site.settings.doc.role.permission.list'); 
+        Route::post('site-settings/documents-role-and-permission/edit', 'edit')->name('site.settings.doc.role.permission.edit');
+        Route::post('site-settings/documents-role-and-permission/update', 'update')->name('site.settings.doc.role.permission.update');
+        Route::delete('site-settings/documents-role-and-permission/delete/{id}', 'destroy')->name('site.settings.doc.role.permission.destory');
+        Route::post('site-settings/documents-role-and-permission/restore/{id}', 'restore')->name('site.settings.doc.role.permission.restore');
+    });
+
+    Route::controller(FilemanagerController::class)->group(function() {
+        Route::get('file-manager/{params?}', 'index')->where('params', '(.*)')->name('file.manager'); 
+        Route::post('file-manager/create-folder', 'createFolder')->name('file.manager.create.folder'); 
+        Route::post('file-manager/employee-permission-set', 'employeePermissionSet')->name('file.manager.get.employee.permission.set'); 
+        Route::post('file-manager/permission-set', 'permissionSet')->name('file.manager.get.permission.set'); 
+    });
+
+    Route::controller(CommunicationTemplateController::class)->group(function() {
+        Route::get('site-settings/communication-templates', 'index')->name('communication.template'); 
+        Route::get('site-settings/communication-templates/list', 'list')->name('communication.template.list'); 
+        Route::post('site-settings/communication-templates/store', 'store')->name('communication.template.store');
+        Route::get('site-settings/communication-templates/edit/{id}', 'edit')->name('communication.template.edit');
+        Route::post('site-settings/communication-templates/update', 'update')->name('communication.template.update');
+        Route::delete('site-settings/communication-templates/delete/{id}', 'destroy')->name('communication.template.destory');
+        Route::post('site-settings/communication-templates/restore/{id}', 'restore')->name('communication.template.restore');
     });
 });
 

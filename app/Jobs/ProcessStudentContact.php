@@ -53,7 +53,9 @@ class ProcessStudentContact implements ShouldQueue
                 'mobile' => $applicantContact->mobile,
                 'external_link_ref'=> isset($applicantContact->external_link_ref) ? $applicantContact->external_link_ref : NULL,
                 'mobile_verification' => isset($applicantContact->mobile_verification) ? $applicantContact->mobile_verification : '0',
-                //'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : NULL,
+                'permanent_post_code' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : NULL,
+                'personal_email' => isset($applicantContact->permanent_post_code) ? ($applicantContact->permanent_post_code) : NULL,
+                'personal_email_verification' => isset($user->email_verified_at) && !empty($user->email_verified_at) ? 1 : 0,
                 
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];

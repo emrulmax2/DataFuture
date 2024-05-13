@@ -50,7 +50,14 @@ class AccCsvTransactionController extends Controller
                 Session::flash('csv_error', '<strong>'.$csvFileName.'</strong> file aready exist in the system.'); 
                 return redirect('/accounts/storage/transactions/'.$acc_bank_id);
             else:
-                $csvData = array_map('str_getcsv', file($csvTmpPath));
+                //$csvData = array_map('str_getcsv', file($csvTmpPath));
+                $csvData = [];
+                $theCSVFile = fopen($csvTmpPath, 'r');
+                while (($line = fgetcsv($theCSVFile)) !== FALSE) {
+                    $csvData[] = $line;
+                }
+                fclose($theCSVFile);
+                //dd($csvData);
                 if(!empty($csvData) && count($csvData) > 0):
                     $data = [];
                     $data['acc_bank_id'] = $acc_bank_id;
@@ -68,7 +75,7 @@ class AccCsvTransactionController extends Controller
                                 $data = [];
                                 $data['acc_csv_file_id'] = $accCsvFile->id;
                                 $data['trans_date'] = (isset($row[0]) && !empty($row[0]) ? date('Y-m-d', strtotime($row[0])) : null);
-                                $data['description'] = (isset($row[2]) && !empty($row[2]) ? $row[2] : null);
+                                $data['description'] = (isset($row[2]) && !empty($row[2]) ? trim(str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array(' ', ' ', ' ', ' ', "\\'", '\\"', ' '), $row[2])) : null);
                                 $data['amount'] = $trans_amount;
                                 $data['transaction_type'] = $transaction_type;
                                 $data['flow'] = $flow;

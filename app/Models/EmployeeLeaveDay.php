@@ -20,6 +20,7 @@ class EmployeeLeaveDay extends Model
         'status',
         'is_taken',
         'was_absent_day',
+        'supervision_status',
         'created_by',
         'updated_by',
     ];

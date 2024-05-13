@@ -119,6 +119,9 @@
                                                 {{ date('jS M, Y', strtotime($leave->from_date)).' - '.date('jS M, Y', strtotime($leave->to_date))}}
                                             </div>
                                         </div>
+                                        @if(isset($leave->supervisedDays) && $leave->supervisedDays->count() > 0)
+                                            <span class="w-auto px-2 text-success py-0 ml-auto"><i data-lucide="shield-check" class="w-6 h-6"></i></span>
+                                        @endif
                                         <div class="text-danger">
                                             {{ $hourMins }}
                                         </div>

@@ -1705,3 +1705,12 @@ input[type=number] {
     margin: 0 !important;
     padding: 0 !important;
 }
+#myStaffHolidayTable.table.table-bordered td.ChildRowColumn {
+    border-top: none;
+}
+#myStaffHolidayTable.table.table-bordered td.ParentRowHasChild.ParentRowColumn{
+    border-bottom: none;
+}
+#myStaffHolidayTable.table.table-bordered tbody tr.activePatternRow td:not(:first-child){
+    background-color: rgb(var(--color-success) / .2) !important;
+}

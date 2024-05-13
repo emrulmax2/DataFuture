@@ -311,6 +311,16 @@ import TomSelect from "tom-select";
 
     /* Edit Contact Details */
     if($('#editAdmissionContactDetailsForm').length > 0){
+        $('#editAdmissionContactDetailsForm').on('click', '#editInstEmail', function(e){
+            if($(this).hasClass('editable')){
+                $(this).removeClass('editable');
+                $(this).siblings('#org_email').attr('readonly', 'readonly');
+            }else{
+                $(this).addClass('editable');
+                $(this).siblings('#org_email').removeAttr('readonly');
+            }
+        });
+
         $('#editAdmissionContactDetailsForm').on('submit', function(e){
             e.preventDefault();
             var $form = $(this);
@@ -370,6 +380,149 @@ import TomSelect from "tom-select";
             }
         });
 
+        $('#editAdmissionContactDetailsForm #personal_email').on('keyup paste', function(){
+            var $input = $(this);
+            var $btn = $(this).siblings('#sendEmailVerifiCode');
+            var $orgStatusInput = $(this).siblings('.personal_email_verification');
+    
+            var orgCode = $input.attr('data-org');
+            var code = $input.val();
+            var orgStatus = $orgStatusInput.attr('data-org');
+            var status = $orgStatusInput.val();
+            if(code != '' && code != orgCode){
+                $btn.css({'display': 'inline-flex'}).removeClass('btn-primary verified').addClass('btn-danger').html('<i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code');
+                $input.css({'border-color': 'red'});
+                $orgStatusInput.val('0');
+                status = 0;
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }else if(code == orgCode){
+                if(orgStatus == 1){
+                    $btn.css({'display': 'inline-flex'}).removeClass('btn-danger').addClass('btn-primary verified').html('<i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified');
+                    $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+                
+                    $orgStatusInput.val(orgStatus);
+                    status = orgStatus;
+                }else{
+                    $btn.css({'display': 'inline-flex'}).removeClass('btn-primary verified').addClass('btn-danger').html('<i data-lucide="link" class="w-4 h-4 mr-1"></i> Send Code');
+                    $input.css({'border-color': 'red'});
+                    $orgStatusInput.val('0');
+                    status = 0;
+                }
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }else{
+                $btn.fadeOut();
+                $input.css({'border-color': 'rgba(226, 232, 240, 1)'});
+                $orgStatusInput.val(orgStatus);
+                status = orgStatus;
+            }
+        });
+
+        $('#sendEmailVerifiCode').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var $theInput = $theBtn.siblings('input[name="personal_email"]');
+            if(!$theBtn.hasClass('verified')){
+                var student_id = $theBtn.attr('data-student-id');
+                var personal_email = $theInput.val();
+
+                $theBtn.attr('disabled', 'disabled');
+                $theInput.attr('readonly', 'readonly');
+
+                 
+                axios({
+                    method: "post",
+                    url: route('student.send.email.verification.code'),
+                    data: {student_id : student_id, personal_email : personal_email},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#editAdmissionContactDetailsForm .emailVerifyCodeGroup').fadeIn(function(){
+                            $('#email_verification_code', this).val('').removeAttr('readonly');
+                            $('#verifyEmail', this).removeAttr('disabled');
+                        })
+                    }
+                }).catch(error => {
+                    $theBtn.removeAttr('disabled');
+                    $theInput.removeAttr('readonly');
+
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }
+        });
+
+        $('#verifyEmail').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var $theInput = $theBtn.siblings('input[name="email_verification_code"]');
+            var $orgStatusInput = $('#editAdmissionContactDetailsForm .personal_email_verification');
+
+            $theBtn.attr('disabled', 'disabled');
+            $theInput.attr('readonly', 'readonly');
+
+            if($theInput.val() != '' && $theInput.val().length == 6){
+                $('.error-email_verification_error').html('');
+
+                var student_id = $theBtn.attr('data-student-id');
+                var code = $theInput.val();
+                var email = $('#editAdmissionContactDetailsForm input[name="personal_email"]').val();
+
+                axios({
+                    method: "post",
+                    url: route('student.email.verify.code'),
+                    data: {student_id : student_id, code : code, email : email},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+
+                        if(response.data.suc == 1){
+                            $('.error-email_verification_error').html('');
+                            $('#editAdmissionContactDetailsForm .emailVerifyCodeGroup').fadeOut(function(){
+                                $('#email_verification_code', this).val('').removeAttr('readonly');
+                                $('#verifyEmail', this).removeAttr('disabled');
+                            });
+
+                            $('#editAdmissionContactDetailsForm #sendEmailVerifiCode').css({'display': 'inline-flex'}).removeClass('btn-danger').addClass('btn-primary verified').html('<i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Verified');
+                            $('#editAdmissionContactDetailsForm input[name="personal_email"]').css({'border-color': 'rgba(226, 232, 240, 1)'});
+                        
+                            $orgStatusInput.val(1);
+                        }else{
+                            $theBtn.removeAttr('disabled');
+                            $theInput.removeAttr('readonly');
+
+                            $('.error-email_verification_error').html('Verification code does not found. Please insert a valid one.')
+                        }
+
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }else{
+                $theBtn.removeAttr('disabled');
+                $theInput.removeAttr('readonly');
+
+                $('.error-email_verification_error').html('Verification code can not be empty and code length should be 6 digit.')
+            }
+        });
+
         $('#editAdmissionContactDetailsForm #mobile').on('keyup paste', function(){
             var $input = $(this);
             var $btn = $(this).siblings('#sendMobileVerifiCode');
@@ -421,7 +574,7 @@ import TomSelect from "tom-select";
             e.preventDefault();
             var $theBtn = $(this);
             var $theInput = $theBtn.siblings('input[name="mobile"]');
-            if(!$theBtn.hasClass('.verified')){
+            if(!$theBtn.hasClass('verified')){
                 var student_id = $theBtn.attr('data-student-id');
                 var mobileNo = $theInput.val();
 
@@ -477,6 +630,7 @@ import TomSelect from "tom-select";
                     if (response.status == 200) {
 
                         if(response.data.suc == 1){
+                            $('.error-mobile_verification_error').html('');
                             $('#editAdmissionContactDetailsForm .verifyCodeGroup').fadeOut(function(){
                                 $('#verification_code', this).val('').removeAttr('readonly');
                                 $('#verifyMobile', this).removeAttr('disabled');

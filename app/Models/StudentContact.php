@@ -23,6 +23,8 @@ class StudentContact extends Model
         'mobile_verification',
         'personal_email_verification',
         'personal_email',
+        'institutional_email',
+        'institutional_email_verification',
         'permanent_post_code',
         'term_time_post_code',
         'created_by',

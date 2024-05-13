@@ -109,10 +109,10 @@
                 </a>
             </li>
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="mail" class="w-4 h-4 mr-2 "></i> Communication Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'block' : 'none' }};">
                     <li class="hasChild">
                         <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> SMS Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
@@ -150,6 +150,11 @@
                     <li>
                         <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'letter.set' ? 'active text-primary font-medium' : '' }}" href="{{ route('letter.set') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Letter Templates
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'communication.template' ? 'active text-primary font-medium' : '' }}" href="{{ route('communication.template') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> System Communication Templates
                         </a>
                     </li>
                     <li>
@@ -258,6 +263,19 @@
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Categories
                         </a>
                     </li>
+                </ul>
+            </li>
+
+            <li class="hasChild">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'site.settings.doc.role.permission' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                    <i data-lucide="folder-cog" class="w-4 h-4 mr-2"></i> File Manager Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
+                </a>
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'site.settings.doc.role.permission' ? 'block' : 'none' }};">
+                    <li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'site.settings.doc.role.permission' ? 'active text-primary font-medium' : '' }}" href="{{ route('site.settings.doc.role.permission') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Roles & Permissions
+                        </a>
+                    </li> 
                 </ul>
             </li>
         </ul>

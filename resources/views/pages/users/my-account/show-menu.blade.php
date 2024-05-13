@@ -13,7 +13,7 @@
     @endif
     @if((isset($employee->user->hourauth) && $employee->user->hourauth->count() > 0) || (isset($employee->user->holiauth) && $employee->user->holiauth->count() > 0))
         <li class="nav-item" role="presentation">
-            <a href="{{ route('user.account.staff') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.staff' ? 'active' : '' }}">
+            <a href="{{ route('user.account.staff') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.staff.team.holiday' || Route::currentRouteName() == 'user.account.staff' ? 'active' : '' }}">
                 My Staff
             </a>
         </li>
