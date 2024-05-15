@@ -37,6 +37,8 @@ export default defineConfig({
                 "resources/js/agent-dahsboard.js",
                 "resources/js/agent-crud.js",
                 "resources/js/agent-profile.js",
+                "resources/js/agent-upload.js",
+                "resources/js/sub-agent-crud.js",
                 "resources/js/bankholiday.js",
                 "resources/js/permissioncategory.js",
                 "resources/js/department.js",

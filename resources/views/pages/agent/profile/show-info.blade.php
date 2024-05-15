@@ -13,11 +13,22 @@
         </div>
         <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
             <div class="font-medium text-center lg:text-left lg:mt-3">Contact Details
-                <button data-id="{{ $employee->id }}" data-type="employee" data-tw-toggle="modal" data-tw-target="#editModal" class="editPopupToggler transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1 ml-2"><i data-lucide="Pencil" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
+                <button data-id="{{ $employee->id }}" data-type="employee" data-tw-toggle="modal" data-tw-target="#editContactModal" class="editPopupToggler transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1 ml-2"><i data-lucide="Pencil" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
             </div>
             <div class="flex flex-col justify-center items-center lg:items-start mt-4">
                 <div class="truncate sm:whitespace-normal flex items-center">
-                    <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $user->email }} <i data-lucide="circle-check" class="w-4 h-4 ml-2"></i> 
+
+                    <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $employee->AgentUser->email }} 
+                    @if($employee->AgentUser->email_verified_at!=null)
+                    <span class="mt-0 font-medium items-center w-24 inline-flex intro-x text-success"><i data-lucide="check-circle" class="w-4 h-4  ml-2 mr-1  "></i>Verified</span> 
+                    @else
+                    <span class="mt-0 font-medium items-center w-24 inline-flex intro-x text-danger"><i data-lucide="x-circle" class="w-4 h-4  ml-2 mr-1  "></i>Unverifed</span> 
+                    <form id="resendverification-staff" method="post" action="" class="xl:flex sm:mr-auto" >
+                        @csrf
+                        <input type="hidden" name="id" value="{{ $employee->AgentUser->id }}" />
+                        <button type="submit" id="resend-mail-agent" class="btn btn-sm btn-primary w-24 text-white">Resend <i data-lucide="send" class="w-4 h-4  ml-2 mr-1 theSend"></i> <i data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 theLoading hidden"></i></button>
+                    </form>
+                    @endif
                 </div>
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $employee->mobile }}

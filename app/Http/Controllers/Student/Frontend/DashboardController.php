@@ -127,6 +127,9 @@ class DashboardController extends Controller
     }
 
     public function profileView(){
+
+            
+        
         $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
 
         return view('pages.students.frontend.dashboard.profile.index', [
