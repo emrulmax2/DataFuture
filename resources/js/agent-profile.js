@@ -212,7 +212,7 @@ function checkPasswordStrength(password) {
 (function () {
     
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+    const editContactModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editContactModal"));
     if($('#agentTableId').length > 0){
         // Init Table
         agentTableId.init();
@@ -339,15 +339,72 @@ function checkPasswordStrength(password) {
             });
         });
     };
-    /*Address Modal*/
+    /*Resend Verification Modal*/
+    if($('#resendverification-staff').length > 0) {
 
-    // Update Course Data
-    $("#editModalForm").on("submit", function (e) {
+        $("#resendverification-staff").on("submit", function (e) {
+            e.preventDefault();
+            let editId = $('#resendverification-staff input[name="id"]').val();
+
+            const form = document.getElementById("resendverification-staff");
+
+            document.querySelector('#resend-mail-agent').setAttribute('disabled', 'disabled');
+            document.querySelector('#resend-mail-agent .theSend').style.cssText = 'display: none;';
+            document.querySelector('#resend-mail-agent .theLoading').style.cssText = 'display: inline-block;';
+
+            let form_data = new FormData(form);
+
+            axios({
+                method: "post",
+                url:  route('agent.verification.send.from.staff', editId),
+                data: form_data,
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                if (response.status == 200) {
+                    document.querySelector("#resend-mail-agent").removeAttribute("disabled");
+                    document.querySelector("#resend-mail-agent svg.theLoading").style.cssText = "display: none;";
+                    document.querySelector("#resend-mail-agent svg.theSend").style.cssText = "display: inline-block;";
+                    succModal.show();
+                    
+                    $("#successModal .successModalTitle").html("Email Sent!");
+                    $("#successModal .successModalDesc").html('Verification email successfully sent.');
+                    
+                    location.reload();
+                }
+            }).catch((error) => {
+                document.querySelector("#resend-mail-agent").removeAttribute("disabled");
+                document.querySelector("#resend-mail-agent svg.theLoading").style.cssText = "display: none;";
+                document.querySelector("#resend-mail-agent svg.theSend").style.cssText = "display: inline-block;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#editForm .${key}`).addClass('border-danger')
+                            $(`#editForm  .error-${key}`).html(val)
+                        }
+                    }else if (error.response.status == 304) {
+                        let message = error.response.statusText;
+                        succModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            
+                            $("#successModal .successModalTitle").html("Oops!");
+                            $("#successModal .successModalDesc").html(message);
+                        });
+                    } else {
+                        console.log("error");
+                    }
+                }
+            });
+        });
+    }
+    // Update Contact Data
+    $("#editContactModal").on("submit", function (e) {
 
         e.preventDefault();
-        let editId = $('#editModal input[name="id"]').val();
+        let editId = $('#editContactModal input[name="id"]').val();
 
-        const form = document.getElementById("editModalForm");
+        const form = document.getElementById("editContactModalForm");
 
         document.querySelector('#update').setAttribute('disabled', 'disabled');
         document.querySelector('#update svg').style.cssText = 'display: inline-block;';
@@ -365,13 +422,11 @@ function checkPasswordStrength(password) {
             if (response.status == 200) {
                 document.querySelector("#update").removeAttribute("disabled");
                 document.querySelector("#update svg").style.cssText = "display: none;";
-                editModal.hide();
-
+                editContactModal.hide();
+                $("#successModal .successModalTitle").html("Congratulations!");
+                $("#successModal .successModalDesc").html('Data successfully updated.');
                 succModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Data successfully updated.');
-                });
+   
                 location.reload();
             }
         }).catch((error) => {
@@ -384,7 +439,7 @@ function checkPasswordStrength(password) {
                         $(`#editForm  .error-${key}`).html(val)
                     }
                 }else if (error.response.status == 304) {
-                    editModal.hide();
+                    editContactModal.hide();
 
                     let message = error.response.statusText;
                     succModal.show();

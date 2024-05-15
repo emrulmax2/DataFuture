@@ -18,6 +18,7 @@ use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Agent\AgentController;
+use App\Http\Controllers\Agent\AgentDocumentsController;
 use App\Http\Controllers\Agent\AgentMyAccountController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\CourseManagement\GroupController;
@@ -65,7 +66,7 @@ use App\Http\Controllers\Agent\Frontend\ApplicationCheckController;
 use App\Http\Controllers\Agent\Frontend\ApplicationController as FrontendApplicationController;
 use App\Http\Controllers\Agent\Frontend\DashboardController as AgentDashboardController;
 use App\Http\Controllers\Agent\Auth\VerificationController as AgentVerificationController;
-
+use App\Http\Controllers\Agent\SubAgentController;
 use App\Http\Controllers\Applicant\Auth\LoginController;
 use App\Http\Controllers\Applicant\Auth\RegisterController;
 
@@ -410,6 +411,14 @@ Route::post('/agent/email/verification-notification', function (Request $request
     return back()->with('verifymessage', 'Verification link sent!');
 
 })->middleware(['auth.agent', 'throttle:6,1'])->name('agent.verification.send');
+
+Route::post('/agent/email/via-staff/verification-notification/{id}', function (Request $request) {
+    $id = $request->id;
+    $user = AgentUser::find($id);
+    $user->sendEmailVerificationNotification();
+    return response()->json(["msg"=>'Verification link sent!'],200);
+
+})->middleware(['auth', 'throttle:6,1'])->name('agent.verification.send.from.staff');
 
 // all student have a prefix route name student.* value
 Route::prefix('/students')->name('students.')->group(function() {
@@ -2257,9 +2266,37 @@ Route::middleware('auth')->group(function() {
         Route::get('agent-user-termlist/{id}', 'ApplicantionList')->name('agent-user.termlist'); 
         
         Route::post('agent-user/{agent_user}/restore', 'restore')->name('agent-user.restore');
-
+        Route::get('agent-user/{agent_user}/sub', 'subAgentShow')->name('agent-user.sub.show');
+        
 
     });
+    // GET|HEAD        sub-agent ............................. sub-agent.index › Agent\SubAgentController@index  
+    // POST            sub-agent ............................. sub-agent.store › Agent\SubAgentController@store  
+    // GET|HEAD        sub-agent-list ........................ sub-agent.list › Agent\AgentController@list  
+    // GET|HEAD        sub-agent/create ...................... sub-agent.create › Agent\SubAgentController@create  
+    // GET|HEAD        sub-agent/{sub_agent} ................. sub-agent.show › Agent\SubAgentController@show  
+    // DELETE          sub-agent/{sub_agent} ................. sub-agent.destroy › Agent\SubAgentController@destroy  
+    // GET|HEAD        sub-agent/{sub_agent}/edit ............ sub-agent.edit › Agent\SubAgentController@edit  
+    Route::resource('sub-agent', SubAgentController::class,[
+        'except' => ['update']
+    ]);
+    Route::controller(SubAgentController::class)->group(function() {
+
+        Route::post('sub-agent/{sub_agent}', 'update')->name('sub-agent.update'); 
+
+        Route::get('sub-agent-list', 'list')->name('sub-agent.list');
+        Route::post('sub-agent/{sub_agent}/restore', 'restore')->name('sub-agent.restore');
+    });
+    Route::controller(AgentDocumentsController::class)->group(function(){
+        Route::get('agent-profile/documents/{id}', 'index')->name('agent-user.documents'); 
+        Route::post('agent-profile/documents/uploads-documents', 'employeeUploadDocument')->name('agent-user.documents.upload.documents'); 
+        Route::get('agent-profile/documents-upload/uploads-list', 'list')->name('agent-user.documents.uploads.list');
+        Route::get('agent-profile/documents-upload/communication-list', 'communicationList')->name('agent-user.documents.communication.list');
+        Route::delete('agent-profile/documents/uploads-destroy', 'destroy')->name('agent-user.documents.destory.uploads');
+        Route::post('agent-profile/documents/uploads-restore', 'restore')->name('agent-user.documents.restore.uploads');
+        Route::post('agent-profile/documents/download-url', 'downloadUrl')->name('agent-user.documents.download.url');
+    });
+
 
     Route::controller(CourseManagementController::class)->group(function() {
         Route::get('course-management', 'index')->name('course.management'); 
