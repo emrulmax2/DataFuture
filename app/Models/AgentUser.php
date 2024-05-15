@@ -19,6 +19,7 @@ class AgentUser  extends Authenticatable  implements MustVerifyEmail
 
     protected $fillable = [
         'email',
+        'parent_id',
         'password','active','created_by','updated_by'
     ];
 
