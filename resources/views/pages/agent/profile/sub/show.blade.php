@@ -222,11 +222,6 @@
                             <div class="intro-x  col-span-12">
                                     <div class="inline-flex">
                                     <input type="email" id="email1" name="email" class="intro-x login__input form-control py-3 px-4 w-auto mt-4 " placeholder="Email"> <span id="verificationEmail" class="mt-4 font-medium items-center w-24 inline-flex text-danger intro-x"></span>
-                                    <form id="resendverification-staff" method="post" action="" class="xl:flex sm:mr-auto" >
-                                        @csrf
-                                        <input type="hidden" name="id" value="{{ $employee->AgentUser->id }}" />
-                                        <button type="submit" id="resend-mail-agent" class="btn btn-sm btn-primary w-24 text-white">Resend <i data-lucide="send" class="w-4 h-4  ml-2 mr-1 theSend"></i> <i data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 theLoading hidden"></i></button>
-                                    </form>
                                     </div>
                                     <div id="error-email1" class="acc__input-error error-email text-danger mt-2"></div>
         
