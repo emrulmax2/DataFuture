@@ -1,71 +1,21 @@
-<!-- BEGIN: Address Modal -->
-<div id="addressCorrespondenceModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="#" id="addressCorrespondenceForm" enctype="multipart/form-data">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Update Correspondence Address</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12">
-                            <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="student_address_address_line_1">
-                            <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12">
-                            <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full" name="student_address_address_line_2">
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full" name="student_address_city">
-                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_state_province_region" class="form-label">State</label>
-                            <input type="text" placeholder="State" id="student_address_state_province_region" class="form-control w-full" name="student_address_state_province_region">
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full" name="student_address_postal_zip_code">
-                            <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="student_address_country">
-                            <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
-                        </div>
-                        <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-                        <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="insertAddress" class="btn btn-primary w-auto">     
-                        Add Address                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <input type="hidden" name="place" value=""/>
-                    <input type="hidden" name="address_id" value="@if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0) {{ $student->contact->term_time_address_id }} @endif"/>
-                </div>
+
+<!-- BEGIN: Modal Content -->
+<div data-tw-backdrop="" aria-hidden="true" tabindex="-1" id="student-login-alert" class="modal group bg-black/60 transition-[visibility,opacity] w-screen h-screen fixed left-0 top-0 [&:not(.show)]:duration-[0s,0.2s] [&:not(.show)]:delay-[0.2s,0s] [&:not(.show)]:invisible [&:not(.show)]:opacity-0 [&.show]:visible [&.show]:opacity-100 [&.show]:duration-[0s,0.4s]">
+    <div class="w-[90%] mx-auto bg-white relative rounded-md shadow-md transition-[margin-top,transform] duration-[0.4s,0.3s] -mt-16 group-[.show]:mt-16 group-[.modal-static]:scale-[1.05] dark:bg-darkmode-600 sm:w-[460px]"><a class="absolute top-0 right-0 mt-3 mr-3" data-tw-dismiss="modal" href="#">
+            <i data-lucide="x" width="24" height="24" class="stroke-1.5 h-8 w-8 text-slate-400 h-8 w-8 text-slate-400"></i>
+
+
+        </a>
+        <div class="p-5 text-center">
+            <i data-lucide="alert-circle" width="24" height="24" class="stroke-1.5 mx-auto mt-3 h-16 w-16 text-success mx-auto mt-3 h-16 w-16 text-warning"></i>
+            <div class="mt-2 text-slate-500">
+                We need few more data to create your account. Please provide the following data best of your knowledge.
             </div>
-        </form>
+        </div>
+        <div class="px-5 pb-8 text-center">
+            <button data-tw-merge data-tw-dismiss="modal" type="button" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-white dark:border-warning w-24 w-24">Ok</button>
+        </div>
     </div>
 </div>
-<!-- END: Address Modal -->
+<!-- END: Modal Content -->
 

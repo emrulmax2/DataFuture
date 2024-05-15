@@ -42,9 +42,8 @@ class AgentController extends Controller
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $academicyear = (isset($request->academicyear) && $request->academicyear > 0 ? $request->academicyear : '');
-        $agentUserList = AgentUser::whereNull('parent_id')->pluck('id')->toArray();
-        
-        $query = Agent::whereIn('agent_user_id', $agentUserList);
+
+        $query = Agent::where('id', '!=', 0);
         if(!empty($queryStr)):
             $query->where('first_name','LIKE','%'.$queryStr.'%');
             $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
@@ -63,7 +62,7 @@ class AgentController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $query = $query->orderByRaw(implode(',', $sorts));
+        $query = Agent::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
             $query->where('title','LIKE','%'.$queryStr.'%');
             $query->orWhere('first_name','LIKE','%'.$queryStr.'%');
@@ -229,7 +228,6 @@ class AgentController extends Controller
         ]);
     
     }
-
 
     /**
      * Show the form for editing the specified resource.

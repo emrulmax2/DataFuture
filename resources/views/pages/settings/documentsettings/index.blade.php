@@ -144,11 +144,6 @@
                                     <label class="form-check-label mr-3 ml-0" for="staff">Staff</label>
                                     <input id="staff" class="form-check-input" name="staff" value="1" type="checkbox">
                                 </div>
-                                
-                                <div class="mt-3 form-check form-switch">
-                                    <label class="form-check-label mr-3 ml-0" for="staff">Agent</label>
-                                    <input id="agent" class="form-check-input" name="agent" value="1" type="checkbox">
-                                </div>
                                 <div class="acc__input-error error-choose text-danger mt-2"></div>
                             </div>
                         </div>
@@ -230,10 +225,6 @@
                             <div class="mt-3 form-check form-switch">
                                 <label class="form-check-label mr-3 ml-0" for="staff">Staff</label>
                                 <input id="staff" class="form-check-input" name="staff" value="1" type="checkbox">
-                            </div>
-                            <div class="mt-3 form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="staff">Agent</label>
-                                <input id="agent" class="form-check-input" name="agent" value="1" type="checkbox">
                             </div>
                             {{-- <div class="acc__input-error error-choose text-danger mt-2"></div> --}}
                         </div>

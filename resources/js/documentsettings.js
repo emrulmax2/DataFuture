@@ -68,11 +68,6 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Agent",
-                    field: "agent",
-                    headerHozAlign: "left",
-                },
-                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -313,12 +308,6 @@ var table = (function () {
                             document.querySelector('#editModal #staff').checked = true;
                         }else{
                             document.querySelector('#editModal #staff').checked = false;
-                        }
-                        
-                        if(dataset.agent == 1){
-                            document.querySelector('#editModal #agent').checked = true;
-                        }else{
-                            document.querySelector('#editModal #agent').checked = false;
                         }
 
                         $('#editModal input[name="id"]').val(editId);

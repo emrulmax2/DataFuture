@@ -67,9 +67,9 @@
 </div>
 <!-- END: Address Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="editContactModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="#" id="editContactModalForm" enctype="multipart/form-data">
+        <form method="POST" action="#" id="editModalForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="font-medium text-base mr-auto">Edit Contact</h2>
@@ -80,9 +80,9 @@
                 <div class="modal-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="intro-x col-span-12">
-                             <label for="emailPersonal" class="form-label inline-flex">Email (use for login)<span class="text-danger">*</span></label>
-                                <input type="email" id="emailPersonal" name="email" value="{{ $employee->email }}" class="form-control rounded-none " placeholder="Email"> 
-                                <div id="error-emailPersonal" class="acc__input-error error-email text-danger mt-2"></div>
+                             <label for="email1" class="form-label inline-flex">Email (use for login)<span class="text-danger">*</span></label>
+                                <input type="email" id="email1" name="email" value="{{ $user->email }}" class="form-control rounded-none " placeholder="Email"> 
+                                <div id="error-email1" class="acc__input-error error-email text-danger mt-2"></div>
                         </div>
                         <div class="intro-x col-span-12">
                             <label for="mobile" class="form-label inline-flex">Mobile <span class="text-danger">*</span></label>
@@ -108,7 +108,7 @@
                             </g>
                         </svg>
                     </button>
-                    <input type="hidden" name="id" value="{{ $employee->id }}" />
+                    <input type="hidden" name="id" value="{{ $user->id }}" />
                     
                 </div>
             </div>

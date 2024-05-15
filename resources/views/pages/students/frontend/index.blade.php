@@ -194,35 +194,35 @@
                         <div id="currenAdress__no" class="hidden">
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_address_line_1" class="form-label inline-flex">Address Line 1</label>
-                                            <input id="student_address_address_line_1" autocomplete="off" type="text" name="address_line_1" value="" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
+                                            <input type="text" name="address_line_1" value="" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                            <input id="student_address_address_line_2" type="text"  autocomplete="off" name="address_line_2" value="" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
+                                            <input type="text" name="address_line_2" value="" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_postal_zip_code" class="form-label inline-flex">Post Code</label>
-                                            <input id="student_address_postal_zip_code" type="text"  autocomplete="off" name="post_code" value="" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
+                                            <input type="text" name="post_code" value="" class="w-full text-sm" />
                                         </div>
                                 
                                 </div>
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_city" class="form-label inline-flex">City</label>
-                                            <input id="student_address_city" type="text"  autocomplete="off" name="city" value="" class="w-full text-sm"  />
+                                            <label for="input-wizard-4" class="form-label inline-flex">City</label>
+                                            <input type="text" name="city" value="" class="w-full text-sm"  />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_state_province_region" class="form-label inline-flex">State</label>
-                                            <input id="student_address_state_province_region"  autocomplete="off" type="text" name="state" value="" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">State</label>
+                                            <input type="text" name="state" value="" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_country" class="form-label inline-flex">Country</label>
-                                            <input id="student_address_country" type="text"  autocomplete="off" name="country" value="" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Country</label>
+                                            <input type="text" name="country" value="" class="w-full text-sm" />
                                         </div>
                                     
                                 </div>
@@ -275,36 +275,38 @@
                                 <div class="col-span-12">
                                     <div class="grid grid-cols-12 gap-x-4">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="permanent_address_line_1" class="form-label inline-flex">Address Line 1</label>
-                                            <input id="permanent_address_line_1" type="text" name="permanent_address_line_1" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 1</label>
+                                            <input type="text" name="permanent_address_line_1" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="permanent_address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                            <input id="permanent_address_line_2" type="text" name="permanent_address_line_2" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Address Line 2</label>
+                                            <input type="text" name="permanent_address_line_2" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label  for="permanent_post_code" class="form-label inline-flex">Post Code</label>
-                                            <input id="permanent_post_code" type="text" name="permanent_post_code" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Post Code</label>
+                                            <input type="text" name="permanent_post_code" class="w-full text-sm" />
                                         </div>
                                     </div>
                                 </div>
+                            
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label  for="permanent_city" class="form-label inline-flex">City</label>
-                                            <input id="permanent_city" type="text" name="permanent_city" class="w-full text-sm"  />
+                                            <label for="input-wizard-4" class="form-label inline-flex">City</label>
+                                            <input type="text" name="permanent_city" class="w-full text-sm"  />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="permanent_state" class="form-label inline-flex">State</label>
-                                            <input id="permanent_state" type="text" name="permanent_state" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">State</label>
+                                            <input type="text" name="permanent_state" class="w-full text-sm" />
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="permanent_country" class="form-label inline-flex">Country</label>
-                                            <input id="permanent_country" type="text" name="permanent_country" class="w-full text-sm" />
+                                            <label for="input-wizard-4" class="form-label inline-flex">Country</label>
+                                            <input type="text" name="permanent_country" class="w-full text-sm" />
                                         </div>
+                                    
                                 </div>
                             
                         </div>
@@ -430,16 +432,11 @@
         <!-- ALL APPLICANT BASE DATA WILL BE HERE -->
   
     <!-- End: HTML Table Data --> 
-    
-    <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-    <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
-
-    @include('pages.students.frontend.modals.first-login.index')
+    @include('pages.students.frontend.modals.index')
 @endsection
 
 
 @section('script')
-<script>(function(n,t,i,r){var u,f;n[i]=n[i]||{},n[i].initial={accountCode:"INDIV65018",host:"INDIV65018.pcapredict.com"},n[i].on=n[i].on||function(){(n[i].onq=n[i].onq||[]).push(arguments)},u=t.createElement("script"),u.async=!0,u.src=r,f=t.getElementsByTagName("script")[0],f.parentNode.insertBefore(u,f)})(window,document,"pca","//INDIV65018.pcapredict.com/js/sensor.js")</script>
     @vite('resources/js/student-frontend.js')
  
 @endsection

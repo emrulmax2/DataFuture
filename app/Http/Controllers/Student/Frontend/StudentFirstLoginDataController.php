@@ -61,7 +61,6 @@ class StudentFirstLoginDataController extends Controller
         // "permanent_address_id" => null
         // "student_id" => "52"
         // "term_time_accommodation_type_id" => something
-
         if($request->current_address_id==null) {
             // New Address insert then connect link
                 $address = new Address();
@@ -78,8 +77,8 @@ class StudentFirstLoginDataController extends Controller
                 $address->fill($addressData);
                 $address->save();
                 
-                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
-                $studentContact = StudentContact::find($studentContactId->id);
+                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+                $studentContact = StudentContact::find($studentContactId[0]);
                 $studentContact->term_time_address_id = $address->id;
                 $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
                 $studentContact->save();
@@ -88,8 +87,8 @@ class StudentFirstLoginDataController extends Controller
         if($request->permanent_address_id==null && $request->permanent_address_line_1 == null)  {
             // get the current address data and use it for permanent address
 
-            $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
-            $studentContact = StudentContact::find($studentContactId->id);
+            $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+            $studentContact = StudentContact::find($studentContactId[0]);
             $studentContact->permanent_address_id  = $request->current_address_id;
             $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
             $studentContact->save();
@@ -110,8 +109,8 @@ class StudentFirstLoginDataController extends Controller
                 $address->fill($addressData);
                 $address->save();
                 
-                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
-                $studentContact = StudentContact::find($studentContactId->id);
+                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+                $studentContact = StudentContact::find($studentContactId[0]);
                 $studentContact->permanent_address_id = $address->id;
                 $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
                 $studentContact->save();
@@ -132,16 +131,16 @@ class StudentFirstLoginDataController extends Controller
                 $address->fill($addressData);
                 $address->save();
                 
-                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
-                $studentContact = StudentContact::find($studentContactId->id);
+                $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+                $studentContact = StudentContact::find($studentContactId[0]);
                 $studentContact->permanent_address_id = $address->id;
                 $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
                 $studentContact->save();
 
         } else if($request->permanent_address_id!=null) {
             // insert the permanent address Id to student contacts table
-            $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
-            $studentContact = StudentContact::find($studentContactId->id);
+            $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first()->pluck('id')->toArray();
+            $studentContact = StudentContact::find($studentContactId[0]);
             $studentContact->permanent_address_id  = $request->permanent_address_id;
             $studentContact->term_time_accommodation_type_id = $request->term_time_accommodation_type_id;
             $studentContact->save();
@@ -152,52 +151,43 @@ class StudentFirstLoginDataController extends Controller
     public function consentConfirm(Request $request)
     {
         $consentIds = [];
-        if(isset($request->consent_number)) {
-            foreach($request->consent_number as $consent) {
+        foreach($request->consent_number as $consent) {
+                $studentConsent = new StudentConsent();
+                $data = [
+                    "student_id" => $request->student_id,
+                    "consent_policy_id" => $consent,
+                    "status" => "Agree",
+                    "created_by" => 1
+                ];
+                $studentConsent->fill($data);
+                $studentConsent->save();
+                $consentIds[] = $consent;
+        }
+
+        $consentPolicies = ConsentPolicy::all();
+        if(!empty($consentPolicies)):
+            foreach($consentPolicies as $csp):
+                if(!in_array($csp->id, $consentIds)):
                     $studentConsent = new StudentConsent();
                     $data = [
                         "student_id" => $request->student_id,
-                        "consent_policy_id" => $consent,
-                        "status" => "Agree",
+                        "consent_policy_id" => $csp->id,
+                        "status" => "Disagree",
                         "created_by" => 1
                     ];
                     $studentConsent->fill($data);
                     $studentConsent->save();
-                    $consentIds[] = $consent;
-            }
+                endif;
+            endforeach;
+        endif;
 
-            $consentPolicies = ConsentPolicy::all();
-            if(!empty($consentPolicies)):
-                foreach($consentPolicies as $csp):
-                    if(!in_array($csp->id, $consentIds)):
-                        $studentConsent = new StudentConsent();
-                        $data = [
-                            "student_id" => $request->student_id,
-                            "consent_policy_id" => $csp->id,
-                            "status" => "Disagree",
-                            "created_by" => 1
-                        ];
-                        $studentConsent->fill($data);
-                        $studentConsent->save();
-                    endif;
-                endforeach;
-            endif;
+        $student = Student::find($request->student_id);
+        
+        $studentUser = StudentUser::find($student->users->id);
+        $studentUser->first_login = 0;
+        $studentUser->save();
 
-            $student = Student::find($request->student_id);
-            
-            $studentUser = StudentUser::find($student->users->id);
-            $studentUser->first_login = 0;
-            $studentUser->save();
-
-            return response()->json(["Consent Updated"]);
-        }else {
-            $student = Student::find($request->student_id);
-            
-            $studentUser = StudentUser::find($student->users->id);
-            $studentUser->first_login = 0;
-            $studentUser->save();
-            return response()->json(["No Consent Updated"]);
-        }
+        return response()->json(["Consent Updated"]);
     }
     public function reviewShows()
     {
