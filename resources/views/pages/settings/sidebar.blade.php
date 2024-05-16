@@ -245,7 +245,7 @@
 
             <li class="hasChild">
                 <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'site.settings.category' || Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
-                    <i data-lucide="landmark" class="w-4 h-4 mr-2"></i> Account Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
+                    <i data-lucide="landmark" class="w-4 h-4 mr-2"></i> Accounts Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
                 <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'site.settings.category' || Route::currentRouteName() == 'site.settings.banks' || Route::currentRouteName() == 'site.settings.methods' ? 'block' : 'none' }};">
                     <li>

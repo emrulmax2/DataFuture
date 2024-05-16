@@ -2505,6 +2505,10 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/create-folder', 'createFolder')->name('file.manager.create.folder'); 
         Route::post('file-manager/employee-permission-set', 'employeePermissionSet')->name('file.manager.get.employee.permission.set'); 
         Route::post('file-manager/permission-set', 'permissionSet')->name('file.manager.get.permission.set'); 
+        Route::post('file-manager/edit-folder', 'editFolder')->name('file.manager.edit.folder'); 
+        Route::post('file-manager/update-folder', 'updateFolder')->name('file.manager.update.folder'); 
+        Route::post('file-manager/edit-folder-permission', 'editFolderPermission')->name('file.manager.edit.folder.permission'); 
+        Route::post('file-manager/update-folder-permission', 'updateFolderPermission')->name('file.manager.update.folder.permission'); 
     });
 
     Route::controller(CommunicationTemplateController::class)->group(function() {
