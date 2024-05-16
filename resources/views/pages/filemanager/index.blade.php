@@ -10,7 +10,7 @@
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             @if($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1))
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFolderModal" class="add_btn btn btn-primary shadow-md mr-2">New Folder</button>
-                <button type="button" data-tw-toggle="modal" data-tw-target="#addFolderModal" class="add_btn btn btn-primary shadow-md mr-2">Upload File</button>
+                <button type="button" data-tw-toggle="modal" data-tw-target="#addFileModal" class="add_btn btn btn-primary shadow-md mr-2">Upload File</button>
             @endif
         </div>
     </div>
@@ -35,13 +35,18 @@
                                     <div class="dropdown-menu w-40" id="_f12z2ubls">
                                         <ul class="dropdown-content">
                                             <li>
-                                                <a href="" class="dropdown-item">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-text" class="lucide lucide-file-text w-4 h-4 mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><line x1="10" x2="8" y1="9" y2="9"></line></svg> Export
+                                                <a data-id="{{ $folder->id }}" data-tw-toggle="modal" data-tw-target="#editFolderModal" href="javascript:void(0);" class="editFolder dropdown-item">
+                                                    <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit Folder
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="" class="dropdown-item">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" class="lucide lucide-settings w-4 h-4 mr-2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> Settings
+                                                <a data-id="{{ $folder->id }}" data-tw-toggle="modal" data-tw-target="#editFolderPermissionModal" href="javascript:void(0);" class="editPermission dropdown-item">
+                                                    <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $folder->id }}" href="javascript:void(0);" class="deleteFolder dropdown-item">
+                                                    <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete Folder
                                                 </a>
                                             </li>
                                         </ul>
@@ -59,7 +64,192 @@
     </div>
 
 
-    <!-- BEGIN: Edit New Request Modal -->
+    <!-- BEGIN: Add File Modal -->
+    <div id="addFileModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="addFileForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Upload File</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="file_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                            <select name="employee_ids[]" id="file_employee_ids" class="w-full tom-selects" multiple>
+                                @if(!empty($employee))
+                                    @foreach($employee as $emp)
+                                        <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employees text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <table class="table table-bordered table-sm folderPermissionTable">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Role</th>
+                                        <th class="text-center">Create</th>
+                                        <th class="text-center">Read</th>
+                                        <th class="text-center">Update</th>
+                                        <th class="text-center">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="noticeTr">
+                                        <td colspan="6">
+                                            <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateFolderPermission" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add File Modal -->
+
+
+    <!-- BEGIN: Edit Folder Permission Modal -->
+    <div id="editFolderPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editFolderPermissionForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit Folder Permission</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                            <select name="employee_ids[]" id="edit_employee_ids" class="w-full tom-selects" multiple>
+                                @if(!empty($employee))
+                                    @foreach($employee as $emp)
+                                        <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employees text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <table class="table table-bordered table-sm folderPermissionTable">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Role</th>
+                                        <th class="text-center">Create</th>
+                                        <th class="text-center">Read</th>
+                                        <th class="text-center">Update</th>
+                                        <th class="text-center">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="noticeTr">
+                                        <td colspan="6">
+                                            <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateFolderPermission" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit Folder Permission Modal -->
+
+    <!-- BEGIN: Edit Folder Modal -->
+    <div id="editFolderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="editFolderForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit Folder</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="name" class="form-label">Folder Name <span class="text-danger">*</span></label>
+                            <input id="name" type="text" name="name" class="form-control w-full">
+                            <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateFolder" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit Folder Modal -->
+
+
+    <!-- BEGIN: Add Folder Modal -->
     <div id="addFolderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addFolderForm" enctype="multipart/form-data">
@@ -76,37 +266,46 @@
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
-                            <select name="employee_ids[]" id="employee_ids" class="w-full tom-selects" multiple>
-                                @if(!empty($employee))
-                                    @foreach($employee as $emp)
-                                        <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-employees text-danger mt-2"></div>
+                        <div class="mt-3 permissionSwitchWrap">
+                            <label for="name" class="form-label">Inherit Permission</label>
+                            <div class="form-check form-switch">
+                                <input {{ $parent_id == 0 ? '' : 'checked' }} id="permission_inheritence" name="permission_inheritence" value="1" class="form-check-input" type="checkbox">
+                                <label class="form-check-label permission_inheritence_label" for="permission_inheritence">Yes</label>
+                            </div>
                         </div>
-                        <div class="mt-3">
-                            <table class="table table-bordered table-sm folderPermissionTable">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Role</th>
-                                        <th>Create</th>
-                                        <th>Read</th>
-                                        <th>Update</th>
-                                        <th>Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="noticeTr">
-                                        <td colspan="6">
-                                            <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="permissionWrap" style="display: {{ $parent_id == 0 ? 'block' : 'none' }};">
+                            <div class="mt-3">
+                                <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                <select name="employee_ids[]" id="employee_ids" class="w-full tom-selects" multiple>
+                                    @if(!empty($employee))
+                                        @foreach($employee as $emp)
+                                            <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-employees text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3">
+                                <table class="table table-bordered table-sm folderPermissionTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>Role</th>
+                                            <th>Create</th>
+                                            <th>Read</th>
+                                            <th>Update</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="noticeTr">
+                                            <td colspan="6">
+                                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -132,7 +331,7 @@
             </form>
         </div>
     </div>
-    <!-- END: Edit New Request Modal -->
+    <!-- END: Add Folder Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">

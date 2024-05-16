@@ -24,4 +24,8 @@ class DocumentFolderPermission extends Model
     public function role(){
         return $this->belongsTo(DocumentRoleAndPermission::class, 'document_role_and_permission_id');
     }
+
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 }

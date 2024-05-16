@@ -14,6 +14,7 @@ class EmployeeTerm extends Model
         'employee_notice_period_id',
         'employment_ssp_term_id',
         'employment_period_id',
+        'provision_end'
     ];
 
     public function SSP() {
@@ -24,5 +25,13 @@ class EmployeeTerm extends Model
     }
     public function period() {
         return $this->belongsTo(EmploymentPeriod::class, 'employment_period_id');
+    }
+
+    public function setProvisionEndAttribute($value) {  
+        $this->attributes['provision_end'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+    
+    public function getProvisionEndAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }
