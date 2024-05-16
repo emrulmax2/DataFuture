@@ -60,7 +60,7 @@ class DashboardController extends Controller
                     'applicationCheck' => isset($agentCheck->id) && !empty($agentCheck->id) ? $agentCheck->id : '',
                     'gender' => isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : '',
                     'course' => (isset($list->course->creation->course->name) ? $list->course->creation->course->name : '').(isset($list->course->semester->name) ? ' - '.$list->course->semester->name : ''),
-                    'submission_date' => $list->submission_date,
+                    'submission_date' => $list->submission_date . "( ".$list->referral_code." )",
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),
                     'deleted_at' => $list->deleted_at
                 ];
