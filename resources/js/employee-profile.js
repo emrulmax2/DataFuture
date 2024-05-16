@@ -19,6 +19,7 @@ import { createIcons, icons } from "lucide";
 
     var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
     var employee_work_type_id_tom = new TomSelect('#employee_work_type_id', tomOptions);
+    var employment_period_id = new TomSelect('#employment_period_id', tomOptions);
 
     let multiTomOption = tomOptions
     $('.lccTom').each(function(){
@@ -329,4 +330,19 @@ import { createIcons, icons } from "lucide";
             });
         });
     }
+
+    $('#employment_period_id').on('change', function(e){
+        let $thePeriod = $(this);
+        let period_id = $thePeriod.val();
+
+        if(period_id == 3){
+            $('.provisionEndDateWrap').fadeIn('fast', function(e){
+                $('#provision_end').val('');
+            })
+        }else{
+            $('.provisionEndDateWrap').fadeOut('fast', function(e){
+                $('#provision_end').val('');
+            })
+        }
+    })
 })();

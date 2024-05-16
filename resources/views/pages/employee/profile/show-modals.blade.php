@@ -566,17 +566,22 @@
                         </div> 
 
                         <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="employment-period" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span></label>
-                            <select id="employment-period" name="employment_period_id" class="form-control lccTom lcc-tom-select">
+                            <label for="employment_period_id" class="form-label inline-flex employment-period">Period of Employment  <span class="text-danger"> *</span></label>
+                            <select id="employment_period_id" name="employment_period_id" class="form-control lcc-tom-select">
                                 <option value="" selected>Please Select</option>
                                 @if($employmentPeriods->count() > 0)
                                     @foreach($employmentPeriods as $employmentPeriod)
                                         <option {{ isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == $employmentPeriod->id ? 'Selected' : '' }} value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>
-                                        {{-- <option  value="{{ $employmentPeriod->id }}">{{ $employmentPeriod->name }}</option>               --}}
                                     @endforeach
                                 @endif
                             </select>
                             <div class="acc__input-error error-employment_period_id text-danger mt-2"></div>
+                        </div>
+
+                        <div class="intro-y col-span-12 sm:col-span-4 provisionEndDateWrap" style="display: {{ (isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == 3 ? 'block' : 'none') }};">
+                            <label for="provision_end" class="form-label inline-flex employment-period">Provision End  <span class="text-danger">*</span></label>
+                            <input value="{{ (isset($employeeTerms->provision_end) && !empty($employeeTerms->provision_end) ? date('d-m-Y', strtotime($employeeTerms->provision_end)) : '') }}" type="text" id="provision_end" name="provision_end" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            <div class="acc__input-error error-provision_end text-danger mt-2"></div>
                         </div>
                         <div class="intro-y col-span-12 sm:col-span-4">
                             <label for="ssp-term" class="form-label inline-flex employment-period">SSP Terms & Conditions   <span class="text-danger"> *</span></label>

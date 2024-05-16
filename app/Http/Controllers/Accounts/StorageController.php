@@ -230,7 +230,7 @@ class StorageController extends Controller
         static $level = 0;
         $level ++;
 
-        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         if($categories):
             foreach ($categories as $cat):
@@ -252,7 +252,7 @@ class StorageController extends Controller
         static $level = 0;
         $level ++;
 
-        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
 
         if($categories):
             foreach ($categories as $cat):
