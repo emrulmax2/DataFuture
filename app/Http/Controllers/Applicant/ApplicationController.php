@@ -229,16 +229,14 @@ class ApplicationController extends Controller
         ]);
 
         if(auth('agent')->user()) {
-            $agentUserId = auth('agent')->user()->id;
-            $agentData = Agent::where('agent_user_id',)->get()->first();
-            
-            // $ref = Applicant::where('id', $applicant_id)->update([
-            //     'referral_code' => $agentData->code,
-            //     'is_referral_varified' => 1,
-            //     'updated_by' =>  auth('agent')->user()->id,
-            // ]);
-
             $applicant = Applicant::find($applicant_id);
+            $agentUserId = auth('agent')->user()->id;
+            
+            $referral = ReferralCode::where('code',$applicant->referral_code)->get()->first();
+            $applicant->agent_user_id = $referral->agent_user_id;
+            $applicant->updated_by = auth('agent')->user()->id;
+            $applicant->save();
+            
             $application = AgentApplicationCheck::where('agent_user_id',$agentUserId)
                                 ->where("email", $applicant->users->email)
                                 ->where("mobile",$applicant->users->phone)
