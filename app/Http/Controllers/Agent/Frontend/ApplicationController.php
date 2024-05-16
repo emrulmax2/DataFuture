@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Http\Requests\ApplicationPersonalDetailsRequest;
 use App\Models\Address;
 use App\Models\AgentApplicationCheck;
+use App\Models\AgentUser;
 use App\Models\Applicant;
 use App\Models\ApplicantContact;
 use App\Models\ApplicantDisability;
@@ -63,6 +64,7 @@ class ApplicationController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
+            'agentRefferalCode' => ReferralCode::where('agent_user_id',auth('agent')->user()->id)->get()->first()->code,
             'titles' => Title::all(),
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),

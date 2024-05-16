@@ -232,11 +232,11 @@ class ApplicationController extends Controller
             $agentUserId = auth('agent')->user()->id;
             $agentData = Agent::where('agent_user_id',)->get()->first();
             
-            $ref = Applicant::where('id', $applicant_id)->update([
-                'referral_code' => $agentData->code,
-                'is_referral_varified' => 1,
-                'updated_by' =>  auth('agent')->user()->id,
-            ]);
+            // $ref = Applicant::where('id', $applicant_id)->update([
+            //     'referral_code' => $agentData->code,
+            //     'is_referral_varified' => 1,
+            //     'updated_by' =>  auth('agent')->user()->id,
+            // ]);
 
             $applicant = Applicant::find($applicant_id);
             $application = AgentApplicationCheck::where('agent_user_id',$agentUserId)
