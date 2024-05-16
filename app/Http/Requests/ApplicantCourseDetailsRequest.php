@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class ApplicantCourseDetailsRequest extends FormRequest
 {
@@ -15,7 +16,21 @@ class ApplicantCourseDetailsRequest extends FormRequest
     {
         return true;
     }
-
+    public function withValidator(Validator $validator)
+    {
+        $refferelcode = $validator->getData()['referral_code'] ?? '';
+        $validator->after(
+            function ($validator) use ($refferelcode) {
+          
+                if (auth('agent')->user() && $refferelcode=="") {
+                    $validator->errors()->add(
+                        'referral_code',
+                        'Refferal code required'
+                    );
+                }
+            }
+        );                            
+    }
     /**
      * Get the validation rules that apply to the request.
      *
