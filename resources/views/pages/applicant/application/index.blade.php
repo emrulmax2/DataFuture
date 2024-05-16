@@ -609,11 +609,11 @@
                     </div>
                     
                         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                        <div class="font-medium text-base">Others @if(isset(auth('agent')->user())) <span class="text-danger">*</span> @endif</div>
+                        <div class="font-medium text-base">Others @if(auth('agent')->user()) <span class="text-danger">*</span> @endif</div>
                         <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                             <div class="col-span-12 sm:col-span-8">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by @if(isset(auth('agent')->user())) <span> Agent/Sub Agent </span> @else <span> Somone/ Agent </span> @endif Please enter the Referral Code.</label>
+                                    <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by @if(auth('agent')->user()) <span> Agent/Sub Agent </span> @else <span> Somone/ Agent </span> @endif Please enter the Referral Code.</label>
                                     <div class="col-span-12 sm:col-span-6">
                                         <div class="validationGroup">
                                             <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
