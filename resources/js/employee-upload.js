@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import Dropzone from "dropzone";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 ("use strict");
 var employeeDocumentListTable = (function () {
@@ -325,6 +326,39 @@ var employeeCommunicationDocumentListTable = (function () {
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const uploadsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadsDropdown"));
     const uploadEmployeeDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModal"));
+    const addCommunicationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCommunicationModal"));
+
+    let emailBody;
+    if($("#email_body").length > 0){
+        const el = document.getElementById('email_body');
+        ClassicEditor.create(el).then(newEditor => {
+            emailBody = newEditor;
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+    
+    $('#addCommunicationForm').on('change', '#editComDocument', function(){
+        showFileName('editComDocument', 'editComDocumentName');
+    });
+
+    function showFileName(inputId, targetPreviewId) {
+        let fileInput = document.getElementById(inputId);
+        let namePreview = document.getElementById(targetPreviewId);
+        let fileName = fileInput.files[0].name;
+        namePreview.innerText = fileName;
+        return false;
+    };
+    
+    const addCommunicationModalEl = document.getElementById('addCommunicationModal')
+    addCommunicationModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addCommunicationModal .acc__input-error').html('');
+        $('#addCommunicationModal input[name="document_name"]').val('');
+        $('#addCommunicationModal input[name="hard_copy_check_status"][value="0"]').prop('checked', true);
+        $('#addCommunicationModal input[name="document"]').val('');
+        $('#addCommunicationModal #editComDocumentName').html('');
+        emailBody.setData($('#addCommunicationModal .sendEmailContent').attr('data-content'));
+    });
 
     const uploadEmployeeDocumentModalEl = document.getElementById('uploadEmployeeDocumentModal')
     uploadEmployeeDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -337,6 +371,7 @@ var employeeCommunicationDocumentListTable = (function () {
 
         Dropzone.forElement('#uploadDocumentForm').removeAllFiles(true);
     });
+
     const confirmModalEl = document.getElementById('confirmModal')
     confirmModalEl.addEventListener('hide.tw.modal', function(event) {
         $("#confirmModal .confModDesc").html('');
@@ -660,6 +695,69 @@ var employeeCommunicationDocumentListTable = (function () {
             if(error.response){
                 $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
                 console.log('error');
+            }
+        });
+    });
+
+    $('#addCommunicationForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addCommunicationForm');
+    
+        document.querySelector('#sendEmail').setAttribute('disabled', 'disabled');
+        document.querySelector("#sendEmail svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#addCommunicationForm input[name="document"]')[0].files[0]); 
+        axios({
+            method: "post",
+            url: route('employee.documents.sent.mail'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#sendEmail').removeAttribute('disabled');
+            document.querySelector("#sendEmail svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                addCommunicationModal.hide();
+                var res = response.data.suc;
+                
+                if(res.suc == 1){
+                    successModal.show(); 
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulation!" );
+                        $("#successModal .successModalDesc").html('Employee communication email successfully sent.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });  
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }else{
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html("Error Found!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                        $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
+                    });
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000);
+                }
+            }
+            employeeCommunicationDocumentListTable.init();
+        }).catch(error => {
+            document.querySelector('#sendEmail').removeAttribute('disabled');
+            document.querySelector("#sendEmail svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addCommunicationForm .${key}`).addClass('border-danger');
+                        $(`#addCommunicationForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
             }
         });
     });

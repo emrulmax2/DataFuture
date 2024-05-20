@@ -24,7 +24,7 @@ class EmployeePrivilegeController extends Controller
         endif;
         
         return view('pages.employee.profile.privilege',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "employee" => $employee,
             "employment" => $employment,

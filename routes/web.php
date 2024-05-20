@@ -202,6 +202,7 @@ use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\Filemanager\FilemanagerController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
+use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\InternalLinkController;
@@ -1139,6 +1140,7 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/documents/uploads-restore', 'restore')->name('employee.documents.restore.uploads');
         
         Route::post('employee-profile/documents/download-url', 'downloadUrl')->name('employee.documents.download.url');
+        Route::post('employee-profile/documents/sent-mail', 'employeeSentMail')->name('employee.documents.sent.mail'); 
     });
 
     Route::controller(EmployeeNotesController::class)->group(function(){
@@ -2519,6 +2521,15 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/communication-templates/update', 'update')->name('communication.template.update');
         Route::delete('site-settings/communication-templates/delete/{id}', 'destroy')->name('communication.template.destory');
         Route::post('site-settings/communication-templates/restore/{id}', 'restore')->name('communication.template.restore');
+    });
+
+    Route::controller(EmployeeTrainingController::class)->group(function(){ 
+        Route::post('employee-profile/training-store', 'store')->name('employee.training.store');
+        Route::get('employee-profile/training-list', 'list')->name('employee.training.list');
+        Route::post('employee-profile/training-edit', 'edit')->name('employee.training.edit');
+        Route::post('employee-profile/training-update', 'update')->name('employee.training.update');
+        Route::delete('employee-profile/training-destroy', 'destroy')->name('employee.training.destory');
+        Route::post('employee-profile/training-restore', 'restore')->name('employee.training.restore');
     });
 });
 

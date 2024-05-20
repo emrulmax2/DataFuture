@@ -17,7 +17,7 @@ class StarterReportController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.starterreport', [
-            'title' => 'Employee Starter Report - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Employee Starter', 'href' => 'javascript:void(0);']
             ],

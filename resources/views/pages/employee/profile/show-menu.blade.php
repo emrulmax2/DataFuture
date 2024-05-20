@@ -32,7 +32,7 @@
 
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.appraisal', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.appraisal.documents' || Route::currentRouteName() == 'employee.appraisal' ? 'active' : '' }}">
-            Appraisal
+            Appraisal & Training
         </a>
     </li>
     @if((isset(auth()->user()->priv()['privilege_menu']) && auth()->user()->priv()['privilege_menu'] == 1) || in_array(auth()->user()->id, [1, 7]))

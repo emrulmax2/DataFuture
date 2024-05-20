@@ -23,7 +23,7 @@ class RecordCardController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.recordcard', [
-            'title' => 'Employee Record Card - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Employee Record Card', 'href' => 'javascript:void(0);']
             ],

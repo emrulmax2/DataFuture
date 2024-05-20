@@ -20,6 +20,7 @@ class EmployeeDocuments extends Model
         'display_file_name',
         'current_file_name',
         'type',
+        'mail_content',
         'created_by',
         'updated_by',
     ];

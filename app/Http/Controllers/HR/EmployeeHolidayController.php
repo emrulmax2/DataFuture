@@ -51,7 +51,7 @@ class EmployeeHolidayController extends Controller
         endif;
 
         return view('pages.employee.profile.holiday', [
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Employee Holidays', 'href' => 'javascript:void(0);']

@@ -579,7 +579,7 @@
                         </div>
 
                         <div class="intro-y col-span-12 sm:col-span-4 provisionEndDateWrap" style="display: {{ (isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == 3 ? 'block' : 'none') }};">
-                            <label for="provision_end" class="form-label inline-flex employment-period">Provision End  <span class="text-danger">*</span></label>
+                            <label for="provision_end" class="form-label inline-flex employment-period">Probation End  <span class="text-danger">*</span></label>
                             <input value="{{ (isset($employeeTerms->provision_end) && !empty($employeeTerms->provision_end) ? date('d-m-Y', strtotime($employeeTerms->provision_end)) : '') }}" type="text" id="provision_end" name="provision_end" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-provision_end text-danger mt-2"></div>
                         </div>

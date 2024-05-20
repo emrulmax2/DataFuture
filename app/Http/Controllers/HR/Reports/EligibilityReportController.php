@@ -12,7 +12,7 @@ class EligibilityReportController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.eligibilityreport', [
-            'title' => 'Eligibility Expiry Report - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Eligibility Expiry Report', 'href' => 'javascript:void(0);']
             ]

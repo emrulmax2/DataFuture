@@ -20,7 +20,7 @@ class EmployeeAppraisalDocumentController extends Controller
         $employment = Employment::where("employee_id", $id)->get()->first();
 
         return view('pages.employee.profile.appraisal-document', [
-            'title' => 'Employee Appraisals Document - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

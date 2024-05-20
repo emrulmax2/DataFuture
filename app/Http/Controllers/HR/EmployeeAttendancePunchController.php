@@ -15,7 +15,7 @@ class EmployeeAttendancePunchController extends Controller
         $venueIpAddresses = VenueIpAddress::pluck('ip')->unique()->toArray();
         $requestIp = $request->getClientIp();
         return view('pages.hr.punch.index', [
-            'title' => 'Live Attendance Punch - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             'ip_check' => (!empty($venueIpAddresses) && in_array($requestIp, $venueIpAddresses) ? true : false)
         ]);

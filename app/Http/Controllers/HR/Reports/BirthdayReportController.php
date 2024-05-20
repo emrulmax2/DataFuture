@@ -22,7 +22,7 @@ class BirthdayReportController extends Controller
         $employeeWorkType = EmployeeWorkType::all();
         $departments = Department::all();
         return view('pages.hr.portal.reports.birthdaylist', [
-            'title' => 'Birthday List - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Birthday List', 'href' => 'javascript:void(0);']
             ],

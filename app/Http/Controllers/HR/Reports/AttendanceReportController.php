@@ -22,7 +22,7 @@ class AttendanceReportController extends Controller
     public function index($date){
         $theDate = (!empty($date) ? date('Y-m-d', strtotime('01-'.$date)) : date('Y-m-d'));
         return view('pages.hr.portal.reports.attendance', [
-            'title' => 'Attendance Report - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],
@@ -317,7 +317,7 @@ class AttendanceReportController extends Controller
     public function show($employee_id, $date){
         $date = (!empty($date) ? strtotime(date('Y-m-d', strtotime('01-'.$date))) : strtotime(date('Y-m-d')));
         return view('pages.hr.portal.reports.attendance-show', [
-            'title' => 'Employee Attendance Report Details - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],

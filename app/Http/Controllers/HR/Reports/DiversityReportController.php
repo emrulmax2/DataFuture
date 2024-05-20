@@ -18,7 +18,7 @@ class DiversityReportController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.diversityreport', [
-            'title' => 'Diversity Information - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Diversity Information', 'href' => 'javascript:void(0);']
             ],
