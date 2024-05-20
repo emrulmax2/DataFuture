@@ -140,6 +140,7 @@ export default defineConfig({
                 "resources/js/employee-upload.js",      
                 "resources/js/employee-note.js",
                 "resources/js/employee-profile.js",
+                "resources/js/employee-training.js",
 
                 "resources/js/attendance.js",
                 "resources/js/attendance-studentstaff.js",
