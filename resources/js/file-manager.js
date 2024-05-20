@@ -19,6 +19,7 @@ import TomSelect from "tom-select";
 
     var employeeIDS = new TomSelect('#employee_ids', tomOptions);
     var editEmployeeIds = new TomSelect('#edit_employee_ids', tomOptions);
+    var fileEmployeeIds = new TomSelect('#file_employee_ids', tomOptions);
 
 
     const addFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFolderModal"));

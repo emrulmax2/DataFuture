@@ -30,7 +30,7 @@ class EmployeePortalController extends Controller
         $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
 
         return view('pages.hr.portal.index', [
-            'title' => 'HR Portal - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => 'javascript:void(0);']
             ],
@@ -110,7 +110,7 @@ class EmployeePortalController extends Controller
 
     public function manageHolidays(){
         return view('pages.hr.portal.manage-holidays', [
-            'title' => 'HR Portal Holidays - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Manage Holidays', 'href' => 'javascript:void(0);']
@@ -284,7 +284,7 @@ class EmployeePortalController extends Controller
     public function employmentReportShow()
     {
         return view('pages.hr.portal.reports.showreport', [
-            'title' => 'Employment Reports - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'subtitle' => 'Employment Reports',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
@@ -324,7 +324,7 @@ class EmployeePortalController extends Controller
         $html .= '</tbody>';
         
         return view('pages.hr.portal.leave-calendar', [
-            'title' => 'HR Portal Calendar - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Leave Calendar', 'href' => 'javascript:void(0);']

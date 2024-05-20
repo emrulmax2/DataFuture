@@ -29,7 +29,7 @@ class EmployeeTimeKeepingController extends Controller
         $clockout = HrCondition::where('type', 'Clock Out')->where('time_frame', 1)->get()->first();
         
         return view('pages.employee.profile.time-keeper', [
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "employee" => $employee,
             "employment" => $employment,

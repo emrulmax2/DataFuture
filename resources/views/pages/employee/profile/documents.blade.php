@@ -90,21 +90,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-UP" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-ED" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-UP" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -142,6 +132,7 @@
                     </div>
                 </form>
                 <div class="flex mt-5 sm:mt-0">
+                    <button data-tw-toggle="modal" data-tw-target="#addCommunicationModal" type="button" class="btn btn-primary w-auto mr-2" >Send Email</button>
                     <button id="tabulator-print-EDC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                         <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                     </button>
@@ -171,6 +162,74 @@
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Send Email Modal -->
+    <div id="addCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="post"  action="#" id="addCommunicationForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Send Email</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">  
+                        <div class="sendEmailContent" data-content="<?php echo 'Dear '.$employee->full_name.',<br/><p>Please find attached a important communication from Human Resources department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?>">
+                            <label class="block mb-1">Mail Content <span class="text-danger">*</span></label>
+                            <textarea rows="8" name="email_body" id="email_body"><?php echo 'Dear '.$employee->full_name.',<br/><p>Please find attached a important communication from Human Resources department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?></textarea>
+                            <div class="acc__input-error error-email_body text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-5 flex justify-start items-center relative">
+                            <div class="flex justify-start items-center relative">
+                                <label for="editComDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                                    <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Document
+                                </label>
+                                <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editComDocument"/>
+                                <span id="editComDocumentName" class="editComDocumentName ml-5"></span>
+                            </div>
+                            <div class="acc__input-error error-email_body text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block mb-1">Document Name</label>
+                            <input type="text" name="document_name" class="form-control w-full"/>
+                        </div>
+                        <div class="mt-3">
+                            <label>Hard Copy Checked?</label>
+                            <div class="form-check mt-2">
+                                <input id="hard_copy_check-11" class="form-check-input" type="radio" value="1" name="hard_copy_check_status" value="vertical-radio-chris-evans">
+                                <label class="form-check-label" for="hard_copy_check-11">Yes</label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input checked id="hard_copy_check-22" class="form-check-input" type="radio" value="0" name="hard_copy_check_status" value="vertical-radio-liam-neeson">
+                                <label class="form-check-label" for="hard_copy_check-22">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="sendEmail" class="btn btn-primary w-auto">     
+                            Send                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Send Email Modal -->
 
     <!-- BEGIN: Import Modal -->
     <div id="uploadEmployeeDocumentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

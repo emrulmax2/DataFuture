@@ -15,7 +15,7 @@ class EmployeeArchiveController extends Controller
         $employment = Employment::where("employee_id",$id)->get()->first();
 
         return view('pages.employee.profile.archive',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             'employee' => $employee,
             'employment' => $employment

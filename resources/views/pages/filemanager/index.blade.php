@@ -76,43 +76,79 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="file_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
-                            <select name="employee_ids[]" id="file_employee_ids" class="w-full tom-selects" multiple>
-                                @if(!empty($employee))
-                                    @foreach($employee as $emp)
-                                        <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-employees text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4 gap-y-2">
+                            <div class="col-span-6">
+                                <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
+                                <input id="document" type="file" name="document" class="w-full">
+                                <div class="acc__input-error error-document text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="linked_document" class="form-label">Linked Document <span class="text-danger">*</span></label>
+                                <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
+                                <div class="acc__input-error error-linked_document text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="name" class="form-label">Document Name <span class="text-danger">*</span></label>
+                                <input id="name" type="text" name="name" class="form-control w-full">
+                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="expire_at" class="form-label">Exipiry Date</label>
+                                <input id="expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-expire_at text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <textarea id="description" name="description" class="form-control w-full" rows="4"></textarea>
+                                <div class="acc__input-error error-description text-danger mt-2"></div>
+                            </div>
                         </div>
-                        <div class="mt-3">
-                            <table class="table table-bordered table-sm folderPermissionTable">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Role</th>
-                                        <th class="text-center">Create</th>
-                                        <th class="text-center">Read</th>
-                                        <th class="text-center">Update</th>
-                                        <th class="text-center">Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="noticeTr">
-                                        <td colspan="6">
-                                            <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="mt-3 filePermissionSwitchWrap">
+                            <label for="name" class="form-label">Inherit Permission</label>
+                            <div class="form-check form-switch">
+                                <input checked id="file_permission_inheritence" name="file_permission_inheritence" value="1" class="form-check-input" type="checkbox">
+                                <label class="form-check-label file_permission_inheritence_label" for="permission_inheritence">Yes</label>
+                            </div>
+                        </div>
+                        <div class="filePermissionWrap" style="display: none;">
+                            <div>
+                                <label for="file_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                <select name="employee_ids[]" id="file_employee_ids" class="w-full tom-selects" multiple>
+                                    @if(!empty($employee))
+                                        @foreach($employee as $emp)
+                                            <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-employees text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3">
+                                <table class="table table-bordered table-sm filePermissionTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>Role</th>
+                                            <th class="text-center">Create</th>
+                                            <th class="text-center">Read</th>
+                                            <th class="text-center">Update</th>
+                                            <th class="text-center">Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="noticeTr">
+                                            <td colspan="6">
+                                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateFolderPermission" class="btn btn-primary w-auto">     
-                            Update                      
+                        <button type="submit" id="uploadFile" class="btn btn-primary w-auto">     
+                            Upload                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
@@ -126,7 +162,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <input type="hidden" name="folder_id" value="0"/>
+                        <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
                     </div>
                 </div>
             </form>

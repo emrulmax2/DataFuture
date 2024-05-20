@@ -50,7 +50,7 @@ class EmployeeController extends Controller
     public function index()
     {
         return view('pages.employee.index', [
-            'title' => 'Employees - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Employees', 'href' => 'javascript:void(0);']
@@ -164,7 +164,7 @@ class EmployeeController extends Controller
         $workPermitTypes = EmployeeWorkPermitType::all();
         
         return view('pages.employee.create',[
-            'title' => 'Add new Employee - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             'titles' => $titles,
             // 'gender' => $gender,

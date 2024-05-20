@@ -11,7 +11,7 @@ class EmployeePassportExpiryController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.passport-expiry', [
-            'title' => 'HR Portal Visa Expiry - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Visa Expiry', 'href' => 'javascript:void(0);']

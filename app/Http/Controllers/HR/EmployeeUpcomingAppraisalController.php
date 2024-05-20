@@ -12,7 +12,7 @@ class EmployeeUpcomingAppraisalController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.upcoming-appraisal', [
-            'title' => 'HR Portal Upcoming Appraisal - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Upcoming Appraisal', 'href' => 'javascript:void(0);']

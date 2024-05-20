@@ -18,7 +18,7 @@ class EmployeeAttendanceLiveController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.live', [
-            'title' => 'HR Portal Live Attendance - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Live Attendance', 'href' => 'javascript:void(0);']
@@ -243,7 +243,7 @@ class EmployeeAttendanceLiveController extends Controller
 
     public function add(){
         return view('pages.hr.portal.live-add', [
-            'title' => 'HR Portal Add Live Attendance - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Live', 'href' => route('hr.portal.live.attedance')],

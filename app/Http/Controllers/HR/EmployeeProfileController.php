@@ -70,7 +70,7 @@ class EmployeeProfileController extends Controller
         $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
 
         return view('pages.employee.profile.show',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

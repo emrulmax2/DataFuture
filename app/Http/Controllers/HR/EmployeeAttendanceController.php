@@ -19,7 +19,7 @@ class EmployeeAttendanceController extends Controller
 {
     public function index(Request $request){
         return view('pages.hr.attendance.index', [
-            'title' => 'HR Attendance - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Monthly Attendance', 'href' => 'javascript:void(0);']
             ],
@@ -129,7 +129,7 @@ class EmployeeAttendanceController extends Controller
 
     public function show($date){
         return view('pages.hr.attendance.show', [
-            'title' => 'HR Daily Attendance - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
                 ['label' => 'HR Daily Attendance', 'href' => 'javascript:void(0);']

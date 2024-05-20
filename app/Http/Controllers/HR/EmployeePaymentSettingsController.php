@@ -26,7 +26,7 @@ class EmployeePaymentSettingsController extends Controller
         $employment = Employment::where("employee_id",$id)->get()->first();
 
         return view('pages.employee.profile.payment',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

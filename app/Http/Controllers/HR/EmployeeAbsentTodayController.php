@@ -18,7 +18,7 @@ class EmployeeAbsentTodayController extends Controller
         $date = (!empty($date) ? strtotime($date) : strtotime(date('Y-m-d')));
         $theDate = date('Y-m-d', $date);
         return view('pages.hr.portal.absent-today', [
-            'title' => 'HR Portal Absent Today - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Absent Today', 'href' => 'javascript:void(0);']

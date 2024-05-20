@@ -20,7 +20,7 @@ class TelephoneDirectoryController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.telephonedirectory', [
-            'title' => 'Telephone Directory - LCC Data Future Managment',
+            'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Telephone Directory', 'href' => 'javascript:void(0);']
             ],
