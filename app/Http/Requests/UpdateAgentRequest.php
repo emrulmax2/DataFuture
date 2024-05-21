@@ -30,7 +30,8 @@ class UpdateAgentRequest extends FormRequest
 
             'password' => 'nullable|string|required_with:confirmed',
             //'email' => Rule::unique('agent_users')->ignore($this->id),
-            'email' => 'unique:agent_users,email,'. $agentUserId
+            'email' => 'unique:agent_users,email,'. $agentUserId,
+            'code' => 'unique:agent_users,code,'. $agentUserId
 
         ];
     }
