@@ -41,6 +41,7 @@ class DashboardController extends Controller
 
     public function list(Request $request){
 
+     
         $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
@@ -62,6 +63,7 @@ class DashboardController extends Controller
             endif;
         endif;
 
+        
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -94,7 +96,7 @@ class DashboardController extends Controller
         endif;
         if(!empty($agents)): $query->whereIn('agent_user_id', $agents); endif;
 
-        $total_rows = $query->count();
+        $total_rows = 1;//$query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';

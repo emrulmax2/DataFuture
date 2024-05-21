@@ -13,8 +13,8 @@ var applicantApplicantionList = (function () {
         let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
         let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
 
-        let semesters = $("#semesters").val() != "" ? $("#semesters").val() : "";
-        let courses = $("#courses").val() != "" ? $("#courses").val() : "";
+        let semesters = $("#semesters").val() != "" ? $("#semesters").val() : [];
+        let courses = $("#courses").val() != "" ? $("#courses").val() : [];
         let statuses = $("#statuses").val() != "" ? $("#statuses").val() : [];
         let agents = $("#agents").val() != "" ? $("#agents").val() : [];
 
@@ -304,8 +304,8 @@ var applicantionCustonList = (function () {
         };
 
         
-        var semesters = new TomSelect('#semesters', tomOptions);
-        var courses = new TomSelect('#courses', tomOptions);
+        var semesters = new TomSelect('#semesters', tomOptionsMul);
+        var courses = new TomSelect('#courses', tomOptionsMul);
 
         var statuses = new TomSelect('#statuses', tomOptionsMul);
         var agents = new TomSelect('#agents', tomOptionsMul);
