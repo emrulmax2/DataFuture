@@ -148,6 +148,10 @@ class AdmissionController extends Controller
         $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
         $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
         $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
+        
+        $email = (isset($request->email) && !empty($request->email) ? $request->email : '');
+        $phone = (isset($request->phone) && !empty($request->phone) ? $request->phone : '');
+
         $dob = (isset($request->dob) && !empty($request->dob) ? date('Y-m-d', strtotime($request->dob)) : '');
 
         $courseCreationId = [];
@@ -172,6 +176,14 @@ class AdmissionController extends Controller
         if(!empty($refno)): $query->where('application_no', $refno); endif;
         if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
         if(!empty($lastname)): $query->where('last_name', 'LIKE', '%'.$lastname.'%'); endif;
+        
+        if(!empty($email) || !empty($phone)):
+            $query->whereHas('users', function($qs) use($email, $phone){
+                if(!empty($email)): $qs->where('email', 'LIKE', '%'.$email.'%'); endif;
+                if(!empty($phone)): $qs->where('phone', 'LIKE', '%'.$phone.'%'); endif;
+            });
+        endif;
+
         if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
         if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
         if(!empty($semesters) || !empty($courseCreationId)):

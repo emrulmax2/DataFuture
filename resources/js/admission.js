@@ -18,10 +18,12 @@ var admissionListTable = (function () {
         let lastname = $("#lastname-ADM").val() != "" ? $("#lastname-ADM").val() : "";
         let dob = $("#dob-ADM").val() != "" ? $("#dob-ADM").val() : "";
         let agents = $("#agents-ADM").val() != "" ? $("#agents-ADM").val() : "";
+        let email = $("#email-ADM").val() != "" ? $("#email-ADM").val() : "";
+        let phone = $("#phone-ADM").val() != "" ? $("#phone-ADM").val() : "";
 
         let tableContent = new Tabulator("#admissionListTable", {
             ajaxURL: route("admission.list"),
-            ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob, agents: agents},
+            ajaxParams: { semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob, agents: agents,email:email,phone:phone},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
