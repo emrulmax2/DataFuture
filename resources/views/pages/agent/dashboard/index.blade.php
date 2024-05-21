@@ -209,7 +209,7 @@
                                             <option value="">Please Select</option>
                                             @if(!empty($agents))
                                             @foreach($agents as $crs)
-                                                <option value="{{ $crs->id }}">{{ $crs->full_name }} [{{ $crs->code }}]</option>
+                                                <option value="{{ $crs->agent_user_id }}">{{ $crs->full_name }} [{{ $crs->code }}]</option>
                                             @endforeach
                                         @endif
                                         </select>
