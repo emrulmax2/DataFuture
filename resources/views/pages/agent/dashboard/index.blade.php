@@ -169,7 +169,7 @@
                                     
                                     <div class="col-span-12 sm:col-span-3">
                                         <label for="semesters" class="form-label">Intake Semester</label>
-                                        <select id="semesters" class="w-full tom-selects" name="semesters">
+                                        <select id="semesters" class="w-full tom-selects" name="semesters[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($semesters))
                                                 @foreach($semesters as $sem)
@@ -177,11 +177,11 @@
                                                 @endforeach
                                             @endif
                                         </select>
-                                        <div class="acc__input-error error-intake_semester text-danger mt-2"></div>
+                                        <div class="acc__input-error error-semesters text-danger mt-2"></div>
                                     </div>
                                     <div class="col-span-12 sm:col-span-3">
                                         <label for="courses" class="form-label">Course </label>
-                                        <select id="courses" class="w-full tom-selects" name="courses">
+                                        <select id="courses" class="w-full tom-selects" name="courses[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($courses))
                                                 @foreach($courses as $crs)
