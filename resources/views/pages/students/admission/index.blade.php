@@ -39,6 +39,19 @@
                         <input type="text" id="dob-ADM" name="dob-ADM" placeholder="DD-MM-YYYY" value="" data-format="DD-MM-YYYY" data-single-mode="true" class="w-full datepicker"/>
                     </div>
                 </div>
+
+                <div class="col-span-3">
+                    <div class="flex">
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Email</div>
+                        <input type="text" id="email-ADM" name="email-ADM" placeholder="xyz@zyx.com" value="" class="w-full"/>
+                    </div>
+                </div>
+                <div class="col-span-3">
+                    <div class="flex">
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Last Name</div>
+                        <input type="text" id="phone-ADM" name="phone-ADM" placeholder="012XXXXXXXX" value="" class="w-full"/>
+                    </div>
+                </div>
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Semester</div>
