@@ -1,15 +1,29 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var applicantApplicantionList = (function () {
     var _tableGen = function () {
         // Setup Tabulator
 
+        
+        let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
+        let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
+        let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
+
+        let semesters = $("#semesters").val() != "" ? $("#semesters").val() : "";
+        let courses = $("#courses").val() != "" ? $("#courses").val() : "";
+        let statuses = $("#statuses").val() != "" ? $("#statuses").val() : [];
+        let agents = $("#agents").val() != "" ? $("#agents").val() : [];
+
         let tableContent = new Tabulator("#applicantApplicantionList", {
+
             ajaxURL: route("agent.dashboard.applications.list"),
-            ajaxParams: {},
+
+            ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents},
+
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -54,6 +68,11 @@ var applicantApplicantionList = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "RF code",
+                    field: "referral_code",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
@@ -65,11 +84,15 @@ var applicantApplicantionList = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {      
+
                         var btns = "";
                         if (cell.getData().submission_date == '') {
+
                             btns += '<a href="'+route('agent.application',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                        
                         }else{
+
                             btns += '<a href="'+route('agent.application.show', cell.getData().id)+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                         }
                         
@@ -253,8 +276,51 @@ var applicantionCustonList = (function () {
 })();
 
 (function () {
+    
+
     if($('#applicantApplicantionList').length > 0){
-        applicantApplicantionList.init();
+        
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            persist: false,
+            create: false,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+
+        let tomOptionsMul = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+                remove_button: {
+                    title: "Remove this item",
+                },
+            }
+        };
+
+        
+        var semesters = new TomSelect('#semesters', tomOptions);
+        var courses = new TomSelect('#courses', tomOptions);
+
+        var statuses = new TomSelect('#statuses', tomOptionsMul);
+        var agents = new TomSelect('#agents', tomOptionsMul);
+
+            // Filter function
+            function filterHTMLForm() {
+                applicantApplicantionList.init();
+            }
+            // On click go button
+            $("#studentGroupSearchSubmitBtn").on("click", function (event) {
+                filterHTMLForm();
+            });
+            // On reset filter form
+            
+        
     }
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addDeteilsModal"));
