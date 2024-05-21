@@ -23,9 +23,9 @@ class CoursCreationController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Course Creations', 'href' => 'javascript:void(0);']
             ],
-            'courses' => Course::all(),
-            'semesters' => Semester::all(),
-            'qualifications' => CourseQualification::all(),
+            'courses' => Course::orderBy('name','asc')->get(),
+            'semesters' => Semester::orderBy('id','desc')->get(),
+            'qualifications' => CourseQualification::orderBy('name','asc')->get(),
             'venues' => Venue::all(),
         ]);
     }
@@ -110,9 +110,9 @@ class CoursCreationController extends Controller
         $has_evening_and_weekend = (isset($request->has_evening_and_weekend) && $request->has_evening_and_weekend > 0 ? $request->has_evening_and_weekend : 0);
         $is_workplacement = (isset($request->is_workplacement) && $request->is_workplacement > 0 ? $request->is_workplacement : 0);
         $required_hours = ($is_workplacement == 1 && isset($request->required_hours) && $request->required_hours > 0 ? $request->required_hours : 0);
-        $request->remove('is_workplacement');
-        $request->remove('required_hours');
-        $request->remove('has_evening_and_weekend');
+        $request->request->remove('is_workplacement');
+        $request->request->remove('required_hours');
+        $request->request->remove('has_evening_and_weekend');
 
         $request->request->add(['has_evening_and_weekend' => $has_evening_and_weekend, 'is_workplacement' => $is_workplacement, 'required_hours' => $required_hours, 'created_by' => auth()->user()->id]);
         $courseCreation = CourseCreation::create($request->all());
