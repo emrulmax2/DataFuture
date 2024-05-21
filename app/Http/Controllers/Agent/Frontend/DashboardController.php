@@ -72,8 +72,10 @@ class DashboardController extends Controller
         $query = Applicant::orderByRaw(implode(',', $sorts));
   
         if(count($agents)<=0) {
-
             array_push($agents,$userData->id);
+            $subAgents = AgentUser::where('parent_id',$userData->id)->get()->pluck('id')->toArray();
+            $agents = array_merge($agents,$subAgents);
+            
 
         }
 
