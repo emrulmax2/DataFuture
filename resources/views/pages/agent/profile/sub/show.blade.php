@@ -79,7 +79,7 @@
             <form method="POST" action="#" id="addAgentForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Agent</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Sub Agent</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>

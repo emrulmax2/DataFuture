@@ -80,11 +80,12 @@ class AgentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $agentUserCount = AgentUser::where('parent_id',$list->agent_user_id)->get()->count();
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->full_name,
-                    'organization' => $list->organization,
+                    'organization' => ($agentUserCount) ? $list->organization." [ ".$agentUserCount." ]" : $list->organization,
                     'code' => $list->code,
                     'deleted_at' => $list->deleted_at
                 ];
