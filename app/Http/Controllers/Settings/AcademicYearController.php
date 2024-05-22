@@ -90,11 +90,12 @@ class AcademicYearController extends Controller
     }
 
     public function store(AcademicYearRequest $request){
+
         $data = AcademicYear::create([
             'name'=> $request->name,
-            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
+            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : '0'),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
-            'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
+            'is_df'=> (isset($request->is_df) ? $request->is_df : '0'),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
             'from_date'=> date('Y-m-d', strtotime($request->from_date)),
             'to_date'=> date('Y-m-d', strtotime($request->to_date)),
@@ -117,9 +118,9 @@ class AcademicYearController extends Controller
     public function update(AcademicYearUpdateRequest $request, AcademicYear $dataId){      
         $data = AcademicYear::where('id', $request->id)->update([
             'name'=> $request->name,
-            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : 0),
+            'is_hesa'=> (isset($request->is_hesa) ? $request->is_hesa : '0'),
             'hesa_code'=> (isset($request->is_hesa) && $request->is_hesa == 1 && !empty($request->hesa_code) ? $request->hesa_code : null),
-            'is_df'=> (isset($request->is_df) ? $request->is_df : 0),
+            'is_df'=> (isset($request->is_df) ? $request->is_df : '0'),
             'df_code'=> (isset($request->is_df) && $request->is_df == 1 && !empty($request->df_code) ? $request->df_code : null),
             'from_date'=> date('Y-m-d', strtotime($request->from_date)),
             'to_date'=> date('Y-m-d', strtotime($request->to_date)),
@@ -137,7 +138,15 @@ class AcademicYearController extends Controller
     }
 
     public function destroy($id){
+
         $data = AcademicYear::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function forceDelete($id) 
+    {
+        $data = AcademicYear::where('id', $id)->withTrashed()->forceDelete();
+
         return response()->json($data);
     }
 

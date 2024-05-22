@@ -83,6 +83,7 @@ var table = (function () {
                                 '<button data-id="' +
                                 cell.getData().id +
                                 '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            
                         }
                         
                         return btns;
@@ -189,6 +190,7 @@ var table = (function () {
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
         const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
+        let confPermanentModalDelTitle = 'Permanently Delete Alert';
 
         const addModalEl = document.getElementById('addModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -475,6 +477,21 @@ var table = (function () {
             });
         });
 
+        // delete Final Btn
+        $('#academicyearsTableId').on('click', '.delete_final_btn', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to remove these record from system? This action is final and no turning back from it.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+            });
+        });
+
+        
         // Restore Course
         $('#academicyearsTableId').on('click', '.restore_btn', function(){
             const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
