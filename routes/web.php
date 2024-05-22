@@ -1320,6 +1320,9 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/live/add', 'add')->name('hr.portal.live.attedance.add');
         Route::post('hr/portal/live/get-day-data', 'getDayAttendanceData')->name('hr.portal.live.attedance.get.day.data');
         Route::post('hr/portal/live/feed-live-attendance', 'feeAttendanceLive')->name('hr.portal.live.attedance.fee.data');
+
+        Route::post('hr/portal/live/get-employee-mail', 'getEmployeeEmail')->name('hr.portal.live.get.employee.mail');
+        Route::post('hr/portal/live/sent-mail', 'sentEmail')->name('hr.portal.live.attedance.sent.mail');
     });
     
     Route::controller(StaffDashboard::class)->group(function() {
@@ -2511,6 +2514,11 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/update-folder', 'updateFolder')->name('file.manager.update.folder'); 
         Route::post('file-manager/edit-folder-permission', 'editFolderPermission')->name('file.manager.edit.folder.permission'); 
         Route::post('file-manager/update-folder-permission', 'updateFolderPermission')->name('file.manager.update.folder.permission'); 
+
+        Route::post('file-manager/upload-file', 'uploadFile')->name('file.manager.upload.file'); 
+        Route::post('file-manager/get-file-data', 'getFileData')->name('file.manager.get.file.data'); 
+        Route::post('file-manager/update-file', 'updateFile')->name('file.manager.update.file'); 
+        Route::post('file-manager/upload-new-version', 'uploadNewVersion')->name('file.manager.upload.new.version'); 
     });
 
     Route::controller(CommunicationTemplateController::class)->group(function() {

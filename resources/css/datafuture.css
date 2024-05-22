@@ -1714,3 +1714,14 @@ input[type=number] {
 #myStaffHolidayTable.table.table-bordered tbody tr.activePatternRow td:not(:first-child){
     background-color: rgb(var(--color-success) / .2) !important;
 }
+
+#addFileModal input[type="file"]{
+    overflow: hidden;
+    cursor: pointer;
+}
+.w-1\/6{
+    width: 16.666666%;
+}
+.w-2\/6{
+    width: 33.333333%;
+}

@@ -24,6 +24,7 @@ import TomSelect from "tom-select";
 
     const addFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFolderModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const editFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFolderModal"));
     const editFolderPermissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFolderPermissionModal"));
@@ -457,6 +458,354 @@ import TomSelect from "tom-select";
                 }
             });
         }
-    })
+    });
+
+    /* File Upload Code Start */
+    const addFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFileModal"));
+    const editFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFileModal"));
+    const uploadFileVersionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadFileVersionModal"));
+
+    const addFileModalEl = document.getElementById('addFileModal')
+    addFileModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addFileModal .acc__input-error').html('');
+        $('#addFileModal .modal-body input:not([type="checkbox"])').val('');
+        $('#addFileModal .modal-body textarea').val('');
+        $('#addFileModal #addDocumentName').html('');
+
+        $('#addFileModal .modal-body input[name="file_permission_inheritence"]').prop('checked', true);
+        $('#addFileModal .file_permission_inheritence_label').html('Yes');
+        $('#addFileModal .filePermissionWrap').fadeOut('fast', function(){
+            $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+            fileEmployeeIds.clear(true);
+        });
+    });
+
+    const editFileModalEl = document.getElementById('editFileModal')
+    editFileModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editFileModal .acc__input-error').html('');
+        $('#editFileModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editFileModal .modal-footer input[name="id"]').val('0');
+    });
+
+    const uploadFileVersionModalEl = document.getElementById('uploadFileVersionModal')
+    uploadFileVersionModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#uploadFileVersionModal .acc__input-error').html('');
+        $('#uploadFileVersionModal .modal-body input:not([type="checkbox"])').val('');
+        $('#uploadFileVersionModal .modal-footer input[name="id"]').val('0');
+        $('#uploadFileVersionModal #editDocumentName').html('');
+    });
+    
+    $('#addFileModal').on('change', '#addDocument', function(){
+        showFileName('addDocument', 'addDocumentName');
+    });
+    
+    $('#uploadFileVersionModal').on('change', '#editDocument', function(){
+        showFileName('editDocument', 'editDocumentName');
+    });
+
+    function showFileName(inputId, targetPreviewId) {
+        let fileInput = document.getElementById(inputId);
+        let namePreview = document.getElementById(targetPreviewId);
+        let fileName = fileInput.files[0].name;
+        namePreview.innerText = fileName;
+        return false;
+    };
+
+    $('#addFileModal #file_permission_inheritence').on('change', function(){
+        if($(this).prop('checked')){
+            $('#addFileModal .file_permission_inheritence_label').html('Yes');
+            $('#addFileModal .filePermissionWrap').fadeOut('fast', function(){
+                $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+                $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+                fileEmployeeIds.clear(true);
+            });
+        }else{
+            $('#addFileModal .file_permission_inheritence_label').html('No');
+            $('#addFileModal .filePermissionWrap').fadeIn('fast', function(){
+                $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+                $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+                fileEmployeeIds.clear(true);
+            });
+        }
+    });
+
+    fileEmployeeIds.on('item_add', function(employee_id, item){
+        axios({
+            method: "post",
+            url: route('file.manager.get.employee.permission.set'),
+            data: {employee_id : employee_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (response.status == 200) {
+                let res = response.data.res;
+                $('#addFileForm .filePermissionTable').find('.noticeTr').fadeOut('fast', function(){
+                    $('#addFileForm .filePermissionTable tbody').append(res);
+                });
+
+                createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+            }
+        }).catch(error => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+
+    fileEmployeeIds.on('item_remove', function(employee_id, item){
+        let $theTr = $('#addFileModal #employeeFolderPermission_'+employee_id);
+        $theTr.remove();
+
+        var permissionTrLength = $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').length;
+        if(permissionTrLength == 0){
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+        }else{
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeOut();
+        }
+    });
+
+    $('#addFileModal').on('change', '.documentRoleAndPermission', function(e){
+        let $thePermission = $(this);
+        let thePermission = $thePermission.val();
+        let $thePermissionRow = $thePermission.closest('.permissionEmployeeRow');
+        let employee_id = $thePermissionRow.attr('data-employee');
+
+        axios({
+            method: "post",
+            url: route('file.manager.get.permission.set'),
+            data: {employee_id : employee_id, role_permission_id : thePermission},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (response.status == 200) {
+                let res = response.data.res;
+                $thePermissionRow.find('.permissionCols').remove();;
+                $thePermissionRow.append(res);
+
+                createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+            }
+        }).catch(error => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+
+    $('#addFileForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('addFileForm');
+    
+        document.querySelector('#uploadFile').setAttribute('disabled', 'disabled');
+        document.querySelector("#uploadFile svg").style.cssText ="display: inline-block;";
+
+        var userLengt = $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').length;
+
+        if(userLengt == 0 && !$('#addFileModal #file_permission_inheritence').prop('checked')){
+            $form.find('.modError').remove();
+            $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
+            
+            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+            
+            setTimeout(function(){
+                $form.find('.modError').remove();
+            }, 2000);
+
+            document.querySelector('#uploadFile').removeAttribute('disabled');
+            document.querySelector("#uploadFile svg").style.cssText = "display: none;";
+        }else{
+            let form_data = new FormData(form);
+            form_data.append('file', $('#addFileForm input[name="document"]')[0].files[0]); 
+            axios({
+                method: "post",
+                url: route('file.manager.upload.file'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#uploadFile').removeAttribute('disabled');
+                document.querySelector("#uploadFile svg").style.cssText = "display: none;";
+                
+                if (response.status == 200) {
+                    addFileModal.hide();
+                    var suc = response.data.suc;
+
+                    if(suc == 1){
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html( "Congratulations!" );
+                            $("#successModal .successModalDesc").html('File successfully uploaded.');
+                        }); 
+                        
+                        setTimeout(function(){
+                            successModal.hide();
+                            window.location.reload();
+                        }, 2000);
+                    }else{
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .sarningModalTitle").html( "Oops!" );
+                            $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact with site administrator.');
+                        }); 
+                        
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 2000);
+                    }
+                }
+            }).catch(error => {
+                document.querySelector('#uploadFile').removeAttribute('disabled');
+                document.querySelector("#uploadFile svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#addFileForm .${key}`).addClass('border-danger');
+                            $(`#addFileForm  .error-${key}`).html(val);
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        }
+    });
+
+    $('.fileWrap').on('dblclick', function(){
+        window.location.href = $(this).attr('data-href');
+    });
+
+    $(document).on('click', '.editFile', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        let row_id = $theLink.attr('data-id');
+
+        axios({
+            method: "post",
+            url: route('file.manager.get.file.data'),
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                var row = response.data.res;
+                $('#editFileModal [name="name"]').val(row.display_file_name ? row.display_file_name : '');
+                $('#editFileModal [name="expire_at"]').val(row.expire_at ? row.expire_at : '');
+                $('#editFileModal [name="description"]').val(row.description ? row.description : '');
+                $('#editFileModal [name="id"]').val(row_id);
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+
+    $('#editFileForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('editFileForm');
+    
+        document.querySelector('#updateFile').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateFile svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('file.manager.update.file'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateFile').removeAttribute('disabled');
+            document.querySelector("#updateFile svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                editFileModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('File Information successfully updated.');
+                }); 
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateFile').removeAttribute('disabled');
+            document.querySelector("#updateFile svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editFileForm .${key}`).addClass('border-danger');
+                        $(`#editFileForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.uploadNewVersion', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        let row_id = $theLink.attr('data-id');
+
+        $('#uploadFileVersionModal [name="id"]').val(row_id);
+    });
+
+    $('#uploadFileVersionForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('uploadFileVersionForm');
+    
+        document.querySelector('#uploadNV').setAttribute('disabled', 'disabled');
+        document.querySelector("#uploadNV svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#uploadFileVersionForm input[name="document"]')[0].files[0]); 
+        
+        axios({
+            method: "post",
+            url: route('file.manager.upload.new.version'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#uploadNV').removeAttribute('disabled');
+            document.querySelector("#uploadNV svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                uploadFileVersionModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Document new version successfully uploaded.');
+                }); 
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#uploadNV').removeAttribute('disabled');
+            document.querySelector("#uploadNV svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#uploadFileVersionForm .${key}`).addClass('border-danger');
+                        $(`#uploadFileVersionForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* File Upload Code END */
 
 })();

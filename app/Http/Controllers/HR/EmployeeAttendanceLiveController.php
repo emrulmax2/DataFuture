@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmployeeSentEmailRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
+use App\Models\ComonSmtp;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
@@ -28,7 +32,9 @@ class EmployeeAttendanceLiveController extends Controller
                                     $sq->where('status', 1);
                                 });
                             })->orderBy('name', 'ASC')->get(),
-            'live' => $this->getEmployeeLiveAttendanceTableHtml()
+            'live' => $this->getEmployeeLiveAttendanceTableHtml(),
+            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+            'employees' => Employee::where('status', 1)->orderBy('first_name', 'asc')->get()
         ]);
     }
 
@@ -88,7 +94,7 @@ class EmployeeAttendanceLiveController extends Controller
 
                     $html .= '<tr>';
 
-                        $html .= '<td class="w-2/5">';
+                        $html .= '<td class="w-2/6">';
                             $html .= '<a href="javascript:void(0);" class="block">';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                     $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
@@ -100,18 +106,24 @@ class EmployeeAttendanceLiveController extends Controller
                             $html .= '</a>';
                         $html .= '</td>';
 
-                        $html .= '<td class="text-center w-1/5">';
+                        $html .= '<td class="text-center w-1/6">';
                             $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
                             $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
                         $html .= '</td>';
 
-                        $html .= '<td class="text-left w-2/5">';
+                        $html .= '<td class="text-left w-2/6">';
                             $html .= '<div>';
                                 $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
                                 $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
                             $html .= '</div>';
                             $html .= '<div>';
                                 $html .= (isset($day['since']) && !empty($day['since']) ? '<span>'.$day['since'].'</span>' : '');
+                            $html .= '</div>';
+                        $html .= '</td>';
+
+                        $html .= '<td class="text-left w-1/6">';
+                            $html .= '<div class="text-right">';
+                                $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
                             $html .= '</div>';
                         $html .= '</td>';
 
@@ -408,5 +420,71 @@ class EmployeeAttendanceLiveController extends Controller
         else:
             return response()->json(['res' => 2], 200);
         endif;
+    }
+
+    public function getEmployeeEmail(Request $request){
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+
+        $mailTo = [];
+        if(isset($employee->employment->email) && !empty($employee->employment->email)):
+            $mailTo[] = $employee->employment->email;
+        endif;
+
+        return response()->json(['emails' => (!empty($mailTo) ? implode(',', $mailTo) : '')], 200);
+    }
+
+    public function sentEmail(EmployeeSentEmailRequest $request){
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+
+        $cc_email = (isset($request->cc_email) && !empty($request->cc_email) ? $request->cc_email : []);
+        $to_email = (isset($request->to_email) && !empty($request->to_email) ? explode(',', $request->to_email) : []);
+        $toMails = array_merge($to_email, $cc_email);
+
+        $mail_body = $request->mail_body;
+        $SUBJECT = $request->subject;
+
+        $MAILBODY = 'Dear '.$employee->full_name.', <br/>';
+        $MAILBODY .= $mail_body;
+        $MAILBODY .= '<br/>';
+        $MAILBODY .= 'Best regards,<br/>';
+        $MAILBODY .= 'Human Resources Department<br/>';
+        $MAILBODY .= 'London Churchill College';
+
+        $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $configuration = [
+            'smtp_host'         => $commonSmtp->smtp_host,
+            'smtp_port'         => $commonSmtp->smtp_port,
+            'smtp_username'     => $commonSmtp->smtp_user,
+            'smtp_password'     => $commonSmtp->smtp_pass,
+            'smtp_encryption'   => $commonSmtp->smtp_encryption,
+            
+            'from_email'        => $fromEmail,
+            'from_name'         => $crntUser->full_name,
+        ];
+
+        $attachmentInfo = [];
+        if($request->hasFile('documents')):
+            $documents = $request->file('documents');
+            $docCounter = 1;
+            foreach($documents as $document):
+                $documentName = time().'_'.$document->getClientOriginalName();
+                $path = $document->storeAs('public/tmps', $documentName, 's3');
+
+                $attachmentInfo[$docCounter++] = [
+                    "pathinfo" => $path,
+                    "nameinfo" => $document->getClientOriginalName(),
+                    "mimeinfo" => $document->getMimeType(),
+                    'disk'     => 's3'      
+                ];
+                $docCounter++;
+            endforeach;
+        endif;
+
+        UserMailerJob::dispatch($configuration, $toMails, new CommunicationSendMail($SUBJECT, $MAILBODY, $attachmentInfo));
+        return response()->json(['res' => 'Mail successfully sent.'], 200);
     }
 }

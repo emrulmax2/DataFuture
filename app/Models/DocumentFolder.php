@@ -15,6 +15,7 @@ class DocumentFolder extends Model
         'parent_id',
         'name',
         'slug',
+        'path',
         'created_by',
         'updated_by',
     ];
