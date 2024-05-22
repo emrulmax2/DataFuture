@@ -4,13 +4,21 @@ namespace App\Http\Controllers\Filemanager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateFolderRequest;
+use App\Http\Requests\DocumentFileUploadRequest;
+use App\Http\Requests\DocumentVersionRequest;
+use App\Http\Requests\UpdateDocumentInfoRequest;
 use App\Http\Requests\UpdateFolderPermissionRequest;
 use App\Http\Requests\UpdateFolderRequest;
+use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\DocumentFolderPermission;
+use App\Models\DocumentInfo;
+use App\Models\DocumentInfoHasEmployees;
+use App\Models\DocumentRevision;
 use App\Models\DocumentRoleAndPermission;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FilemanagerController extends Controller
@@ -42,6 +50,7 @@ class FilemanagerController extends Controller
             'employee' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
             'theFolder' => ($parent_id > 0 ? DocumentFolder::find($parent_id) : []),
             'folders' => DocumentFolder::whereIn('id', $my_folder_ids)->orderBy('name', 'asc')->get(),
+            'files' => DocumentInfo::where('document_folder_id', $parent_id)->orderBy('display_file_name', 'ASC')->get(),
             'params' => $params,
             'parent_id' => $parent_id
         ]);
@@ -53,6 +62,7 @@ class FilemanagerController extends Controller
         $inherit = (isset($request->permission_inheritence) && $request->permission_inheritence > 0 ? $request->permission_inheritence : 0);
         $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
         $permission = (isset($request->permission) && !empty($request->permission) ? $request->permission : []);
+        $params = (isset($request->params) && !empty($request->params) ? $request->params : '');
 
         $data = [];
         $data['parent_id'] = $parent_id;
@@ -60,6 +70,13 @@ class FilemanagerController extends Controller
         $data['created_by'] = auth()->user()->id;
 
         $folder = DocumentFolder::create($data);
+        if($folder->id):
+            Storage::disk('local')->makeDirectory('public/file-manager/'.(!empty($params) ? $params.'/' : '').$folder->slug);
+            $path = (!empty($params) ? $params.'/' : '').$folder->slug;
+            $docFolder = DocumentFolder::where('id', $folder->id)->update([
+                'path' => $path
+            ]);
+        endif;
         if($inherit == 1 && $folder->id && $parent_id > 0):
             $parentPermission = DocumentFolderPermission::where('document_folder_id', $parent_id)->orderBy('id', 'ASC')->get();
             if($parentPermission->count() > 0):
@@ -280,5 +297,157 @@ class FilemanagerController extends Controller
         endif;
 
         return response()->json(['res' => 'Document Folder Permission successfully updated.'], 200);
+    }
+
+    public function uploadFile(DocumentFileUploadRequest $request){
+        $folder_id = $request->folder_id;
+        $params = $request->params;
+        $inherit = (isset($request->file_permission_inheritence) && $request->file_permission_inheritence > 0 ? $request->file_permission_inheritence : 0);
+        $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+        $permission = (isset($request->permission) && !empty($request->permission) ? $request->permission : []);
+        $linkedDocument = (isset($request->linked_document) && !empty($request->linked_document) ? $request->linked_document : null);
+
+        $current_file_name = null;
+        $filePath = null;
+        $docType = null;
+        if($request->hasFile('document') || !empty($linkedDocument)):
+            $document = $request->file('document');
+            $docType = $document->getClientOriginalExtension();
+            $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+            $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
+        
+
+            $data = [];
+            $data['document_folder_id'] = $folder_id;
+            $data['doc_type'] = $docType;
+            $data['disk_type'] = 'local';
+            $data['path'] = $params;
+            $data['display_file_name'] = $request->name;
+            $data['current_file_name'] = $current_file_name;
+            $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null);
+            $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
+            $data['created_by'] = auth()->user()->id;
+
+            $documentInfo = DocumentInfo::create($data);
+            if($documentInfo->id):
+                unset($data['document_folder_id']);
+                $data['document_info_id'] = $documentInfo->id;
+                $documentRwo = Document::create($data);
+
+                if($inherit == 1 && $folder_id > 0):
+                    $parentPermission = DocumentFolderPermission::where('document_folder_id', $folder_id)->orderBy('id', 'ASC')->get();
+                    if($parentPermission->count() > 0):
+                        foreach($parentPermission as $prmsn):
+                            $data = [];
+                            $data['document_role_and_permission_id'] = $prmsn->document_role_and_permission_id;
+                            $data['document_info_id'] = $documentInfo->id;
+                            $data['employee_id'] = $prmsn->employee_id;
+        
+                            DocumentInfoHasEmployees::create($data);
+                        endforeach;
+                    endif;
+                elseif(!empty($employee_ids)):
+                    foreach($employee_ids as $employee_id):
+                        if(isset($permission[$employee_id]) && $permission[$employee_id] > 0):
+                            $data = [];
+                            $data['document_role_and_permission_id'] = $permission[$employee_id];
+                            $data['document_info_id'] = $documentInfo->id;
+                            $data['employee_id'] = $employee_id;
+        
+                            DocumentInfoHasEmployees::create($data);
+                        endif;
+                    endforeach;
+                endif;
+            endif;
+
+            return response()->json(['suc' => 1, 'res' => 'File successfully uploaded.'], 200);
+        else:
+            return response()->json(['suc' => 2, 'res' => 'Something went wrong. Please try later.'], 200);
+        endif;
+    }
+
+    public function getFileData(Request $request){
+        $row_id = $request->row_id;
+        $documentInfo = DocumentInfo::find($row_id);
+        return response()->json(['res' => $documentInfo], 200);
+    }
+
+    public function updateFile(UpdateDocumentInfoRequest $request){
+        $id = $request->id;
+        $document = Document::where('document_info_id', $id)->orderBy('id', 'DESC')->get()->first();
+        $document_id = $document->id;
+
+        $docInfo = DocumentInfo::find($id);
+        $docInfo->fill([
+            'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
+            'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
+            'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
+            'updated_by' => auth()->user()->id,
+        ]);
+        $docInfo->save();
+
+        $documentRow = Document::find($document_id);
+        $documentRow->fill([
+            'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
+            'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
+            'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
+            'updated_by' => auth()->user()->id,
+        ]);
+        $changes = $documentRow->getDirty();
+        $documentRow->save();
+
+        if($documentRow->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['document_id'] = $document_id;
+                $data['field_name'] = $field;
+                $data['field_previous_value'] = $document->$field;
+                $data['field_current_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                DocumentRevision::create($data);
+            endforeach;
+        endif;
+
+        return response()->json(['res' => 'File data successfully updated.'], 200);
+    }
+
+    public function uploadNewVersion(DocumentVersionRequest $request){
+        $folder_id = $request->folder_id;
+        $params = $request->params;
+        $id = $request->id;
+        
+        $linkedDocument = (isset($request->linked_document) && !empty($request->linked_document) ? $request->linked_document : null);
+
+        if($request->hasFile('document') || !empty($linkedDocument)):
+            $document = $request->file('document');
+            $docType = $document->getClientOriginalExtension();
+            $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+            $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
+        
+
+            $data = [];
+            $data['doc_type'] = $docType;
+            $data['path'] = $params;
+            $data['current_file_name'] = $current_file_name;
+            $data['updated_by'] = auth()->user()->id;
+
+            $documentInfo = DocumentInfo::where('id', $id)->update($data);
+            if($documentInfo):
+                $docInf = DocumentInfo::find($id);
+                $data['document_info_id'] = $id;
+                $data['disk_type'] = $docInf->disk_type;
+                $data['display_file_name'] = $docInf->display_file_name;
+                $data['linked_document'] = $docInf->linked_document;
+                $data['expire_at'] = $docInf->expire_at;
+                $data['description'] = $docInf->description;
+                $data['created_by'] = auth()->user()->id;
+                $documentRwo = Document::create($data);
+            endif;
+
+            return response()->json(['suc' => 1, 'res' => 'File successfully uploaded.'], 200);
+        else:
+            return response()->json(['suc' => 2, 'res' => 'Something went wrong. Please try later.'], 200);
+        endif;
     }
 }

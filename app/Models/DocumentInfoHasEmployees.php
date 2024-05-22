@@ -9,6 +9,8 @@ class DocumentInfoHasEmployees extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'document_info_id',
         'employee_id',

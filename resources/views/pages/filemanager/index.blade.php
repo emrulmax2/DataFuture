@@ -8,8 +8,10 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">File Manager</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            @if($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1))
+            @if(($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1)) || auth()->user()->id == 1)
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFolderModal" class="add_btn btn btn-primary shadow-md mr-2">New Folder</button>
+            @endif
+            @if($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1))
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFileModal" class="add_btn btn btn-primary shadow-md mr-2">Upload File</button>
             @endif
         </div>
@@ -60,9 +62,232 @@
                     </div>
                 @endforeach
             @endif
+            @if($files->count() > 0)
+                @foreach($files as $theFile)
+                    <div data-href="{{ ($theFile->download_url ? $theFile->download_url : '') }}" class="intro-y cursor-pointer fileWrap block col-span-2">
+                        <div class="folder bg-slate-200 p-2 rounded text-center">
+                            <div class="folderHeader flex w-full justify-between py-3 px-2">
+                                <h3 class="font-medium inline-flex items-center"><i data-lucide="arrow-big-down-dash" class="w-4 h-4 mr-1"></i>{{ $theFile->display_file_name }}</h3>
+                                <div class="dropdown ml-auto" style="position: relative;">
+                                    <button class="dropdown-toggle w-5 h-5 block -mr-2" type="button" aria-expanded="false" data-tw-toggle="dropdown">
+                                        <i data-lucide="more-vertical" class="dropdownSVG w-5 h-5 text-slate-500"></i>
+                                    </button>
+                                    <div class="dropdown-menu w-48" >
+                                        <ul class="dropdown-content">
+                                            <li>
+                                                <a {{ ($theFile->download_url ? 'download' : '') }} href="{{ ($theFile->download_url ? $theFile->download_url : 'javascript:void(0);') }}" class="downloadDoc dropdown-item">
+                                                    <i data-lucide="download-cloud" class="text-success w-4 h-4 mr-2"></i> Download
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#editFileModal" href="javascript:void(0);" class="editFile dropdown-item">
+                                                    <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit File
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#uploadFileVersionModal" href="javascript:void(0);" class="uploadNewVersion dropdown-item">
+                                                    <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
+                                                    <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#editFilePermissionModal" href="javascript:void(0);" class="editFilePermission dropdown-item">
+                                                    <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#fileReminderModal" href="javascript:void(0);" class="editFilePermission dropdown-item">
+                                                    <i data-lucide="bell" class="text-info w-4 h-4 mr-2"></i> Reminder
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-id="{{ $theFile->id }}" href="javascript:void(0);" class="deleteFile dropdown-item">
+                                                    <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete File
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="folderIcon w-full text-warning bg-white rounded flex justify-center items-center py-10">
+                                <i data-lucide="file" class="w-24 h-24"></i>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </div>
 
+
+    <!-- BEGIN: File History Modal -->
+    <div id="fileHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="fileHistoryForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Upload New Version</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4 gap-y-1">
+                            <div class="col-span-12">
+                                <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
+                                <label class="uploadWrap form-control relative border flex justify-start items-center cursor-pointer" for="editDocument">
+                                    <input accept="image/*,.doc,.docx,.xl,.xlsx,.xls,.ppt,.pptx,.pdf,.txt,.sql" id="editDocument" type="file" name="document" class="w-full" style="position: absolute; width: 0; height: 0; opacity: 0; visibility: hidden;">
+                                    <span class="btn btn-secondary w-auto">Choose File</span>
+                                    <span id="editDocumentName" class="ml-3"></span>
+                                </label>
+                                <div class="acc__input-error error-document text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="linked_document" class="form-label">Linked Document </label>
+                                <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="uploadNV" class="btn btn-primary w-auto">     
+                            Upload                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
+                        <input type="hidden" name="params" value="{{ $params }}"/>
+                        <input type="hidden" name="id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: File History Modal -->
+
+    <!-- BEGIN: File New Version Modal -->
+    <div id="uploadFileVersionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="uploadFileVersionForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Upload New Version</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4 gap-y-1">
+                            <div class="col-span-12">
+                                <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
+                                <label class="uploadWrap form-control relative border flex justify-start items-center cursor-pointer" for="editDocument">
+                                    <input accept="image/*,.doc,.docx,.xl,.xlsx,.xls,.ppt,.pptx,.pdf,.txt,.sql" id="editDocument" type="file" name="document" class="w-full" style="position: absolute; width: 0; height: 0; opacity: 0; visibility: hidden;">
+                                    <span class="btn btn-secondary w-auto">Choose File</span>
+                                    <span id="editDocumentName" class="ml-3"></span>
+                                </label>
+                                <div class="acc__input-error error-document text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="linked_document" class="form-label">Linked Document </label>
+                                <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="uploadNV" class="btn btn-primary w-auto">     
+                            Upload                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
+                        <input type="hidden" name="params" value="{{ $params }}"/>
+                        <input type="hidden" name="id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: File New Version Modal -->
+
+    <!-- BEGIN: Edit File Modal -->
+    <div id="editFileModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="editFileForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Edit File</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4 gap-y-1">
+                            <div class="col-span-6">
+                                <label for="edit_name" class="form-label">Document Name <span class="text-danger">*</span></label>
+                                <input id="edit_name" type="text" name="name" class="form-control w-full">
+                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="edit_expire_at" class="form-label">Exipiry Date</label>
+                                <input id="edit_expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            </div>
+                            <div class="col-span-12">
+                                <label for="edit_description" class="form-label">Description</label>
+                                <textarea id="edit_description" name="description" class="form-control w-full" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateFile" class="btn btn-primary w-auto">     
+                            Update                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
+                        <input type="hidden" name="params" value="{{ $params }}"/>
+                        <input type="hidden" name="id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Edit File Modal -->
 
     <!-- BEGIN: Add File Modal -->
     <div id="addFileModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -76,16 +301,19 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4 gap-y-2">
+                        <div class="grid grid-cols-12 gap-4 gap-y-1">
                             <div class="col-span-6">
                                 <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
-                                <input id="document" type="file" name="document" class="w-full">
+                                <label class="uploadWrap form-control relative border flex justify-start items-center cursor-pointer" for="addDocument">
+                                    <input accept="image/*,.doc,.docx,.xl,.xlsx,.xls,.ppt,.pptx,.pdf,.txt,.sql" id="addDocument" type="file" name="document" class="w-full" style="position: absolute; width: 0; height: 0; opacity: 0; visibility: hidden;">
+                                    <span class="btn btn-secondary w-auto">Choose File</span>
+                                    <span id="addDocumentName" class="ml-3"></span>
+                                </label>
                                 <div class="acc__input-error error-document text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6">
-                                <label for="linked_document" class="form-label">Linked Document <span class="text-danger">*</span></label>
+                                <label for="linked_document" class="form-label">Linked Document </label>
                                 <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
-                                <div class="acc__input-error error-linked_document text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6">
                                 <label for="name" class="form-label">Document Name <span class="text-danger">*</span></label>
@@ -95,22 +323,20 @@
                             <div class="col-span-6">
                                 <label for="expire_at" class="form-label">Exipiry Date</label>
                                 <input id="expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-expire_at text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12">
-                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <label for="description" class="form-label">Description</label>
                                 <textarea id="description" name="description" class="form-control w-full" rows="4"></textarea>
-                                <div class="acc__input-error error-description text-danger mt-2"></div>
                             </div>
                         </div>
-                        <div class="mt-3 filePermissionSwitchWrap">
+                        <div class="mt-3 filePermissionSwitchWrap mb-3">
                             <label for="name" class="form-label">Inherit Permission</label>
                             <div class="form-check form-switch">
                                 <input checked id="file_permission_inheritence" name="file_permission_inheritence" value="1" class="form-check-input" type="checkbox">
                                 <label class="form-check-label file_permission_inheritence_label" for="permission_inheritence">Yes</label>
                             </div>
                         </div>
-                        <div class="filePermissionWrap" style="display: none;">
+                        <div class="filePermissionWrap pt-2" style="display: none;">
                             <div>
                                 <label for="file_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
                                 <select name="employee_ids[]" id="file_employee_ids" class="w-full tom-selects" multiple>
@@ -163,6 +389,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
+                        <input type="hidden" name="params" value="{{ $params }}"/>
                     </div>
                 </div>
             </form>
@@ -362,6 +589,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="parent_id" value="{{ $parent_id }}"/>
+                        <input type="hidden" name="params" value="{{ $params }}"/>
                     </div>
                 </div>
             </form>
@@ -387,6 +615,26 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="warningModal" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="octagon-alert" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 sarningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
+
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

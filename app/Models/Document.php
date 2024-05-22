@@ -19,6 +19,7 @@ class Document extends Model
         'current_file_name',
         'expire_at',
         'reminder_at',
+        'description',
         
         'created_by',
         'updated_by',
