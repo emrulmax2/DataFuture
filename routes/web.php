@@ -2539,9 +2539,12 @@ Route::middleware('auth')->group(function() {
         Route::delete('employee-profile/training-destroy', 'destroy')->name('employee.training.destory');
         Route::post('employee-profile/training-restore', 'restore')->name('employee.training.restore');
     });
-});
 
-Route::controller(AttendanceLiveController::class)->group(function(){
-    Route::get('live', 'index')->name('attendance.live'); 
-    Route::post('live/attendance-data', 'ajaxLiveData')->name('attendance.live.attedance.ajax');
+    Route::controller(AttendanceLiveController::class)->group(function(){
+        Route::get('live', 'index')->name('attendance.live'); 
+        Route::post('live/attendance-data', 'ajaxLiveData')->name('attendance.live.attedance.ajax');
+    
+        Route::post('live/get-employee-mail', 'getEmployeeEmail')->name('attendance.live.get.employee.mail');
+        Route::post('live/sent-mail', 'sentEmail')->name('attendance.live.attedance.sent.mail');
+    });
 });

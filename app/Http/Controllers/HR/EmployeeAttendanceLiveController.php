@@ -122,7 +122,7 @@ class EmployeeAttendanceLiveController extends Controller
                         $html .= '</td>';
 
                         $html .= '<td class="text-left w-1/6">';
-                            $html .= '<div class="text-right">';
+                            $html .= '<div class="text-center">';
                                 $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
                             $html .= '</div>';
                         $html .= '</td>';
@@ -439,18 +439,11 @@ class EmployeeAttendanceLiveController extends Controller
         $employee = Employee::find($employee_id);
 
         $cc_email = (isset($request->cc_email) && !empty($request->cc_email) ? $request->cc_email : []);
-        $to_email = (isset($request->to_email) && !empty($request->to_email) ? explode(',', $request->to_email) : []);
+        $to_email = (isset($employee->employment->email) && !empty($employee->employment->email) ? [$employee->employment->email] : [$employee->email]);
         $toMails = array_merge($to_email, $cc_email);
 
         $mail_body = $request->mail_body;
         $SUBJECT = $request->subject;
-
-        $MAILBODY = 'Dear '.$employee->full_name.', <br/>';
-        $MAILBODY .= $mail_body;
-        $MAILBODY .= '<br/>';
-        $MAILBODY .= 'Best regards,<br/>';
-        $MAILBODY .= 'Human Resources Department<br/>';
-        $MAILBODY .= 'London Churchill College';
 
         $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
         $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
@@ -484,7 +477,7 @@ class EmployeeAttendanceLiveController extends Controller
             endforeach;
         endif;
 
-        UserMailerJob::dispatch($configuration, $toMails, new CommunicationSendMail($SUBJECT, $MAILBODY, $attachmentInfo));
+        UserMailerJob::dispatch($configuration, $toMails, new CommunicationSendMail($SUBJECT, $mail_body, $attachmentInfo));
         return response()->json(['res' => 'Mail successfully sent.'], 200);
     }
 }
