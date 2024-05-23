@@ -2199,11 +2199,12 @@ Route::middleware('auth')->group(function() {
     Route::resource('term-declaration',TermDeclarationController::class);
     
     Route::resource('term-declaration', TermDeclarationController::class,[
-        'except' => ['create']
+        'except' => ['create','update']
     ]);
     Route::controller(TermDeclarationController::class)->group(function() {
 
         Route::get('term-declaration-list', 'list')->name('term-declaration.list'); 
+        Route::post('term-declaration/{id}/update', 'update')->name('term-declaration.update'); 
         
     });
 

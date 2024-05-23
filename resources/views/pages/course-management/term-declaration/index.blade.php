@@ -90,6 +90,17 @@
                         </a>
                     </div>
                     <div class="modal-body">
+                        <div class="mt-3">       
+                            <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                            
+                            <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
+                                <option value="">Please Select</option>
+                                @foreach($academicYears as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach    
+                            </select>
+                            <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                        </div>
                         <div>
                             <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
                             <input id="name" type="text" name="name" class="form-control w-full">
@@ -104,7 +115,7 @@
                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                                 @endforeach    
                             </select>
-                            <div id="error-interview_result" class="term_type_id__input-error error-user text-danger mt-2"></div>
+                            <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -143,6 +154,17 @@
                         </a>
                     </div>
                     <div class="modal-body">
+                        <div class="mt-3">       
+                            <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                            
+                            <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
+                                <option value="">Please Select</option>
+                                @foreach($academicYears as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach    
+                            </select>
+                            <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                        </div>
                         <div>
                             <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
                             <input id="name" type="text" name="name" class="form-control w-full">
@@ -157,7 +179,7 @@
                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                                 @endforeach    
                             </select>
-                            <div id="error-interview_result" class="term_type_id__input-error error-user text-danger mt-2"></div>
+                            <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">

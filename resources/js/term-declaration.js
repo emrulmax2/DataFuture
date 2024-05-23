@@ -27,6 +27,13 @@ var table = (function () {
                     field: "id",
                     width: "180",
                 },
+                
+                {
+                    title: "Academic Year",
+                    headerSort: false,
+                    field: "academic_year",
+                    headerHozAlign: "left",
+                },
                 {
                     title: "Declared Term",
                     field: "name",
@@ -227,6 +234,7 @@ var table = (function () {
                         let dataset = response.data;
                         $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         $('#editModal select[name="term_type_id"]').val(dataset.term_type_id ? dataset.term_type_id : '');
+                        $('#editModal select[name="academic_year_id"]').val(dataset.academic_year_id ? dataset.academic_year_id : '');
 
                         $('#editModal input[name="id"]').val(editId);
                     }

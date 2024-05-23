@@ -24,7 +24,9 @@ class StoreTermDeclarationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name'=> 'required',
+            'academic_year_id'=> 'required',
+            'term_type_id'=> 'required',
         ];
     }
 }
