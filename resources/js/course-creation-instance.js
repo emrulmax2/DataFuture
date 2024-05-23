@@ -359,10 +359,17 @@ var courseCreationINListTable = (function () {
 
         const addCourseCreationInstModallEl = document.getElementById('addCourseCreationInstModal')
         addCourseCreationInstModallEl.addEventListener('hide.tw.modal', function(event) {
+            
+            let Fees = $('#addCourseCreationInstModal .modal-body input[name="fees"]').val();
+            let regFees = $('#addCourseCreationInstModal .modal-body input[name="reg_fees"]').val();
+
             $('#addCourseCreationInstModal .acc__input-error').html('');
             $('#addCourseCreationInstModal .modal-body input[type="text"]').val('');
             $('#addCourseCreationInstModal .modal-body input[type="number"]').val('');
             $('#addCourseCreationInstModal .modal-body  select').val('');
+
+            $('#addCourseCreationInstModal .modal-body input[name="fees"]').val(Fees);
+            $('#addCourseCreationInstModal .modal-body input[name="reg_fees"]').val(regFees);
         });
         
         const editCourseCreationInstModalEl = document.getElementById('editCourseCreationInstModal')
