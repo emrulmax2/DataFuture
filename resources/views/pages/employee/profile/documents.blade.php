@@ -175,9 +175,9 @@
                         </a>
                     </div>
                     <div class="modal-body">  
-                        <div class="sendEmailContent" data-content="<?php echo 'Dear '.$employee->full_name.',<br/><p>Please find attached a important communication from Human Resources department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?>">
+                        <div class="sendEmailContent" data-content="<?php echo 'Dear '.$employee->full_name.',<br/><p>Enclosed herewith is an important communication from the Human Resources Department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?>">
                             <label class="block mb-1">Mail Content <span class="text-danger">*</span></label>
-                            <textarea rows="8" name="email_body" id="email_body"><?php echo 'Dear '.$employee->full_name.',<br/><p>Please find attached a important communication from Human Resources department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?></textarea>
+                            <textarea rows="8" name="email_body" id="email_body"><?php echo 'Dear '.$employee->full_name.',<br/><p>Enclosed herewith is an important communication from the Human Resources Department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?></textarea>
                             <div class="acc__input-error error-email_body text-danger mt-2"></div>
                         </div>
                         <div class="mt-5 flex justify-start items-center relative">

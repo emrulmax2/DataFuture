@@ -224,7 +224,7 @@ class EmployeeDocumentsController extends Controller
             'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
             
             'from_email'    => 'hr@lcc.ac.uk',
-            'from_name'    =>  'London Churchill College',
+            'from_name'    =>  'HR London Churchill College',
         ];
 
         $mailTo = [];
@@ -232,7 +232,6 @@ class EmployeeDocumentsController extends Controller
         if(isset($employee->employment->email) && !empty($employee->employment->email)):
             $mailTo[] = $employee->employment->email;
         endif;
-        $mailTo[] = 'hr@lcc.ac.uk';
 
         if($request->hasFile('document')):
             $document = $request->file('document');
