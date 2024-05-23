@@ -75,7 +75,9 @@ class TermDeclarationController extends Controller
                     'sl' => $i,
                     'name' => $list->name,
                     'academic_year' => $list->academicYear->name,
-                    'type' => $list->termType->name,
+                    'type' => $list->termType->name,           
+                    'start_date'=> $list->start_date,
+                    'end_date'=> $list->end_date,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -105,6 +107,13 @@ class TermDeclarationController extends Controller
             'name'=> $request->name,
             'academic_year_id'=> $request->academic_year_id,
             'term_type_id'=> $request->term_type_id,
+            'start_date'=> $request->start_date,
+            'end_date'=> $request->end_date,
+            'total_teaching_weeks'=> $request->total_teaching_weeks,
+            'teaching_start_date'=> $request->teaching_start_date,
+            'teaching_end_date'=> $request->teaching_end_date,
+            'revision_start_date'=> $request->revision_start_date,
+            'revision_end_date'=> $request->revision_end_date,
             'created_by' => auth()->user()->id
         ]);
 
@@ -150,24 +159,39 @@ class TermDeclarationController extends Controller
      */
     public function update(UpdateTermDeclarationRequest $request, TermDeclaration $term)
     {
-        $data = TermDeclaration::where('id', $term->id)->update([
-            'name'=> $request->name,
-            'term_type_id'=> $request->term_type_id,
-            'academic_year_id'=> $request->academic_year_id,
-            'updated_by' => auth()->user()->id
-        ]);
+        //dd($request);
+        // $data = TermDeclaration::where('id', $term->id)->update([
+        //     'name'=> $request->name,
+        //     'term_type_id'=> $request->term_type_id,
+        //     'academic_year_id'=> $request->academic_year_id,
+        //     'start_date'=> $request->start_date,
+        //     'end_date'=> $request->end_date,
+        //     'total_teaching_weeks'=> $request->total_teaching_weeks,
+        //     'teaching_start_date'=> $request->teaching_start_date,
+        //     'teaching_end_date'=> $request->teaching_end_date,
+        //     'revision_start_date'=> $request->revision_start_date,
+        //     'revision_end_date'=> $request->revision_end_date,
+        //     'updated_by' => auth()->user()->id
+        // ]);
+        
+        $request->request->add(['updated_by' => auth()->user()->id]);
+        $request->request->remove('id');
+        
+        $term->fill($request->all());
+        $term->save();
+        
+        if($term->wasChanged()){
+            return response()->json(['message' => 'Data updated'], 200);
+        }else{
+            return response()->json(['message' => 'something went wrong'], 422);
+        }
 
         $dataset = TermDeclaration::all()->sortByDesc("name");
         Cache::forever('terms', $dataset);
 
-        return response()->json($data);
+        return response()->json($term);
 
 
-        if($data->wasChanged()){
-            return response()->json(['message' => 'Data updated'], 200);
-        }else{
-            return response()->json(['message' => 'No data Modified'], 304);
-        }
     }
 
     /**

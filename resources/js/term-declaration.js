@@ -128,6 +128,35 @@ var table = (function () {
 })();
 
 (function () {
+
+        const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
+        const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+        const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        let confModalDelTitle = 'Are you sure?';
+        let confPermanentModalDelTitle = 'Permanently Delete Alert';
+
+        const addModalEl = document.getElementById('addModal')
+        addModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addModal .acc__input-error').html('');
+            $('#addModal input').val('');
+            $('#addModal select').val('');
+        });
+        
+        const editModalEl = document.getElementById('editModal')
+        editModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editModal .acc__input-error').html('');
+            $('#editModal input').val('');
+            $('#addModal select').val('');
+            $('#editModal input[name="id"]').val('0');
+        });
+
+        const confirmModalEl = document.getElementById('confirmModal')
+        confirmModalEl.addEventListener('hidden.tw.modal', function(event){
+            $('#confirmModal .agreeWith').attr('data-id', '0');
+            $('#confirmModal .agreeWith').attr('data-action', 'none');
+        });
+
     // Tabulator
     if ($("#termTableId").length) {
         // Init Table
@@ -231,11 +260,20 @@ var table = (function () {
             })
                 .then((response) => {
                     if (response.status == 200) {
+
                         let dataset = response.data;
+
                         $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         $('#editModal select[name="term_type_id"]').val(dataset.term_type_id ? dataset.term_type_id : '');
                         $('#editModal select[name="academic_year_id"]').val(dataset.academic_year_id ? dataset.academic_year_id : '');
-
+                        $('#editModal input[name="start_date"]').val(dataset.start_date ? dataset.start_date : '');
+                        $('#editModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '');
+                        $('#editModal input[name="total_teaching_weeks"]').val(dataset.total_teaching_weeks ? dataset.total_teaching_weeks : '');
+                        $('#editModal input[name="teaching_start_date"]').val(dataset.teaching_start_date ? dataset.teaching_start_date : '');
+                        $('#editModal input[name="teaching_end_date"]').val(dataset.teaching_end_date ? dataset.teaching_end_date : '');
+                        $('#editModal input[name="revision_start_date"]').val(dataset.revision_start_date ? dataset.revision_start_date : '');
+                        $('#editModal input[name="revision_end_date"]').val(dataset.revision_end_date ? dataset.revision_end_date : '');
+                        
                         $('#editModal input[name="id"]').val(editId);
                     }
                 })

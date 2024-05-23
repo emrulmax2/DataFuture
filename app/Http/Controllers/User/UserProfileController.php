@@ -23,4 +23,19 @@ class UserProfileController extends Controller
             "emergencyContacts" => EmployeeEmergencyContact::where("employee_id",$employeeId)->get()->first(),
         ]);
     }
+    public function extraBenefit(){
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $employeeId = $employee->id;
+
+        return view('pages.users.my-account.extrabenefit', [
+            'title' => 'My Account - LCC Data Future Managment',
+            'breadcrumbs' => [
+                ['label' => 'My Account', 'href' => 'javascript:void(0);']
+            ],
+            'user' => User::find(auth()->user()->id),
+            'employee' => Employee::where('user_id', auth()->user()->id)->get()->first(),
+            "emergencyContacts" => EmployeeEmergencyContact::where("employee_id",$employeeId)->get()->first(),
+        ]);
+    }
+    
 }

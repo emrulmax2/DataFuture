@@ -18,4 +18,9 @@
             </a>
         </li>
     @endif
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('user.account.extrabenefit') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.extrabenefit' ? 'active' : '' }}">
+            Extra benefit
+        </a>
+    </li>
 </ul>
