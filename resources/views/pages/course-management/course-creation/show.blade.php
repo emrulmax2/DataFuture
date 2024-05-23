@@ -60,9 +60,6 @@
                             <div class="truncate sm:whitespace-normal flex items-center mt-3">
                                 <i data-lucide="fingerprint" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Workplacement:</span> <span class="font-medium ml-2">{{ isset($creation->is_workplacement) && $creation->is_workplacement == 1 ? 'Yes' : 'No' }}</span>
                             </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="fingerprint" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Workplacement:</span> <span class="font-medium ml-2">{{ isset($creation->is_workplacement) && $creation->is_workplacement == 1 ? 'Yes' : 'No' }}</span>
-                            </div>
                             @if(isset($creation->is_workplacement) && $creation->is_workplacement == 1)
                             <div class="truncate sm:whitespace-normal flex items-center mt-3">
                                 <i data-lucide="clock" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Required Hours:</span> <span class="font-medium ml-2">{{ isset($creation->required_hours) && $creation->required_hours == 1 ? $creation->required_hours.' Hour' : $creation->required_hours.' Hours' }}</span>
