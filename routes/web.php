@@ -1016,6 +1016,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(UserProfileController::class)->group(function() {
         Route::get('my-account', 'index')->name('user.account'); 
+        Route::get('my-account/extra-benefit', 'extraBenefit')->name('user.account.extrabenefit'); 
     });
 
     Route::controller(UserHolidayController::class)->group(function(){
@@ -2204,7 +2205,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(TermDeclarationController::class)->group(function() {
 
         Route::get('term-declaration-list', 'list')->name('term-declaration.list'); 
-        Route::post('term-declaration/{id}/update', 'update')->name('term-declaration.update'); 
+        Route::post('term-declaration/{term}/update', 'update')->name('term-declaration.update'); 
         
     });
 

@@ -122,7 +122,7 @@ class EmployeeAttendanceLiveController extends Controller
                         $html .= '</td>';
 
                         $html .= '<td class="text-left w-1/6">';
-                            $html .= '<div class="text-center">';
+                            $html .= '<div class="text-left">';
                                 $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
                             $html .= '</div>';
                         $html .= '</td>';

@@ -682,6 +682,36 @@ var courseCreationINListTable = (function () {
             $('#instancetermConfirmModal .agreeWith').attr('data-action', 'none');
         });
 
+        $('#instancetermAddModal select#term_declaration_id').on('change', function(e){
+            
+            let $editBtn = $(this);
+            let editId = $editBtn.val();
+            if(editId=="") {
+                $('#instancetermAddModal .modal-body input').val('');
+                $('#instancetermAddModal .modal-body select').val('');
+            }else{
+                axios({
+                    method: "get",
+                    url: route("term-declaration.edit", editId),
+                    headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+                }).then((response) => {
+                    if (response.status == 200) {
+                        let dataset = response.data;
+
+                        $('#instancetermAddModal input[name="start_date"]').val(dataset.start_date ? dataset.start_date : '');
+                        $('#instancetermAddModal input[name="end_date"]').val(dataset.end_date ? dataset.end_date : '');
+                        $('#instancetermAddModal input[name="total_teaching_weeks"]').val(dataset.total_teaching_weeks ? dataset.total_teaching_weeks : '');
+                        $('#instancetermAddModal input[name="teaching_start_date"]').val(dataset.teaching_start_date ? dataset.teaching_start_date : '');
+                        $('#instancetermAddModal input[name="teaching_end_date"]').val(dataset.teaching_end_date ? dataset.teaching_end_date : '');
+                        $('#instancetermAddModal input[name="revision_start_date"]').val(dataset.revision_start_date ? dataset.revision_start_date : '');
+                        $('#instancetermAddModal input[name="revision_end_date"]').val(dataset.revision_end_date ? dataset.revision_end_date : '');
+
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
+        });
         $('#instancetermAddForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('instancetermAddForm');

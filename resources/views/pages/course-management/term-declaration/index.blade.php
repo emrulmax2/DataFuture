@@ -90,32 +90,69 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="mt-3">       
-                            <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
-                            
-                            <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
-                                <option value="">Please Select</option>
-                                @foreach($academicYears as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach    
-                            </select>
-                            <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
-                        </div>
-                        <div>
-                            <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>      
-                        <div class="mt-3">       
-                            <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
-                            
-                            <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
-                                <option value="">Please Select</option>
-                                @foreach($termTypes as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach    
-                            </select>
-                            <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">       
+                                <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                                
+                                <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
+                                    <option value="">Please Select</option>
+                                    @foreach($academicYears as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @endforeach    
+                                </select>
+                                <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
+                                <input id="name" type="text" name="name" class="form-control w-full">
+                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            </div>      
+                            <div class="col-span-6">       
+                                <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
+                                
+                                <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
+                                    <option value="">Please Select</option>
+                                    @foreach($termTypes as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @endforeach    
+                                </select>
+                                <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                <input id="start_date" name="start_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                                <input id="end_date" name="end_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="total_teaching_weeks" class="form-label">Total Teaching Weeks <span class="text-danger">*</span></label>
+                                <input id="total_teaching_weeks" type="number" name="total_teaching_weeks" class="form-control w-full">
+                                <div class="acc__input-error error-total_teaching_weeks text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="teaching_start_date" class="form-label">Teaching Start Date <span class="text-danger">*</span></label>
+                                <input id="teaching_start_date" name="teaching_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-teaching_start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="teaching_end_date" class="form-label">Teaching End Date <span class="text-danger">*</span></label>
+                                <input id="teaching_end_date" name="teaching_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-teaching_end_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="revision_start_date" class="form-label">Revision Start Date <span class="text-danger">*</span></label>
+                                <input id="revision_start_date" name="revision_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-revision_start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="revision_end_date" class="form-label">Revision End Date <span class="text-danger">*</span></label>
+                                <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -154,32 +191,69 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="mt-3">       
-                            <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
-                            
-                            <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
-                                <option value="">Please Select</option>
-                                @foreach($academicYears as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach    
-                            </select>
-                            <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
-                        </div>
-                        <div>
-                            <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>                           
-                        </div>
-                        <div class="mt-3">       
-                            <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
-                            
-                            <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
-                                <option value="">Please Select</option>
-                                @foreach($termTypes as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach    
-                            </select>
-                            <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">       
+                                <label for="academic_year_id" class="form-label">Academic Year <span class="text-danger">*</span></label>
+                                
+                                <select id="academic_year_id" name="academic_year_id" class="form-control w-full academic_year_id">
+                                    <option value="">Please Select</option>
+                                    @foreach($academicYears as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @endforeach    
+                                </select>
+                                <div id="error-academic_year_id" class="acc__input-error error-academic_year_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="name" class="form-label"><span class="text-danger">*</span>Term Name</label>
+                                <input id="name" type="text" name="name" class="form-control w-full">
+                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            </div>      
+                            <div class="col-span-6">       
+                                <label for="term_type_id" class="form-label">Term Type <span class="text-danger">*</span></label>
+                                
+                                <select id="term_type_id" name="term_type_id" class="form-control w-full term_type_id">
+                                    <option value="">Please Select</option>
+                                    @foreach($termTypes as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @endforeach    
+                                </select>
+                                <div id="error-term_type_id" class="acc__input-error error-term_type_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                <input id="start_date" name="start_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                                <input id="end_date" name="end_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-end_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="total_teaching_weeks" class="form-label">Total Teaching Weeks <span class="text-danger">*</span></label>
+                                <input id="total_teaching_weeks" type="number" name="total_teaching_weeks" class="form-control w-full">
+                                <div class="acc__input-error error-total_teaching_weeks text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="teaching_start_date" class="form-label">Teaching Start Date <span class="text-danger">*</span></label>
+                                <input id="teaching_start_date" name="teaching_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-teaching_start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="teaching_end_date" class="form-label">Teaching End Date <span class="text-danger">*</span></label>
+                                <input id="teaching_end_date" name="teaching_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-teaching_end_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="revision_start_date" class="form-label">Revision Start Date <span class="text-danger">*</span></label>
+                                <input id="revision_start_date" name="revision_start_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-revision_start_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="revision_end_date" class="form-label">Revision End Date <span class="text-danger">*</span></label>
+                                <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

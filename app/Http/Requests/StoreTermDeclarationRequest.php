@@ -27,6 +27,13 @@ class StoreTermDeclarationRequest extends FormRequest
             'name'=> 'required',
             'academic_year_id'=> 'required',
             'term_type_id'=> 'required',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'total_teaching_weeks' => 'required',
+            'teaching_start_date' => 'required|date',
+            'teaching_end_date' => 'required|date',
+            'revision_start_date' => 'required|date',
+            'revision_end_date' => 'required|date',
         ];
     }
 }
