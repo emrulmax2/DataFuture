@@ -7,6 +7,7 @@ use App\Http\Requests\HR\EmploymentDataUpdateRequest;
 use App\Models\Employee;
 use App\Models\EmployeeArchive;
 use App\Models\Employment;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class EmploymentController extends Controller
@@ -73,13 +74,26 @@ class EmploymentController extends Controller
      */
     public function update(EmploymentDataUpdateRequest $request, Employment $employment)
     {
+        $user_email = (isset($request->user_email) && !empty($request->user_email) ? $request->user_email : '');
         $employmentOld = Employment::where('employee_id', $request->employee_id)->get()->first();
+        $employee = Employee::find($employment->employee_id);
+
+        if(!empty($user_email) && $user_email != $employee->user->email):
+            $existUser = User::where('email', $user_email)->where('id', '!=', $employee->user_id)->get()->count();
+            if($existUser > 0):
+                return response()->json(['res' => 'Email id already exist.'], 400);
+            else:
+                User::where('id', $employee->user_id)->update(['email' => $user_email]);
+                $request->request->add(['email' => $user_email]);
+            endif;
+        endif;
+
         $input = $request->all();
         $employment->fill($input);
         $changes = $employment->getDirty();
         $employment->save();
 
-        $employee = Employee::find($employment->employee_id);
+        /* Sync Site Location */
         $employee->venues()->sync($request->site_location);
 
         if($employment->wasChanged() && !empty($changes)):
@@ -98,9 +112,9 @@ class EmploymentController extends Controller
 
         
         if($employment->wasChanged())
-            return response()->json(["message"=>"updated", ]);
+            return response()->json(["message"=>"updated"], 200);
         else
-            return response()->json(["no update"]);
+            return response()->json(["no update"], 200);
     }
 
     /**

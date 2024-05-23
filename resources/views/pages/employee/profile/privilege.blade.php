@@ -185,6 +185,12 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_3">Privilege Menu</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['edit_user_email']) && $priv['hr_portal']['edit_user_email'] == 1 ? 'checked' : '') }} id="permission_hr_portal_4" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][edit_user_email]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_4">Edit User Email</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

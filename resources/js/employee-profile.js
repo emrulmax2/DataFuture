@@ -178,7 +178,6 @@ import { createIcons, icons } from "lucide";
             cache: false,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             success: function(res, textStatus, xhr) {
-
                 $('.acc__input-error', parentForm).html('');
                 
                 if(xhr.status == 200){
@@ -211,6 +210,8 @@ import { createIcons, icons } from "lucide";
                         $(`#${formID} .${key}`).addClass('border-danger');
                         $(`#${formID}  .error-${key}`).html(val);
                     }
+                }else if(jqXHR.status == 400){
+                    $(`#${formID}  .error-user_email`).html('Email address already exist.');
                 }else{
                     console.log(textStatus+' => '+errorThrown);
                 }
