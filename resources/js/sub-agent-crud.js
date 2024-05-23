@@ -212,9 +212,11 @@ var agentTableId = (function () {
 
         const addAgentModalEl = document.getElementById('addAgentModal')
         addAgentModalEl.addEventListener('hide.tw.modal', function(event) {
+            let ParentId = $('#addAgentModal input[name="parent_id"]').val();
             $('#addAgentModal .acc__input-error').html('');
             $('#addAgentModal input').val('');
             $('#addAgentModal select').val('');
+            $('#addAgentModal input[name="parent_id"]').val(ParentId);
         });
         
         const editAgentModalEl = document.getElementById('editAgentModal')

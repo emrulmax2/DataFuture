@@ -5,6 +5,7 @@ namespace App\Http\Controllers\CourseManagement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTermDeclarationRequest;
 use App\Http\Requests\UpdateTermDeclarationRequest;
+use App\Models\AcademicYear;
 use App\Models\TermDeclaration;
 use App\Models\TermType;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class TermDeclarationController extends Controller
      */
     public function index()
     {
+        
         return view('pages.course-management.term-declaration.index', [
             'title' => 'Course & Semester - LCC Data Future Managment',
             'subtitle' => 'Term Declarations',
@@ -28,6 +30,7 @@ class TermDeclarationController extends Controller
             ],
             
             'termTypes' => TermType::all(),
+            'academicYears' => AcademicYear::orderBy('id','desc')->get(),
         ]);
     }
 
@@ -71,6 +74,7 @@ class TermDeclarationController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'academic_year' => $list->academicYear->name,
                     'type' => $list->termType->name,
                     'deleted_at' => $list->deleted_at
                 ];
@@ -99,6 +103,7 @@ class TermDeclarationController extends Controller
     {
         $data = TermDeclaration::create([
             'name'=> $request->name,
+            'academic_year_id'=> $request->academic_year_id,
             'term_type_id'=> $request->term_type_id,
             'created_by' => auth()->user()->id
         ]);
@@ -148,6 +153,7 @@ class TermDeclarationController extends Controller
         $data = TermDeclaration::where('id', $term->id)->update([
             'name'=> $request->name,
             'term_type_id'=> $request->term_type_id,
+            'academic_year_id'=> $request->academic_year_id,
             'updated_by' => auth()->user()->id
         ]);
 
