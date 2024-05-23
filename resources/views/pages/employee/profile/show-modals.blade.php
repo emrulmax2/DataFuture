@@ -256,10 +256,10 @@
                             <input type="text" value="{{ isset($employment->mobile) ? $employee->mobile : '' }}" id="mobile" class="form-control" name="mobile"  >
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4 disabled" >
+                        <div class="col-span-12 sm:col-span-4 {{ (isset(auth()->user()->priv()['edit_user_email']) && auth()->user()->priv()['edit_user_email'] == 1 ? '' : 'disabled') }}" >
                             <label for="email" class="form-label">Email (username) <span class="text-danger">*</span></label>
-                            <input disabled type="text" value="{{ isset($employee->user->email) ? $employee->user->email : '' }}" id="email" class="form-control"  >
-                            <input type="hidden" value="{{ isset($employee->user->email) ? $employee->user->email : '' }}" name="email"/>
+                            <input {{ (isset(auth()->user()->priv()['edit_user_email']) && auth()->user()->priv()['edit_user_email'] == 1 ? '' : 'disabled') }} type="text" value="{{ isset($employee->user->email) ? $employee->user->email : '' }}" name="user_email" id="email" class="form-control"  >
+                            <div class="acc__input-error error-user_email text-danger mt-2"></div>
                         </div>
 
                         <div class="col-span-12 sm:col-span-4">
