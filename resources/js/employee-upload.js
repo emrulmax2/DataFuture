@@ -719,9 +719,9 @@ var employeeCommunicationDocumentListTable = (function () {
 
             if (response.status == 200) {
                 addCommunicationModal.hide();
-                var res = response.data.suc;
+                var suc = response.data.suc;
                 
-                if(res.suc == 1){
+                if(suc == 1){
                     successModal.show(); 
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                         $("#successModal .successModalTitle").html("Congratulation!" );
@@ -731,7 +731,6 @@ var employeeCommunicationDocumentListTable = (function () {
                     
                     setTimeout(function(){
                         successModal.hide();
-                        window.location.reload();
                     }, 2000);
                 }else{
                     warningModal.show();
