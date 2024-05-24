@@ -453,7 +453,8 @@ class EmployeeAttendanceLiveController extends Controller
 
         $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
         $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
-        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $toMails[] = $fromEmail;
+        $commonSmtp = ComonSmtp::where('smtp_user', 'internal@lcc.ac.uk')->get()->first();
         $configuration = [
             'smtp_host'         => $commonSmtp->smtp_host,
             'smtp_port'         => $commonSmtp->smtp_port,
