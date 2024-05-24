@@ -152,11 +152,15 @@
                                             <ul class="autoFillDropdown"></ul>
                                         </div>
                                     </div>
-                                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Search By Name</label>
-                                        <input id="query-CNTR" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search by Name">
+                                    <div class="col-span-12 sm:col-span-3">
+                                        <label class="form-label">Search By Name</label>
+                                        <div class="autoCompleteField" data-table="students">
+                                            <input id="query-CNTR" autocomplete="off" name="query" type="text" class="form-control"  placeholder="Search by Name">
+                                            <ul class="autoFillDropdown"></ul>
+                                        </div>
+                                        
                                     </div>
-                                    
+
                                     <div class="col-span-12 sm:col-span-3">
                                         <label for="applicantEmail" class="form-label">Applicant Email</label>
                                         <div class="autoCompleteField" data-table="students">
