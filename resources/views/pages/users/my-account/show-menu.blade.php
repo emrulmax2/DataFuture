@@ -20,7 +20,7 @@
     @endif
     <li class="nav-item" role="presentation">
         <a href="{{ route('user.account.extrabenefit') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.extrabenefit' ? 'active' : '' }}">
-            Extra benefits
+            Extra Benefits
         </a>
     </li>
     @if(isset(auth()->user()->priv()['staff_groups']) && auth()->user()->priv()['staff_groups'] == 1)
