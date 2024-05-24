@@ -65,7 +65,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
-            'applicant' => Applicant::all()->count(),
+            'applicant' => Applicant::where('status_id', '>', 1)->get()->count(),
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
@@ -496,9 +496,10 @@ class DashboardController extends Controller
 
         $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
         $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
-        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $commonSmtp = ComonSmtp::where('smtp_user', 'internal@lcc.ac.uk')->get()->first();
 
         if(!empty($mailTos) && (isset($commonSmtp->id) && $commonSmtp->id > 0)):
+            $mailTos[] = $fromEmail;
             $configuration = [
                 'smtp_host'         => $commonSmtp->smtp_host,
                 'smtp_port'         => $commonSmtp->smtp_port,
