@@ -91,6 +91,9 @@ class DashboardController extends Controller
         if(!empty($queryStr)):
             $query->where('first_name','LIKE','%'.$queryStr.'%');
             $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
+            $query->orWhereRaw(
+                "concat(first_name, ' ', last_name) like '%" . $queryStr . "%' "
+            );
         endif;
         if(!empty($semesters) || !empty($courseCreationId)):
 
