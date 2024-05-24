@@ -61,7 +61,7 @@ class DashboardController extends Controller
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
         return view('pages.users.staffs.dashboard.index', [
-            'title' => 'Applicant Dashboard - LCC Data Future Managment',
+            'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
@@ -97,7 +97,7 @@ class DashboardController extends Controller
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
 
         return view('pages.users.staffs.dashboard.internal-links', [
-            'title' => 'Internal Link - LCC Data Future Managment',
+            'title' => 'Internal Link - London Churchill College',
             'subtitle' => '',
             'breadcrumbs' => [
                 ['label' => 'Internal Site Link', 'href' => 'javascript:void(0);']

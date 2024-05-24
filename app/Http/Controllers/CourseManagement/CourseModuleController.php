@@ -90,7 +90,7 @@ class CourseModuleController extends Controller
         $assementTypes = AssessmentType::all();
         $gradesList = Grade::all();
         return view('pages.course-management.modules.show', [
-            'title' => 'Course & Semester - LCC Data Future Managment',
+            'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Courses Module Details',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

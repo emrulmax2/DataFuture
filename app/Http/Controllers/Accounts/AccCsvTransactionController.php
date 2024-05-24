@@ -22,7 +22,7 @@ class AccCsvTransactionController extends Controller
             $file = AccCsvFile::where('acc_bank_id', $bank)->get()->first();
         endif;
         return view('pages.accounts.storage.csv.index', [
-            'title' => 'Accounts Storage - LCC Data Future Managment',
+            'title' => 'Accounts Storage - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Storage', 'href' => 'javascript:void(0);']

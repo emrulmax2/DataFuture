@@ -36,7 +36,7 @@ class MyStaffController extends Controller
         $auth_emp_ids = array_unique(array_merge($hour_auth_ids, $holiday_auth_ids));
 
         return view('pages.users.my-account.my-staff',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'Welcome - London Churchill College',
             'breadcrumbs' => [],
             'user' => $userData,
             'employee' => $employee,
@@ -159,7 +159,7 @@ class MyStaffController extends Controller
         $runningHolidayYear = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
 
         return view('pages.users.my-account.my-team', [
-            'title' => 'My Team Holidays - LCC Data Future Managment',
+            'title' => 'My Team Holidays - London Churchill College',
             'breadcrumbs' => [],
             'user' => $userData,
             'employee' => $employee,

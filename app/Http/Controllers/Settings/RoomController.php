@@ -92,7 +92,7 @@ class RoomController extends Controller
     {
         $data = Room::find($id);
         return view('pages.settings.venues.rooms.show', [
-            'title' => 'Rooms - LCC Data Future Managment',
+            'title' => 'Rooms - London Churchill College',
             'subtitle' => 'Campus Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

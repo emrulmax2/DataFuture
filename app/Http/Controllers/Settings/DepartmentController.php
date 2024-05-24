@@ -19,7 +19,7 @@ class DepartmentController extends Controller
     public function index()
     {
         return view('pages.settings.department.index', [
-            'title' => 'Departments - LCC Data Future Managment',
+            'title' => 'Departments - London Churchill College',
             'subtitle' => 'User Privilege',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

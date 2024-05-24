@@ -13,7 +13,7 @@ class DatafutureFieldController extends Controller
     public function index()
     {
         return view('pages.settings.datafuture.fields.index', [
-            'title' => 'Datafuture Field Settings - LCC Data Future Managment',
+            'title' => 'Datafuture Field Settings - London Churchill College',
             'subtitle' => 'Datafuture Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

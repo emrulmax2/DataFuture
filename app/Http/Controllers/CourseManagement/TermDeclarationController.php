@@ -22,7 +22,7 @@ class TermDeclarationController extends Controller
     {
         
         return view('pages.course-management.term-declaration.index', [
-            'title' => 'Course & Semester - LCC Data Future Managment',
+            'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Term Declarations',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

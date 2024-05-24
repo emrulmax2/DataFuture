@@ -14,7 +14,7 @@ class CourseCreationController extends Controller
 {
     public function index(){
         return view('pages/course-creation/index', [
-            'title' => 'Course Creations - LCC Data Future Managment',
+            'title' => 'Course Creations - London Churchill College',
             'breadcrumbs' => [['label' => 'Course Creations', 'href' => 'javascript:void(0);']],
             'courses' => Course::all(),
             'semesters' => Semester::all(),
@@ -106,7 +106,7 @@ class CourseCreationController extends Controller
 
     public function show($id){
         return view('pages/course-creation/show', [
-            'title' => 'Course Creations - LCC Data Future Managment',
+            'title' => 'Course Creations - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Course Creations', 'href' => route('course.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']

@@ -20,7 +20,7 @@ class ProcessListController extends Controller
     public function index()
     {
         return view('pages.settings.processlist.index', [
-            'title' => 'Process List - LCC Data Future Managment',
+            'title' => 'Process List - London Churchill College',
             'subtitle' => 'Applicant Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

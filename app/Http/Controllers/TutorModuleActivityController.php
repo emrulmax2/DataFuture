@@ -35,7 +35,7 @@ class TutorModuleActivityController extends Controller
         
 
         return view('pages.tutor.module.activity.create', [
-            'title' => 'Tutor Dashboard - LCC Data Future Managment',
+            'title' => 'Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
             "plansDateList" =>$plansDateList,
             "EActivitySettings"=>$activity

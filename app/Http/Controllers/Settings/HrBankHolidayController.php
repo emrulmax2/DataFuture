@@ -14,7 +14,7 @@ class HrBankHolidayController extends Controller
 {
     public function index($id){
         return view('pages.settings.holiday-year.bank-holiday.index', [
-            'title' => 'Bank Holiday - LCC Data Future Managment',
+            'title' => 'Bank Holiday - London Churchill College',
             'subtitle' => 'HR Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

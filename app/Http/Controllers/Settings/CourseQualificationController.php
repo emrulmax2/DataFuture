@@ -14,7 +14,7 @@ class CourseQualificationController extends Controller
     public function index()
     {
         return view('pages.settings.coursequalification.index', [
-            'title' => 'Course Qualification - LCC Data Future Managment',
+            'title' => 'Course Qualification - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

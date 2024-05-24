@@ -12,7 +12,7 @@ class HolidayYearController extends Controller
 {
     public function index(){
         return view('pages.settings.holiday-year.index', [
-            'title' => 'Holiday Years - LCC Data Future Managment',
+            'title' => 'Holiday Years - London Churchill College',
             'subtitle' => 'HR Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -127,7 +127,7 @@ class HolidayYearController extends Controller
 
     public function leaveOptions($id){
         return view('pages.settings.holiday-year.leave-options', [
-            'title' => 'Holiday Year Leave Option - LCC Data Future Managment',
+            'title' => 'Holiday Year Leave Option - London Churchill College',
             'subtitle' => 'HR Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

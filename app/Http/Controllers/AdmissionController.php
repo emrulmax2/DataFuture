@@ -129,7 +129,7 @@ class AdmissionController extends Controller
         
         
         return view('pages.students.admission.index', [
-            'title' => 'Admission Management - X LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => 'javascript:void(0);']
             ],
@@ -233,7 +233,7 @@ class AdmissionController extends Controller
 
     public function show($applicantId){
         return view('pages.students.admission.show', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
@@ -623,7 +623,7 @@ class AdmissionController extends Controller
         endif;
 
         return view('pages.students.admission.process', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1070,7 +1070,7 @@ class AdmissionController extends Controller
 
     public function admissionUploads($applicantId){
         return view('pages.students.admission.uploads', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1182,7 +1182,7 @@ class AdmissionController extends Controller
 
     public function admissionNotes($applicantId){
         return view('pages.students.admission.notes', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],
@@ -1430,7 +1430,7 @@ class AdmissionController extends Controller
 
     public function admissionCommunication($applicantId){
         return view('pages.students.admission.communication', [
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => route('admission.show', $applicantId)],

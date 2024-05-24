@@ -15,7 +15,7 @@ class TitleController extends Controller
     public function index()
     {
         return view('pages/title/index', [
-            'title' => 'Titles - LCC Data Future Managment',
+            'title' => 'Titles - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Titles', 'href' => 'javascript:void(0);']
             ],

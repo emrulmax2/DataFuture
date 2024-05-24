@@ -18,7 +18,7 @@ class SettingController extends Controller
     public function index()
     {
         return view('pages.settings.index', [
-            'title' => 'Site Settings - LCC Data Future Managment',
+            'title' => 'Site Settings - London Churchill College',
             'subtitle' => 'Site Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => 'javascript:void(0);']
@@ -30,7 +30,7 @@ class SettingController extends Controller
     public function addressApi()
     {
         return view('pages.settings.address-capture', [
-            'title' => 'Site Settings - LCC Data Future Managment',
+            'title' => 'Site Settings - London Churchill College',
             'subtitle' => 'Site Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -43,7 +43,7 @@ class SettingController extends Controller
     public function smsApi()
     {
         return view('pages.settings.sms-api', [
-            'title' => 'SMS Settings - LCC Data Future Managment',
+            'title' => 'SMS Settings - London Churchill College',
             'subtitle' => 'SMS Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

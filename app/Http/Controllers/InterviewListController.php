@@ -46,7 +46,7 @@ class InterviewListController extends Controller
         }
 
         return view('pages.interviewlist.index', [
-            'title' => 'Interview List - LCC Data Future Managment',
+            'title' => 'Interview List - London Churchill College',
             'breadcrumbs' => [['label' => 'Interview List', 'href' => 'javascript:void(0);']],
             'tasklists' => TaskList::all(),
             'applicanttasks' => ApplicantTask::all(),
@@ -459,7 +459,7 @@ class InterviewListController extends Controller
         
         return view('pages.interviewlist.profiles.show', [
 
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
@@ -479,7 +479,7 @@ class InterviewListController extends Controller
         
         return view('pages.interviewlist.profiles.showonly', [
 
-            'title' => 'Admission Management - LCC Data Future Managment',
+            'title' => 'Recruitment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Admission', 'href' => route('admission')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],

@@ -12,7 +12,7 @@ class StatusController extends Controller
     public function index()
     {
         return view('pages.settings.status.index', [
-            'title' => 'Statuses - LCC Data Future Managment',
+            'title' => 'Statuses - London Churchill College',
             'subtitle' => 'Applicant Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

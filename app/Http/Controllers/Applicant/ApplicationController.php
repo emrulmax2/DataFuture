@@ -43,7 +43,7 @@ class ApplicationController extends Controller
 {
     public function index(){
         return view('pages.applicant.application.index', [
-            'title' => 'Application Form - LCC Data Future Managment',
+            'title' => 'Application Form - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
@@ -751,7 +751,7 @@ class ApplicationController extends Controller
             redirect('applicant.dashboard');
         endif;
         return view('pages.applicant.application.show', [
-            'title' => 'Application View - LCC Data Future Managment',
+            'title' => 'Application View - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Application View', 'href' => 'javascript:void(0);']
             ],

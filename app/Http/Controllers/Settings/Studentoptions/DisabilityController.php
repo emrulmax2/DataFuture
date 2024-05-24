@@ -15,7 +15,7 @@ class DisabilityController extends Controller
     public function index()
     {
         return view('pages/disability/index', [
-            'title' => 'Disabilities - LCC Data Future Managment',
+            'title' => 'Disabilities - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Disabilities', 'href' => 'javascript:void(0);']
             ],

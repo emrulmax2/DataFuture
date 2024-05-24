@@ -21,7 +21,7 @@ class ApplicantInterviewListController extends Controller
     public function index()
     {
         return view('pages/users/access/staff', [
-            'title' => 'Interview List - LCC Data Future Managment',
+            'title' => 'Interview List - London Churchill College',
             'breadcrumbs' => [['label' => 'Interview List', 'href' => 'javascript:void(0);']],
             'tasklists' => TaskList::all(),
             'applicanttasks' => ApplicantTask::all(),

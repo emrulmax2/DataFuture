@@ -11,7 +11,7 @@ class DocumentRoleAndPermissionController extends Controller
 {
     public function index(){
         return view('pages.settings.filemanager.role-and-permission', [
-            'title' => 'Filemanager Settings - LCC Data Future Managment',
+            'title' => 'Filemanager Settings - London Churchill College',
             'subtitle' => 'Role & Permission Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

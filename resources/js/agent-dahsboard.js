@@ -12,6 +12,7 @@ var applicantApplicantionList = (function () {
         let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
         let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
         let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
+        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
 
         let semesters = $("#semesters").val() != "" ? $("#semesters").val() : [];
         let courses = $("#courses").val() != "" ? $("#courses").val() : [];
@@ -22,7 +23,7 @@ var applicantApplicantionList = (function () {
 
             ajaxURL: route("agent.dashboard.applications.list"),
 
-            ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents},
+            ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents, querystr:querystr },
 
             ajaxFiltering: true,
             ajaxSorting: true,

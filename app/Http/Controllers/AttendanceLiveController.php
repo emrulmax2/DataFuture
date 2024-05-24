@@ -22,7 +22,7 @@ class AttendanceLiveController extends Controller
 {
     public function index(){
         return view('pages.attendance-live.index', [
-            'title' => 'Live Attendance - LCC Data Future Managment',
+            'title' => 'Live Attendance - London Churchill College',
             'breadcrumbs' => [],
             'departments' => Department::whereHas('employment', function($q){
                                 $q->whereHas('employee', function($sq){

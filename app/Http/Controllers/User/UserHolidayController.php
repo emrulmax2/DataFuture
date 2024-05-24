@@ -43,7 +43,7 @@ class UserHolidayController extends Controller
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
         return view('pages.users.my-account.holiday',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'Welcome - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

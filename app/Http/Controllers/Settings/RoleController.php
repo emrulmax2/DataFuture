@@ -24,7 +24,7 @@ class RoleController extends Controller
     public function index()
     {
         return view('pages.settings.role.index', [
-            'title' => 'Roles - LCC Data Future Managment',
+            'title' => 'Roles - London Churchill College',
             'subtitle' => 'User Privilege',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -108,7 +108,7 @@ class RoleController extends Controller
     {
         $permissionTemplateIds = PermissionTemplate::where('role_id', $id)->pluck('id')->toArray();
         return view('pages.settings.role.show', [
-            'title' => 'Roles - LCC Data Future Managment',
+            'title' => 'Roles - London Churchill College',
             'subtitle' => 'User Privilege',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

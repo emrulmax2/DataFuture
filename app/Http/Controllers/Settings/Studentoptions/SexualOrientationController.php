@@ -15,7 +15,7 @@ class SexualOrientationController extends Controller
     public function index()
     {
         return view('pages/sexual-orientation/index', [
-            'title' => 'Sexual Orientation - LCC Data Future Managment',
+            'title' => 'Sexual Orientation - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Sexual Orientation', 'href' => 'javascript:void(0);']
             ],

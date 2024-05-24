@@ -43,7 +43,7 @@ class FilemanagerController extends Controller
 
 
         return view('pages.filemanager.index', [
-            'title' => 'File Manager - LCC Data Future Managment',
+            'title' => 'File Manager - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'File Manager', 'href' => 'javascript:void(0);']
             ],

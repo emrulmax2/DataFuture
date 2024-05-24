@@ -172,7 +172,7 @@ class DashboardController extends Controller
         endif;
         
         return view('pages.tutor.dashboard.index', [
-            'title' => 'Tutor Dashboard - LCC Data Future Managment',
+            'title' => 'Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,
@@ -262,7 +262,7 @@ class DashboardController extends Controller
             }
         }
         return view('pages.tutor.dashboard.indexnew', [
-            'title' => 'Tutor Dashboard New - LCC Data Future Managment',
+            'title' => 'Tutor Dashboard New - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,
@@ -443,7 +443,7 @@ class DashboardController extends Controller
             ];
         endforeach;
         return view('pages.tutor.attendance.create', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
@@ -513,7 +513,7 @@ class DashboardController extends Controller
                 
        
         return view('pages.tutor.module.view', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],

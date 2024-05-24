@@ -15,7 +15,7 @@ class HesaGenderController extends Controller
     public function index()
     {
         return view('pages/hesagender/index', [
-            'title' => 'Hesa Genders - LCC Data Future Managment',
+            'title' => 'Hesa Genders - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Hesa Genders', 'href' => 'javascript:void(0);']
             ],

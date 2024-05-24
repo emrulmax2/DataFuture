@@ -19,7 +19,7 @@ class CourseController extends Controller
     public function index()
     {
         return view('pages.course-management.courses.index', [
-            'title' => 'Course & Semester - LCC Data Future Managment',
+            'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Courses',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -126,7 +126,7 @@ class CourseController extends Controller
     public function show($id)
     {
         return view('pages.course-management.courses.show', [
-            'title' => 'Course & Semester - LCC Data Future Managment',
+            'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Courses Details',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

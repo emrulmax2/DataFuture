@@ -21,7 +21,7 @@ class StorageController extends Controller
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $csvfiles = AccCsvFile::where('acc_bank_id', $bank)->pluck('id')->unique()->toArray();
         return view('pages.accounts.storage.index', [
-            'title' => 'Accounts Storage - LCC Data Future Managment',
+            'title' => 'Accounts Storage - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Storage', 'href' => 'javascript:void(0);']

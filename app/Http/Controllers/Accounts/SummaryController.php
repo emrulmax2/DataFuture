@@ -13,7 +13,7 @@ class SummaryController extends Controller
     public function index(){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         return view('pages.accounts.summary', [
-            'title' => 'Accounts - LCC Data Future Managment',
+            'title' => 'Accounts - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Accounts Summary', 'href' => 'javascript:void(0);']
             ],
@@ -203,7 +203,7 @@ class SummaryController extends Controller
 
     public function report($startDate, $endDate){
         return view('pages.accounts.report', [
-            'title' => 'Accounts Report - LCC Data Future Managment',
+            'title' => 'Accounts Report - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Report', 'href' => 'javascript:void(0);']
