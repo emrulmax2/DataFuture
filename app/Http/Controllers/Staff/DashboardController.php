@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SendGroupMailRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
 use App\Models\TaskList;
 use App\Models\ApplicantTask;
+use App\Models\ComonSmtp;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
+use App\Models\EmployeeGroup;
+use App\Models\EmployeeGroupMember;
 use App\Models\Employment;
 use App\Models\InternalLink;
 use App\Models\ProcessList;
@@ -25,6 +32,7 @@ class DashboardController extends Controller
     public function index()
     {
         $userData = \Auth::guard('web')->user();
+        $userEmployeeId = $userData->employee->id;
         $taskListData = TaskList::with('applicant')->where('interview','yes')->get();
         //$user = User::find($userData->id);
         $TotalInterviews = 0;
@@ -65,7 +73,12 @@ class DashboardController extends Controller
             'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
             'home_work_history_btns' => $this->getUserAttendanceLiveBtns(),
             'internal_link_buttons' => $this->getInternalLinkBtns(),
-            'venue_ips' => $ips
+            'venue_ips' => $ips,
+            'departments' => Department::where('available_for_all', 1)->orderBy('name', 'ASC')->get(),
+            'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
+            'groups' => EmployeeGroup::where('type', 2)->orWhere(function($q) use($userEmployeeId){
+                $q->where('employee_id', $userEmployeeId)->whereIn('type', [1, 2]);
+            })->orderBy('name', 'ASC')->get()
         ]);
     }
 
@@ -451,6 +464,75 @@ class DashboardController extends Controller
         endif;
 
         return response()->json(['res' => $res], 200);
+    }
+
+
+    public function getDeptEmployeeIds(Request $request){
+        $department_ids = (isset($request->department_ids) && !empty($request->department_ids) ? $request->department_ids : []);
+        $group_ids = (isset($request->group_ids) && !empty($request->group_ids) ? $request->group_ids : []);
+
+        $employee_ids = [];
+        if(!empty($department_ids)):
+            $employee_ids = Employee::where('status', 1)->orderBy('first_name', 'ASC')
+                    ->whereHas('employment', function($q) use($department_ids){
+                        $q->whereIn('department_id', $department_ids);
+                    })->pluck('id')->unique()->toArray();
+        elseif(!empty($group_ids)):
+            $employees = EmployeeGroupMember::whereIn('employee_group_id', $group_ids)->pluck('employee_id')->unique()->toArray();
+            if(!empty($employees)):
+                $employee_ids = Employee::where('status', 1)->orderBy('first_name', 'ASC')
+                    ->whereIn('id', $employees)->pluck('id')->unique()->toArray();
+            endif;
+        endif;
+        return response()->json(['emps' => $employee_ids], 200);
+    }
+
+    public function sendGroupEmail(SendGroupMailRequest $request){
+        $employee_ids = $request->employee_ids;
+        $subject = $request->subject;
+        $mail_body = $request->mail_body;
+
+        $mailTos = Employment::whereIn('employee_id', $employee_ids)->pluck('email')->unique()->toArray();
+
+        $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+
+        if(!empty($mailTos) && (isset($commonSmtp->id) && $commonSmtp->id > 0)):
+            $configuration = [
+                'smtp_host'         => $commonSmtp->smtp_host,
+                'smtp_port'         => $commonSmtp->smtp_port,
+                'smtp_username'     => $commonSmtp->smtp_user,
+                'smtp_password'     => $commonSmtp->smtp_pass,
+                'smtp_encryption'   => $commonSmtp->smtp_encryption,
+                
+                'from_email'        => $fromEmail,
+                'from_name'         => $crntUser->full_name,
+            ];
+
+            $attachmentInfo = [];
+            if($request->hasFile('documents')):
+                $documents = $request->file('documents');
+                $docCounter = 1;
+                foreach($documents as $document):
+                    $documentName = time().'_'.$document->getClientOriginalName();
+                    $path = $document->storeAs('public/tmps', $documentName, 's3');
+
+                    $attachmentInfo[$docCounter++] = [
+                        "pathinfo" => $path,
+                        "nameinfo" => $document->getClientOriginalName(),
+                        "mimeinfo" => $document->getMimeType(),
+                        'disk'     => 's3'      
+                    ];
+                    $docCounter++;
+                endforeach;
+            endif;
+
+            UserMailerJob::dispatch($configuration, $mailTos, new CommunicationSendMail($subject, $mail_body, $attachmentInfo));
+            return response()->json(['suc' => 1, 'res' => 'Mail successfully sent.'], 200);
+        else:
+            return response()->json(['suc' => 2, 'res' => 'Mail successfully sent.'], 200);
+        endif;
     }
     
 }

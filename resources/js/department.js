@@ -33,6 +33,22 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Available For All",
+                    field: "available_for_all",
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    formatter(cell, formatterParams) {                        
+                        var html = "";
+                        if (cell.getData().available_for_all == 1) {
+                            html += '<span class="btn btn-success text-white py-0 px-2 rounded-0">Yes</span>';
+                        }  else {
+                            html += '<span class="btn btn-danger text-white py-0 px-2 rounded-0">No</span>';
+                        }
+                        
+                        return html;
+                    },
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -159,14 +175,16 @@ var table = (function () {
         const addModalEl = document.getElementById('addDepartmentModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addDepartmentModal .acc__input-error').html('');
-            $('#addDepartmentModal input').val('');
+            $('#addDepartmentModal input:not([type="radio"])').val('');
+            $('#addDepartmentModal input[type="radio"][value="1"]').prop('checked', true);
         });
         
         const editModalEl = document.getElementById('editDepartmentModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editDepartmentModal .acc__input-error').html('');
-            $('#editDepartmentModal input').val('');
+            $('#editDepartmentModal input:not([type="radio"])').val('');
             $('#editDepartmentModal input[name="id"]').val('0');
+            $('#editDepartmentModal input[type="radio"]').prop('checked', false);
         });
 
         const confirmModalEl = document.getElementById('confirmModal')
@@ -235,6 +253,11 @@ var table = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     $('#editDepartmentModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                    if(dataset.available_for_all == 1){
+                        $('#editDepartmentModal #edit_available_for_1').prop('checked', true);
+                    }else{
+                        $('#editDepartmentModal #edit_available_for_2').prop('checked', true);
+                    }
 
                     $('#editDepartmentModal input[name="id"]').val(editId);
                 }

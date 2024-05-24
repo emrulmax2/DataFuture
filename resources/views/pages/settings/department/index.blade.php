@@ -61,21 +61,11 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -103,16 +93,26 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <div>
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input id="name" type="text" name="name" class="form-control w-full">
-                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                            <input id="name" type="text" name="name" class="form-control w-full">
+                            <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label>Available For Everyone</label>
+                            <div class="flex flex-col sm:flex-row mt-2">
+                                <div class="form-check mr-2">
+                                    <input checked id="available_for_1" class="form-check-input" type="radio" name="available_for_all" value="1">
+                                    <label class="form-check-label" for="available_for_1">Yes</label>
+                                </div>
+                                <div class="form-check mr-2 mt-2 sm:mt-0">
+                                    <input id="available_for_2" class="form-check-input" type="radio" name="available_for_all" value="0">
+                                    <label class="form-check-label" for="available_for_2">No</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="save" class="btn btn-primary w-auto">     
                             Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -150,6 +150,19 @@
                             <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label>Available For Everyone</label>
+                            <div class="flex flex-col sm:flex-row mt-2">
+                                <div class="form-check mr-2">
+                                    <input checked id="edit_available_for_1" class="form-check-input" type="radio" name="available_for_all" value="1">
+                                    <label class="form-check-label" for="edit_available_for_1">Yes</label>
+                                </div>
+                                <div class="form-check mr-2 mt-2 sm:mt-0">
+                                    <input id="edit_available_for_2" class="form-check-input" type="radio" name="available_for_all" value="0">
+                                    <label class="form-check-label" for="edit_available_for_2">No</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -450,4 +450,49 @@ class FilemanagerController extends Controller
             return response()->json(['suc' => 2, 'res' => 'Something went wrong. Please try later.'], 200);
         endif;
     }
+
+    public function fileVersionHistory(Request $request){
+        $doc_info_id = (isset($request->file_id) && $request->file_id > 0 ? $request->file_id : 0);
+        $currentVersion = Document::where('document_info_id', $doc_info_id)->orderBy('id', 'desc')->get()->first();
+        $currentVerId = (isset($currentVersion->id) && $currentVersion->id > 0 ? $currentVersion->id : 0);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Document::where('document_info_id', $doc_info_id)->orderByRaw(implode(',', $sorts));
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'current_version' => ($list->id == $currentVerId ? 1 : 0),
+                    'created_at' => date('jS F, Y h:i A'),
+                    'created_by' => (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : ''),
+                    'download_url' => $list->download_url,
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
 }

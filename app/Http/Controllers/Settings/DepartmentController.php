@@ -67,6 +67,7 @@ class DepartmentController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->name,
+                    'available_for_all' => $list->available_for_all,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -85,6 +86,7 @@ class DepartmentController extends Controller
     {
         $data = Department::create([
             'name'=> $request->name,
+            'available_for_all'=> (isset($request->available_for_all) && $request->available_for_all > 0 ? $request->available_for_all : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -127,6 +129,7 @@ class DepartmentController extends Controller
     public function update(DepartmentUpdateRequest $request, Department $dataId){      
         $data = Department::where('id', $request->id)->update([
             'name'=> $request->name,
+            'available_for_all'=> (isset($request->available_for_all) && $request->available_for_all > 0 ? $request->available_for_all : 0),
             'updated_by' => auth()->user()->id
         ]);
 

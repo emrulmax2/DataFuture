@@ -159,6 +159,27 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
+                    <div class="font-medium text-base">Staff Profile Privilege</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['sfaff_profile']['staff_groups']) && $priv['sfaff_profile']['staff_groups'] == 1 ? 'checked' : '') }} id="permission_sfaff_profile_1" class="form-check-input" type="checkbox" value="1" name="permission[sfaff_profile][staff_groups]">
+                            <label class="form-check-label ml-4" for="permission_sfaff_profile_1">Staff Group</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
                     <div class="font-medium text-base">HR Portal Privileges</div>
                 </div>
                 <div class="col-span-6 text-right relative">
@@ -232,6 +253,12 @@
                             </div>
                         @endforeach
                     @endif
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['internal_links']['group_email']) && $priv['internal_links']['group_email'] == 1 ? 'checked' : '') }} id="permission_internal_links_1" class="form-check-input" type="checkbox" value="1" name="permission[internal_links][group_email]">
+                            <label class="form-check-label ml-4" for="permission_internal_links_1">Group Email</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

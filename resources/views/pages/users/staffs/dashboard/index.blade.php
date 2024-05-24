@@ -80,6 +80,11 @@
                         <div class="intro-x mt-6 mb-6">
                             <div class="grid grid-cols-12 gap-5">
                                 {!! $internal_link_buttons !!}
+                                @if(isset(auth()->user()->priv()['group_email']) && auth()->user()->priv()['group_email'] == 1)
+                                <a href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#senGroupMailModal" class="block relative col-span-6 2xl:col-span-4 mb-3">
+                                    <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/group_email.png') }}">
+                                </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -209,6 +214,92 @@
         </div> --}}
     </div>
 
+    <!-- BEGIN: Send Group Mail Modal -->
+    <div id="senGroupMailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="senGroupMailForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Send Email</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="department_ids" class="form-label">Department</label>
+                            <select id="department_ids" name="department_ids[]" class="w-full tom-selects" multiple>
+                                @if($departments->count() > 0)
+                                    @foreach($departments as $dpt)
+                                        <option value="{{ $dpt->id }}">{{ $dpt->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-department_ids text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="groups_ids" class="form-label">Groups</label>
+                            <select id="groups_ids" name="groups_ids[]" class="w-full tom-selects" multiple>
+                                @if($groups->count() > 0)
+                                    @foreach($groups as $gr)
+                                        <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-groups_ids text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="employee_ids" class="form-label">Members <span class="text-danger">*</span></label>
+                            <select id="employee_ids" name="employee_ids[]" class="w-full tom-selects" multiple>
+                                @if($employees->count() > 0)
+                                    @foreach($employees as $emp)
+                                        <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                            <input id="subject" type="text" name="subject" class="form-control w-full">
+                            <div class="acc__input-error error-subject text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 pt-2 pb-1">
+                            <textarea name="mail_body" id="mailEditor"></textarea>
+                            <div class="acc__input-error error-mail_body text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 flex justify-start items-center relative">
+                            <label for="sendMailsDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                                <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Attachments
+                            </label>
+                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="sendMailsDocument"/>
+                        </div>
+                        <div id="sendMailsDocumentNames" class="sendMailsDocumentNames mt-3" style="display: none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="sentMailBtn" class="btn btn-primary w-auto">     
+                            Send Mail                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Send Group Mail Modal -->
+
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -227,6 +318,25 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Warning Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="octagon-alert" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="warningCloser btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Warning Modal Content -->
     
 @endsection
 

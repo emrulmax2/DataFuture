@@ -247,6 +247,7 @@ export default defineConfig({
                 'resources/js/file-manager.js',
                 'resources/js/communication-template.js',
                 'resources/js/user-team-holiday.js',
+                'resources/js/user-groups.js',
                 
             ],
             refresh: true,

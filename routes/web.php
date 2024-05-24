@@ -222,6 +222,7 @@ use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
+use App\Http\Controllers\User\MyGroupController;
 use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\WblProfileController;
 use App\Models\AgentUser;
@@ -1334,6 +1335,9 @@ Route::middleware('auth')->group(function() {
         Route::post('/dashboard/fee-attendance', 'feeAttendance')->name('dashboard.feed.attendance');
         
         Route::get('/dashboard/internal-link/{id}', 'parentLinkBox')->name('dashboard.internal-link.parent');
+
+        Route::post('/dashboard/get-departments-employees', 'getDeptEmployeeIds')->name('dashboard.get.dept.employee.ids');
+        Route::post('/dashboard/send-group-mail', 'sendGroupEmail')->name('dashboard.get.send.group.mail');
     });
 
 
@@ -2521,6 +2525,7 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/get-file-data', 'getFileData')->name('file.manager.get.file.data'); 
         Route::post('file-manager/update-file', 'updateFile')->name('file.manager.update.file'); 
         Route::post('file-manager/upload-new-version', 'uploadNewVersion')->name('file.manager.upload.new.version'); 
+        Route::get('file-manager/file-version-history', 'fileVersionHistory')->name('file.manager.file.version.history'); 
     });
 
     Route::controller(CommunicationTemplateController::class)->group(function() {
@@ -2548,5 +2553,16 @@ Route::middleware('auth')->group(function() {
     
         Route::post('live/get-employee-mail', 'getEmployeeEmail')->name('attendance.live.get.employee.mail');
         Route::post('live/sent-mail', 'sentEmail')->name('attendance.live.attedance.sent.mail');
+    });
+
+    Route::controller(MyGroupController::class)->group(function(){
+        Route::get('my-account/groups', 'index')->name('user.account.group'); 
+        Route::post('my-account/groups/store', 'store')->name('user.account.group.store'); 
+        Route::get('my-account/groups/list', 'list')->name('user.account.group.list'); 
+        Route::post('my-account/groups/edit', 'edit')->name('user.account.group.edit'); 
+        Route::post('my-account/groups/update', 'update')->name('user.account.group.update'); 
+
+        Route::delete('my-account/groups/delete/{id}', 'destroy')->name('user.account.group.destory');
+        Route::post('my-account/groups/restore/{id}', 'restore')->name('user.account.group.restore');
     });
 });

@@ -90,7 +90,7 @@
                                                 </a>
                                             </li>
                                             <li>
-                                                <a data-id="{{ $theFile->id }}" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
+                                                <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
                                                     <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
                                                 </a>
                                             </li>
@@ -126,55 +126,23 @@
 
     <!-- BEGIN: File History Modal -->
     <div id="fileHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="fileHistoryForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Upload New Version</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4 gap-y-1">
-                            <div class="col-span-12">
-                                <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
-                                <label class="uploadWrap form-control relative border flex justify-start items-center cursor-pointer" for="editDocument">
-                                    <input accept="image/*,.doc,.docx,.xl,.xlsx,.xls,.ppt,.pptx,.pdf,.txt,.sql" id="editDocument" type="file" name="document" class="w-full" style="position: absolute; width: 0; height: 0; opacity: 0; visibility: hidden;">
-                                    <span class="btn btn-secondary w-auto">Choose File</span>
-                                    <span id="editDocumentName" class="ml-3"></span>
-                                </label>
-                                <div class="acc__input-error error-document text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-12">
-                                <label for="linked_document" class="form-label">Linked Document </label>
-                                <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="uploadNV" class="btn btn-primary w-auto">     
-                            Upload                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="folder_id" value="{{ $parent_id }}"/>
-                        <input type="hidden" name="params" value="{{ $params }}"/>
-                        <input type="hidden" name="id" value="0"/>
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Version History of <span class="displayName"></span></h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="overflow-x-auto scrollbar-hidden fileVersionHistoryListTableWrap" style="display: none;">
+                        <div data-fileinfo="0" id="fileVersionHistoryListTable" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
                 </div>
-            </form>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
     <!-- END: File History Modal -->
