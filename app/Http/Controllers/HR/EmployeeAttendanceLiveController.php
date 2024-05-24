@@ -31,7 +31,7 @@ class EmployeeAttendanceLiveController extends Controller
                                 $q->whereHas('employee', function($sq){
                                     $sq->where('status', 1);
                                 });
-                            })->orderBy('name', 'ASC')->get(),
+                            })->where('available_for_all', 1)->orderBy('name', 'ASC')->get(),
             'live' => $this->getEmployeeLiveAttendanceTableHtml(),
             'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'asc')->get()
@@ -52,6 +52,7 @@ class EmployeeAttendanceLiveController extends Controller
 
     public function getEmployeeLiveAttendanceTableHtml($department = 0, $theDate = '', $emp = ''){
         $theDate = (!empty($theDate) ? $theDate : date('Y-m-d'));
+        $privateDepartments = Department::where('available_for_all', 0)->pluck('id')->unique()->toArray();
 
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
@@ -74,6 +75,10 @@ class EmployeeAttendanceLiveController extends Controller
             $query->whereHas('employment', function($q) use($department){
                 $q->where('department_id', $department);
             });
+        elseif(!empty($privateDepartments)):
+            $query->whereDoesntHave('employment', function($q) use($privateDepartments){
+                $q->whereIn('department_id', $privateDepartments);
+            });
         endif;
         if(!empty($emp)):
             $query->where(function($q) use($emp){
@@ -88,47 +93,45 @@ class EmployeeAttendanceLiveController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $day = $this->getTheDayStatusWithSchedule($list->id, $theDate);
-                if($day['feed_status']):
-                    $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
-                    $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
+                $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
+                $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
 
-                    $html .= '<tr>';
+                $html .= '<tr>';
 
-                        $html .= '<td class="w-2/6">';
-                            $html .= '<a href="javascript:void(0);" class="block">';
-                                $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
-                                $html .= '</div>';
-                                $html .= '<div class="inline-block relative" style="top: -5px;">';
-                                    $html .= '<div class="font-medium whitespace-nowrap">'.$list->full_name.'</div>';
-                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
-                                $html .= '</div>';
-                            $html .= '</a>';
-                        $html .= '</td>';
-
-                        $html .= '<td class="text-center w-1/6">';
-                            $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
-                            $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
-                        $html .= '</td>';
-
-                        $html .= '<td class="text-left w-2/6">';
-                            $html .= '<div>';
-                                $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
-                                $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
+                    $html .= '<td class="w-2/6">';
+                        $html .= '<a href="javascript:void(0);" class="block">';
+                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
                             $html .= '</div>';
-                            $html .= '<div>';
-                                $html .= (isset($day['since']) && !empty($day['since']) ? '<span>'.$day['since'].'</span>' : '');
+                            $html .= '<div class="inline-block relative" style="top: -5px;">';
+                                $html .= '<div class="font-medium whitespace-nowrap">'.$list->full_name.'</div>';
+                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
                             $html .= '</div>';
-                        $html .= '</td>';
+                        $html .= '</a>';
+                    $html .= '</td>';
 
-                        $html .= '<td class="text-left w-1/6">';
-                            $html .= '<div class="text-left">';
-                                $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
-                            $html .= '</div>';
-                        $html .= '</td>';
+                    $html .= '<td class="text-center w-1/6">';
+                        $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
+                        $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
+                    $html .= '</td>';
 
-                    $html .= '</tr>';
-                endif;
+                    $html .= '<td class="text-left w-2/6">';
+                        $html .= '<div>';
+                            $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
+                            $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
+                        $html .= '</div>';
+                        $html .= '<div>';
+                            $html .= (isset($day['since']) && !empty($day['since']) ? '<span>'.$day['since'].'</span>' : '');
+                        $html .= '</div>';
+                    $html .= '</td>';
+
+                    $html .= '<td class="text-left w-1/6">';
+                        $html .= '<div class="text-left">';
+                            $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
+                        $html .= '</div>';
+                    $html .= '</td>';
+
+                $html .= '</tr>';
 
                 $i++;
             endforeach;
@@ -232,6 +235,9 @@ class EmployeeAttendanceLiveController extends Controller
                 if(isset($patternDay->start) && !empty($patternDay->start) && $patternDay->start <= $currentTime):
                     $statusLabel = 'Awaiting Clock In / Absent';
                     $statusClass = 'text-danger';
+                elseif(!$dayStatus && $todaysAttendances->count() == 0):
+                    $statusLabel = 'NOT WORKING TODAY';
+                    $statusClass = 'text-pending';
                 else:
                     $statusLabel = 'No Clock-In';
                     $statusClass = 'text-danger';
