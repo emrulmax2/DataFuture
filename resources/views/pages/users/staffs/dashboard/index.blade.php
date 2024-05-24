@@ -226,27 +226,29 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="department_ids" class="form-label">Department</label>
-                            <select id="department_ids" name="department_ids[]" class="w-full tom-selects" multiple>
-                                @if($departments->count() > 0)
-                                    @foreach($departments as $dpt)
-                                        <option value="{{ $dpt->id }}">{{ $dpt->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-department_ids text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="groups_ids" class="form-label">Groups</label>
-                            <select id="groups_ids" name="groups_ids[]" class="w-full tom-selects" multiple>
-                                @if($groups->count() > 0)
-                                    @foreach($groups as $gr)
-                                        <option value="{{ $gr->id }}">{{ $gr->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-groups_ids text-danger mt-2"></div>
+                        <div class="grid grid-cols-12 gap-x-4">
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="department_ids" class="form-label">Department</label>
+                                <select id="department_ids" name="department_ids[]" class="w-full tom-selects" multiple>
+                                    @if($departments->count() > 0)
+                                        @foreach($departments as $dpt)
+                                            <option value="{{ $dpt->id }}">{{ $dpt->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-department_ids text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="groups_ids" class="form-label">Groups</label>
+                                <select id="groups_ids" name="groups_ids[]" class="w-full tom-selects" multiple>
+                                    @if($groups->count() > 0)
+                                        @foreach($groups as $gr)
+                                            <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-groups_ids text-danger mt-2"></div>
+                            </div>
                         </div>
                         <div class="mt-3">
                             <label for="employee_ids" class="form-label">Members <span class="text-danger">*</span></label>
