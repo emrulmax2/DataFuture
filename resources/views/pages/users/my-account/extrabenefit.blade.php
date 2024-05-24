@@ -18,7 +18,9 @@
         <div class="intro-y box p-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-12">
-                    <img class="block w-full h-auto " src="{{ asset('build/assets/images/hr/extra-benifit.png') }}" />
+                    <a href="https://app.workplaceextras.com/login" class="block w-full " target="_blank">
+                        <img class="block w-full h-auto " src="{{ asset('build/assets/images/hr/extra-benifit.png') }}" />
+                    </a>
                 </div>
                 <div class="col-span-12" style="margin: 25px auto;">
                     <div class="col-span-12 mb-2">
