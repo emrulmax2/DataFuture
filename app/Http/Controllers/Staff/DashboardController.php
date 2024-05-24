@@ -65,7 +65,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
-            'applicant' => Applicant::all()->count(),
+            'applicant' => Applicant::where('status_id', '>', 1)->get()->count(),
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
