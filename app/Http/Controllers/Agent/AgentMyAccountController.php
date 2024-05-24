@@ -18,7 +18,7 @@ class AgentMyAccountController extends Controller
     {
         $userData = Agent::with('AgentUser')->where('agent_user_id', auth('agent')->user()->id)->get()->first();
         return view('pages.agent.my-account.index', [
-            'title' => 'My Account - LCC Data Future Managment',
+            'title' => 'My Account - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'My Account', 'href' => 'javascript:void(0);']
             ],

@@ -18,7 +18,7 @@ class SmsTemplateController extends Controller
     public function index()
     {
         return view('pages.settings.sms.index', [
-            'title' => 'SMS Template - LCC Data Future Managment',
+            'title' => 'SMS Template - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

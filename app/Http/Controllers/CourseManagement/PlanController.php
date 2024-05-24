@@ -31,7 +31,7 @@ class PlanController extends Controller
     public function index()
     {
         return view('pages.course-management.plan.index', [
-            'title' => 'Plans - LCC Data Future Managment',
+            'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plans',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -299,7 +299,7 @@ class PlanController extends Controller
     {
         
         return view('pages.course-management.plan.add', [
-            'title' => 'Plans - LCC Data Future Managment',
+            'title' => 'Plans - London Churchill College',
             'subtitle' => 'Add Class Plans',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -326,7 +326,7 @@ class PlanController extends Controller
                     ->pluck('module_creation_id')->unique()->toArray();
 
         return view('pages.course-management.plan.builder', [
-            'title' => 'Plans - LCC Data Future Managment',
+            'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plan Builder',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

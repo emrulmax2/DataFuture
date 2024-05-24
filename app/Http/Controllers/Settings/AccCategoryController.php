@@ -11,7 +11,7 @@ class AccCategoryController extends Controller
 {
     public function index(){
         return view('pages.settings.accounts.category', [
-            'title' => 'Account Settings - LCC Data Future Managment',
+            'title' => 'Account Settings - London Churchill College',
             'subtitle' => 'Category Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

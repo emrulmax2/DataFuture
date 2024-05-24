@@ -74,7 +74,7 @@ class DashboardController extends Controller
 
         if($studentData->users->first_login==1):
             return view('pages.students.frontend.index', [
-                'title' => 'Student Dashboard - LCC Data Future Managment',
+                'title' => 'Student Dashboard - London Churchill College',
                 'breadcrumbs' => [],
                 'user' => $userData,
                 "countries" =>$countries,
@@ -97,7 +97,7 @@ class DashboardController extends Controller
                 $dataBox = ["termList" =>[],"data" => [],"currenTerm" => [] ];
             }
             return view('pages.students.frontend.dashboard.index', [
-                'title' => 'Live Students - LCC Data Future Managment',
+                'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
                     ['label' => 'Profile View', 'href' => 'javascript:void(0);'],
                 ],
@@ -133,7 +133,7 @@ class DashboardController extends Controller
         $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
 
         return view('pages.students.frontend.dashboard.profile.index', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Profile View', 'href' => 'javascript:void(0);'],
             ],
@@ -293,7 +293,7 @@ class DashboardController extends Controller
                 
        
         return view('pages.students.frontend.dashboard.module.view', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],

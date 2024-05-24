@@ -19,7 +19,7 @@ class TermModuleCreationController extends Controller
     public function index()
     {
         return view('pages.course-management.module-creations.index', [
-            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'title' => 'Terms & Modules - London Churchill College',
             'subtitle' => 'Term Module Creations',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -90,7 +90,7 @@ class TermModuleCreationController extends Controller
 
     public function add($instanceTermId, $courseId){
         return view('pages.course-management.module-creations.add', [
-            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'title' => 'Terms & Modules - London Churchill College',
             'subtitle' => 'Add Term Module Creations',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -133,7 +133,7 @@ class TermModuleCreationController extends Controller
 
     public function moduleDetails($instanceTermId){
         return view('pages.course-management.module-creations.add-details', [
-            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'title' => 'Terms & Modules - London Churchill College',
             'subtitle' => 'Term Module Details',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
@@ -155,7 +155,7 @@ class TermModuleCreationController extends Controller
                     ->where('it.id', $instanceTermId)
                     ->first();
         return view('pages.course-management.module-creations.show', [
-            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'title' => 'Terms & Modules - London Churchill College',
             'subtitle' => 'Module Creation Details',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

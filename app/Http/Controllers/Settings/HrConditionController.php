@@ -10,7 +10,7 @@ class HrConditionController extends Controller
 {
     public function index(){
         return view('pages.settings.hr-condition.index', [
-            'title' => 'HR Conditions - LCC Data Future Managment',
+            'title' => 'HR Conditions - London Churchill College',
             'subtitle' => 'HR Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

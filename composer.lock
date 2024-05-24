@@ -62,6 +62,7 @@
         },
         {
             "name": "aws/aws-sdk-php",
+<<<<<<< Updated upstream
             "version": "3.306.6",
             "source": {
                 "type": "git",
@@ -72,6 +73,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/79a618bb5624e52f31de7083a26d1749050aa5a0",
                 "reference": "79a618bb5624e52f31de7083a26d1749050aa5a0",
+=======
+            "version": "3.305.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aws/aws-sdk-php.git",
+                "reference": "3ce65364cc318ae36fc2c61c87a7aa5c83ee626f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3ce65364cc318ae36fc2c61c87a7aa5c83ee626f",
+                "reference": "3ce65364cc318ae36fc2c61c87a7aa5c83ee626f",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -151,9 +164,15 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
+<<<<<<< Updated upstream
                 "source": "https://github.com/aws/aws-sdk-php/tree/3.306.6"
             },
             "time": "2024-05-14T18:05:44+00:00"
+=======
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.305.6"
+            },
+            "time": "2024-04-30T18:08:11+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -1589,6 +1608,7 @@
         },
         {
             "name": "google/apiclient-services",
+<<<<<<< Updated upstream
             "version": "v0.355.0",
             "source": {
                 "type": "git",
@@ -1599,6 +1619,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/235e6a45ecafd77accc102b5ab6d529aab54da23",
                 "reference": "235e6a45ecafd77accc102b5ab6d529aab54da23",
+=======
+            "version": "v0.351.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/googleapis/google-api-php-client-services.git",
+                "reference": "a053f7dd118e46845fcefa9036c5b97b1050dfaa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/a053f7dd118e46845fcefa9036c5b97b1050dfaa",
+                "reference": "a053f7dd118e46845fcefa9036c5b97b1050dfaa",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -1627,6 +1659,7 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
+<<<<<<< Updated upstream
                 "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.355.0"
             },
             "time": "2024-05-11T01:02:11+00:00"
@@ -1643,6 +1676,24 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/23e8e696d87f8d7dfefbd347ca1c99ce17ecb368",
                 "reference": "23e8e696d87f8d7dfefbd347ca1c99ce17ecb368",
+=======
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.351.0"
+            },
+            "time": "2024-04-23T21:58:18+00:00"
+        },
+        {
+            "name": "google/auth",
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/googleapis/google-auth-library-php.git",
+                "reference": "5d0c47368fc644d98d0a6299362d4ce03a0ef250"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/5d0c47368fc644d98d0a6299362d4ce03a0ef250",
+                "reference": "5d0c47368fc644d98d0a6299362d4ce03a0ef250",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -1687,9 +1738,15 @@
             "support": {
                 "docs": "https://googleapis.github.io/google-auth-library-php/main/",
                 "issues": "https://github.com/googleapis/google-auth-library-php/issues",
+<<<<<<< Updated upstream
                 "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.39.0"
             },
             "time": "2024-05-02T16:03:51+00:00"
+=======
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.38.0"
+            },
+            "time": "2024-04-24T18:36:53+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "graham-campbell/result-type",
@@ -2641,6 +2698,7 @@
         },
         {
             "name": "laravel/socialite",
+<<<<<<< Updated upstream
             "version": "v5.14.0",
             "source": {
                 "type": "git",
@@ -2651,6 +2709,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/socialite/zipball/c7b0193a3753a29aff8ce80aa2f511917e6ed68a",
                 "reference": "c7b0193a3753a29aff8ce80aa2f511917e6ed68a",
+=======
+            "version": "v5.13.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/socialite.git",
+                "reference": "278d4615f68205722b3a129135774b3764b28a90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/socialite/zipball/278d4615f68205722b3a129135774b3764b28a90",
+                "reference": "278d4615f68205722b3a129135774b3764b28a90",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -2709,7 +2779,11 @@
                 "issues": "https://github.com/laravel/socialite/issues",
                 "source": "https://github.com/laravel/socialite"
             },
+<<<<<<< Updated upstream
             "time": "2024-05-03T20:31:38+00:00"
+=======
+            "time": "2024-04-26T13:48:16+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "laravel/tinker",
@@ -8548,6 +8622,7 @@
     "packages-dev": [
         {
             "name": "barryvdh/laravel-debugbar",
+<<<<<<< Updated upstream
             "version": "v3.13.5",
             "source": {
                 "type": "git",
@@ -8558,6 +8633,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/92d86be45ee54edff735e46856f64f14b6a8bb07",
                 "reference": "92d86be45ee54edff735e46856f64f14b6a8bb07",
+=======
+            "version": "v3.13.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/barryvdh/laravel-debugbar.git",
+                "reference": "00201bcd1eaf9b1d3debddcdc13c219e4835fb61"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/00201bcd1eaf9b1d3debddcdc13c219e4835fb61",
+                "reference": "00201bcd1eaf9b1d3debddcdc13c219e4835fb61",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -8616,7 +8703,11 @@
             ],
             "support": {
                 "issues": "https://github.com/barryvdh/laravel-debugbar/issues",
+<<<<<<< Updated upstream
                 "source": "https://github.com/barryvdh/laravel-debugbar/tree/v3.13.5"
+=======
+                "source": "https://github.com/barryvdh/laravel-debugbar/tree/v3.13.4"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -8628,7 +8719,11 @@
                     "type": "github"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2024-04-12T11:20:37+00:00"
+=======
+            "time": "2024-04-10T09:15:45+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "fakerphp/faker",
@@ -10774,6 +10869,7 @@
         },
         {
             "name": "spatie/ignition",
+<<<<<<< Updated upstream
             "version": "1.14.1",
             "source": {
                 "type": "git",
@@ -10784,6 +10880,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/spatie/ignition/zipball/c23cc018c5f423d2f413b99f84655fceb6549811",
                 "reference": "c23cc018c5f423d2f413b99f84655fceb6549811",
+=======
+            "version": "1.14.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/ignition.git",
+                "reference": "80385994caed328f6f9c9952926932e65b9b774c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/ignition/zipball/80385994caed328f6f9c9952926932e65b9b774c",
+                "reference": "80385994caed328f6f9c9952926932e65b9b774c",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -10853,6 +10961,7 @@
                     "type": "github"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2024-05-03T15:56:16+00:00"
         },
         {
@@ -10867,6 +10976,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/spatie/laravel-ignition/zipball/f52124d50122611e8a40f628cef5c19ff6cc5b57",
                 "reference": "f52124d50122611e8a40f628cef5c19ff6cc5b57",
+=======
+            "time": "2024-04-26T08:45:51+00:00"
+        },
+        {
+            "name": "spatie/laravel-ignition",
+            "version": "2.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-ignition.git",
+                "reference": "42d986f4ab9d667020264a7481190a4606ebbeb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-ignition/zipball/42d986f4ab9d667020264a7481190a4606ebbeb0",
+                "reference": "42d986f4ab9d667020264a7481190a4606ebbeb0",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -10875,7 +11000,11 @@
                 "ext-mbstring": "*",
                 "illuminate/support": "^10.0|^11.0",
                 "php": "^8.1",
+<<<<<<< Updated upstream
                 "spatie/flare-client-php": "^1.5",
+=======
+                "spatie/flare-client-php": "^1.3.5",
+>>>>>>> Stashed changes
                 "spatie/ignition": "^1.14",
                 "symfony/console": "^6.2.3|^7.0",
                 "symfony/var-dumper": "^6.2.3|^7.0"
@@ -10945,7 +11074,11 @@
                     "type": "github"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2024-05-02T13:42:49+00:00"
+=======
+            "time": "2024-04-30T13:56:21+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "symfony/yaml",
@@ -11079,5 +11212,5 @@
         "php": "^8.0.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

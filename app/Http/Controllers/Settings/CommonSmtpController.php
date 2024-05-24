@@ -18,7 +18,7 @@ class CommonSmtpController extends Controller
     public function index()
     {
         return view('pages.settings.smtp.index', [
-            'title' => 'SMTP Settings - LCC Data Future Managment',
+            'title' => 'SMTP Settings - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

@@ -11,7 +11,7 @@ class AccMethodController extends Controller
 {
     public function index(){
         return view('pages.settings.accounts.methods', [
-            'title' => 'Account Settings - LCC Data Future Managment',
+            'title' => 'Account Settings - London Churchill College',
             'subtitle' => 'Method Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

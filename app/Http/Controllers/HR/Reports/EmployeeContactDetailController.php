@@ -22,7 +22,7 @@ class EmployeeContactDetailController extends Controller
 {
     public function index(){
         return view('pages.hr.portal.reports.contactdetail', [
-            'title' => 'Employee Contact Details - LCC Data Future Managment',
+            'title' => 'Employee Contact Details - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Employee Contact Details', 'href' => 'javascript:void(0);']
             ],

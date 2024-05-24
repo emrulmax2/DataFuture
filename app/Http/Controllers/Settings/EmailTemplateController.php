@@ -18,7 +18,7 @@ class EmailTemplateController extends Controller
     public function index()
     {
         return view('pages.settings.email.index', [
-            'title' => 'Email Template - LCC Data Future Managment',
+            'title' => 'Email Template - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

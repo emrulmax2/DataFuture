@@ -14,7 +14,7 @@ class ELearningActivitySettingController extends Controller
     public function index()
     {
         return view('pages.settings.activity.index', [
-            'title' => 'E - Learning Activity Settings - LCC Data Future Managment',
+            'title' => 'E - Learning Activity Settings - London Churchill College',
             'subtitle' => 'E - Learning Activity Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

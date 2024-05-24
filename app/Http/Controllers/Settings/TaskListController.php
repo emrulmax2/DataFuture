@@ -25,7 +25,7 @@ class TaskListController extends Controller
     public function index()
     {
         return view('pages.settings.tasklist.index', [
-            'title' => 'Task List - LCC Data Future Managment',
+            'title' => 'Task List - London Churchill College',
             'subtitle' => 'Applicant Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

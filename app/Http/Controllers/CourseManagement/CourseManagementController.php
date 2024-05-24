@@ -16,7 +16,7 @@ class CourseManagementController extends Controller
     public function index()
     {
         return view('pages.course-management.index', [
-            'title' => 'Course Management - LCC Data Future Managment',
+            'title' => 'Course Management - London Churchill College',
             'subtitle' => 'Dashboard',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);']

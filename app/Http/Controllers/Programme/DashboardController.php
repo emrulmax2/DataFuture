@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $usedCourses = Plan::pluck('course_id')->unique()->toArray();
 
         return view('pages.programme.dashboard.index', [
-            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'theDate' => date('d-m-Y', strtotime($theDate)),
@@ -263,7 +263,7 @@ class DashboardController extends Controller
         endif;
         
         return view('pages.programme.dashboard.tutors', [
-            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
@@ -282,7 +282,7 @@ class DashboardController extends Controller
         endif;
         
         return view('pages.programme.dashboard.tutors-details', [
-            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'p_tutor_id' => $tutorid,
@@ -309,7 +309,7 @@ class DashboardController extends Controller
         endif;
 
         return view('pages.programme.dashboard.personal-tutors', [
-            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
@@ -329,7 +329,7 @@ class DashboardController extends Controller
         endif;
 
         return view('pages.programme.dashboard.personal-tutors-details', [
-            'title' => 'Programme Dashboard - LCC Data Future Managment',
+            'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'p_tutor_id' => $tutorid,

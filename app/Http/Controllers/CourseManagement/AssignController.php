@@ -38,7 +38,7 @@ class AssignController extends Controller
                    ->whereIn('group_id', $sameNameGroupIds)->pluck('id')->unique()->toArray();
 
         return view('pages.course-management.assign.index', [
-            'title' => 'Course Management - LCC Data Future Managment',
+            'title' => 'Course Management - London Churchill College',
             'subtitle' => 'Assign / Deassign',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => route('course.management')],

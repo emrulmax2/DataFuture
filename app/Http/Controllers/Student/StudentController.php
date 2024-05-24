@@ -93,7 +93,7 @@ class StudentController extends Controller
         
         
         return view('pages.students.live.index', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Students Live', 'href' => 'javascript:void(0);']
             ],
@@ -240,7 +240,7 @@ class StudentController extends Controller
             $referral = ReferralCode::where('code', $referralCode)->first();
         endif;
         return view('pages.students.live.show', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
@@ -270,7 +270,7 @@ class StudentController extends Controller
 
     public function courseDetails($studentId){
         return view('pages.students.live.course', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Course', 'href' => 'javascript:void(0);'],
@@ -288,7 +288,7 @@ class StudentController extends Controller
 
     public function communications($studentId){
         return view('pages.students.live.communication', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Communications', 'href' => 'javascript:void(0);'],
@@ -305,7 +305,7 @@ class StudentController extends Controller
 
     public function uploads($studentId){
         return view('pages.students.live.uploads', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Documents', 'href' => 'javascript:void(0);'],
@@ -319,7 +319,7 @@ class StudentController extends Controller
 
     public function notes($studentId){
         return view('pages.students.live.notes', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Notes', 'href' => 'javascript:void(0);'],
@@ -357,7 +357,7 @@ class StudentController extends Controller
         endif;
 
         return view('pages.students.live.process', [
-            'title' => 'Live Student - LCC Data Future Managment',
+            'title' => 'Live Student - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Process & Tasks', 'href' => 'javascript:void(0);'],
@@ -441,7 +441,7 @@ class StudentController extends Controller
         $firstCreationInstance = CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('id', 'ASC')->get()->first();
 
         return view('pages.students.live.slc-history', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student SLC History', 'href' => 'javascript:void(0);'],
@@ -464,7 +464,7 @@ class StudentController extends Controller
         $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
 
         return view('pages.students.live.accounts', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -647,7 +647,7 @@ class StudentController extends Controller
         // endforeach;
 
         return view('pages.students.live.attendance.index', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -710,7 +710,7 @@ class StudentController extends Controller
                 }
             endforeach;
         return view('pages.students.live.result.index', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -818,7 +818,7 @@ class StudentController extends Controller
 
 
         return view('pages.students.live.attendance.form', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -860,7 +860,7 @@ class StudentController extends Controller
         $student = Student::find($student_id);
 
         return view('pages.students.live.workplacement', [
-            'title' => 'Live Students - LCC Data Future Managment',
+            'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Work Placement', 'href' => 'javascript:void(0);'],

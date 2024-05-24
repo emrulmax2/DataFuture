@@ -13,7 +13,7 @@ class AwardingBodyController extends Controller
 {
     public function index(){
         return view('pages.settings.awardingbody.index', [
-            'title' => 'Awarding Body - LCC Data Future Managment',
+            'title' => 'Awarding Body - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -72,7 +72,7 @@ class AwardingBodyController extends Controller
     public function show($id)
     {
         return view('pages/awardingbody/show', [
-            'title' => 'Awarding Body - LCC Data Future Managment',
+            'title' => 'Awarding Body - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Awarding Body', 'href' => route('awardingbody')],
                 ['label' => 'Awarding Body Details', 'href' => 'javascript:void(0);']

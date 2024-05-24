@@ -17,7 +17,7 @@ class LetterSetController extends Controller
     public function index()
     {
         return view('pages.settings.letter.index', [
-            'title' => 'Letter Sets - LCC Data Future Managment',
+            'title' => 'Letter Sets - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

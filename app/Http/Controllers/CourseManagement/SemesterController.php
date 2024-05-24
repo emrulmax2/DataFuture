@@ -15,7 +15,7 @@ class SemesterController extends Controller
     public function index()
     {
         return view('pages.course-management.semester.index', [
-            'title' => 'Course & Semester - LCC Data Future Managment',
+            'title' => 'Course & Semester - London Churchill College',
             'subtitle' => 'Semesters',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

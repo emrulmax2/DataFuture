@@ -15,7 +15,7 @@ class ReligionController extends Controller
     public function index()
     {
         return view('pages/religion/index', [
-            'title' => 'Religions - LCC Data Future Managment',
+            'title' => 'Religions - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Religions', 'href' => 'javascript:void(0);']
             ],

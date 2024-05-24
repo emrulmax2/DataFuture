@@ -20,7 +20,7 @@ class LetterHeaderFooterController extends Controller
     public function index()
     {
         return view('pages.settings.letterheaderfooter.index', [
-            'title' => 'Letter Header & Footer - LCC Data Future Managment',
+            'title' => 'Letter Header & Footer - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

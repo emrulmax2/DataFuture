@@ -222,7 +222,7 @@ class AgentController extends Controller
         $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
 
         return view('pages.agent.profile.show',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'Welcome - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

@@ -19,7 +19,7 @@ class DocumentSettingsController extends Controller
     public function index()
     {
         return view('pages.settings.documentsettings.index', [
-            'title' => 'Document Settings - LCC Data Future Managment',
+            'title' => 'Document Settings - London Churchill College',
             'subtitle' => 'Applicant Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

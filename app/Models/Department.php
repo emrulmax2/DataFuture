@@ -12,6 +12,7 @@ class Department extends Model
 
     protected $fillable = [
         'name',
+        'available_for',
         'created_by',
         'updated_by',
     ];

@@ -16,7 +16,7 @@ class GroupController extends Controller
     public function index()
     {
         return view('pages.course-management.groups.index', [
-            'title' => 'Terms & Modules - LCC Data Future Managment',
+            'title' => 'Terms & Modules - London Churchill College',
             'subtitle' => 'Groups',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

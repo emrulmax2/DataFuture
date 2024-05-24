@@ -13,7 +13,7 @@ class ConsentPolicyController extends Controller
     public function index()
     {
         return view('pages.settings.consent.index', [
-            'title' => 'Consent Policy - LCC Data Future Managment',
+            'title' => 'Consent Policy - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

@@ -18,7 +18,7 @@ class VenueController extends Controller
     public function index()
     {
         return view('pages.settings.venues.index', [
-            'title' => 'Venues - LCC Data Future Managment',
+            'title' => 'Venues - London Churchill College',
             'subtitle' => 'Campus Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -141,7 +141,7 @@ class VenueController extends Controller
     public function show($id)
     {
         return view('pages.settings.venues.show', [
-            'title' => 'Venues - LCC Data Future Managment',
+            'title' => 'Venues - London Churchill College',
             'subtitle' => 'Campus Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

@@ -136,7 +136,7 @@ class SubAgentController extends Controller
         $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
 
         return view('pages.agent.profile.sub.show',[
-            'title' => 'Welcome - LCC Data Future Managment',
+            'title' => 'Welcome - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

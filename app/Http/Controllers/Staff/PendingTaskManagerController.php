@@ -40,7 +40,7 @@ class PendingTaskManagerController extends Controller
         $userData = \Auth::guard('web')->user();
         
         return view('pages.users.staffs.task.index', [
-            'title' => 'User Task Manager - LCC Data Future Managment',
+            'title' => 'User Task Manager - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Task Manager', 'href' => 'javascript:void(0);'],
             ],
@@ -72,7 +72,7 @@ class PendingTaskManagerController extends Controller
 
     public function show($id){
         return view('pages.users.staffs.task.details', [
-            'title' => 'User Task Manager - LCC Data Future Managment',
+            'title' => 'User Task Manager - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Task Manager', 'href' => route('task.manager')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);'],
@@ -231,7 +231,7 @@ class PendingTaskManagerController extends Controller
 
     public function allTasks(){
         return view('pages.users.staffs.task.all-task', [
-            'title' => 'User Task Manager - LCC Data Future Managment',
+            'title' => 'User Task Manager - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Task Manager', 'href' => route('task.manager')],
                 ['label' => 'All Task', 'href' => 'javascript:void(0);'],

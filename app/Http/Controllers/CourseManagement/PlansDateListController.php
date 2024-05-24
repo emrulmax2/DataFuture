@@ -22,7 +22,7 @@ class PlansDateListController extends Controller
 {
     public function index($planId){
         return view('pages.course-management.plandates.index', [
-            'title' => 'Plans - LCC Data Future Managment',
+            'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plan Dates',
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],

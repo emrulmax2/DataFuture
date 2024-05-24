@@ -77,7 +77,7 @@ class ResultController extends Controller
                     ];
 
         return view('pages.tutor.module.results.view', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],

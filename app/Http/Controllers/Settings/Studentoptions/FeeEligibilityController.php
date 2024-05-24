@@ -15,7 +15,7 @@ class FeeEligibilityController extends Controller
     public function index()
     {
         return view('pages/feeeligibility/index', [
-            'title' => 'Fee Eligibilities - LCC Data Future Managment',
+            'title' => 'Fee Eligibilities - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Fee Eligibilities', 'href' => 'javascript:void(0);']
             ],

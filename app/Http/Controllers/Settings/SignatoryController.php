@@ -21,7 +21,7 @@ class SignatoryController extends Controller
     public function index()
     {
         return view('pages.settings.signatory.index', [
-            'title' => 'Signatory - LCC Data Future Managment',
+            'title' => 'Signatory - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

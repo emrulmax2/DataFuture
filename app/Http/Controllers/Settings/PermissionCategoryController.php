@@ -18,7 +18,7 @@ class PermissionCategoryController extends Controller
     public function index()
     {
         return view('pages.settings.permissioncategory.index', [
-            'title' => 'Permission Category - LCC Data Future Managment',
+            'title' => 'Permission Category - London Churchill College',
             'subtitle' => 'User Privilege',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

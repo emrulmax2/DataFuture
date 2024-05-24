@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $agents = Agent::whereIn('agent_user_id',$agentUserList)->orderBy('first_name','ASC')->get();
         $data = AgentApplicationCheck::where('agent_user_id',$userData->id)->whereNull("applicant_id")->get();
         return view('pages.agent.dashboard.index', [
-            'title' => 'Agent Dashboard - LCC Data Future Managment',
+            'title' => 'Agent Dashboard - London Churchill College',
             'breadcrumbs' => [],
             'user' => $userData,
             'recentData' => $data,
@@ -49,6 +49,7 @@ class DashboardController extends Controller
         $agents = (isset($request->agents) && !empty($request->agents) ? $request->agents : []);
         $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
         $email = (isset($request->email) && !empty($request->email) ? $request->email : '');
+        $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $phone = (isset($request->phone) && !empty($request->phone) ? $request->phone : '');
         $dob = (isset($request->dob) && !empty($request->dob) ? date('Y-m-d', strtotime($request->dob)) : '');
 
@@ -87,6 +88,10 @@ class DashboardController extends Controller
         if(!empty($phone)): $query->where('phone', $phone); endif;
         if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
         if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
+        if(!empty($queryStr)):
+            $query->where('first_name','LIKE','%'.$queryStr.'%');
+            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
+        endif;
         if(!empty($semesters) || !empty($courseCreationId)):
 
             $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId){

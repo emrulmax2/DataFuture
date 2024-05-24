@@ -14,7 +14,7 @@ class AcademicYearController extends Controller
     public function index()
     {
         return view('pages.settings.academicyears.index', [
-            'title' => 'Academic Years - LCC Data Future Managment',
+            'title' => 'Academic Years - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
@@ -78,7 +78,7 @@ class AcademicYearController extends Controller
     public function show($id)
     {
         return view('pages.settings.academicyears.show', [
-            'title' => 'Academic Years - LCC Data Future Managment',
+            'title' => 'Academic Years - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

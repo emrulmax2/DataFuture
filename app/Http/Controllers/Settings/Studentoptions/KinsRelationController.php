@@ -15,7 +15,7 @@ class KinsRelationController extends Controller
     public function index()
     {
         return view('pages/kins-relation/index', [
-            'title' => 'Kins Relation - LCC Data Future Managment',
+            'title' => 'Kins Relation - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Kins Relations', 'href' => 'javascript:void(0);']
             ],

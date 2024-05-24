@@ -25,7 +25,7 @@ class AttendanceController extends Controller
     public function index()
     {
         return view('pages.attendance.index', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
@@ -166,7 +166,7 @@ class AttendanceController extends Controller
             ];
         endforeach;
         return view('pages.attendance.create', [
-            'title' => 'Attendance - LCC Data Future Managment',
+            'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],

@@ -12,7 +12,7 @@ class CommunicationTemplateController extends Controller
     public function index()
     {
         return view('pages.settings.communication.index', [
-            'title' => 'System Communication Templates - LCC Data Future Managment',
+            'title' => 'System Communication Templates - London Churchill College',
             'subtitle' => 'Communication Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

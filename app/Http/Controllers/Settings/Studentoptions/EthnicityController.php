@@ -15,7 +15,7 @@ class EthnicityController extends Controller
     public function index()
     {
         return view('pages/ethnicity/index', [
-            'title' => 'Ethnicity - LCC Data Future Managment',
+            'title' => 'Ethnicity - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Ethnicities', 'href' => 'javascript:void(0);']
             ],

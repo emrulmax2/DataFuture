@@ -14,7 +14,7 @@ class SourceTutionFeeController extends Controller
     public function index()
     {
         return view('pages.settings.sourcetutionfee.index', [
-            'title' => 'Source of Tution Fees - LCC Data Future Managment',
+            'title' => 'Source of Tution Fees - London Churchill College',
             'subtitle' => 'Course Parameters',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

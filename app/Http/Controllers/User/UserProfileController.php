@@ -14,9 +14,9 @@ class UserProfileController extends Controller
         $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
         $employeeId = $employee->id;
         return view('pages.users.my-account.index', [
-            'title' => 'My Account - LCC Data Future Managment',
+            'title' => 'My HR - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'My Account', 'href' => 'javascript:void(0);']
+                ['label' => 'My HR', 'href' => 'javascript:void(0);']
             ],
             'user' => User::find(auth()->user()->id),
             'employee' => Employee::where('user_id', auth()->user()->id)->get()->first(),
@@ -28,9 +28,9 @@ class UserProfileController extends Controller
         $employeeId = $employee->id;
 
         return view('pages.users.my-account.extrabenefit', [
-            'title' => 'My Account - LCC Data Future Managment',
+            'title' => 'My HR - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'My Account', 'href' => 'javascript:void(0);']
+                ['label' => 'My HR', 'href' => 'javascript:void(0);']
             ],
             'user' => User::find(auth()->user()->id),
             'employee' => Employee::where('user_id', auth()->user()->id)->get()->first(),

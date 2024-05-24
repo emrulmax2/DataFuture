@@ -100,7 +100,7 @@ class InstanceTermController extends Controller
     {
         $data = InstanceTerm::find($id);
         return view('pages/instanceterm/show', [
-            'title' => 'Instance Terms - LCC Data Future Managment',
+            'title' => 'Instance Terms - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Instance Terms', 'href' => route('instance.term.show', $data->course_creation_instance_id)],
                 //['label' => 'Instance Terms', 'href' => route('instance.term.show')],

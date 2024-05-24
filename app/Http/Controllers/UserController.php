@@ -20,7 +20,7 @@ class UserController extends Controller
     public function index()
     {
         return view('pages/users/index', [
-            'title' => 'User Managment - LCC Data Future Managment',
+            'title' => 'User Managment - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Users', 'href' => 'javascript:void(0);']
             ],
@@ -30,7 +30,7 @@ class UserController extends Controller
     public function useraccess($userId)
     {
         return view('pages/users/access/index', [
-            'title' => 'User Access Dashboard - LCC Data Future Managment',
+            'title' => 'User Access Dashboard - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'User Access Dashboard', 'href' => 'javascript:void(0);']
             ],

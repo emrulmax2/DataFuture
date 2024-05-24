@@ -12,7 +12,7 @@ class AccBankController extends Controller
 {
     public function index(){
         return view('pages.settings.accounts.banks', [
-            'title' => 'Account Settings - LCC Data Future Managment',
+            'title' => 'Account Settings - London Churchill College',
             'subtitle' => 'Banks Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

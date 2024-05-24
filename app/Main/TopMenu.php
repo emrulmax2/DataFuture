@@ -75,7 +75,7 @@ class TopMenu
                         'agent' => [
                             'route_name' => 'agent-user.index',
                             'params' => [],
-                            'title' => 'Agent Information'
+                            'title' => 'Agent'
                         ]
                     ]
                 ];

@@ -1,4 +1,79 @@
 import TomSelect from "tom-select";
+import xlsx from "xlsx";
+import { createIcons, icons } from "lucide";
+import Tabulator from "tabulator-tables";
+
+("use strict");
+var fileVersionHistoryListTable = (function () {
+    var _tableGen = function (file_id ) {
+        
+        let tableContent = new Tabulator('#fileVersionHistoryListTable', {
+            ajaxURL: route("file.manager.file.version.history"),
+            ajaxParams: { file_id: file_id },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Created At",
+                    field: "created_at",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Created By",
+                    field: "created_by",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "&nbsp;",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) {                        
+                        var btns = "";
+                        btns += '<button data-id="' +cell.getData().id +'" style="top: -7px;"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9">\
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" icon-name="rotate-cw" data-lucide="rotate-cw" class="lucide lucide-rotate-cw block mx-auto"><path d="M21 2v6h-6"></path><path d="M21 13a9 9 0 11-3-7.7L21 8"></path></svg>\
+                        </button>';
+                        
+                        return btns;
+                    },
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+    };
+    return {
+        init: function ( file_id ) {
+            _tableGen( file_id );
+        },
+    };
+})();
 
 (function(){
     let tomOptions = {
@@ -464,6 +539,7 @@ import TomSelect from "tom-select";
     const addFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFileModal"));
     const editFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFileModal"));
     const uploadFileVersionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadFileVersionModal"));
+    const fileHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileHistoryModal"));
 
     const addFileModalEl = document.getElementById('addFileModal')
     addFileModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -805,6 +881,23 @@ import TomSelect from "tom-select";
                 }
             }
         });
+    });
+
+    const fileHistoryModalEl = document.getElementById('fileHistoryModal')
+    fileHistoryModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#fileHistoryModal .fileVersionHistoryListTableWrap').fadeOut('fast', function(){
+            $('#fileVersionHistoryListTable').attr('data-fileinfo', '0').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role').html('');
+        });
+        $('#fileHistoryModal .displayName').html('');
+    });
+
+    $(document).on('click', '.versionHistory', function(e){
+        let $theLink = $(this);
+        let file_id = $theLink.attr('data-id');
+        let file_name = $theLink.attr('data-name');
+
+        $('#fileHistoryModal .displayName').html(file_name);
+        $('#fileHistoryModal #fileVersionHistoryListTable').attr('data-fileinfo', file_id);
     });
     /* File Upload Code END */
 

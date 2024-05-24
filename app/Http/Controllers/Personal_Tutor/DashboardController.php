@@ -84,7 +84,7 @@ class DashboardController extends Controller
         $returnData = json_decode($todaysList->getContent(),true);
    
         return  view('pages.personal-tutor.dashboard.index', [
-            'title' => 'Personal Tutor Dashboard - LCC Data Future Managment',
+            'title' => 'Personal Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,

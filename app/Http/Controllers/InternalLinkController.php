@@ -18,7 +18,7 @@ class InternalLinkController extends Controller
     public function index()
     {
         return view('pages.settings.internallink.index', [
-            'title' => 'Internal Link - LCC Data Future Managment',
+            'title' => 'Internal Link - London Churchill College',
             'subtitle' => '',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],

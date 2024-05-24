@@ -15,7 +15,7 @@ class CountryController extends Controller
     public function index()
     {
         return view('pages/country/index', [
-            'title' => 'Countries - LCC Data Future Managment',
+            'title' => 'Countries - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Countries', 'href' => 'javascript:void(0);']
             ],
