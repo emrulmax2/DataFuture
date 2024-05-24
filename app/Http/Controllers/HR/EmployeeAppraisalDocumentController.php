@@ -69,17 +69,13 @@ class EmployeeAppraisalDocumentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $url = '';
-                if(isset($list->document->current_file_name) && !empty($list->document->current_file_name) && Storage::disk('s3')->exists('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name)):
-                    $disk = Storage::disk('s3');
-                    $url = $disk->url('public/employees/'.$employee_id.'/documents/'.$list->document->current_file_name);
-                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'display_file_name' => (isset($list->document->display_file_name) ? $list->document->display_file_name : 'Unknown'),
                     'hard_copy_check' => (isset($list->document->hard_copy_check) ? $list->document->hard_copy_check : 0),    
                     'url' => (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? 1 : 0),
+                    'document_id' => (isset($list->document->id) && $list->document->id > 0 ? $list->document->id : 0),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
