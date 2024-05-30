@@ -417,10 +417,13 @@
 <!-- BEGIN: Edit Emergency Contact Details Modal -->
 <div id="editEmergencyContactDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
-        @if(isset($emergencyContacts))
+        
         <form method="POST" action="#" id="editEmergencyContactDetailsForm" enctype="multipart/form-data">
-            
-            <input type="hidden" name="url" value="{{ route('employee.emergency.update',$emergencyContacts->id) }}" />
+            @if(isset($emergencyContacts))
+                <input type="hidden" name="url" value="{{ route('employee.emergency.update',$emergencyContacts->id) }}" />
+            @else
+                <input type="hidden" name="url" value="{{ route('employee.emergency.store') }}" />
+            @endif
             <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
             <div class="modal-content">
                 <div class="modal-header">
@@ -531,7 +534,6 @@
                 </div>
             </div>
         </form>
-        @endif;
     </div>
 </div>
 <!-- END: Edit Emergency Contact Details Modal -->
