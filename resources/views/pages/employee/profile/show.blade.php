@@ -286,16 +286,18 @@
                 <div class="col-span-6">
                     <div class="font-medium text-base">Emergency Contacts</div>
                 </div>
-
+                @if(isset($emergencyContacts))
                 <div class="col-span-6 text-right">
                     <button data-applicant="" data-tw-toggle="modal" data-tw-target="#editEmergencyContactDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Emergency Contacts Details
                     </button>
                 </div>
+                @endif;
             </div>
             
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
+                @if(isset($emergencyContacts))
                 <div class="col-span-6">
                     <div class="grid grid-cols-12 gap-0 mb-4">
                         <div class="col-span-4 text-slate-500 font-medium">Name</div>
@@ -352,6 +354,11 @@
                         
                     </div>
                 </div>
+                @else
+                <div class="col-span-12">
+                    <div class="text-slate-500 font-medium">No Emergency Contact Found</div>
+                </div>
+                @endif;
             </div>
         </div>
     </div>
