@@ -1060,6 +1060,7 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(EmployeeEmergencyContactController::class)->group(function() {
         Route::post('employee-emergency/update/{contact}','update')->name('employee.emergency.update');
+        Route::post('employee-emergency/store','store')->name('employee.emergency.store');
     });
 
     

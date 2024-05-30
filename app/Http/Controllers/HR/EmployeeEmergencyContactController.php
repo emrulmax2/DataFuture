@@ -37,9 +37,17 @@ class EmployeeEmergencyContactController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(EmployeeEmergencyContactUpdateRequest $request)
     {
-        //
+
+        $data = new EmployeeEmergencyContact();
+        $data->fill($request->all());
+        $data->save();
+
+        if($data->id)
+            return response()->json(['message' => 'Emergency contact successfully saved.',"data"=>['EmployeeEmergencyContactId'=>$data->id]], 200);
+        else
+            return response()->json(['message' => 'Emergency contact could not be saved'], 302);
     }
 
     /**

@@ -292,7 +292,13 @@
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Emergency Contacts Details
                     </button>
                 </div>
-                @endif;
+                @else
+                <div class="col-span-6 text-right">
+                    <button data-applicant="" data-tw-toggle="modal" data-tw-target="#editEmergencyContactDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add a emergency contact
+                    </button>
+                </div>
+                @endif
             </div>
             
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
@@ -358,7 +364,7 @@
                 <div class="col-span-12">
                     <div class="text-slate-500 font-medium">No Emergency Contact Found</div>
                 </div>
-                @endif;
+                @endif
             </div>
         </div>
     </div>
