@@ -51,8 +51,20 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
         <!-- BEGIN: Breadcrumb -->
         <nav aria-label="breadcrumb" class="-intro-x h-[45px] mr-auto">
             <ol class="breadcrumb breadcrumb-light flex-wrap max-[639px]:pr-5">
-                <li class="breadcrumb-item"><a href="javascript:void(0);">Application</a></li>
-                <li class="breadcrumb-item"><a href="{{ !is_null(\Auth::guard('applicant')->user()) ? route('applicant.dashboard') : route('dashboard') }}">Dashboard</a></li>
+                @if(Auth::guard('applicant')->check())
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Applicant</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('applicant.dashboard')  }}">Dashboard</a></li>
+                @elseif(Auth::guard('student')->check())
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Student</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('student.dashboard') }}">Dashboard</a></li>
+                @elseif(Auth::guard('agent')->check())
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Agent</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('agent.dashboard') }}">Dashboard</a></li>
+                @else
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">User</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('staff.dashboard') }}">Dashboard</a></li>
+                @endif
+                
                 @if(isset($breadcrumbs) && !empty($breadcrumbs))
                     @php $i = 1; @endphp
                     @foreach($breadcrumbs as $crumbs)
