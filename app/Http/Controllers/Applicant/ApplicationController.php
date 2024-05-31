@@ -236,6 +236,12 @@ class ApplicationController extends Controller
             $applicant->agent_user_id = $referral->agent_user_id;
             $applicant->updated_by = auth('agent')->user()->id;
             $applicant->save();
+            if(isset($applicant->contact)) {
+                $applicantContact = ApplicantContact::find($applicant->contact->id);
+
+                $applicantContact->mobile_verification = 1;
+                $applicantContact->save();
+            }
             
             $application = AgentApplicationCheck::where('agent_user_id',$agentUserId)
                                 ->where("email", $applicant->users->email)
