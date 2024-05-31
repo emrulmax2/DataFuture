@@ -1,17 +1,178 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
-var agentTableId = (function () {
+// var agentTableId = (function () {
+//     var _tableGen = function () {
+//         // Setup Tabulator
+//         let querystr = $("#query-Agent").val() != "" ? $("#query-Agent").val() : "";
+//         let status = $("#status-Agent").val() != "" ? $("#status-Agent").val() : "";
+//         let agentId = $('#addressModal [name=id]').val()
+//         let tableContent = new Tabulator("#agentTableId", {
+//             ajaxURL: route("agent-user.termlist",agentId),
+//             ajaxParams: { querystr: querystr, status: status, id: agentId},
+//             ajaxFiltering: true,
+//             ajaxSorting: true,
+//             printAsHtml: true,
+//             printStyled: true,
+//             pagination: "remote",
+//             paginationSize: 10,
+//             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+//             layout: "fitColumns",
+//             responsiveLayout: "collapse",
+//             placeholder: "No matching records found",
+//             columnDefaults:{
+//             resizable:true,
+//             },
+//             columns: [
+//                 {
+//                     title: "Serial",
+//                     field: "sl",
+//                     width: "180",
+//                     headerSort: false,
+//                 },
+//                 ,
+//                 {
+//                     title: "Term Name",
+//                     field: "term",
+//                     headerHozAlign: "left",
+//                     headerSort: false,
+//                 },
+//                 {
+//                     title: "Total Applicants",
+//                     field: "ApplicantCount",
+//                     headerHozAlign: "left",
+//                     headerSort: false,
+//                     hozAlign: "center",
+//                     headerHozAlign: "center",
+                    
+//                 },
+//                 {
+//                     title: "Total Students",
+//                     field: "StudentCount",
+//                     headerHozAlign: "left",
+//                     headerSort: false,
+//                     hozAlign: "center",
+//                     headerHozAlign: "center",
+//                     headerSort: false,
+                    
+//                 },
+//             ],
+//             rowFormatter:function(row){
+//                 //create and style holder elements
+//                var holderEl = document.createElement("div");
+//                var tableEl = document.createElement("div");
+        
+//                holderEl.style.boxSizing = "border-box";
+//                //holderEl.style.padding = "10px 30px 10px 10px";
+//                //holderEl.style.borderTop = "1px solid #333";
+//                //holderEl.style.borderBotom = "1px solid #333";
+               
+        
+//                //tableEl.style.border = "1px solid #333";
+        
+//                holderEl.appendChild(tableEl);
+        
+//                row.getElement().appendChild(holderEl);
+        
+//                var subTable = new Tabulator(tableEl, {
+//                    layout:"fitColumns",
+//                    pagination: "local",
+//                    paginationSize: 10,
+//                    paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+//                    data:row.getData()._children,
+//                    columns:[
+//                    {title:"Name", field:"name"},
+//                    {title:"Gender", field:"gender"},
+//                    {title:"Status", field:"status"},
+//                    {title:"Mobile", field:"mobile"},
+//                     {
+//                         title: "Actions",
+//                         field: "id",
+//                         headerSort: false,
+//                         hozAlign: "center",
+//                         headerHozAlign: "center",
+//                         width: "180",
+//                         download: false,
+//                         formatter(cell, formatterParams) {                        
+//                             var btns = "";
+//                             if (cell.getData().status == "Applicant") {
+//                                 btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+//                             } else {
+//                                 btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+//                             }
+                            
+//                             return btns;
+//                         },
+//                     },
+//                    ]
+//                })
+//             },
+//             renderComplete() {
+//                 createIcons({
+//                     icons,
+//                     "stroke-width": 1.5,
+//                     nameAttr: "data-lucide",
+//                 });
+//             },
+//         });
+
+//         // Export
+//         $("#tabulator-export-csv").on("click", function (event) {
+//             tableContent.download("csv", "data.csv");
+//         });
+
+//         $("#tabulator-export-json").on("click", function (event) {
+//             tableContent.download("json", "data.json");
+//         });
+
+//         $("#tabulator-export-xlsx").on("click", function (event) {
+//             window.XLSX = xlsx;
+//             tableContent.download("xlsx", "data.xlsx", {
+//                 sheetName: "Agent List",
+//             });
+//         });
+
+//         $("#tabulator-export-html").on("click", function (event) {
+//             tableContent.download("html", "data.html", {
+//                 style: true,
+//             });
+//         });
+
+//         // Print
+//         $("#tabulator-print").on("click", function (event) {
+//             tableContent.print();
+//         });
+//     };
+//     return {
+//         init: function () {
+//             _tableGen();
+//         },
+//     };
+// })();
+var applicantApplicantionList = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-Agent").val() != "" ? $("#query-Agent").val() : "";
-        let status = $("#status-Agent").val() != "" ? $("#status-Agent").val() : "";
-        let agentId = $('#addressModal [name=id]').val()
-        let tableContent = new Tabulator("#agentTableId", {
-            ajaxURL: route("agent-user.termlist",agentId),
-            ajaxParams: { querystr: querystr, status: status, id: agentId},
+
+        
+        let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
+        let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
+        let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
+        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
+
+        let semesters = $("#semesters").val() != "" ? $("#semesters").val() : [];
+        let courses = $("#courses").val() != "" ? $("#courses").val() : [];
+        let statuses = $("#statuses").val() != "" ? $("#statuses").val() : [];
+        let agents = $("#agents").val() != "" ? $("#agents").val() : [];
+
+        let tableContent = new Tabulator("#applicantApplicantionList", {
+
+            ajaxURL: route("agent-user.query.list"),
+
+            ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents, querystr:querystr },
+
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -22,127 +183,89 @@ var agentTableId = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
-            columnDefaults:{
-            resizable:true,
-            },
             columns: [
                 {
-                    title: "Serial",
-                    field: "sl",
+                    title: "#ID",
+                    field: "application_no",
                     width: "180",
-                    headerSort: false,
-                },
-                ,
-                {
-                    title: "Term Name",
-                    field: "term",
-                    headerHozAlign: "left",
-                    headerSort: false,
                 },
                 {
-                    title: "Total Applicants",
-                    field: "ApplicantCount",
+                    title: "Name",
+                    field: "name",
                     headerHozAlign: "left",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    
                 },
                 {
-                    title: "Total Students",
-                    field: "StudentCount",
+                    title: "DOB",
+                    field: "dob",
                     headerHozAlign: "left",
+                },
+                {
+                    title: "Gender",
+                    field: "gender",
+                    headerSort:false,
+                    headerHozAlign: "left",
+                    width: "100"
+                },
+                {
+                    title: "Course",
+                    field: "course",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Submission Date",
+                    field: "submission_date",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "RF code",
+                    field: "referral_code",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Actions",
+                    field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    headerSort: false,
-                    
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    download: false,
+                    formatter(cell, formatterParams) {      
+
+                        var btns = "";
+                        if (cell.getData().submission_date == '') {
+
+                            btns += '<a href="'+route('agent.application',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                        
+                        }else{
+
+                            btns += '<a href="'+route('agent.application.show', cell.getData().id)+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                        }
+                        
+                        return btns;
+                    },
                 },
             ],
-            rowFormatter:function(row){
-                //create and style holder elements
-               var holderEl = document.createElement("div");
-               var tableEl = document.createElement("div");
-        
-               holderEl.style.boxSizing = "border-box";
-               //holderEl.style.padding = "10px 30px 10px 10px";
-               //holderEl.style.borderTop = "1px solid #333";
-               //holderEl.style.borderBotom = "1px solid #333";
-               
-        
-               //tableEl.style.border = "1px solid #333";
-        
-               holderEl.appendChild(tableEl);
-        
-               row.getElement().appendChild(holderEl);
-        
-               var subTable = new Tabulator(tableEl, {
-                   layout:"fitColumns",
-                   pagination: "local",
-                   paginationSize: 10,
-                   paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-                   data:row.getData()._children,
-                   columns:[
-                   {title:"Name", field:"name"},
-                   {title:"Gender", field:"gender"},
-                   {title:"Status", field:"status"},
-                   {title:"Mobile", field:"mobile"},
-                    {
-                        title: "Actions",
-                        field: "id",
-                        headerSort: false,
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        width: "180",
-                        download: false,
-                        formatter(cell, formatterParams) {                        
-                            var btns = "";
-                            if (cell.getData().status == "Applicant") {
-                                btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            } else {
-                                btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            }
-                            
-                            return btns;
-                        },
-                    },
-                   ]
-               })
-            },
             renderComplete() {
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-            },
+            }
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Agent List",
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
             });
-        });
-
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
         });
     };
     return {
@@ -210,16 +333,60 @@ function checkPasswordStrength(password) {
     }
 }
 (function () {
-    
+
+    if($('#applicantApplicantionList').length > 0){
+        
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            persist: false,
+            create: false,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+
+        let tomOptionsMul = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+                remove_button: {
+                    title: "Remove this item",
+                },
+            }
+        };
+
+        
+        var semesters = new TomSelect('#semesters', tomOptionsMul);
+        var courses = new TomSelect('#courses', tomOptionsMul);
+
+        var statuses = new TomSelect('#statuses', tomOptionsMul);
+        var agents = new TomSelect('#agents', tomOptionsMul);
+
+            // Filter function
+            function filterHTMLForm() {
+                applicantApplicantionList.init();
+            }
+            // On click go button
+            $("#studentGroupSearchSubmitBtn").on("click", function (event) {
+                filterHTMLForm();
+            });
+            // On reset filter form
+            
+        
+    }
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editContactModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editContactModal"));
-    if($('#agentTableId').length > 0){
-        // Init Table
-        agentTableId.init();
-        //const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        //const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    // if($('#agentTableId').length > 0){
+    //     // Init Table
+    //     agentTableId.init();
+    //     //const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    //     //const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 
-    }
+    // }
     /*Address Modal*/
     if($('#addressModal').length > 0){
         const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
