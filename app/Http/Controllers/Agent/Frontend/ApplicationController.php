@@ -41,7 +41,7 @@ class ApplicationController extends Controller
     protected $Application;
 
     public function index( AgentApplicationCheck $checkedApplication ) {
-
+        $agentCode = ReferralCode::where('agent_user_id',$checkedApplication->agent_user_id)->get()->first();
         $applicantUser = ApplicantUser::where("email",$checkedApplication->email)->where("phone",$checkedApplication->mobile)->get()->first();
 
         if(!$applicantUser) {
@@ -53,6 +53,7 @@ class ApplicationController extends Controller
                 "phone_verified_at" =>	$checkedApplication->mobile_verified_at,
                 "password" =>	Str::random(16),
                 "active" =>	1,
+                
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
         }
@@ -74,6 +75,7 @@ class ApplicationController extends Controller
             'sexid' => SexIdentifier::all(),
             'agentApplicant' => $checkedApplication,
             'applicant' => $applicantUser,
+            'agentCode' => ($agentCode) ?$agentCode->code : '',
             'apply' => Applicant::where('applicant_user_id',$applicantUser->id)->whereNull('submission_date')->orderBy('id', 'DESC')->first(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
                 if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
