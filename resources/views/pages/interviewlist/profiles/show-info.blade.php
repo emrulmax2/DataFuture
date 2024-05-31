@@ -37,7 +37,7 @@
                     
                         <button id="magic-button1" type="button" data-id="{{ $interview->id }}" class="into-x interview-end hover-bg-success hover-text-white btn w-40 {{ ($interview->end_time==null) ? '' : "hidden" }}" ><i data-lucide="alarm-clock-off" class="w-4 h-4 mr-2"></i> End interview</button>
                     
-                        <button id="magic-button2" type="button" data-id="{{ $interview->id }}" data-tw-toggle="modal" data-tw-target="#editModal" class="into-x  w-40 interview-result hover-bg-success hover-text-white btn {{ ($interview->applicant_document_id==null && $interview->end_time!=null) ? '' : "hidden" }}" ><i data-lucide="activity" class="w-4 h-4 mr-2"></i> Update Result</button>
+                        <button id="magic-button2" type="button" data-id="{{ $interview->id }}" data-tw-toggle="modal" data-tw-target="#editModal" class="into-x  w-40 interview-result btn-success hover-text-white btn {{ ($interview->applicant_document_id==null && $interview->end_time!=null) ? '' : "hidden" }}" ><i data-lucide="activity" class="w-4 h-4 mr-2"></i> Update Result</button>
                     
                         <button id="magic-button3" type="button" data-id="{{ $interview->id }}"  class="into-x  interview-taskend hover-bg-success hover-text-white w-40 btn {{ ($interview->interview_status!='Completed' && $interview->applicant_document_id!=null && $interview->end_time!=null) ? "" : 'hidden' }}" ><i data-lucide="archive" class="w-4 h-4 mr-2"></i> Finish Task</button>
                     

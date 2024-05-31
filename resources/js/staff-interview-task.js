@@ -580,27 +580,42 @@ $(document).on("click", ".interview-end", function (e) {
             e.preventDefault();
             document.querySelector('#update').setAttribute('disabled', 'disabled');
             document.querySelector("#update svg").style.cssText ="display: inline-block;";
-       
+            let dataDropZones = drzn1.getAcceptedFiles()
+            
+            
             if($('#editModal [name="resultValue"]').val() !=""){
                 var result = $('#editModal [name="resultValue"]').val();
                 $('#editModal input[name="resultValue"]').val(result)
-                drzn1.processQueue();
+                if(dataDropZones.length>0) {
+                    drzn1.processQueue();
+                }else {
+                    $('#editModal .modal-content .modal-body').prepend('<div id="dropZoneError" class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i>Please add a file before submit.</div>');
+                    
+                }
+                
                 $("#magic-button2").addClass('hidden');
                 $("#magic-button3").removeClass('hidden');
             }else{
+                document.querySelector('#update').removeAttribute('disabled');
+                document.querySelector("#update svg").style.cssText ="display: none;";
                 $('#editModal .modal-content .uploadError').remove();
-                $('#editModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select result type.</div>');
+                $('#editModal .modal-content .modal-body').prepend('<div id="resultTypeDropZoneError" class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i>Please select result type.</div>');
                 
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-
+                if(dataDropZones.length<=0) {
+                    $('#editModal .modal-content .modal-body').prepend('<div id="dropZoneError" class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i>Please add a file before submit.</div>');
+                    
+                }
+                
                 setTimeout(function(){
                     $('#editModal .modal-content .uploadError').remove();
                 }, 5000)
             }
+
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
             
         });
 
