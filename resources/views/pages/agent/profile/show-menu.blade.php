@@ -6,18 +6,6 @@
     </li>
     
     <li class="nav-item" role="presentation">
-        <a href="" class="nav-link py-4 ">
-            Applicants
-        </a>
-    </li>
-
-    <li class="nav-item" role="presentation">
-        <a href="" class="nav-link py-4 ">
-            Students
-        </a>
-    </li>
-
-    <li class="nav-item" role="presentation">
         <a href="{{ route('sub-agent.show', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'sub-agent.show' ? 'active' : '' }}">
             Sub Agents
         </a>
