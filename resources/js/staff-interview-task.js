@@ -287,7 +287,6 @@ $(document).on("click", ".interview-taskend", function (e) {
                         $("#magic-button3").addClass('hidden');
                 }
                 location.href = route("staff.dashboard");
-                //interviewListTable.init();
 
             }).catch(error => {
                 
@@ -568,6 +567,7 @@ $(document).on("click", ".interview-end", function (e) {
                     $("#errorModal .errorModalDesc").html(errorResponse.message);
                     $("#errorModal .errorCloser").attr('data-action', 'DISMISS');
                 });
+                window.location.reload();
                 // setTimeout(function(){
                 //     errorModal.hide();
                 //     window.location.reload();
