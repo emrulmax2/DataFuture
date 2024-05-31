@@ -592,7 +592,9 @@ $(document).on("click", ".interview-end", function (e) {
                     document.querySelector('#update').removeAttribute('disabled');
                     document.querySelector("#update svg").style.cssText ="display: none;";
                     $('#editModal .modal-content .modal-body').prepend('<div id="dropZoneError" class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i>Please add a file before submit.</div>');
-                    
+                    setTimeout(function(){
+                        $('#editModal .modal-content .uploadError').remove();
+                    }, 3000)
                 }
                 
                 $("#magic-button2").addClass('hidden');
@@ -610,7 +612,7 @@ $(document).on("click", ".interview-end", function (e) {
                 
                 setTimeout(function(){
                     $('#editModal .modal-content .uploadError').remove();
-                }, 5000)
+                }, 3000)
             }
 
             createIcons({
