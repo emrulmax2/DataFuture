@@ -170,7 +170,7 @@ class AgentController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function listByQuery(Request $request){
+    public function listByQuery(Request $request, $id){
 
      
         $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
@@ -202,12 +202,12 @@ class AgentController extends Controller
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        $userData = Auth::guard('agent')->user();
+        $userData = Agent::find($id);
         $query = Applicant::orderByRaw(implode(',', $sorts));
   
         if(count($agents)<=0) {
-            array_push($agents,$userData->id);
-            $subAgents = AgentUser::where('parent_id',$userData->id)->get()->pluck('id')->toArray();
+            array_push($agents,$userData->agent_user_id);
+            $subAgents = AgentUser::where('parent_id',$userData->agent_user_id)->get()->pluck('id')->toArray();
             $agents = array_merge($agents,$subAgents);
             
 

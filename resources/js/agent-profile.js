@@ -156,7 +156,7 @@ var applicantApplicantionList = (function () {
     var _tableGen = function () {
         // Setup Tabulator
 
-        
+        let id = $('#addressForm input[name="id"]').val()
         let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
         let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
         let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
@@ -169,7 +169,7 @@ var applicantApplicantionList = (function () {
 
         let tableContent = new Tabulator("#applicantApplicantionList", {
 
-            ajaxURL: route("agent-user.query.list"),
+            ajaxURL: route("agent-user.query.list",id),
 
             ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents, querystr:querystr },
 
@@ -335,7 +335,7 @@ function checkPasswordStrength(password) {
 (function () {
 
     if($('#applicantApplicantionList').length > 0){
-        
+        applicantApplicantionList.init();
         let tomOptions = {
             plugins: {
                 dropdown_input: {}
