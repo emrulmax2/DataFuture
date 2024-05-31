@@ -143,7 +143,7 @@ class PendingTaskManagerController extends Controller
                         'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
                         'first_name' => $list->first_name,
                         'last_name' => $list->last_name,
-                        'date_of_birth'=> (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : ''),
+                        'date_of_birth'=> 'N/A',
                         'course'=> (isset($list->course->creation->course->name) && !empty($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                         'semester'=> (isset($list->course->creation->semester->name) && !empty($list->course->creation->semester->name) ? $list->course->creation->semester->name : ''),
                         'sex_identifier_id'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),

@@ -67,11 +67,6 @@ var taskAssignedStudentTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "DOB",
-                    field: "date_of_birth",
-                    headerHozAlign: "left",
-                },
-                {
                     title: "Course",
                     field: "course",
                     headerSort: false,

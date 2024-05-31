@@ -18,7 +18,7 @@
         <div class="intro-y box p-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Terms Application Details</div>
+                    <div class="font-medium text-base">Applicant/Student Details</div>
                 </div>
 
             </div>
