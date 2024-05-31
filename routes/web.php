@@ -2275,7 +2275,7 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-user/{agent_user}/address', 'addressUpdate')->name('agent-user.address.store'); 
         
         Route::get('agent-user-list', 'list')->name('agent-user.list');
-        Route::get('agent-user-applicantlist', 'listByQuery')->name('agent-user.query.list');
+        Route::get('agent-user-applicantlist/{id}', 'listByQuery')->name('agent-user.query.list');
         Route::get('agent-user-termlist/{id}', 'ApplicantionList')->name('agent-user.termlist'); 
         
         Route::post('agent-user/{agent_user}/restore', 'restore')->name('agent-user.restore');
