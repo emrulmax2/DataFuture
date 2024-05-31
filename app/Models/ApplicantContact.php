@@ -16,6 +16,7 @@ class ApplicantContact extends Model
         'permanent_country_id',
         'home',
         'mobile',
+        'mobile_verification',
         'address_line_1',
         'address_line_2',
         'state',

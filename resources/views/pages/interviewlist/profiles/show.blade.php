@@ -8,7 +8,7 @@
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</strong></u></h2>
         <div class="ml-auto flex justify-end">
-            <a id="assignedPageLoad" href="{{ route('interviewlist') }}" type="button" class="btn btn-primary text-white w-auto  mt-2 sm:mt-0 sm:ml-1  mr-2" ><i data-lucide="arrow-left"  class="w-4 h-4 mr-2"></i> Back</a>
+            <a id="assignedPageLoad" href="{{ route('task.manager.show',7) }}" type="button" class="btn btn-primary text-white w-auto  mt-2 sm:mt-0 sm:ml-1  mr-2" ><i data-lucide="arrow-left"  class="w-4 h-4 mr-2"></i> Back</a>
         </div>
     </div>
     <!-- BEGIN: Profile Info -->
