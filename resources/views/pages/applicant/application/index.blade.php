@@ -1091,31 +1091,31 @@
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12">
                                 <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full required" name="student_address_address_line_1">
+                                <input type="text" placeholder="Address Line 1" autocomplete="off" id="student_address_address_line_1" class="form-control w-full required" name="student_address_address_line_1">
                                 <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12">
                                 <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                                <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full" name="student_address_address_line_2">
+                                <input type="text" placeholder="Address Line 2 (Optional)" autocomplete="off" id="student_address_address_line_2" class="form-control w-full" name="student_address_address_line_2">
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full required" name="student_address_city">
+                                <input type="text" placeholder="City / Town" id="student_address_city" autocomplete="off" class="form-control w-full required" name="student_address_city">
                                 <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_state_province_region" class="form-label">State</label>
-                                <input type="text" placeholder="State" id="student_address_state_province_region" class="form-control w-full" name="student_address_state_province_region">
+                                <input type="text" placeholder="State" id="student_address_state_province_region" autocomplete="off" class="form-control w-full" name="student_address_state_province_region">
                                 <div class="acc__input-error error-student_address_state_province_region text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full required" name="student_address_postal_zip_code">
+                                <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" autocomplete="off" class="form-control w-full required" name="student_address_postal_zip_code">
                                 <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full required" name="student_address_country">
+                                <input type="text" placeholder="Country" id="student_address_country" autocomplete="off" class="form-control w-full required" name="student_address_country">
                                 <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
                             </div>
                             <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
