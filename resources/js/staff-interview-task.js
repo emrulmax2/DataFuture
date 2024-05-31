@@ -286,7 +286,7 @@ $(document).on("click", ".interview-taskend", function (e) {
                         $("#magic-button2").addClass('hidden');
                         $("#magic-button3").addClass('hidden');
                 }
-                
+                location.href = route("staff.dashboard");
                 //interviewListTable.init();
 
             }).catch(error => {
