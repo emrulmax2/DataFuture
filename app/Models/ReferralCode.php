@@ -10,6 +10,8 @@ class ReferralCode extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'agent_referral_codes';
+
     protected $fillable = [
         'code',
         'type',
@@ -33,5 +35,9 @@ class ReferralCode extends Model
 
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function agentUser(){
+        return $this->belongsTo(AgentUser::class, 'agent_user_id');
     }
 }

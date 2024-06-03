@@ -549,10 +549,31 @@ var applicantInterviewLogTable = (function () {
         $('#uploadProcessDoc').on('click', function(e){
             e.preventDefault();
             var acceptedFiles = drzn.getAcceptedFiles().length;
+            
             if(acceptedFiles > 0){
                 document.querySelector('#uploadProcessDoc').setAttribute('disabled', 'disabled');
                 document.querySelector("#uploadProcessDoc svg").style.cssText ="display: inline-block;";
-                drzn.processQueue();
+                if($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
+                    var hardCopyChecked = $('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val();
+                    $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
+                    drzn.processQueue();
+                }else{
+                    $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                    $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
+                    
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+
+                    setTimeout(function(){
+                        $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                        document.querySelector('#uploadProcessDoc').removeAttribute('disabled', 'disabled');
+                        document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+                    }, 2000)
+                }
+                
             }else{
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -576,6 +597,8 @@ var applicantInterviewLogTable = (function () {
     uploadTaskDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadTaskDocumentModal input[type="applicant_task_id"]').val('0');
         $('#uploadTaskDocumentModal input[type="display_file_name"]').val('');
+        $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
+        $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
         //drzn.removeAllFiles();
     });
 
