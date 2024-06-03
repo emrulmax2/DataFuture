@@ -592,10 +592,22 @@
                         <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
                         <input type="hidden" name="applicant_task_id" value="0"/>
                         <input type="hidden" name="display_file_name" value=""/>
+                        <input type="hidden" name="hard_copy_check" value="0"/>
                     </form>
                     <div class="mt-3">
                         <label for="process_doc_name" class="form-label">Document Name</label>
                         <input type="text" id="process_doc_name" class="form-control w-full" name="process_doc_name">
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Hard Copy Checked?</label>
+                        <div class="form-check mt-2">
+                            <input id="hard_copy_check-1" class="form-check-input" type="radio" value="1" name="hard_copy_check_status" value="vertical-radio-chris-evans">
+                            <label class="form-check-label" for="hard_copy_check-1">Yes</label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input checked id="hard_copy_check-2" class="form-check-input" type="radio" value="0" name="hard_copy_check_status" value="vertical-radio-liam-neeson">
+                            <label class="form-check-label" for="hard_copy_check-2">No</label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
