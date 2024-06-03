@@ -616,7 +616,7 @@
                                     <label for="referral_code" class="form-label col-span-12 sm:col-span-6">If you referred by @if(auth('agent')->user()) <span> Agent/Sub Agent </span> @else <span> Somone/ Agent </span> @endif Please enter the Referral Code.</label>
                                     <div class="col-span-12 sm:col-span-6">
                                         <div class="validationGroup">
-                                            <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full"  placeholder="Referral Code">
+                                            <input value="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" data-org="{{ isset($apply->referral_code) ? $apply->referral_code : '' }}" id="referral_code" name="referral_code" type="text" class="form-control w-full uppercase"  placeholder="Referral Code">
                                             <button id="varifiedReferral" 
                                                 data-applicant-id="{{ isset($apply->id) && $apply->id > 0 ? $apply->id : 0 }}" 
                                                 class="btn w-auto mr-0 mb-0 absolute h-full  {{ isset($apply->referral_code) && !empty($apply->referral_code) && isset($apply->is_referral_varified) && $apply->is_referral_varified == 1 ? 'btn-primary verified' : 'btn-danger' }}"
