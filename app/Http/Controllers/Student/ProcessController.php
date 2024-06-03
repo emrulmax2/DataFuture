@@ -81,7 +81,7 @@ class ProcessController extends Controller
         $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 's3');
         $data = [];
         $data['student_id'] = $student_id;
-        $data['hard_copy_check'] = $request->hard_copy_check;
+        $data['hard_copy_check'] = 0;
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('s3')->url($path);
         $data['display_file_name'] = (!empty($taskName) ? $taskName : $imageName);
