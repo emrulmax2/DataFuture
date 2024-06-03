@@ -286,8 +286,7 @@ $(document).on("click", ".interview-taskend", function (e) {
                         $("#magic-button2").addClass('hidden');
                         $("#magic-button3").addClass('hidden');
                 }
-                
-                //interviewListTable.init();
+                location.href = route("staff.dashboard");
 
             }).catch(error => {
                 
@@ -561,17 +560,18 @@ $(document).on("click", ".interview-end", function (e) {
                     window.location.reload();
                 }, 1500);
             }else{
-                console.log(errorResponse);
+                //console.log(errorResponse);
                 errorModal.show();
                 document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
                     $("#errorModal .errorModalTitle").html("Error!" );
                     $("#errorModal .errorModalDesc").html(errorResponse.message);
                     $("#errorModal .errorCloser").attr('data-action', 'DISMISS');
                 });
-                // setTimeout(function(){
-                //     errorModal.hide();
-                //     window.location.reload();
-                // }, 5000);
+                //window.location.reload();
+                setTimeout(function(){
+                    errorModal.hide();
+                    window.location.reload();
+                }, 2000);
                 drzn1.removeAllFiles(true);
             }
         })
@@ -652,6 +652,10 @@ $(document).on("click", ".interview-end", function (e) {
                             $('#successModal .successModalTitle').html('Done!');
                             $('#successModal .successModalDesc').html('Uploaded interview file successfully deleted!');
                         });
+                        $('#magic-button3').removeClass('show')
+                        $('#magic-button3').addClass('hidden')
+                        $('#magic-button2').removeClass('hidden')
+                        $('#magic-button2').addClass('show')
                     }
                     document.getElementById('fileLoadedView').innerHTML='<i data-lucide="slash" class="w-5 h-5"></i>';
                     createIcons({

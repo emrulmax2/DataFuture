@@ -36,7 +36,7 @@ class EmployeeTraining extends Model
     }
     
     public function setStartDateAttribute($value) {  
-        $this->attributes['start_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['start_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     
     public function getStartDateAttribute($value) {
@@ -44,7 +44,7 @@ class EmployeeTraining extends Model
     }
     
     public function setEndDateAttribute($value) {  
-        $this->attributes['end_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['end_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     
     public function getEndDateAttribute($value) {
@@ -52,7 +52,7 @@ class EmployeeTraining extends Model
     }
     
     public function setExpireDateAttribute($value) {  
-        $this->attributes['expire_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['expire_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     
     public function getExpireDateAttribute($value) {
