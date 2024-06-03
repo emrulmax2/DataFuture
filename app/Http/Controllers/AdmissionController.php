@@ -719,7 +719,7 @@ class AdmissionController extends Controller
 
         $data = [];
         $data['applicant_id'] = $applicant_id;
-        $data['hard_copy_check'] = 0;
+        $data['hard_copy_check'] = $request->hard_copy_check;
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('s3')->url($path);
         $data['display_file_name'] = (!empty($taskName) ? $taskName : $imageName);
