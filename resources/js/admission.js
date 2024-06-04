@@ -112,8 +112,8 @@ var admissionListTable = (function () {
             // tableContent.download("xlsx", "data.xlsx", {
             //     sheetName: "Admission Details",
             // });
-            e.preventDefault();
-            $('svg#excel-loading').show();
+            event.preventDefault();
+            $('#tabulator-export-xlsx-ADM #excel-loading').show();
             let semesters = $("#semesters-ADM").val() != "" ? $("#semesters-ADM").val() : "";
             let courses = $("#courses-ADM").val() != "" ? $("#courses-ADM").val() : "";
             let statuses = $("#statuses-ADM").val() != "" ? $("#statuses-ADM").val() : "";
@@ -141,7 +141,7 @@ var admissionListTable = (function () {
                     link.setAttribute('download', 'admission_download.xlsx'); 
                     document.body.appendChild(link);
                     link.click();
-                    $('svg#excel-loading').hide();
+                    $('#tabulator-export-xlsx-ADM #excel-loading').hide();
             })
             .catch((error) => {
                     console.log(error);

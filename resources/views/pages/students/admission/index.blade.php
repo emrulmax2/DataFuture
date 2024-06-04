@@ -110,35 +110,25 @@
                         <button id="tabulator-print-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                         </button>
-                        <div class="dropdown w-1/2 sm:w-auto mr-2" id="tabulator-export-ADM">
+                        <button id="tabulator-export-xlsx-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel <i id="excel-loading" data-loading-icon="oval"  class="w-4 h-4 ml-2 mx-auto hidden"></i>
+                        </button>
+                        {{-- <div class="dropdown w-1/2 sm:w-auto mr-2">
                             <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                             </button>
                             <div class="dropdown-menu w-40">
                                 <ul class="dropdown-content">
-                                    {{-- <li>
-                                        <a id="tabulator-export-csv-ADM" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                        </a>
-                                    </li> --}}
-                                    {{-- <li>
-                                        <a id="tabulator-export-json-ADM" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                        </a>
-                                    </li> --}}
+                                    
                                     <li>
                                         <a id="tabulator-export-xlsx-ADM" href="javascript:;" class="dropdown-item">
                                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel <i id="excel-loading" data-loading-icon="oval"  class="w-4 h-4 ml-2 mx-auto hidden"></i>
                                         </a>
                                     </li>
-                                    {{-- <li>
-                                        <a id="tabulator-export-html-ADM" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                        </a>
-                                    </li> --}}
+                                    
                                 </ul>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
