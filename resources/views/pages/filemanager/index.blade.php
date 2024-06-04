@@ -497,6 +497,48 @@
     </div>
     <!-- END: Edit File Modal -->
 
+    <!-- BEGIN: Add Tag Modal -->
+    <div id="addTagModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="addTagForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Add Tag</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="name" class="form-label">Tag Name <span class="text-danger">*</span></label>
+                            <input id="name" type="text" name="name" class="form-control w-full">
+                            <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="addTag" class="btn btn-primary w-auto">     
+                            Upload                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Tag Modal -->
+
     <!-- BEGIN: Add File Modal -->
     <div id="addFileModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -552,23 +594,8 @@
                             <div class="col-span-12 pt-2">
                                 <label for="tag_ids" class="form-label">Tags</label>
                                 <div class="fileTagsWrap border rounded relative">
-                                    <div class="fileTag">
-                                        <span>Web Design</span>
-                                        <button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                        <input type="hidden" name="tag_ids[]" value=""/>
-                                    </div>
-                                    <div class="fileTag">
-                                        <span>Web Design</span>
-                                        <button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                        <input type="hidden" name="tag_ids[]" value=""/>
-                                    </div>
                                     <input type="text" name="tag_search" class="tag_search"/>
-                                    <ul class="autoFillDropdown">
-                                        <li><a href="1" class="dropdown-item">UI/UX</a></li>
-                                        <li><a href="1" class="dropdown-item">Web Design</a></li>
-                                        <li><a href="1" class="dropdown-item">Web Development</a></li>
-                                        <li><a href="1" class="dropdown-item">Mobile App</a></li>
-                                    </ul>
+                                    <ul class="autoFillDropdown"></ul>
                                 </div>
                             </div>
                         </div>

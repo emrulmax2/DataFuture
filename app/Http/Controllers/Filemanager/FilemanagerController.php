@@ -18,8 +18,10 @@ use App\Models\DocumentInfo;
 use App\Models\DocumentInfoHasEmployees;
 use App\Models\DocumentInfoReminder;
 use App\Models\DocumentInfoReminderEmployee;
+use App\Models\DocumentInfoTag;
 use App\Models\DocumentRevision;
 use App\Models\DocumentRoleAndPermission;
+use App\Models\DocumentTag;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -405,6 +407,7 @@ class FilemanagerController extends Controller
             $data['current_file_name'] = $current_file_name;
             $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
             $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
+            $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
             $data['created_by'] = auth()->user()->id;
 
             $documentInfo = DocumentInfo::create($data);
@@ -412,6 +415,16 @@ class FilemanagerController extends Controller
                 unset($data['document_folder_id']);
                 $data['document_info_id'] = $documentInfo->id;
                 $documentRwo = Document::create($data);
+
+                if(isset($request->tag_ids) && !empty($request->tag_ids)):
+                    foreach($request->tag_ids as $tag_id):
+                        $data = [];
+                        $data['document_info_id'] = $documentInfo->id;
+                        $data['document_tag_id'] = $tag_id;
+
+                        DocumentInfoTag::create($data);
+                    endforeach;
+                endif;
             endif;
 
             return response()->json(['suc' => 1, 'res' => 'File successfully uploaded.'], 200);
@@ -732,9 +745,5 @@ class FilemanagerController extends Controller
         Document::where('document_info_id', $row_id)->delete();
 
         return response()->json(['res' => 'File successfully deleted'], 200);
-    }
-
-    public function searchTags(Request $request){
-        
     }
 }
