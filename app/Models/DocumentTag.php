@@ -6,17 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DocumentRoleAndPermission extends Model
+class DocumentTag extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'display_name',
-        'type',
-        'create',
-        'read',
-        'update',
-        'delete',
+        'name',
+        
         'created_by',
         'updated_by',
     ];
@@ -27,8 +23,4 @@ class DocumentRoleAndPermission extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
-    public function hasEmployee(){
-        return $this->hasMany(DocumentInfoHasEmployees::class, 'document_role_and_permission_id', 'id');
-    }
 }

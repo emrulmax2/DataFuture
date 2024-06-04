@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateFolderRequest extends FormRequest
+class UpdateFilePermissionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,7 @@ class CreateFolderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
-            'parent_id' => 'sometimes',
-            'employee_ids' => 'required_if:parent_id,0',
+            'employee_ids' => 'required'
         ];
     }
 }

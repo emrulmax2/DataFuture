@@ -214,6 +214,15 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @php 
+                                                        $user_ids = [];
+                                                        if(isset($task->task->users) && !empty($task->task->users)):
+                                                            foreach($task->task->users as $usr):
+                                                                $user_ids[] = $usr->user_id;
+                                                            endforeach;
+                                                        endif;
+                                                    @endphp
+                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
                                                     <div class="col-span-3 sm:col-span-4 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -256,6 +265,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         @else 
@@ -335,6 +345,15 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @php 
+                                                        $user_ids = [];
+                                                        if(isset($task->task->users) && !empty($task->task->users)):
+                                                            foreach($task->task->users as $usr):
+                                                                $user_ids[] = $usr->user_id;
+                                                            endforeach;
+                                                        endif;
+                                                    @endphp
+                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
                                                     <div class="col-span-3 sm:col-span-4 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -377,6 +396,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         @else 
@@ -457,6 +477,15 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @php 
+                                                        $user_ids = [];
+                                                        if(isset($task->task->users) && !empty($task->task->users)):
+                                                            foreach($task->task->users as $usr):
+                                                                $user_ids[] = $usr->user_id;
+                                                            endforeach;
+                                                        endif;
+                                                    @endphp
+                                                    @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
                                                     <div class="col-span-3 sm:col-span-4 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
@@ -478,6 +507,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         @else 

@@ -100,10 +100,11 @@ var fileVersionHistoryListTable = (function () {
         },
     };
 
-    let employeeIDS = ($('#employee_ids').length > 0 ? new TomSelect('#employee_ids', tomOptions) : null);
-    let editEmployeeIds = ($('#edit_employee_ids').length > 0 ? new TomSelect('#edit_employee_ids', tomOptions) : null);
-    let editFileEmployeeIds = ($('#edit_file_employee_ids').length > 0 ? new TomSelect('#edit_file_employee_ids', tomOptions) : null);
-    let reminderEmployeeIds = ($('#reminder_employee_ids').length > 0 ? new TomSelect('#reminder_employee_ids', tomOptions) : null);
+    var employeeIDS = new TomSelect('#employee_ids', tomOptions);
+    var editEmployeeIds = new TomSelect('#edit_employee_ids', tomOptions);
+    var fileEmployeeIds = new TomSelect('#file_employee_ids', tomOptions);
+    var editFileEmployeeIds = new TomSelect('#edit_file_employee_ids', tomOptions);
+    var reminderEmployeeIds = new TomSelect('#reminder_employee_ids', tomOptions);
 
 
     const addFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFolderModal"));
@@ -141,9 +142,7 @@ var fileVersionHistoryListTable = (function () {
         $('#addFolderModal .permissionWrap').fadeOut('fast', function(){
             $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').remove();
             $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeIn();
-            if($('#employee_ids').length > 0){
-                employeeIDS.clear(true);
-            }
+            employeeIDS.clear(true);
         });
     });
 
@@ -158,9 +157,7 @@ var fileVersionHistoryListTable = (function () {
     editFolderPermissionModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editFolderPermissionModal .folderPermissionTable').find('.permissionEmployeeRow').remove();
         $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeIn();
-        if($('#edit_employee_ids').length > 0){
-            editEmployeeIds.clear(true);
-        }
+        editEmployeeIds.clear(true);
 
         $('#editFolderPermissionModal .modal-footer input[name="id"]').val('0');
     });
@@ -181,85 +178,98 @@ var fileVersionHistoryListTable = (function () {
     });
 
 
-    if($('#employee_ids').length > 0){
-        employeeIDS.on('item_add', function(employee_id, item){
+    employeeIDS.on('item_add', function(employee_id, item){
+        axios({
+            method: "post",
+            url: route('file.manager.get.employee.permission.set'),
+            data: {employee_id : employee_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('#addFolderModal .leaveTableLoader').removeClass('active');
+            if (response.status == 200) {
+                let res = response.data.res;
+                $('#addFolderForm .folderPermissionTable').find('.noticeTr').fadeOut('fast', function(){
+                    $('#addFolderForm .folderPermissionTable tbody').append(res);
+                });
+
+                createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+            }
+        }).catch(error => {
+            $('#addFolderModal .leaveTableLoader').removeClass('active');
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+    employeeIDS.on('item_remove', function(employee_id, item){
+        let $theTr = $('#addFolderModal #employeeFolderPermission_'+employee_id);
+        $theTr.remove();
+
+        var permissionTrLength = $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').length;
+        if(permissionTrLength == 0){
+            $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeIn();
+        }else{
+            $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeOut();
+        }
+    });
+
+    editEmployeeIds.on('item_add', function(employee_id, item){
+        let folder_id = $('#editFolderPermissionModal [name="folder_id"]').val();
+        let existRow = $('#editFolderPermissionModal').find('#employeeFolderPermission_'+employee_id).length;
+        
+        if(existRow == 0){
             axios({
                 method: "post",
                 url: route('file.manager.get.employee.permission.set'),
-                data: {employee_id : employee_id},
+                data: {employee_id : employee_id, folder_id : (folder_id > 0 ? folder_id : 0)},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                $('#addFolderModal .leaveTableLoader').removeClass('active');
+                $('#editFolderPermissionModal .leaveTableLoader').removeClass('active');
                 if (response.status == 200) {
                     let res = response.data.res;
-                    $('#addFolderForm .folderPermissionTable').find('.noticeTr').fadeOut('fast', function(){
-                        $('#addFolderForm .folderPermissionTable tbody').append(res);
+                    $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeOut('fast', function(){
+                        $('#editFolderPermissionModal .folderPermissionTable tbody').append(res);
                     });
 
                     createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
                 }
             }).catch(error => {
-                $('#addFolderModal .leaveTableLoader').removeClass('active');
+                $('#editFolderPermissionModal .leaveTableLoader').removeClass('active');
                 if (error.response) {
                     console.log('error');
                 }
             });
-        });
-        employeeIDS.on('item_remove', function(employee_id, item){
-            let $theTr = $('#addFolderModal #employeeFolderPermission_'+employee_id);
-            $theTr.remove();
+        }
+    });
+    editEmployeeIds.on('item_remove', function(employee_id, item){
+        let $theTr = $('#editFolderPermissionModal #employeeFolderPermission_'+employee_id);
+        $theTr.remove();
 
-            var permissionTrLength = $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').length;
-            if(permissionTrLength == 0){
+        var permissionTrLength = $('#editFolderPermissionModal .folderPermissionTable').find('.permissionEmployeeRow').length;
+        if(permissionTrLength == 0){
+            $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeIn();
+        }else{
+            $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeOut();
+        }
+    });
+
+    $('#addFolderModal #permission_inheritence').on('change', function(){
+        if($(this).prop('checked')){
+            $('#addFolderModal .permission_inheritence_label').html('Yes');
+            $('#addFolderModal .permissionWrap').fadeOut('fast', function(){
+                $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').remove();
                 $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeIn();
-            }else{
-                $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeOut();
-            }
-        });
-    }
-
-    if($('#edit_employee_ids').length > 0){
-        editEmployeeIds.on('item_add', function(employee_id, item){
-            let folder_id = $('#editFolderPermissionModal [name="folder_id"]').val();
-            let existRow = $('#editFolderPermissionModal').find('#employeeFolderPermission_'+employee_id).length;
-            
-            if(existRow == 0){
-                axios({
-                    method: "post",
-                    url: route('file.manager.get.employee.permission.set'),
-                    data: {employee_id : employee_id, folder_id : (folder_id > 0 ? folder_id : 0)},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    $('#editFolderPermissionModal .leaveTableLoader').removeClass('active');
-                    if (response.status == 200) {
-                        let res = response.data.res;
-                        $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeOut('fast', function(){
-                            $('#editFolderPermissionModal .folderPermissionTable tbody').append(res);
-                        });
-
-                        createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
-                    }
-                }).catch(error => {
-                    $('#editFolderPermissionModal .leaveTableLoader').removeClass('active');
-                    if (error.response) {
-                        console.log('error');
-                    }
-                });
-            }
-        });
-        editEmployeeIds.on('item_remove', function(employee_id, item){
-            let $theTr = $('#editFolderPermissionModal #employeeFolderPermission_'+employee_id);
-            $theTr.remove();
-
-            var permissionTrLength = $('#editFolderPermissionModal .folderPermissionTable').find('.permissionEmployeeRow').length;
-            if(permissionTrLength == 0){
-                $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeIn();
-            }else{
-                $('#editFolderPermissionModal .folderPermissionTable').find('.noticeTr').fadeOut();
-            }
-        });
-    }
-
+                employeeIDS.clear(true);
+            });
+        }else{
+            $('#addFolderModal .permission_inheritence_label').html('No');
+            $('#addFolderModal .permissionWrap').fadeIn('fast', function(){
+                $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').remove();
+                $('#addFolderModal .folderPermissionTable').find('.noticeTr').fadeIn();
+                employeeIDS.clear(true);
+            });
+        }
+    })
 
     $('#addFolderModal').on('change', '.documentRoleAndPermission', function(e){
         let $thePermission = $(this);
@@ -322,14 +332,13 @@ var fileVersionHistoryListTable = (function () {
         e.preventDefault();
         var $form = $(this);
         const form = document.getElementById('addFolderForm');
-        var parent_id = $form.find('input[name="parent_id"]').val();
     
         document.querySelector('#createFolder').setAttribute('disabled', 'disabled');
         document.querySelector("#createFolder svg").style.cssText ="display: inline-block;";
 
         var userLengt = $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').length;
 
-        if(userLengt == 0 && parent_id == 0){
+        if(userLengt == 0 && !$('#addFolderForm #permission_inheritence').prop('checked')){
             $form.find('.modError').remove();
             $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
             
@@ -631,10 +640,17 @@ var fileVersionHistoryListTable = (function () {
     const addFileModalEl = document.getElementById('addFileModal')
     addFileModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addFileModal .acc__input-error').html('');
-        $('#addFileModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
+        $('#addFileModal .modal-body input:not([type="checkbox"])').val('');
         $('#addFileModal .modal-body textarea').val('');
         $('#addFileModal #addDocumentName').html('');
-        $('#addFileModal input#file_type_1').prop('checked', true);
+
+        $('#addFileModal .modal-body input[name="file_permission_inheritence"]').prop('checked', true);
+        $('#addFileModal .file_permission_inheritence_label').html('Yes');
+        $('#addFileModal .filePermissionWrap').fadeOut('fast', function(){
+            $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+            fileEmployeeIds.clear(true);
+        });
     });
 
     const editFileModalEl = document.getElementById('editFileModal')
@@ -656,9 +672,7 @@ var fileVersionHistoryListTable = (function () {
     editFilePermissionModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editFilePermissionModal .filePermissionTable').find('.permissionEmployeeRow').remove();
         $('#editFilePermissionModal .filePermissionTable').find('.noticeTr').fadeIn();
-        if($('#edit_file_employee_ids').length > 0){
-            editFileEmployeeIds.clear(true);
-        }
+        editFileEmployeeIds.clear(true);
 
         $('#editFilePermissionModal .modal-footer input[name="document_info_id"]').val('0');
     });
@@ -685,86 +699,97 @@ var fileVersionHistoryListTable = (function () {
         return false;
     };
 
-    if($('#edit_file_employee_ids').length > 0){
-        editFileEmployeeIds.on('item_add', function(employee_id, item){
-            let existRow = $('#editFilePermissionModal').find('#employeeFolderPermission_'+employee_id).length;
-            
-            if(existRow == 0){
-                axios({
-                    method: "post",
-                    url: route('file.manager.get.employee.permission.set'),
-                    data: {employee_id : employee_id},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    $('#editFilePermissionModal .leaveTableLoader').removeClass('active');
-                    if (response.status == 200) {
-                        let res = response.data.res;
-                        $('#editFilePermissionForm .filePermissionTable').find('.noticeTr').fadeOut('fast', function(){
-                            $('#editFilePermissionForm .filePermissionTable tbody').append(res);
-                        });
-
-                        createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
-                    }
-                }).catch(error => {
-                    $('#editFilePermissionModal .leaveTableLoader').removeClass('active');
-                    if (error.response) {
-                        console.log('error');
-                    }
-                });
-            }
-        });
-
-        editFileEmployeeIds.on('item_remove', function(employee_id, item){
-            let $theTr = $('#editFilePermissionModal #employeeFolderPermission_'+employee_id);
-            $theTr.remove();
-
-            var permissionTrLength = $('#editFilePermissionModal .filePermissionTable').find('.permissionEmployeeRow').length;
-            if(permissionTrLength == 0){
-                $('#editFilePermissionModal .filePermissionTable').find('.noticeTr').fadeIn();
-            }else{
-                $('#editFilePermissionModal .filePermissionTable').find('.noticeTr').fadeOut();
-            }
-        });
-    }
-
-    let currentRequest = null;
-    $('.tag_search').on('keyup', function(e){
-        e.preventDefault();
-        var $theSearch = $(this);
-        var $theFilterWrap = $theSearch.parent('.fileTagsWrap');
-        var $theDropdown = $theSearch.siblings('.autoFillDropdown');
-
-        var query = $theSearch.val();
-        if(query.length >= 3){
-            currentRequest = $.ajax({
-                type: 'POST',
-                data: {query : query},
-                url: route("file.manager.search.tags"),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                beforeSend : function()    {           
-                    if(currentRequest != null) {
-                        currentRequest.abort();
-                        $theDropdown.fadeOut().html('');
-                    }
-                },
-                success: function(data) {
-                    $('.summarySearchResultWrap').fadeIn().html(data.res);
-
-                    createIcons({
-                        icons,
-                        "stroke-width": 1.5,
-                        nameAttr: "data-lucide",
-                    });
-                },
-                error:function(e){
-                    console.log('Error');
-                }
+    $('#addFileModal #file_permission_inheritence').on('change', function(){
+        if($(this).prop('checked')){
+            $('#addFileModal .file_permission_inheritence_label').html('Yes');
+            $('#addFileModal .filePermissionWrap').fadeOut('fast', function(){
+                $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+                $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+                fileEmployeeIds.clear(true);
             });
         }else{
-            $theDropdown.fadeOut().html('');
-            if(currentRequest != null) {
-                currentRequest.abort();
+            $('#addFileModal .file_permission_inheritence_label').html('No');
+            $('#addFileModal .filePermissionWrap').fadeIn('fast', function(){
+                $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').remove();
+                $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+                fileEmployeeIds.clear(true);
+            });
+        }
+    });
+
+    fileEmployeeIds.on('item_add', function(employee_id, item){
+        axios({
+            method: "post",
+            url: route('file.manager.get.employee.permission.set'),
+            data: {employee_id : employee_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (response.status == 200) {
+                let res = response.data.res;
+                $('#addFileForm .filePermissionTable').find('.noticeTr').fadeOut('fast', function(){
+                    $('#addFileForm .filePermissionTable tbody').append(res);
+                });
+
+                createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
             }
+        }).catch(error => {
+            $('#addFileModal .leaveTableLoader').removeClass('active');
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+
+    fileEmployeeIds.on('item_remove', function(employee_id, item){
+        let $theTr = $('#addFileModal #employeeFolderPermission_'+employee_id);
+        $theTr.remove();
+
+        var permissionTrLength = $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').length;
+        if(permissionTrLength == 0){
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeIn();
+        }else{
+            $('#addFileModal .filePermissionTable').find('.noticeTr').fadeOut();
+        }
+    });
+
+    editFileEmployeeIds.on('item_add', function(employee_id, item){
+        let existRow = $('#editFilePermissionModal').find('#employeeFolderPermission_'+employee_id).length;
+        
+        if(existRow == 0){
+            axios({
+                method: "post",
+                url: route('file.manager.get.employee.permission.set'),
+                data: {employee_id : employee_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('#editFilePermissionModal .leaveTableLoader').removeClass('active');
+                if (response.status == 200) {
+                    let res = response.data.res;
+                    $('#editFilePermissionForm .filePermissionTable').find('.noticeTr').fadeOut('fast', function(){
+                        $('#editFilePermissionForm .filePermissionTable tbody').append(res);
+                    });
+
+                    createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+                }
+            }).catch(error => {
+                $('#editFilePermissionModal .leaveTableLoader').removeClass('active');
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }
+    });
+
+    editFileEmployeeIds.on('item_remove', function(employee_id, item){
+        let $theTr = $('#editFilePermissionModal #employeeFolderPermission_'+employee_id);
+        $theTr.remove();
+
+        var permissionTrLength = $('#editFilePermissionModal .filePermissionTable').find('.permissionEmployeeRow').length;
+        if(permissionTrLength == 0){
+            $('#editFilePermissionModal .filePermissionTable').find('.noticeTr').fadeIn();
+        }else{
+            $('#editFilePermissionModal .filePermissionTable').find('.noticeTr').fadeOut();
         }
     });
 
@@ -1394,7 +1419,6 @@ var fileVersionHistoryListTable = (function () {
         let read = $(this).attr('data-metar');
         let update = $(this).attr('data-metau');
         let del = $(this).attr('data-metad');
-        let parent = $(this).attr('data-parent');
 
         $('.fileDropdown').hide();
         if(create == 1 || update == 1 || read == 1 || del == 1){
@@ -1407,7 +1431,7 @@ var fileVersionHistoryListTable = (function () {
                     $('.folderDropdown').find('li.editFolderLink a').attr('data-id', '0');
                 })
             }
-            if(create == 1 && update == 1 && parent == 0){
+            if(create == 1 && update == 1){
                 $('.folderDropdown').find('li.editFolderPermissionLink').show('fast', function(){
                     $('.folderDropdown').find('li.editFolderPermissionLink a').attr('data-id', id);
                 })
@@ -1428,8 +1452,8 @@ var fileVersionHistoryListTable = (function () {
 
             $('.folderDropdown').css({
                 display: "block",
-                left: e.clientX+'px',
-                top: e.clientY+'px'
+                left: e.pageX+'px',
+                top: e.pageY+'px'
             });
         }
         return false;
@@ -1491,7 +1515,7 @@ var fileVersionHistoryListTable = (function () {
                     $('.fileDropdown').find('li.versionHistoryLink a').attr('data-id', '0').attr('data-name', '');
                 })
             }
-            /*if(create == 1 && update == 1 && read == 1){
+            if(create == 1 && update == 1 && read == 1){
                 $('.fileDropdown').find('li.editPermissionLink').show('fast', function(){
                     $('.fileDropdown').find('li.editPermissionLink a').attr('data-id', id).attr('data-name', name);
                 })
@@ -1499,7 +1523,7 @@ var fileVersionHistoryListTable = (function () {
                 $('.fileDropdown').find('li.editPermissionLink').hide('fast', function(){
                     $('.fileDropdown').find('li.editPermissionLink a').attr('data-id', '0').attr('data-name', '');
                 })
-            }*/
+            }
             if(create == 1 && update == 1){
                 $('.fileDropdown').find('li.reminderLink').show('fast', function(){
                     $('.fileDropdown').find('li.reminderLink a').attr('data-id', id).attr('data-name', name);
@@ -1522,8 +1546,8 @@ var fileVersionHistoryListTable = (function () {
             
             $('.fileDropdown').css({
                 display: "block",
-                left: e.clientX+'px',
-                top: e.clientY+'px'
+                left: e.pageX+'px',
+                top: e.pageY+'px'
             });
         }
         return false;
@@ -1535,11 +1559,6 @@ var fileVersionHistoryListTable = (function () {
     $('.fileDropdown li a').on('click', function(e){
         var  f = $(this);
     });
-
-    $(window).on('scroll', function(){
-        $('.fileDropdown').hide();
-        $('.folderDropdown').hide();
-    })
 
 
     $('.fileManagerViewToggle > button').on('click', function(e){

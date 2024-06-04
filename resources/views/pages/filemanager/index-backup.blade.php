@@ -8,29 +8,17 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">File Manager</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            @if(($parent_id > 0 && (isset($root_permission->role->create) && $root_permission->role->create == 1)) || auth()->user()->id == 1)
+            @if(($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1)) || auth()->user()->id == 1)
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFolderModal" class="add_btn btn btn-primary shadow-md mr-2">New Folder</button>
             @endif
-            @if($parent_id > 0 && (isset($root_permission->role->create) && $root_permission->role->create == 1))
+            @if($parent_id > 0 && (isset($theFolder->folder_permission->create) && $theFolder->folder_permission->create == 1))
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFileModal" class="add_btn btn btn-primary shadow-md mr-2">Upload File</button>
-            @endif
-            @if($folders->count() > 0 || $files->count() > 0)
-            <div class="btnGroup fileManagerViewToggle inline-flex bg-slate-100 border rounded shadow-md">
-                <button type="button" class="btn-grid active"><i data-lucide="layout-grid" class="w-5 h-5"></i></button>
-                <button type="button" class="btn-list"><i data-lucide="list" class="w-5 h-5"></i></button>
-            </div>
             @endif
         </div>
     </div>
     <div class="intro-y box p-5 mt-5">
-        @if($folders->count() > 0 || $files->count() > 0)
-        <div class="folderGridWrap activeGrid">
-            <div class="activeListHeader">
-                <div class="font-medium uppercase fileNameCol">Name</div>
-                <div class="font-medium uppercase fileUpdateCol">Last Modified</div>
-                <div class="font-medium uppercase fileOwnedCol">Owned By</div>
-            </div>
-            @if(!empty($folders) && $folders->count() > 0)
+        <div class="folderGridWrap">
+            @if(!empty($folders))
                 @foreach($folders as $folder)
                     @php 
                         $parameters = (!empty($params) ? explode('/', $params) : []);
@@ -38,157 +26,98 @@
 
                         $parameters = implode('/', $parameters);
                     @endphp
-                    <div data-id="{{ $folder->id }}" 
-                        data-name="{{ $folder->name }}" 
-                        data-href="{{ route('file.manager', $parameters) }}" class="fileFolderWrap cursor-pointer folderWrap" 
-                        data-metac="{{ (isset($root_permission->role->create) ? $root_permission->role->create : ($parent_id == 0 && isset($folder->folder_permission->create) ? $folder->folder_permission->create : 0)) }}"
-                        data-metar="{{ (isset($root_permission->role->read) ? $root_permission->role->read : ($parent_id == 0 && isset($folder->folder_permission->read) ? $folder->folder_permission->read : 0)) }}"
-                        data-metau="{{ (isset($root_permission->role->update) ? $root_permission->role->update : ($parent_id == 0 && isset($folder->folder_permission->update) ? $folder->folder_permission->update : 0)) }}"
-                        data-metad="{{ (isset($root_permission->role->delete) ? $root_permission->role->delete : ($parent_id == 0 && isset($folder->folder_permission->delete) ? $folder->folder_permission->delete : 0)) }}" 
-                        data-parent="{{ $parent_id }}" 
-                        >
+                    <div data-href="{{ route('file.manager', $parameters) }}" class="intro-y cursor-pointer folderWrap">
                         <div class="folderItem gridItems filesFoldersBox text-center">
-                            <div class="fileFolderImg">
-                                <img src="{{ asset('build/assets/images/file_icons/folder.png') }}" alt="{{ $folder->name }}"/>
-                            </div>
+                            <img src="{{ asset('build/assets/images/file_icons/folder.png') }}" alt="{{ $folder->name }}"/>
                             <h5>{{ $folder->name }}</h5>
-                            <span class="fileFolderUpdated">{{ (!empty($folder->updated_at) ? date('jS F, Y', strtotime($folder->updated_at)) : date('jS F, Y', strtotime($folder->created_at))) }}</span>
-                            @if(isset($root->folder_admins) && !empty($root->folder_admins))
-                                <div class="ownedBy">
-                                    <div class="flex">
-                                        @foreach($root->folder_admins as $admin)
-                                            @if(isset($admin['photo_url']) && !empty($admin['photo_url']))
-                                            <div class="w-8 h-8 image-fit zoom-in {{ (!$loop->first ? '-ml-5' : '') }}">
-                                                <img title="{{ $admin['full_name'] }}" alt="{{ $admin['full_name'] }}" class="tooltip rounded-full" src="{{ $admin['photo_url'] }}">
-                                            </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle w-5 h-5 block -mr-2" type="button" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="more-vertical" class="dropdownSVG w-5 h-5 text-slate-500"></i>
+                                </button>
+                                <div class="dropdown-menu w-40" id="_f12z2ubls">
+                                    <ul class="dropdown-content">
+                                        <li>
+                                            <a data-id="{{ $folder->id }}" data-tw-toggle="modal" data-tw-target="#editFolderModal" href="javascript:void(0);" class="editFolder dropdown-item">
+                                                <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit Folder
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $folder->id }}" data-tw-toggle="modal" data-tw-target="#editFolderPermissionModal" href="javascript:void(0);" class="editPermission dropdown-item">
+                                                <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $folder->id }}" href="javascript:void(0);" class="deleteFolder dropdown-item">
+                                                <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete Folder
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                            @else
-                                <div class="ownedBy"></div>
-                            @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach
             @endif
-            @if(!empty($files) && $files->count() > 0)
+            @if($files->count() > 0)
                 @foreach($files as $theFile)
                     @php 
                         $currentFileName = explode('.', $theFile->current_file_name);
                         $fileExtension = end($currentFileName);
                     @endphp
-                    <div 
-                        data-id="{{ $theFile->id }}" 
-                        data-name="{{ $theFile->display_file_name }}" 
-                        data-url="{{ (isset($theFile->download_url) ? $theFile->download_url : '') }}"
-                        data-metac="{{ (isset($root_permission->role->create) ? $root_permission->role->create : 0) }}"
-                        data-metar="{{ (isset($root_permission->role->read) ? $root_permission->role->read : 0) }}"
-                        data-metau="{{ (isset($root_permission->role->update) ? $root_permission->role->update : 0) }}"
-                        data-metad="{{ (isset($root_permission->role->delete) ? $root_permission->role->delete : 0) }}" 
-                        data-parent="{{ $parent_id }}" 
-
-                        data-href="{{ ($theFile->download_url ? $theFile->download_url : '') }}" 
-                        class="fileFolderWrap cursor-pointer fileWrap"
-                        >
+                    <div data-href="{{ ($theFile->download_url ? $theFile->download_url : '') }}" class="intro-y cursor-pointer fileWrap">
                         <div class="fileItem gridItems filesFoldersBox text-center">
-                            <div class="fileFolderImg">
-                                <img src="{{ asset('build/assets/images/file_icons/'.strtolower($fileExtension).'.png') }}" alt="{{ $theFile->display_file_name }}"/>
-                            </div>
+                            <img src="{{ asset('build/assets/images/file_icons/'.strtolower($fileExtension).'.png') }}" alt="{{ $theFile->display_file_name }}"/>
                             <h5>{{ $theFile->display_file_name }}</h5>
-                            <span class="fileFolderUpdated">{{ (!empty($theFile->updated_at) ? date('jS F, Y', strtotime($theFile->updated_at)) : date('jS F, Y', strtotime($theFile->created_at))) }}</span>
-                            @if(isset($root->folder_admins) && !empty($root->folder_admins))
-                                <div class="ownedBy">
-                                    <div class="flex">
-                                        @foreach($root->folder_admins as $admin)
-                                            @if(isset($admin['photo_url']) && !empty($admin['photo_url']))
-                                            <div class="w-8 h-8 image-fit zoom-in {{ (!$loop->first ? '-ml-5' : '') }}">
-                                                <img title="{{ $admin['full_name'] }}" alt="{{ $admin['full_name'] }}" class="tooltip rounded-full" src="{{ $admin['photo_url'] }}">
-                                            </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle w-5 h-5 block -mr-2" type="button" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="more-vertical" class="dropdownSVG w-5 h-5 text-slate-500"></i>
+                                </button>
+                                <div class="dropdown-menu w-48" >
+                                    <ul class="dropdown-content">
+                                        <li>
+                                            <a {{ ($theFile->download_url ? 'download' : '') }} href="{{ ($theFile->download_url ? $theFile->download_url : 'javascript:void(0);') }}" class="downloadDoc dropdown-item">
+                                                <i data-lucide="download-cloud" class="text-success w-4 h-4 mr-2"></i> Download
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#editFileModal" href="javascript:void(0);" class="editFile dropdown-item">
+                                                <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit File
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#uploadFileVersionModal" href="javascript:void(0);" class="uploadNewVersion dropdown-item">
+                                                <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
+                                                <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#editFilePermissionModal" href="javascript:void(0);" class="editFilePermission dropdown-item">
+                                                <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" data-name="{{ $theFile->display_file_name }}" data-tw-toggle="modal" data-tw-target="#fileReminderModal" href="javascript:void(0);" class="fileReminderBtn dropdown-item">
+                                                <i data-lucide="bell" class="text-info w-4 h-4 mr-2"></i> Reminder
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-id="{{ $theFile->id }}" href="javascript:void(0);" class="deleteFile dropdown-item">
+                                                <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete File
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                            @else
-                                <div class="ownedBy"></div>
-                            @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach
             @endif
-
         </div>
-        @else 
-        <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
-            <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <div><strong>Oops!</strong> The directory is empty.</div>
-        </div>
-        @endif
     </div>
-
-    <!-- BEGIN: Folder Dropdown Start -->
-    <div class="dropdown-menu folderDropdown w-40">
-        <ul class="dropdown-content">
-            <li class="editFolderLink">
-                <a data-id="0" data-tw-toggle="modal" data-tw-target="#editFolderModal" href="javascript:void(0);" class="editFolder dropdown-item">
-                    <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit Folder
-                </a>
-            </li>
-            <li class="editFolderPermissionLink">
-                <a data-id="0" data-tw-toggle="modal" data-tw-target="#editFolderPermissionModal" href="javascript:void(0);" class="editPermission dropdown-item">
-                    <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
-                </a>
-            </li>
-            <li class="deleteFolderLink">
-                <a data-name="" data-id="0" href="javascript:void(0);" class="deleteFolder dropdown-item">
-                    <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete Folder
-                </a>
-            </li>
-        </ul>
-    </div>
-    <!-- BEGIN: Folder Dropdown End -->
-
-    <!-- BEGIN: File Dropdown Start -->
-    <div class="dropdown-menu fileDropdown w-48" >
-        <ul class="dropdown-content">
-            <li class="downloadLink">
-                <a href="" class="downloadDoc dropdown-item">
-                    <i data-lucide="download-cloud" class="text-success w-4 h-4 mr-2"></i> Download
-                </a>
-            </li>
-            <li class="editFileLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#editFileModal" href="javascript:void(0);" class="editFile dropdown-item">
-                    <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit File
-                </a>
-            </li>
-            <li class="uploadVersionLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#uploadFileVersionModal" href="javascript:void(0);" class="uploadNewVersion dropdown-item">
-                    <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
-                </a>
-            </li>
-            <li class="versionHistoryLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
-                    <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
-                </a>
-            </li>
-            {{--<li class="editPermissionLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#editFilePermissionModal" href="javascript:void(0);" class="editFilePermission dropdown-item">
-                    <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
-                </a>
-            </li>--}}
-            <li class="reminderLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileReminderModal" href="javascript:void(0);" class="fileReminderBtn dropdown-item">
-                    <i data-lucide="bell" class="text-info w-4 h-4 mr-2"></i> Reminder
-                </a>
-            </li>
-            <li class="deleteFileLink">
-                <a data-name="" data-id="0" href="javascript:void(0);" class="deleteFile dropdown-item">
-                    <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete File
-                </a>
-            </li>
-        </ul>
-    </div>
-    <!-- BEGIN: File Dropdown End -->
-
 
     <!-- BEGIN: File Reminder Modal -->
     <div id="fileReminderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -409,10 +338,10 @@
                                 </label>
                                 <div class="acc__input-error error-document text-danger mt-2"></div>
                             </div>
-                            {{--<div class="col-span-12">
+                            <div class="col-span-12">
                                 <label for="linked_document" class="form-label">Linked Document </label>
                                 <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
-                            </div>--}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -519,10 +448,10 @@
                                 </label>
                                 <div class="acc__input-error error-document text-danger mt-2"></div>
                             </div>
-                            {{--<div class="col-span-6">
+                            <div class="col-span-6">
                                 <label for="linked_document" class="form-label">Linked Document </label>
                                 <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
-                            </div>--}}
+                            </div>
                             <div class="col-span-6">
                                 <label for="name" class="form-label">Document Name <span class="text-danger">*</span></label>
                                 <input id="name" type="text" name="name" class="form-control w-full">
@@ -532,44 +461,50 @@
                                 <label for="expire_at" class="form-label">Exipiry Date</label>
                                 <input id="expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
-                            <div class="col-span-6">
-                                <label for="file_type" class="form-label">File Type</label>
-                                <div class="flex flex-col sm:flex-row">
-                                    <div class="form-check mr-2">
-                                        <input checked id="file_type_1" class="form-check-input" type="radio" name="file_type" value="1">
-                                        <label class="form-check-label" for="file_type_1">Public</label>
-                                    </div>
-                                    <div class="form-check mr-2 mt-2 sm:mt-0">
-                                        <input id="file_type_2" class="form-check-input" type="radio" name="file_type" value="2">
-                                        <label class="form-check-label" for="file_type_2">Private</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 pt-2">
+                            <div class="col-span-12">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea id="description" name="description" class="form-control w-full" rows="4"></textarea>
                             </div>
-                            <div class="col-span-12 pt-2">
-                                <label for="tag_ids" class="form-label">Tags</label>
-                                <div class="fileTagsWrap border rounded relative">
-                                    <div class="fileTag">
-                                        <span>Web Design</span>
-                                        <button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                        <input type="hidden" name="tag_ids[]" value=""/>
-                                    </div>
-                                    <div class="fileTag">
-                                        <span>Web Design</span>
-                                        <button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                        <input type="hidden" name="tag_ids[]" value=""/>
-                                    </div>
-                                    <input type="text" name="tag_search" class="tag_search"/>
-                                    <ul class="autoFillDropdown">
-                                        <li><a href="1" class="dropdown-item">UI/UX</a></li>
-                                        <li><a href="1" class="dropdown-item">Web Design</a></li>
-                                        <li><a href="1" class="dropdown-item">Web Development</a></li>
-                                        <li><a href="1" class="dropdown-item">Mobile App</a></li>
-                                    </ul>
-                                </div>
+                        </div>
+                        <div class="mt-3 filePermissionSwitchWrap mb-3">
+                            <label for="name" class="form-label">Inherit Permission</label>
+                            <div class="form-check form-switch">
+                                <input checked id="file_permission_inheritence" name="file_permission_inheritence" value="1" class="form-check-input" type="checkbox">
+                                <label class="form-check-label file_permission_inheritence_label" for="permission_inheritence">Yes</label>
+                            </div>
+                        </div>
+                        <div class="filePermissionWrap pt-2" style="display: none;">
+                            <div>
+                                <label for="file_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                <select name="employee_ids[]" id="file_employee_ids" class="w-full tom-selects" multiple>
+                                    @if(!empty($employee))
+                                        @foreach($employee as $emp)
+                                            <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-employees text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3">
+                                <table class="table table-bordered table-sm filePermissionTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>Role</th>
+                                            <th class="text-center">Create</th>
+                                            <th class="text-center">Read</th>
+                                            <th class="text-center">Update</th>
+                                            <th class="text-center">Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="noticeTr">
+                                            <td colspan="6">
+                                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please select employee and assign role.</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -716,7 +651,7 @@
 
     <!-- BEGIN: Add Folder Modal -->
     <div id="addFolderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog {{ $parent_id == 0 ? 'modal-xl' : '' }}">
+        <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addFolderForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -731,8 +666,14 @@
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
-                        @if($parent_id == 0)
-                        <div class="permissionWrap">
+                        <div class="mt-3 permissionSwitchWrap">
+                            <label for="name" class="form-label">Inherit Permission</label>
+                            <div class="form-check form-switch">
+                                <input {{ $parent_id == 0 ? '' : 'checked' }} id="permission_inheritence" name="permission_inheritence" value="1" class="form-check-input" type="checkbox">
+                                <label class="form-check-label permission_inheritence_label" for="permission_inheritence">Yes</label>
+                            </div>
+                        </div>
+                        <div class="permissionWrap" style="display: {{ $parent_id == 0 ? 'block' : 'none' }};">
                             <div class="mt-3">
                                 <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
                                 <select name="employee_ids[]" id="employee_ids" class="w-full tom-selects" multiple>
@@ -766,7 +707,6 @@
                                 </table>
                             </div>
                         </div>
-                        @endif
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

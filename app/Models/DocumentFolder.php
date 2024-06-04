@@ -11,6 +11,8 @@ class DocumentFolder extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = ['folder_admins', 'folder_permission'];
+
     protected $fillable = [
         'parent_id',
         'name',
@@ -49,5 +51,18 @@ class DocumentFolder extends Model
         else:
             return false;
         endif;
+    }
+
+    public function getFolderAdminsAttribute(){
+        $res = [];
+        $folderPermission = DocumentFolderPermission::where('document_folder_id', $this->id)->where('document_role_and_permission_id', 1)->get();
+        if(!empty($folderPermission)):
+            foreach($folderPermission as $permission):
+                $res[$permission->id]['full_name'] = (isset($permission->employee->full_name) && !empty($permission->employee->full_name) ? $permission->employee->full_name : 'Unknown');
+                $res[$permission->id]['photo_url'] = (isset($permission->employee->photo_url) && !empty($permission->employee->photo_url) ? $permission->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'));
+            endforeach;
+        endif;
+
+        return $res;
     }
 }
