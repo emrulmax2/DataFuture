@@ -17,7 +17,6 @@
                         
                             <option value="Pass">Pass</option>
                             <option value="Fail">Fail</option>
-                            <option value="Unattainded">Unattainded</option>
                             
                     </select>
                     <div id="error-interview_result" class="interview_result__input-error error-user text-danger mt-2"></div>

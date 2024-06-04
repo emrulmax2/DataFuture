@@ -559,6 +559,8 @@ $(document).on("click", ".interview-end", function (e) {
                     succModal.hide();
                     window.location.reload();
                 }, 1500);
+                $("#magic-button2").addClass('hidden');
+                $("#magic-button3").removeClass('hidden');
             }else{
                 //console.log(errorResponse);
                 errorModal.show();
@@ -567,11 +569,13 @@ $(document).on("click", ".interview-end", function (e) {
                     $("#errorModal .errorModalDesc").html(errorResponse.message);
                     $("#errorModal .errorCloser").attr('data-action', 'DISMISS');
                 });
+                $("#magic-button3").addClass('hidden');
+                $("#magic-button2").removeClass('hidden');
                 //window.location.reload();
                 setTimeout(function(){
                     errorModal.hide();
                     window.location.reload();
-                }, 2000);
+                }, 1500);
                 drzn1.removeAllFiles(true);
             }
         })
@@ -597,8 +601,6 @@ $(document).on("click", ".interview-end", function (e) {
                     }, 3000)
                 }
                 
-                $("#magic-button2").addClass('hidden');
-                $("#magic-button3").removeClass('hidden');
             }else{
                 document.querySelector('#update').removeAttribute('disabled');
                 document.querySelector("#update svg").style.cssText ="display: none;";
@@ -652,10 +654,8 @@ $(document).on("click", ".interview-end", function (e) {
                             $('#successModal .successModalTitle').html('Done!');
                             $('#successModal .successModalDesc').html('Uploaded interview file successfully deleted!');
                         });
-                        $('#magic-button3').removeClass('show')
-                        $('#magic-button3').addClass('hidden')
-                        $('#magic-button2').removeClass('hidden')
-                        $('#magic-button2').addClass('show')
+                        
+
                     }
                     document.getElementById('fileLoadedView').innerHTML='<i data-lucide="slash" class="w-5 h-5"></i>';
                     createIcons({
@@ -663,6 +663,10 @@ $(document).on("click", ".interview-end", function (e) {
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+                    $('#magic-button3').removeClass('show')
+                    $('#magic-button3').addClass('hidden')
+                    $('#magic-button2').removeClass('hidden')
+                    $('#magic-button2').addClass('show')
                 }).catch(error =>{
                     console.log(error)
                 });
