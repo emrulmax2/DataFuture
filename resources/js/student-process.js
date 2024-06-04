@@ -539,7 +539,7 @@ var studentInterviewLogTable = (function () {
 
     const uploadTaskDocumentModalEl = document.getElementById('uploadTaskDocumentModal')
     uploadTaskDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#uploadTaskDocumentModal input[type="student_task_id"]').val('0');
+        $('#uploadTaskDocumentModal input[name="student_task_id"]').val('0');
         //drzn.removeAllFiles();
     });
 

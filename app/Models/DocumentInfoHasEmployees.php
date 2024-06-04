@@ -16,4 +16,16 @@ class DocumentInfoHasEmployees extends Model
         'employee_id',
         'document_role_and_permission_id'
     ];
+
+    public function info(){
+        return $this->belongsTo(DocumentInfo::class, 'document_info_id');
+    }
+
+    public function role(){
+        return $this->belongsTo(DocumentRoleAndPermission::class, 'document_role_and_permission_id');
+    }
+
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 }

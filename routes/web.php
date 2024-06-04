@@ -2328,6 +2328,10 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/update-task-status', 'updateTaskStatus')->name('task.manager.update.task.status'); 
         Route::get('task-manager/download-task-students-list', 'downloadTaskStudentListExcel')->name('task.manager.students.list.excel'); 
         Route::post('task-manager/canceled-task', 'canceledTask')->name('task.manager.canceled.task'); 
+
+        Route::post('task-manager/upload-task-documents', 'uploadTaskDocument')->name('task.manager.upload.document');
+        Route::post('task-manager/task-outcome-statuses', 'taskOutcomeStatuses')->name('task.manager.outcome.statuses');
+        Route::post('task-manager/update-task-outcome', 'updateTaskOutcome')->name('task.manager.update.outcome');
     });
 
     Route::controller(AssignController::class)->group(function() {
@@ -2522,12 +2526,21 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/update-folder', 'updateFolder')->name('file.manager.update.folder'); 
         Route::post('file-manager/edit-folder-permission', 'editFolderPermission')->name('file.manager.edit.folder.permission'); 
         Route::post('file-manager/update-folder-permission', 'updateFolderPermission')->name('file.manager.update.folder.permission'); 
+        Route::delete('file-manager/destroy-folder', 'destroyFolder')->name('file.manager.destroy.folder'); 
 
         Route::post('file-manager/upload-file', 'uploadFile')->name('file.manager.upload.file'); 
         Route::post('file-manager/get-file-data', 'getFileData')->name('file.manager.get.file.data'); 
         Route::post('file-manager/update-file', 'updateFile')->name('file.manager.update.file'); 
         Route::post('file-manager/upload-new-version', 'uploadNewVersion')->name('file.manager.upload.new.version'); 
-        Route::get('file-manager/file-version-history', 'fileVersionHistory')->name('file.manager.file.version.history'); 
+        Route::post('file-manager/file-version-history-list', 'fileVersionHistoryList')->name('file.manager.file.version.history'); 
+        Route::post('file-manager/file-restore-version', 'fileRestoreVersion')->name('file.manager.file.restore.version'); 
+        Route::post('file-manager/edit-file-permission', 'editFilePermission')->name('file.manager.edit.file.permission'); 
+        Route::post('file-manager/update-file-permission', 'updateFilePermission')->name('file.manager.update.file.permission'); 
+        Route::post('file-manager/store-file-reminder', 'storeFileReminder')->name('file.manager.store.file.reminder'); 
+        Route::post('file-manager/edit-file-reminder', 'editFileReminder')->name('file.manager.edit.file.reminder'); 
+        Route::delete('file-manager/destroy-file', 'destroyFile')->name('file.manager.destroy.file'); 
+
+        Route::delete('file-manager/search-tags', 'searchTags')->name('file.manager.search.tags'); 
     });
 
     Route::controller(CommunicationTemplateController::class)->group(function() {

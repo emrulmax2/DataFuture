@@ -44,10 +44,18 @@ class DocumentInfo extends Model
     }
 
     public function setExpireAtAttribute($value) {  
-        $this->attributes['expire_at'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['expire_at'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getDateOfBirthAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function permission(){
+        return $this->hasMany(DocumentInfoHasEmployees::class, 'document_info_id', 'id');
+    }
+
+    public function admins(){
+        return $this->hasMany(DocumentInfoHasEmployees::class, 'document_info_id', 'id')->where('document_role_and_permission_id', 1);
     }
 }

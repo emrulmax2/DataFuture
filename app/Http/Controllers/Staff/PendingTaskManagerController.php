@@ -10,8 +10,10 @@ use App\Http\Requests\TaskCanceledReasonRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
+use App\Models\ApplicantDocument;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantTask;
+use App\Models\ApplicantTaskDocument;
 use App\Models\ApplicantTaskLog;
 use App\Models\ApplicantViewUnlock;
 use App\Models\ComonSmtp;
@@ -20,16 +22,20 @@ use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentContact;
+use App\Models\StudentDocument;
 use App\Models\StudentTask;
+use App\Models\StudentTaskDocument;
 use App\Models\StudentTaskLog;
 use App\Models\StudentUser;
 use App\Models\TaskList;
 use App\Models\TaskListUser;
+use App\Models\TaskStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Str;
 
@@ -156,7 +162,10 @@ class PendingTaskManagerController extends Controller
                         'ids' => $list->id,
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theApplicantTask->canceled_reason) && !empty($theApplicantTask->canceled_reason) ? $theApplicantTask->canceled_reason : ''),
-                        'interview' => $interviewDetails
+                        'interview' => $interviewDetails,
+                        'has_task_status' => (isset($theApplicantTask->task->status) && !empty($theApplicantTask->task->status) ? $theApplicantTask->task->status : 'No'),
+                        'has_task_upload' => (isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
+                        'outcome' => (isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : '')
                     ];
                     $i++;
                 endforeach;
@@ -218,7 +227,10 @@ class PendingTaskManagerController extends Controller
                         'ids' => $list->id,
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
-                        'interview' => []
+                        'interview' => [],
+                        'has_task_status' => (isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
+                        'has_task_upload' => (isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
+                        'outcome' => (isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : '')
                     ];
                     $i++;
                 endforeach;
@@ -575,6 +587,147 @@ class PendingTaskManagerController extends Controller
             return Excel::download(new ArrayCollectionExport($theCollection), 'Task_Student_List.xlsx');
         else:
             return response()->json(['msg' => 'Error Found!'], 422);
+        endif;
+    }
+
+    public function uploadTaskDocument(Request $request){
+        $student_id = $request->student_id;
+        $task_id = $request->task_id;
+        $phase = $request->phase;
+        $display_file_name = $request->display_file_name;
+
+
+        $thePerson = ($phase == 'Applicant' ? Applicant::find($student_id) : Student::find($student_id));
+        $applicantId = ($phase == 'Applicant' ? $thePerson->id : $thePerson->applicant_id);
+
+        $theTask = ($phase == 'Applicant' ? ApplicantTask::where('applicant_id', $student_id)->where('task_list_id', $task_id)->get()->first() : StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first());
+        $taskName = (isset($theTask->task->name) && !empty($theTask->task->name) ? $theTask->task->name : '');
+
+        $document = $request->file('file');
+        $imageName = time().'_'.$document->getClientOriginalName();
+        $path = $document->storeAs('public/applicants/'.$applicantId, $imageName, 's3');
+
+        $data = [];
+        if($phase == 'Applicant'):
+            $data['applicant_id'] = $student_id;
+        else:
+            $data['student_id'] = $student_id;
+        endif;
+        $data['hard_copy_check'] = (isset($request->hard_copy_check) && $request->hard_copy_check > 0 ? $request->hard_copy_check : 0);
+        $data['doc_type'] = $document->getClientOriginalExtension();
+        $data['path'] = Storage::disk('s3')->url($path);
+        $data['display_file_name'] = (!empty($display_file_name) ? $display_file_name.' - '.$taskName : (!empty($taskName) ? $taskName : $imageName));
+        $data['current_file_name'] = $imageName;
+        $data['created_by'] = auth()->user()->id;
+        if($phase == 'Applicant'):
+            $theDoc = ApplicantDocument::create($data);
+        else:
+            $theDoc = StudentDocument::create($data);
+        endif;
+
+        if($theDoc->id):
+            if($phase == 'Applicant'):
+                $studentTaskDoc = ApplicantTaskDocument::create([
+                    'applicant_task_id' => $theTask->id,
+                    'applicant_document_id' => $theDoc->id,
+                    'created_by' => auth()->user()->id
+                ]);
+
+                $applicantTaskLog = ApplicantTaskLog::create([
+                    'applicant_tasks_id' => $theTask->id,
+                    'actions' => 'Document',
+                    'field_name' => '',
+                    'prev_field_value' => '',
+                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'created_by' => auth()->user()->id
+                ]);
+            else:
+                $studentTaskDoc = StudentTaskDocument::create([
+                    'student_id' => $student_id,
+                    'student_task_id' => $theTask->id,
+                    'student_document_id' => $theDoc->id,
+                    'created_by' => auth()->user()->id
+                ]);
+
+                $studentTaskLog = StudentTaskLog::create([
+                    'student_tasks_id' => $theTask->id,
+                    'actions' => 'Document',
+                    'field_name' => '',
+                    'prev_field_value' => '',
+                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'created_by' => auth()->user()->id
+                ]);
+            endif;
+        endif;
+
+        return response()->json(['message' => 'Document successfully uploaded.'], 200);
+    }
+
+    public function taskOutcomeStatuses(Request $request){
+        $phase = $request->phase;
+        $taskid = $request->taskid;
+        $studentid = $request->studentid;
+
+        $theTask = ($phase == 'Applicant' ? ApplicantTask::where('applicant_id', $studentid)->where('task_list_id', $taskid)->get()->first() : StudentTask::where('student_id', $studentid)->where('task_list_id', $taskid)->get()->first());
+        $taskStatuses = $theTask->task->statuses;
+
+        $statusOpt = [];
+        if(!empty($taskStatuses)):
+            $html = '<label for="upload" class="form-label">Task Result <span class="text-danger">*</span></label>';
+            foreach($taskStatuses as $ts):
+                $taskStatus = TaskStatus::find($ts->task_status_id);
+                $html .= '<div class="form-check mt-2">';
+                    $html .= '<input '.($theTask->task_status_id == $taskStatus->id ? 'Checked' : '').' id="outc_task-status-'.$taskStatus->id.'" class="form-check-input resultStatus" type="radio" name="result_statuses" value="'.$taskStatus->id.'">';
+                    $html .= '<label class="form-check-label" for="outc_task-status-'.$taskStatus->id.'">'.$taskStatus->name.'</label>';
+                $html .= '</div>';
+            endforeach;
+            $statusOpt['suc'] = 1;
+            $statusOpt['res'] = $html;
+        else:
+            $statusOpt['suc'] = 2;
+            $statusOpt['res'] = '<div class="alert alert-pending-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No status found for this task.</div>';
+        endif;
+
+        return response()->json(['message' => $statusOpt], 200);
+    }
+    
+
+    public function updateTaskOutcome(Request $request){
+        $student_id = $request->student_id;
+        $task_id = $request->task_id;
+        $phase = $request->phase;
+        $result_statuses = (isset($request->result_statuses) ? $request->result_statuses : '');
+
+        $theOldTask = ($phase == 'Applicant' ? ApplicantTask::where('applicant_id', $student_id)->where('task_list_id', $task_id)->get()->first() : StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first());
+
+        if($result_statuses > 0):
+            $data = [];
+            $data['task_status_id'] = $result_statuses;
+            $data['updated_by'] = auth()->user()->id;
+            if($phase == 'Applicant'):
+                $studentTask = ApplicantTask::where('applicant_id', $student_id)->where('task_list_id', $task_id)->update($data);
+                $studentTaskLog = ApplicantTaskLog::create([
+                    'applicant_tasks_id' => $theOldTask->id,
+                    'actions' => 'Task Status',
+                    'field_name' => 'task_status_id',
+                    'prev_field_value' => $theOldTask->task_status_id,
+                    'current_field_value' => $result_statuses,
+                    'created_by' => auth()->user()->id
+                ]);
+            else:
+                $studentTask = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->update($data);
+                $studentTaskLog = StudentTaskLog::create([
+                    'student_tasks_id' => $theOldTask->id,
+                    'actions' => 'Task Status',
+                    'field_name' => 'task_status_id',
+                    'prev_field_value' => $theOldTask->task_status_id,
+                    'current_field_value' => $result_statuses,
+                    'created_by' => auth()->user()->id
+                ]);
+            endif;
+            return response()->json(['message' => 'Result successfully updated.'], 200);
+        else: 
+            return response()->json(['message' => 'Error found!'], 422);
         endif;
     }
 }

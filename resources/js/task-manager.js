@@ -3,6 +3,7 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import html2canvas from "html2canvas";
 import { saveAs } from 'file-saver';
+import Dropzone from "dropzone";
 
 ("use strict");
 var taskAssignedStudentTable = (function () {
@@ -50,9 +51,12 @@ var taskAssignedStudentTable = (function () {
                     field: (phase == 'Applicant' ? "application_no" : 'registration_no'),
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) {  
-                        var html = '<a href="'+cell.getData().url+'" class="whitespace-normal font-medium text-primary">';
+                        var html = '<a href="'+cell.getData().url+'" class="whitespace-normal font-medium text-primary mr-1">';
                                 html += (phase == 'Applicant' ? cell.getData().application_no : cell.getData().registration_no),
                             html += '</a>';
+                        if(cell.getData().outcome != ''){
+                            html += ' <span class="font-medium underline text-primary">(Outcome: '+cell.getData().outcome+')</span>';
+                        }
                         return html;
                     }
                 },
@@ -153,6 +157,44 @@ var taskAssignedStudentTable = (function () {
                             html += '</div>';
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
                             html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
+                        return html;
+                    }
+                },
+                {
+                    title: "&nbsp;",
+                    field: "has_task_status",
+                    headerSort: false,
+                    headerHozAlign: "right",
+                    hozAlign: "right", 
+                    width: "60",
+                    formatter(cell, formatterParams) {  
+                        var html = '';
+                        if(cell.getData().has_task_status == 'Yes' || cell.getData().has_task_upload == 'Yes'){
+                            html += '<div class="flex justify-end">';
+                                html += '<div class="dropdown">';
+                                    html += '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="more-vertical" class="w-5 h-5 text-slate-500"></i></a>';
+                                    html += '<div class="dropdown-menu w-64">';
+                                        html += '<ul class="dropdown-content">';
+                                            if(cell.getData().has_task_status == 'Yes'){
+                                                html += '<li>';
+                                                    html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">';
+                                                        html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome';
+                                                    html += '</a>';
+                                                html += '</li>';
+                                            }
+                                            if(cell.getData().has_task_upload == 'Yes'){
+                                                html += '<li>';
+                                                    html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">';
+                                                        html += '<i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents';
+                                                    html += '</a>';
+                                                html += '</li>';
+                                            }
+                                        html += '</ul>';
+                                    html += '</div>';
+                                html += '</div>';
+                            html += '</div>';
+                        }
+
                         return html;
                     }
                 }
@@ -271,6 +313,9 @@ var taskAssignedStudentTable = (function () {
     const callLockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
 
+    const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
+    const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
+
     const downloadIDCardEl = document.getElementById('downloadIDCard')
     downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
         $('#downloadIDCard .idContent').html('').fadeOut('fast');
@@ -288,6 +333,24 @@ var taskAssignedStudentTable = (function () {
         $('#callLockModal .acc__input-error').html('');
         $('#callLockModal textarea, #canceledReasonModal input').val('');
     });
+    
+    const updateTaskOutcomeModalEl = document.getElementById('updateTaskOutcomeModal')
+    updateTaskOutcomeModalEl.addEventListener('hide.tw.modal', function(event) {
+        $("#updateTaskOutcomeModal .modal-body").html('');
+        $('#updateTaskOutcomeModal input[name="student_id"]').val('0');
+        $('#updateTaskOutcomeModal input[name="task_id"]').val('0');
+        $('#updateTaskOutcomeModal input[name="phase"]').val('');
+    });
+
+    $('#successModal .successCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            successModal.hide();
+            window.location.reload();
+        }else{
+            successModal.hide();
+        }
+    })
 
     $('#exportTaskStudentsBtn').on('click', function(e){
         e.preventDefault();
@@ -719,6 +782,261 @@ var taskAssignedStudentTable = (function () {
             }
         });
     
+    });
+
+
+    if($("#uploadTaskDocumentForm").length > 0){
+        let dzError = false;
+        Dropzone.autoDiscover = false;
+        Dropzone.options.uploadTaskDocumentForm = {
+            autoProcessQueue: false,
+            maxFiles: 10,
+            maxFilesize: 20,
+            parallelUploads: 10,
+            acceptedFiles: ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
+            addRemoveLinks: true,
+            thumbnailWidth: 100,
+            thumbnailHeight: 100,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        };
+
+        let options = {
+            accept: (file, done) => {
+                console.log("Uploaded");
+                done();
+            },
+        };
+
+
+        var drzn = new Dropzone('#uploadTaskDocumentForm', options);
+
+        drzn.on('addedfile', function(file){
+            if(file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)){
+                $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! One of your selected file name contain validation error & that file has been removed.</div>');
+                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
+                drzn.removeFile(file);
+
+                setTimeout(function(){
+                    $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+                }, 5000)
+            }
+        });
+
+        drzn.on("maxfilesexceeded", (file) => {
+            $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+            $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
+            drzn.removeFile(file);
+            setTimeout(function(){
+                $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
+            }, 2000)
+        });
+
+        drzn.on("error", function(file, response){
+            dzError = true;
+        });
+
+        drzn.on("success", function(file, response){
+            //console.log(response);
+            return file.previewElement.classList.add("dz-success");
+        });
+
+        drzn.on("complete", function(file) {
+            //drzn.removeFile(file);
+        }); 
+
+        drzn.on('queuecomplete', function(){
+            $('#uploadProcessDoc').removeAttr('disabled');
+            document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+
+            uploadTaskDocumentModal.hide();
+            if(!dzError){
+                uploadTaskDocumentModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('student document successfully uploaded.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });      
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }else{
+                $('#uploadProcessDoc').removeAttr('disabled');
+                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!" );
+                    $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                    $("#warningModal .warningCloser").attr('data-action', 'RELOAD');
+                });
+                setTimeout(function(){
+                    warningModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        })
+
+        $('#uploadProcessDoc').on('click', function(e){
+            e.preventDefault();
+            var acceptedFiles = drzn.getAcceptedFiles().length;
+            if(acceptedFiles > 0){
+                document.querySelector('#uploadProcessDoc').setAttribute('disabled', 'disabled');
+                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: inline-block;";
+                drzn.processQueue();
+            }else{
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!" );
+                    $("#warningModal .warningModalDesc").html('Empty submission are not accepted. Please upload some valid files.');
+                    $("#warningModal .warningCloser").attr('data-action', 'NONE');
+                });
+                
+                setTimeout(function(){
+                    warningModal.hide();
+                }, 2000);
+            }
+        });
+
+        const uploadTaskDocumentModalEl = document.getElementById('uploadTaskDocumentModal')
+        uploadTaskDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#uploadTaskDocumentModal input[name="student_id"]').val('0');
+            $('#uploadTaskDocumentModal input[name="task_id"]').val('0');
+            $('#uploadTaskDocumentModal input[name="phase"]').val('');
+            $('#uploadTaskDocumentModal input[name="display_file_name"]').val('');
+            $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val('0');
+            $('#uploadTaskDocumentModal #hard_copy_check-2').prop('checked', true);
+            drzn.removeAllFiles(true);
+        });
+    }
+
+    $(document).on('click', '.uploadTaskDoc', function(e){
+        var $btn = $(this); 
+        var phase = $btn.attr('data-phase');
+        var taskid = $btn.attr('data-taskid');
+        var studentid = $btn.attr('data-studentid');
+
+        $('#uploadTaskDocumentModal [name="student_id"]').val(studentid);
+        $('#uploadTaskDocumentModal [name="task_id"]').val(taskid);
+        $('#uploadTaskDocumentModal [name="phase"]').val(phase);
+    });
+
+    $('#uploadTaskDocumentModal #process_doc_name').on('keyup', function(){
+        $('#uploadTaskDocumentModal input[name="display_file_name"]').val($('#uploadTaskDocumentModal #process_doc_name').val());
+    });
+
+    $('#uploadTaskDocumentModal [name="hard_copy_check_status"]').on('change', function(){
+        $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val());
+    });
+
+    $(document).on('click', '.updateTaskOutcome', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+
+        var phase = $btn.attr('data-phase');
+        var taskid = $btn.attr('data-taskid');
+        var studentid = $btn.attr('data-studentid');
+
+        axios({
+            method: 'post',
+            url: route('task.manager.outcome.statuses'),
+            data: {phase : phase, taskid : taskid, studentid : studentid},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#updateTaskOutcomeModal .modal-body').html(response.data.message.res);
+                $('#updateTaskOutcomeModal input[name="student_id"]').val(studentid);
+                $('#updateTaskOutcomeModal input[name="task_id"]').val(taskid);
+                $('#updateTaskOutcomeModal input[name="phase"]').val(phase);
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        }).catch(error =>{
+            console.log(error)
+        });
+    });
+
+    $("#updateTaskOutcomeForm").on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('updateTaskOutcomeForm');
+    
+        document.querySelector('#updateOutcomeBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateOutcomeBtn svg").style.cssText ="display: inline-block;";
+
+        var taskStatusId = [];
+        $form.find('.resultStatus').each(function(){
+            if($(this).prop('checked')){
+                taskStatusId.push($(this).val());
+            }
+        });
+        if(taskStatusId.length > 0){
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('task.manager.update.outcome'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
+                    document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+                    updateTaskOutcomeModal.hide();
+
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulation!" );
+                        $("#successModal .successModalDesc").html('Process Task result successfully updated.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });      
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error => {
+                document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
+                document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html("Error Found!" );
+                            $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                            $("#warningModal .warningCloser").attr('data-action', 'RELOAD');
+                        });
+                        setTimeout(function(){
+                            warningModal.hide();
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        }else{
+            document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
+            document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+
+            $('#updateTaskOutcomeModal .taskUoutComeAlert').remove();
+            $('#updateTaskOutcomeModal .modal-content').prepend('<div class="alert taskUoutComeAlert alert-pending-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Result can not be empty.</div>')
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+            setTimeout(function(){
+                $('#updateTaskOutcomeModal .taskUoutComeAlert').remove();
+            }, 2000);
+        }
     });
 
 })();
