@@ -455,18 +455,38 @@
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4 gap-y-1">
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="edit_name" class="form-label">Document Name <span class="text-danger">*</span></label>
                                 <input id="edit_name" type="text" name="name" class="form-control w-full">
                                 <div class="acc__input-error error-name text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="edit_expire_at" class="form-label">Exipiry Date</label>
                                 <input id="edit_expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            </div>
+                            <div class="col-span-4">
+                                <label for="edit_file_type" class="form-label">File Type</label>
+                                <div class="flex flex-col sm:flex-row">
+                                    <div class="form-check mr-2">
+                                        <input checked id="edit_file_type_1" class="form-check-input" type="radio" name="file_type" value="1">
+                                        <label class="form-check-label" for="edit_file_type_1">Public</label>
+                                    </div>
+                                    <div class="form-check mr-2 mt-2 sm:mt-0">
+                                        <input id="edit_file_type_2" class="form-check-input" type="radio" name="file_type" value="2">
+                                        <label class="form-check-label" for="edit_file_type_2">Private</label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-span-12">
                                 <label for="edit_description" class="form-label">Description</label>
                                 <textarea id="edit_description" name="description" class="form-control w-full" rows="4"></textarea>
+                            </div>
+                            <div class="col-span-12 pt-2">
+                                <label for="tag_ids" class="form-label">Tags</label>
+                                <div class="fileTagsWrap border rounded relative">
+                                    <input type="text" name="tag_search" class="tag_search"/>
+                                    <ul class="autoFillDropdown"></ul>
+                                </div>
                             </div>
                         </div>
                     </div>

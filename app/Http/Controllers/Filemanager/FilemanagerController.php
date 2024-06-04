@@ -443,12 +443,32 @@ class FilemanagerController extends Controller
         $id = $request->id;
         $document = Document::where('document_info_id', $id)->orderBy('id', 'DESC')->get()->first();
         $document_id = $document->id;
+        $existingDocumentTags = DocumentInfoTag::where('document_info_id', $id)->pluck('document_tag_id')->unique()->toArray();
+        $tagIds = (isset($request->tag_ids) && !empty($request->tag_ids) ? $request->tag_ids : []);
+        $deleteTags = array_diff($existingDocumentTags, $tagIds);
+
+        if(!empty($deleteTags)):
+            DocumentInfoTag::where('document_info_id', $id)->whereIn('document_tag_id', $deleteTags)->forceDelete();
+        endif;
+        if(!empty($tagIds)):
+            foreach($tagIds as $tag_id):
+                $exist = DocumentInfoTag::where('document_info_id', $id)->where('document_tag_id', $tag_id)->get()->count();
+                if($exist == 0):
+                    $data = [];
+                    $data['document_info_id'] = $id;
+                    $data['document_tag_id'] = $tag_id;
+
+                    DocumentInfoTag::create($data);
+                endif;
+            endforeach;
+        endif;
 
         $docInfo = DocumentInfo::find($id);
         $docInfo->fill([
             'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
             'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
             'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
+            'file_type' => (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1),
             'updated_by' => auth()->user()->id,
         ]);
         $docInfo->save();

@@ -60,12 +60,12 @@
                                                                 <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                                                     <div class="grid grid-cols-12 gap-4">
                                                                         <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">Start</div>
-                                                                            <div class="font-medium">{{ date('jS M, Y', strtotime($pattern->pattern_start)) }}</div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">End</div>
-                                                                            <div class="font-medium">{{ date('jS M, Y', strtotime($pattern->pattern_end)) }}</div>
+                                                                            <div class="text-slate-500 font-medium">Date</div>
+                                                                            <div class="font-medium">
+                                                                                {{ date('jS F, Y', strtotime($pattern->pattern_start)) }}
+                                                                                 - 
+                                                                                {{ date('jS F, Y', strtotime($pattern->pattern_end)) }}
+                                                                            </div>
                                                                         </div>
                                                                         <div class="col-span-6 sm:col-span-3">
                                                                             <div class="text-slate-500 font-medium">Entitlement</div>
@@ -76,9 +76,26 @@
                                                                                 <span class="line-height: 24px;">{{ $pattern->adjustmentHtml }} = {{ $pattern->totalHolidayEntitlement }}</span>
                                                                             </div>
                                                                         </div>
+                                                                        <div class="col-span-6 sm:col-span-6"></div>
                                                                         <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">Bank Holiday Auto Book</div>
+                                                                            <div class="text-slate-500 font-medium">Bank Holiday</div>
                                                                             <div class="font-medium">{{ (isset($pattern->autoBookedBankHoliday) && !empty($pattern->autoBookedBankHoliday) ? $pattern->autoBookedBankHoliday : '00:00') }}</div>
+                                                                        </div>
+                                                                        <div class="col-span-6 sm:col-span-2">
+                                                                            <div class="text-slate-500 font-medium">Taken/Booked</div>
+                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['taken']) && !empty($pattern->existingLeaveHours['taken']) ? $pattern->existingLeaveHours['taken'] : '00:00') }}</div>
+                                                                        </div>
+                                                                        <div class="col-span-6 sm:col-span-2">
+                                                                            <div class="text-slate-500 font-medium">Requested</div>
+                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['requested']) && !empty($pattern->existingLeaveHours['requested']) ? $pattern->existingLeaveHours['requested'] : '00:00') }}</div>
+                                                                        </div>
+                                                                        <div class="col-span-6 sm:col-span-2">
+                                                                            <div class="text-slate-500 font-medium">Total</div>
+                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['total_taken']) && !empty($pattern->existingLeaveHours['total_taken']) ? $pattern->existingLeaveHours['total_taken'] : '00:00') }}</div>
+                                                                        </div>
+                                                                        <div class="col-span-6 sm:col-span-2">
+                                                                            <div class="text-slate-500 font-medium">{{ ($pattern->existingLeaveHours['balance'] >= 0 ? 'Balance' : 'Overtaken') }}</div>
+                                                                            <div class="font-medium {{ ($pattern->existingLeaveHours['balance'] >= 0 ? '' : 'text-danger') }}">{{ ($pattern->existingLeaveHours['balance'] >= 0 ? '' : '-') }} {{ (isset($pattern->existingLeaveHours['balance_html']) && !empty($pattern->existingLeaveHours['balance_html']) ? $pattern->existingLeaveHours['balance_html'] : '00:00') }}</div>
                                                                         </div>
                                                                         
                                                                         <div class="col-span-12">

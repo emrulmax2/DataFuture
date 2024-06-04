@@ -163,9 +163,9 @@ class PendingTaskManagerController extends Controller
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theApplicantTask->canceled_reason) && !empty($theApplicantTask->canceled_reason) ? $theApplicantTask->canceled_reason : ''),
                         'interview' => $interviewDetails,
-                        'has_task_status' => (isset($theApplicantTask->task->status) && !empty($theApplicantTask->task->status) ? $theApplicantTask->task->status : 'No'),
-                        'has_task_upload' => (isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
-                        'outcome' => (isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : '')
+                        'has_task_status' => ($task->interview != 'Yes' && isset($theApplicantTask->task->status) && !empty($theApplicantTask->task->status) ? $theApplicantTask->task->status : 'No'),
+                        'has_task_upload' => ($task->interview != 'Yes' && isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
+                        'outcome' => ($task->interview != 'Yes' && isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : '')
                     ];
                     $i++;
                 endforeach;
@@ -228,9 +228,9 @@ class PendingTaskManagerController extends Controller
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
                         'interview' => [],
-                        'has_task_status' => (isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
-                        'has_task_upload' => (isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
-                        'outcome' => (isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : '')
+                        'has_task_status' => ($task->interview != 'Yes' && isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
+                        'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
+                        'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : '')
                     ];
                     $i++;
                 endforeach;

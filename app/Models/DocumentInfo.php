@@ -11,7 +11,7 @@ class DocumentInfo extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $appends = ['download_url'];
+    protected $appends = ['download_url', 'tags_html'];
 
     protected $fillable = [
         'document_folder_id',
@@ -58,5 +58,25 @@ class DocumentInfo extends Model
 
     public function admins(){
         return $this->hasMany(DocumentInfoHasEmployees::class, 'document_info_id', 'id')->where('document_role_and_permission_id', 1);
+    }
+
+    public function tags(){
+        return $this->hasMany(DocumentInfoTag::class, 'document_info_id', 'id');
+    }
+
+    public function getTagsHtmlAttribute(){
+        $html = '';
+        $infoTags = DocumentInfoTag::where('document_info_id', $this->id)->get();
+        if($infoTags->count() > 0){
+            foreach($infoTags as $tag):
+                $html .= '<div class="fileTag">';
+                    $html .= '<span>'.$tag->tag->name.'</span>';
+                    $html .= '<button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>';
+                    $html .= '<input type="hidden" name="tag_ids[]" value="'.$tag->document_tag_id.'"/>';
+                $html .= '</div>';
+            endforeach;
+        }
+
+        return $html;
     }
 }

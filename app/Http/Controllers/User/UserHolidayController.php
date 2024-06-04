@@ -76,7 +76,7 @@ class UserHolidayController extends Controller
                 $yearStart = date('Y-m-d', strtotime($year->start_date));
                 $yearEnd = date('Y-m-d', strtotime($year->end_date));
                 
-                $hrEmployeePatterns = EmployeeWorkingPattern::where('employee_id', $employee_id)->orderBy('id', 'ASC')->get();
+                $hrEmployeePatterns = EmployeeWorkingPattern::where('employee_id', $employee_id)->orderBy('id', 'DESC')->get();
                 $empPatterms = [];
                 if(!empty($hrEmployeePatterns)):
                     foreach($hrEmployeePatterns as $pattern):
@@ -121,6 +121,21 @@ class UserHolidayController extends Controller
                             $pattern['approvedLeaves'] = $this->employeesApprovedLeaves($employee_id, $year->id, $pattern->id);
                             $pattern['takenLeaves'] = $this->employeesTakenLeaves($employee_id, $year->id, $pattern->id);
                             $pattern['rejectedLeaves'] = $this->employeesRejectedLeaves($employee_id, $year->id, $pattern->id);
+
+                            $existingLeaveHours = $this->employeeExistingLeaveHours($employee_id, $year->id, $pattern->id, $psd, $ped);
+                            $totalBankHolidayHour = (isset($autoBookedBankHoliday['bank_holiday_total']) ? $autoBookedBankHoliday['bank_holiday_total'] : 0);
+                            $bookedAndTaken = ($existingLeaveHours['taken'] + $existingLeaveHours['booked']);
+                            $totalTaken = $bookedAndTaken + $totalBankHolidayHour + $existingLeaveHours['requested'];
+                            $balance = ($totalHolidayEntitlement - $totalTaken);
+
+                            $calculations['taken'] = $this->calculateHourMinute($bookedAndTaken);
+                            $calculations['requested'] = $this->calculateHourMinute($existingLeaveHours['requested']);
+                            $calculations['total_taken'] = $this->calculateHourMinute($totalTaken);
+                            $calculations['balance'] = $balance;
+                            $calculations['balance_html'] = ($balance >= 0 ? $this->calculateHourMinute($balance) : $this->calculateHourMinute(str_replace('-', '', $balance)));
+
+                            $pattern['existingLeaveHours'] = $calculations;
+
                             $empPatterms[] = $pattern;
                         endif;
                     endforeach;
