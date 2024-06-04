@@ -128,7 +128,7 @@
                                     </li> --}}
                                     <li>
                                         <a id="tabulator-export-xlsx-ADM" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel <i id="excel-loading" data-loading-icon="oval"  class="w-4 h-4 ml-2 mx-auto hidden"></i>
                                         </a>
                                     </li>
                                     {{-- <li>
