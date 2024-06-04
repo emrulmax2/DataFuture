@@ -905,6 +905,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('admission', 'index')->name('admission'); 
         Route::get('admission/list', 'list')->name('admission.list'); 
+        Route::get('admission/export', 'export')->name('admission.export');
         Route::get('admission/show/{applicantId}', 'show')->name('admission.show');
         
         //Route::get('admission/qualification-list', 'qualificationList')->name('admission.qualification.list');
