@@ -199,6 +199,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\Filemanager\DocumentTagController;
 use App\Http\Controllers\Filemanager\FilemanagerController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
@@ -2540,8 +2541,11 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/store-file-reminder', 'storeFileReminder')->name('file.manager.store.file.reminder'); 
         Route::post('file-manager/edit-file-reminder', 'editFileReminder')->name('file.manager.edit.file.reminder'); 
         Route::delete('file-manager/destroy-file', 'destroyFile')->name('file.manager.destroy.file'); 
+    });
 
-        Route::delete('file-manager/search-tags', 'searchTags')->name('file.manager.search.tags'); 
+    Route::controller(DocumentTagController::class)->group(function() {
+        Route::post('file-manager/tags/store', 'store')->name('file.manager.store.tags'); 
+        Route::post('file-manager/tags/search', 'searchTags')->name('file.manager.search.tags'); 
     });
 
     Route::controller(CommunicationTemplateController::class)->group(function() {

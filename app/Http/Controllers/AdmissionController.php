@@ -143,6 +143,7 @@ class AdmissionController extends Controller
     }
 
     public function list(Request $request){
+        
         $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
         $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
@@ -231,14 +232,109 @@ class AdmissionController extends Controller
                 $i++;
             endforeach;
         endif;
+        
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    private function dataSetList(Request $request){
+        
+        $semesters = (isset($request->semesters) && !empty($request->semesters) ? $request->semesters : []);
+        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : []);
+        $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : []);
+        $agents = (isset($request->agents) && !empty($request->agents) ? $request->agents : []);
+        $refno = (isset($request->refno) && !empty($request->refno) ? $request->refno : '');
+        $firstname = (isset($request->firstname) && !empty($request->firstname) ? $request->firstname : '');
+        $lastname = (isset($request->lastname) && !empty($request->lastname) ? $request->lastname : '');
+        
+        $email = (isset($request->email) && !empty($request->email) ? $request->email : '');
+        $phone = (isset($request->phone) && !empty($request->phone) ? $request->phone : '');
+
+        $dob = (isset($request->dob) && !empty($request->dob) ? date('Y-m-d', strtotime($request->dob)) : '');
+
+        $courseCreationId = [];
+        if(!empty($courses)):
+            $courseCreations = CourseCreation::whereIn('course_id', $courses)->get();
+            if(!$courseCreations->isEmpty()):
+                foreach($courseCreations as $cc):
+                    $courseCreationId[] = $cc->id;
+                endforeach;
+            else:
+                $courseCreationId[1] = '0';
+            endif;
+        endif;
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Applicant::orderByRaw(implode(',', $sorts))->whereNotNull('submission_date');
+        if(!empty($refno)): $query->where('application_no', $refno); endif;
+        if(!empty($firstname)): $query->where('first_name', 'LIKE', '%'.$firstname.'%'); endif;
+        if(!empty($lastname)): $query->where('last_name', 'LIKE', '%'.$lastname.'%'); endif;
+        
+        if(!empty($email) || !empty($phone)):
+            $query->whereHas('users', function($qs) use($email, $phone){
+                if(!empty($email)): $qs->where('email', 'LIKE', '%'.$email.'%'); endif;
+                if(!empty($phone)): $qs->where('phone', 'LIKE', '%'.$phone.'%'); endif;
+            });
+        endif;
+
+        if(!empty($dob)): $query->where('date_of_birth', $dob); endif;
+        if(!empty($statuses)): $query->whereIn('status_id', $statuses); else: $query->where('status_id', '>', 1); endif;
+        if(!empty($semesters) || !empty($courseCreationId)):
+            $query->whereHas('course', function($qs) use($semesters, $courses, $courseCreationId){
+                if(!empty($semesters)): $qs->whereIn('semester_id', $semesters); endif;
+                if(!empty($courses) && !empty($courseCreationId)): $qs->whereIn('course_creation_id', $courseCreationId); endif;
+            });
+        endif;
+        if(!empty($agents)): $query->whereIn('agent_user_id', $agents); endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        // $Query = $query->skip($offset)
+        //        ->take($limit)
+        $Query =  $query->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = (object) [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
+                    'first_name' => ucfirst($list->first_name),
+                    'last_name' => ucfirst($list->last_name),
+                    'date_of_birth'=> $list->date_of_birth,
+                    'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                    'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                    'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
+                    'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                    'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
+                    'url' => route('admission.show', $list->id),
+                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId)
+                ];
+                $i++;
+            endforeach;
+        endif;
+        
+        return  $data;
+    }
     public function export(Request $request){
 
-        $dataSetArrray = $this->list($request);
-
-        $statusList = Status::where('type', 'Applicant')->where('id', '>', 1)->get();
+        
+        $dataSetArrray = $this->dataSetList($request);
+       
+        $statusList = TaskList::where('process_list_id', 1)->get();
         $statusCount = $statusList->count();
         $theCollection = [];
         $theCollection[1][0] = 'LCC Ref';
@@ -253,8 +349,6 @@ class AdmissionController extends Controller
         foreach($statusList as $status) :
             $theCollection[1][$statusIncrement++] = $status->name;
         endforeach;
-
-        $transactions = $dataSetArrray;
 
         $row = 2;
         if(!empty($dataSetArrray)):
@@ -280,7 +374,7 @@ class AdmissionController extends Controller
             endforeach;
         endif;
 
-        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $storage->bank_name).'_transactions.xlsx');
+        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $dataSetArrray[0]->semester).'_excel.xlsx');
     }
 
     public function show($applicantId){

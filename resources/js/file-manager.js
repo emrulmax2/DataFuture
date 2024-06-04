@@ -627,6 +627,7 @@ var fileVersionHistoryListTable = (function () {
     const uploadFileVersionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadFileVersionModal"));
     const fileHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileHistoryModal"));
     const editFilePermissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFilePermissionModal"));
+    const addTagModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTagModal"));
 
     const addFileModalEl = document.getElementById('addFileModal')
     addFileModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -635,6 +636,11 @@ var fileVersionHistoryListTable = (function () {
         $('#addFileModal .modal-body textarea').val('');
         $('#addFileModal #addDocumentName').html('');
         $('#addFileModal input#file_type_1').prop('checked', true);
+
+        $('#addFileModal .fileTagsWrap').removeClass('opened');
+        $('#addFileModal .fileTagsWrap .fileTag').remove();
+        $('#addFileModal .fileTagsWrap .tag_search').val('');
+        $('#addFileModal .fileTagsWrap .autoFillDropdown').fadeOut().val();
     });
 
     const editFileModalEl = document.getElementById('editFileModal')
@@ -667,6 +673,12 @@ var fileVersionHistoryListTable = (function () {
     fileHistoryModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#fileVersionHistoryListTable').attr('data-fileinfo', '0').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role').html('');
         $('#fileHistoryModal .displayName').html('');
+    });
+
+    const addTagModalEl = document.getElementById('addTagModal')
+    addTagModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addTagModal .acc__input-error').html('');
+        $('#addTagModal input').val('');
     });
     
     $('#addFileModal').on('change', '#addDocument', function(){
@@ -738,7 +750,7 @@ var fileVersionHistoryListTable = (function () {
         if(query.length >= 3){
             currentRequest = $.ajax({
                 type: 'POST',
-                data: {query : query},
+                data: {querystr : query},
                 url: route("file.manager.search.tags"),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 beforeSend : function()    {           
@@ -748,7 +760,8 @@ var fileVersionHistoryListTable = (function () {
                     }
                 },
                 success: function(data) {
-                    $('.summarySearchResultWrap').fadeIn().html(data.res);
+                    $theFilterWrap.addClass('opened');
+                    $theDropdown.fadeIn().html(data.htm);
 
                     createIcons({
                         icons,
@@ -767,6 +780,89 @@ var fileVersionHistoryListTable = (function () {
             }
         }
     });
+
+    $(document).on('click', '.addNewTagBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var theStr = $theBtn.attr('data-str');
+
+        document.getElementById("addTagModal").addEventListener("shown.tw.modal", function (event) {
+            $("#addTagModal input[name='name']").val(theStr);
+        }); 
+    });
+
+    $(document).on('click', '.selectableTag', function(e){
+        e.preventDefault();
+        var $theTag = $(this);
+        var tagName = $theTag.html();
+        var tagId = $theTag.attr('href');
+
+        var html = '';
+        html += '<div class="fileTag">';
+            html += '<span>'+tagName+'</span>';
+            html += '<button type="button" class="removeTag"><i data-lucide="x" class="w-3 h-3"></i></button>';
+            html += '<input type="hidden" name="tag_ids[]" value="'+tagId+'"/>';
+        html += '</div>';
+
+        $('.fileTagsWrap.opened').prepend(html);
+        $('.fileTagsWrap.opened .autoFillDropdown').fadeOut().html('');
+        $('.fileTagsWrap.opened .tag_search').val('');
+
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    })
+
+    $(document).on('click', '.removeTag', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        $theBtn.parent('.fileTag').remove();
+    })
+
+    $('#addTagForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('addTagForm');
+    
+        document.querySelector('#addTag').setAttribute('disabled', 'disabled');
+        document.querySelector("#addTag svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('file.manager.store.tags'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#addTag').removeAttribute('disabled');
+            document.querySelector("#addTag svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                addTagModal.hide();
+                var html = response.data.htm;
+                if(html != ''){
+                    $('.fileTagsWrap.opened').prepend(html);
+                    $('.fileTagsWrap.opened .autoFillDropdown').fadeOut().html('');
+                    $('.fileTagsWrap.opened .tag_search').val('');
+                }
+            }
+        }).catch(error => {
+            document.querySelector('#addTag').removeAttribute('disabled');
+            document.querySelector("#addTag svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addTagForm .${key}`).addClass('border-danger');
+                        $(`#addTagForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
 
     $('#addFileModal').on('change', '.documentRoleAndPermission', function(e){
         let $thePermission = $(this);
@@ -831,75 +927,59 @@ var fileVersionHistoryListTable = (function () {
     
         document.querySelector('#uploadFile').setAttribute('disabled', 'disabled');
         document.querySelector("#uploadFile svg").style.cssText ="display: inline-block;";
-
-        var userLengt = $('#addFileModal .filePermissionTable').find('.permissionEmployeeRow').length;
-
-        if(userLengt == 0 && !$('#addFileModal #file_permission_inheritence').prop('checked')){
-            $form.find('.modError').remove();
-            $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
-            
-            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
-            
-            setTimeout(function(){
-                $form.find('.modError').remove();
-            }, 2000);
-
+        
+        let form_data = new FormData(form);
+        form_data.append('file', $('#addFileForm input[name="document"]')[0].files[0]); 
+        axios({
+            method: "post",
+            url: route('file.manager.upload.file'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
             document.querySelector('#uploadFile').removeAttribute('disabled');
             document.querySelector("#uploadFile svg").style.cssText = "display: none;";
-        }else{
-            let form_data = new FormData(form);
-            form_data.append('file', $('#addFileForm input[name="document"]')[0].files[0]); 
-            axios({
-                method: "post",
-                url: route('file.manager.upload.file'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#uploadFile').removeAttribute('disabled');
-                document.querySelector("#uploadFile svg").style.cssText = "display: none;";
-                
-                if (response.status == 200) {
-                    addFileModal.hide();
-                    var suc = response.data.suc;
+            
+            if (response.status == 200) {
+                addFileModal.hide();
+                var suc = response.data.suc;
 
-                    if(suc == 1){
-                        successModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html( "Congratulations!" );
-                            $("#successModal .successModalDesc").html('File successfully uploaded.');
-                        }); 
-                        
-                        setTimeout(function(){
-                            successModal.hide();
-                            window.location.reload();
-                        }, 2000);
-                    }else{
-                        warningModal.show();
-                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#warningModal .sarningModalTitle").html( "Oops!" );
-                            $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact with site administrator.');
-                        }); 
-                        
-                        setTimeout(function(){
-                            warningModal.hide();
-                        }, 2000);
-                    }
+                if(suc == 1){
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "Congratulations!" );
+                        $("#successModal .successModalDesc").html('File successfully uploaded.');
+                    }); 
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }else{
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .sarningModalTitle").html( "Oops!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact with site administrator.');
+                    }); 
+                    
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000);
                 }
-            }).catch(error => {
-                document.querySelector('#uploadFile').removeAttribute('disabled');
-                document.querySelector("#uploadFile svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addFileForm .${key}`).addClass('border-danger');
-                            $(`#addFileForm  .error-${key}`).html(val);
-                        }
-                    } else {
-                        console.log('error');
+            }
+        }).catch(error => {
+            document.querySelector('#uploadFile').removeAttribute('disabled');
+            document.querySelector("#uploadFile svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addFileForm .${key}`).addClass('border-danger');
+                        $(`#addFileForm  .error-${key}`).html(val);
                     }
+                } else {
+                    console.log('error');
                 }
-            });
-        }
+            }
+        });
     });
 
     $('.fileWrap').on('dblclick', function(){
