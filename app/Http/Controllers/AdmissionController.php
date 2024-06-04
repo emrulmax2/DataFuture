@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ArrayCollectionExport;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use App\Http\Requests\AdmissionContactDetailsRequest;
@@ -112,6 +113,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdmissionController extends Controller
 {
@@ -220,6 +222,7 @@ class AdmissionController extends Controller
                     'date_of_birth'=> $list->date_of_birth,
                     'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                    'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
                     'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
                     'url' => route('admission.show', $list->id),
@@ -229,6 +232,55 @@ class AdmissionController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function export(Request $request){
+
+        $dataSetArrray = $this->list($request);
+
+        $statusList = Status::where('type', 'Applicant')->where('id', '>', 1)->get();
+        $statusCount = $statusList->count();
+        $theCollection = [];
+        $theCollection[1][0] = 'LCC Ref';
+        $theCollection[1][1] = 'First Name';
+        $theCollection[1][2] = 'Sur Name';
+        $theCollection[1][3] = 'Date of Birth';
+        $theCollection[1][4] = 'Course name';
+        $theCollection[1][5] = 'Weekday/Weekend';
+        $theCollection[1][6] = 'Semester';
+        $theCollection[1][7] = 'Status';
+        $statusIncrement = 8;
+        foreach($statusList as $status) :
+            $theCollection[1][$statusIncrement++] = $status->name;
+        endforeach;
+
+        $transactions = $dataSetArrray;
+
+        $row = 2;
+        if(!empty($dataSetArrray)):
+            foreach($dataSetArrray as $data):
+                $applicantTaskDataSet = ApplicantTask::with(['task','applicatnTaskStatus'])->where('applicant_id',$data->id)->get();
+
+                $theCollection[$row][0] = $data->application_no;
+                $theCollection[$row][1] = $data->first_name;
+                $theCollection[$row][2] = $data->last_name;
+                $theCollection[$row][3] = $data->date_of_birth;
+                $theCollection[$row][4] = $data->course;
+                $theCollection[$row][5] = $data->full_time;
+                $theCollection[$row][6] = $data->semester;
+                $theCollection[$row][7] = $data->status_id;
+                $statusIncrement = 8;
+                foreach($statusList as $status) :
+                    foreach($applicantTaskDataSet as $applicantTask)
+                    if($applicantTask->task->name == $status->name)
+                        $theCollection[$row][$statusIncrement++] = ($applicantTask->status=="Completed" && isset($applicantTask->applicatnTaskStatus)) ? $applicantTask->applicatnTaskStatus->name : $applicantTask->status;
+                endforeach;
+
+                $row++;
+            endforeach;
+        endif;
+
+        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $storage->bank_name).'_transactions.xlsx');
     }
 
     public function show($applicantId){

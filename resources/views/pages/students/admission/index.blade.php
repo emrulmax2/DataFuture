@@ -116,11 +116,11 @@
                             </button>
                             <div class="dropdown-menu w-40">
                                 <ul class="dropdown-content">
-                                    <li>
+                                    {{-- <li>
                                         <a id="tabulator-export-csv-ADM" href="javascript:;" class="dropdown-item">
                                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                         </a>
-                                    </li>
+                                    </li> --}}
                                     {{-- <li>
                                         <a id="tabulator-export-json-ADM" href="javascript:;" class="dropdown-item">
                                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
@@ -128,7 +128,7 @@
                                     </li> --}}
                                     <li>
                                         <a id="tabulator-export-xlsx-ADM" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel
                                         </a>
                                     </li>
                                     {{-- <li>

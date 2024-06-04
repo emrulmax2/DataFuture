@@ -108,9 +108,42 @@ var admissionListTable = (function () {
         });
 
         $("#tabulator-export-xlsx-ADM").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Admission Details",
+            // window.XLSX = xlsx;
+            // tableContent.download("xlsx", "data.xlsx", {
+            //     sheetName: "Admission Details",
+            // });
+            e.preventDefault();
+            let semesters = $("#semesters-ADM").val() != "" ? $("#semesters-ADM").val() : "";
+            let courses = $("#courses-ADM").val() != "" ? $("#courses-ADM").val() : "";
+            let statuses = $("#statuses-ADM").val() != "" ? $("#statuses-ADM").val() : "";
+            let refno = $("#refno-ADM").val() != "" ? $("#refno-ADM").val() : "";
+            let firstname = $("#firstname-ADM").val() != "" ? $("#firstname-ADM").val() : "";
+            let lastname = $("#lastname-ADM").val() != "" ? $("#lastname-ADM").val() : "";
+            let dob = $("#dob-ADM").val() != "" ? $("#dob-ADM").val() : "";
+            let agents = $("#agents-ADM").val() != "" ? $("#agents-ADM").val() : "";
+            let email = $("#email-ADM").val() != "" ? $("#email-ADM").val() : "";
+            let phone = $("#phone-ADM").val() != "" ? $("#phone-ADM").val() : "";
+            
+            axios({
+                method: "get",
+                url: route("admission.export"),
+                params:{ semesters: semesters, courses: courses, statuses: statuses, refno: refno, firstname: firstname, lastname: lastname, dob: dob, agents: agents,email:email,phone:phone},
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                responseType: 'blob',
+            })
+            .then((response) => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'admission_download.xlsx'); 
+                    document.body.appendChild(link);
+                    link.click();
+                    
+            })
+            .catch((error) => {
+                    console.log(error);
             });
         });
 
