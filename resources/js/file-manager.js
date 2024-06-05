@@ -1007,6 +1007,7 @@ var fileVersionHistoryListTable = (function () {
                 var row = response.data.res;
                 $('#editFileModal [name="name"]').val(row.display_file_name ? row.display_file_name : '');
                 $('#editFileModal [name="expire_at"]').val(row.expire_at ? row.expire_at : '');
+                $('#editFileModal [name="publish_date"]').val(row.publish_date ? row.publish_date : '');
                 $('#editFileModal [name="description"]').val(row.description ? row.description : '');
                 $('#editFileModal [name="id"]').val(row_id);
                 if(row.file_type == 2){

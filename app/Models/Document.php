@@ -24,6 +24,7 @@ class Document extends Model
         'reminder_at',
         'description',
         'file_type',
+        'publish_date',
         
         'created_by',
         'updated_by',
@@ -46,5 +47,13 @@ class Document extends Model
 
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function setPublishDateAttribute($value) {  
+        $this->attributes['publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getPublishDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }

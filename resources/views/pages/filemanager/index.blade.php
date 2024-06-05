@@ -455,16 +455,20 @@
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4 gap-y-1">
-                            <div class="col-span-4">
+                            <div class="col-span-6">
                                 <label for="edit_name" class="form-label">Document Name <span class="text-danger">*</span></label>
                                 <input id="edit_name" type="text" name="name" class="form-control w-full">
                                 <div class="acc__input-error error-name text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-4">
+                            <div class="col-span-6">
                                 <label for="edit_expire_at" class="form-label">Exipiry Date</label>
                                 <input id="edit_expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
-                            <div class="col-span-4">
+                            <div class="col-span-6">
+                                <label for="edit_publish_date" class="form-label">Website Publish Date</label>
+                                <input id="edit_publish_date" type="text" name="publish_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            </div>
+                            <div class="col-span-6">
                                 <label for="edit_file_type" class="form-label">File Type</label>
                                 <div class="flex flex-col sm:flex-row">
                                     <div class="form-check mr-2">
@@ -590,11 +594,15 @@
                                 <input id="name" type="text" name="name" class="form-control w-full">
                                 <div class="acc__input-error error-name text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="expire_at" class="form-label">Exipiry Date</label>
                                 <input id="expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
+                                <label for="publish_date" class="form-label">Website Publish Date</label>
+                                <input id="publish_date" type="text" name="publish_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
+                            </div>
+                            <div class="col-span-4">
                                 <label for="file_type" class="form-label">File Type</label>
                                 <div class="flex flex-col sm:flex-row">
                                     <div class="form-check mr-2">

@@ -24,6 +24,7 @@ class DocumentInfo extends Model
         'reminder_at',
         'description',
         'file_type',
+        'publish_date',
         
         'created_by',
         'updated_by',
@@ -49,6 +50,14 @@ class DocumentInfo extends Model
     }
 
     public function getDateOfBirthAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setPublishDateAttribute($value) {  
+        $this->attributes['publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getPublishDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 
