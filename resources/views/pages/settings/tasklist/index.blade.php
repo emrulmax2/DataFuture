@@ -139,9 +139,9 @@
                                 <div class="mt-3">
                                     <label for="assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
                                     <select id="assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
-                                        @if(!empty($users))
-                                            @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                        @if(!empty($employees))
+                                            @foreach($employees as $emp)
+                                                <option value="{{ $emp->user_id }}">{{ $emp->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>
@@ -329,9 +329,9 @@
                                 <div class="mt-3">
                                     <label for="edit_assigned_users" class="form-label">Assigned Users <span class="text-danger">*</span></label>
                                     <select id="edit_assigned_users" name="assigned_users[]" class="w-full tom-selects" multiple>
-                                        @if(!empty($users))
-                                            @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                        @if(!empty($employees))
+                                            @foreach($employees as $emp)
+                                                <option value="{{ $emp->user_id }}">{{ $emp->full_name }}</option>
                                             @endforeach
                                         @endif
                                     </select>

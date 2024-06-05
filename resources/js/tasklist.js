@@ -197,8 +197,9 @@ var taskListTable = (function () {
                 }
             },
             placeholder: 'Search Here...',
-            persist: false,
+            //persist: false,
             create: true,
+            maxOptions: null,
             allowEmptyOption: true,
             onDelete: function (values) {
                 return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
