@@ -684,7 +684,7 @@ class PendingTaskManagerController extends Controller
                     'actions' => 'Document',
                     'field_name' => '',
                     'prev_field_value' => '',
-                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'current_field_value' => $theDoc->id,
                     'created_by' => auth()->user()->id
                 ]);
             else:
@@ -700,7 +700,7 @@ class PendingTaskManagerController extends Controller
                     'actions' => 'Document',
                     'field_name' => '',
                     'prev_field_value' => '',
-                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'current_field_value' => $theDoc->id,
                     'created_by' => auth()->user()->id
                 ]);
             endif;
