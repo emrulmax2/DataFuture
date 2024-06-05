@@ -53,13 +53,17 @@ class FilemanagerController extends Controller
                 $q->where('employee_id', $employee_id);
             })->orderBy('name', 'ASC')->get();
             $root_permission = [];
-            $documentInfos = DocumentInfo::where('document_folder_id', 0)->orderBy('display_file_name', 'ASC')->get();
+            $documentInfos = DocumentInfo::where('document_folder_id', 0)->where('file_type', 1)->orWhere(function($q){
+                $q->where('file_type', 2)->where('created_by', auth()->user()->id);
+            })->orderBy('display_file_name', 'ASC')->get();
         else:
             $folders = DocumentFolder::where('parent_id', $parent_id)->orderBy('name', 'ASC')->get();
             $root_permission = DocumentFolderPermission::where('employee_id', $employee_id)->whereHas('folder', function($q) use($root){
                 $q->where('slug', $root);
             })->get()->first();
-            $documentInfos = DocumentInfo::where('document_folder_id', $parent_id)->orderBy('display_file_name', 'ASC')->get();
+            $documentInfos = DocumentInfo::where('document_folder_id', $parent_id)->where('file_type', 1)->orWhere(function($q){
+                $q->where('file_type', 2)->where('created_by', auth()->user()->id);
+            })->orderBy('display_file_name', 'ASC')->get();
         endif;
 
 
@@ -406,6 +410,7 @@ class FilemanagerController extends Controller
             $data['display_file_name'] = $request->name;
             $data['current_file_name'] = $current_file_name;
             $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
+            $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
             $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
             $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
             $data['created_by'] = auth()->user()->id;
@@ -467,6 +472,7 @@ class FilemanagerController extends Controller
         $docInfo->fill([
             'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
             'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
+            'publish_date' => (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : null),
             'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
             'file_type' => (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1),
             'updated_by' => auth()->user()->id,
@@ -477,6 +483,7 @@ class FilemanagerController extends Controller
         $documentRow->fill([
             'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
             'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
+            'publish_date' => (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : null),
             'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
             'updated_by' => auth()->user()->id,
         ]);
