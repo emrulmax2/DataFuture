@@ -559,21 +559,24 @@ var employmentHistoryTable = (function () {
 
         semestersADM.on('change',function(event){
             
-            // axios({
-            //     method: "get",
-            //     url: route("course.creation.coursesbysemester"),
-            //     params:{ semesters:event },
-            //     headers: {
-            //         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            //     },
-            //     responseType: 'json',
-            // })
-            // .then((response) => {
-            //     console.log(response.data)
-            // })
-            // .catch((error) => {
-            //         console.log(error);
-            // });
+            axios({
+                method: "get",
+                url: route("course.creation.coursesbysemester"),
+                params:{ semesters:event },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                responseType: 'json',
+            })
+            .then((response) => {
+                let courseList = response.data
+                $(courseList).each(function(index,course) {
+                    coursesADM.addOption({value:course.id,text:course.name})
+                  });
+            })
+            .catch((error) => {
+                    console.log(error);
+            });
         })
     }
 
