@@ -49,7 +49,7 @@
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Phone</div>
-                        <input type="text" id="phone-ADM" name="phone-ADM" placeholder="012XXXXXXXX" value="" class="w-full"/>
+                        <input type="text" id="phone-ADM" name="phone-ADM" placeholder="07XXXXXXXXX" value="" class="w-full"/>
                     </div>
                 </div>
                 <div class="col-span-3">
