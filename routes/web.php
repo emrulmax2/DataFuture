@@ -526,6 +526,7 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/course-creation/update', 'update')->name('course.creation.update');
         Route::delete('course-management/course-creation/delete/{id}', 'destroy')->name('course.creation.destory');
         Route::post('course-management/course-creation/restore/{id}', 'restore')->name('course.creation.restore');
+        Route::get('course-management/course-creation/courses-by-semester', 'getCourseListBySemester')->name('course.creation.coursesbysemester'); 
     });
     
     Route::controller(CourseCreationAvailabilityController::class)->group(function() {
