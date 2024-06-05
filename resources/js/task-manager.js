@@ -50,6 +50,7 @@ var taskAssignedStudentTable = (function () {
                     title: (phase == 'Applicant' ? 'Ref. No' : 'Reg. No'),
                     field: (phase == 'Applicant' ? "application_no" : 'registration_no'),
                     headerHozAlign: "left",
+                    width: "150",
                     formatter(cell, formatterParams) {  
                         var html = '<a href="'+cell.getData().url+'" class="whitespace-normal font-medium text-primary mr-1">';
                                 html += (phase == 'Applicant' ? cell.getData().application_no : cell.getData().registration_no),
@@ -64,11 +65,13 @@ var taskAssignedStudentTable = (function () {
                     title: "First Name",
                     field: "first_name",
                     headerHozAlign: "left",
+                    width: "180",
                 },
                 {
                     title: "Last Name",
                     field: "last_name",
                     headerHozAlign: "left",
+                    width: "180",
                 },
                 {
                     title: "Course",
@@ -166,32 +169,58 @@ var taskAssignedStudentTable = (function () {
                     headerSort: false,
                     headerHozAlign: "right",
                     hozAlign: "right", 
-                    width: "60",
+                    visible: (interview != 'Yes' ? true : false),
                     formatter(cell, formatterParams) {  
                         var html = '';
-                        if(cell.getData().has_task_status == 'Yes' || cell.getData().has_task_upload == 'Yes'){
-                            html += '<div class="flex justify-end">';
-                                html += '<div class="dropdown">';
-                                    html += '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="more-vertical" class="w-5 h-5 text-slate-500"></i></a>';
-                                    html += '<div class="dropdown-menu w-64">';
-                                        html += '<ul class="dropdown-content">';
-                                            if(cell.getData().has_task_status == 'Yes'){
-                                                html += '<li>';
-                                                    html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">';
-                                                        html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome';
-                                                    html += '</a>';
-                                                html += '</li>';
-                                            }
-                                            if(cell.getData().has_task_upload == 'Yes'){
-                                                html += '<li>';
-                                                    html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">';
-                                                        html += '<i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents';
-                                                    html += '</a>';
-                                                html += '</li>';
-                                            }
-                                        html += '</ul>';
+                        if(cell.getData().has_task_status == 'Yes' || cell.getData().has_task_upload == 'Yes' || cell.getData().is_completable == 1 || cell.getData().downloads != ''){
+                            html += '<div class="flex justify-end items-center">';
+                                if(cell.getData().downloads != ''){
+                                    html += cell.getData().downloads;
+                                }
+                                if(cell.getData().task_status == 'Pending'){
+                                    html += '<div class="flex justify-end ml-3">';
+                                        html += '<div class="dropdown">';
+                                            html += '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="more-vertical" class="w-5 h-5 text-slate-500"></i></a>';
+                                            html += '<div class="dropdown-menu w-64">';
+                                                html += '<ul class="dropdown-content">';
+                                                    if(cell.getData().has_task_status == 'Yes'){
+                                                        html += '<li>';
+                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskOutcomeModal" class="updateTaskOutcome dropdown-item">';
+                                                                html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update Outcome';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
+                                                    if(cell.getData().has_task_upload == 'Yes'){
+                                                        html += '<li>';
+                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#uploadTaskDocumentModal" class="uploadTaskDoc dropdown-item">';
+                                                                html += '<i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i> Upload Documents';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
+                                                    if(cell.getData().is_completable == 1){
+                                                        html += '<li>';
+                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
+                                                                html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
+                                                                html += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
+                                                                    stroke="rgb(100, 116, 139)" class="w-4 h-4 ml-2 theLoaderSvg">\
+                                                                    <g fill="none" fill-rule="evenodd">\
+                                                                        <g transform="translate(1 1)" stroke-width="4">\
+                                                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
+                                                                            <path d="M36 18c0-9.94-8.06-18-18-18">\
+                                                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"\
+                                                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
+                                                                            </path>\
+                                                                        </g>\
+                                                                    </g>\
+                                                                </svg>';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
+                                                html += '</ul>';
+                                            html += '</div>';
+                                        html += '</div>';
                                     html += '</div>';
-                                html += '</div>';
+                                }
                             html += '</div>';
                         }
 
@@ -543,6 +572,59 @@ var taskAssignedStudentTable = (function () {
                 $btn.removeClass('disabled');
                 $btn.find('svg.theLoaderSvg').fadeOut();
                 $btn.closest('.updateSelectedStudentTaskStatusBtn').removeClass('disabled');
+
+                taskAssignedStudentTable.init();
+            }
+        }
+    });
+
+    
+    $(document).on('click', '.markAsSingleComplete', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+
+        if(!$btn.hasClass('disabled')){
+
+            $btn.addClass('disabled');
+            $btn.find('svg.theLoaderSvg').fadeIn();
+
+            var task_id = $btn.attr('data-taskid');
+            var status = 'Completed';
+            var phase = $btn.attr('data-phase');
+            var studentid = $btn.attr('data-studentid');
+            var student_ids = [studentid];
+
+            if(student_ids.length > 0){
+                axios({
+                    method: "post",
+                    url: route('task.manager.update.task.status'),
+                    data: {student_ids : student_ids, task_id : task_id, status : status, phase : phase},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $btn.removeClass('disabled');
+                        $btn.find('svg.theLoaderSvg').fadeOut();
+
+                        taskAssignedStudentTable.init();
+
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html('Congratulations!');
+                            $("#successModal .successModalDesc").html('Students task status successfully updated.');
+                        });
+
+                        setTimeout(function(){
+                            successModal.hide();
+                        }, 2000);
+                    }
+                }).catch(error => {
+                    if(error.response){
+                        console.log('error');
+                    }
+                });
+            }else{
+                $btn.removeClass('disabled');
+                $btn.find('svg.theLoaderSvg').fadeOut();
 
                 taskAssignedStudentTable.init();
             }
@@ -1039,4 +1121,33 @@ var taskAssignedStudentTable = (function () {
         }
     });
 
+    $(document).on('click', '.downloadTaskDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var phase = $theLink.attr('data-phase');
+        var id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('task.manage.document.download'), 
+            data: {phase : phase, id : id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    })
 })();

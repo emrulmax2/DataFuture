@@ -2334,6 +2334,8 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/upload-task-documents', 'uploadTaskDocument')->name('task.manager.upload.document');
         Route::post('task-manager/task-outcome-statuses', 'taskOutcomeStatuses')->name('task.manager.outcome.statuses');
         Route::post('task-manager/update-task-outcome', 'updateTaskOutcome')->name('task.manager.update.outcome');
+
+        Route::post('task-manager/download-document', 'documentDownload')->name('task.manage.document.download');
     });
 
     Route::controller(AssignController::class)->group(function() {
