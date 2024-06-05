@@ -8,6 +8,7 @@ use App\Models\ProcessList;
 use Illuminate\Http\Request;
 use App\Http\Requests\TaskListRequest;
 use App\Http\Requests\TaskListUpdateRequest;
+use App\Models\Employee;
 use App\Models\TaskListStatus;
 use App\Models\TaskListUser;
 use App\Models\TaskStatus;
@@ -33,7 +34,8 @@ class TaskListController extends Controller
             ],
             'processlists' => ProcessList::all(),
             'taskStatus' => TaskStatus::all(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
         ]);
     }
 
