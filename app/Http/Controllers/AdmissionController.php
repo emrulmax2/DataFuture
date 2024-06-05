@@ -884,7 +884,7 @@ class AdmissionController extends Controller
                 'actions' => 'Document',
                 'field_name' => '',
                 'prev_field_value' => '',
-                'current_field_value' => Storage::disk('s3')->url($path),
+                'current_field_value' => $applicantDoc->id,
                 'created_by' => auth()->user()->id
             ]);
         endif;
@@ -1132,7 +1132,12 @@ class AdmissionController extends Controller
                 if($list->actions == 'Document'):
                     $fieldName = '';
                     $prevValue = '';
-                    $newValue = '<a href="'.$list->current_field_value.'" download traget="_blank" class="text-success" style="white-space: normal; word-break: break-all;">'.$list->current_field_value.'</a>';
+                    if(!empty($list->current_field_value) && !preg_match("/[a-z]/i", $list->current_field_value)):
+                        $applicantDocument = ApplicantDocument::find($list->current_field_value);
+                        $newValue = '<a data-id="'.$list->current_field_value.'" href="javascript:void(0);" class="text-success downloadDoc" style="white-space: normal; word-break: break-all;">'.$applicantDocument->current_file_name.'</a>';
+                    else:
+                        $newValue = 'Not Available';
+                    endif;
                 elseif($list->actions == 'Restore'):
                     $fieldName = '';
                     $prevValue = '';
@@ -1152,6 +1157,7 @@ class AdmissionController extends Controller
                     $prevValue = $list->prev_field_value;
                     $newValue = $list->current_field_value;
                 endif;
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,

@@ -526,6 +526,7 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/course-creation/update', 'update')->name('course.creation.update');
         Route::delete('course-management/course-creation/delete/{id}', 'destroy')->name('course.creation.destory');
         Route::post('course-management/course-creation/restore/{id}', 'restore')->name('course.creation.restore');
+        Route::get('course-management/course-creation/courses-by-semester', 'getCourseListBySemester')->name('course.creation.coursesbysemester'); 
     });
     
     Route::controller(CourseCreationAvailabilityController::class)->group(function() {
@@ -2334,6 +2335,8 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/upload-task-documents', 'uploadTaskDocument')->name('task.manager.upload.document');
         Route::post('task-manager/task-outcome-statuses', 'taskOutcomeStatuses')->name('task.manager.outcome.statuses');
         Route::post('task-manager/update-task-outcome', 'updateTaskOutcome')->name('task.manager.update.outcome');
+
+        Route::post('task-manager/download-document', 'documentDownload')->name('task.manage.document.download');
     });
 
     Route::controller(AssignController::class)->group(function() {

@@ -863,7 +863,7 @@ var studentInterviewLogTable = (function () {
     });
 
 
-    $('#studentProcessAccordion').on('click', '.downloadDoc', function(e){
+    $('#studentProcessAccordion, #processTaskLogTable').on('click', '.downloadDoc', function(e){
         e.preventDefault();
         var $theLink = $(this);
         var row_id = $theLink.attr('data-id');

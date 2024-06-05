@@ -143,6 +143,27 @@ class PendingTaskManagerController extends Controller
                             $interviewDetails['result'] = (isset($interview->interview_result) && !empty($interview->interview_result) ? $interview->interview_result : '');
                         endif;
                     endif;
+
+                    $taskDownloads = '';
+                    if(isset($theApplicantTask->documents) && !empty($theApplicantTask->documents)):
+                        $taskDownloads .= '<div class="flex">';
+                            foreach($theApplicantTask->documents as $tdoc):
+                                if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif'):
+                                    if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                        $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
+                                            $taskDownloads .= '<i data-lucide="image" class="w-4 h-4 text-primary"></i>';
+                                        $taskDownloads .= '</a>';
+                                    endif;
+                                else: 
+                                    if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                        $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
+                                            $taskDownloads .= '<i data-lucide="file-text" class="w-4 h-4 text-primary"></i>';
+                                        $taskDownloads .= '</a>';
+                                    endif;
+                                endif;
+                            endforeach;
+                        $taskDownloads .= '</div>';
+                    endif;
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
@@ -163,9 +184,11 @@ class PendingTaskManagerController extends Controller
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theApplicantTask->canceled_reason) && !empty($theApplicantTask->canceled_reason) ? $theApplicantTask->canceled_reason : ''),
                         'interview' => $interviewDetails,
-                        'has_task_status' => (isset($theApplicantTask->task->status) && !empty($theApplicantTask->task->status) ? $theApplicantTask->task->status : 'No'),
-                        'has_task_upload' => (isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
-                        'outcome' => (isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : '')
+                        'has_task_status' => ($task->interview != 'Yes' && isset($theApplicantTask->task->status) && !empty($theApplicantTask->task->status) ? $theApplicantTask->task->status : 'No'),
+                        'has_task_upload' => ($task->interview != 'Yes' && isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
+                        'outcome' => ($task->interview != 'Yes' && isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : ''),
+                        'is_completable' => ($task->interview != 'Yes' &&  ($theApplicantTask->task->status == 'No' || ($theApplicantTask->task->status == 'Yes' && $theApplicantTask->task_status_id > 0)) && ($theApplicantTask->task->upload == 'No' || ($theApplicantTask->task->upload == 'Yes' && $theApplicantTask->documents->count() > 0)) ? 1 : 0),
+                        'downloads' => $taskDownloads
                     ];
                     $i++;
                 endforeach;
@@ -208,6 +231,27 @@ class PendingTaskManagerController extends Controller
                     else:
                         $createOrUpdate = (isset($theStudentTask->created_at) && !empty($theStudentTask->created_at) ? date('jS M, Y', strtotime($theStudentTask->created_at)) : '');
                     endif;
+
+                    $taskDownloads = '';
+                    if(isset($theStudentTask->documents) && !empty($theStudentTask->documents)):
+                        $taskDownloads .= '<div class="flex">';
+                            foreach($theStudentTask->documents as $tdoc):
+                                if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif'):
+                                    if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                        $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
+                                            $taskDownloads .= '<i data-lucide="image" class="w-4 h-4 text-primary"></i>';
+                                        $taskDownloads .= '</a>';
+                                    endif;
+                                else: 
+                                    if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0):
+                                        $taskDownloads .= '<a data-phase="'.$phase.'" data-id="'.$tdoc->id.'" class="downloadTaskDoc w-6 h-6 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">';
+                                            $taskDownloads .= '<i data-lucide="file-text" class="w-4 h-4 text-primary"></i>';
+                                        $taskDownloads .= '</a>';
+                                    endif;
+                                endif;
+                            endforeach;
+                        $taskDownloads .= '</div>';
+                    endif;
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
@@ -228,9 +272,11 @@ class PendingTaskManagerController extends Controller
                         'phase' => $phase,
                         'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
                         'interview' => [],
-                        'has_task_status' => (isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
-                        'has_task_upload' => (isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
-                        'outcome' => (isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : '')
+                        'has_task_status' => ($task->interview != 'Yes' && isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
+                        'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
+                        'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
+                        'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
+                        'downloads' => $taskDownloads
                     ];
                     $i++;
                 endforeach;
@@ -638,7 +684,7 @@ class PendingTaskManagerController extends Controller
                     'actions' => 'Document',
                     'field_name' => '',
                     'prev_field_value' => '',
-                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'current_field_value' => $theDoc->id,
                     'created_by' => auth()->user()->id
                 ]);
             else:
@@ -654,7 +700,7 @@ class PendingTaskManagerController extends Controller
                     'actions' => 'Document',
                     'field_name' => '',
                     'prev_field_value' => '',
-                    'current_field_value' => Storage::disk('s3')->url($path),
+                    'current_field_value' => $theDoc->id,
                     'created_by' => auth()->user()->id
                 ]);
             endif;
@@ -729,5 +775,15 @@ class PendingTaskManagerController extends Controller
         else: 
             return response()->json(['message' => 'Error found!'], 422);
         endif;
+    }
+
+    public function documentDownload(Request $request){ 
+        $phase = $request->phase;
+        $row_id = $request->id;
+
+        $theDoc = ($phase == 'Applicant' ? ApplicantDocument::find($row_id) : StudentDocument::find($row_id));
+        $applicant_id = ($phase == 'Applicant' ? $theDoc->applicant_id : $theDoc->student->applicant_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$theDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

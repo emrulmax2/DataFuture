@@ -28,7 +28,8 @@
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
                         <a href="{{ route('admission') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y relative">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/APPLICANT-logos.jpeg') }}">
-                            <span style="margin-top: -55px;" class="absolute bg-white rounded-full l-0 r-0 mr-auto ml-auto w-10 text-center font-bold py-2 text-base text-slate-500">{{ $applicant }}</span>
+                            {{--<span style="margin-top: -55px;" class="absolute bg-white rounded-full l-0 r-0 mr-auto ml-auto w-10 text-center font-bold py-2 text-base text-slate-500">{{ $applicant }}</span>--}}
+                            <span style="margin-top: -55px;border-radius: 0.25rem 0 0.25rem 0;padding: 2px 10px 0;" class="absolute bg-white b-0 r-0 text-center font-medium py-0 px-2 text-slate-500 w-auto">{{ $applicant }}</span>
                         </a>
                         @endif
                         @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)

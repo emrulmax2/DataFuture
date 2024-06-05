@@ -185,4 +185,18 @@ class CoursCreationController extends Controller
 
         response()->json($data);
     }
+
+    public function getCourseListBySemester(Request $request) {
+    
+        $courseCreationList = CourseCreation::with('course')->whereIn('semester_id',$request->semesters)->get();
+
+        foreach($courseCreationList as $courCreation) {
+            $courseList[$courCreation->course->id]["id"] = $courCreation->course->id;
+            $courseList[$courCreation->course->id]["name"] = $courCreation->course->name;
+        }
+
+        $courses = array_values($courseList);
+
+        return response()->json($courses);
+    }
 }

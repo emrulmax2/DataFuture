@@ -29,8 +29,8 @@ var admissionListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: 50,
+            paginationSizeSelector: [true, 50,100,200,500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -556,6 +556,25 @@ var employmentHistoryTable = (function () {
 
             filterHTMLFormADM();
         });
+
+        semestersADM.on('change',function(event){
+            
+            // axios({
+            //     method: "get",
+            //     url: route("course.creation.coursesbysemester"),
+            //     params:{ semesters:event },
+            //     headers: {
+            //         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            //     },
+            //     responseType: 'json',
+            // })
+            // .then((response) => {
+            //     console.log(response.data)
+            // })
+            // .catch((error) => {
+            //         console.log(error);
+            // });
+        })
     }
 
     if($('#educationQualTable').length > 0){

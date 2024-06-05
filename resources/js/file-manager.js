@@ -646,8 +646,14 @@ var fileVersionHistoryListTable = (function () {
     const editFileModalEl = document.getElementById('editFileModal')
     editFileModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editFileModal .acc__input-error').html('');
-        $('#editFileModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editFileModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
         $('#editFileModal .modal-footer input[name="id"]').val('0');
+        $('#editFileModal input#edit_file_type_1').prop('checked', true);
+
+        $('#editFileModal .fileTagsWrap').removeClass('opened');
+        $('#editFileModal .fileTagsWrap .fileTag').remove();
+        $('#editFileModal .fileTagsWrap .tag_search').val('');
+        $('#editFileModal .fileTagsWrap .autoFillDropdown').fadeOut().val();
     });
 
     const uploadFileVersionModalEl = document.getElementById('uploadFileVersionModal')
@@ -1003,6 +1009,23 @@ var fileVersionHistoryListTable = (function () {
                 $('#editFileModal [name="expire_at"]').val(row.expire_at ? row.expire_at : '');
                 $('#editFileModal [name="description"]').val(row.description ? row.description : '');
                 $('#editFileModal [name="id"]').val(row_id);
+                if(row.file_type == 2){
+                    $('#editFileModal #edit_file_type_2').prop('checked', true);
+                }else{
+                    $('#editFileModal #edit_file_type_1').prop('checked', true);
+                }
+
+                if(row.tags_html != ''){
+                    $('#editFileModal .fileTagsWrap').prepend(row.tags_html);
+                }else{
+                    $('#editFileModal .fileTagsWrap .fileTag').remove();
+                }
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
             }
         }).catch(error => {
             if (error.response) {
