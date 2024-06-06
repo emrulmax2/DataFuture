@@ -61,7 +61,7 @@ class ELearningActivitySettingController extends Controller
             $i = 1;
             foreach($Query as $list):
                 if ($list->logo !== null && Storage::disk('s3')->exists('public/activity/'.$list->logo)) {
-                    $logoUrl = Storage::disk('s3')->temporaryUrl($list->logo, now()->addMinutes(30));
+                    $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$list->logo, now()->addMinutes(120));
                 } else {
                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                 }
