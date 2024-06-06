@@ -12,6 +12,8 @@ use App\Models\Role;
 use App\Models\UserRole;
 use App\Models\User;
 use App\Http\Requests\InterviewerUpdateRequest;
+use App\Models\ApplicantTaskDocument;
+use App\Models\ApplicantTaskLog;
 use App\Models\ApplicantViewUnlock;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -111,10 +113,28 @@ class ApplicantInterviewListController extends Controller
             $data['created_by'] = auth()->user()->id;
             $applicantDoc = ApplicantDocument::create($data);
             if($applicantDoc):
+                
+                $applicant_task_id = $applicantInterviewData->task->id;
                 $applicantInterviewUpdate = $applicantInterviewData->update([
                     'applicant_document_id' => $applicantDoc->id,
                     'interview_result' => $request->resultValue
                 ]);
+
+                $applicantTaskDoc = ApplicantTaskDocument::create([
+                    'applicant_task_id' => $applicant_task_id,
+                    'applicant_document_id' => $applicantDoc->id,
+                    'created_by' => auth()->user()->id
+                ]);
+
+                $applicantTaskLog = ApplicantTaskLog::create([
+                    'applicant_tasks_id' => $applicant_task_id,
+                    'actions' => 'Document',
+                    'field_name' => '',
+                    'prev_field_value' => '',
+                    'current_field_value' => $applicantDoc->id,
+                    'created_by' => auth()->user()->id
+                ]);
+
             endif;
             return response()->json(['message' => 'Upload Successful.'], 200);
         } else
@@ -136,6 +156,8 @@ class ApplicantInterviewListController extends Controller
             $task->task_status_id = 1;
             $task->updated_by = \Auth::user()->id;
             $task->save();
+
+
 
         } else {
             $task = ApplicantTask::find($ApplicantInterview->task->id);
