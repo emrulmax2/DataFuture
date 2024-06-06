@@ -26,7 +26,8 @@ class LetterSetRequest extends FormRequest
         return [
             'letter_type' => 'required',
             'letter_title' => 'required',
-            'description' => 'required'
+            'description' => 'required',
+            'phase' => 'required',
         ];
     }
 }

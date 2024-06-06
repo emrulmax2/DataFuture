@@ -1737,6 +1737,9 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('site-settings/sms-template/delete/{id}', 'destroy')->name('sms.template.destory');
         Route::post('site-settings/sms-template/restore/{id}', 'restore')->name('sms.template.restore');
+
+        Route::post('site-settings/sms-template/update-status', 'updateStatus')->name('sms.template.update.status');
+        Route::post('site-settings/sms-template/update-phase-status', 'updatePhaseStatus')->name('sms.template.update.phase.status');
     });
 
     Route::controller(EmailTemplateController::class)->group(function() {
@@ -1748,6 +1751,9 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('site-settings/email-template/delete/{id}', 'destroy')->name('email.template.destory');
         Route::post('site-settings/email-template/restore/{id}', 'restore')->name('email.template.restore');
+
+        Route::post('site-settings/email-template/update-status', 'updateStatus')->name('email.template.update.status');
+        Route::post('site-settings/email-template/update-phase-status', 'updatePhaseStatus')->name('email.template.update.phase.status');
     });
 
     Route::controller(CommonSmtpController::class)->group(function() {
@@ -1769,6 +1775,9 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
         Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
+
+        Route::post('site-settings/letter-sets/update-status', 'updateStatus')->name('letter.set.update.status');
+        Route::post('site-settings/letter-sets/update-phase-status', 'updatePhaseStatus')->name('letter.set.update.phase.status');
     });
 
     Route::controller(SignatoryController::class)->group(function() {

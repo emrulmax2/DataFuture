@@ -13,6 +13,11 @@ class EmailTemplate extends Model
     protected $fillable = [
         'email_title',
         'description',
+        'admission',
+        'live',
+        'hr',
+        'status',
+        
         'created_by',
         'updated_by',
     ];
