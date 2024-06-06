@@ -335,6 +335,7 @@ class AdmissionController extends Controller
         $dataSetArrray = $this->dataSetList($request);
        
         $statusList = TaskList::where('process_list_id', 1)->get();
+
         $statusCount = $statusList->count();
         $theCollection = [];
         $theCollection[1][0] = 'LCC Ref';
@@ -354,7 +355,8 @@ class AdmissionController extends Controller
         if(!empty($dataSetArrray)):
             foreach($dataSetArrray as $data):
                 $applicantTaskDataSet = ApplicantTask::with(['task','applicatnTaskStatus'])->where('applicant_id',$data->id)->get();
-
+                //var_dump($statusList);
+                
                 $theCollection[$row][0] = $data->application_no;
                 $theCollection[$row][1] = $data->first_name;
                 $theCollection[$row][2] = $data->last_name;
@@ -365,15 +367,19 @@ class AdmissionController extends Controller
                 $theCollection[$row][7] = $data->status_id;
                 $statusIncrement = 8;
                 foreach($statusList as $status) :
+                    $dataFound =0;
                     foreach($applicantTaskDataSet as $applicantTask)
-                    if($applicantTask->task->name == $status->name)
+                    if($applicantTask->task->name == $status->name) {
                         $theCollection[$row][$statusIncrement++] = ($applicantTask->status=="Completed" && isset($applicantTask->applicatnTaskStatus)) ? $applicantTask->applicatnTaskStatus->name : $applicantTask->status;
+                        $dataFound =1;
+                    }
+                    if( $dataFound ==0)
+                        $theCollection[$row][$statusIncrement++] = "";
                 endforeach;
-
+                
                 $row++;
             endforeach;
         endif;
-
         return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $dataSetArrray[0]->semester).'_excel.xlsx');
     }
 
