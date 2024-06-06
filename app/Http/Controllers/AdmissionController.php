@@ -401,6 +401,11 @@ class AdmissionController extends Controller
             'sexid' => SexIdentifier::all(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'instance' => CourseCreationInstance::all()->sortByDesc('id'),
+            'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
+                if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
+                  return $item;
+                }
+            }),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all()
