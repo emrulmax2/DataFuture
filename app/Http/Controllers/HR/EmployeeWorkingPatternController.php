@@ -5,7 +5,13 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeWorkPatternRequest;
 use App\Http\Requests\EmployeeWorkPatterUpdateRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
+use App\Models\ComonSmtp;
+use App\Models\Employee;
 use App\Models\EmployeeArchive;
+use App\Models\EmployeeLeave;
+use App\Models\EmployeeLeaveDay;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\EmployeeWorkingPatternPay;
@@ -67,6 +73,8 @@ class EmployeeWorkingPatternController extends Controller
 
     public function store(EmployeeWorkPatternRequest $request){
         $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+        $oldPattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
 
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
         $salary = (isset($request->salary) ? $request->salary : 0);
@@ -95,6 +103,62 @@ class EmployeeWorkingPatternController extends Controller
 
             EmployeeWorkingPatternPay::create($data);
             if($active == 1):
+                if(isset($oldPattern->id) && $oldPattern->id > 0):
+                    $old_pattern_id = $oldPattern->id;
+                    $leave_ids = EmployeeLeaveDay::where('status', 'Active')->where('leave_date', '>=', $effectiveFrom)
+                                ->whereHas('leave', function($q) use($employee_id, $old_pattern_id){
+                                    $q->where('employee_working_pattern_id', $old_pattern_id)->where('employee_id', $employee_id)->whereIn('status', ['Pending', 'Approved']);
+                                })->pluck('employee_leave_id')->unique()->toArray();
+                    if(!empty($leave_ids)):
+                        $commonSmtp = ComonSmtp::where('smtp_user', 'internal@lcc.ac.uk')->get()->first();
+                        $configuration = [
+                            'smtp_host'         => $commonSmtp->smtp_host,
+                            'smtp_port'         => $commonSmtp->smtp_port,
+                            'smtp_username'     => $commonSmtp->smtp_user,
+                            'smtp_password'     => $commonSmtp->smtp_pass,
+                            'smtp_encryption'   => $commonSmtp->smtp_encryption,
+
+                            'from_email'         => $commonSmtp->smtp_user,
+                            'from_name'         => 'HR Department London Churchill College',
+                        ];
+
+                        $days = EmployeeLeaveDay::whereIn('employee_leave_id', $leave_ids)->where('status', 'Active')->where('leave_date', '>=', $effectiveFrom)
+                                ->whereHas('leave', function($q) use($employee_id, $old_pattern_id){
+                                    $q->where('employee_working_pattern_id', $old_pattern_id)->where('employee_id', $employee_id)->whereIn('status', ['Pending', 'Approved']);
+                                })->orderBy('leave_date', 'ASC')->get();
+                        EmployeeLeave::whereIn('id', $leave_ids)->update(['status' => 'Canceled']);
+                        
+
+                        $empMessage = 'Hi '.$employee->full_name.', <br/><br/>';
+                        $empMessage .= 'Some of your leave days have been canceled due to new working pattern creation. Here are the details:';
+                        $empMessage .= '<ul>';
+                            foreach($days as $day):
+                                EmployeeLeaveDay::where('id', $day->id)->update(['status' => 'In Active']);
+                                $empMessage .= '<li>'.date('jS F, Y', strtotime($day->leave_date)).'</li>';
+                            endforeach;
+                        $empMessage .= '</ul>';
+                        $empMessage .= 'Please contact with the HR Manager to resolve this issue.<br/><br/>';
+                        $empMessage .= 'Thanks & Regards<br/>';
+                        $empMessage .= 'HR London Churchill College';
+
+                        $configuration['from_email'] = 'hr@lcc.ac.uk';
+                        UserMailerJob::dispatch($configuration, [$employee->employment->email], new CommunicationSendMail('Canceled Leave Days', $empMessage, []));
+
+                        $hrMessage = 'Hi Dear, <br/><br/>';
+                        $hrMessage .= "Some of ".$employee->full_name."'s leave days have been canceled due to new working pattern creation. Here are the details:";
+                        $hrMessage .= '<ul>';
+                            foreach($days as $day):
+                                $hrMessage .= '<li>'.date('jS F, Y', strtotime($day->leave_date)).'</li>';
+                            endforeach;
+                        $hrMessage .= '</ul>';
+                        $hrMessage .= 'Please contact with '.$employee->full_name.' and resolve this issue.<br/><br/>';
+                        $hrMessage .= 'Thanks & Regards<br/>';
+                        $hrMessage .= 'HR London Churchill College';
+                        
+                        $configuration['from_email'] = 'internal@lcc.ac.uk';
+                        UserMailerJob::dispatch($configuration, ['hr@lcc.ac.uk'], new CommunicationSendMail('Canceled Leave Days', $hrMessage, []));
+                    endif;
+                endif;
                 EmployeeWorkingPattern::where('employee_id', $employee_id)->where('id', '!=', $pattern->id)->where('active', 1)->update(['active' => 0]);
             endif;
         endif;
