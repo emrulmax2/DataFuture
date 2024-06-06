@@ -94,6 +94,7 @@ use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
 use App\Models\ApplicantUser;
+use App\Models\CourseCreationAvailability;
 use App\Models\EmailTemplate;
 use App\Models\FeeEligibility;
 use App\Models\LetterHeaderFooter;
