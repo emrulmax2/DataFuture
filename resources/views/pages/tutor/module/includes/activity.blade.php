@@ -73,10 +73,13 @@
                                             <div class="flex">
                                                 @if(($task->taskUploads))
                                                     @foreach($task->taskUploads as $upload)
-                                                        <a target="_blank" href="{{ Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
+                                                    @php
+                                                        $tempUrl = Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name, now()->addMinutes(120))
+                                                    @endphp
+                                                        <a target="_blank" href="{{ $tempUrl }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
                                                             
                                                             @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
-                                                                <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
+                                                                <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ $tempUrl }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
                                                             @else
                                                                 <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">             
                                                             @endif   
