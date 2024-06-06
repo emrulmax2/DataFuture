@@ -440,7 +440,7 @@
                                         @endif  --}}
                                         @if(!empty($courseCreationAvailibility))
                                             @foreach($courseCreationAvailibility as $ci)
-                                                <option data-ew="{{ $ci->creation->has_evening_and_weekend }}" {{ isset($apply->course->course_creation_id) && $applicant->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
+                                                <option data-ew="{{ $ci->creation->has_evening_and_weekend }}" {{ isset($applicant->course->course_creation_id) && $applicant->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
                                             @endforeach 
                                         @endif 
                                     </select>
