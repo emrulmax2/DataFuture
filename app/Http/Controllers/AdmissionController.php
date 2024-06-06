@@ -893,6 +893,23 @@ class AdmissionController extends Controller
                 'current_field_value' => $applicantDoc->id,
                 'created_by' => auth()->user()->id
             ]);
+
+            if($applicantTask->task->interview == "Yes") {
+
+                ApplicantInterview::create([
+                    'user_id' =>auth()->user()->id,
+                    'applicant_id' =>$applicant_id,
+                    'applicant_task_id' => $applicantTask->id,
+                    'applicant_document_id' => $applicantDoc->id,
+                    'interview_date' => date("Y-m-d"),
+                    'start_time' => NULL,
+                    'end_time' => NULL,
+                    'interview_result' =>'N/A',
+                    'created_by' => auth()->user()->id,
+                ]);
+
+            }
+
         endif;
 
         return response()->json(['message' => 'Document successfully uploaded.'], 200);
@@ -903,6 +920,7 @@ class AdmissionController extends Controller
         $recordid = $request->recordid;
 
         $data = ApplicantTask::where('id', $recordid)->where('applicant_id', $applicant)->delete();
+
         $applicantTaskLog = ApplicantTaskLog::create([
             'applicant_tasks_id' => $recordid,
             'actions' => 'Delete',
@@ -911,10 +929,12 @@ class AdmissionController extends Controller
             'current_field_value' => 'Item Deleted',
             'created_by' => auth()->user()->id
         ]);
+
         return response()->json(['message' => 'Data deleted'], 200);
     }
 
     public function admissionCompletedTask(Request $request){
+
         $applicant = $request->applicant;
         $recordid = $request->recordid;
         $applicantRow = Applicant::find($applicant);
@@ -1090,7 +1110,9 @@ class AdmissionController extends Controller
             $data = [];
             $data['task_status_id'] = $result_statuses;
             $data['updated_by'] = auth()->user()->id;
+
             $applicantTask = ApplicantTask::where('applicant_id', $applicant_id)->where('id', $applicant_task_id)->update($data);
+
             $applicantTaskLog = ApplicantTaskLog::create([
                 'applicant_tasks_id' => $applicant_task_id,
                 'actions' => 'Task Status',
@@ -2420,7 +2442,9 @@ class AdmissionController extends Controller
                     'result' => $list->interview_result,
                     'status' => $list->interview_status,
                     'interviewer' => (isset($list->user->name) ? $list->user->name : ''),
-                    'file' => ($list->document) ? $list->document->path : ''
+                    'file' => ($list->document) ? $list->document->path : '',
+                    'doc_id' => $list->document->id
+                        
                 ];
                 $i++;
             endforeach;

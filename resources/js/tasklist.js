@@ -41,8 +41,8 @@ var taskListTable = (function () {
                                     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
                                 html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().processlist+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().name+'</div>';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().processlist+'</div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;
