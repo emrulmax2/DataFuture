@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     
-                    <!-- END: Activity Product List -->
+                    
                     <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
                         <table class="table table-report sm:mt-2">
                             <thead>
@@ -52,7 +52,7 @@
                                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                 }
 
-                                //dd($task->task->user);
+                                dd($task->task->user);
 
                                 $FullName = $task->task->user->employee->full_name;
                                 $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
@@ -130,7 +130,8 @@
             </div>
         </div>
     </div>
-    @foreach($planDateList as $dateList)
+    <!-- START: Activity Product List -->
+    {{-- @foreach($planDateList as $dateList)
     <div data-tw-merge class="accordion-item bg-slate-200 py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
         <div class="accordion-header" id="faq-accordion-7">
             <button data-tw-merge data-tw-toggle="collapse" data-tw-target="#faq-accordion-7-collapse" type="button" aria-expanded="true" aria-controls="faq-accordion-7-collapse" class="accordion-button outline-none inline-flex justify-between py-4 -my-4 font-medium w-full text-left dark:text-slate-400 [&amp;:not(.collapsed)]:text-primary [&amp;:not(.collapsed)]:dark:text-slate-300 collapsed"><div class="flex-none">{{ date("F jS, Y",strtotime($dateList->date)) }} - {{ $dateList->name }}</div> <div class="accordian-lucide flex-none"><i data-lucide="plus" class="w-4 h-4"></i></div></button>
@@ -159,7 +160,7 @@
                             </span></button>
                     </div>
                 </div>
-                <!-- END: Activity Product List -->
+                
                 
                 <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
                     <table class="table table-report sm:mt-2">
@@ -186,7 +187,6 @@
                                     }
                                     $rand = rand(0,1);
                                     @endphp
-                                    {{-- @if($dateList->id == $keyDate) --}}
                                         <tr class="intro-x">
                                             <td class="w-20">
                                                 <div class="flex">
@@ -206,7 +206,7 @@
                                                             
                                                         @foreach($moduleContent->taskUploads as $upload)
                                                         <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
-                                                            {{-- <div class="w-10 h-10 image-fit zoom-in"> --}}
+                                                      
                                                                 @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
                                                                     
                                                                         <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
@@ -215,7 +215,7 @@
                                                                         <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
                                                                     
                                                                 @endif
-                                                            {{-- </div> --}}
+                                                   
                                                         </a>
                                                         @endForeach
                                                     @else
@@ -239,7 +239,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    {{-- @endif --}}
+                                
                                 @endforeach
                             @endif
                         </tbody>
@@ -248,5 +248,6 @@
             </div>
         </div>
     </div>
-    @endforeach
+    @endforeach --}}
+    <!-- END: Activity Product List -->
 </div>
