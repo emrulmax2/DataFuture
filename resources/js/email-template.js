@@ -9,10 +9,11 @@ var emailTemplateListTable = (function () {
         // Setup Tabulator
         let querystr = $("#query-EMAIL").val() != "" ? $("#query-EMAIL").val() : "";
         let status = $("#status-EMAIL").val() != "" ? $("#status-EMAIL").val() : "";
+        let phase = $("#phase-EMAIL").val() != "" ? $("#phase-EMAIL").val() : "";
         
         let tableContent = new Tabulator("#emailTemplateListTable", {
             ajaxURL: route("email.template.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, phase: phase },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -27,7 +28,7 @@ var emailTemplateListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "120",
+                    width: "70",
                 },
                 {
                     title: "Template Title",
@@ -35,9 +36,40 @@ var emailTemplateListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Description",
-                    field: "description",
+                    title: "Admission",
+                    field: "admission",
                     headerHozAlign: "left",
+                    width: "120",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="admission" data-id="'+cell.getData().id+'" '+(cell.getData().admission == 1 ? 'Checked' : '')+' value="'+cell.getData().admission+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Live",
+                    field: "live",
+                    headerHozAlign: "left",
+                    width: "120",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="live" data-id="'+cell.getData().id+'" '+(cell.getData().live == 1 ? 'Checked' : '')+' value="'+cell.getData().live+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "HR",
+                    field: "hr",
+                    width: "120",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="hr" data-id="'+cell.getData().id+'" '+(cell.getData().hr == 1 ? 'Checked' : '')+' value="'+cell.getData().hr+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    width: "120",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
                 },
                 {
                     title: "Actions",
@@ -133,6 +165,7 @@ var emailTemplateListTable = (function () {
         $("#tabulator-html-filter-reset-EMAIL").on("click", function (event) {
             $("#query-EMAIL").val("");
             $("#status-EMAIL").val("1");
+            $("#phase-EMAIL").val("");
             filterHTMLForm();
         });
     }
@@ -165,20 +198,25 @@ var emailTemplateListTable = (function () {
     const addEmailModalEl = document.getElementById('addEmailModal')
     addEmailModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addEmailModal .acc__input-error').html('');
-        $('#addEmailModal input').val('');
+        $('#addEmailModal input:not([type="checkbox"])').val('');
+        $('#addEmailModal .phaseCheckboxs').prop('checked', false);
+        $('#addEmailModal #status').prop('checked', true);
         addEditor.setData('');
     });
 
     const editEmailModalEl = document.getElementById('editEmailModal')
     editEmailModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editEmailModal .acc__input-error').html('');
-        $('#editEmailModal .modal-body input').val('');
+        $('#editEmailModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editEmailModal .phaseCheckboxs').prop('checked', false);
+        $('#editEmailModal #edit_status').prop('checked', false);
         editEditor.setData('');
     });
 
     document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
         $('#confirmModal .agreeWith').attr('data-id', '0');
         $('#confirmModal .agreeWith').attr('data-action', 'none');
+        $('#confirmModal .agreeWith').attr('data-phase', '');
     });
 
     $('#addEmailForm').on('submit', function(e){
@@ -245,6 +283,27 @@ var emailTemplateListTable = (function () {
                 $('#editEmailModal input[name="email_title"]').val(dataset.email_title ? dataset.email_title : '');
                 editEditor.setData(dataset.description ? dataset.description : '');
                 $('#editEmailModal input[name="id"]').val(recordId);
+
+                if(dataset.admission == 1){
+                    $('#editEmailModal #edit_phase_admission').prop('checked', true);
+                }else{
+                    $('#editEmailModal #edit_phase_admission').prop('checked', false);
+                }
+                if(dataset.live == 1){
+                    $('#editEmailModal #edit_phase_live').prop('checked', true);
+                }else{
+                    $('#editEmailModal #edit_phase_live').prop('checked', false);
+                }
+                if(dataset.hr == 1){
+                    $('#editEmailModal #edit_phase_hr').prop('checked', true);
+                }else{
+                    $('#editEmailModal #edit_phase_hr').prop('checked', false);
+                }
+                if(dataset.status == 1){
+                    $('#editEmailModal #edit_status').prop('checked', true);
+                }else{
+                    $('#editEmailModal #edit_status').prop('checked', false);
+                }
             }
         }).catch((error) => {
             console.log(error);
@@ -327,12 +386,43 @@ var emailTemplateListTable = (function () {
         });
     });
 
+    // Update Status
+    $('#emailTemplateListTable').on('click', '.status_updater', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
+        });
+    });
+
+    // Update Phase
+    $('#emailTemplateListTable').on('click', '.updatePhase', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let phase = $statusBTN.attr('data-phase');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change phase status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-phase', phase);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGEPHS');
+        });
+    });
+
 
     // Confirm Modal Action
     $('#confirmModal .agreeWith').on('click', function(){
         let $agreeBTN = $(this);
         let recordID = $agreeBTN.attr('data-id');
         let action = $agreeBTN.attr('data-action');
+        let phase = $agreeBTN.attr('data-phase');
 
         $('#confirmModal button').attr('disabled', 'disabled');
         if(action == 'DELETE'){
@@ -350,6 +440,10 @@ var emailTemplateListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('Email Template successfully deleted!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 emailTemplateListTable.init();
             }).catch(error =>{
@@ -370,6 +464,60 @@ var emailTemplateListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('Email Template successfully restored!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                emailTemplateListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGESTAT'){
+            axios({
+                method: 'post',
+                url: route('email.template.update.status'),
+                data: {row_id : recordID},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('Email Template status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                emailTemplateListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGEPHS'){
+            axios({
+                method: 'post',
+                url: route('email.template.update.phase.status'),
+                data: {row_id : recordID, phase : phase},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('Email Template Phase status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 emailTemplateListTable.init();
             }).catch(error =>{

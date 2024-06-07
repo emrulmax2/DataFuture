@@ -13,6 +13,11 @@ class SmsTemplate extends Model
     protected $fillable = [
         'sms_title',
         'description',
+        'admission',
+        'live',
+        'hr',
+        'status',
+
         'created_by',
         'updated_by',
     ];
