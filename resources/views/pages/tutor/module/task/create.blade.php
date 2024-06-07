@@ -11,20 +11,7 @@
             <a href="{{ route('tutor-dashboard.plan.module.show',$plan->id) }}" class="transition duration-200 border shadow-md inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80  mb-2 mr-2  w-24">
                 <i class="w-4 h-4 ml-2" data-lucide="arrow-left"></i> Back 
             </a>
-            <button id="moduleCreateSave" data-tw-merge class="transition duration-200 border shadow-md inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-1 ">Save
-                <span class="ml-2 h-4 w-4" style="display: none">
-                    <svg class="w-full h-full" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white">
-                        <g fill="none" fill-rule="evenodd">
-                            <g transform="translate(1 1)" stroke-width="4">
-                                <circle stroke-opacity=".5" cx="18" cy="18" r="18" />
-                                <path d="M36 18c0-9.94-8.06-18-18-18">
-                                    <animateTransform type="rotate" attributeName="transform" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite" />
-                                </path>
-                            </g>
-                        </g>
-                    </svg>
-                </span>
-            </button>
+            
         </div>
     </div>
     <div class="pos intro-y grid grid-cols-12 gap-5 mt-5">
@@ -107,6 +94,20 @@
                     <label for="post-form-2" class="form-label inline-flex"><i data-lucide="calendar" class="w-4 h-4 mr-1 mt-1"></i> Published At</label>
                     <input type="text" data-show-current="true" value="{{ date("d-m-Y") }}" class="form-control" readonly name="start_date"  data-single-mode="true">
                 </div>
+                <button id="moduleCreateSave" data-tw-merge class="transition duration-200 w-full border shadow-md inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-1 ">Save to Publish
+                    <span class="ml-2 h-4 w-4" style="display: none">
+                        <svg class="w-full h-full" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18" />
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform type="rotate" attributeName="transform" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite" />
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </span>
+                </button>
             </div>
         </div>
         <!-- END: Post Info -->
