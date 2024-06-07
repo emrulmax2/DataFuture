@@ -2,6 +2,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var studentCommLetterListTable = (function () {
@@ -178,6 +179,22 @@ var studentCommLetterListTable = (function () {
         });
     }
 
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: false,
+        maxItems: null,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let letter_set_id = new TomSelect('#letter_set_id', tomOptions);
+
     
 
 
@@ -195,6 +212,7 @@ var studentCommLetterListTable = (function () {
         $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#addLetterModal .letterEditorArea').fadeOut();
         letterEditor.setData('');
+        letter_set_id.clear(true);
     });
 
     const confirmModalEl = document.getElementById('confirmModal')

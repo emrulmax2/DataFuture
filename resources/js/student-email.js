@@ -2,6 +2,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 
 ("use strict");
@@ -165,6 +166,22 @@ var studentCommEmailListTable = (function () {
         });
     }
 
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: false,
+        maxItems: null,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let email_template_id = new TomSelect('#email_template_id', tomOptions);
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
@@ -178,6 +195,7 @@ var studentCommEmailListTable = (function () {
         $('#sendEmailModal .modal-body input, #sendEmailModal .modal-body select').val('');
         $('#addNoteModal .sendMailsDocumentNames').html('').fadeOut();
         mailEditor.setData('');
+        email_template_id.clear(true);
     });
 
     const confirmModalEl = document.getElementById('confirmModal')

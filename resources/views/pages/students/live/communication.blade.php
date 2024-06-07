@@ -57,21 +57,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -128,21 +118,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -199,21 +179,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -257,7 +227,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
-                            <select id="letter_set_id" name="letter_set_id" class="form-control w-full">
+                            <select id="letter_set_id" name="letter_set_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
                                 @if(!empty($letterSet))
                                     @foreach($letterSet as $ls)
@@ -357,7 +327,7 @@
                     <div class="modal-body">
                         <div>
                             <label for="sms_template_id" class="form-label">Template</label>
-                            <select id="sms_template_id" name="sms_template_id" class="form-control w-full">
+                            <select id="sms_template_id" name="sms_template_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
                                 @if(!empty($smsTemplates))
                                     @foreach($smsTemplates as $st)
@@ -436,7 +406,7 @@
                         </div>
                         <div class="mt-3 mb-4">
                             <label for="email_template_id" class="form-label">Template</label>
-                            <select id="email_template_id" name="email_template_id" class="form-control w-full">
+                            <select id="email_template_id" name="email_template_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
                                 @if(!empty($emailTemplates))
                                     @foreach($emailTemplates as $et)
