@@ -24,7 +24,9 @@ class StorePlanTaskRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            
+            'description'=> 'required',
+            'name'=> 'required',
         ];
     }
 }
