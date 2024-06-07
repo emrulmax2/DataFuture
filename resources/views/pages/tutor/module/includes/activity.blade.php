@@ -103,7 +103,7 @@
                                         <td>
                                             <div class="flex items-center px-5 py-5">
                                                 <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
-                                                    <img src="https://enigma-laravel.left4code.com/build/assets/profile-3-614e7dcb.jpg" alt="Midone Tailwind HTML Admin Template">
+                                                    <img src="{{ $upload->createdBy->employee->photo_url }}" alt="{{ $FullName }}">
                                                 </div>
                                                 <div class="ml-4 mr-auto">
                                                     <div class="font-medium">{{ $FullName }}</div>
