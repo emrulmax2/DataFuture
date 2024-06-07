@@ -9,10 +9,11 @@ var letterSettingsListTable = (function () {
         // Setup Tabulator
         let querystr = $("#query-LS").val() != "" ? $("#query-LS").val() : "";
         let status = $("#status-LS").val() != "" ? $("#status-LS").val() : "";
+        let phase = $("#phase-LS").val() != "" ? $("#phase-LS").val() : "";
         
         let tableContent = new Tabulator("#letterSettingsListTable", {
             ajaxURL: route("letter.set.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, phase : phase },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -27,7 +28,7 @@ var letterSettingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "120",
+                    width: "70",
                 },
                 {
                     title: "Letter Type",
@@ -40,12 +41,48 @@ var letterSettingsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Admission",
+                    field: "admission",
+                    headerHozAlign: "left",
+                    width: "100",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="admission" data-id="'+cell.getData().id+'" '+(cell.getData().admission == 1 ? 'Checked' : '')+' value="'+cell.getData().admission+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Live",
+                    field: "live",
+                    headerHozAlign: "left",
+                    width: "100",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="live" data-id="'+cell.getData().id+'" '+(cell.getData().live == 1 ? 'Checked' : '')+' value="'+cell.getData().live+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "HR",
+                    field: "hr",
+                    width: "100",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="hr" data-id="'+cell.getData().id+'" '+(cell.getData().hr == 1 ? 'Checked' : '')+' value="'+cell.getData().hr+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    width: "120",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: "100",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -84,20 +121,10 @@ var letterSettingsListTable = (function () {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-LS").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
         $("#tabulator-export-xlsx-LS").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Letter Set Details",
-            });
-        });
-
-        $("#tabulator-export-html-LS").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
             });
         });
 
@@ -133,6 +160,7 @@ var letterSettingsListTable = (function () {
         $("#tabulator-html-filter-reset-LS").on("click", function (event) {
             $("#query-LS").val("");
             $("#status-LS").val("1");
+            $("#phase-LS").val("");
             filterHTMLForm();
         });
     }
@@ -155,19 +183,7 @@ var letterSettingsListTable = (function () {
     let editEditor;
     if($("#editEditor").length > 0){
         const el = document.getElementById('editEditor');
-        ClassicEditor.create(el, {
-            toolbar: {
-                items: [
-                    'undo', 'redo',
-                    '|', 'heading',
-                    '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
-                    '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
-                    '|', 'link', 'uploadImage', 'blockQuote', 'codeBlock',
-                    '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
-                ],
-                shouldNotGroupWhenFull: false
-            }
-        }).then(newEditor => {
+        ClassicEditor.create(el).then(newEditor => {
             editEditor = newEditor;
         }).catch((error) => {
             console.error(error);
@@ -177,19 +193,24 @@ var letterSettingsListTable = (function () {
     const addLetterModalEl = document.getElementById('addLetterModal')
     addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal input').val('');
+        $('#addLetterModal input:not([type="checkbox"])').val('');
+        $('#addLetterModal .phaseCheckboxs').prop('checked', false);
+        $('#addLetterModal #status').prop('checked', true);
         addEditor.setData('');
     });
 
     const editLetterModalEl = document.getElementById('editLetterModal')
     editLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editLetterModal .acc__input-error').html('');
-        $('#editLetterModal .modal-body input').val('');
+        $('#editLetterModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editLetterModal .phaseCheckboxs').prop('checked', false);
+        $('#addLetterModal #edit_status').prop('checked', false);
         editEditor.setData('');
     });
 
     document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
         $('#confirmModal .agreeWith').attr('data-id', '0');
+        $('#confirmModal .agreeWith').attr('data-phase', '');
         $('#confirmModal .agreeWith').attr('data-action', 'none');
     });
 
@@ -258,6 +279,27 @@ var letterSettingsListTable = (function () {
                 $('#editLetterModal input[name="letter_title"]').val(dataset.letter_title ? dataset.letter_title : '');
                 editEditor.setData(dataset.description ? dataset.description : '');
                 $('#editLetterModal input[name="id"]').val(recordId);
+
+                if(dataset.admission == 1){
+                    $('#editLetterModal #edit_phase_admission').prop('checked', true);
+                }else{
+                    $('#editLetterModal #edit_phase_admission').prop('checked', false);
+                }
+                if(dataset.live == 1){
+                    $('#editLetterModal #edit_phase_live').prop('checked', true);
+                }else{
+                    $('#editLetterModal #edit_phase_live').prop('checked', false);
+                }
+                if(dataset.hr == 1){
+                    $('#editLetterModal #edit_phase_hr').prop('checked', true);
+                }else{
+                    $('#editLetterModal #edit_phase_hr').prop('checked', false);
+                }
+                if(dataset.status == 1){
+                    $('#editLetterModal #edit_status').prop('checked', true);
+                }else{
+                    $('#editLetterModal #edit_status').prop('checked', false);
+                }
             }
         }).catch((error) => {
             console.log(error);
@@ -340,12 +382,43 @@ var letterSettingsListTable = (function () {
         });
     });
 
+    // Update Status
+    $('#letterSettingsListTable').on('click', '.status_updater', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
+        });
+    });
+
+    // Update Phase
+    $('#letterSettingsListTable').on('click', '.updatePhase', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let phase = $statusBTN.attr('data-phase');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change phase status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-phase', phase);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGEPHS');
+        });
+    });
+
 
     // Confirm Modal Action
     $('#confirmModal .agreeWith').on('click', function(){
         let $agreeBTN = $(this);
         let recordID = $agreeBTN.attr('data-id');
         let action = $agreeBTN.attr('data-action');
+        let phase = $agreeBTN.attr('data-phase');
 
         $('#confirmModal button').attr('disabled', 'disabled');
         if(action == 'DELETE'){
@@ -363,6 +436,10 @@ var letterSettingsListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('Letter Set item successfully deleted!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 letterSettingsListTable.init();
             }).catch(error =>{
@@ -383,6 +460,60 @@ var letterSettingsListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('Letter Set item successfully restored!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                letterSettingsListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGESTAT'){
+            axios({
+                method: 'post',
+                url: route('letter.set.update.status'),
+                data: {row_id : recordID},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('Letter Set status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                letterSettingsListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGEPHS'){
+            axios({
+                method: 'post',
+                url: route('letter.set.update.phase.status'),
+                data: {row_id : recordID, phase : phase},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('Letter Set Phase status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 letterSettingsListTable.init();
             }).catch(error =>{

@@ -29,7 +29,8 @@ class SmsTemplateController extends Controller
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && $request->querystr != '' ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
+        $phase = (isset($request->phase) && $request->phase > 0 ? $request->phase : '');
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -42,8 +43,11 @@ class SmsTemplateController extends Controller
             $query->orWhere('sms_title','LIKE','%'.$queryStr.'%');
             $query->orWhere('description','LIKE','%'.$queryStr.'%');
         endif;
+        if(!empty($phase)): $query->where($phase, 1); endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('status', $status);
         endif;
 
         $total_rows = $query->count();
@@ -68,6 +72,10 @@ class SmsTemplateController extends Controller
                     'sl' => $i,
                     'sms_title' => $list->sms_title,
                     'description' => Str::limit($list->description,20),
+                    'admission' => (isset($list->admission) && $list->admission > 0 ? $list->admission : 0),
+                    'live' => (isset($list->live) && $list->live > 0 ? $list->live : 0),
+                    'hr' => (isset($list->hr) && $list->hr > 0 ? $list->hr : 0),
+                    'status' => (isset($list->status) && $list->status > 0 ? $list->status : 0),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -94,9 +102,14 @@ class SmsTemplateController extends Controller
      */
     public function store(SMSTemplateRequest $request)
     {
+        $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : []);
         $sms = SmsTemplate::create([
             'sms_title' => $request->sms_title,
             'description' => $request->description,
+            'admission' => (isset($phase['admission']) && $phase['admission'] > 0 ? $phase['admission'] : 0),
+            'live' => (isset($phase['live']) && $phase['live'] > 0 ? $phase['live'] : 0),
+            'hr' => (isset($phase['hr']) && $phase['hr'] > 0 ? $phase['hr'] : 0),
+            'status' => (isset($request->status) && $request->status > 0 ? $request->status : 0),
             'created_by' => auth()->user()->id
         ]);
         if($sms):
@@ -138,10 +151,15 @@ class SmsTemplateController extends Controller
      */
     public function update(SMSTemplateRequest $request)
     {
+        $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : []);
         $smsId = $request->id;
         $sms = SmsTemplate::where('id', $smsId)->update([
             'sms_title' => $request->sms_title,
             'description' => $request->description,
+            'admission' => (isset($phase['admission']) && $phase['admission'] > 0 ? $phase['admission'] : 0),
+            'live' => (isset($phase['live']) && $phase['live'] > 0 ? $phase['live'] : 0),
+            'hr' => (isset($phase['hr']) && $phase['hr'] > 0 ? $phase['hr'] : 0),
+            'status' => (isset($request->status) && $request->status > 0 ? $request->status : 0),
             'updated_by' => $smsId,
         ]);
 
@@ -164,5 +182,30 @@ class SmsTemplateController extends Controller
         $data = SmsTemplate::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function updateStatus(Request $request){
+        $title = SmsTemplate::find($request->row_id);
+        $status = (isset($title->status) && $title->status == 1 ? 0 : 1);
+
+        SmsTemplate::where('id', $request->row_id)->update([
+            'status'=> $status,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
+    }
+
+    public function updatePhaseStatus(Request $request){
+        $phase = $request->phase;
+        $letter = SmsTemplate::find($request->row_id);
+        $status = (isset($letter->$phase) && $letter->$phase == 1 ? 0 : 1);
+
+        SmsTemplate::where('id', $request->row_id)->update([
+            $phase => $status,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

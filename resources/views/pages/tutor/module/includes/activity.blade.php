@@ -71,8 +71,11 @@
                                         </td>
                                         <td class="w-40">
                                             <div class="flex">
-                                                @if(($task->taskUploads))
+                                                
+                                                @if($task->taskUploads->isNotEmpty())
+                                                    
                                                     @foreach($task->taskUploads as $upload)
+                                                    
                                                     @php
                                                         $tempUrl = Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name, now()->addMinutes(120))
                                                     @endphp

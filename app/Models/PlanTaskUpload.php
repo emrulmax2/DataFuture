@@ -15,11 +15,11 @@ class PlanTaskUpload extends Model
 
     public function updatedBy(): BelongsTo 
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'updated_by');
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'created_by');
     }
 }

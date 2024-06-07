@@ -487,7 +487,7 @@ class DashboardController extends Controller
         $allPlanTasks = [];
 
             foreach($planTask as $task){
-                $uploads = PlanTaskUpload::where("plan_task_id",$task->id)->get();
+                $uploads = PlanTaskUpload::with(['createdBy','updatedBy'])->where("plan_task_id",$task->id)->get();
 
                 $allPlanTasks[$task->id] = (object) [
                     "task"=> $task,
@@ -521,7 +521,8 @@ class DashboardController extends Controller
             "user" => $userData,
             "employee" => $employee,
             "data" => $data,
-            'planTasks' => $allPlanTasks,
+            'planTasks' => $allPlanTasks, 
+
             'planDates' => $planDateWiseContent,
             'planDateList' => $planDateList,
             'eLearningActivites' => $eLearningActivites,

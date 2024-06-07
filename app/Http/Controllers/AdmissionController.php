@@ -1625,10 +1625,10 @@ class AdmissionController extends Controller
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'smtps' => ComonSmtp::all(),
-            'letterSet' => LetterSet::all(),
+            'letterSet' => LetterSet::where('admission', 1)->where('status', 1)->orderBy('letter_title', 'ASC')->get(),
             'signatory' => Signatory::all(),
-            'smsTemplates' => SmsTemplate::all(),
-            'emailTemplates' => EmailTemplate::all(),
+            'smsTemplates' => SmsTemplate::where('admission', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all()
         ]);
     }

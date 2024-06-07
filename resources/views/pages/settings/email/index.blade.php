@@ -35,9 +35,19 @@
                                 <input id="query-EMAIL" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
                             </div>
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Phase</label>
+                                <select id="phase-EMAIL" name="phase" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                                    <option value="">All</option>
+                                    <option value="admission">Admission</option>
+                                    <option value="live">Live Student</option>
+                                    <option value="hr">Human Resource</option>
+                                </select>
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status-EMAIL" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
                             </div>
@@ -61,21 +71,11 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json-EMAIL" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx-EMAIL" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html-EMAIL" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -102,6 +102,24 @@
                         </a>
                     </div>
                     <div class="modal-body">
+                        <div>
+                            <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
+                            <div class="flex flex-col sm:flex-row">
+                                <div class="form-check mr-4">
+                                    <input id="edit_phase_admission" class="form-check-input phaseCheckboxs" name="phase[admission]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="edit_phase_admission">Admission</label>
+                                </div>
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="edit_phase_live" class="form-check-input phaseCheckboxs"  name="phase[live]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="edit_phase_live">Live Student</label>
+                                </div>
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="edit_phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="edit_phase_hr">Human Resource</label>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-phase text-danger mt-2"></div>
+                        </div>
                         <div class="mt-3">
                             <label for="edit_email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
                             <input id="edit_email_title" type="text" name="email_title" class="form-control w-full">
@@ -114,6 +132,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="edit_status">Active</label>
+                            <input id="edit_status" class="form-check-input m-0" name="status" checked value="1" type="checkbox">
+                        </div>
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="editEmailSet" class="btn btn-primary w-auto">     
                             Save                      
@@ -150,6 +172,24 @@
                         </a>
                     </div>
                     <div class="modal-body">
+                        <div>
+                            <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
+                            <div class="flex flex-col sm:flex-row">
+                                <div class="form-check mr-4">
+                                    <input id="phase_admission" class="form-check-input phaseCheckboxs" name="phase[admission]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="phase_admission">Admission</label>
+                                </div>
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="phase_live" class="form-check-input phaseCheckboxs"  name="phase[live]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="phase_live">Live Student</label>
+                                </div>
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="phase_hr">Human Resource</label>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-phase text-danger mt-2"></div>
+                        </div>
                         <div class="mt-3">
                             <label for="email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
                             <input id="email_title" type="text" name="email_title" class="form-control w-full">
@@ -162,6 +202,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="status">Active</label>
+                            <input id="status" class="form-check-input m-0" name="status" checked value="1" type="checkbox">
+                        </div>
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="saveEmailSet" class="btn btn-primary w-auto">     
                             Save                      
@@ -216,7 +260,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                        <button data-phase="" type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>

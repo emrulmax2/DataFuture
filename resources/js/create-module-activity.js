@@ -158,7 +158,7 @@ import Dropzone from "dropzone";
         $('#moduleCreateSave').on('click', function(e){
             e.preventDefault();
             let tthis = $(this);
-            alert("works");
+            
             document.querySelector("#moduleCreateSave span").style.cssText ="display: inline-block;";
             
             const title = $("input[name='title']").val();

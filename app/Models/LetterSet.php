@@ -14,6 +14,11 @@ class LetterSet extends Model
         'letter_type',
         'letter_title',
         'description',
+        'admission',
+        'live',
+        'hr',
+        'status',
+
         'created_by',
         'updated_by',
     ];

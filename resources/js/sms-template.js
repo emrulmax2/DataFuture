@@ -9,10 +9,11 @@ var smsTempalteListTable = (function () {
         // Setup Tabulator
         let querystr = $("#query-SMS").val() != "" ? $("#query-SMS").val() : "";
         let status = $("#status-SMS").val() != "" ? $("#status-SMS").val() : "";
+        let phase = $("#phase-SMS").val() != "" ? $("#phase-SMS").val() : "";
         
         let tableContent = new Tabulator("#smsTempalteListTable", {
             ajaxURL: route("sms.template.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr: querystr, status: status, phase: phase },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -35,9 +36,40 @@ var smsTempalteListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Description",
-                    field: "description",
+                    title: "Admission",
+                    field: "admission",
                     headerHozAlign: "left",
+                    width: "120",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="admission" data-id="'+cell.getData().id+'" '+(cell.getData().admission == 1 ? 'Checked' : '')+' value="'+cell.getData().admission+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Live",
+                    field: "live",
+                    headerHozAlign: "left",
+                    width: "120",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="live" data-id="'+cell.getData().id+'" '+(cell.getData().live == 1 ? 'Checked' : '')+' value="'+cell.getData().live+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "HR",
+                    field: "hr",
+                    width: "120",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="hr" data-id="'+cell.getData().id+'" '+(cell.getData().hr == 1 ? 'Checked' : '')+' value="'+cell.getData().hr+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Status",
+                    field: "status",
+                    width: "120",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
                 },
                 {
                     title: "Actions",
@@ -133,6 +165,7 @@ var smsTempalteListTable = (function () {
         $("#tabulator-html-filter-reset-SMS").on("click", function (event) {
             $("#query-SMS").val("");
             $("#status-SMS").val("1");
+            $("#phase-SMS").val("");
             filterHTMLForm();
         });
     }
@@ -146,17 +179,17 @@ var smsTempalteListTable = (function () {
     const addSmsModalEl = document.getElementById('addSmsModal')
     addSmsModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addSmsModal .acc__input-error').html('');
-        $('#addSmsModal .modal-body input, #addSmsModal .modal-body textarea').val('');
-        //$('#addSmsModal input').val('');
-        //addEditor.setData('');
+        $('#addSmsModal .modal-body input:not([type="checkbox"]), #addSmsModal .modal-body textarea').val('');
+        $('#addSmsModal .phaseCheckboxs').prop('checked', false);
+        $('#addSmsModal #status').prop('checked', true);
     });
 
     const editSmsModalEl = document.getElementById('editSmsModal')
     editSmsModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editSmsModal .acc__input-error').html('');
-        $('#editSmsModal .modal-body input, #editSmsModal .modal-body textarea').val('');
-        //$('#editSmsModal .modal-body input').val('');
-        //editEditor.setData('');
+        $('#editSmsModal .modal-body input:not([type="checkbox"]), #editSmsModal .modal-body textarea').val('');
+        $('#editSmsModal .phaseCheckboxs').prop('checked', false);
+        $('#editSmsModal #edit_status').prop('checked', false);
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -178,26 +211,6 @@ var smsTempalteListTable = (function () {
             warningModal.hide();
         }
     });
-    
-    //let addEditor;
-    // if($("#addEditor").length > 0){
-    //     const el = document.getElementById('addEditor');
-    //     ClassicEditor.create(el).then(newEditor => {
-    //         addEditor = newEditor;
-    //     }).catch((error) => {
-    //         console.error(error);
-    //     });
-    // }
-
-    // let editEditor;
-    // if($("#editEditor").length > 0){
-    //     const el = document.getElementById('editEditor');
-    //     ClassicEditor.create(el).then(newEditor => {
-    //         editEditor = newEditor;
-    //     }).catch((error) => {
-    //         console.error(error);
-    //     });
-    // }
     
     $('#addSmsTextArea').on('keyup', function(){
         var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
@@ -304,9 +317,29 @@ var smsTempalteListTable = (function () {
                 let dataset = response.data;
                 
                 $('#editSmsModal input[name="sms_title"]').val(dataset.sms_title ? dataset.sms_title : '');
-                //editEditor.setData(dataset.description ? dataset.description : '');
                 $('#editSmsModal textarea[name="description"]').val(dataset.description ? dataset.description : '');
                 $('#editSmsModal input[name="id"]').val(recordId);
+
+                if(dataset.admission == 1){
+                    $('#editSmsModal #edit_phase_admission').prop('checked', true);
+                }else{
+                    $('#editSmsModal #edit_phase_admission').prop('checked', false);
+                }
+                if(dataset.live == 1){
+                    $('#editSmsModal #edit_phase_live').prop('checked', true);
+                }else{
+                    $('#editSmsModal #edit_phase_live').prop('checked', false);
+                }
+                if(dataset.hr == 1){
+                    $('#editSmsModal #edit_phase_hr').prop('checked', true);
+                }else{
+                    $('#editSmsModal #edit_phase_hr').prop('checked', false);
+                }
+                if(dataset.status == 1){
+                    $('#editSmsModal #edit_status').prop('checked', true);
+                }else{
+                    $('#editSmsModal #edit_status').prop('checked', false);
+                }
                 
 
                 let tthisSMS = $("#editSmsTextArea");
@@ -408,12 +441,43 @@ var smsTempalteListTable = (function () {
         });
     });
 
+    // Update Status
+    $('#smsTempalteListTable').on('click', '.status_updater', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
+        });
+    });
+
+    // Update Phase
+    $('#smsTempalteListTable').on('click', '.updatePhase', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let phase = $statusBTN.attr('data-phase');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html('Are you sure?');
+            $('#confirmModal .confModDesc').html('Do you really want to change phase status of this record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-phase', phase);
+            $('#confirmModal .agreeWith').attr('data-action', 'CHANGEPHS');
+        });
+    });
+
 
     // Confirm Modal Action
     $('#confirmModal .agreeWith').on('click', function(){
         let $agreeBTN = $(this);
         let recordID = $agreeBTN.attr('data-id');
         let action = $agreeBTN.attr('data-action');
+        let phase = $agreeBTN.attr('data-phase');
 
         $('#confirmModal button').attr('disabled', 'disabled');
         if(action == 'DELETE'){
@@ -431,6 +495,10 @@ var smsTempalteListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('SMS Template item successfully deleted!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 smsTempalteListTable.init();
             }).catch(error =>{
@@ -451,6 +519,60 @@ var smsTempalteListTable = (function () {
                         $('#successModal .successModalTitle').html('Congratulation!');
                         $('#successModal .successModalDesc').html('SMS Template item successfully restored!');
                     });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                smsTempalteListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGESTAT'){
+            axios({
+                method: 'post',
+                url: route('sms.template.update.status'),
+                data: {row_id : recordID},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('SMS Template status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+                smsTempalteListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'CHANGEPHS'){
+            axios({
+                method: 'post',
+                url: route('sms.template.update.phase.status'),
+                data: {row_id : recordID, phase : phase},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulation!');
+                        $('#successModal .successModalDesc').html('SMS Template Phase status successfully updated!');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
                 }
                 smsTempalteListTable.init();
             }).catch(error =>{
