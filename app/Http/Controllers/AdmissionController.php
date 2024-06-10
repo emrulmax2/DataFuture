@@ -2450,6 +2450,7 @@ class AdmissionController extends Controller
                     'interviewer' => (isset($list->user->name) ? $list->user->name : ''),
                     'file' => ($list->document) ? Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantId."/".$list->document->current_file_name, now()->addMinutes(120)) : '',
                     'doc_id' => $list->document->id,
+                    'current_file_name' =>($list->document) ? $list->document->current_file_name : "",
                         
                 ];
                 $i++;

@@ -246,7 +246,7 @@ var applicantInterviewLogTable = (function () {
                         var htms = "";
                             htms += '<div>';
                                 if(cell.getData().file != ''){
-                                    htms += '<a href='+cell.getData().file+' class="font-medium whitespace-nowrap text-success">'+cell.getData().file+'</a>';
+                                    htms += '<a data-id='+cell.getData().doc_id+' href="'+cell.getData().file+'" class="text-success " style="white-space: normal; word-break: break-all;">'+cell.getData().current_file_name +'</a>';
                                 }
                             htms += '</div>';
                         return htms;
