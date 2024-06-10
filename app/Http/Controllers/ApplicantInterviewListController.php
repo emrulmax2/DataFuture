@@ -103,7 +103,7 @@ class ApplicantInterviewListController extends Controller
 
             $document = $request->file('file');
             $imageName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/interviewresult/'.$applicantInterviewData->applicant_id, $imageName, 's3');
+            $path = $document->storeAs('public/applicants/'.$applicantInterviewData->applicant_id, $imageName, 's3');
             $data = [];
             $data['applicant_id'] = $applicantInterviewData->applicant_id;
             $data['doc_type'] = $document->getClientOriginalExtension();
