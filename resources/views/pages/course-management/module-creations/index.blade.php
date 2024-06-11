@@ -126,6 +126,25 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="confirmModalPlanTask" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="info" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 title">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 description"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWithPlanTask btn btn-primary w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')
