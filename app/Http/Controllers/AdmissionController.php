@@ -839,6 +839,12 @@ class AdmissionController extends Controller
             if($applicantTasks->count() > 0 && $applicantRow->status_id < 3):
                 $applicantData['status_id'] = 3;
                 Applicant::where('id', $applicant_id)->update($applicantData);
+                $statusRow = Status::find(3);
+                if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                    $this->sendLetterOnStatusChanged($applicant_id, 3);
+                elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                    $this->sendEmailOnStatusChanged($applicant_id, 3);
+                endif;
 
                 $data = [];
                 $data['applicant_id'] = $applicant_id;
@@ -958,6 +964,12 @@ class AdmissionController extends Controller
         if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
             $applicantData['status_id'] = 4;
             Applicant::where('id', $applicant)->update($applicantData);
+            $statusRow = Status::find(4);
+            if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                $this->sendLetterOnStatusChanged($applicant, 4);
+            elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                $this->sendEmailOnStatusChanged($applicant, 4);
+            endif;
 
             $data = [];
             $data['applicant_id'] = $applicant;
@@ -991,6 +1003,12 @@ class AdmissionController extends Controller
         if($applicantRow->status_id > 3):
             $applicantData['status_id'] = 3;
             Applicant::where('id', $applicant)->update($applicantData);
+            $statusRow = Status::find(3);
+            if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                $this->sendLetterOnStatusChanged($applicant, 3);
+            elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                $this->sendEmailOnStatusChanged($applicant, 3);
+            endif;
 
             $data = [];
             $data['applicant_id'] = $applicant;
@@ -2392,6 +2410,14 @@ class AdmissionController extends Controller
                 session()->put("lastBatchId",$bus->id);
                 /* Student Process END */
             endif;
+
+            $statusRow = Status::find($statusidID);
+            if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                $this->sendLetterOnStatusChanged($applicant_id, $statusidID);
+            elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                $this->sendEmailOnStatusChanged($applicant_id, $statusidID);
+            endif;
+
             foreach($changes as $field => $value):
                 $data = [];
                 $data['applicant_id'] = $applicant_id;
@@ -2580,6 +2606,237 @@ class AdmissionController extends Controller
         $applicantDoc = ApplicantDocument::find($row_id);
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantDoc->applicant_id.'/'.$applicantDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
+    }
+
+    public function sendLetterOnStatusChanged($applicant_id, $status_id){
+        $statusRow = Status::find(3);
+        $applicant = Applicant::find($applicant_id);
+        $pin = time();
+
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        if(isset($commonSmtp->id) && $commonSmtp->id > 0 && isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+            $letter_set_id = $statusRow->letter_set_id;
+            $letterSet = LetterSet::find($statusRow->letter_set_id);
+            $subject = 'Application Status Updated to '.$statusRow->name;
+
+            $issued_date = date('Y-m-d');
+            $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
+
+            $letter_body = $letterSet->description;
+            $is_email_or_attachment = 2;
+
+            $data = [];
+            $data['applicant_id'] = $applicant_id;
+            $data['letter_set_id'] = $letter_set_id;
+            $data['pin'] = $pin;
+            $data['signatory_id'] = 0;
+            $data['comon_smtp_id'] = $commonSmtp->id;
+            $data['is_email_or_attachment'] = $is_email_or_attachment;
+            $data['issued_by'] = auth()->user()->id;
+            $data['issued_date'] = $issued_date;
+            $data['created_by'] = auth()->user()->id;
+
+            $letter = ApplicantLetter::create($data);
+            $attachmentFiles = [];
+            if($letter):
+                /* Generate PDF Start */
+                $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
+                $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+                $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+                $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+                $PDFHTML = '';
+                $PDFHTML .= '<html>';
+                    $PDFHTML .= '<head>';
+                        $PDFHTML .= '<title>'.$letter_title.'</title>';
+                        $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                        $PDFHTML .= '<style>
+                                        table{margin-left: 0px;}
+                                        figure{margin: 0;}
+                                        @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
+                                        header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
+                                        footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                        .pageCounter{position: relative;}
+                                        .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                        .pinRow td{border-bottom: 1px solid gray;}
+                                        .text-center{text-align: center;}
+                                        .text-left{text-align: left;}
+                                        .text-right{text-align: right;}
+                                    </style>';
+                    $PDFHTML .= '</head>';
+                    $PDFHTML .= '<body>';
+                        if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('s3')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
+                            $PDFHTML .= '<header>';
+                                $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                            $PDFHTML .= '</header>';
+                        endif;
+
+                        $PDFHTML .= '<footer>';
+                            $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
+                                        font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
+                                if($LetterFooters->count() > 0):
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
+                                            $numberOfPartners = $LetterFooters->count();
+                                            $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
+
+                                            foreach($LetterFooters as $lf):
+                                                if(Storage::disk('s3')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
+                                                    $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                                                endif;
+                                            endforeach;
+                                        $PDFHTML .= '</td>';
+                                    $PDFHTML .= '</tr>';
+                                endif;
+                                $PDFHTML .= '<tr class="pinRow">';
+                                    $PDFHTML .= '<td style="padding-bottom: 3px;">';
+                                        $PDFHTML .= '<span class="pageCounter text-left"></span>';
+                                    $PDFHTML .= '</td>';
+                                    $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
+                                        $PDFHTML .= 'pin - '.$pin;
+                                    $PDFHTML .= '</td>';
+                                $PDFHTML .= '</tr>';
+
+                                if(!empty($regNo) || !empty($regAt)):
+                                $PDFHTML .= '<tr class="regInfoRow">';
+                                    $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
+                                        $PDFHTML .= (!empty($regNo) ? 'Company Reg. No. '.$regNo->value : '');
+                                        $PDFHTML .= (!empty($regAt) ? (!empty($regNo) ? ', ' : '').$regAt->value : '');
+                                    $PDFHTML .= '</td>';
+                                $PDFHTML .= '</tr>';
+                                endif;
+                            $PDFHTML .= '</table>';
+                        $PDFHTML .= '</footer>';
+
+                        $PDFHTML .= $letter_body;
+                    $PDFHTML .= '</body>';
+                $PDFHTML .= '</html>';
+
+                $fileName = time().'_'.$applicant_id.'_Letter.pdf';
+                $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
+                    ->setPaper('a4', 'portrait')
+                    ->setWarnings(false);
+                $content = $pdf->output();
+                Storage::disk('s3')->put('public/applicants/'.$applicant_id.'/'.$fileName, $content );
+
+                $data = [];
+                $data['applicant_id'] = $applicant_id;
+                $data['hard_copy_check'] = 0;
+                $data['doc_type'] = 'pdf';
+                $data['path'] = Storage::disk('s3')->url('public/applicants/'.$applicant_id.'/'.$fileName);
+                $data['display_file_name'] = $letter_title;
+                $data['current_file_name'] = $fileName;
+                $data['created_by'] = auth()->user()->id;
+                $applicantDocument = ApplicantDocument::create($data);
+
+                if($applicantDocument):
+                    $noteUpdate = ApplicantLetter::where('id', $letter->id)->update([
+                        'applicant_document_id' => $applicantDocument->id
+                    ]);
+                endif;
+                /* Generate PDF End */
+
+
+                $signatoryHTML = '';
+                $signatoryHTML .= '<p>';
+                    $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
+                    $signatoryHTML .= 'The Academic Admin Dept.<br/>';
+                    $signatoryHTML .= 'London Churchill College';
+                $signatoryHTML .= '</p>';
+
+                $emailHTML = '';
+                $emailHTML .= 'Dear '.$applicant->first_name.' '.$applicant->last_name.', <br/>';
+                $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
+                $emailHTML .= $signatoryHTML;
+
+                $attachmentFiles[] = [
+                    "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$fileName,
+                    "nameinfo" => $fileName,
+                    "mimeinfo" => 'application/pdf',
+                    'disk'     => 's3'
+                ];
+
+                $configuration = [
+                    'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+                    'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+                    'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                    'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+                    'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+                    
+                    'from_email'    => 'no-reply@lcc.ac.uk',
+                    'from_name'    =>  'London Churchill College',
+                ];
+                UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail($subject, $emailHTML, $attachmentFiles));
+
+                return true;
+            else:
+                return false;
+            endif;
+        else:
+            return false;
+        endif;
+    }
+
+    public function sendEmailOnStatusChanged($applicant_id, $status_id){
+        $statusRow = Status::find(3);
+        $applicant = Applicant::find($applicant_id);
+
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        if(isset($commonSmtp->id) && $commonSmtp->id > 0 && isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+            $template = EmailTemplate::find($statusRow->email_template_id);
+            $subject = 'Application Status Updated to '.$statusRow->name;
+
+            $applicantEmail = ApplicantEmail::create([
+                'applicant_id' => $applicant_id,
+                'comon_smtp_id' => $commonSmtp->id,
+                'email_template_id' => $statusRow->email_template_id,
+                'subject' => $subject,
+                'body' => $template->description,
+                'created_by' => auth()->user()->id,
+            ]);
+
+            $configuration = [
+                'smtp_host'    => $commonSmtp->smtp_host,
+                'smtp_port'    => $commonSmtp->smtp_port,
+                'smtp_username'  => $commonSmtp->smtp_user,
+                'smtp_password'  => $commonSmtp->smtp_pass,
+                'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                
+                'from_email'    => $commonSmtp->smtp_user,
+                'from_name'    =>  'London Churchill College',
+            ];
+
+            if($applicantEmail):
+                $emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+                $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+
+                $MAILHTML = '';
+                if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('s3')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
+                    $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
+                        $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
+                    $MAILHTML .= '</div>';
+                endif;
+                $MAILHTML .= $template->description;
+                if($emailFooters->count() > 0):
+                    $MAILHTML .= '<div style="text-align: center; vertical-align: middle; margin: 20px 0 0 0;">';
+                        $numberOfPartners = $emailFooters->count();
+                        $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
+
+                        foreach($emailFooters as $lf):
+                            if(Storage::disk('s3')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
+                                $MAILHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
+                            endif;
+                        endforeach;
+                    $MAILHTML .= '</div>';
+                endif;
+
+                UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail($subject, $MAILHTML, []))->now();
+                return true;
+            else:
+                return false;
+            endif;
+        else:
+            return false;
+        endif;
     }
 
 }

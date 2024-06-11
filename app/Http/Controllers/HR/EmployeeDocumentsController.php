@@ -7,6 +7,7 @@ use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\ComonSmtp;
 use App\Models\DocumentSettings;
+use App\Models\EmailTemplate;
 use App\Models\EmployeeDocuments;
 use App\Models\Employee;
 use App\Models\Employment;
@@ -30,6 +31,7 @@ class EmployeeDocumentsController extends Controller
             "employee" => $employee,
             "employment" => $employment,
             'docSettings' => DocumentSettings::where('staff', '1')->get(),
+            'emailTemplates' => EmailTemplate::where('hr', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
         ]);
     }
 
@@ -253,6 +255,7 @@ class EmployeeDocumentsController extends Controller
 
             if($insert->id):
                 $MAILBODY = $email_body;
+                $MAILBODY = str_replace('[EMPLOYEE_FULL_NAME]', $employee->full_name, $MAILBODY);
 
                 $attachmentFiles = [];
                 $attachmentFiles[] = [
@@ -269,5 +272,12 @@ class EmployeeDocumentsController extends Controller
         else:
             return response()->json(['suc' => 2, 'msg' => 'Something went wrong. Please try later.'], 200);
         endif;
+    }
+
+    public function employeeGetTemplate(Request $request){
+        $the_template_id = $request->the_template_id;
+        $template = EmailTemplate::find($the_template_id);
+
+        return response()->json(['row' => $template], 200);
     }
 }

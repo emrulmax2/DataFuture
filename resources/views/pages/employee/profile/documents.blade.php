@@ -175,6 +175,17 @@
                         </a>
                     </div>
                     <div class="modal-body">  
+                        <div class="mb-4">
+                            <label for="email_template_id" class="form-label">Template</label>
+                            <select id="email_template_id" placeholder="Select Template" name="email_template_id" class="w-full tom-selects">
+                                <option value="">Please Select a Template</option>
+                                @if(!empty($emailTemplates))
+                                    @foreach($emailTemplates as $et)
+                                        <option value="{{ $et->id }}">{{ $et->email_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
                         <div class="sendEmailContent" data-content="<?php echo 'Dear '.$employee->full_name.',<br/><p>Enclosed herewith is an important communication from the Human Resources Department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?>">
                             <label class="block mb-1">Mail Content <span class="text-danger">*</span></label>
                             <textarea rows="8" name="email_body" id="email_body"><?php echo 'Dear '.$employee->full_name.',<br/><p>Enclosed herewith is an important communication from the Human Resources Department.</p><br/> Best regards,<br/>Human Resources Department<br/>London Churchill College'; ?></textarea>

@@ -61,21 +61,11 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
@@ -112,10 +102,32 @@
                             <select id="type" name="type" class="form-control w-full">
                                 <option value="">Please Select</option>
                                 <option value="Applicant">Applicant</option>
-                                <option value="Register">Register</option>
-                                <option value="Student">Student</option>
+                                {{--<option value="Register">Register</option>--}}
+                                <option value="Student">Live Student</option>
                             </select>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
+                        </div>  
+                        <div class="mt-3">
+                            <label for="letter_set_id" class="form-label">Letter Template</label>
+                            <select id="letter_set_id" placeholder="Select Template" name="letter_set_id" class="w-full tom-selects">
+                                <option value="">Please Select a Template</option>
+                                @if(!empty($letters))
+                                    @foreach($letters as $altr)
+                                        <option value="{{ $altr->id }}">{{ $altr->letter_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
+                            <label for="email_template_id" class="form-label">Email Template</label>
+                            <select id="email_template_id" placeholder="Select Template" name="email_template_id" class="w-full tom-selects">
+                                <option value="">Please Select a Template</option>
+                                @if(!empty($emails))
+                                    @foreach($emails as $aeml)
+                                        <option value="{{ $aeml->id }}">{{ $aeml->email_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -167,6 +179,28 @@
                                 <option value="Student">Student</option>
                             </select>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_letter_set_id" class="form-label">Letter Template</label>
+                            <select id="edit_letter_set_id" placeholder="Select Template" name="letter_set_id" class="w-full tom-selects">
+                                <option value="">Please Select a Template</option>
+                                @if(!empty($letters))
+                                    @foreach($letters as $altr)
+                                        <option value="{{ $altr->id }}">{{ $altr->letter_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_email_template_id" class="form-label">Email Template</label>
+                            <select id="edit_email_template_id" placeholder="Select Template" name="email_template_id" class="w-full tom-selects">
+                                <option value="">Please Select a Template</option>
+                                @if(!empty($emails))
+                                    @foreach($emails as $aeml)
+                                        <option value="{{ $aeml->id }}">{{ $aeml->email_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
