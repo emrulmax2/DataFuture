@@ -464,7 +464,8 @@ class DashboardController extends Controller
         
         $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
         
-        $planTask = PlanTask::where("plan_id",$plan->id)->get();  
+        $planTask = PlanTask::where("plan_id",$plan->id)
+                    ->orWhere('module_creation_id',$moduleCreation->id)->get();  
         
         $studentAssign = Assign::where('plan_id', $plan->id)->get();
         $studentListCount = $studentAssign->count();
