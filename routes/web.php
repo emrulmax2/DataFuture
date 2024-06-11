@@ -621,6 +621,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('course-management/module-creation/edit/{id}', 'edit')->name('term.module.creation.edit');
         Route::post('course-management/module-creation/update', 'update')->name('term.module.creation.update');
+        Route::post('course-management/module-creation/plan-taskupdate/{id}', 'updatePlanTask')->name('term.module.creation.plantask-update');
         
     });
 

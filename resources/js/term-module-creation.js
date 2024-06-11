@@ -74,7 +74,12 @@ var termModuleCreationsListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().modules_count > 0) {
-                            btns += '<a href="'+route('term.module.creation.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            btns += '<a href="'+route('term.module.creation.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1 mr-2w"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            if(cell.getData().planTasks_count == 0) {
+                            btns += '<a data-instanceTermid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" class="callModalPlanTask btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="list-restart" class="w-4 h-4"></i></a>';
+                            } else {
+                                btns += '<a data-instanceTermid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" class="callModalPlanTask btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-1"><i data-lucide="info" class="w-4 h-4"></i></a>';    
+                            }
                         } else {
                             btns += '<a href="'+route('term.module.creation.add', { instanceTermId : cell.getData().id, courseId : cell.getData().course_id})+'" class="btn btn-success text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="plus-circle" class="w-4 h-4"></i></a>';
                         }
@@ -89,6 +94,8 @@ var termModuleCreationsListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+
+                
             },
         });
 
@@ -260,6 +267,60 @@ var termModuleListTable = (function () {
 
 
 (function(){
+
+    if($("#confirmModalPlanTask").length > 0) {
+        const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        const confirmModalPlanTask = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalPlanTask"));
+        let confirmModalPlanTaskTitle = 'Are you sure?';
+        let confirmModalPlanTaskDescription = 'Do you really want to re-assign the module related documents.';
+        const confirmModalPlanTaskEL = document.getElementById('confirmModalPlanTask');
+        confirmModalPlanTaskEL.addEventListener('hidden.tw.modal', function(event){
+            $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-id', '0');
+            $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-action', 'none');
+        });
+        document.getElementById('confirmModalPlanTask').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModalPlanTask .title').html(confirmModalPlanTaskTitle);
+            $('#confirmModalPlanTask .description').html(confirmModalPlanTaskDescription);
+            let id = $(".callModalPlanTask").data('instancetermid');
+            $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-id', id);
+            $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-action', 'update');
+        });
+        
+        $(".agreeWithPlanTask").on('click',function(e){
+            let $agreeBTN = $(this);
+            let recordID = $agreeBTN.attr('data-id');
+            
+            $('#confirmModalPlanTask button').attr('disabled', 'disabled');
+            
+            e.preventDefault();
+            let instanceTermId = recordID;
+            axios({
+                method: "post",
+                url: route('term.module.creation.plantask-update',instanceTermId),
+                
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    succModal.show();
+                    confirmModalPlanTask.hide()
+                    termModuleCreationsListTable.init();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulations!');
+                        $('#successModal .successModalDesc').html('Modules Assignment data successfully generated.');
+                    });
+
+                }
+                
+                setTimeout(function(){
+                    succModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }).catch(error => {
+                confirmModalPlanTask.hide();
+                console.log('error');
+            });
+        });
+    }
     $(".datepicker").each(function () {
         var maskOptions = {
             mask: '00-00-0000'
@@ -882,7 +943,9 @@ var termModuleListTable = (function () {
             $('#editModuleCreationModal .modal-body select').val('');
             $('#courseModuleEditModal input[name="id"]').val('0');
         });
-
+        const confirmModalMCR = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalMCR"));
+        let confModalDelTitle = 'Are you sure?';
+        let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
         const confirmModalMCREL = document.getElementById('confirmModalMCR');
         confirmModalMCREL.addEventListener('hidden.tw.modal', function(event){
             $('#confirmModalMCR .agreeWithMCR').attr('data-id', '0');

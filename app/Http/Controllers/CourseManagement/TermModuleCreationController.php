@@ -11,6 +11,8 @@ use App\Models\ModuleLevel;
 use App\Models\Assessment;
 use App\Models\Course;
 use App\Models\CourseModuleBaseAssesment;
+use App\Models\ELearningActivitySetting;
+use App\Models\PlanTask;
 use App\Models\Semester;
 use Illuminate\Support\Facades\DB;
 
@@ -68,6 +70,10 @@ class TermModuleCreationController extends Controller
             foreach($Query as $list):
                 $instanceTermId = $list->id;
                 $moduleCreations = ModuleCreation::where('instance_term_id', $instanceTermId)->get();
+                $moduleCreationsCount = $moduleCreations->count();
+                $moduleCreationIds = $moduleCreations->pluck('id')->toArray();
+                $planTasks = PlanTask::whereIn('module_creation_id',$moduleCreationIds)->get()->count();
+                
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -79,7 +85,8 @@ class TermModuleCreationController extends Controller
                     'term_type' => (isset($list->term_type_name) && !empty($list->term_type_name) ? $list->term_type_name : ''),
                     'start_date' => (isset($list->start_date) && !empty($list->start_date) && $list->start_date != '0000-00-00' ? date('jS F, Y', strtotime($list->start_date)) : ''),
                     'end_date' => (isset($list->end_date) && !empty($list->end_date) && $list->end_date != '0000-00-00' ? date('jS F, Y', strtotime($list->end_date)) : ''),
-                    'modules_count' => $moduleCreations->count(),
+                    'modules_count' => $moduleCreationsCount,
+                    'planTasks_count' => isset($planTasks) ? $planTasks : 0,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -123,14 +130,61 @@ class TermModuleCreationController extends Controller
                 $data['unit_value'] = (isset($courseModule->unit_value) && !empty($courseModule->unit_value) ? $courseModule->unit_value : '');
                 $data['created_by'] = auth()->user()->id;
 
+
                 $moduleCreation = ModuleCreation::create($data);
+
+                $eLearningActivitys = ELearningActivitySetting::all();
+                foreach($eLearningActivitys as $eLearningActivity) :
+                    $planTask = new PlanTask();
+                    $planTask->name = $eLearningActivity->category;
+                    $planTask->description = $eLearningActivity->category;
+                    $planTask->category = $eLearningActivity->category;
+                    $planTask->module_creation_id = $moduleCreation->id;
+                    $planTask->logo = $eLearningActivity->logo;
+                    $planTask->days_reminder = $eLearningActivity->days_reminder;
+                    $planTask->is_mandatory = $eLearningActivity->is_mandatory;
+                    $planTask->e_learning_activity_setting_id = $eLearningActivity->id;
+                    $planTask->created_by = auth()->user()->id;
+                    $planTask->save();
+                endforeach;
             endforeach;
             return response()->json(['message' => 'Selected modules successfully inserted. Click <a class="text-success font-medium" href="'.route('term.module.creation.module.details', $instanceTermId).'"><u>here</u></a> to redirect the details page.', 'red' => route('term.module.creation.module.details', $instanceTermId)], 200);
         else:
             return response()->json(['message' => 'Moudes can not be empty. Please select at least one moudle from available module.'], 422);
         endif;
     }
+    public function updatePlanTask($id) {
+        
+        $moduleCreations = ModuleCreation::where('instance_term_id',$id)->get();
+        $eLearningActivitys = ELearningActivitySetting::all();
+        if($moduleCreations->count()>0):
+        foreach($moduleCreations as $moduleCreation):
+            foreach($eLearningActivitys as $eLearningActivity) :
+                $planTask = PlanTask::where("module_creation_id",$moduleCreation->id)
+                            ->where('e_learning_activity_setting_id', $eLearningActivity->id)
+                            ->get()
+                            ->first();
+                if(!$planTask)
+                $planTask = new PlanTask();
 
+                $planTask->name = $eLearningActivity->category;
+                $planTask->description = $eLearningActivity->category;
+                $planTask->category = $eLearningActivity->category;
+                $planTask->module_creation_id = $moduleCreation->id;
+                $planTask->logo = $eLearningActivity->logo;
+                $planTask->days_reminder = $eLearningActivity->days_reminder;
+                $planTask->is_mandatory = $eLearningActivity->is_mandatory;
+                $planTask->e_learning_activity_setting_id = $eLearningActivity->id;
+                $planTask->created_by = auth()->user()->id;
+                $planTask->save();
+            endforeach;
+        endforeach;
+            return response()->json(['message' => 'Successfully regenerated'], 200);
+        else:
+            return response()->json(['message' => 'Couldn\'t regenerated'], 422);
+        
+        endif;
+    }
     public function moduleDetails($instanceTermId){
         return view('pages.course-management.module-creations.add-details', [
             'title' => 'Terms & Modules - London Churchill College',
