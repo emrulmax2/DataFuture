@@ -89,23 +89,23 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td>
-                                            <div class="flex items-center px-5 py-5">
-                                                @if(!$onlyTaskCreatorFound)
-                                                <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
-                                                    <img src="{{ $userProfileImage }}" alt="{{ $FullName }}">
-                                                </div>
-                                                <div class="ml-4 mr-auto">
-                                                    <div class="font-medium">{{ $FullName }}</div>
-                                                    <div class="mt-0.5 text-xs text-slate-500">
-                                                        {{ date("F jS, Y",strtotime($lastUpdate)) }}
+                                        <td class="flex">
+                                            @if(!$onlyTaskCreatorFound)
+                                                <div class="flex items-center px-5 py-5 mx-auto">
+                                                    <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
+                                                        <img src="{{ $userProfileImage }}" alt="{{ $FullName }}">
+                                                    </div>
+                                                    <div class="ml-4 mr-auto">
+                                                        <div class="font-medium">{{ $FullName }}</div>
+                                                        <div class="mt-0.5 text-xs text-slate-500">
+                                                            {{ date("F jS, Y",strtotime($lastUpdate)) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-success ml-2">
+                                                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                     </div>
                                                 </div>
-                                                <div class="text-success">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                                </div>
-                                                @endif
-                                            </div>
+                                            @endif
                                         </td>
                                         <td class="table-report__action w-56">
                                             <div class="flex justify-center items-center">
