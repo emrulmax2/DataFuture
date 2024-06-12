@@ -106,7 +106,7 @@
                                                     </div>
                                                 </div>
                                             @else
-                                            <div class="font-medium text-slate-400">
+                                            <div class="font-medium items-center text-slate-400 mx-auto">
                                                     N/A
                                             </div>
                                             @endif
