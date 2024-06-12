@@ -24,7 +24,7 @@
                                     <th class="whitespace-nowrap w-20">#</th>
                                     <th class="whitespace-nowrap">NAME</th>
                                     <th class="text-center whitespace-nowrap">UPLOADS</th>
-                                    <th class="text-center whitespace-nowrap">CREATED BY</th>
+                                    <th class="text-center whitespace-nowrap">UPLOADED BY</th>
                                     <th class="text-center whitespace-nowrap">ACTIONS</th>
                                 </tr>
                             </thead>
@@ -84,7 +84,7 @@
                                                     @endForeach
                                                 @else
                                                     <div class="font-medium text-slate-400">
-                                                            No Upload File Found
+                                                            No Uploaded File Found
                                                     </div>
                                                 @endif
                                             </div>
@@ -105,6 +105,10 @@
                                                         <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                     </div>
                                                 </div>
+                                            @else
+                                            <div class="font-medium text-slate-400">
+                                                    N/A
+                                            </div>
                                             @endif
                                         </td>
                                         <td class="table-report__action w-56">
