@@ -2829,7 +2829,7 @@ class AdmissionController extends Controller
                     $MAILHTML .= '</div>';
                 endif;
 
-                UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail($subject, $MAILHTML, []))->now();
+                UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail($subject, $MAILHTML, []));
                 return true;
             else:
                 return false;

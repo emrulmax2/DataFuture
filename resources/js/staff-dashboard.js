@@ -9,6 +9,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 
 (function(){
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const senGroupMailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#senGroupMailModal"));
@@ -269,5 +270,70 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
             }
         });
     });
+
+    if($('#attendanceHistoryLocModal').length > 0){
+        const attendanceHistoryLocModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#attendanceHistoryLocModal"));
+        attendanceHistoryLocModal.show();
+
+        $('#attendanceHistoryLocModal .actionBtn').on('click', function(e){
+            e.preventDefault();
+            let $theBtn = $(this);
+
+            $('#attendanceHistoryLocModal .actionBtn').attr('disabled', 'disabled');
+            if($theBtn.hasClass('disagreeWith')){ 
+                axios({
+                    method: 'post',
+                    url: route('dashboard.ignore.feed.attendance'),
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                    },
+                }).then((response) => {
+                    $('#attendanceHistoryLocModal .actionBtn').removeAttr('disabled');
+                    attendanceHistoryLocModal.hide();
+                    
+                    if (response.status == 200) {
+                        window.location.reload();
+                    }
+                }).catch((error) => {
+                    $('#attendanceHistoryLocModal .actionBtn').removeAttr('disabled');
+                    if (error.response) {
+                        console.log("error");
+                    }
+                });
+            }else if($theBtn.hasClass('agreeWith')){
+                var action_type = $theBtn.attr('data-value');
+                axios({
+                    method: 'post',
+                    url: route('dashboard.feed.attendance'),
+                    data: {action_type : action_type},
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                    },
+                }).then((response) => {
+                    $('#attendanceHistoryLocModal .actionBtn').removeAttr('disabled');
+                    attendanceHistoryLocModal.hide();
+                    
+                    if (response.status == 200) {
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html( "Congratulations!" );
+                            $("#successModal .successModalDesc").html(response.data.res);
+                            $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                        }); 
+        
+                        setTimeout(function(){
+                            successModal.hide();
+                            window.location.reload();
+                        }, 2000)
+                    }
+                }).catch((error) => {
+                    $('#attendanceHistoryLocModal .actionBtn').removeAttr('disabled');
+                    if (error.response) {
+                        console.log("error");
+                    }
+                });
+            }
+        })
+    }
 
 })();
