@@ -2175,7 +2175,8 @@ Route::middleware('auth')->group(function() {
     Route::resource('plan-module-task', PlanTaskController::class,[
         'except' => ['create']
     ]);
-
+  
+    
     // GET|HEAD        plan-module-task ............................................................................................................................. plan-module-task.index › PlanTaskController@index  
     // POST            plan-module-task ............................................................................................................................. plan-module-task.store › PlanTaskController@store  
     // GET|HEAD        plan-module-task/create/{plan}/{activity} ................................................................................................... plan-module-task.create › PlanTaskController@create  
@@ -2186,6 +2187,8 @@ Route::middleware('auth')->group(function() {
     Route::controller(PlanTaskController::class)->group(function() {
 
         Route::get('plan-module-task/create/{plan}/{activity}', 'create')->name('plan-module-task.create'); 
+
+        Route::post('plan-task/{id}', 'updatePlanTask')->name('plan-module-task.auto.sync');
         
     });
 

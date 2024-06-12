@@ -794,69 +794,69 @@ var classPlanDateListsTutorTable = (function () {
     });
 
     
-    $('.module-call').on('click', function(e){
-        e.preventDefault();
-        let tthis = $(this)
-        let planDateListId = tthis.data('plandataid');
+    // $('.module-call').on('click', function(e){
+    //     e.preventDefault();
+    //     let tthis = $(this)
+    //     let planDateListId = tthis.data('plandataid');
      
-        tthis.children('span').css('display', 'inline-block');
-        tthis.attr('disabled', 'disabled');
-        let data ={
-            page: 1,
-            size: 100,
-            status:1,
-        }
+    //     tthis.children('span').css('display', 'inline-block');
+    //     tthis.attr('disabled', 'disabled');
+    //     let data ={
+    //         page: 1,
+    //         size: 100,
+    //         status:1,
+    //     }
 
-        axios({
-            method: 'get',
-            url: route('elearning.list', data),
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                tthis.removeAttr('disabled');
-                tthis.children('span').css('display', 'none');
+    //     axios({
+    //         method: 'get',
+    //         url: route('elearning.list', data),
+    //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    //     }).then(response => {
+    //         if (response.status == 200) {
+    //             tthis.removeAttr('disabled');
+    //             tthis.children('span').css('display', 'none');
                 
-                const LearningData = response.data.data;
+    //             const LearningData = response.data.data;
                 
-                let html = '';
-                for (let i=0; i<LearningData.length; i++) {
-                    let data =[planDateListId,LearningData[i].id
-                    ]
-                    if(LearningData[i].active==1 ) {
-                      html += `<a href="${
-                        route('plan-module-task.create',data)
-                      }" data-tw-toggle="modal" data-tw-target="#add-item-modal" class="intro-y block col-span-12 sm:col-span-4 2xl:col-span-3">
-                                 <div class="box rounded-md p-3 relative zoom-in">
-                                     <div class="flex-none relative block before:block before:w-full before:pt-[100%]">
-                                         <div class="absolute top-0 left-0 w-full h-full image-fit">
-                                             <img alt="London Churchill College" class="rounded-md" src="${
-                                                LearningData[i].logo_url
-                                             }">
-                                         </div>
-                                     </div>
-                                     <div class="block font-medium text-center truncate mt-3">${
-                                        LearningData[i].name
-                                     }</div>
-                                </div>
-                             </a>`
-                    }
-                }
+    //             let html = '';
+    //             for (let i=0; i<LearningData.length; i++) {
+    //                 let data =[planDateListId,LearningData[i].id
+    //                 ]
+    //                 if(LearningData[i].active==1 ) {
+    //                   html += `<a href="${
+    //                     route('plan-module-task.create',data)
+    //                   }" data-tw-toggle="modal" data-tw-target="#add-item-modal" class="intro-y block col-span-12 sm:col-span-4 2xl:col-span-3">
+    //                              <div class="box rounded-md p-3 relative zoom-in">
+    //                                  <div class="flex-none relative block before:block before:w-full before:pt-[100%]">
+    //                                      <div class="absolute top-0 left-0 w-full h-full image-fit">
+    //                                          <img alt="London Churchill College" class="rounded-md" src="${
+    //                                             LearningData[i].logo_url
+    //                                          }">
+    //                                      </div>
+    //                                  </div>
+    //                                  <div class="block font-medium text-center truncate mt-3">${
+    //                                     LearningData[i].name
+    //                                  }</div>
+    //                             </div>
+    //                          </a>`
+    //                 }
+    //             }
 
-                $("#activit-contentlist").html(html)
+    //             $("#activit-contentlist").html(html)
 
-                if(html!="") {
-                    activityModalCP.show();
-                }
-            }
-        }).catch(error =>{
-            errorModal.show();
-                document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#errorModal .title").html("Token Mismatch!" );
-                    $("#errorModal .descrtiption").html('Please reload');
-                }); 
-            location.reload();
-        });
+    //             if(html!="") {
+    //                 activityModalCP.show();
+    //             }
+    //         }
+    //     }).catch(error =>{
+    //         errorModal.show();
+    //             document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+    //                 $("#errorModal .title").html("Token Mismatch!" );
+    //                 $("#errorModal .descrtiption").html('Please reload');
+    //             }); 
+    //         location.reload();
+    //     });
         
-    });
+    // });
     /* Profile Menu End */
 })();
