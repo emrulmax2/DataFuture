@@ -19,7 +19,8 @@ class PlanTaskController extends Controller
     {
         //
     }
-
+    
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -117,5 +118,38 @@ class PlanTaskController extends Controller
     public function destroy(PlanTask $planTask)
     {
         //
+    }
+
+    public function updatePlanTask($id) {
+        
+        $plan = Plan::find($id);
+        $eLearningActivitys = ELearningActivitySetting::all();
+        if($plan->count()>0):
+            foreach($eLearningActivitys as $eLearningActivity) :
+                $planTask = PlanTask::where("module_creation_id",$plan->module_creation_id)
+                            ->orWhere('plan_id',$plan->id)
+                            ->where('e_learning_activity_setting_id', $eLearningActivity->id)
+                            ->get()
+                            ->first();
+                if(!$planTask)  
+                    $planTask = new PlanTask();
+
+                $planTask->name = $eLearningActivity->category;
+                $planTask->description = $eLearningActivity->category;
+                $planTask->category = $eLearningActivity->category;
+                $planTask->module_creation_id = $plan->module_creation_id;
+                $planTask->plan_id = $plan ->id;
+                $planTask->logo = $eLearningActivity->logo;
+                $planTask->days_reminder = $eLearningActivity->days_reminder;
+                $planTask->is_mandatory = $eLearningActivity->is_mandatory;
+                $planTask->e_learning_activity_setting_id = $eLearningActivity->id;
+                $planTask->created_by = auth()->user()->id;
+                $planTask->save();
+            endforeach;
+            return response()->json(['message' => 'Successfully regenerated'], 200);
+        else:
+            return response()->json(['message' => 'Couldn\'t regenerated'], 422);
+        
+        endif;
     }
 }

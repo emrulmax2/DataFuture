@@ -664,7 +664,57 @@ var classPlanAssessmentModuleTable = (function () {
                 }
             }
         );
-
+        if($("#confirmModalPlanTask").length > 0) {
+            const confirmModalPlanTask = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalPlanTask"));
+            let confirmModalPlanTaskTitle = 'Are you sure?';
+            let confirmModalPlanTaskDescription = 'Do you really want to re-assign the module related documents.';
+            const confirmModalPlanTaskEL = document.getElementById('confirmModalPlanTask');
+            confirmModalPlanTaskEL.addEventListener('hidden.tw.modal', function(event){
+                $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-id', '0');
+                $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-action', 'none');
+            });
+            document.getElementById('confirmModalPlanTask').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModalPlanTask .title').html(confirmModalPlanTaskTitle);
+                $('#confirmModalPlanTask .description').html(confirmModalPlanTaskDescription);
+                let id = $(".callModalPlanTask").data('planid');
+                $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-id', id);
+                $('#confirmModalPlanTask .agreeWithPlanTask').attr('data-action', 'update');
+            });
+            
+            $(".agreeWithPlanTask").on('click',function(e){
+                let $agreeBTN = $(this);
+                let recordID = $agreeBTN.attr('data-id');
+                
+                $('#confirmModalPlanTask button').attr('disabled', 'disabled');
+                
+                e.preventDefault();
+                let planid = recordID;
+                axios({
+                    method: "post",
+                    url: route('plan-module-task.auto.sync',planid),
+                    
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        succModal.show();
+                        confirmModalPlanTask.hide()
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Congratulations!');
+                            $('#successModal .successModalDesc').html('Modules Assignment data successfully generated.');
+                        });
+    
+                    }
+                    
+                    setTimeout(function(){
+                        succModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }).catch(error => {
+                    confirmModalPlanTask.hide();
+                    console.log('error');
+                });
+            });
+        }
         // On click go button
         $("#tabulator-html-filter-go-PT").on("click", function (event) {
             filterHTMLForm();

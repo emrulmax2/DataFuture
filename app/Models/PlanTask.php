@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PlanTask extends Model
@@ -18,14 +18,14 @@ class PlanTask extends Model
 
     }
 
-    public function updatedBy(): HasOne
+    public function updatedBy(): BelongsTo
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class,'updated_by');
     }
 
-    public function createdBy(): HasOne
+    public function createdBy(): BelongsTo
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class,'created_by');
     }
     
 }
