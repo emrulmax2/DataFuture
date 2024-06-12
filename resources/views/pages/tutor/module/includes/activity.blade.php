@@ -106,8 +106,10 @@
                                                     </div>
                                                 </div>
                                             @else
-                                            <div class="font-medium items-center text-slate-400 mx-auto">
-                                                    N/A
+                                            <div class="flex items-center px-5 py-5 mx-auto ">
+                                                <div class="font-medium text-slate-400">
+                                                        N/A
+                                                </div>
                                             </div>
                                             @endif
                                         </td>
