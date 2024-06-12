@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Models\UserPrivilege;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 
 class DashboardController extends Controller
@@ -49,17 +50,12 @@ class DashboardController extends Controller
                 }
             }
         }
-        // foreach ($user->interviews as $interview) {
-        //     $ApplicantTask = ApplicantTask::find($interview->applicant_task_id);
-        //      if($ApplicantTask->status!="Completed") {
-        //          $unfinishedInterviewCount++;
-        //     }
-        // }
 
         $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
         $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
+        $workHistory = $this->getUserAttendanceLiveBtns();
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -71,7 +67,9 @@ class DashboardController extends Controller
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
             'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
             'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
-            'home_work_history_btns' => $this->getUserAttendanceLiveBtns(),
+            'home_work_history_btns' => (isset($workHistory['html']) && !empty($workHistory['html']) ? $workHistory['html'] : ''),
+            'work_history_lock' => (isset($workHistory['loc']) ? $workHistory['loc'] : false),
+            'work_history_lock_no' => (isset($workHistory['loc_no']) ? $workHistory['loc_no'] : 0),
             'internal_link_buttons' => $this->getInternalLinkBtns(),
             'venue_ips' => $ips,
             'departments' => Department::where('available_for_all', 1)->orderBy('name', 'ASC')->get(),
@@ -277,7 +275,13 @@ class DashboardController extends Controller
             $html .= '</div>';
         endif;
 
-        return $html;
+        $res = [];
+        $res['html'] = $html;
+        $res['loc'] = ($loc == 0 || $loc == 2 ? true : false);
+        $res['loc_no'] = ($loc == 0 ? 1 : ($loc == 2 ? 3 : 0));
+
+        return $res;
+        //return $html;
     }
 
     public function getInternalLinkBtns(){
@@ -409,7 +413,13 @@ class DashboardController extends Controller
         return $html;
     }
 
+    public function ignoreFeeAttendance(Request $request){
+        Session::put('work_history_lock_first_time', 1);
+        return response()->json(['res' => 'Success!'], 200);
+    }
+
     public function feeAttendance(Request $request){
+        Session::forget('work_history_lock_first_time');
         $venuIpAddresses        = VenueIpAddress::pluck('ip')->unique()->toArray();
 
         $user_id                = auth()->user()->id;

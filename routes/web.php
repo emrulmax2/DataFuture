@@ -1339,6 +1339,7 @@ Route::middleware('auth')->group(function() {
         Route::get('/dashboard/account', 'getAccountDashBoard')->name('staff.dashboard.account');
         Route::get('/dashboard/list', 'list')->name('dashboard.staff.list');
         Route::post('/dashboard/fee-attendance', 'feeAttendance')->name('dashboard.feed.attendance');
+        Route::post('/dashboard/ignore-feed-attendance', 'ignoreFeeAttendance')->name('dashboard.ignore.feed.attendance');
         
         Route::get('/dashboard/internal-link/{id}', 'parentLinkBox')->name('dashboard.internal-link.parent');
 
