@@ -126,11 +126,11 @@ class PlanTaskController extends Controller
         $eLearningActivitys = ELearningActivitySetting::all();
         if($plan->count()>0):
             foreach($eLearningActivitys as $eLearningActivity) :
-                $planTask = PlanTask::where("module_creation_id",$plan->module_creation_id)
-                            ->orWhere('plan_id',$plan->id)
+                $planTask = PlanTask::where('plan_id',$plan->id)
                             ->where('e_learning_activity_setting_id', $eLearningActivity->id)
                             ->get()
                             ->first();
+                          
                 if(!$planTask)  
                     $planTask = new PlanTask();
 
@@ -138,7 +138,7 @@ class PlanTaskController extends Controller
                 $planTask->description = $eLearningActivity->category;
                 $planTask->category = $eLearningActivity->category;
                 $planTask->module_creation_id = $plan->module_creation_id;
-                $planTask->plan_id = $plan ->id;
+                $planTask->plan_id = $plan->id;
                 $planTask->logo = $eLearningActivity->logo;
                 $planTask->days_reminder = $eLearningActivity->days_reminder;
                 $planTask->is_mandatory = $eLearningActivity->is_mandatory;
@@ -146,6 +146,7 @@ class PlanTaskController extends Controller
                 $planTask->created_by = auth()->user()->id;
                 $planTask->save();
             endforeach;
+            
             return response()->json(['message' => 'Successfully regenerated'], 200);
         else:
             return response()->json(['message' => 'Couldn\'t regenerated'], 422);
