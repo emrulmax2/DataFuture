@@ -25,39 +25,39 @@
                         <a href="{{ route('user.account') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MY-HR-logos.jpeg') }}">
                         </a>
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['applicant']) && auth()->user()->priv()['applicant'] == 1)
                         <a href="{{ route('admission') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y relative">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/APPLICANT-logos.jpeg') }}">
                             <span style="margin-top: -55px;border-radius: 0.25rem 0 0.25rem 0;padding: 2px 10px 0;" class="absolute bg-white b-0 r-0 text-center font-medium py-0 px-2 text-slate-500 w-auto">{{ $applicant }}</span>
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['live']) && auth()->user()->priv()['live'] == 1)
                         <a href="{{ route('student') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/STUDENTS-logos.jpeg') }}">
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
                         <a href="{{ route('tutor-dashboard.show.new', 32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Tutor-logos.jpeg') }}">
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
                         <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/personal_tutor-logos.jpeg') }}">
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
                         <a href="{{ route('hr.portal') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Human-Resources-logos.jpeg') }}">
                         </a>
                         @endif
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
                         <a href="{{ route('programme.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/MANAGER-logos.jpeg') }}">
                         </a>
                         @endif
 
-                        @if(auth()->user()->remote_access && isset(auth()->user()->priv()['access_account']) && auth()->user()->priv()['access_account'] == 1)
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['access_account']) && auth()->user()->priv()['access_account'] == 1)
                         <a href="{{ route('accounts') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/ACCOUNT-logos.png') }}">
                         </a>
@@ -70,13 +70,14 @@
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-2">
-                        @if(Auth::user() && Route::currentRouteName() == 'dashboard' && !empty($home_work_history_btns) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
+                        @if(Auth::user() && (Route::currentRouteName() == 'dashboard' || Route::currentRouteName() == 'staff.dashboard') && (isset($home_work_history_btns) && !empty($home_work_history_btns)) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
                         <div class="intro-x mt-6 mb-6">
                             <div class="grid grid-cols-12 gap-5 logBtns">
                                 {!! $home_work_history_btns !!}
                             </div>
                         </div>
                         @endif
+                        @if(!$work_history_lock)
                         <div class="intro-x mt-6 mb-6">
                             <div class="grid grid-cols-12 gap-5">
                                 {!! $internal_link_buttons !!}
@@ -87,16 +88,18 @@
                                 @endif
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div> 
+        @if(!empty($myPendingTask))
         <div class="col-span-12 2xl:col-span-3">
              <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-6">
                         <div class="grid grid-cols-12 gap-5 gap-y-0">
-                            @if(!empty($myPendingTask))
+                            @if(!$work_history_lock)
                                 @foreach($myPendingTask as $process_id => $process)
                                     <div class="col-span-12 {{ !$loop->first ? 'border-t pt-5 mt-3' : '' }}">
                                         <div class="grid grid-cols-12 gap-5">
@@ -130,6 +133,7 @@
              </div>
             
         </div>
+        @endif
     </div>
 
     <!-- BEGIN: Send Group Mail Modal -->
@@ -257,6 +261,29 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
+
+    @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1))
+    <!-- BEGIN: Confirm Modal Content -->
+    <div id="attendanceHistoryLocModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5">{{ ($work_history_lock_no == 1 ? 'Oops!' : 'Hi '.Auth::user()->load('employee')->full_name) }}</div>
+                        <div class="text-slate-500 mt-2">{{ ($work_history_lock_no == 1 ? 'Looks like you are not clocked in. Would you like to clock in now?' : 'It seems you\'re on break. Are you returning to work now?') }}</div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" class="disagreeWith actionBtn btn btn-danger text-white w-20 mr-1">No</button>
+                        <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn btn btn-success text-white w-20">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Confirm Modal Content -->
+    @endif
+
     
 @endsection
 
