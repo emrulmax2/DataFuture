@@ -407,6 +407,9 @@
                                     <div id="process-tab-{{ $loop->index }}-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-2-tab">
                                         @if($proGroup['completedTask']->count() > 0)
                                             @foreach($proGroup['completedTask'] as $task)
+                                            @php 
+                                                $uploadedBy = [];
+                                            @endphp
                                             <div class="grid grid-cols-12 gap-4">
                                                     <div class="col-span-6 sm:col-span-4">
                                                         <div class="relative ">
@@ -433,6 +436,13 @@
                                                                         @if(isset($task->documents) && !empty($task->documents))
                                                                             <div class="flex mt-2">
                                                                                 @foreach($task->documents as $tdoc)
+                                                                                    @php 
+                                                                                        if(isset($tdoc->user->employee->full_name) && !empty($tdoc->user->employee->full_name)):
+                                                                                            $uploadedBy[$tdoc->created_by]['photo'] = (isset($tdoc->user->employee->photo_url) ? $tdoc->user->employee->photo_url : '');
+                                                                                            $uploadedBy[$tdoc->created_by]['by'] = (isset($tdoc->user->employee->full_name) ? $tdoc->user->employee->full_name : '');
+                                                                                            $uploadedBy[$tdoc->created_by]['at'] = (isset($tdoc->created_at) && !empty($tdoc->created_at) ? date('jS F, Y', strtotime($tdoc->created_at)) : '');
+                                                                                        endif;
+                                                                                    @endphp
                                                                                     @if($tdoc->doc_type == 'jpg' || $tdoc->doc_type == 'jpeg' || $tdoc->doc_type == 'png' || $tdoc->doc_type == 'gif')
                                                                                         @if(isset($tdoc->current_file_name) && !empty($tdoc->current_file_name) && isset($tdoc->id) && $tdoc->id > 0)
                                                                                             <a data-id="{{ $tdoc->id }}" class="downloadDoc w-8 h-8 mr-1 zoom-in inline-flex rounded-md btn-primary-soft justify-center items-center" href="javascript:void(0);">
@@ -455,7 +465,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-span-3 sm:col-span-4">
-                                                        <div class="flex items-center justify-end assignedUserWrap completedUserWrap" id="assignedUserWrap_{{ $task->id }}">
+                                                        <div class="flex items-start justify-end assignedUserWrap completedUserWrap" id="assignedUserWrap_{{ $task->id }}">
                                                             <div class="font-medium text-base mr-5 ml-auto">Completed By:</div>
                                                             @if(isset($task->updatedBy->employee) && !empty($task->updatedBy->employee))
                                                                 <div class="flex items-center justify-start">
@@ -475,6 +485,29 @@
                                                                 </div>
                                                             @endif
                                                         </div>
+
+                                                        @if(!empty($uploadedBy))
+                                                            <div class="flex items-start justify-end assignedUserWrap completedUserWrap mt-3" id="assignedUserWrap_{{ $task->id }}">
+                                                                <div class="font-medium text-base mr-5 ml-auto">Uploaded By:</div>
+                                                                <div class="ml-0">
+                                                                    @foreach($uploadedBy as $upby)
+                                                                    <div class="flex items-center justify-start mb-1">
+                                                                        <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">
+                                                                            <img class="assignedUserPhoto" alt="Assign To" src="{{ (isset($upby['photo']) && !empty($upby['photo']) ? $upby['photo'] : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                                        </div>
+                                                                        <div class="ml-4">
+                                                                            <div class="font-medium assignedUserName">
+                                                                                {{ (isset($upby['by']) ? $upby['by'] : 'Unknown Employee') }}
+                                                                                @if(isset($upby['at']) && !empty($upby['at']))
+                                                                                    <span class="ml-2 text-slate-500 text-xs whitespace-nowrap">{{ date('jS M, Y', strtotime($upby['at'])) }}</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                     @php 
                                                         $user_ids = [];

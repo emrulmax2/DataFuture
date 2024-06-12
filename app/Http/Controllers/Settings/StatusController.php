@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Status;
 use App\Http\Requests\StatusRequest;
+use App\Models\EmailTemplate;
+use App\Models\LetterSet;
 
 class StatusController extends Controller
 {
@@ -18,6 +20,8 @@ class StatusController extends Controller
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Statuses', 'href' => 'javascript:void(0);']
             ],
+            'letters' => LetterSet::where('hr', '!=', 1)->where('status', 1)->orderBy('letter_title', 'ASC')->get(),
+            'emails' => EmailTemplate::where('hr', '!=', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
         ]);
     }
 
@@ -61,6 +65,10 @@ class StatusController extends Controller
                     'sl' => $i,
                     'name' => $list->name,
                     'type' => $list->type,
+                    'letter_set_id' => $list->letter_set_id,
+                    'letter_name' => (isset($list->letter->letter_title) && !empty($list->letter->letter_title) ? $list->letter->letter_title : ''),
+                    'email_template_id' => $list->email_template_id,
+                    'email_name' => (isset($list->mail->email_title) && !empty($list->mail->email_title) ? $list->mail->email_title : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -70,9 +78,13 @@ class StatusController extends Controller
     }
 
     public function store(StatusRequest $request){
+        $letter_set_id = (isset($request->letter_set_id) && $request->letter_set_id > 0 ? $request->letter_set_id : 0);
+        $email_template_id = ($letter_set_id == 0 && isset($request->email_template_id) && $request->email_template_id > 0 ? $request->email_template_id : 0);
         $data = Status::create([
             'name'=> $request->name,
             'type'=> $request->type,
+            'letter_set_id' => $letter_set_id,
+            'email_template_id' => $email_template_id,
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -88,10 +100,14 @@ class StatusController extends Controller
         }
     }
 
-    public function update(StatusRequest $request){      
+    public function update(StatusRequest $request){  
+        $letter_set_id = (isset($request->letter_set_id) && $request->letter_set_id > 0 ? $request->letter_set_id : 0);
+        $email_template_id = ($letter_set_id == 0 && isset($request->email_template_id) && $request->email_template_id > 0 ? $request->email_template_id : 0);    
         $data = Status::where('id', $request->id)->update([
             'name'=> $request->name,
             'type'=> $request->type,
+            'letter_set_id' => $letter_set_id,
+            'email_template_id' => $email_template_id,
             'updated_by' => auth()->user()->id
         ]);
 

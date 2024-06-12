@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import Dropzone from "dropzone";
+import TomSelect from "tom-select";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 ("use strict");
@@ -320,6 +321,21 @@ var employeeCommunicationDocumentListTable = (function () {
 
     }
 
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let emailTemplateId = new TomSelect('#email_template_id', tomOptions);
+
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
@@ -358,6 +374,8 @@ var employeeCommunicationDocumentListTable = (function () {
         $('#addCommunicationModal input[name="document"]').val('');
         $('#addCommunicationModal #editComDocumentName').html('');
         emailBody.setData($('#addCommunicationModal .sendEmailContent').attr('data-content'));
+
+        emailTemplateId.clear(true);
     });
 
     const uploadEmployeeDocumentModalEl = document.getElementById('uploadEmployeeDocumentModal')
@@ -760,4 +778,29 @@ var employeeCommunicationDocumentListTable = (function () {
             }
         });
     });
+
+    $('#email_template_id').on('change', function(e){
+        let $theTemplate = $(this);
+        let the_template_id = $theTemplate.val();
+
+        if(the_template_id > 0){
+            axios({
+                method: "post",
+                url: route('employee.documents.get.template'),
+                data: {the_template_id : the_template_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let row = response.data.row;
+                    emailBody.setData(row.description);
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            emailBody.setData($('#addCommunicationModal .sendEmailContent').attr('data-content'));
+        }
+    })
 })();

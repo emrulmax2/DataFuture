@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
  
 ("use strict");
 var settingsListTable = (function () {
@@ -36,6 +37,21 @@ var settingsListTable = (function () {
                     title: "Type",
                     field: "type",
                     headerHozAlign: "left",
+                },{
+                    title: "Letter/Email",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "left",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        if(cell.getData().letter_set_id > 0){
+                            return '<div style="white-space: normal; word-break: break-all;">Letter: '+cell.getData().letter_name+'</div>';
+                        }else if(cell.getData().email_template_id > 0){
+                            return '<div style="white-space: normal; word-break: break-all;">Email: '+cell.getData().email_name+'</div>';
+                        }else{
+                            return '';
+                        }
+                    }
                 },
                 {
                     title: "Actions",
@@ -146,6 +162,25 @@ var settingsListTable = (function () {
             filterHTMLForm();
         });
 
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: false,
+            maxOptions: null,
+            create: false,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+    
+        let letter_set_id = new TomSelect('#letter_set_id', tomOptions);
+        let email_template_id = new TomSelect('#email_template_id', tomOptions);
+        let edit_letter_set_id = new TomSelect('#edit_letter_set_id', tomOptions);
+        let edit_email_template_id = new TomSelect('#edit_email_template_id', tomOptions);
+
         const addSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSettingsModal"));
         const editSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSettingsModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -157,6 +192,9 @@ var settingsListTable = (function () {
             $('#addSettingsModal .acc__input-error').html('');
             $('#addSettingsModal .modal-body input').val('');
             $('#addSettingsModal .modal-body select').val('');
+
+            letter_set_id.clear(true);
+            email_template_id.clear(true);
         });
         
         const editSettingsModalEl = document.getElementById('editSettingsModal')
@@ -165,7 +203,18 @@ var settingsListTable = (function () {
             $('#editSettingsModal .modal-body input').val('');
             $('#editSettingsModal .modal-body select').val('');
             $('#editSettingsModal input[name="id"]').val('0');
+
+            edit_letter_set_id.clear(true);
+            edit_email_template_id.clear(true);
         });
+
+        $('#letter_set_id').on('change', function(e){
+            email_template_id.clear(true);
+        })
+
+        $('#email_template_id').on('change', function(e){
+            letter_set_id.clear(true);
+        })
 
         $('#addSettingsForm').on('submit', function(e){
             e.preventDefault();
@@ -228,12 +277,32 @@ var settingsListTable = (function () {
                         $('#editSettingsModal select[name="type"]').val(dataset.type ? dataset.type : '');
                         
                         $('#editSettingsModal input[name="id"]').val(editId);
+                        if(dataset.letter_set_id > 0){
+                            edit_letter_set_id.addItem(dataset.letter_set_id, true);
+                            edit_email_template_id.clear(true);
+                        }else{
+                            edit_letter_set_id.clear(true);
+                        }
+                        if(dataset.email_template_id > 0){
+                            edit_email_template_id.addItem(dataset.email_template_id, true);
+                            edit_letter_set_id.clear(true);
+                        }else{
+                            edit_email_template_id.clear(true);
+                        }
                     }
                 })
                 .catch((error) => {
                     console.log(error);
                 });
         });
+
+        $('#edit_letter_set_id').on('change', function(e){
+            edit_email_template_id.clear(true);
+        })
+
+        $('#edit_email_template_id').on('change', function(e){
+            edit_letter_set_id.clear(true);
+        })
 
         // Update Course Data
         $("#editSettingsForm").on("submit", function (e) {

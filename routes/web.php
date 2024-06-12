@@ -1148,6 +1148,7 @@ Route::middleware('auth')->group(function() {
         
         Route::post('employee-profile/documents/download-url', 'downloadUrl')->name('employee.documents.download.url');
         Route::post('employee-profile/documents/sent-mail', 'employeeSentMail')->name('employee.documents.sent.mail'); 
+        Route::post('employee-profile/documents/get-template', 'employeeGetTemplate')->name('employee.documents.get.template'); 
     });
 
     Route::controller(EmployeeNotesController::class)->group(function(){
