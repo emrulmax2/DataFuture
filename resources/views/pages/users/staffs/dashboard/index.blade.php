@@ -274,8 +274,8 @@
                         <div class="text-slate-500 mt-2">{{ ($work_history_lock_no == 1 ? 'Looks like you are not clocked in. Would you like to clock in now?' : 'It seems you\'re on break. Are you returning to work now?') }}</div>
                     </div>
                     <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disagreeWith actionBtn btn btn-danger text-white w-20 mr-1">No</button>
-                        <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn btn btn-success text-white w-20">Yes</button>
+                        <button type="button" class="disagreeWith actionBtn btn btn-danger text-white w-40 mr-1">No</button>
+                        <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn btn btn-success text-white w-48 h-20">Yes</button>
                     </div>
                 </div>
             </div>
