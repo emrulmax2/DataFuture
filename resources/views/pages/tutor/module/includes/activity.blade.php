@@ -24,7 +24,7 @@
                                     <th class="whitespace-nowrap w-20">#</th>
                                     <th class="whitespace-nowrap">NAME</th>
                                     <th class="text-center whitespace-nowrap">UPLOADS</th>
-                                    <th class="text-center whitespace-nowrap">CREATED BY</th>
+                                    <th class="text-center whitespace-nowrap">UPLOADED BY</th>
                                     <th class="text-center whitespace-nowrap">ACTIONS</th>
                                 </tr>
                             </thead>
@@ -42,6 +42,7 @@
                                 $FullName = isset($task->task->user) ? $task->task->user->employee->full_name : '';
                                 $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
                                 $userProfileImage =$task->task->createdBy->employee->photo_url;
+                                $onlyTaskCreatorFound =1;
                                 $rand = rand(0,1);
                                 @endphp
                                     <tr class="intro-x">
@@ -78,30 +79,37 @@
                                                             $userProfileImage =$upload->createdBy->employee->photo_url;
                                                             $FullName = $upload->createdBy->employee->full_name;
                                                             $lastUpdate = $upload->created_at;
+                                                            $onlyTaskCreatorFound = 0;
                                                         @endphp
                                                     @endForeach
                                                 @else
                                                     <div class="font-medium text-slate-400">
-                                                            No Upload File Found
+                                                            No Uploaded File Found
                                                     </div>
                                                 @endif
                                             </div>
                                         </td>
-                                        <td>
-                                            <div class="flex items-center px-5 py-5">
-                                                <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
-                                                    <img src="{{ $userProfileImage }}" alt="{{ $FullName }}">
-                                                </div>
-                                                <div class="ml-4 mr-auto">
-                                                    <div class="font-medium">{{ $FullName }}</div>
-                                                    <div class="mt-0.5 text-xs text-slate-500">
-                                                        {{ date("F jS, Y",strtotime($lastUpdate)) }}
+                                        <td class="flex">
+                                            @if(!$onlyTaskCreatorFound)
+                                                <div class="flex items-center px-5 py-5 mx-auto">
+                                                    <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
+                                                        <img src="{{ $userProfileImage }}" alt="{{ $FullName }}">
+                                                    </div>
+                                                    <div class="ml-4 mr-auto">
+                                                        <div class="font-medium">{{ $FullName }}</div>
+                                                        <div class="mt-0.5 text-xs text-slate-500">
+                                                            {{ date("F jS, Y",strtotime($lastUpdate)) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-success ml-2">
+                                                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                     </div>
                                                 </div>
-                                                <div class="text-success">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                                </div>
+                                            @else
+                                            <div class="font-medium text-slate-400">
+                                                    N/A
                                             </div>
+                                            @endif
                                         </td>
                                         <td class="table-report__action w-56">
                                             <div class="flex justify-center items-center">
