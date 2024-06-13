@@ -70,6 +70,7 @@ import { createIcons, icons } from "lucide";
         let $theBtn = $(this);
         let employee = $theBtn.attr('data-employee');
         let clock_in_no = $('#clock_in_no').val();
+        $('#liveAttendanceForm').removeClass('activeForm');
         clockoutConfirmModal.show();
 
         $('#clockoutConfirmModal .employeeName').html(employee);
