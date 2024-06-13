@@ -35,8 +35,7 @@ class EmployeeAttendancePunchController extends Controller
             }else{
                 $res['loc'] = 0;
             }
-            $res['name'] = (isset($employment->employee->first_name) && !empty($employment->employee->first_name)) ? $employment->employee->first_name.' ' : '';
-            $res['name'] .= (isset($employment->employee->last_name) && !empty($employment->employee->last_name)) ? $employment->employee->last_name : '';
+            $res['name'] = (isset($employment->employee->full_name) && !empty($employment->employee->full_name)) ? $employment->employee->full_name.' ' : '';
         else:
             $res['loc'] = 'error';
             $res['name'] = '';
@@ -51,6 +50,62 @@ class EmployeeAttendancePunchController extends Controller
             $dara['created_by'] = $employment->employee->user_id;
             
             EmployeeAttendancePunchHistory::create($dara);
+        endif;
+
+        return response()->json(['res' => $res], 200);
+    }
+
+    public function storeAttendance(Request $request){
+        $clock_in_no            = $request->clockinno;
+        $attendance_type        = $request->type;
+        $today                  = date('Y-m-d');
+        $time                   = date('H:i:s');
+        $datetime               = date('jS F, Y H:i:s');
+
+        $type_name = '';
+        switch ($attendance_type):
+            case 2:
+                $type_name = 'Break';
+                break;
+            case 4:
+                $type_name = 'Clock-Out';
+                break;
+        endswitch;
+
+        $ipAddresses = VenueIpAddress::orderBy('id', 'ASC')->pluck('ip')->toArray();
+
+        $employment = Employment::where('punch_number', $clock_in_no)->get()->first();
+        $employee_id = $employment->employee_id;
+
+        $data[] = '';
+        $data['employee_id'] = $employee_id;
+        $data['attendance_type'] = $attendance_type;
+        $data['date'] = $today;
+        $data['time'] = $time;
+        $data['ip'] = $request->ip();
+        $data['created_by'] = $employee_id;
+
+        $res = [];
+        $attendanceLive = EmployeeAttendanceLive::create($data);
+        if($attendanceLive->id):
+            $data = [];
+            $data['last_action'] = $attendance_type;
+            $data['last_action_date'] = $today;
+            $data['last_action_time'] = $time;
+
+            Employment::where('punch_number', $clock_in_no)->where('employee_id', $employee_id)->update($data);
+
+            $res['message'] = '';
+            if(!empty($ipAddresses) && !in_array($request->ip(), $ipAddresses)):
+                $res['suc'] = 2;
+                $res['msg'] = '<strong>'.$datetime.'</strong><br/>Your '.$type_name.' is recorded away from the campus. Please ensure this has been authorised by the HR/Department manager.';
+            else:
+                $res['suc'] = 1;
+                $res['msg'] = 'Your punch for '.$type_name.' successfully recorde for the day '.$datetime.'.';
+            endif;
+        else:
+            $res['suc'] = 2;
+            $res['msg'] = 'Oops! Something went wrong. Please try later or contact with your HR/Department manager.';
         endif;
 
         return response()->json(['res' => $res], 200);

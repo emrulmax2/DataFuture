@@ -257,6 +257,7 @@ Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::get('punch', 'index')->name('attendance.punch');
     Route::post('punch/get-attendance-history', 'getAttendanceHistory')->name('attendance.punch.get.history');
     Route::post('punch/store-attendance', 'store')->name('attendance.punch.store');
+    Route::post('punch/store-attendance-dif', 'storeAttendance')->name('attendance.punch.store.dif');
 });
 
 // all applicant have a prefix route name applicant.* value
