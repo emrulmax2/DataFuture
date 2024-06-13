@@ -14,6 +14,17 @@ import { createIcons, icons } from "lucide";
 
         $('#clockoutConfirmModal button').removeAttr('disabled');
         $('#clockoutConfirmModal button').find('svg').fadeOut();
+
+        let $form = $('#liveAttendanceForm');
+        setTimeout(function(){
+            $form.find('.theMessage').remove();
+            $form.find('.liveAttendanceFormBtnGroup').fadeOut('fast', function(){
+                $form.find('.btn-action').fadeOut().attr('disabled', 'disabled');
+                $form.find('.btn-back').fadeOut().attr('disabled', 'disabled');
+                $form.find('#clock_in_no').val('');
+                $form.find('[name="attendance_type"]').val('0');
+            });
+        }, 5000);
     });
 
     $('#clockoutConfirmModal button').on('click', function(e){
