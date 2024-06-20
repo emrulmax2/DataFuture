@@ -89,27 +89,29 @@ class ProcessStudentInterview implements ShouldQueue
             if($applicantSet->applicant_document_id) { 
 
                 $applicantDocument = ApplicantDocument::find($applicantSet->applicant_document_id);
-                $studentDocument = new StudentDocument();
 
-                $applicantArray = [
-                    'student_id' => $student->id,
-                    'hard_copy_check' => $applicantDocument->hard_copy_check,
-                    'doc_type' => $applicantDocument->doc_type,
-                    'disk_type' => $applicantDocument->disk_type,
-                    'path' => $applicantDocument->path,
-                    'display_file_name' =>	 $applicantDocument->display_file_name,
-                    'current_file_name' => $applicantDocument->current_file_name,
-                    'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
-                ];
+                if($applicantDocument!=null) {
+                    $studentDocument = new StudentDocument();
 
-                if($applicantDocument->document_setting_id) {
-                    $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                    $applicantArray = [
+                        'student_id' => $student->id,
+                        'hard_copy_check' => $applicantDocument->hard_copy_check,
+                        'doc_type' => $applicantDocument->doc_type,
+                        'disk_type' => $applicantDocument->disk_type,
+                        'path' => $applicantDocument->path,
+                        'display_file_name' =>	 $applicantDocument->display_file_name,
+                        'current_file_name' => $applicantDocument->current_file_name,
+                        'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                    ];
+
+                    if($applicantDocument->document_setting_id) {
+                        $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                    }
+
+                    $studentDocument->fill($applicantArray);
+                    $studentDocument->save();
+                    $dataArray = array_merge($dataArray,['student_document_id' => $studentDocument->id]);
                 }
-
-                $studentDocument->fill($applicantArray);
-                $studentDocument->save();
-                $dataArray = array_merge($dataArray,['student_document_id' => $studentDocument->id]);
-
             }
             $data = new StudentInterview();
 
