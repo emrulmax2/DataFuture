@@ -88,9 +88,8 @@ class ProcessStudentInterview implements ShouldQueue
             }
             if($applicantSet->applicant_document_id) { 
 
-                $applicantDocument = ApplicantDocument::find($applicantSet->applicant_document_id);
+                $applicantDocument = ApplicantDocument::withTrashed()->where("id",$applicantSet->applicant_document_id)->get()->first();
 
-                if($applicantDocument!=null) {
                     $studentDocument = new StudentDocument();
 
                     $applicantArray = [
@@ -102,16 +101,15 @@ class ProcessStudentInterview implements ShouldQueue
                         'display_file_name' =>	 $applicantDocument->display_file_name,
                         'current_file_name' => $applicantDocument->current_file_name,
                         'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                        'deleted_at'=> ($applicantDocument->deleted_at!=null) ? $applicantDocument->deleted_at : null,
                     ];
-
                     if($applicantDocument->document_setting_id) {
                         $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
                     }
-
                     $studentDocument->fill($applicantArray);
                     $studentDocument->save();
                     $dataArray = array_merge($dataArray,['student_document_id' => $studentDocument->id]);
-                }
+                
             }
             $data = new StudentInterview();
 
