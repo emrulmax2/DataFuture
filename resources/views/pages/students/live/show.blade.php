@@ -683,6 +683,8 @@
                                         <span>{{ $referral->student->first_name }} {{ $referral->student->last_name }}</span><br/>
                                         <span>{{ $referral->student->users->email }}</span><br/>
                                         <span>{{ $referral->student->contact->mobile }}</span>
+                                    @elseif($referral->type == 'Agent')
+                                        <span>N/A</span>
                                     @else 
                                         <span>{{ $referral->user->name }}</span><br/>
                                         <span>{{ $referral->user->email }}</span>

@@ -2347,17 +2347,12 @@ class AdmissionController extends Controller
     public function admissionStudentUpdateStatus(Request $request){
         $applicant_id = $request->applicantID;
         $statusidID = $request->statusidID;
-        $rejectedReason = (isset($request->rejectedReason) && !empty($request->rejectedReason) ? $request->rejectedReason : Null);
+        $rejectedReason = ((isset($request->rejectedReason) && !$request->rejectedReason!="") ? $request->rejectedReason : null);
 
-        $applicantOldRow = Applicant::find($applicant_id);
-
-        $statusData = [];
-        $statusData['status_id'] = $statusidID;
-        $statusData['rejected_reason'] = $rejectedReason;
-        
-
-        $applicant = Applicant::find($applicant_id);
-        $applicant->fill($statusData);
+        $applicant =  $applicantOldRow = Applicant::find($applicant_id);
+       
+        $applicant->status_id = $statusidID;
+        $applicant->rejected_reason = $rejectedReason;
         $changes = $applicant->getDirty();
         $applicant->save();
 
