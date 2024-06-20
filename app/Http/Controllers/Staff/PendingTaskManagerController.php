@@ -10,6 +10,7 @@ use App\Http\Requests\TaskCanceledReasonRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
+use App\Models\ApplicantArchive;
 use App\Models\ApplicantDocument;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantTask;
@@ -19,6 +20,7 @@ use App\Models\ApplicantViewUnlock;
 use App\Models\ComonSmtp;
 use App\Models\LetterSet;
 use App\Models\ProcessList;
+use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentContact;
@@ -521,6 +523,29 @@ class PendingTaskManagerController extends Controller
                         'current_field_value' => $status,
                         'created_by' => auth()->user()->id
                     ]);
+                    
+                    $applicantRow = Applicant::find($student_id);
+                    $pendingTask = ApplicantTask::where('applicant_id', $student_id)->whereIn('status', ['Pending', 'In Progress'])->get();
+                    if($pendingTask->count() == 0 && $applicantRow->status_id < 4):
+                        $applicantData['status_id'] = 4;
+                        Applicant::where('id', $student_id)->update($applicantData);
+                        $statusRow = Status::find(4);
+                        if(isset($statusRow->letter_set_id) && $statusRow->letter_set_id > 0):
+                            $this->sendLetterOnStatusChanged($student_id, 4);
+                        elseif(isset($statusRow->email_template_id) && $statusRow->email_template_id > 0):
+                            $this->sendEmailOnStatusChanged($student_id, 4);
+                        endif;
+            
+                        $data = [];
+                        $data['applicant_id'] = $student_id;
+                        $data['table'] = 'applicants';
+                        $data['field_name'] = 'status_id';
+                        $data['field_value'] = $applicantRow->status_id;
+                        $data['field_new_value'] = '4';
+                        $data['created_by'] = auth()->user()->id;
+            
+                        ApplicantArchive::create($data);
+                    endif;
                 endif;
             else:
                 $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
