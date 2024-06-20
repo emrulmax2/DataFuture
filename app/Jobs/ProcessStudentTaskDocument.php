@@ -58,30 +58,28 @@ class ProcessStudentTaskDocument implements ShouldQueue
                     $applicantDocument = ApplicantDocument::find($applicantTaskDocument->applicant_document_id);
                     //find the document and put it in student document
                     // then insert it into studentDocument and applicantTaskDocument
-                    $studentDocument = new StudentDocument();
                     //DB::enableQueryLog();
-                    if($applicantDocument==null) {
-                        dd($applicantTaskDocument);
-                    }   
-                    $applicantArray = [
-                        'student_id' => $student->id,
-                        'hard_copy_check' => ($applicantDocument->hard_copy_check==1) ? 1 : 0,
-                        'doc_type' => $applicantDocument->doc_type,
-                        'disk_type' => $applicantDocument->disk_type,
-                        'path' => $applicantDocument->path,
-                        'display_file_name' =>	 $applicantDocument->display_file_name,
-                        'current_file_name' => $applicantDocument->current_file_name,
-                        'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
-                    ];
-                    if($applicantDocument->document_setting_id) {
-                        $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
-                    }
-                    $studentDocument->fill($applicantArray);
+                    if($applicantDocument!=null) {
+                        $studentDocument = new StudentDocument();
+                        $applicantArray = [
+                            'student_id' => $student->id,
+                            'hard_copy_check' => ($applicantDocument->hard_copy_check==1) ? 1 : 0,
+                            'doc_type' => $applicantDocument->doc_type,
+                            'disk_type' => $applicantDocument->disk_type,
+                            'path' => $applicantDocument->path,
+                            'display_file_name' =>	 $applicantDocument->display_file_name,
+                            'current_file_name' => $applicantDocument->current_file_name,
+                            'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                        ];
+                        if($applicantDocument->document_setting_id) {
+                            $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
+                        }
+                        $studentDocument->fill($applicantArray);
 
-                    $studentDocument->save();
-                    //endDocuemnt saved
-                    $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
-                    
+                        $studentDocument->save();
+                        //endDocuemnt saved
+                        $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
+                    }
                 endforeach;
                 
             }
