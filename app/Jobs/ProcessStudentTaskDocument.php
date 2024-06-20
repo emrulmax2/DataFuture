@@ -63,7 +63,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
 
                     $applicantArray = [
                         'student_id' => $student->id,
-                        'hard_copy_check' => $applicantDocument->hard_copy_check,
+                        'hard_copy_check' => ($applicantDocument->hard_copy_check==1) ? 1 : 0,
                         'doc_type' => $applicantDocument->doc_type,
                         'disk_type' => $applicantDocument->disk_type,
                         'path' => $applicantDocument->path,
