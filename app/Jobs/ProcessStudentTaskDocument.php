@@ -60,7 +60,9 @@ class ProcessStudentTaskDocument implements ShouldQueue
                     // then insert it into studentDocument and applicantTaskDocument
                     $studentDocument = new StudentDocument();
                     //DB::enableQueryLog();
-
+                    if($applicantDocument==null) {
+                        dd($applicantTaskDocument->applicant_document_id);
+                    }   
                     $applicantArray = [
                         'student_id' => $student->id,
                         'hard_copy_check' => ($applicantDocument->hard_copy_check==1) ? 1 : 0,
