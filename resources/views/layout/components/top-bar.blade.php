@@ -56,7 +56,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                     <li class="breadcrumb-item"><a href="{{ route('applicant.dashboard')  }}">Dashboard</a></li>
                 @elseif(Auth::guard('student')->check())
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Student</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('student.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('students.dashboard') }}">Dashboard</a></li>
                 @elseif(Auth::guard('agent')->check())
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Agent</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('agent.dashboard') }}">Dashboard</a></li>
