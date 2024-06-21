@@ -262,7 +262,7 @@
     </div>
     <!-- END: Warning Modal Content -->
 
-    @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1))
+    @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
     <!-- BEGIN: Confirm Modal Content -->
     <div id="attendanceHistoryLocModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
