@@ -14,6 +14,7 @@ class ComonSmtp extends Model
         'user_id',
         'smtp_user',
         'smtp_pass',
+        'smtp_email_password',
         'smtp_host',
         'smtp_port',
         'smtp_encryption',

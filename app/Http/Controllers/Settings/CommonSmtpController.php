@@ -67,6 +67,7 @@ class CommonSmtpController extends Controller
                     'sl' => $i,
                     'smtp_user' => $list->smtp_user,
                     'smtp_pass' => $list->smtp_pass,
+                    'smtp_email_password' => $list->smtp_email_password,
                     'smtp_host' => $list->smtp_host,
                     'smtp_port' => $list->smtp_port,
                     'smtp_encryption' => strtoupper($list->smtp_encryption),
