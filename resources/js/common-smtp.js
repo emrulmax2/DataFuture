@@ -34,8 +34,13 @@ var smtpSettingsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Password",
+                    title: "App Password",
                     field: "smtp_pass",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Email Password",
+                    field: "smtp_email_password",
                     headerHozAlign: "left",
                 },
                 {
@@ -216,6 +221,7 @@ var smtpSettingsListTable = (function () {
                 
                 $('#editSmtpModal input[name="smtp_user"]').val(dataset.smtp_user ? dataset.smtp_user : '');
                 $('#editSmtpModal input[name="smtp_pass"]').val(dataset.smtp_pass ? dataset.smtp_pass : '');
+                $('#editSmtpModal input[name="smtp_email_password"]').val(dataset.smtp_email_password ? dataset.smtp_email_password : '');
                 $('#editSmtpModal input[name="smtp_host"]').val(dataset.smtp_host ? dataset.smtp_host : '');
                 $('#editSmtpModal input[name="smtp_port"]').val(dataset.smtp_port ? dataset.smtp_port : '');
                 $('#editSmtpModal select[name="smtp_encryption"]').val(dataset.smtp_encryption ? dataset.smtp_encryption : '');

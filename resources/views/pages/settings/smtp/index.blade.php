@@ -108,9 +108,14 @@
                             <div class="acc__input-error error-smtp_user text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_smtp_pass" class="form-label">SMTP Password <span class="text-danger">*</span></label>
+                            <label for="edit_smtp_pass" class="form-label">APP Password <span class="text-danger">*</span></label>
                             <input id="edit_smtp_pass" type="password" name="smtp_pass" class="form-control w-full">
                             <div class="acc__input-error error-smtp_pass text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_smtp_email_password" class="form-label">Email Password <span class="text-danger">*</span></label>
+                            <input id="edit_smtp_email_password" type="password" name="smtp_email_password" class="form-control w-full">
+                            <div class="acc__input-error error-smtp_email_password text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <label for="edit_smtp_host" class="form-label">SMTP Host <span class="text-danger">*</span></label>
@@ -188,9 +193,14 @@
                             <div class="acc__input-error error-smtp_user text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="smtp_pass" class="form-label">SMTP Password <span class="text-danger">*</span></label>
+                            <label for="smtp_pass" class="form-label">App Password <span class="text-danger">*</span></label>
                             <input id="smtp_pass" type="password" name="smtp_pass" class="form-control w-full">
                             <div class="acc__input-error error-smtp_pass text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="smtp_email_password" class="form-label">Email Password <span class="text-danger">*</span></label>
+                            <input id="smtp_email_password" type="password" name="smtp_email_password" class="form-control w-full">
+                            <div class="acc__input-error error-smtp_email_password text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <label for="smtp_host" class="form-label">SMTP Host <span class="text-danger">*</span></label>
