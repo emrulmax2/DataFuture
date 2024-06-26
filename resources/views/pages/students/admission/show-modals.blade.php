@@ -797,7 +797,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="start_date" class="form-control admissionDatepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-start_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-2 text-center">
@@ -809,7 +809,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control admissionDatepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
@@ -903,7 +903,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="edit_start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="edit_start_date" class="form-control admissionDatepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="edit_start_date" class="form-control datepicker" name="start_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-start_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-2 text-center">
@@ -915,7 +915,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-5">
                             <label for="edit_end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control admissionDatepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
+                            <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
