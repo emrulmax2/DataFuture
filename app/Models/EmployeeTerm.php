@@ -28,7 +28,7 @@ class EmployeeTerm extends Model
     }
 
     public function setProvisionEndAttribute($value) {  
-        $this->attributes['provision_end'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['provision_end'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     
     public function getProvisionEndAttribute($value) {
