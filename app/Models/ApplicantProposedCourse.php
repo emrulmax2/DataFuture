@@ -14,6 +14,7 @@ class ApplicantProposedCourse extends Model
         'applicant_id',
         'course_creation_id',
         'semester_id',
+        'venue_id',
         'academic_year_id',
         'student_loan',
         'student_finance_england',
@@ -42,5 +43,8 @@ class ApplicantProposedCourse extends Model
 
     public function semester(){
         return $this->belongsTo(Semester::class, 'semester_id');
+    }
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
     }
 }

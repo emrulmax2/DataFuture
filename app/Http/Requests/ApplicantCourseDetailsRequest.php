@@ -43,6 +43,8 @@ class ApplicantCourseDetailsRequest extends FormRequest
             'student_loan' => 'required',
             'other_funding' => 'required_if:student_loan,Other',
             'employment_status' => 'required',
+            'venue_id' => 'required_unless:course_creation_id,null',
+            
         ];
     }
 
@@ -53,6 +55,8 @@ class ApplicantCourseDetailsRequest extends FormRequest
             'student_loan.reuired' => 'The Student Loan field is required.',
             'other_funding.required_if' => 'The Other Funding field is required.',
             'employment_status.reuired' => 'The Employment Status field is required.',
+            'venue_id.required_unless' => 'Please select a venue.',
+            
         ];
     }
 }

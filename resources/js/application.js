@@ -604,7 +604,13 @@ var employmentHistoryTable = (function () {
             })
         }
         $('.courseLoading').show();
+        let SelectedValue = $(this).val();
         //woorking all here get the venues
+        if(SelectedValue=="") {
+            $('#selectVenue').fadeOut('fast', function(){
+                $('.courseLoading').hide();
+            })
+        }else
             axios({
                 method: "get",
                 url: route("global.course.creation.edit", $('#course_creation_id').val()),

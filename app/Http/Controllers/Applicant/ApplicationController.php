@@ -161,6 +161,7 @@ class ApplicationController extends Controller
             'course_creation_id' => $course_creation_id,
             'semester_id' => $courseCreation->semester_id,
             'academic_year_id' => (isset($crsCrnInstance->academic_year_id) && $crsCrnInstance->academic_year_id > 0 ? $crsCrnInstance->academic_year_id : null),
+            'venue_id' => (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : null),
             'student_loan' => $studentLoan,
             'student_finance_england' => $studentFinanceEngland,
             'applied_received_fund' => $appliedReceivedFund,
@@ -528,6 +529,12 @@ class ApplicationController extends Controller
                                 $html .= '<div class="grid grid-cols-12 gap-0">';
                                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>';
                                     $html .= '<div class="col-span-8 font-medium">'.$applicant->course->creation->course->name.' - '.$applicant->course->semester->name.'</div>';
+                                $html .= '</div>';
+                            $html .= '</div>';
+                            $html .= '<div class="col-span-12 sm:col-span-12">';
+                                $html .= '<div class="grid grid-cols-12 gap-0">';
+                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Venue</div>';
+                                    $html .= '<div class="col-span-8 font-medium">'.$applicant->course->venue->name.'</div>';
                                 $html .= '</div>';
                             $html .= '</div>';
                             $html .= '<div class="col-span-12 sm:col-span-12">';
