@@ -237,10 +237,12 @@ class ApplicantProfilePrintController extends Controller
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which course do you propose to take?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->creation->course->name.'</td>';
                 $PDFHTML .= '</tr>';
+                if(isset($applicant->course->venue) && !empty($applicant->course->venue)):
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->venue->name.'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $applicant->course->venue->name.'</td>';
                 $PDFHTML .= '</tr>';
+                endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.$applicant->course->student_loan.'</td>';
