@@ -418,6 +418,7 @@ var employmentHistoryTable = (function () {
     };
 
     var course_creation_id = new TomSelect('#course_creation_id', tomOptions);
+    var venue_id = new TomSelect('#venue_id', tomOptions);
     var employment_status = new TomSelect('#employment_status', tomOptions);
     var student_loan = new TomSelect('#student_loan', tomOptions);
 
@@ -602,7 +603,48 @@ var employmentHistoryTable = (function () {
                 $('[name="full_time"]', this).prop('checked', false);
             })
         }
-    })
+        $('.courseLoading').show();
+        //woorking all here get the venues
+            axios({
+                method: "get",
+                url: route("global.course.creation.edit", $('#course_creation_id').val()),
+                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+            }).then((response) => {
+                if (response.status == 200) {
+                    let venues = response.data.venues;
+                        venue_id.clear();
+                        venue_id.clearOptions();
+                    if(venues.length>1) {
+                        venue_id.addOption({value:'',text:"Please Select"});
+                        venue_id.addItem('');
+                    }
+                    venues.forEach((e, i) => {
+                        if(e.pivot.deleted_at==null) {
+                            if(venues.length==1) {
+                                venue_id.removeOption('');
+                                venue_id.addOption({value:e.id,text:e.name});
+                                venue_id.addItem(e.id);
+                            } else {
+                                venue_id.removeItem(e.id);
+                                venue_id.addOption({value:e.id,text:e.name});
+                            }
+                        }
+                    });
+                    
+                    if(venues.length>0) {
+                        
+                        $('#selectVenue').fadeIn('fast', function(){
+                            $('.courseLoading').hide();
+                        })
+                    } else {
+                        $('.courseLoading').hide();
+                    }
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+            
+        })
 
     $('#disability_status').on('change', function(){
         if($('#disability_status').prop('checked')){

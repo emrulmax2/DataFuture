@@ -35,6 +35,7 @@ use App\Models\EmploymentReference;
 use App\Models\Option;
 use App\Models\ReferralCode;
 use App\Models\SexIdentifier;
+use App\Models\Venue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -48,6 +49,7 @@ class ApplicationController extends Controller
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
             'titles' => Title::all(),
+            'venues' => Venue::all(),
             'country' => Country::all(),
             'ethnicity' => Ethnicity::all(),
             'disability' => Disability::all(),

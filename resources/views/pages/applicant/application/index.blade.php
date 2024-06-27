@@ -336,7 +336,7 @@
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
                         <div class="col-span-12 sm:col-span-8">
                             <div class="grid grid-cols-12 gap-x-4">
-                                <label for="course_creation_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course & Semester <span class="text-danger">*</span></label>
+                                <label for="course_creation_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6 inline-flex">Course & Semester <span class="text-danger">*</span> <i data-loading-icon="oval" data-color="black"  class="courseLoading w-4 h-4 ml-2 hidden"></i></label>
                                 <div class="col-span-12 sm:col-span-6">
                                     <select id="course_creation_id" class="lcc-tom-select w-full" name="course_creation_id">
                                         <option value="" selected>Please Select</option>
@@ -351,7 +351,19 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5 ">
+                        <div id="selectVenue" class="col-span-12 sm:col-span-8 hidden">
+                            <div class="grid grid-cols-12 gap-x-4">
+                                <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Venues <span class="text-danger">*</span></label>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <select id="venue_id" class="lcc-tom-select w-full tomselected" name="venue_id">
+                                
+                                    </select>
+                                    <div class="acc__input-error error-venue_id text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                     <div class="font-medium text-base">Programme</div>
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">

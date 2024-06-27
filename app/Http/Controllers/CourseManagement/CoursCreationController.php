@@ -9,6 +9,7 @@ use App\Models\Semester;
 use App\Models\CourseCreation;
 use App\Http\Requests\CourseCreationsRequest;
 use App\Models\AcademicYear;
+use App\Models\CourseCreationVenue;
 use App\Models\CourseQualification;
 use App\Models\TermDeclaration;
 use App\Models\Venue;
@@ -113,10 +114,26 @@ class CoursCreationController extends Controller
         $request->request->remove('is_workplacement');
         $request->request->remove('required_hours');
         $request->request->remove('has_evening_and_weekend');
+        $venuList = $request->venue_id;
+        $slcCode =$request->slc_code;
+
+        $request->request->remove('venue_id');
+        $request->request->remove('slc_code');
 
         $request->request->add(['has_evening_and_weekend' => $has_evening_and_weekend, 'is_workplacement' => $is_workplacement, 'required_hours' => $required_hours, 'created_by' => auth()->user()->id]);
         $courseCreation = CourseCreation::create($request->all());
         
+        
+
+        if($courseCreation)
+        foreach($venuList as $key => $venueId):
+            $courseCreationVenue = new CourseCreationVenue();
+            $courseCreationVenue->course_creation_id =  $courseCreation->id;
+            $courseCreationVenue->venue_id = $venueId;
+            $courseCreationVenue->slc_code = $slcCode[$key];
+            $courseCreationVenue->save();
+        endforeach;
+
         return response()->json($courseCreation);
     }
 
@@ -137,8 +154,9 @@ class CoursCreationController extends Controller
     }
 
     public function edit($id) {
-
-        $data = CourseCreation::find($id);
+       
+        $data = CourseCreation::with('venues')->where('id',$id)->get()->first();
+        
         if($data){
             return response()->json($data);
         }else{
@@ -156,8 +174,6 @@ class CoursCreationController extends Controller
             'course_id'=> $request->course_id,
             'duration'=> $request->duration,
             'unit_length'=> $request->unit_length,
-            'slc_code'=> $request->slc_code,
-            'venue_id'=> (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : null),
             'fees'=> (isset($request->fees) && $request->fees > 0 ? $request->fees : null),
             'reg_fees'=> (isset($request->reg_fees) && $request->reg_fees > 0 ? $request->reg_fees : null),
             'has_evening_and_weekend'=> $has_evening_and_weekend,
@@ -167,6 +183,26 @@ class CoursCreationController extends Controller
             'course_creation_qualification_id' => (isset($request->course_creation_qualification_id) && $request->course_creation_qualification_id > 0 ? $request->course_creation_qualification_id : null),
         ]);
 
+        $venuList = $request->venue_id;
+        $slcCode =$request->slc_code;
+        if($courseDF)
+        foreach($venuList as $key => $venueId):
+            $courseCreationVenue = CourseCreationVenue::where('course_creation_id',$CC_ID)->where('venue_id',$venueId)->withTrashed()->get()->first();
+            if($courseCreationVenue):
+                if($courseCreationVenue->deleted_at!=null) {
+                $courseCreationVenue->slc_code = $slcCode[$key];
+                $courseCreationVenue->save();
+                } else {
+                    return response()->json(["errors"=>['venue_id'=>"venue already deleted, need restore before doing any update'"], 'message' => 'venue already deleted. need restore before doing any update'], 422);
+                }
+            else:
+                $courseCreationVenue = new CourseCreationVenue();
+                $courseCreationVenue->course_creation_id =  $CC_ID;
+                $courseCreationVenue->venue_id = $venueId;
+                $courseCreationVenue->slc_code = $slcCode[$key];
+                $courseCreationVenue->save();
+            endif;
+        endforeach;
 
         if($courseDF){
             return response()->json(['message' => 'Data updated'], 200);
@@ -177,6 +213,11 @@ class CoursCreationController extends Controller
 
     public function destroy($id){
         $data = CourseCreation::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function venueDestroy($id,){
+        $data = CourseCreationVenue::find($id)->delete();
         return response()->json($data);
     }
 

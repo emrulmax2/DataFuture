@@ -153,6 +153,11 @@ class VenueController extends Controller
         ]);
     }
 
+    public function getAll()
+    {
+        return response()->json(Venue::all());
+    }
+
     public function destroy($id){
         $data = Venue::find($id)->delete();
         return response()->json($data);

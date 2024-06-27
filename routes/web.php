@@ -252,6 +252,9 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::post('login', 'login')->name('login.check');
 });
 
+Route::controller(CoursCreationController::class)->group(function() {
+    Route::get('global/course-creation/edit/{id}', 'edit')->name('global.course.creation.edit');
+});
 
 Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::get('punch', 'index')->name('attendance.punch');
@@ -526,6 +529,7 @@ Route::middleware('auth')->group(function() {
         Route::get('course-management/course-creation/edit/{id}', 'edit')->name('course.creation.edit');
         Route::post('course-management/course-creation/update', 'update')->name('course.creation.update');
         Route::delete('course-management/course-creation/delete/{id}', 'destroy')->name('course.creation.destory');
+        Route::delete('course-management/course-creation/delete/{id}/venue', 'venueDestroy')->name('course.creation.venue.destroy');
         Route::post('course-management/course-creation/restore/{id}', 'restore')->name('course.creation.restore');
         Route::get('course-management/course-creation/courses-by-semester', 'getCourseListBySemester')->name('course.creation.coursesbysemester'); 
     });
@@ -1662,6 +1666,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(VenueController::class)->group(function() {
         Route::get('site-settings/venues', 'index')->name('venues'); 
+        Route::get('site-settings/venues/all', 'getAll')->name('venues.all');  
         Route::get('site-settings/venues/list', 'list')->name('venues.list');        
         Route::post('site-settings/venues/store', 'store')->name('venues.store');
         Route::get('site-settings/venues/edit/{id}', 'edit')->name('venues.edit');
