@@ -167,21 +167,7 @@
                                 </select>
                                 <div class="acc__input-error error-unit_length text-danger mt-2"></div>
                             </div> 
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="slc_code" class="form-label">SLC Code</label>
-                                <input id="slc_code" type="text" name="slc_code" class="form-control w-full">
-                            </div> 
-                            <div class="col-span-12 sm:col-span-6">
-                                <label for="venue_id" class="form-label">Venue</label>
-                                <select id="venue_id" name="venue_id" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    @if(!empty($venues))
-                                        @foreach($venues as $vn)
-                                            <option value="{{ $vn->id }}">{{ $vn->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
+                            
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="fees" class="form-label">Fees(UK)</label>
                                 <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
@@ -209,6 +195,41 @@
                                 <input id="required_hours" type="number" step="any" name="required_hours" class="form-control w-full">
                                 <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 
+                        </div>
+                        <div class="grid grid-cols-12 gap-3 border border-gray-100 p-5 mt-2">
+                            
+                            <div class="col-start-8 col-span-4">
+                                <button class="venueAdd transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-48 "><i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
+                                    Add more venue <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i></button>
+                            </div>
+                            <table id="add-newvenue" class=" col-span-12 text-left tabulator-responsive-collapse border-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="col-span-5">
+                                            <div>
+                                                <label for="venue_id1" class="form-label">Venue</label>
+                                                <select id="venue_id1" name="venue_id[]" class="form-control w-full">
+                                                    <option value="">Please Select</option>
+                                                    @if(!empty($venues))
+                                                        @foreach($venues as $vn)
+                                                            <option value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td class="col-span-5">
+                                            <div>
+                                                <label for="slc_code1" class="form-label">SLC Code</label>
+                                                <input id="slc_code1" type="text" name="slc_code[]" class="form-control w-full">
+                                            </div>
+                                        </td>
+                                        <td class="col-span-2">
+                                            
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>      
                     </div>
                     <div class="modal-footer">
@@ -300,7 +321,7 @@
                                 </select>
                                 <div class="acc__input-error error-unit_length text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-12 sm:col-span-6">
+                            {{-- <div class="col-span-12 sm:col-span-6">
                                 <label for="edit_slc_code" class="form-label">SLC Code</label>
                                 <input id="edit_slc_code" type="text" name="slc_code" class="form-control w-full">
                             </div> 
@@ -314,7 +335,7 @@
                                         @endforeach
                                     @endif
                                 </select>
-                            </div> 
+                            </div>  --}}
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="fees" class="form-label">Fees(UK)</label>
                                 <input id="fees" type="number" step="any" name="fees" class="form-control w-full">
@@ -343,6 +364,17 @@
                                 <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 
                         </div>
+                        <div class="grid grid-cols-12 gap-3 border border-gray-100 p-5 mt-2">
+                            
+                            <div class="col-start-8 col-span-4">
+                                <button class="venueAddForEdit transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-48 "><i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
+                                    Add more venue <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i></button>
+                            </div>
+                            <table id="edit-newvenue" class=" col-span-12 text-left tabulator-responsive-collapse border-0">
+                                <tbody><tr></tr></tbody>
+                            </table>
+                            <div class="acc__input-error error-venue_id text-danger mt-2 col-span-12"></div>
+                        </div>    
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -405,6 +437,24 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
+
+    <div id="confirmModalVenue" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWithVenue btn btn-danger w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')

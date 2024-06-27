@@ -181,6 +181,7 @@ var courseCreationListTable = (function () {
         const editCourseCreationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCourseCreationModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        const confirmModalVenue = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalVenue"));
 
         let confModalDelTitle = 'Are you sure?';
         let confModalDelDescription = 'Do you really want to delete these records? <br>This process cannot be undone.';
@@ -384,6 +385,32 @@ var courseCreationListTable = (function () {
                     }
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);
+                    let venues = response.data.venues;
+                    $('table#edit-newvenue').html('');
+                    $('table#edit-newvenue').html('<tr></tr>');
+                    venues.forEach((e, i) => {
+                    if(e.pivot.deleted_at==null) {
+                    let html='<tr id="'+e.pivot.id+'"><td class="col-span-5">\
+                                <label for="venue_id'+e.pivot.id+'" class="form-label">Venue</label>\
+                                <select id="venue_id'+e.pivot.id+'" name="venue_id[]" class="form-control w-full">\
+                                    <option selected value="'+e.id+'">'+e.name+'</option>\
+                                </select>\
+                            </td>\
+                            <td class="col-span-5">\
+                                <label for="slc_code'+e.pivot.id+'" class="form-label">SLC Code</label>\
+                                <input id="slc_code'+e.pivot.id+'" type="text" name="slc_code[]" value="'+e.pivot.slc_code+'" class="form-control w-full">\
+                            </td>\
+                            <td class="col-span-2">\
+                                <button id="delete-'+e.pivot.id+'" type="button" data-id="'+e.pivot.id+'"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                            </td></tr>';
+                            $('table#edit-newvenue tr:last').after(html); 
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                        }
+                    });
                 }
             }).catch((error) => {
                 console.log(error);
@@ -477,5 +504,178 @@ var courseCreationListTable = (function () {
                 }
             });
         });
+
+        $("table#add-newvenue").on('click','.btnDelete',function(){
+            let tthis = $(this);
+                tthis.closest('tr').remove();
+            
+            
+        });
+        $('.venueAdd').on('click', function(e){
+            e.preventDefault();
+            document.querySelector('.venueAdd').setAttribute('disabled', 'disabled');
+            document.querySelector(".venueAdd svg.load-icon").style.cssText ="display: inline-block;";
+            axios({
+                method: "get",
+                url: route("venues.all"),
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                document.querySelector('.venueAdd').removeAttribute('disabled');
+                document.querySelector(".venueAdd svg.load-icon").style.cssText ="display:none;";
+            
+                if (response.status == 200) {
+
+                    let dataset = response.data
+                    let randomId = Math.floor(Math.random() * 101);
+                    let html='<tr><td class="col-span-5">\
+                                <label for="venue_id'+randomId+'" class="form-label">Venue</label>\
+                                <select id="venue_id'+randomId+'" name="venue_id[]" class="form-control w-full">\
+                                    <option value="">Please Select</option>'
+                                    dataset.forEach((e, i) => {
+                                        html+='<option value="'+e.id+'">'+e.name+'</option>'
+                                    });
+                    
+                                 html+='</select>\
+                            </td>\
+                            <td class="col-span-5">\
+                                <label for="slc_code'+randomId+'" class="form-label">SLC Code</label>\
+                                <input id="slc_code'+randomId+'" type="text" name="slc_code[]" class="form-control w-full">\
+                            </td>\
+                            <td class="col-span-2">\
+                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                            </td></tr>';
+                            $('table#add-newvenue tr:last').after(html); 
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                            
+
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        })
+
+        $("table#edit-newvenue").on('click','.btnDelete',function(){
+            let tthis = $(this);
+            let getId = tthis.data('id');
+            if(getId==0) {
+                tthis.closest('tr').remove();
+            } else {
+                confirmModalVenue.show();
+                document.getElementById('confirmModalVenue').addEventListener('shown.tw.modal', function(event){
+                    $('#confirmModalVenue .confModTitle').html(confModalDelTitle);
+                    $('#confirmModalVenue .confModDesc').html('Do you really want to delete these venue? If yes, the please click on agree btn.');
+                    $('#confirmModalVenue .agreeWithVenue').attr('data-id', getId);
+                    $('#confirmModalVenue .agreeWithVenue').attr('data-action', 'DELETE');
+                });
+            }
+            
+         });
+                 // Confirm Modal Action
+        $('#confirmModalVenue .agreeWithVenue').on('click', function(){
+            let $agreeBTN = $(this);
+            let recordID = $agreeBTN.attr('data-id');
+            let action = $agreeBTN.attr('data-action');
+            btnId="#delete-"+recordID;
+                
+            $('#confirmModalVenue button').attr('disabled', 'disabled');
+            if(action == 'DELETE'){
+                axios({
+                    method: 'delete',
+                    url: route('course.creation.venue.destroy', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModalVenue button').removeAttr('disabled');
+                        confirmModalVenue.hide();
+                        $(btnId).closest('tr').remove();
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Done!');
+                            $('#successModal .successModalDesc').html('Venue successfully deleted.');
+                        });
+                    }
+                    courseCreationListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            } else if(action == 'RESTORE'){
+                axios({
+                    method: 'post',
+                    url: route('course.creation.venue.restore', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Success!');
+                            $('#successModal .successModalDesc').html('Course Creation Data Successfully Restored!');
+                        });
+                    }
+                    courseCreationListTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            }
+        })
+
+        $('.venueAddForEdit').on('click', function(e){
+            e.preventDefault();
+            document.querySelector('.venueAddForEdit').setAttribute('disabled', 'disabled');
+            document.querySelector(".venueAddForEdit svg.load-icon").style.cssText ="display: inline-block;";
+            axios({
+                method: "get",
+                url: route("venues.all"),
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                document.querySelector('.venueAddForEdit').removeAttribute('disabled');
+                document.querySelector(".venueAddForEdit svg.load-icon").style.cssText ="display:none;";
+            
+                if (response.status == 200) {
+
+                    let dataset = response.data
+                    let randomId = Math.floor(Math.random() * 101);
+                    let html='<tr id="'+randomId+'"><td class="col-span-5">\
+                                <label for="venue_id'+randomId+'" class="form-label">Venue</label>\
+                                <select id="venue_id'+randomId+'" name="venue_id[]" class="form-control w-full">\
+                                    <option value="">Please Select</option>'
+                                    dataset.forEach((e, i) => {
+                                        html+='<option value="'+e.id+'">'+e.name+'</option>'
+                                    });
+                    
+                                 html+='</select>\
+                            </td>\
+                            <td class="col-span-5">\
+                                <label for="slc_code'+randomId+'" class="form-label">SLC Code</label>\
+                                <input id="slc_code'+randomId+'" type="text" name="slc_code[]" class="form-control w-full">\
+                            </td>\
+                            <td class="col-span-2">\
+                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                            </td></tr>';
+                            $('table#edit-newvenue tr:last').after(html); 
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                            
+
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        })
     }
 })()

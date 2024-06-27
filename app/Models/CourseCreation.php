@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\CourseQualification;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class CourseCreation extends Model
 {
@@ -17,8 +18,6 @@ class CourseCreation extends Model
         'course_creation_qualification_id',
         'duration',
         'unit_length',
-        'slc_code',
-        'venue_id',
         'fees',
         'reg_fees',
         'is_workplacement',
@@ -65,4 +64,10 @@ class CourseCreation extends Model
     public function venue(){
         return $this->belongsTo(Venue::class, 'venue_id');
     }
+
+    public function venues(): BelongsToMany
+    {
+        return $this->belongsToMany(Venue::class,'course_creation_venue', 'course_creation_id', 'venue_id')->withPivot('slc_code','id','deleted_at');
+    }
+
 }
