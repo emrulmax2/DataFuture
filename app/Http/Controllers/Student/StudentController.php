@@ -326,7 +326,8 @@ class StudentController extends Controller
             ],
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'terms' => TermDeclaration::orderBy('id', 'desc')->get()
         ]);
     }
 
