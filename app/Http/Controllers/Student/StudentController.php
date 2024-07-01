@@ -118,7 +118,7 @@ class StudentController extends Controller
         $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
 
         $Query = DB::table('students as std')
-                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name')
+                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name','spc.full_time')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
                     ->leftJoin('student_contacts as scn', 'std.id', 'scn.student_id')
                     ->leftJoin('student_users as su', 'std.student_user_id', 'su.id')
@@ -207,6 +207,7 @@ class StudentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $studentList = Student::with('disability')->where('id',$list->id)->get()->first();
                 if ($list->photo !== null && Storage::disk('local')->exists('public/applicants/'.$list->applicant_id.'/'.$list->photo)) {
                     $photo_url = Storage::disk('local')->url('public/applicants/'.$list->applicant_id.'/'.$list->photo);
                 } else {
@@ -215,13 +216,13 @@ class StudentController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'disability' =>  (count($studentList->disability)>0 ? 1 : 0),
+                    'full_time' => ($list->full_time) ? 1 : 0, 
                     'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
-                    'date_of_birth'=> (!empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : '') ,
                     'course'=> (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
                     'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
-                    'gender'=> (isset($list->sexid_name) && !empty($list->sexid_name) ? $list->sexid_name : ''),
                     'status_id'=> (isset($list->status_name) && !empty($list->status_name) ? $list->status_name : ''),
                     'url' => route('student.show', $list->id),
                     'photo_url' => $photo_url

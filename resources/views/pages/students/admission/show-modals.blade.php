@@ -433,11 +433,6 @@
                                 <div class="col-span-12 sm:col-span-6">
                                     <select id="course_creation_id" class="lcc-tom-select w-full" name="course_creation_id">
                                         <option value="" selected>Please Select</option>
-                                        {{-- @if(!empty($instance))
-                                            @foreach($instance as $ci)
-                                                <option data-ew="{{ $ci->creation->has_evening_and_weekend }}" {{ isset($applicant->course->course_creation_id) && $applicant->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
-                                            @endforeach 
-                                        @endif  --}}
                                         @if(!empty($courseCreationAvailibility))
                                             @foreach($courseCreationAvailibility as $ci)
                                                 <option data-ew="{{ $ci->creation->has_evening_and_weekend }}" {{ isset($applicant->course->course_creation_id) && $applicant->course->course_creation_id == $ci->creation->id ? 'selected' : ''}} value="{{ $ci->creation->id }}">{{ $ci->creation->course->name }} - {{ $ci->creation->semester->name }}</option>
@@ -445,6 +440,22 @@
                                         @endif 
                                     </select>
                                     <div class="acc__input-error error-course_creation_id text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12">
+                            <div class="grid grid-cols-12 gap-x-4">
+                                <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Venue <span class="text-danger">*</span></label>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <select id="venue_id" class="lcc-tom-select w-full" name="venue_id">
+                                        <option value="" selected>Please Select</option>
+                                        @if(!empty($venues))
+                                            @foreach($venues as $vn)
+                                                <option {{ isset($applicant->course->venue) && !empty($applicant->course->venue) && ($applicant->course->venue->id==$vn->id) ? 'selected' : ''}} value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                            @endforeach 
+                                        @endif 
+                                    </select>
+                                    <div class="acc__input-error error-venue_id text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>

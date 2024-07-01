@@ -64,6 +64,7 @@ class ProcessStudentProposedCourse implements ShouldQueue
             'student_finance_england'=>$applicantProposedCourse->student_finance_england,
             'fund_receipt'=>$applicantProposedCourse->fund_receipt,
             'applied_received_fund'=>$applicantProposedCourse->applied_received_fund,
+            'venue_id'=>$applicantProposedCourse->venue_id,
             'full_time'=>$applicantProposedCourse->full_time,
             'other_funding'=>$applicantProposedCourse->other_funding,
             'created_by'=>($applicantProposedCourse->updated_by) ? $applicantProposedCourse->updated_by : $applicantProposedCourse->created_by,

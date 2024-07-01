@@ -84,7 +84,6 @@ class ProcessStudents implements ShouldQueue
             'referral_code' => $this->applicant->referral_code,
             'is_referral_varified' => $this->applicant->is_referral_varified,
             'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
-
             'registration_no'=> (!empty($registration_no) ? $registration_no : null),
         ];
         $student->fill($applicantArray);
