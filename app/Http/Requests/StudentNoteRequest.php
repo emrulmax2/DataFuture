@@ -25,7 +25,10 @@ class StudentNoteRequest extends FormRequest
     {
         return [
             'opening_date' => 'required|date',
-            'content' => 'required'
+            'content' => 'required',
+            'followed_up' => 'sometimes',
+            'follow_up_start' => 'required_if:followed_up,yes',
+            'follow_up_by' => 'required_if:followed_up,yes',
         ];
     }
 

@@ -253,24 +253,24 @@ var liveStudentsListTable = (function () {
             academic_year.clear(true);
             intake_semester.clear(true);
             attendance_semester.clear(true);
-            course.clear(true);
-            group.clear(true);
+            course.clear(true); 
+            group.clear(true); 
             
             term_status.clear(true);
             student_type.clear(true);
             group_student_status.clear(true);
             $('#evening_weekend').val('');
-            $('#groupSearchStatus').val('0');
+            $('#groupSearchStatus').val('0'); 
         }
 
         /* Start List Table Inits */
-            liveStudentsListTable.init();
+            //liveStudentsListTable.init();
 
             function filterStudentListTable() {
                 liveStudentsListTable.init();
             }
 
-            $("#studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
+            $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
@@ -309,7 +309,8 @@ var liveStudentsListTable = (function () {
                 resetGroupSearch();
                 resetStudentIDSearch();
 
-                filterStudentListTable();
+                //filterStudentListTable();
+                $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
             });
         /* End List Table Inits */
 
@@ -325,7 +326,8 @@ var liveStudentsListTable = (function () {
             resetGroupSearch();
             resetStudentIDSearch();
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('#studentSearchBtn').on('click', function(){
@@ -341,7 +343,8 @@ var liveStudentsListTable = (function () {
                 $('#groupSearchStatus').val(0);
             }
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('#studentGroupSearchBtn').on('click', function(){
@@ -357,7 +360,8 @@ var liveStudentsListTable = (function () {
                 $('#groupSearchStatus').val(0);
             }
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('.registration_no').on('keyup', function(){

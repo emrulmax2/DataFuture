@@ -263,22 +263,19 @@ Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::post('punch/store-attendance-dif', 'storeAttendance')->name('attendance.punch.store.dif');
 });
 
-// all applicant have a prefix route name applicant.* value
+//All applicant have a prefix route name applicant.* value
 Route::prefix('/applicant')->name('applicant.')->group(function() {
 
     Route::controller(LoginController::class)->middleware('applicant.loggedin')->group(function() {
-
         Route::get('login', 'loginView')->name('login');
         Route::post('login', 'login')->name('check');
     });
     Route::controller(ForgetPasswordController::class)->middleware('applicant.loggedin')->group(function() {
-
         Route::get('forget-password',  'showForgetPasswordForm')->name('forget.password.get');
         Route::post('forget-password','submitForgetPasswordForm')->name('forget.password.post'); 
         Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
         Route::post('reset-password', 'submitResetPasswordForm')->name('reset.password.post');
         Route::post('change-password', 'submitChangePasswordForm')->name('change.password.post');
-    
     });
 
     Route::controller(RegisterController::class)->middleware('applicant.loggedin')->group(function() {
@@ -290,10 +287,8 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     * Verification Routes
     */
     Route::controller(VerificationController::class)->group(function() {
-        
         //Route::get('email/verify', 'show')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')->name('verification.verify')->middleware(['signed']);
-        
     });
 
     Route::middleware('auth.applicant')->group(function() {
@@ -1162,7 +1157,7 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/store-notes', 'store')->name('employee.store.note');
         Route::get('employee-profile/notes-list', 'list')->name('employee.note.list');
         Route::post('employee-profile/show-note', 'show')->name('employee.show.note');
-        Route::post('student/get-note', 'edit')->name('employee.get.note');
+        Route::post('employee-profile/get-note', 'edit')->name('employee.get.note');
         Route::post('employee-profile/update-note', 'update')->name('employee.update.note');
         Route::delete('employee-profile/destory-note', 'destroy')->name('employee.destory.note');
         Route::post('employee-profile/restore-note', 'restore')->name('employee.restore.note');

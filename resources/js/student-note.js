@@ -2,6 +2,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var studentNotesListTable = (function () {
@@ -10,10 +11,11 @@ var studentNotesListTable = (function () {
         let studentId = $("#studentNotesListTable").attr('data-student') != "" ? $("#studentNotesListTable").attr('data-student') : "0";
         let queryStr = $("#query-AN").val() != "" ? $("#query-AN").val() : "";
         let status = $("#status-AN").val() != "" ? $("#status-AN").val() : "1";
+        let term = $("#term-SN").val() != "" ? $("#term-SN").val() : "";
 
         let tableContent = new Tabulator("#studentNotesListTable", {
             ajaxURL: route("student.note.list"),
-            ajaxParams: { studentId: studentId, queryStr : queryStr, status : status},
+            ajaxParams: { studentId: studentId, queryStr : queryStr, status : status, term : term},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -29,7 +31,13 @@ var studentNotesListTable = (function () {
                     title: "#ID",
                     field: "id",
                     headerHozAlign: "left",
-                    width: "120",
+                    width: "90",
+                },
+                {
+                    title: "Term",
+                    field: "term",
+                    headerHozAlign: "left",
+                    headerSort: false
                 },
                 {
                     title: "Opening Date",
@@ -61,6 +69,27 @@ var studentNotesListTable = (function () {
                             html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
                         html += '</div>';
 
+                        return html;
+                    }
+                },{
+                    title: "Followed Up",
+                    field: "followed_up",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().followed_up == 'yes'){
+                            html += '<div>';
+                                if(cell.getData().followed != ''){
+                                    html += '<div class="font-medium whitespace-nowrap">'+cell.getData().followed+'</div>';
+                                }
+                                if(cell.getData().follow_up_start != '' || cell.getData().follow_up_end != ''){
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">';
+                                        html += (cell.getData().follow_up_start != '' ? cell.getData().follow_up_start : '');
+                                        html += (cell.getData().follow_up_end != '' ? ' - '+cell.getData().follow_up_end : '');
+                                    html += '</div>';
+                                }
+                            html += '</div>';
+                        }
                         return html;
                     }
                 },
@@ -143,6 +172,20 @@ var studentNotesListTable = (function () {
 })();
 
 (function(){
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        persist: true,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    var termSN = new TomSelect('#term-SN', tomOptions);
+
     if ($("#studentNotesListTable").length) {
         // Init Table
         studentNotesListTable.init();
@@ -162,10 +205,16 @@ var studentNotesListTable = (function () {
         $("#tabulator-html-filter-reset-AN").on("click", function (event) {
             $("#query-AN").val("");
             $("#status-AN").val("1");
+            termSN.clear(true);
             filterHTMLFormAN();
         });
 
     }
+
+    var term_declaration_id = new TomSelect('#term_declaration_id', tomOptions);
+    var edit_term_declaration_id = new TomSelect('#edit_term_declaration_id', tomOptions);
+    var follow_up_by = new TomSelect('#follow_up_by', tomOptions);
+    var edit_follow_up_by = new TomSelect('#edit_follow_up_by', tomOptions);
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
@@ -200,6 +249,8 @@ var studentNotesListTable = (function () {
         $('#addNoteModal input[name="document"]').val('');
         $('#addNoteModal #addNoteDocumentName').html('');
         addEditor.setData('');
+        term_declaration_id.clear(true);
+        follow_up_by.clear(true);
     });
 
     const editNoteModalEl = document.getElementById('editNoteModal')
@@ -211,6 +262,8 @@ var studentNotesListTable = (function () {
         $('#editNoteModal input[name="id"]').val('0');
         $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
         editEditor.setData('');
+        edit_term_declaration_id.clear(true);
+        edit_follow_up_by.clear(true);
     });
 
     const viewNoteModalEl = document.getElementById('viewNoteModal')
@@ -262,6 +315,34 @@ var studentNotesListTable = (function () {
         namePreview.innerText = fileName;
         return false;
     };
+    
+    $('#addNoteForm').on('change', '[name="followed_up"]', function(){
+        if($(this).prop('checked')){
+            $('#addNoteForm .followedUpWrap').fadeIn('fast', function(){
+                $('input', this).val('');
+                follow_up_by.clear(true);
+            });
+        }else{
+            $('#addNoteForm .followedUpWrap').fadeOut('fast', function(){
+                $('input', this).val('');
+                follow_up_by.clear(true);
+            });
+        }
+    });
+    
+    $('#editNoteForm').on('change', '[name="followed_up"]', function(){
+        if($(this).prop('checked')){
+            $('#editNoteForm .followedUpWrap').fadeIn('fast', function(){
+                $('input', this).val('');
+                edit_follow_up_by.clear(true);
+            });
+        }else{
+            $('#editNoteForm .followedUpWrap').fadeOut('fast', function(){
+                $('input', this).val('');
+                edit_follow_up_by.clear(true);
+            });
+        }
+    });
 
     $('#studentNotesListTable').on('click', '.view_btn', function(e){
         var $btn = $(this);
@@ -350,10 +431,30 @@ var studentNotesListTable = (function () {
             editEditor.setData(dataset.note ? dataset.note : '');
             $('#editNoteModal [name="opening_date"]').val(dataset.opening_date ? dataset.opening_date : '');
             $('#editNoteModal input[name="id"]').val(noteId);
+             
+            if(dataset.term_declaration_id){
+                edit_term_declaration_id.addItem(dataset.term_declaration_id, true)
+            }else{
+                edit_term_declaration_id.clear(true);
+            }
             if(dataset.docURL != ''){
                 $('#editNoteModal .downloadExistAttachment').attr('href', dataset.docURL).fadeIn();
             }else{
                 $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
+            }
+            if(dataset.followed_up == 'yes'){
+                $('#editNoteForm [name="followed_up"]').prop('checked', true);
+                $('#editNoteForm .followedUpWrap').fadeIn('fast', function(){
+                    $('#editNoteForm  [name="follow_up_start"]').val(dataset.follow_up_start ? dataset.follow_up_start : '');
+                    $('#editNoteForm  [name="follow_up_end"]').val(dataset.follow_up_end ? dataset.follow_up_end : '');
+                    edit_follow_up_by.addItem(dataset.follow_up_by, true);
+                });
+            }else{
+                $('#editNoteForm [name="followed_up"]').prop('checked', false);
+                $('#editNoteForm .followedUpWrap').fadeOut('fast', function(){
+                    $('input', this).val('');
+                    edit_follow_up_by.clear(true);
+                });
             }
         }).catch(error => {
             console.log('error');
