@@ -54,10 +54,6 @@ class StudentProposedCourse extends Model
     public function academicYear(){
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
-    
-    public function venue(){
-        return $this->belongsTo(Venue::class, 'venue_id');
-    }
 
     public function getSlcCodeAttribute(){
         $crVenue = CourseCreationVenue::where('course_creation_id', $this->course_creation_id)->where('venue_id', $this->venue_id)->get()->first();
