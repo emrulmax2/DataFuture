@@ -719,6 +719,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/send-email-verification-code','sendEmailVerificationCode')->name('student.send.email.verification.code');
         Route::post('student/send-email-verify-code','verifyEmailVerificationCode')->name('student.email.verify.code');
+
+        Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {

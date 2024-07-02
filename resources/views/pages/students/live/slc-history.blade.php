@@ -285,13 +285,13 @@
                                     <div class="col-span-4 text-slate-500 font-medium">Course</div>
                                     <div class="col-span-8 font-medium">
                                         {{ $student->crel->creation->course->name }}
-                                        {{ (isset($student->crel->creation->slc_code) ? ' ('.$student->crel->creation->slc_code.')' : '')}}
+                                        {{ (isset($student->crel->propose->slc_code) && !empty($student->crel->propose->slc_code) ? ' ('.$student->crel->propose->slc_code.')' : '')}}
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
                                     <div class="col-span-4 text-slate-500 font-medium">Campus</div>
                                     <div class="col-span-8 font-medium">
-                                        {{ (isset($student->crel->creation->venue->name) ? $student->crel->creation->venue->name : '') }}
+                                        {{ (isset($student->crel->propose->venue->name) ? $student->crel->propose->venue->name : '') }}
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
@@ -321,7 +321,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($ac_years) && $ac_years->count() > 0)
                                         @foreach($ac_years as $year)
-                                            <option {{ ($active_ac_year == $year->id ? 'Selected' : '') }} value="{{ $year->id }}">{{ $year->name }}</option>
+                                            <option {{ (isset($student->crel->propose->academic_year_id) && $student->crel->propose->academic_year_id == $year->id ? 'Selected' : '') }} value="{{ $year->id }}">{{ $year->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>

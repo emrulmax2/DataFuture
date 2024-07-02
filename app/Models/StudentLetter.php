@@ -38,4 +38,16 @@ class StudentLetter extends Model
     public function document(){
         return $this->belongsTo(StudentDocument::class, 'student_document_id');
     }
+
+    public function signatory(){
+        return $this->belongsTo(Signatory::class, 'signatory_id');
+    }
+
+    public function letterSet(){
+        return $this->belongsTo(LetterSet::class, 'letter_set_id');
+    }
+
+    public function issuedBy(){
+        return $this->belongsTo(User::class, 'issued_by');
+    }
 }

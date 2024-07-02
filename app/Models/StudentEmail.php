@@ -36,7 +36,7 @@ class StudentEmail extends Model
     }
     
     public function smtp(){
-        return $this->belongsTo(ComonSmtp::class, 'comon_smtp_id');
+        return $this->belongsTo(ComonSmtp::class, 'common_smtp_id');
     }
 
     public function documents(){
