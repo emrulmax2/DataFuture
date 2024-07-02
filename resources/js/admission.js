@@ -1725,6 +1725,7 @@ var employmentHistoryTable = (function () {
 
     if($('#editAdmissionCourseDetailsForm').length > 0){
         var course_creation_id = new TomSelect('#course_creation_id', tomOptions);
+        var venue_id = new TomSelect('#venue_id', tomOptions);
         var student_loan = new TomSelect('#student_loan', tomOptions);
 
         $('#course_creation_id').on('change', function(e){

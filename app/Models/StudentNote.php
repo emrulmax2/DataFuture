@@ -12,10 +12,15 @@ class StudentNote extends Model
 
     protected $fillable = [
         'student_id',
+        'term_declaration_id',
         'student_document_id',
         'opening_date',
         'note',
         'phase',
+        'followed_up',
+        'follow_up_start',
+        'follow_up_end',
+        'follow_up_by',
         'created_by',
         'updated_by',
     ];
@@ -26,6 +31,10 @@ class StudentNote extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function term() {
+        return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
+    }
 
     public function document() {
         return $this->belongsTo(StudentDocument::class, 'student_document_id');
@@ -41,5 +50,25 @@ class StudentNote extends Model
 
     public function getOpeningDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setFollowUpStartAttribute($value) {  
+        $this->attributes['follow_up_start'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getFollowUpStartAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setFollowUpEndAttribute($value) {  
+        $this->attributes['follow_up_end'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getFollowUpEndAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+    
+    public function followed(){
+        return $this->belongsTo(User::class, 'follow_up_by');
     }
 }

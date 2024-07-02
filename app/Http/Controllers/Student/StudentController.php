@@ -27,6 +27,7 @@ use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseCreationVenue;
 use App\Models\CourseModule;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
@@ -37,6 +38,8 @@ use App\Models\FeeEligibility;
 use App\Models\Grade;
 use App\Models\Group;
 use App\Models\HesaGender;
+use App\Models\HesaQualificationSubject;
+use App\Models\HighestQualificationOnEntry;
 use App\Models\InstanceTerm;
 use App\Models\KinsRelation;
 use App\Models\LetterSet;
@@ -44,7 +47,9 @@ use App\Models\MobileVerificationCode;
 use App\Models\ModuleCreation;
 use App\Models\Option;
 use App\Models\Plan;
+use App\Models\PreviousProvider;
 use App\Models\ProcessList;
+use App\Models\QualificationTypeIdentifier;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Result;
@@ -64,6 +69,8 @@ use App\Models\StudentConsent;
 use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentDocument;
+use App\Models\StudentEmail;
+use App\Models\StudentLetter;
 use App\Models\StudentProposedCourse;
 use App\Models\Title;
 use App\Models\User;
@@ -76,6 +83,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
+use PDF;
 
 
 class StudentController extends Controller
@@ -118,7 +126,7 @@ class StudentController extends Controller
         $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
 
         $Query = DB::table('students as std')
-                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name')
+                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name','spc.full_time')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
                     ->leftJoin('student_contacts as scn', 'std.id', 'scn.student_id')
                     ->leftJoin('student_users as su', 'std.student_user_id', 'su.id')
@@ -207,6 +215,7 @@ class StudentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $studentList = Student::with('disability')->where('id',$list->id)->get()->first();
                 if ($list->photo !== null && Storage::disk('local')->exists('public/applicants/'.$list->applicant_id.'/'.$list->photo)) {
                     $photo_url = Storage::disk('local')->url('public/applicants/'.$list->applicant_id.'/'.$list->photo);
                 } else {
@@ -215,13 +224,13 @@ class StudentController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'disability' =>  (count($studentList->disability)>0 ? 1 : 0),
+                    'full_time' => ($list->full_time) ? 1 : 0, 
                     'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
-                    'date_of_birth'=> (!empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : '') ,
                     'course'=> (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
                     'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
-                    'gender'=> (isset($list->sexid_name) && !empty($list->sexid_name) ? $list->sexid_name : ''),
                     'status_id'=> (isset($list->status_name) && !empty($list->status_name) ? $list->status_name : ''),
                     'url' => route('student.show', $list->id),
                     'photo_url' => $photo_url
@@ -265,17 +274,34 @@ class StudentController extends Controller
             'consent' => ConsentPolicy::all(),
             'referral' => $referral,
             'ttacom' => TermTimeAccommodationType::where('active', 1)->get(),
+            'PreviousProviders' => PreviousProvider::all(),
+            'QualificationTypeIdentifiers' => QualificationTypeIdentifier::all(),
+            'HighestQualificationOnEntrys' => HighestQualificationOnEntry::all(),
+            'HesaQualificationSubjects' => HesaQualificationSubject::all(),
         ]);
     }
 
     public function courseDetails($studentId){
+
+        $student = Student::with('crel','course')->where('id',$studentId)->get()->first();
+        $courseRelationCreation = $student->crel->creation;
+        $studentCourseAvailability = $courseRelationCreation->availability;
+        $courseCreationQualificationData = $courseRelationCreation->qualification;
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id',$courseRelationCreation->id)
+                        ->where('student_course_relation_id',$student->crel->id)
+                        ->get()
+                        ->first();
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
+        
         return view('pages.students.live.course', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Course', 'href' => 'javascript:void(0);'],
             ],
-            'student' => Student::find($studentId),
+            'student' => $student,
+            'studentCourseAvailability' => $studentCourseAvailability,
             'allStatuses' => Status::where('type', 'Student')->get(),
             'instance' => CourseCreationInstance::all(),
             'feeelegibility' => FeeEligibility::all(),
@@ -283,6 +309,9 @@ class StudentController extends Controller
             "courses" => Course::orderBy('name', 'ASC')->get(),
             "academicYears" => AcademicYear::orderBy('from_date', 'DESC')->get(),
             "semesters" => Semester::orderBy('id', 'DESC')->get(),
+            "courseQualification" =>$courseCreationQualificationData,
+            "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
+            "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
         ]);
     }
 
@@ -326,7 +355,8 @@ class StudentController extends Controller
             ],
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
-            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get()
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'terms' => TermDeclaration::orderBy('id', 'desc')->get()
         ]);
     }
 
@@ -936,5 +966,253 @@ class StudentController extends Controller
         else:
             return response()->json(['suc' => 2], 200);
         endif;
+    }
+
+    public function printStudentCommunications($student_id, $type){
+        $student = Student::find($student_id);
+        $address = '';
+        if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
+            if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                $address .= $student->contact->termaddress->address_line_1.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                $address .= $student->contact->termaddress->address_line_2.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                $address .= $student->contact->termaddress->city.', ';
+            endif;
+            if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                $address .= $student->contact->termaddress->state.', <br/>';
+            endif;
+            if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                $address .= $student->contact->termaddress->post_code.', ';
+            endif;
+            if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                $address .= '<br/>'.$student->contact->termaddress->country;
+            endif;
+        endif;
+
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>Communication Sheets of '.$student->full_name.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
+                                table{margin-left: 0px; border-collapse: collapse; width: 100%;}
+                                figure{margin: 0;}
+                                @page{margin-top: 115px;margin-left: 30px;margin-right: 30px;margin-bottom: 30px;}
+                                header{position: fixed;left: 0px;right: 0px;height: 90px;margin-top: -90px;}
+                                
+                                .regInfoRow td{border-top: 1px solid gray;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                .btn{display: inline-block; font-size: 10px; line-height: normal; font-weight: bold; color: #FFF; background: rgb(22 78 99); padding: 2px 5px; text-align: center;}
+                                .btn-success{background: rgb(13 148 13);}
+                                .btn-danger{background: rgb(185 28 28);}
+
+                                .bodyContainer{font-size: 13px; line-height: normal; padding: 0 30px;}
+                                .tableTitle{font-size: 22px; font-weight: bold; color: #000; line-height: 22px; margin: 0;}
+                                .employeeInfo{line-height: normal;}
+                                .mb-30{margin-bottom: 30px;}
+                                .mb-20{margin-bottom: 20px;}
+                                .mb-15{margin-bottom: 15px;}
+                                .mb-10{margin-bottom: 10px;}
+                                .text-justify{text-align: justify;}
+                            
+                                .table {width: 100%; text-align: left; text-indent: 0; border-color: inherit; border-collapse: collapse;}
+                                .table th {border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: 500;}
+                                .table td {border-style: solid;border-color: #e5e7eb; border-bottom-width: 1px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;}
+
+                                .table.table-bordered th, .table.table-bordered td {border-left-width: 1px;border-right-width: 1px;border-top-width: 1px;}
+
+                                .table.table-sm th {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+                                .table.table-sm td {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+
+                                .barTitle{padding: 5px 10px; background: rgb(226, 232, 240); font-size: 14px; font-weight: bold; line-height: normal;}
+                                .spacer{padding: 5px 0 6px;}
+                                .theLabel{vertical-align: top; padding: 0 10px 15px; width: 20%; font-weight: medium; font-size: 13px; color: rgb(100, 116, 139); line-height: normal;}
+                                .theValue{vertical-align: top; padding: 0 10px 15px; width: 30%; font-weight: medium; font-size: 13px; color: rgb(30, 41, 59); line-height: normal;}
+                                .theValue.tv-large{width: 80%;}
+
+                                .pdfList{margin: 0; padding: 0 0 0 10px; }
+                                .pdfList li{margin: 0 0 3px; font-size: 12px; line-height: normal; color: rgb(100, 116, 139);}
+                            </style>';
+            $PDFHTML .= '</head>';
+
+            $PDFHTML .= '<body>';
+
+                $PDFHTML .= '<header>';
+                    $PDFHTML .= '<table>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>';
+                                $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
+                            $PDFHTML .= '</td>';
+                            $PDFHTML .= '<td class="text-right">';
+                                $PDFHTML .= '<img style="height: 55px; width: auto;" alt="'.$student->full_name.'" src="'.(isset($student->photo) && !empty($student->photo) && Storage::disk('local')->exists('public/applicants/'.$student->applicant_id.'/'.$student->photo) ? url('storage/applicants/'.$student->applicant_id.'/'.$student->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                                $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.$student->full_name.'</span>';
+                                $PDFHTML .= '<span style="font-size: 10px; padding: 0 0 0; font-weight: 700; display: block;">'.(!empty($student->registration_no) ? $student->registration_no : '').'</span>';
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</table>';
+                $PDFHTML .= '</header>';
+
+                $PDFHTML .= '<table class="mb-10">';
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="barTitle text-center">Student Communication Sheet</td>';
+                    $PDFHTML .= '</tr>';
+                $PDFHTML .= '</table>';
+
+                $PDFHTML .= '<table class="mb-10">';
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel">Semester</td>';
+                        $PDFHTML .= '<td class="theValue">'.(isset($student->course->semester->name) ? $student->course->semester->name : '').'</td>';
+                    
+                        $PDFHTML .= '<td class="theLabel">Programme Name</td>';
+                        $PDFHTML .= '<td class="theValue">'.(isset($student->course->creation->course->name) ? $student->course->creation->course->name : '').'</td>';
+                    $PDFHTML .= '</tr>';
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel">Date of Birth</td>';
+                        $PDFHTML .= '<td class="theValue">'.(isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('jS F, Y', strtotime($student->date_of_birth)) : '').'</td>';
+
+                        $PDFHTML .= '<td class="theLabel">Awarding Body</td>';
+                        $PDFHTML .= '<td class="theValue">'.(isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : '').'</td>';
+                    $PDFHTML .= '</tr>';
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel">Awarding Body Reg. No</td>';
+                        $PDFHTML .= '<td class="theValue">'.(isset($student->crel->abody->reference) ? $student->crel->abody->reference : '').'</td>';
+                    
+                        $PDFHTML .= '<td class="theLabel">Date of Award</td>';
+                        $PDFHTML .= '<td class="theValue"></td>';
+                    $PDFHTML .= '</tr>';
+                    $PDFHTML .= '<tr>';
+                        $PDFHTML .= '<td class="theLabel">Address</td>';
+                        $PDFHTML .= '<td class="theValue">'.$address.'</td>';
+                    $PDFHTML .= '</tr>';
+                $PDFHTML .= '</table>';
+
+                $PDFHTML .= '<table class="mb-10">';
+                    if($type == 'letter' || $type == 'all'):
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" class="barTitle text-center">Letters</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" style="padding: '.($type == 'all' ? '0 0 30px' : '0').';">';
+                                $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
+                                    $PDFHTML .= '<thead>';
+                                        $PDFHTML .= '<tr>';
+                                            $PDFHTML .= '<th class="text-left">#ID</th>';
+                                            $PDFHTML .= '<th class="text-left">Type</th>';
+                                            $PDFHTML .= '<th class="text-left">Subject</th>';
+                                            $PDFHTML .= '<th class="text-left">Signatory</th>';
+                                            $PDFHTML .= '<th class="text-left">Issued By</th>';
+                                        $PDFHTML .= '</tr>';
+                                    $PDFHTML .= '</thead>';
+                                    $PDFHTML .= '<tbody>';
+                                        $letters = StudentLetter::where('student_id', $student_id)->orderBy('id', 'DESC')->get();
+                                        if($letters->count() > 0):
+                                            foreach($letters as $ltr):
+                                                $PDFHTML .= '<tr>';
+                                                    $PDFHTML .= '<td class="text-left">'.$ltr->id.'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($ltr->letterSet->letter_type) ? $ltr->letterSet->letter_type : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($ltr->letterSet->letter_title) ? $ltr->letterSet->letter_title : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($ltr->signatory->signatory_name) ? $ltr->signatory->signatory_name : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">';
+                                                        $PDFHTML .= (isset($ltr->issuedBy->employee->full_name) ? '<strong>'.$ltr->issuedBy->employee->full_name.'</strong><br/>' : '<strong>'.$ltr->issuedBy->name.'</strong><br/>');
+                                                        $PDFHTML .= (isset($ltr->issued_date) && !empty($ltr->issued_date) ? date('jS F, Y', strtotime($ltr->issued_date)) : '');
+                                                    $PDFHTML .= '</td>';
+                                                $PDFHTML .= '</tr>';
+                                            endforeach;
+                                        else:
+                                            $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
+                                        endif;
+                                    $PDFHTML .= '</tbody>';
+                                $PDFHTML .= '</table>';
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    endif;
+                    if($type == 'email' || $type == 'all'):
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" class="barTitle text-center">Emails</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" style="padding: '.($type == 'all' ? '0 0 30px' : '0').';">';
+                                $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
+                                    $PDFHTML .= '<thead>';
+                                        $PDFHTML .= '<tr>';
+                                            $PDFHTML .= '<th class="text-left">#ID</th>';
+                                            $PDFHTML .= '<th class="text-left">Subject</th>';
+                                            $PDFHTML .= '<th class="text-left">From</th>';
+                                            $PDFHTML .= '<th class="text-left">Issued By</th>';
+                                        $PDFHTML .= '</tr>';
+                                    $PDFHTML .= '</thead>';
+                                    $PDFHTML .= '<tbody>';
+                                        $emails = StudentEmail::where('student_id', $student_id)->orderBy('id', 'DESC')->get();
+                                        if($emails->count() > 0):
+                                            foreach($emails as $eml):
+                                                $PDFHTML .= '<tr>';
+                                                    $PDFHTML .= '<td class="text-left">'.$eml->id.'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($eml->subject) ? $eml->subject : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($eml->smtp->smtp_user) ? $eml->smtp->smtp_user : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">';
+                                                        $PDFHTML .= (isset($eml->user->employee->full_name) ? '<strong>'.$eml->user->employee->full_name.'</strong><br/>' : '<strong>'.$eml->user->name.'</strong><br/>');
+                                                        $PDFHTML .= (isset($eml->created_at) && !empty($eml->created_at) ? date('jS F, Y', strtotime($eml->created_at)) : '');
+                                                    $PDFHTML .= '</td>';
+                                                $PDFHTML .= '</tr>';
+                                            endforeach;
+                                        else:
+                                            $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
+                                        endif;
+                                    $PDFHTML .= '</tbody>';
+                                $PDFHTML .= '</table>';
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    endif;
+                    if($type == 'sms' || $type == 'all'):
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" class="barTitle text-center">SMS</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="4" style="padding: '.($type == 'all' ? '0 0 30px' : '0').';">';
+                                $PDFHTML .= '<table class="table table-bordered table-sm mb-15">';
+                                    $PDFHTML .= '<thead>';
+                                        $PDFHTML .= '<tr>';
+                                            $PDFHTML .= '<th class="text-left">#ID</th>';
+                                            $PDFHTML .= '<th class="text-left">Subject</th>';
+                                            $PDFHTML .= '<th class="text-left">Issued By</th>';
+                                        $PDFHTML .= '</tr>';
+                                    $PDFHTML .= '</thead>';
+                                    $PDFHTML .= '<tbody>';
+                                        $smss = StudentSms::where('student_id', $student_id)->orderBy('id', 'DESC')->get();
+                                        if($smss->count() > 0):
+                                            foreach($smss as $sms):
+                                                $PDFHTML .= '<tr>';
+                                                    $PDFHTML .= '<td class="text-left">'.$sms->id.'</td>';
+                                                    $PDFHTML .= '<td class="text-left">'.(isset($sms->subject) ? $sms->subject : '').'</td>';
+                                                    $PDFHTML .= '<td class="text-left">';
+                                                        $PDFHTML .= (isset($sms->user->employee->full_name) ? '<strong>'.$sms->user->employee->full_name.'</strong><br/>' : '<strong>'.$sms->user->name.'</strong><br/>');
+                                                        $PDFHTML .= (isset($sms->created_at) && !empty($sms->created_at) ? date('jS F, Y', strtotime($sms->created_at)) : '');
+                                                    $PDFHTML .= '</td>';
+                                                $PDFHTML .= '</tr>';
+                                            endforeach;
+                                        else:
+                                            $PDFHTML .= '<tr><td colspan="5" class="text-center">No data found!</td></tr>';
+                                        endif;
+                                    $PDFHTML .= '</tbody>';
+                                $PDFHTML .= '</table>';
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    endif;
+                $PDFHTML .= '</table>';
+
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = str_replace(' ', '_', $student->full_name).'_communication_sheet.pdf';
+        $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'portrait')
+            ->setWarnings(false);
+        return $pdf->download($fileName);
     }
 }

@@ -110,6 +110,7 @@ use App\Models\StudentFeeEligibility;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentUser;
 use App\Models\TaskList;
+use App\Models\Venue;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Cache;
@@ -410,6 +411,7 @@ class AdmissionController extends Controller
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
             'sexid' => SexIdentifier::all(),
+            'venues' => Venue::all(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'instance' => CourseCreationInstance::all()->sortByDesc('id'),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {

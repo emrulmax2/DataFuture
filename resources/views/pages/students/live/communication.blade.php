@@ -20,7 +20,13 @@
                 <div class="font-medium text-base">Letters</div>
             </div>
             <div class="col-span-6 text-right relative">
+                <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print All
+                </a>
                 <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary w-auto">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Letters
+                </a>
             </div>
         </div>
         <div class="intro-y mt-5">
@@ -42,30 +48,6 @@
                         <button id="tabulator-html-filter-reset-CML" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CML" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
                 <div id="studentCommLetterListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
@@ -82,6 +64,9 @@
             </div>
             <div class="col-span-6 text-right relative">
                 <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Emails
+                </a>
             </div>
         </div>
         <div class="intro-y mt-5">
@@ -103,30 +88,6 @@
                         <button id="tabulator-html-filter-reset-CME" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CME" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
                 <div id="studentCommEmailListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
@@ -143,6 +104,9 @@
             </div>
             <div class="col-span-6 text-right relative">
                 <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto">
+                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print SMS
+                </a>
             </div>
         </div>
         <div class="intro-y mt-5">
@@ -164,30 +128,6 @@
                         <button id="tabulator-html-filter-reset-CMS" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CMS" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-CMS" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="overflow-x-auto scrollbar-hidden">
                 <div id="studentCommSMSListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>

@@ -17,11 +17,17 @@ class NoteController extends Controller
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
+        $followed_up = (isset($request->followed_up) && $request->followed_up > 0 ? 'yes' : 'no');
         $note = StudentNote::create([
             'student_id'=> $student_id,
+            'term_declaration_id'=> (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null),
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Live',
+            'followed_up'=> $followed_up,
+            'follow_up_start'=> ($followed_up == 'yes' && isset($request->follow_up_start) && !empty($request->follow_up_start) ? date('Y-m-d', strtotime($request->follow_up_start)) : null),
+            'follow_up_end'=> ($followed_up == 'yes' && isset($request->follow_up_end) && !empty($request->follow_up_end) ? date('Y-m-d', strtotime($request->follow_up_end)) : null),
+            'follow_up_by'=> ($followed_up == 'yes' && isset($request->follow_up_by) && !empty($request->follow_up_by) ? $request->follow_up_by : null),
             'created_by' => auth()->user()->id
         ]);
         if($note):
@@ -58,6 +64,7 @@ class NoteController extends Controller
         $studentApplicantId = $student->applicant_id;
         $queryStr = (isset($request->queryStr) && $request->queryStr != '' ? $request->queryStr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $term = (isset($request->term) && $request->term > 0 ? $request->term : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -69,6 +76,7 @@ class NoteController extends Controller
         if(!empty($queryStr)):
             $query->where('note','LIKE','%'.$queryStr.'%');
         endif;
+        if($term > 0): $query->where('term_declaration_id', $term); endif;
         if($status == 2):
             $query->onlyTrashed();
         endif;
@@ -97,9 +105,14 @@ class NoteController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'term' => (isset($list->term->name) && !empty($list->term->name) ? $list->term->name : ''),
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
                     'student_document_id' => (isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? $list->student_document_id : 0),
+                    'followed_up' => (isset($list->followed_up) && !empty($list->followed_up) ? $list->followed_up : 'no'),
+                    'follow_up_start' => (isset($list->follow_up_start) && !empty($list->follow_up_start) ? date('jS F, Y', strtotime($list->follow_up_start)) : ''),
+                    'follow_up_end' => (isset($list->follow_up_end) && !empty($list->follow_up_end) ? date('jS F, Y', strtotime($list->follow_up_end)) : ''),
+                    'followed' => (isset($list->followed->employee->full_name) && !empty($list->followed->employee->full_name) ? $list->followed->employee->full_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -147,7 +160,7 @@ class NoteController extends Controller
         return response()->json(['res' => $theNote], 200);
     }
 
-    public function update(ApplicantNoteRequest $request){
+    public function update(StudentNoteRequest $request){
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
@@ -155,11 +168,17 @@ class NoteController extends Controller
         $oleNote = StudentNote::find($noteId);
         $studentDocumentId = (isset($oleNote->student_document_id) && $oleNote->student_document_id > 0 ? $oleNote->student_document_id : 0);
 
+        $followed_up = (isset($request->followed_up) && $request->followed_up > 0 ? 'yes' : 'no');
         $note = StudentNote::where('id', $noteId)->where('student_id', $student_id)->Update([
             'student_id'=> $student_id,
+            'term_declaration_id'=> (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null),
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
-            'phase'=> 'Admission',
+            'phase'=> 'Live',
+            'followed_up'=> $followed_up,
+            'follow_up_start'=> ($followed_up == 'yes' && isset($request->follow_up_start) && !empty($request->follow_up_start) ? date('Y-m-d', strtotime($request->follow_up_start)) : null),
+            'follow_up_end'=> ($followed_up == 'yes' && isset($request->follow_up_end) && !empty($request->follow_up_end) ? date('Y-m-d', strtotime($request->follow_up_end)) : null),
+            'follow_up_by'=> ($followed_up == 'yes' && isset($request->follow_up_by) && !empty($request->follow_up_by) ? $request->follow_up_by : null),
             'updated_by' => auth()->user()->id
         ]);
         if($request->hasFile('document')):

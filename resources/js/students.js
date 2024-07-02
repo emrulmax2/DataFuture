@@ -37,6 +37,8 @@ var liveStudentsListTable = (function () {
                                 html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -13px;">';
                                     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
+                                    if(cell.getData().disability==1)
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap"><i data-lucide="accessibility" class="w-4 h-4"></i></div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -53,14 +55,21 @@ var liveStudentsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "DOB",
-                    field: "date_of_birth",
+                    title: "Evening and Weekend / Regular",
+                    field: "full_time",
                     headerHozAlign: "left",
-                },
-                {
-                    title: "Gender",
-                    field: "gender",
-                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="block">';
+                                html += '<div class="w-8 h-8 intro-x mr-4 inline-block">';
+                                if(cell.getData().full_time==1)
+                                    html += '<i data-lucide="sunset" class="w-5 h-5"></i>';
+                                else
+                                html += '<i data-lucide="sun" class="w-5 h-5"></i>';
+
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Semester",
@@ -244,24 +253,24 @@ var liveStudentsListTable = (function () {
             academic_year.clear(true);
             intake_semester.clear(true);
             attendance_semester.clear(true);
-            course.clear(true);
-            group.clear(true);
+            course.clear(true); 
+            group.clear(true); 
             
             term_status.clear(true);
             student_type.clear(true);
             group_student_status.clear(true);
             $('#evening_weekend').val('');
-            $('#groupSearchStatus').val('0');
+            $('#groupSearchStatus').val('0'); 
         }
 
         /* Start List Table Inits */
-            liveStudentsListTable.init();
+            //liveStudentsListTable.init();
 
             function filterStudentListTable() {
                 liveStudentsListTable.init();
             }
 
-            $("#studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
+            $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
@@ -300,7 +309,8 @@ var liveStudentsListTable = (function () {
                 resetGroupSearch();
                 resetStudentIDSearch();
 
-                filterStudentListTable();
+                //filterStudentListTable();
+                $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
             });
         /* End List Table Inits */
 
@@ -316,7 +326,8 @@ var liveStudentsListTable = (function () {
             resetGroupSearch();
             resetStudentIDSearch();
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('#studentSearchBtn').on('click', function(){
@@ -332,7 +343,8 @@ var liveStudentsListTable = (function () {
                 $('#groupSearchStatus').val(0);
             }
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('#studentGroupSearchBtn').on('click', function(){
@@ -348,7 +360,8 @@ var liveStudentsListTable = (function () {
                 $('#groupSearchStatus').val(0);
             }
 
-            filterStudentListTable();
+            //filterStudentListTable();
+            $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
         });
 
         $('.registration_no').on('keyup', function(){

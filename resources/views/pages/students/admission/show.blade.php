@@ -271,6 +271,7 @@
                     </button>
                 </div>
             </div>
+
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-12">
@@ -279,6 +280,14 @@
                         <div class="col-span-8 font-medium">{{ $applicant->course->creation->course->name.' - '.$applicant->course->semester->name }}</div>
                     </div>
                 </div>
+                @if(isset($applicant->course->venue) && !empty($applicant->course->venue))
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Venue</div>
+                        <div class="col-span-8 font-medium">{{ $applicant->course->venue->name }}</div>
+                    </div>
+                </div>
+                @endif
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">How are you funding your education at London Churchill College?</div>

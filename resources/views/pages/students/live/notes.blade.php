@@ -26,6 +26,17 @@
             <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
                 <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
                     <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Term</label>
+                        <select id="term-SN" name="term" class="mt-2 sm:mt-0 sm:w-40 2xl:w-48 tom-selects" >
+                            <option selected value="">Please Select</option>
+                            @if($terms->count() > 0)
+                                @foreach($terms as $trm)
+                                    <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                         <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
                         <input id="query-AN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
                     </div>
@@ -117,6 +128,18 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="edit_term_declaration_id" class="form-label">Term</label>
+                            <select id="edit_term_declaration_id" class="w-full" name="term_declaration_id">
+                                <option value="">Please Select</option>
+                                @if($terms->count() > 0)
+                                    @foreach($terms as $trm)
+                                        <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
                             <label for="edit_opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
                             <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="edit_opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-opening_date text-danger mt-2"></div>
@@ -125,6 +148,38 @@
                             <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="editEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="form-check form-switch m-0 flex items-center">
+                                <label class="form-check-label mr-3 ml-0" for="edit_followed_up">Followed Up?</label>
+                                <input id="edit_followed_up" name="followed_up" class="form-check-input" value="yes" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 followedUpWrap" style="display: none;">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="edit_follow_up_start" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_start" class="form-control datepicker" name="follow_up_start" data-format="DD-MM-YYYY" data-single-mode="true">
+                                    <div class="acc__input-error error-follow_up_start text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="edit_follow_up_end" class="form-label">End Date</label>
+                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_end" class="form-control datepicker" name="follow_up_end" data-format="DD-MM-YYYY" data-single-mode="true">
+                                    <div class="acc__input-error error-follow_up_end text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="edit_follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
+                                    <select id="edit_follow_up_by" class="w-full tom-selects" name="follow_up_by">
+                                        <option value="">Please Select</option>
+                                        @if($users->count() > 0)
+                                            @foreach($users as $usr)
+                                                <option value="{{ $usr->id }}">{{ (isset($usr->employee->full_name) ? $usr->employee->full_name : $usr->name) }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-follow_up_by text-danger mt-2"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">
                             <a href="#" download class="btn btn-success text-white downloadExistAttachment mr-1 inline-flex" style="display: none;">
@@ -178,6 +233,18 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="term_declaration_id" class="form-label">Term</label>
+                            <select id="term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
+                                <option value="">Please Select</option>
+                                @if($terms->count() > 0)
+                                    @foreach($terms as $trm)
+                                        <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
                             <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
                             <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-opening_date text-danger mt-2"></div>
@@ -186,6 +253,38 @@
                             <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
                             <textarea name="content" id="addEditor"></textarea>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="form-check form-switch m-0 flex items-center">
+                                <label class="form-check-label mr-3 ml-0" for="followed_up">Followed Up?</label>
+                                <input id="followed_up" name="followed_up" class="form-check-input" value="yes" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 followedUpWrap" style="display: none;">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="follow_up_start" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="follow_up_start" class="form-control datepicker" name="follow_up_start" data-format="DD-MM-YYYY" data-single-mode="true">
+                                    <div class="acc__input-error error-follow_up_start text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="follow_up_end" class="form-label">End Date</label>
+                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="follow_up_end" class="form-control datepicker" name="follow_up_end" data-format="DD-MM-YYYY" data-single-mode="true">
+                                    <div class="acc__input-error error-follow_up_end text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-12 sm:col-span-4">
+                                    <label for="follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
+                                    <select id="follow_up_by" class="w-full tom-selects" name="follow_up_by">
+                                        <option value="">Please Select</option>
+                                        @if($users->count() > 0)
+                                            @foreach($users as $usr)
+                                                <option value="{{ $usr->id }}">{{ (isset($usr->employee->full_name) ? $usr->employee->full_name : $usr->name) }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-follow_up_by text-danger mt-2"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">
                             <label for="addNoteDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">

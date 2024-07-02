@@ -22,6 +22,7 @@ class StudentProposedCourse extends Model
         'applied_received_fund',
         'full_time',
         'other_funding',
+        'venue_id',
         'created_by',
         'updated_by',
     ];
@@ -45,7 +46,21 @@ class StudentProposedCourse extends Model
         return $this->belongsTo(Semester::class, 'semester_id');
     }
     
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
+    
+    
     public function academicYear(){
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    }
+    
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
+
+    public function getSlcCodeAttribute(){
+        $crVenue = CourseCreationVenue::where('course_creation_id', $this->course_creation_id)->where('venue_id', $this->venue_id)->get()->first();
+        return (isset($crVenue->slc_code) && !empty($crVenue->slc_code) ? $crVenue->slc_code : '');
     }
 }
