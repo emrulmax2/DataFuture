@@ -31,9 +31,50 @@
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>
-                    <div class="col-span-8 font-medium">{{ $student->crel->creation->course->name.' - '.$student->crel->propose->semester->name }}</div>
+                    <div class="col-span-8 font-medium">
+                            <span>{{ $student->crel->creation->course->name.' - '.$student->crel->propose->semester->name }}</span>
+                    </div>
                 </div>
             </div>
+            <div class="col-span-12 sm:col-span-12">
+                <div class="grid grid-cols-12 gap-0">
+                    <div class="col-span-4 text-slate-500 font-medium">Venue</div>
+                    <div class="col-span-8 font-medium">
+                            <span>{{ $venue }}</span>
+                    </div>
+                </div>
+            </div>
+            @if($studentCourseAvailability->count()>0)
+                @foreach ($studentCourseAvailability as $availability)
+                    <div class="col-span-12 sm:col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Course Start</div>
+                            <div class="col-span-8 font-medium">{{ $availability->course_start_date }}</div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Course End</div>
+                            <div class="col-span-8 font-medium">{{ $availability->course_end_date }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-12 sm:col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-4 text-slate-500 font-medium">Student Type</div>
+                            <div class="col-span-8 font-medium">{{ $availability->type }}</div>
+                        </div>
+                    </div>
+                    
+                @endforeach
+            @endif
+            <div class="col-span-12 sm:col-span-12">
+                <div class="grid grid-cols-12 gap-0">
+                    <div class="col-span-4 text-slate-500 font-medium">Qualification Achivement after completion</div>
+                    <div class="col-span-8 font-medium">{{ $courseQualification->name }}</div>
+                </div>
+            </div>
+
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-4 text-slate-500 font-medium">Awarding Body</div>
@@ -52,7 +93,7 @@
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-4 text-slate-500 font-medium">SLC Course Code</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->creation->slc_code) ? $student->crel->creation->slc_code : 'Unknown')}} </div>
+                    <div class="col-span-8 font-medium">{{ $slcCode }} </div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-12">

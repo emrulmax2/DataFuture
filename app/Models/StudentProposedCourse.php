@@ -45,6 +45,11 @@ class StudentProposedCourse extends Model
         return $this->belongsTo(Semester::class, 'semester_id');
     }
     
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
+    
+    
     public function academicYear(){
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }

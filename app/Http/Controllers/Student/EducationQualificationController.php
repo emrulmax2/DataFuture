@@ -88,6 +88,7 @@ class EducationQualificationController extends Controller
                     'subjects' => $list->subjects,
                     'result' => $list->result,
                     'degree_award_date' => $list->degree_award_date,
+                    'highest_qualification_on_entry_id' => ($list->highest_qualification_on_entries) ?$list->highest_qualification_on_entries->name : null,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -98,12 +99,18 @@ class EducationQualificationController extends Controller
 
 
     public function store(StudentQualificationRequest $request){
+        
         $data = StudentQualification::create([
             'student_id'=> $request->student_id,
             'highest_academic'=> $request->highest_academic,
             'awarding_body'=> $request->awarding_body,
             'subjects'=> $request->subjects,
             'result'=> $request->result,
+            'highest_qualification_on_entry_id'=> $request->highest_qualification_on_entry_id,
+            'hesa_qualification_subject_id'=> $request->hesa_qualification_subject_id,
+            'qualification_type_identifier_id'=> $request->qualification_type_identifier_id,
+            'previous_provider_id'=> $request->previous_provider_id,
+            'hesa_exam_sitting_venue_id'=> ($request->hesa_exam_sitting_venue_id) ?? null,
             'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
             'created_by' => auth()->user()->id
         ]);
@@ -128,6 +135,11 @@ class EducationQualificationController extends Controller
             'awarding_body' => $request->awarding_body,
             'subjects' => $request->subjects,
             'result' => $request->result,
+            'highest_qualification_on_entry_id'=> $request->highest_qualification_on_entry_id,
+            'hesa_qualification_subject_id'=> $request->hesa_qualification_subject_id,
+            'qualification_type_identifier_id'=> $request->qualification_type_identifier_id,
+            'previous_provider_id'=> $request->previous_provider_id,
+            'hesa_exam_sitting_venue_id'=> ($request->hesa_exam_sitting_venue_id) ?? null,
             'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
             'updated_by' => auth()->user()->id
         ]);

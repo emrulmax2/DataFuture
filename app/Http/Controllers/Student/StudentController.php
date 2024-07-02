@@ -27,6 +27,7 @@ use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseCreationVenue;
 use App\Models\CourseModule;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
@@ -37,6 +38,8 @@ use App\Models\FeeEligibility;
 use App\Models\Grade;
 use App\Models\Group;
 use App\Models\HesaGender;
+use App\Models\HesaQualificationSubject;
+use App\Models\HighestQualificationOnEntry;
 use App\Models\InstanceTerm;
 use App\Models\KinsRelation;
 use App\Models\LetterSet;
@@ -44,7 +47,9 @@ use App\Models\MobileVerificationCode;
 use App\Models\ModuleCreation;
 use App\Models\Option;
 use App\Models\Plan;
+use App\Models\PreviousProvider;
 use App\Models\ProcessList;
+use App\Models\QualificationTypeIdentifier;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Result;
@@ -266,17 +271,34 @@ class StudentController extends Controller
             'consent' => ConsentPolicy::all(),
             'referral' => $referral,
             'ttacom' => TermTimeAccommodationType::where('active', 1)->get(),
+            'PreviousProviders' => PreviousProvider::all(),
+            'QualificationTypeIdentifiers' => QualificationTypeIdentifier::all(),
+            'HighestQualificationOnEntrys' => HighestQualificationOnEntry::all(),
+            'HesaQualificationSubjects' => HesaQualificationSubject::all(),
         ]);
     }
 
     public function courseDetails($studentId){
+
+        $student = Student::with('crel','course')->where('id',$studentId)->get()->first();
+        $courseRelationCreation = $student->crel->creation;
+        $studentCourseAvailability = $courseRelationCreation->availability;
+        $courseCreationQualificationData = $courseRelationCreation->qualification;
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id',$courseRelationCreation->id)
+                        ->where('student_course_relation_id',$student->crel->id)
+                        ->get()
+                        ->first();
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
+        
         return view('pages.students.live.course', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Course', 'href' => 'javascript:void(0);'],
             ],
-            'student' => Student::find($studentId),
+            'student' => $student,
+            'studentCourseAvailability' => $studentCourseAvailability,
             'allStatuses' => Status::where('type', 'Student')->get(),
             'instance' => CourseCreationInstance::all(),
             'feeelegibility' => FeeEligibility::all(),
@@ -284,6 +306,9 @@ class StudentController extends Controller
             "courses" => Course::orderBy('name', 'ASC')->get(),
             "academicYears" => AcademicYear::orderBy('from_date', 'DESC')->get(),
             "semesters" => Semester::orderBy('id', 'DESC')->get(),
+            "courseQualification" =>$courseCreationQualificationData,
+            "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
+            "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
         ]);
     }
 
