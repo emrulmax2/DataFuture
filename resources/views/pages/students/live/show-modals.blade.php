@@ -775,19 +775,19 @@
                         <input type="text" placeholder="Subjects" id="subjects" class="form-control" name="subjects">
                         <div class="acc__input-error error-subjects text-danger mt-2"></div>
                     </div>
-                    <div class="col-span-12 sm:col-span-4">
+
+                    <div class="col-span-12 sm:col-span-3">
                         <label for="result" class="form-label">Result <span class="text-danger"></span></label>
                         <input type="text" placeholder="Result" id="result" class="form-control" name="result">
                         <div class="acc__input-error error-result text-danger mt-2"></div>
                     </div>
-                    <div class="col-span-12 sm:col-span-4">
+                    <div class="col-span-12 sm:col-span-3">
                         <label for="degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
                         <input type="text" placeholder="DD-MM-YYYY" id="degree_award_date" class="form-control datepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                         <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                     </div>
-                    
-                    <div class="col-span-12 sm:col-span-4">
-                        <label for="previous_provider_id" class="form-label">Provider Name <span class="text-danger">*</span></label>
+                    <div class="col-span-12 sm:col-span-3">
+                        <label for="previous_provider_id1" class="form-label">Provider Name <span class="text-danger">*</span></label>
                         <select id="previous_provider_id1" class="lcc-tom-select w-full" name="previous_provider_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($PreviousProviders))
@@ -798,9 +798,8 @@
                         </select>
                         <div class="acc__input-error error-previous_provider_id text-danger mt-2"></div>
                     </div>
-
-                    <div class="col-span-12 sm:col-span-4">
-                        <label for="qualification_type_identifier_id" class="form-label">Qualification Type <span class="text-danger">*</span></label>
+                    <div class="col-span-12 sm:col-span-3">
+                        <label for="qualification_type_identifier_id1" class="form-label">Qualification Type <span class="text-danger">*</span></label>
                         <select id="qualification_type_identifier_id1" class="lcc-tom-select w-full" name="qualification_type_identifier_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
@@ -812,7 +811,7 @@
                         <div class="acc__input-error error-qualification_type_identifier_id text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="hesa_qualification_subject_id" class="form-label">Hesa Qualification Subject <span class="text-danger">*</span></label>
+                        <label for="hesa_qualification_subject_id1" class="form-label">Hesa Qualification Subject <span class="text-danger">*</span></label>
                         <select id="hesa_qualification_subject_id1" class="lcc-tom-select w-full" name="hesa_qualification_subject_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaQualificationSubjects))
@@ -824,7 +823,7 @@
                         <div class="acc__input-error error-hesa_qualification_subject_id text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="highest_qualification_on_entry_id" class="form-label">HIghest Qualification Entry (QualEnt3)<span class="text-danger">*</span></label>
+                        <label for="highest_qualification_on_entry_id1" class="form-label">HIghest Qualification Entry (QualEnt3)<span class="text-danger">*</span></label>
                         <select id="highest_qualification_on_entry_id1" class="lcc-tom-select w-full" name="highest_qualification_on_entry_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($HighestQualificationOnEntrys))
@@ -834,6 +833,18 @@
                             @endif 
                         </select>
                         <div class="acc__input-error error-highest_qualification_on_entry_id text-danger mt-2"></div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-4">
+                        <label for="hesa_exam_sitting_venue_id1" class="form-label">Exam Sitting<span class="text-danger">*</span></label>
+                        <select id="hesa_exam_sitting_venue_id1" class="lcc-tom-select w-full" name="hesa_exam_sitting_venue_id">
+                            <option value="" selected>Please Select</option>
+                            @if(!empty($HesaExamSittingVenues))
+                                @foreach($HesaExamSittingVenues as $n)
+                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                @endforeach 
+                            @endif 
+                        </select>
+                        <div class="acc__input-error error-hesa_exam_sitting_venue_id text-danger mt-2"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -948,6 +959,19 @@
                             @endif 
                         </select>
                         <div class="acc__input-error error-highest_qualification_on_entry_id text-danger mt-2"></div>
+                    </div>
+                    
+                    <div class="col-span-12 sm:col-span-4">
+                        <label for="hesa_exam_sitting_venue_id" class="form-label">Exam Sitting<span class="text-danger">*</span></label>
+                        <select id="hesa_exam_sitting_venue_id" class="lcc-tom-select w-full" name="hesa_exam_sitting_venue_id">
+                            <option value="" selected>Please Select</option>
+                            @if(!empty($HesaExamSittingVenues))
+                                @foreach($HesaExamSittingVenues as $n)
+                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                @endforeach 
+                            @endif 
+                        </select>
+                        <div class="acc__input-error error-hesa_exam_sitting_venue_id text-danger mt-2"></div>
                     </div>
                 </div>
                 <div class="modal-footer">

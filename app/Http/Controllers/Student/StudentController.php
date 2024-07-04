@@ -37,6 +37,7 @@ use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
 use App\Models\Grade;
 use App\Models\Group;
+use App\Models\HesaExamSittingVenue;
 use App\Models\HesaGender;
 use App\Models\HesaQualificationSubject;
 use App\Models\HighestQualificationOnEntry;
@@ -278,6 +279,7 @@ class StudentController extends Controller
             'QualificationTypeIdentifiers' => QualificationTypeIdentifier::all(),
             'HighestQualificationOnEntrys' => HighestQualificationOnEntry::all(),
             'HesaQualificationSubjects' => HesaQualificationSubject::all(),
+            'HesaExamSittingVenues' => HesaExamSittingVenue::all(),
         ]);
     }
 
