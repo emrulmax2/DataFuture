@@ -206,6 +206,7 @@ use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
+use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -1303,6 +1304,11 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/eligibilityreport/passportexpiry-list', 'passportList')->name('hr.portal.reports.eligibilityreport.passportexpirylist'); 
         Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf/visa', 'generateVisaPDF')->name('hr.portal.reports.eligibilityreport.visa.pdf');
         Route::get('hr/portal/reports/eligibilityreport/eligibilitypdf/passport', 'generatePassportPDF')->name('hr.portal.reports.eligibilityreport.passport.pdf');
+    });
+
+    Route::controller(HolidayHourReportController::class)->group(function(){
+        Route::any('hr/portal/employee-holiday-hour-reports', 'index')->name('hr.portal.reports.holiday.hour');
+        Route::get('hr/portal/employee-holiday-hour-export/{from_date}/{to_date?}', 'exportExcel')->name('hr.portal.reports.holiday.hour.export');
     });
 
     Route::controller(EmployeeUpcomingAppraisalController::class)->group(function(){
