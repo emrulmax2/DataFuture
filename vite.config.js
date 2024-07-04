@@ -248,6 +248,7 @@ export default defineConfig({
                 'resources/js/communication-template.js',
                 'resources/js/user-team-holiday.js',
                 'resources/js/user-groups.js',
+                'resources/js/holiday-hour-report.js',
                 
             ],
             refresh: true,
