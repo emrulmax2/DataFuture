@@ -56,14 +56,20 @@ var courseCreationListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "SLC Code",
-                    field: "slc_code",
-                    headerHozAlign: "left",
-                },
-                {
                     title: "Venue",
-                    field: "venue_id",
-                    headerHozAlign: "left",
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "180",
+                    formatter(cell, formatterParams) {                        
+                        var thml = "";
+                        $(cell.getData().venues).each(function(index, data) {
+                        thml+=`<div class="font-medium whitespace-nowrap">${data.name} - ${data.pivot.slc_code}</div>`;
+
+                        });
+                        return thml;
+                    },
                 },
                 {
                     title: "Fees",
