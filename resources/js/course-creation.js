@@ -56,16 +56,17 @@ var courseCreationListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Venue",
+                    title: "Venue (s)",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    hozAlign: "left",
+                    headerHozAlign: "left",
                     width: "180",
                     formatter(cell, formatterParams) {                        
                         var thml = "";
                         $(cell.getData().venues).each(function(index, data) {
-                        thml+=`<div class="font-medium whitespace-nowrap">${data.name} - ${data.pivot.slc_code}</div>`;
+                        thml+=`<div class="whitespace-nowrap">${data.name}</div>
+                                <div class="text-slate-500 text-xs whitespace-nowrap mb-1">${data.pivot.slc_code}</div>`;
 
                         });
                         return thml;
