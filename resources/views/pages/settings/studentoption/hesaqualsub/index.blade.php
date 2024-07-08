@@ -1,26 +1,26 @@
 <!-- BEGIN: HTML Table Data -->
 <div class="relative">
     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-        <form id="tabulatorFilterForm-HIGHESTQOE" class="xl:flex sm:mr-auto" >
+        <form id="tabulatorFilterForm-HesaQualSub" class="xl:flex sm:mr-auto" >
             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                <input id="query-HIGHESTQOE" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                <input id="query-HesaQualSub" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
             </div>
             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                <select id="status-HIGHESTQOE" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                <select id="status-HesaQualSub" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                     <option value="1">Active</option>
-                    <option value="0">In Active</option>
+                    <option value="0">Inactive</option>
                     <option value="2">Archived</option>
                 </select>
             </div>
             <div class="mt-2 xl:mt-0">
-                <button id="tabulator-html-filter-go-HIGHESTQOE" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                <button id="tabulator-html-filter-reset-HIGHESTQOE" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                <button id="tabulator-html-filter-go-HesaQualSub" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                <button id="tabulator-html-filter-reset-HesaQualSub" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
             </div>
         </form>
         <div class="flex mt-5 sm:mt-0">
-            <button id="tabulator-print-HIGHESTQOE" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+            <button id="tabulator-print-HesaQualSub" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </button>
             <div class="dropdown w-1/2 sm:w-auto">
@@ -30,43 +30,43 @@
                 <div class="dropdown-menu w-40">
                     <ul class="dropdown-content">
                         <li>
-                            <a id="tabulator-export-csv-HIGHESTQOE" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-csv-HesaQualSub" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                             </a>
                         </li>
                         {{-- <li>
-                            <a id="tabulator-export-json-HIGHESTQOE" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-json-HesaQualSub" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                             </a>
                         </li> --}}
                         <li>
-                            <a id="tabulator-export-xlsx-HIGHESTQOE" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-xlsx-HesaQualSub" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                             </a>
                         </li>
                         {{-- <li>
-                            <a id="tabulator-export-html-HIGHESTQOE" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-html-HesaQualSub" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                             </a>
                         </li> --}}
                     </ul>
                 </div>
             </div>
-            <button data-tw-toggle="modal" data-tw-target="#highestqoeImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
+            <button data-tw-toggle="modal" data-tw-target="#HesaQualSubImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
-        <div id="HighestqoeListTable" class="mt-5 table-report table-report--tabulator"></div>
+        <div id="HesaQualSubListTable" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
 <!-- END: HTML Table Data -->
 <!-- BEGIN: Add Modal -->
-<div id="addHighestqoeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="addHesaQualSubModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="#" id="addHighestqoeForm" enctype="multipart/form-data">
+        <form method="POST" action="#" id="addHesaQualSubForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Add APELCRD</h2>
+                    <h2 class="font-medium text-base mr-auto">Add </h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -106,7 +106,7 @@
                         <input id="active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
                     </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="saveHighestqoe" class="btn btn-primary w-auto">     
+                    <button type="submit" id="saveHesaQualSub" class="btn btn-primary w-auto">     
                         Save                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -128,12 +128,12 @@
 </div>
 <!-- END: Add Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="editHighestqoeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="editHesaQualSubModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="#" id="editHighestqoeForm">
+        <form method="POST" action="#" id="editHesaQualSubForm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Edit APELCRD</h2>
+                    <h2 class="font-medium text-base mr-auto">Edit </h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -175,7 +175,7 @@
                         <input id="edit_active" class="form-check-input m-0" name="active" value="1" type="checkbox">
                     </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="updateHighestqoe" class="btn btn-primary w-auto">
+                    <button type="submit" id="updateHesaQualSub" class="btn btn-primary w-auto">
                         Update
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -198,7 +198,7 @@
 </div>
 <!-- END: Edit Modal -->
 <!-- BEGIN: Import Modal -->
-<div id="highestqoeImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="HesaQualSubImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -208,10 +208,10 @@
                 </a>
             </div>
             <div class="modal-body">
-                <form method="post"  action="{{ route('highestqoe.import') }}" class="dropzone" id="highestqoeImportForm" enctype="multipart/form-data">
+                <form method="post"  action="{{ route('hesaQualificationSubject.import') }}" class="dropzone" id="HesaQualSubImportForm" enctype="multipart/form-data">
                     @csrf
                     <div class="fallback">
-                        <input name="import_highestqoe_file" type="file" />
+                        <input name="import_HesaQualSub_file" type="file" />
                     </div>
                     <div class="dz-message" data-dz-message>
                         <div class="text-lg font-medium">Drop file here or click to upload.</div>
@@ -221,10 +221,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <a style="float: left;" href="{{ route('highestqoe.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample</a>
+                <a style="float: left;" href="{{ route('hesaQualificationSubject.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample</a>
                 <button type="button" data-tw-dismiss="modal"
                     class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                <button id="saveHighestqoe" class="btn btn-primary w-auto">Upload</button>
+                <button id="saveHesaQualSub" class="btn btn-primary w-auto">Upload</button>
             </div>
         </div> 
     </div>

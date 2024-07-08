@@ -103,6 +103,7 @@ export default defineConfig({
                 "resources/js/feeeligibilities.js",
                 "resources/js/apelcredit.js",
                 "resources/js/highest-qualification-on-entry.js",
+                'resources/js/hesa-qualification-subject.js',
                 "resources/js/country-fo-permanent-address.js",
                 "resources/js/previous-provider.js",
                 "resources/js/reason-for-engagement-ending.js",  

@@ -582,7 +582,7 @@ var courseCreationListTable = (function () {
             let $agreeBTN = $(this);
             let recordID = $agreeBTN.attr('data-id');
             let action = $agreeBTN.attr('data-action');
-            btnId="#delete-"+recordID;
+            let btnId="#delete-"+recordID;
                 
             $('#confirmModalVenue button').attr('disabled', 'disabled');
             if(action == 'DELETE'){

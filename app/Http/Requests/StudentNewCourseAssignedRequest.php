@@ -26,7 +26,8 @@ class StudentNewCourseAssignedRequest extends FormRequest
         return [
             'academic_year_id' => 'required',
             'semester_id' => 'required',
-            'course_id' => 'required'
+            'course_id' => 'required',
+            'venue_id' => 'required',
         ];
     }
 
@@ -35,7 +36,8 @@ class StudentNewCourseAssignedRequest extends FormRequest
         return [
             'academic_year_id.required' => 'This field is required.',
             'semester_id.required' => 'This field is required.',
-            'course_id.required' => 'This field is required.'
+            'course_id.required' => 'This field is required.',
+            'venue_id.required' => 'This field is required.'
         ];
     }
 }
