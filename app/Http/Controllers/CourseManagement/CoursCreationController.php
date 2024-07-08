@@ -84,6 +84,7 @@ class CoursCreationController extends Controller
                ->get();
 
         $data = array();
+       
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
@@ -95,8 +96,6 @@ class CoursCreationController extends Controller
                     'qualification' => isset($list->qualification->name) ? $list->qualification->name : '',
                     'duration' => $list->duration,
                     'unit_length' => $list->unit_length,
-                    'slc_code'=> $list->slc_code,
-                    'venue_id' => isset($list->venue->name) && !empty($list->venue->name) ? $list->venue->name : '',
                     'fees' => isset($list->fees) && !empty($list->fees) ? '£'.number_format($list->fees, 2) : '',
                     'reg_fees' => isset($list->reg_fees) && !empty($list->reg_fees) ? '£'.number_format($list->reg_fees, 2) : '',
                     'deleted_at' => $list->deleted_at
@@ -189,12 +188,13 @@ class CoursCreationController extends Controller
         foreach($venuList as $key => $venueId):
             $courseCreationVenue = CourseCreationVenue::where('course_creation_id',$CC_ID)->where('venue_id',$venueId)->withTrashed()->get()->first();
             if($courseCreationVenue):
-                if($courseCreationVenue->deleted_at!=null) {
-                $courseCreationVenue->slc_code = $slcCode[$key];
-                $courseCreationVenue->save();
-                } else {
-                    return response()->json(["errors"=>['venue_id'=>"venue already deleted, need restore before doing any update'"], 'message' => 'venue already deleted. need restore before doing any update'], 422);
+                if($courseCreationVenue->deleted_at!=NULL) {
+                    $courseCreationVenue->restore();
                 }
+                $courseCreationVenue->slc_code = $slcCode[$key];
+                
+                $courseCreationVenue->save();
+                
             else:
                 $courseCreationVenue = new CourseCreationVenue();
                 $courseCreationVenue->course_creation_id =  $CC_ID;

@@ -665,6 +665,7 @@ class AdmissionController extends Controller
             'student_loan' => $studentLoan,
             'student_finance_england' => $studentFinanceEngland,
             'applied_received_fund' => $appliedReceivedFund,
+            'venue_id' => $request->venue_id ?? NULL,
             'fund_receipt' => $fundReceipt,
             'other_funding' => ($studentLoan == 'Others' && isset($request->other_funding) && !empty($request->other_funding) ? $request->other_funding : null),
             'full_time' => ((isset($courseCreation->has_evening_and_weekend) && $courseCreation->has_evening_and_weekend == 1) && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),

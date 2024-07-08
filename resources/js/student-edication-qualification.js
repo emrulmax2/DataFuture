@@ -175,6 +175,7 @@ var studentEducationQualTable = (function () {
         qualification_type_identifier_id1.clear();
         hesa_qualification_subject_id1.clear();
         highest_qualification_on_entry_id1.clear();
+        hesa_exam_sitting_venue_id1.clear()
     });
 
     const editQualificationModalEl = document.getElementById('editQualificationModal')
@@ -187,6 +188,7 @@ var studentEducationQualTable = (function () {
         qualification_type_identifier_id.clear(true);
         hesa_qualification_subject_id.clear(true);
         highest_qualification_on_entry_id.clear(true);
+        hesa_exam_sitting_venue_id.clear(true);
     });
 
     let tomOptions = {
@@ -206,11 +208,13 @@ var studentEducationQualTable = (function () {
     var qualification_type_identifier_id = new TomSelect('#qualification_type_identifier_id', tomOptions);
     var hesa_qualification_subject_id = new TomSelect('#hesa_qualification_subject_id', tomOptions);
     var highest_qualification_on_entry_id = new TomSelect('#highest_qualification_on_entry_id', tomOptions);
+    var hesa_exam_sitting_venue_id = new TomSelect('#hesa_exam_sitting_venue_id', tomOptions);
 
     var previous_provider_id1 = new TomSelect('#previous_provider_id1', tomOptions);
     var qualification_type_identifier_id1 = new TomSelect('#qualification_type_identifier_id1', tomOptions);
     var hesa_qualification_subject_id1 = new TomSelect('#hesa_qualification_subject_id1', tomOptions);
     var highest_qualification_on_entry_id1 = new TomSelect('#highest_qualification_on_entry_id1', tomOptions);
+    var hesa_exam_sitting_venue_id1 = new TomSelect('#hesa_exam_sitting_venue_id1', tomOptions);
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -343,6 +347,8 @@ var studentEducationQualTable = (function () {
                     qualification_type_identifier_id.addItem(dataset.qualification_type_identifier_id);
                     hesa_qualification_subject_id.addItem(dataset.hesa_qualification_subject_id);
                     highest_qualification_on_entry_id.addItem(dataset.highest_qualification_on_entry_id);
+                    hesa_exam_sitting_venue_id.addItem(dataset.hesa_exam_sitting_venue_id);
+                    
 
                     $('#editQualificationModal input[name="id"]').val(editId);
                 }

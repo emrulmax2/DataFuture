@@ -650,7 +650,7 @@ var employmentHistoryTable = (function () {
                 console.log(error);
             });
             
-        })
+    })
 
     $('#disability_status').on('change', function(){
         if($('#disability_status').prop('checked')){

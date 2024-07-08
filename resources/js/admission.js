@@ -1729,6 +1729,7 @@ var employmentHistoryTable = (function () {
         var student_loan = new TomSelect('#student_loan', tomOptions);
 
         $('#course_creation_id').on('change', function(e){
+
             var has_ew = $('option:selected', this).attr('data-ew');
             if(has_ew == 1){
                 $('.eveningWeekendWrap').fadeIn('fast', function(){
@@ -1739,6 +1740,46 @@ var employmentHistoryTable = (function () {
                     $('[name="full_time"]', this).prop('checked', false);
                 })
             }
+            $('.courseLoading').show();
+        let SelectedValue = $(this).val();
+        //woorking all here get the venues
+        if(SelectedValue=="") {
+            $('#selectVenue').fadeOut('fast', function(){
+                $('.courseLoading').hide();
+            })
+        }else
+            axios({
+                method: "get",
+                url: route("global.course.creation.edit", $('#course_creation_id').val()),
+                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+            }).then((response) => {
+                if (response.status == 200) {
+                    let venues = response.data.venues;
+                        venue_id.clear();
+                        venue_id.clearOptions();
+                    if(venues.length>1) {
+                        venue_id.addOption({value:'',text:"Please Select"});
+                        venue_id.addItem('');
+                    }
+                    venues.forEach((e, i) => {
+                        if(e.pivot.deleted_at==null) {
+                            if(venues.length==1) {
+                                venue_id.removeOption('');
+                                venue_id.addOption({value:e.id,text:e.name});
+                                venue_id.addItem(e.id);
+                            } else {
+                                venue_id.removeItem(e.id);
+                                venue_id.addOption({value:e.id,text:e.name});
+                            }
+                        }
+                    });
+                    $('.courseLoading').hide();
+                    
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        
         })
 
         const editAdmissionCourseDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionCourseDetailsModal"));

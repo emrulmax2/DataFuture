@@ -216,6 +216,7 @@ use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
+use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
@@ -229,6 +230,7 @@ use App\Http\Controllers\User\MyStaffController;
 use App\Http\Controllers\WblProfileController;
 use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
+use App\Models\HesaQualificationSubject;
 
 /*
 |--------------------------------------------------------------------------
@@ -1979,6 +1981,21 @@ Route::middleware('auth')->group(function() {
     
         Route::get('highest-qualification-on-entry/export', 'export')->name('highestqoe.export');
         Route::post('highest-qualification-on-entry/import', 'import')->name('highestqoe.import');
+    });
+
+    
+    Route::controller(HesaQualificationSubjectController::class)->group(function() {
+        Route::get('hesa-qualification-subject', 'index')->name('hesaQualificationSubject.index'); 
+        Route::get('hesa-qualification-subject/list', 'list')->name('hesaQualificationSubject.list'); 
+        Route::post('hesa-qualification-subject/store', 'store')->name('hesaQualificationSubject.store'); 
+        Route::get('hesa-qualification-subject/edit/{id}', 'edit')->name('hesaQualificationSubject.edit');
+        Route::post('hesa-qualification-subject/update', 'update')->name('hesaQualificationSubject.update');
+        Route::delete('hesa-qualification-subject/delete/{id}', 'destroy')->name('hesaQualificationSubject.destory');
+        Route::post('hesa-qualification-subject/update-status/{id}', 'updateStatus')->name('hesaQualificationSubject.update.status');
+        Route::post('hesa-qualification-subject/restore/{id}', 'restore')->name('hesaQualificationSubject.restore');
+    
+        Route::get('hesa-qualification-subject/export', 'export')->name('hesaQualificationSubject.export');
+        Route::post('hesa-qualification-subject/import', 'import')->name('hesaQualificationSubject.import');
     });
 
     Route::controller(CountryOfPermanentAddressController::class)->group(function() {

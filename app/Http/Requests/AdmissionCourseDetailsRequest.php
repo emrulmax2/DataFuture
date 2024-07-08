@@ -25,6 +25,7 @@ class AdmissionCourseDetailsRequest extends FormRequest
     {
         return [
             'course_creation_id' => 'required',
+            'venue_id' => 'required',
             'student_loan' => 'required',
             'other_funding' => 'required_if:student_loan,Other',
         ];
@@ -34,6 +35,7 @@ class AdmissionCourseDetailsRequest extends FormRequest
     {
         return [
             'course_creation_id.reuired' => 'The Course field is required.',
+            'venue_id.reuired' => 'The Venue field is required.',
             'student_loan.reuired' => 'The Student Loan field is required.',
             'other_funding.required_if' => 'The Other Funding field is required.'
         ];

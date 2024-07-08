@@ -72,7 +72,7 @@
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
                         <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
-                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ $planDetails[$termId][$moduleDetails]->tutor->employee->full_name }}</div>
+                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ !empty($planDetails[$termId][$moduleDetails]->tutor->employee) ? $planDetails[$termId][$moduleDetails]->tutor->employee->full_name : "Tutor Not Found" }}</div>
                     </div>
                     <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$moduleDetails] }}%</div>
                     <div class="flex-none"></div>
@@ -123,7 +123,7 @@
                                         {{ $start_time }} - {{ $end_time  }}
                                     </td>
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                        {{ $planDateList["attendance_information"]->tutor->employee->full_name }}
+                                        {{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : "Tutor Not Found" }}
                                     </td>
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                         {{ $planDateList["attendance"]->feed->code }}

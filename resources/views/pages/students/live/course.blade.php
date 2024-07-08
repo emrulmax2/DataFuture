@@ -244,7 +244,7 @@
                             </div>
                             <div class="col-span-12 courseWrap" style="display: none;">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="course_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5">Course <span class="text-danger">*</span></label>
+                                    <label for="course_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 inline-flex">Course <span class="text-danger">*</span> <i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 courseLoading hidden"></i></label>
                                     <div class="col-span-12 sm:col-span-7">
                                         <select id="course_id" class="lcc-tom-select w-full" name="course_id">
                                             <option value="">Please Select</option>
@@ -255,6 +255,22 @@
                                             @endif --}}
                                         </select>
                                         <div class="acc__input-error error-course_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 venueWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5">Venue <span class="text-danger">*</span></label>
+                                    <div class="col-span-12 sm:col-span-7">
+                                        <select id="venue_id" class="lcc-tom-select w-full" name="venue_id">
+                                            <option value="">Please Select</option>
+                                            {{-- @if($courses->count() > 0)
+                                                @foreach($courses as $course)
+                                                    <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                                @endforeach
+                                            @endif --}}
+                                        </select>
+                                        <div class="acc__input-error error-venue_id text-danger mt-2"></div>
                                     </div>
                                 </div>
                             </div>

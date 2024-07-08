@@ -89,7 +89,7 @@ class CourseDetailController extends Controller
         if(!empty($res)):
             return response()->json(['res' => $res], 200);
         else:
-            return response()->json(['res' => ''], 422);
+            return response()->json(["message"=> "No relation Found","errors"=>["academic_year_id"=> "No Relation Found"]], 422);
         endif;
     }
 
@@ -97,13 +97,16 @@ class CourseDetailController extends Controller
         $res = [];
         $academic_year_id = $request->academic_year_id;
         $semester_id = $request->semester_id;
+        
         $courseIds = CourseCreation::where('semester_id', $semester_id)->pluck('course_id')->unique()->toArray();
         if(!empty($courseIds)):
             $courses = Course::whereIn('id', $courseIds)->orderBy('id', 'DESC')->get();
             if(!empty($courses)):
                 $i = 1;
                 foreach($courses as $crs):
+                    $course_creation_id = CourseCreation::where('semester_id', $semester_id)->where('course_id', $crs->id)->get()->first();
                     $res[$i]['id'] = $crs->id;
+                    $res[$i]['course_creation_id'] = $course_creation_id->id;
                     $res[$i]['name'] = $crs->name;
 
                     $i++;
@@ -119,9 +122,13 @@ class CourseDetailController extends Controller
     }
 
     public function assignedNewCourse(StudentNewCourseAssignedRequest $request){
+
+        // This request is CourseCreationId not courseId
+        $courseCreation = CourseCreation::find($request->course_id);
         $academic_year_id = $request->academic_year_id;
         $semester_id = $request->semester_id;
-        $course_id = $request->course_id;
+        $course_id = $courseCreation->course_id;
+        $venue_id = $request->venue_id;
         $student_id = $request->student_id;
         $student_course_relation_id = $request->student_course_relation_id;
         $studentCourseRel = StudentCourseRelation::find($student_course_relation_id);
@@ -151,6 +158,7 @@ class CourseDetailController extends Controller
                 'student_course_relation_id' => $studetNCR->id,
                 'student_id' => $student_id,
                 'academic_year_id' => $academic_year_id,
+                'venue_id' => $venue_id,
                 'course_creation_id' => $courseCreation->id,
                 'semester_id' => $semester_id,
                 'created_by' => auth()->user()->id,
@@ -164,6 +172,7 @@ class CourseDetailController extends Controller
             elseif($courseCreation->id == $studentCourseRel->course_creation_id):
                 $msg = 'The student already assigned under this course relation.';
             endif;
+
             return response()->json(['msg' => $msg], 304);
         endif;
     }

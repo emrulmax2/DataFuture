@@ -19,6 +19,7 @@ import TomSelect from "tom-select";
     let academicYearTom = new TomSelect('#academic_year_id', tomOptions);
     let semesterTom= new TomSelect('#semester_id', tomOptions);
     let courseTom = new TomSelect('#course_id', tomOptions);
+    let venue_id = new TomSelect('#venue_id', tomOptions);
 
     $('.lccTom').each(function(){
         if ($(this).attr("multiple") !== undefined) {
@@ -47,9 +48,20 @@ import TomSelect from "tom-select";
             semesterTom.clear();
             semesterTom.disable();
         })
-        $('#editStudentCourseChangeModal .courseWrap').fadeOut('fast', function(){
+        $('#editStudentCourseChangeModal .courseWrap').fadeOut('fast', function() {
+
             courseTom.clear();
+
             courseTom.disable();
+
+        })
+
+        $('#editStudentCourseChangeModal .venueWrap').fadeOut('fast', function() {
+
+            venue_id.clear();
+
+            venue_id.disable();
+
         })
     });
 
@@ -126,6 +138,12 @@ import TomSelect from "tom-select";
                 courseTom.clear(true);
                 courseTom.disable();
             })
+            
+            $('#editStudentCourseChangeModal .venueWrap').fadeOut('fast', function(){
+                venue_id.clear(true);
+                venue_id.disable();
+            })
+            
             axios({
                 method: "post",
                 url: route('student.get.semesters.by.academic'),
@@ -133,6 +151,8 @@ import TomSelect from "tom-select";
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
+                    $(`#editStudentCourseChangeForm  .error-academic_year_id`).removeClass('border-danger');
+                    $(`#editStudentCourseChangeForm  .error-academic_year_id`).html('');
                     $academic_year_id.parent().siblings('label').find('svg.loading').addClass('hidden');
                     $('.semesterWrap').fadeIn('fast', function(){
                         semesterTom.enable();
@@ -148,7 +168,11 @@ import TomSelect from "tom-select";
             }).catch(error => {
                 if (error.response) {
                     if (error.response.status == 422) {
-                        $academic_year_id.parent().siblings('label').find('svg.loading').removeClass('hidden');
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#editStudentCourseChangeForm .${key}`).addClass('border-danger');
+                            $(`#editStudentCourseChangeForm  .error-${key}`).html(val);
+                        }
+                        $academic_year_id.parent().siblings('label').find('svg.loading').addClass('hidden');
                     } else {
                         console.log('error');
                     }
@@ -163,6 +187,11 @@ import TomSelect from "tom-select";
             $('#editStudentCourseChangeModal .courseWrap').fadeOut('fast', function(){
                 courseTom.clear();
                 courseTom.disable();
+            })
+            
+            $('#editStudentCourseChangeModal .venueWrap').fadeOut('fast', function(){
+                venue_id.clear(true);
+                venue_id.disable();
             })
         }
     });
@@ -191,9 +220,10 @@ import TomSelect from "tom-select";
                         courseTom.clearOptions();
                         $.each(response.data.res, function(index, course){
                             courseTom.addOption({
-                                value: course.id,
+                                value: course.course_creation_id,
                                 text: course.name
                             });
+
                         })
                     })
                 }
@@ -217,6 +247,7 @@ import TomSelect from "tom-select";
 
 
     $('#editStudentCourseChangeForm').on('submit', function(e){
+
         e.preventDefault();
         const form = document.getElementById('editStudentCourseChangeForm');
     
@@ -273,5 +304,58 @@ import TomSelect from "tom-select";
             }
         });
     });
+
+    $('#course_id').on('change', function(e){
+
+        $('.courseLoading').show();
+        let SelectedValue = $(this).val();
+        if(SelectedValue=="") {
+            $('#editStudentCourseChangeModal .venueWrap').fadeOut('fast', function(){
+                $('.courseLoading').hide();
+                venue_id.clear(true);
+                venue_id.clearOptions();
+            })
+        }else 
+            axios({
+                method: "get",
+                url: route("global.course.creation.edit", SelectedValue),
+                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+            }).then((response) => {
+                if (response.status == 200) {
+                    let venues = response.data.venues;
+                        venue_id.clear();
+                        venue_id.enable();
+                        venue_id.clearOptions();
+                    if(venues.length>1) {
+                        venue_id.addOption({value:'',text:"Please Select"});
+                        venue_id.addItem('');
+                    }
+                    venues.forEach((e, i) => {
+                        if(e.pivot.deleted_at==null) {
+                            if(venues.length==1) {
+                                venue_id.removeOption('');
+                                venue_id.addOption({value:e.id,text:e.name});
+                                venue_id.addItem(e.id);
+                            } else {
+                                venue_id.removeItem(e.id);
+                                venue_id.addOption({value:e.id,text:e.name});
+                            }
+                        }
+                    });
+                    
+                    if(venues.length>0) {
+
+                        $('#editStudentCourseChangeModal .venueWrap').fadeIn('fast', function(){
+                            $('.courseLoading').hide();
+                        })
+                    } else {
+                        $('.courseLoading').hide();
+                    }
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+            
+    })
 
 })();
