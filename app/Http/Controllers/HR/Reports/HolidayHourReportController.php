@@ -109,6 +109,7 @@ class HolidayHourReportController extends Controller
         $theCollection[1][] = 'NI Number';
         $theCollection[1][] = 'Name';
         $theCollection[1][] = 'Position';
+        $theCollection[1][] = 'Status';
         $theCollection[1][] = 'Employee/Contractor';
         $theCollection[1][] = 'Worked Hour';
         $theCollection[1][] = 'Holiday Hour';
@@ -135,6 +136,7 @@ class HolidayHourReportController extends Controller
                     $theCollection[$row][] = (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
                     $theCollection[$row][] = $emp->full_name;
                     $theCollection[$row][] = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : '');
+                    $theCollection[$row][] = (isset($emp->status) && $emp->status == 1 ? 'Active' : 'Inactive');
                     $theCollection[$row][] = (isset($emp->employment->employeeWorkType->name) && !empty($emp->employment->employeeWorkType->name) ? $emp->employment->employeeWorkType->name : '');
                     $theCollection[$row][] = $this->calculateHourMinute($working_hours);
                     $theCollection[$row][] = $this->calculateHourMinute($holiday_hours);
