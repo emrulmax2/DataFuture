@@ -84,8 +84,7 @@ class CourseCreationController extends Controller
                     'semester' => (isset($list->semester->name) ? $list->semester->name : ''),
                     'duration' => $list->duration,
                     'unit_length' => $list->unit_length,
-                    'slc_code'=> $list->slc_code,
-                    'venue_id' => isset($list->venu->name) && !empty($list->venu->name) ? $list->venu->name : '',
+                    'venues' => isset($list->venues) && !empty($list->venues) ? $list->venues : '',
                     'fees' => isset($list->fees) && !empty($list->fees) ? '£'.number_format($list->fees, 2) : '',
                     'reg_fees' => isset($list->reg_fees) && !empty($list->reg_fees) ? '£'.number_format($list->reg_fees, 2) : '',
                     'deleted_at' => $list->deleted_at
