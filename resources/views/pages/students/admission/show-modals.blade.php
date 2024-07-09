@@ -454,7 +454,9 @@
                                         <option value="" selected>Please Select</option>
                                         @if(!empty($venues))
                                             @foreach($venues as $vn)
-                                                <option {{ isset($applicant->course->venue) && !empty($applicant->course->venue) && ($applicant->course->venue->id==$vn->id) ? 'selected' : ''}} value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                                @if($vn->pivot->deleted_at==null)
+                                                    <option {{ isset($applicant->course->venue) && !empty($applicant->course->venue) && ($applicant->course->venue->id==$vn->id) ? 'selected' : ''}} value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                                @endif
                                             @endforeach 
                                         @endif 
                                     </select>

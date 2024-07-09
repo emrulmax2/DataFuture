@@ -65,8 +65,10 @@ var courseCreationListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var thml = "";
                         $(cell.getData().venues).each(function(index, data) {
-                        thml+=`<div class="whitespace-nowrap">${data.name}</div>
+                            if(data.pivot.deleted_at==null) {
+                                thml+=`<div class="whitespace-nowrap">${data.name}</div>
                                 <div class="text-slate-500 text-xs whitespace-nowrap mb-1">${data.pivot.slc_code}</div>`;
+                            }
 
                         });
                         return thml;
