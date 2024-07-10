@@ -34,4 +34,8 @@ class ApplicantContact extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function applicant(){
+        return $this->belongsTo(Applicant::class, 'applicant_id', 'id');
+    }
 }
