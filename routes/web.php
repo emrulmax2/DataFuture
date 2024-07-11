@@ -1176,7 +1176,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/appraisal-list', 'list')->name('employee.appraisal.list');
         Route::post('employee-profile/appraisal-edit', 'edit')->name('employee.appraisal.edit');
         Route::post('employee-profile/appraisal-update', 'update')->name('employee.appraisal.update');
-        Route::post('employee-profile/get-note', 'getNote')->name('employee.appraisal.get.note');
+        Route::post('employee-profile/get-appraisal', 'getNote')->name('employee.appraisal.get.note');
 
         Route::delete('employee-profile/appraisal-destroy', 'destroy')->name('employee.appraisal.destory');
         Route::post('employee-profile/appraisal-restore', 'restore')->name('employee.appraisal.restore');

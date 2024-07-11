@@ -1,4 +1,4 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -176,8 +176,9 @@ var employeeNotesListTable = (function () {
     let addEmpNoteEditor;
     if($("#addEmpNoteEditor").length > 0){
         const el = document.getElementById('addEmpNoteEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            addEmpNoteEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            addEmpNoteEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -186,8 +187,9 @@ var employeeNotesListTable = (function () {
     let editEmpNoteEditor;
     if($("#editEmpNoteEditor").length > 0){
         const el = document.getElementById('editEmpNoteEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            editEmpNoteEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            editEmpNoteEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -294,6 +296,7 @@ var employeeNotesListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#addEmpNoteForm input[name="document"]')[0].files[0]); 
+        form_data.append("content", addEmpNoteEditor.getData());
         axios({
             method: "post",
             url: route('employee.store.note'),
@@ -368,6 +371,7 @@ var employeeNotesListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#editEmpNoteForm input[name="document"]')[0].files[0]); 
+        form_data.append("content", editEmpNoteEditor.getData());
         axios({
             method: "post",
             url: route('employee.update.note'),

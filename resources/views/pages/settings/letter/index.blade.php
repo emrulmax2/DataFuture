@@ -132,7 +132,12 @@
                         </div>
                         <div class="mt-3">
                             <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea name="description" id="editEditor"></textarea>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="editEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-description text-danger mt-2"></div>
                         </div>
                     </div>
@@ -207,7 +212,12 @@
                         </div>
                         <div class="mt-3">
                             <label for="addEditor" class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea name="description" id="addEditor"></textarea>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="addEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-description text-danger mt-2"></div>
                         </div>
                     </div>

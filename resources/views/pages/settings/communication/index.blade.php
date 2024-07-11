@@ -112,8 +112,13 @@
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 emailContentWrap">
-                            <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea name="email_content" id="editEditor"></textarea>
+                            <label for="editEditor" class="form-label">Ccontent <span class="text-danger">*</span></label>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="editEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-email_content text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 smsContentWrap" style="display: none;">
@@ -183,7 +188,12 @@
                         </div>
                         <div class="mt-3 emailContentWrap">
                             <label for="addEditor" class="form-label">Content <span class="text-danger">*</span></label>
-                            <textarea name="email_content" id="addEditor"></textarea>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="addEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-email_content text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 smsContentWrap" style="display: none;">

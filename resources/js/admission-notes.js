@@ -1,4 +1,4 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -174,8 +174,9 @@ var applicantNotesListTable = (function () {
     let addEditor;
     if($("#addEditor").length > 0){
         const el = document.getElementById('addEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            addEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            addEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -184,8 +185,9 @@ var applicantNotesListTable = (function () {
     let editEditor;
     if($("#editEditor").length > 0){
         const el = document.getElementById('editEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            editEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            editEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -291,6 +293,7 @@ var applicantNotesListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#addNoteForm input[name="document"]')[0].files[0]); 
+        form_data.append("content", addEditor.getData());
         axios({
             method: "post",
             url: route('admission.store.note'),
@@ -364,6 +367,7 @@ var applicantNotesListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#editNoteForm input[name="document"]')[0].files[0]); 
+        form_data.append("content", editEditor.getData());
         axios({
             method: "post",
             url: route('admission.update.note'),

@@ -3,7 +3,7 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import Dropzone from "dropzone";
 import TomSelect from "tom-select";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
 ("use strict");
 var employeeDocumentListTable = (function () {
@@ -347,8 +347,9 @@ var employeeCommunicationDocumentListTable = (function () {
     let emailBody;
     if($("#email_body").length > 0){
         const el = document.getElementById('email_body');
-        ClassicEditor.create(el).then(newEditor => {
-            emailBody = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            emailBody = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -726,6 +727,7 @@ var employeeCommunicationDocumentListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#addCommunicationForm input[name="document"]')[0].files[0]); 
+        form_data.append("email_body", emailBody.getData());
         axios({
             method: "post",
             url: route('employee.documents.sent.mail'),

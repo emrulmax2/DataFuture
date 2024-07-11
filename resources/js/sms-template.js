@@ -1,4 +1,3 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";

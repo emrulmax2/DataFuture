@@ -1,4 +1,4 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -479,8 +479,9 @@ var applicantCommSMSListTable = (function () {
     let letterEditor;
     if($("#letterEditor").length > 0){
         const el = document.getElementById('letterEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            letterEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            letterEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -489,8 +490,9 @@ var applicantCommSMSListTable = (function () {
     let mailEditor;
     if($("#mailEditor").length > 0){
         const el = document.getElementById('mailEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            mailEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            mailEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -645,6 +647,7 @@ var applicantCommSMSListTable = (function () {
 
         let form_data = new FormData(form);
         form_data.append('file', $('#sendEmailForm input#sendMailsDocument')[0].files[0]); 
+        form_data.append('body', mailEditor.getData()); 
         axios({
             method: "post",
             url: route('admission.communication.send.mail'),
@@ -1089,6 +1092,7 @@ var applicantCommSMSListTable = (function () {
         document.querySelector("#sendLetterBtn svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
+        form_data.append('letter_body', letterEditor.getData()); 
         axios({
             method: "post",
             url: route('admission.communication.send.letter'),

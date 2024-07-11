@@ -1,4 +1,4 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -173,18 +173,21 @@ var letterSettingsListTable = (function () {
     let addEditor;
     if($("#addEditor").length > 0){
         const el = document.getElementById('addEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            addEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            addEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
     }
 
+
     let editEditor;
     if($("#editEditor").length > 0){
         const el = document.getElementById('editEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            editEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            editEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -222,6 +225,7 @@ var letterSettingsListTable = (function () {
         document.querySelector("#saveLetterSet svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
+        form_data.append("description", addEditor.getData());
         axios({
             method: "post",
             url: route('letter.set.store'),
@@ -315,6 +319,7 @@ var letterSettingsListTable = (function () {
         document.querySelector("#editLetterSet svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
+        form_data.append("description", editEditor.getData());
         axios({
             method: "post",
             url: route('letter.set.update'),
