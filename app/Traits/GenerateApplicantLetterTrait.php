@@ -89,9 +89,10 @@ trait GenerateApplicantLetterTrait{
                 $PDFHTML .= '<title>'.$letter_title.'</title>';
                 $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
                 $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
                                 table{margin-left: 0px;}
                                 figure{margin: 0;}
-                                @page{margin-top: 95px;margin-left: 50px;margin-right:50px;margin-bottom: 95px;}
+                                @page{margin-top: 95px;margin-left: 85px !important;margin-right:85px !important;margin-bottom: 95px;}
                                 header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
                                 footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
                                 .pageCounter{position: relative;}

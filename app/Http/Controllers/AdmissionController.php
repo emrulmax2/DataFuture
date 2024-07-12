@@ -2664,7 +2664,7 @@ class AdmissionController extends Controller
             $letter_set_id = $statusRow->letter_set_id;
             $letterSet = LetterSet::find($statusRow->letter_set_id);
             $signatory_id = (isset($statusRow->signatory_id) && $statusRow->signatory_id > 0 ? $statusRow->signatory_id : 0);
-            $subject = 'Application Status Updated to '.$statusRow->name;
+            $subject = 'Application Status Update';
 
             $issued_date = date('Y-m-d');
             $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
@@ -2707,8 +2707,8 @@ class AdmissionController extends Controller
                 /*New Code End*/
 
                 $signatoryHTML = '';
-                if($signatory_id > 0):
-                    $signatory = Signatory::find($signatory_id);
+                $signatory = Signatory::find($signatory_id);
+                if($signatory_id > 0 && isset($signatory->id) && $signatory->id > 0):
                     $signatoryHTML .= '<p>';
                         $signatoryHTML .= '<strong>Yours sincerely,</strong><br/>';
                         if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
@@ -2729,7 +2729,7 @@ class AdmissionController extends Controller
 
                 $emailHTML = '';
                 $emailHTML .= 'Dear '.$applicant->first_name.' '.$applicant->last_name.', <br/>';
-                $emailHTML .= '<p>Please Find the letter attached here with. </p>';
+                $emailHTML .= '<p>Please find attached an important communication regarding your application. </p>';
                 $emailHTML .= $signatoryHTML;
 
                 $attachmentFiles[] = [
