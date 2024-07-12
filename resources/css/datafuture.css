@@ -1955,3 +1955,11 @@ input[type=number] {
     color: #2196f3;
     text-decoration: underline;
 }
+.document-editor .ck-content ul {
+    list-style: disc;
+    margin: 0 0 15px 15px;
+}
+.document-editor .ck-content ol {
+    list-style: decimal;
+    margin: 0 0 15px 15px;
+}
