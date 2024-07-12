@@ -5,7 +5,7 @@ import TomSelect from "tom-select";
 
 import dayjs from "dayjs";
 import Litepicker from "litepicker";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
 
 (function(){
@@ -24,8 +24,9 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
     let mailEditor;
     if($("#mailEditor").length > 0){
         const el = document.getElementById('mailEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            mailEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            mailEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -178,6 +179,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
         let form_data = new FormData(form);
         form_data.append('file', $('#senMailForm input#sendMailsDocument')[0].files[0]); 
+        form_data.append("mail_body", mailEditor.getData());
         axios({
             method: "post",
             url: route('attendance.live.attedance.sent.mail'),

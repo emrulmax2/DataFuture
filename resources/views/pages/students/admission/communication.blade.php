@@ -239,8 +239,13 @@
                             </select>
                             <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
                         </div>
-                        <div class="mt-5 letterEditorArea" style="display: none;">
-                            <textarea rows="15" name="letter_body" id="letterEditor"></textarea>
+                        <div class="mt-3 letterEditorArea" style="display: none;">
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="letterEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-letter_body text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
@@ -416,7 +421,12 @@
                             </select>
                         </div>
                         <div>
-                            <textarea name="body" id="mailEditor"></textarea>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="mailEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-body text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">

@@ -104,8 +104,13 @@
                             <input id="subject" type="text" name="subject" class="form-control w-full">
                             <div class="acc__input-error error-subject text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3 pt-2 pb-1">
-                            <textarea name="mail_body" id="mailEditor"></textarea>
+                        <div class="mt-3">
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="mailEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-mail_body text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">

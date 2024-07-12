@@ -14,6 +14,7 @@ class Status extends Model
         'name',
         'type',
         'letter_set_id',
+        'signatory_id',
         'email_template_id',
         'created_by',
         'updated_by',
@@ -32,5 +33,9 @@ class Status extends Model
 
     public function mail(){
         return $this->belongsTo(EmailTemplate::class, 'email_template_id', 'id');
+    }
+
+    public function signatory(){
+        return $this->belongsTo(Signatory::class, 'signatory_id', 'id');
     }
 }

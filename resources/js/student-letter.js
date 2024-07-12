@@ -1,4 +1,4 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -172,8 +172,9 @@ var studentCommLetterListTable = (function () {
     let letterEditor;
     if($("#letterEditor").length > 0){
         const el = document.getElementById('letterEditor');
-        ClassicEditor.create(el).then(newEditor => {
-            letterEditor = newEditor;
+        ClassicEditor.create(el).then((editor) => {
+            letterEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
         }).catch((error) => {
             console.error(error);
         });
@@ -283,6 +284,7 @@ var studentCommLetterListTable = (function () {
         document.querySelector("#sendLetterBtn svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
+        form_data.append("letter_body", letterEditor.getData());
         axios({
             method: "post",
             url: route('student.send.letter'),

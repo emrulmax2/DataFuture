@@ -98,11 +98,10 @@
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="type" class="form-label">Title <span class="text-danger">*</span></label>
+                            <label for="type" class="form-label">Phase <span class="text-danger">*</span></label>
                             <select id="type" name="type" class="form-control w-full">
                                 <option value="">Please Select</option>
                                 <option value="Applicant">Applicant</option>
-                                {{--<option value="Register">Register</option>--}}
                                 <option value="Student">Live Student</option>
                             </select>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
@@ -114,6 +113,17 @@
                                 @if(!empty($letters))
                                     @foreach($letters as $altr)
                                         <option value="{{ $altr->id }}">{{ $altr->letter_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3 signatoryWrap" style="display: none;">
+                            <label for="signatory_id" class="form-label">Signatory</label>
+                            <select id="signatory_id" placeholder="Select Template" name="signatory_id" class="w-full tom-selects">
+                                <option value="">Please Select a Signatory</option>
+                                @if(!empty($signatories))
+                                    @foreach($signatories as $sign)
+                                        <option value="{{ $sign->id }}">{{ $sign->signatory_name }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -171,7 +181,7 @@
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_type" class="form-label">Title <span class="text-danger">*</span></label>
+                            <label for="edit_type" class="form-label">Phase <span class="text-danger">*</span></label>
                             <select id="edit_type" name="type" class="form-control w-full">
                                 <option value="">Please Select</option>
                                 <option value="Applicant">Applicant</option>
@@ -187,6 +197,17 @@
                                 @if(!empty($letters))
                                     @foreach($letters as $altr)
                                         <option value="{{ $altr->id }}">{{ $altr->letter_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3 signatoryWrap" style="display: none;">
+                            <label for="edit_signatory_id" class="form-label">Signatory</label>
+                            <select id="edit_signatory_id" placeholder="Select Template" name="signatory_id" class="w-full tom-selects">
+                                <option value="">Please Select a Signatory</option>
+                                @if(!empty($signatories))
+                                    @foreach($signatories as $sign)
+                                        <option value="{{ $sign->id }}">{{ $sign->signatory_name }}</option>
                                     @endforeach
                                 @endif
                             </select>

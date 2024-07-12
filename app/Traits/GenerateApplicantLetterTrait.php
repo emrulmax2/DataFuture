@@ -29,6 +29,8 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->first_name, $letter_content);
                     elseif($field == 'last_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->last_name, $letter_content);
+                    elseif($field == 'application_no'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->application_no, $letter_content);
                     endif;
                 elseif($table == 'applicant_contacts'):
                     if($field == 'address_line_1'):
@@ -68,6 +70,8 @@ trait GenerateApplicantLetterTrait{
                     elseif($field == 'post'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($signature->signatory_post) && !empty($signature->signatory_post) ? $signature->signatory_post : ''), $letter_content);
                     endif;
+                elseif($table == 'today_date'):
+                    $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", date('d/m/Y'), $letter_content);
                 else:
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", '', $letter_content);
                 endif;
@@ -87,7 +91,7 @@ trait GenerateApplicantLetterTrait{
                 $PDFHTML .= '<style>
                                 table{margin-left: 0px;}
                                 figure{margin: 0;}
-                                @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
+                                @page{margin-top: 95px;margin-left: 50px;margin-right:50px;margin-bottom: 95px;}
                                 header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
                                 footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
                                 .pageCounter{position: relative;}
@@ -148,7 +152,7 @@ trait GenerateApplicantLetterTrait{
 
         $letterTitle = preg_replace('/[^A-Za-z0-9_\-]/', '_', $letter_title);
         $fileName = time().'_'.$applicant_id.'_'.$letterTitle.'.pdf';
-        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
         $content = $pdf->output();

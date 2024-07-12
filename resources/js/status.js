@@ -45,7 +45,7 @@ var settingsListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         if(cell.getData().letter_set_id > 0){
-                            return '<div style="white-space: normal; word-break: break-all;">Letter: '+cell.getData().letter_name+'</div>';
+                            return '<div style="white-space: normal; word-break: break-all;">Letter: '+cell.getData().letter_name+(cell.getData().signatory_name != '' ? '<br/>Signatory: '+cell.getData().signatory_name : '')+'</div>';
                         }else if(cell.getData().email_template_id > 0){
                             return '<div style="white-space: normal; word-break: break-all;">Email: '+cell.getData().email_name+'</div>';
                         }else{
@@ -180,6 +180,8 @@ var settingsListTable = (function () {
         let email_template_id = new TomSelect('#email_template_id', tomOptions);
         let edit_letter_set_id = new TomSelect('#edit_letter_set_id', tomOptions);
         let edit_email_template_id = new TomSelect('#edit_email_template_id', tomOptions);
+        let signatory_id = new TomSelect('#signatory_id', tomOptions);
+        let edit_signatory_id = new TomSelect('#edit_signatory_id', tomOptions);
 
         const addSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSettingsModal"));
         const editSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSettingsModal"));
@@ -194,6 +196,9 @@ var settingsListTable = (function () {
             $('#addSettingsModal .modal-body select').val('');
 
             letter_set_id.clear(true);
+            $('#addSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                signatory_id.clear(true);
+            });
             email_template_id.clear(true);
         });
         
@@ -205,15 +210,24 @@ var settingsListTable = (function () {
             $('#editSettingsModal input[name="id"]').val('0');
 
             edit_letter_set_id.clear(true);
+            $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                edit_signatory_id.clear(true);
+            });
             edit_email_template_id.clear(true);
         });
 
         $('#letter_set_id').on('change', function(e){
             email_template_id.clear(true);
+            $('#addSettingsModal .signatoryWrap').fadeIn('fast', function(){
+                signatory_id.clear(true);
+            });
         })
 
         $('#email_template_id').on('change', function(e){
             letter_set_id.clear(true);
+            $('#addSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                signatory_id.clear(true);
+            });
         })
 
         $('#addSettingsForm').on('submit', function(e){
@@ -280,12 +294,26 @@ var settingsListTable = (function () {
                         if(dataset.letter_set_id > 0){
                             edit_letter_set_id.addItem(dataset.letter_set_id, true);
                             edit_email_template_id.clear(true);
+
+                            $('#editSettingsModal .signatoryWrap').fadeIn('fast', function(){
+                                if(dataset.signatory_id > 0){
+                                    edit_signatory_id.addItem(dataset.signatory_id, true);
+                                }else{
+                                    edit_signatory_id.clear(true);
+                                }
+                            });
                         }else{
                             edit_letter_set_id.clear(true);
+                            $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                                edit_signatory_id.clear(true);
+                            });
                         }
                         if(dataset.email_template_id > 0){
                             edit_email_template_id.addItem(dataset.email_template_id, true);
                             edit_letter_set_id.clear(true);
+                            $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                                edit_signatory_id.clear(true);
+                            });
                         }else{
                             edit_email_template_id.clear(true);
                         }
@@ -298,10 +326,16 @@ var settingsListTable = (function () {
 
         $('#edit_letter_set_id').on('change', function(e){
             edit_email_template_id.clear(true);
+            $('#editSettingsModal .signatoryWrap').fadeIn('fast', function(){
+                edit_signatory_id.clear(true);
+            });
         })
 
         $('#edit_email_template_id').on('change', function(e){
             edit_letter_set_id.clear(true);
+            $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
+                edit_signatory_id.clear(true);
+            });
         })
 
         // Update Course Data

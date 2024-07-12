@@ -272,6 +272,12 @@
                 </div>
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Venue</div>
+                        <div class="col-span-8 font-medium">{{ $applicant->course->venue->name }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">How are you funding your education at London Churchill College?</div>
                         <div class="col-span-8 font-medium">{{ $applicant->course->student_loan }}</div>
                     </div>

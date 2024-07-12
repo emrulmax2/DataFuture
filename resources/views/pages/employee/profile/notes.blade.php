@@ -120,8 +120,13 @@
                             <div class="acc__input-error error-opening_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
-                            <textarea name="content" id="editEmpNoteEditor"></textarea>
+                            <label for="editEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="editEmpNoteEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">
@@ -181,8 +186,13 @@
                             <div class="acc__input-error error-opening_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
-                            <textarea name="content" id="addEmpNoteEditor"></textarea>
+                            <label for="addEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="addEmpNoteEditor"></div>
+                                </div>
+                            </div>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 flex justify-start items-center relative">
