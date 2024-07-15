@@ -57,6 +57,8 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability->course_end_date) && !empty($applicant->course->creation->availability->course_end_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_end_date))  : ''), $letter_content);
                     elseif($field == 'fees'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->fees) && !empty($applicant->course->creation->fees) ? '£'.number_format($applicant->course->creation->fees, 2)  : '£0.00'), $letter_content);
+                    elseif($field == 'venue_name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->venue->name) && !empty($applicant->course->venue->name) ? $applicant->course->venue->name  : ''), $letter_content);
                     endif;
                 elseif($table == 'signatories'):
                     if($field == 'sign_url'):

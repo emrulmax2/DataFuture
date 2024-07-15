@@ -2676,7 +2676,7 @@ class AdmissionController extends Controller
             $data['applicant_id'] = $applicant_id;
             $data['letter_set_id'] = $letter_set_id;
             $data['pin'] = $pin;
-            $data['signatory_id'] = 0;
+            $data['signatory_id'] = $signatory_id;
             $data['comon_smtp_id'] = $commonSmtp->id;
             $data['is_email_or_attachment'] = $is_email_or_attachment;
             $data['issued_by'] = auth()->user()->id;
@@ -2738,6 +2738,14 @@ class AdmissionController extends Controller
                     "mimeinfo" => 'application/pdf',
                     'disk'     => 's3'
                 ];
+                if($status_id == 7):
+                    $attachmentFiles[] = [
+                        "pathinfo" => 'public/terms_and_condition.pdf',
+                        "nameinfo" => 'terms_and_condition.pdf',
+                        "mimeinfo" => 'application/pdf',
+                        'disk'     => 'local'
+                    ];
+                endif;
 
                 $configuration = [
                     'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
