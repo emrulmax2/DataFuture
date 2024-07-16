@@ -107,9 +107,10 @@ trait GenerateApplicantLetterTrait{
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
                 if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
-                    $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_nam); //Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name
+                    $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name); //Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name
                     $PDFHTML .= '<header>';
-                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.$headerImageURL.'"/>';
+                        //$PDFHTML .= $headerImageURL;
+                        $PDFHTML .= '<img alt="'.$LetterHeader->current_file_name.'" style="width: 100%; height: auto;" src="'.$headerImageURL.'"/>';
                     $PDFHTML .= '</header>';
                 endif;
 
@@ -117,9 +118,10 @@ trait GenerateApplicantLetterTrait{
                     $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
                                 font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
                         if(isset($LetterFooters->current_file_name) && !empty($LetterFooters->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name)):
-                            $footerImageURL = url('storage/letterheaderfooter/footer/'.$LetterFooters->current_file_nam); //Storage::disk('local')->url('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name).'" alt="'.$LetterFooters->name
+                            $footerImageURL = url('storage/letterheaderfooter/footer/'.$LetterFooters->current_file_name); //Storage::disk('local')->url('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name).'" alt="'.$LetterFooters->name
                             $PDFHTML .= '<tr>';
                                 $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
+                                    //$PDFHTML .= $footerImageURL;
                                     $PDFHTML .= '<img style=" width: 100%; height: auto; margin-left:0; margin-right:0;" src="'.$footerImageURL.'" alt="'.$LetterFooters->name.'"/>';
                                 $PDFHTML .= '</td>';
                             $PDFHTML .= '</tr>';
