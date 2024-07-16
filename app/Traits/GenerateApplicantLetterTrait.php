@@ -106,7 +106,7 @@ trait GenerateApplicantLetterTrait{
                             </style>';
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
-                if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('s3')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
+                if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
                     $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_nam); //Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name
                     $PDFHTML .= '<header>';
                         $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.$headerImageURL.'"/>';
