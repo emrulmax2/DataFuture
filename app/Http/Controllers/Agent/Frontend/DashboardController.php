@@ -105,7 +105,7 @@ class DashboardController extends Controller
         endif;
         if(!empty($agents)): $query->whereIn('agent_user_id', $agents); endif;
 
-        $total_rows = 1;//$query->count();
+        $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
