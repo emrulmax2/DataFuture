@@ -57,6 +57,8 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability->course_end_date) && !empty($applicant->course->creation->availability->course_end_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_end_date))  : ''), $letter_content);
                     elseif($field == 'fees'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->fees) && !empty($applicant->course->creation->fees) ? '£'.number_format($applicant->course->creation->fees, 2)  : '£0.00'), $letter_content);
+                    elseif($field == 'venue_name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->venue->name) && !empty($applicant->course->venue->name) ? $applicant->course->venue->name  : ''), $letter_content);
                     endif;
                 elseif($table == 'signatories'):
                     if($field == 'sign_url'):
@@ -82,7 +84,7 @@ trait GenerateApplicantLetterTrait{
         $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
         $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
         $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-        $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
+        $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get()->first();
         $PDFHTML = '';
         $PDFHTML .= '<html>';
             $PDFHTML .= '<head>';
@@ -105,25 +107,20 @@ trait GenerateApplicantLetterTrait{
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
                 if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('s3')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
+                    $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_nam); //Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name
                     $PDFHTML .= '<header>';
-                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
+                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.$headerImageURL.'"/>';
                     $PDFHTML .= '</header>';
                 endif;
 
                 $PDFHTML .= '<footer>';
                     $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
                                 font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
-                        if($LetterFooters->count() > 0):
+                        if(isset($LetterFooters->current_file_name) && !empty($LetterFooters->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name)):
+                            $footerImageURL = url('storage/letterheaderfooter/footer/'.$LetterFooters->current_file_nam); //Storage::disk('local')->url('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name).'" alt="'.$LetterFooters->name
                             $PDFHTML .= '<tr>';
                                 $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
-                                    $numberOfPartners = $LetterFooters->count();
-                                    $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
-
-                                    foreach($LetterFooters as $lf):
-                                        if(Storage::disk('s3')->exists('public/letterheaderfooter/footer/'.$lf->current_file_name)):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
-                                        endif;
-                                    endforeach;
+                                    $PDFHTML .= '<img style=" width: 100%; height: auto; margin-left:0; margin-right:0;" src="'.$footerImageURL.'" alt="'.$LetterFooters->name.'"/>';
                                 $PDFHTML .= '</td>';
                             $PDFHTML .= '</tr>';
                         endif;
