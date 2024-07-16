@@ -1753,7 +1753,7 @@ class AdmissionController extends Controller
                 $signatoryHTML .= '<p>';
                     $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
                     if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
-                        $signatureImage = Storage::disk('local')->url('public/signatories/'.$signatory->signature);
+                        $signatureImage = url('storage/signatories/'.$signatory->signature);
                         $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
                     endif;
                     $signatoryHTML .= $signatory->signatory_name.'<br/>';
