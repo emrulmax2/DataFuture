@@ -94,7 +94,7 @@ trait GenerateApplicantLetterTrait{
                                 body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
                                 table{margin-left: 0px;}
                                 figure{margin: 0;}
-                                @page{margin-top: 95px;margin-left: 85px !important;margin-right:85px !important;margin-bottom: 95px;}
+                                @page{margin-top: 105px;margin-left: 85px !important;margin-right:85px !important;margin-bottom: 95px;}
                                 header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
                                 footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
                                 .pageCounter{position: relative;}
@@ -107,9 +107,8 @@ trait GenerateApplicantLetterTrait{
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
                 if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
-                    $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name); //Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name
+                    $headerImageURL = url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name);
                     $PDFHTML .= '<header>';
-                        //$PDFHTML .= $headerImageURL;
                         $PDFHTML .= '<img alt="'.$LetterHeader->current_file_name.'" style="width: 100%; height: auto;" src="'.$headerImageURL.'"/>';
                     $PDFHTML .= '</header>';
                 endif;
@@ -118,10 +117,9 @@ trait GenerateApplicantLetterTrait{
                     $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
                                 font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
                         if(isset($LetterFooters->current_file_name) && !empty($LetterFooters->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name)):
-                            $footerImageURL = url('storage/letterheaderfooter/footer/'.$LetterFooters->current_file_name); //Storage::disk('local')->url('public/letterheaderfooter/footer/'.$LetterFooters->current_file_name).'" alt="'.$LetterFooters->name
+                            $footerImageURL = url('storage/letterheaderfooter/footer/'.$LetterFooters->current_file_name);
                             $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
-                                    //$PDFHTML .= $footerImageURL;
+                                $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle; padding-bottom: 5px;">';
                                     $PDFHTML .= '<img style=" width: 100%; height: auto; margin-left:0; margin-right:0;" src="'.$footerImageURL.'" alt="'.$LetterFooters->name.'"/>';
                                 $PDFHTML .= '</td>';
                             $PDFHTML .= '</tr>';

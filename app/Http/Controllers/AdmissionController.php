@@ -2730,7 +2730,7 @@ class AdmissionController extends Controller
                     "mimeinfo" => 'application/pdf',
                     'disk'     => 's3'
                 ];
-                if($status_id == 7):
+                if($status_id == 5):
                     $attachmentFiles[] = [
                         "pathinfo" => 'public/terms_and_condition.pdf',
                         "nameinfo" => 'terms_and_condition.pdf',
