@@ -33,7 +33,9 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->application_no, $letter_content);
                     endif;
                 elseif($table == 'applicant_contacts'):
-                    if($field == 'address_line_1'):
+                    if($field == 'full_address'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->full_address) ? $applicant->contact->full_address : ''), $letter_content);
+                    elseif($field == 'address_line_1'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->address_line_1) ? $applicant->contact->address_line_1 : ''), $letter_content);
                     elseif($field == 'address_line_2'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->address_line_2) ? $applicant->contact->address_line_2 : ''), $letter_content);
