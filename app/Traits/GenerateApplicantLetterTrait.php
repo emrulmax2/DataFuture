@@ -55,9 +55,9 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", 'Full Time', $letter_content);
                         //(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'Yes' : 'No')
                     elseif($field == 'course_start_date'):
-                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability->course_start_date) && !empty($applicant->course->creation->availability->course_start_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_start_date)) : ''), $letter_content);
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability[0]->course_start_date) && !empty($applicant->course->creation->availability[0]->course_start_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability[0]->course_start_date)) : ''), $letter_content);
                     elseif($field == 'course_end_date'):
-                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability->course_end_date) && !empty($applicant->course->creation->availability->course_end_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_end_date))  : ''), $letter_content);
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability[0]->course_end_date) && !empty($applicant->course->creation->availability[0]->course_end_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability[0]->course_end_date))  : ''), $letter_content);
                     elseif($field == 'fees'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->fees) && !empty($applicant->course->creation->fees) ? '£'.number_format($applicant->course->creation->fees, 2)  : '£0.00'), $letter_content);
                     elseif($field == 'venue_name'):
