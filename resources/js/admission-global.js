@@ -274,12 +274,12 @@ import Dropzone from "dropzone";
                                 let inProgress = $('#progressBarModal input#progress').val();
                                 if(inProgress==100) {
                                     statusStudentProgressModal.hide();
-                                    location.reload();
+                                    window.location.reload();
                                 }
                             }, 2000);
                         } else {   
-                        statusConfirmModal.hide();
-                        window.location.reload();
+                            statusConfirmModal.hide();
+                            window.location.reload();
                         }
                     }
                 }).catch(error => {

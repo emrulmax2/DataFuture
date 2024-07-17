@@ -94,6 +94,7 @@ use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
 use App\Models\ApplicantUser;
+use App\Models\ApplicationRejectedReason;
 use App\Models\CourseCreationAvailability;
 use App\Models\EmailTemplate;
 use App\Models\Employee;
@@ -422,7 +423,8 @@ class AdmissionController extends Controller
             }),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -810,7 +812,8 @@ class AdmissionController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
 
-            'processGroup' => $processGroup
+            'processGroup' => $processGroup,
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1321,7 +1324,8 @@ class AdmissionController extends Controller
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('admission', '1')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1432,7 +1436,8 @@ class AdmissionController extends Controller
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1684,7 +1689,8 @@ class AdmissionController extends Controller
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('admission', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -2285,12 +2291,12 @@ class AdmissionController extends Controller
     public function admissionStudentUpdateStatus(Request $request){
         $applicant_id = $request->applicantID;
         $statusidID = $request->statusidID;
-        $rejectedReason = ((isset($request->rejectedReason) && !$request->rejectedReason!="") ? $request->rejectedReason : null);
+        $rejectedReason = ((isset($request->rejectedReason) && $request->rejectedReason > 0) ? $request->rejectedReason : null);
 
         $applicant =  $applicantOldRow = Applicant::find($applicant_id);
        
         $applicant->status_id = $statusidID;
-        $applicant->rejected_reason = $rejectedReason;
+        $applicant->application_rejected_reason_id = $rejectedReason;
         $changes = $applicant->getDirty();
         $applicant->save();
 

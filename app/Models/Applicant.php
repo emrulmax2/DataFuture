@@ -23,7 +23,8 @@ class Applicant extends Model
         'sex_identifier_id',
         'submission_date',
         'status_id',
-        'rejected_reason',
+        //'rejected_reason',
+        'application_rejected_reason_id',
         'nationality_id',
         'country_id',
         'proof_type',
@@ -175,5 +176,9 @@ class Applicant extends Model
 
     public function agent(){
         return $this->belongsTo(AgentUser::class, 'agent_user_id');
+    }
+
+    public function reason(){
+        return $this->belongsTo(ApplicationRejectedReason::class, 'application_rejected_reason_id');
     }
 }
