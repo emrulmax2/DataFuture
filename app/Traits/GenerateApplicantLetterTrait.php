@@ -33,7 +33,9 @@ trait GenerateApplicantLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->application_no, $letter_content);
                     endif;
                 elseif($table == 'applicant_contacts'):
-                    if($field == 'address_line_1'):
+                    if($field == 'full_address'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->full_address) ? $applicant->contact->full_address : ''), $letter_content);
+                    elseif($field == 'address_line_1'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->address_line_1) ? $applicant->contact->address_line_1 : ''), $letter_content);
                     elseif($field == 'address_line_2'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->contact->address_line_2) ? $applicant->contact->address_line_2 : ''), $letter_content);
@@ -50,7 +52,8 @@ trait GenerateApplicantLetterTrait{
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : ''), $letter_content);
                 elseif($table == 'applicant_proposed_courses'):
                     if($field == 'full_time'):
-                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'Yes' : 'No'), $letter_content);
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", 'Full Time', $letter_content);
+                        //(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'Yes' : 'No')
                     elseif($field == 'course_start_date'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->availability->course_start_date) && !empty($applicant->course->creation->availability->course_start_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_start_date)) : ''), $letter_content);
                     elseif($field == 'course_end_date'):
@@ -74,6 +77,8 @@ trait GenerateApplicantLetterTrait{
                     endif;
                 elseif($table == 'today_date'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", date('d/m/Y'), $letter_content);
+                elseif($table == 'page_break'):
+                    $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", '<div class="pageBreak"></div>', $letter_content);
                 else:
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", '', $letter_content);
                 endif;
@@ -91,11 +96,11 @@ trait GenerateApplicantLetterTrait{
                 $PDFHTML .= '<title>'.$letter_title.'</title>';
                 $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
                 $PDFHTML .= '<style>
-                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
-                                table{margin-left: 0px;}
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59); padding-top: 10px;}
+                                table{margin-left: 0px; width: 100%;}
                                 figure{margin: 0;}
-                                @page{margin-top: 105px;margin-left: 85px !important;margin-right:85px !important;margin-bottom: 95px;}
-                                header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
+                                @page{margin-top: 110px;margin-left: 85px !important;margin-right:85px !important;margin-bottom: 95px;}
+                                header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
                                 footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
                                 .pageCounter{position: relative;}
                                 .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
@@ -103,6 +108,8 @@ trait GenerateApplicantLetterTrait{
                                 .text-center{text-align: center;}
                                 .text-left{text-align: left;}
                                 .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
                             </style>';
             $PDFHTML .= '</head>';
             $PDFHTML .= '<body>';
