@@ -377,10 +377,6 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::post('change-password', 'submitChangePasswordForm')->name('change.password.post');
             
         });
-        Route::controller(AgentDashboardController::class)->group(function() {
-            Route::get('/dashboard', 'index')->name('dashboard');
-            Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
-        });
         
         Route::controller(AgentDashboardController::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
