@@ -2797,7 +2797,7 @@ class AdmissionController extends Controller
                     ],
                     [
                         'role' => 'Applicant',
-                        'email' => 'sakibbhuiyan@yahoo.com', //$applicant->users->email limon@churchill.ac sakib@lcc.ac.uk
+                        'email' => $applicant->users->email, //$applicant->users->email limon@churchill.ac sakib@lcc.ac.uk
                     ]
                 ]
             ];
