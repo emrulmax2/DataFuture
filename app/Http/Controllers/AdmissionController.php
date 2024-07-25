@@ -94,6 +94,7 @@ use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
 use App\Models\ApplicantUser;
+use App\Models\ApplicationRejectedReason;
 use App\Models\CourseCreationAvailability;
 use App\Models\EmailTemplate;
 use App\Models\Employee;
@@ -422,7 +423,8 @@ class AdmissionController extends Controller
             }),
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -810,7 +812,8 @@ class AdmissionController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
 
-            'processGroup' => $processGroup
+            'processGroup' => $processGroup,
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1321,7 +1324,8 @@ class AdmissionController extends Controller
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('admission', '1')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1432,7 +1436,8 @@ class AdmissionController extends Controller
             'applicant' => Applicant::find($applicantId),
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -1684,7 +1689,8 @@ class AdmissionController extends Controller
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('admission', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
-            'feeelegibility' => FeeEligibility::all()
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
         ]);
     }
 
@@ -2285,12 +2291,12 @@ class AdmissionController extends Controller
     public function admissionStudentUpdateStatus(Request $request){
         $applicant_id = $request->applicantID;
         $statusidID = $request->statusidID;
-        $rejectedReason = ((isset($request->rejectedReason) && !$request->rejectedReason!="") ? $request->rejectedReason : null);
+        $rejectedReason = ((isset($request->rejectedReason) && $request->rejectedReason > 0) ? $request->rejectedReason : null);
 
         $applicant =  $applicantOldRow = Applicant::find($applicant_id);
        
         $applicant->status_id = $statusidID;
-        $applicant->rejected_reason = $rejectedReason;
+        $applicant->application_rejected_reason_id = $rejectedReason;
         $changes = $applicant->getDirty();
         $applicant->save();
 
@@ -2322,108 +2328,6 @@ class AdmissionController extends Controller
                     ]);
                 endif;
 
-                $DOCUSEALAPI = env("DOCUSEAL_API_KEY", false);
-                $OFFER_ACCEPTANCE_TEMPLATE_ID = env("OFFER_ACCEPTANCE_FORM_TEMPLATE_ID", false);
-                if($DOCUSEALAPI && $OFFER_ACCEPTANCE_TEMPLATE_ID):
-                    $address = '';
-                    if(isset($applicant->contact->address_line_1) && !empty($applicant->contact->address_line_1)):
-                        $address .= $applicant->contact->address_line_1.', ';
-                    endif;
-                    if(isset($applicant->contact->address_line_2) && !empty($applicant->contact->address_line_2)):
-                        $address .= $applicant->contact->address_line_2.', ';
-                    endif;
-                    if(isset($applicant->contact->city) && !empty($applicant->contact->city)):
-                        $address .= $applicant->contact->city.', ';
-                    endif;
-                    if(isset($applicant->contact->state) && !empty($applicant->contact->state)):
-                        $address .= $applicant->contact->state.', ';
-                    endif;
-                    if(isset($applicant->contact->post_code) && !empty($applicant->contact->post_code)):
-                        $address .= $applicant->contact->post_code.', ';
-                    endif;
-                    if(isset($applicant->contact->country) && !empty($applicant->contact->country)):
-                        $address .= $applicant->contact->country;
-                    endif;
-                    $postArray = [
-                        'template_id' => $OFFER_ACCEPTANCE_TEMPLATE_ID,
-                        'send_email' => true,
-                        'order' => 'preserved',
-                        'submitters' => [[
-                                'role' => 'London Churchill College',
-                                'email' => 'admission@lcc.ac.uk',//limon@lcc.ac.uk
-                                'completed' => true,
-                                'send_email' => false,
-                                'fields' => [[
-                                        'name' => 'application_ref_no',
-                                        'default_value' => $applicant->application_no
-                                    ],[
-                                        'name' => 'title',
-                                        'default_value' => (isset($applicant->title->name) ? $applicant->title->name : '')
-                                    ],[
-                                        'name' => 'first_names',
-                                        'default_value' => $applicant->first_name
-                                    ],[
-                                        'name' => 'surname',
-                                        'default_value' => $applicant->last_name
-                                    ],[
-                                        'name' => 'nationality',
-                                        'default_value' => (isset($applicant->nation->name) ? $applicant->nation->name : '')
-                                    ],[
-                                        'name' => 'country_of_birth',
-                                        'default_value' => (isset($applicant->country->name) ? $applicant->country->name : '')
-                                    ],[
-                                        'name' => 'gender',
-                                        'default_value' => (isset($applicant->sexid->name) ? $applicant->sexid->name : '')
-                                    ],[
-                                        'name' => 'dob',
-                                        'default_value' => (isset($applicant->date_of_birth) && !empty($applicant->date_of_birth) ? date('d-m-Y', strtotime($applicant->date_of_birth)) : '')
-                                    ],[
-                                        'name' => 'address',
-                                        'default_value' => $address
-                                    ],[
-                                        'name' => 'home_phone',
-                                        'default_value' => (isset($applicant->contact->home) ? $applicant->contact->home : '')
-                                    ],[
-                                        'name' => 'mobile',
-                                        'default_value' => (isset($applicant->contact->mobile) ? $applicant->contact->mobile : '')
-                                    ],[
-                                        'name' => 'email',
-                                        'default_value' => (isset($applicant->users->email) ? $applicant->users->email : '')
-                                    ],[
-                                        'name' => 'course_name',
-                                        'default_value' => (isset($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : '')
-                                    ],[
-                                        'name' => 'semester_name',
-                                        'default_value' => (isset($applicant->course->semester->name) ? $applicant->course->semester->name : '')
-                                    ],[
-                                        'name' => 'course_fee',
-                                        'default_value' => (isset($applicant->course->creation->fees) && !empty($applicant->course->creation->fees) ? '£'.number_format($applicant->course->creation->fees, 2) : '£0.00')
-                                    ],[
-                                        'name' => 'course_start_date',
-                                        'default_value' => (isset($applicant->course->creation->availability->course_start_date) && !empty($applicant->course->creation->availability->course_start_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability->course_start_date)) : '')
-                                    ]]
-                            ],
-                            [
-                                'role' => 'Applicant',
-                                'email' => $applicant->users->email //'limon@churchill.ac'
-                            ]
-                        ]
-                    ];
-                    /*$client = new Client();
-                    $res = $client->request('POST', 'https://api.docuseal.co/submissions', 
-                        [
-                            'headers' => [
-                                "X-Auth-Token" => $DOCUSEALAPI,
-                                "content-type" => "application/json",
-                                "Accept" => "application/json"
-                            ],
-                            'body' => json_encode($postArray)
-                        ]
-                    );
-                    $statusCode = $res->getStatusCode();
-                    //return response()->json($statusCode);*/
-                endif;
-
                 /* Student Process Start */
                 $bus = Bus::batch([
                     new ProcessNewStudentToUser($applicant),
@@ -2449,6 +2353,8 @@ class AdmissionController extends Controller
                 
                 session()->put("lastBatchId",$bus->id);
                 /* Student Process END */
+            elseif($statusidID == 6):
+                $docuSealDoc = $this->sendDocusealForm($applicant_id);
             endif;
 
             $statusRow = Status::find($statusidID);
@@ -2818,6 +2724,96 @@ class AdmissionController extends Controller
             else:
                 return false;
             endif;
+        else:
+            return false;
+        endif;
+    }
+
+    public function sendDocusealForm($applicant_id){
+        $applicant = Applicant::find($applicant_id);
+
+        $DOCUSEALAPI = env("DOCUSEAL_API_KEY", false);
+        $OFFER_ACCEPTANCE_TEMPLATE_ID = env("OFFER_ACCEPTANCE_FORM_TEMPLATE_ID", false);
+        if($DOCUSEALAPI && $OFFER_ACCEPTANCE_TEMPLATE_ID):
+            $address = (isset($applicant->contact->full_address) && !empty($applicant->contact->full_address) ? strip_tags($applicant->contact->full_address) : '');
+            $postArray = [
+                'template_id' => $OFFER_ACCEPTANCE_TEMPLATE_ID,
+                'send_email' => true,
+                'order' => 'preserved',
+                'submitters' => [[
+                        'role' => 'London Churchill College',
+                        'email' => 'admission@lcc.ac.uk',//limon@lcc.ac.uk
+                        'completed' => true,
+                        'send_email' => true,
+                        'fields' => [[
+                                'name' => 'application_ref_no',
+                                'default_value' => $applicant->application_no
+                            ],[
+                                'name' => 'title',
+                                'default_value' => (isset($applicant->title->name) ? $applicant->title->name : '')
+                            ],[
+                                'name' => 'first_name',
+                                'default_value' => $applicant->first_name
+                            ],[
+                                'name' => 'last_name',
+                                'default_value' => $applicant->last_name
+                            ],[
+                                'name' => 'nationality',
+                                'default_value' => (isset($applicant->nation->name) ? $applicant->nation->name : '')
+                            ],[
+                                'name' => 'country_of_birth',
+                                'default_value' => (isset($applicant->country->name) ? $applicant->country->name : '')
+                            ],[
+                                'name' => 'gender',
+                                'default_value' => (isset($applicant->sexid->name) ? $applicant->sexid->name : '')
+                            ],[
+                                'name' => 'date_of_birth',
+                                'default_value' => (isset($applicant->date_of_birth) && !empty($applicant->date_of_birth) ? date('d-m-Y', strtotime($applicant->date_of_birth)) : '')
+                            ],[
+                                'name' => 'full_address',
+                                'default_value' => $address
+                            ],[
+                                'name' => 'home_phone',
+                                'default_value' => (isset($applicant->contact->home) ? $applicant->contact->home : '')
+                            ],[
+                                'name' => 'mobile_phone',
+                                'default_value' => (isset($applicant->contact->mobile) ? $applicant->contact->mobile : '')
+                            ],[
+                                'name' => 'email_address',
+                                'default_value' => (isset($applicant->users->email) ? $applicant->users->email : '')
+                            ],[
+                                'name' => 'course',
+                                'default_value' => (isset($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : '')
+                            ],[
+                                'name' => 'semester',
+                                'default_value' => (isset($applicant->course->semester->name) ? $applicant->course->semester->name : '')
+                            ],[
+                                'name' => 'fees',
+                                'default_value' => (isset($applicant->course->creation->fees) && !empty($applicant->course->creation->fees) ? '£'.number_format($applicant->course->creation->fees, 2) : '£0.00')
+                            ],[
+                                'name' => 'start_date',
+                                'default_value' => (isset($applicant->course->creation->availability[0]->course_start_date) && !empty($applicant->course->creation->availability[0]->course_start_date) ? date('d-m-Y', strtotime($applicant->course->creation->availability[0]->course_start_date)) : '')
+                            ]]
+                    ],
+                    [
+                        'role' => 'Applicant',
+                        'email' => 'sakibbhuiyan@yahoo.com', //$applicant->users->email limon@churchill.ac sakib@lcc.ac.uk
+                    ]
+                ]
+            ];
+            $client = new Client();
+            $res = $client->request('POST', 'https://api.docuseal.co/submissions', 
+                [
+                    'headers' => [
+                        "X-Auth-Token" => $DOCUSEALAPI,
+                        "content-type" => "application/json",
+                        "Accept" => "application/json"
+                    ],
+                    'body' => json_encode($postArray)
+                ]
+            );
+            $statusCode = $res->getStatusCode();
+            return $statusCode;
         else:
             return false;
         endif;

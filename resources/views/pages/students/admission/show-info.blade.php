@@ -80,13 +80,16 @@
                                 </div>
                             </div>
                         @else
-                            <button type="button" class="btn btn-primary w-auto mr-1 mb-0">
+                            <button type="button" class="btn btn-{{ $applicant->status_id == 8 ? 'danger' : 'primary' }} text-white w-auto mr-1 mb-0">
                                 {{ $applicant->status->name }}
                             </button>
                         @endif
                     </div>
                 </div>
                 <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                @if($applicant->status_id == 8 && isset($applicant->application_rejected_reason_id) && $applicant->application_rejected_reason_id > 0 && isset($applicant->reason->name) && !empty($applicant->reason->name))
+                    <div class="pb-2 text-right">Rejecttion Reason: <span class="font-medium ">{{ $applicant->reason->name }}</span></div>
+                @endif
                 @php 
                     $pending = $applicant->pendingTasks->count();
                     $inprogress = $applicant->inProgressTasks->count();
@@ -182,13 +185,11 @@
                             <label for="rejected_reason" class="form-label">Rejected Reason <span class="text-danger">*</span></label>
                             <select id="rejected_reason" name="rejected_reason" class="form-control w-3/4">
                                 <option value="">Please select a reason</option>
-                                <option value="Failed Interview">Failed Interview</option>
-                                <option value="Shortage of Document">Shortage of Document</option>
-                                <option value="Wrong Information">Wrong Information</option>
-                                <option value="Lack of Qualification">Lack of Qualification</option>
-                                <option value="Unavailable for Communication">Unavailable for Communication</option>
-                                <option value="Failure in English Test">Failure in English Test</option>
-                                <option value="Previous Bad Records">Previous Bad Records</option> 
+                                @if(isset($reasons) && $reasons->count() > 0)
+                                    @foreach($reasons as $resn)
+                                        <option value="{{ $resn->id }}">{{ $resn->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
 
