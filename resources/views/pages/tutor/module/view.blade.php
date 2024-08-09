@@ -67,7 +67,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
-                Microsoft Teams
+                <i data-lucide="users" class="w-4 h-4 mr-2"></i> Microsoft Teams
             </a>
         </li>
         <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
