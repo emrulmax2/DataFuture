@@ -65,6 +65,11 @@
                 <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
             </a>
         </li>
+        <li class="nav-item" role="presentation">
+            <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
+                Microsoft Teams
+            </a>
+        </li>
         <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#class-dates" aria-controls="class-dates" aria-selected="true" role="tab" >
                 <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Class Dates
@@ -85,11 +90,6 @@
         <li id="analytics-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#analytics" aria-controls="analytics" aria-selected="true" role="tab" >
                 <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
-                Student Teams
             </a>
         </li>
     </ul>
