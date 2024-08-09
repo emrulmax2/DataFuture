@@ -94,10 +94,4 @@
         </a>
     </li>
     
-    <li class="nav-item" role="presentation">
-        <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
-            Student Teams
-        </a>
-    </li>
-    
 </ul>

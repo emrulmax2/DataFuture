@@ -87,6 +87,11 @@
                 <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
             </a>
         </li>
+        <li class="nav-item" role="presentation">
+            <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
+                Student Teams
+            </a>
+        </li>
     </ul>
 </div>
 <div class="intro-y tab-content mt-5">
