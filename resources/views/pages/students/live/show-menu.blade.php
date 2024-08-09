@@ -79,11 +79,6 @@
         </a>
     </li>
     <li class="nav-item" role="presentation">
-        <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
-            Student Teams
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
         <a href="{{ route('student.uploads', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.uploads' ? 'active' : '' }}">
             Documents
         </a>
@@ -96,6 +91,12 @@
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.process', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.process' ? 'active' : '' }}">
             Task & Process
+        </a>
+    </li>
+    
+    <li class="nav-item" role="presentation">
+        <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
+            Student Teams
         </a>
     </li>
     
