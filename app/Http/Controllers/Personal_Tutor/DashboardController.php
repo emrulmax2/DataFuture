@@ -92,6 +92,10 @@ class DashboardController extends Controller
         }
         
         usort($returnData, "cmp");
+        $ipAddresses = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
+        foreach($ipAddresses as $ip):
+            $data = true;
+        endforeach
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
