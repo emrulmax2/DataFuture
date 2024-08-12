@@ -65,9 +65,9 @@
                 <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
             </a>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item mr-5" role="presentation">
             <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4">
-                Microsoft Teams
+                <i data-lucide="users" class="w-4 h-4 mr-2"></i> Microsoft Teams
             </a>
         </li>
         <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
@@ -80,8 +80,6 @@
                 <i data-lucide="users" class="w-4 h-4 mr-2"></i> Participants
             </a>
         </li>
-
-
         <li id="assessment-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
                 <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
