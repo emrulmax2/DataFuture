@@ -82,7 +82,16 @@ class DashboardController extends Controller
         ]);
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
-   
+        function cmp($a, $b)
+        {
+            $end_timeB = date("Y-m-d ".$b['start_time']);
+            $end_timeA = date("Y-m-d ".$a['start_time']);
+
+            return strtotime($end_timeB)> strtotime($end_timeA);
+            
+        }
+        
+        usort($returnData, "cmp");
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
