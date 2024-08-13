@@ -208,6 +208,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -2624,5 +2625,10 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('my-account/groups/delete/{id}', 'destroy')->name('user.account.group.destory');
         Route::post('my-account/groups/restore/{id}', 'restore')->name('user.account.group.restore');
+    });
+
+    Route::controller(ApplicationAnalysisController::class)->group(function(){
+        Route::any('reports/application-analysis-report', 'index')->name('report.application.analysis'); 
+        Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
     });
 });

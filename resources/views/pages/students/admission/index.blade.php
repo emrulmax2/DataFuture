@@ -110,9 +110,14 @@
                         <button id="tabulator-print-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                         </button>
-                        <button id="tabulator-export-xlsx-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                        <button id="tabulator-export-xlsx-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto">
                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel <i id="excel-loading" data-loading-icon="oval"  class="w-4 h-4 ml-2 mx-auto hidden"></i>
                         </button>
+                        @if(isset(auth()->user()->priv()['applicant_analysis']) && auth()->user()->priv()['applicant_analysis'] == 1)
+                        <a href="{{ route('report.application.analysis') }}" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Application Analysis
+                        </a>
+                        @endif
                         {{-- <div class="dropdown w-1/2 sm:w-auto mr-2">
                             <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
