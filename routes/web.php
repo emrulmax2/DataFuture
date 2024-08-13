@@ -2138,6 +2138,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(TutorAttendanceController::class)->group(function() {
 
         Route::post('tutor-attendance/check', 'check')->name('tutor-attendance.check'); 
+        Route::post('tutor-attendance/start-class', 'startClass')->name('tutor-attendance.startClass'); 
     });
 
     Route::controller(TutorDashboard::class)->group(function() {

@@ -12,6 +12,7 @@ use App\Models\Employment;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\User;
+use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -61,15 +62,20 @@ class TutorAttendanceController extends Controller
                 ]);
                 return response()->json(["data"=>["msg"=>"Class started",'tutor' =>8,'plandate'=>$request->plan_date_list_id]],206);
             } else {
-
-                $attendanceInformation = AttendanceInformation::find($attendanceFind->id);
-                $attendanceInformation->end_time = now();
-                $attendanceInformation->updated_by = Auth::user()->id;
-                
-                if($attendanceInformation->isDirty()) {
-                    $attendanceInformation->save();
-                    return response()->json(["data"=>"Class Ended"],200);
-                }
+                $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
+               
+                if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
+                    $attendanceInformation = AttendanceInformation::find($attendanceFind->id);
+                    $attendanceInformation->end_time = now();
+                    $attendanceInformation->updated_by = Auth::user()->id;
+                    
+                    if($attendanceInformation->isDirty()) {
+                        $attendanceInformation->save();
+                        return response()->json(["data"=>"Class Ended"],200);
+                    }
+                } else {
+                    return response()->json(["data"=>"You are out of College. Please return to college to end your class"],422);
+                }  
             }
         
         return response()->json(["data"=>"Something Went Wrong"],422);
@@ -99,7 +105,25 @@ class TutorAttendanceController extends Controller
             return response()->json(["punch_number"=>'Invalid Punch Number'],402);
         }
     }
-
+    public function startClass(Request $request)
+    {
+        
+            $planDateList = PlansDateList::find($request->plan_date_list_id);
+            $plan = Plan::find($planDateList->plan_id);
+            
+            $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
+            if($attendanceFind) {
+                return response()->json(["data"=>'Attendance Start Found'],443);
+            } else {
+                if($plan->tutor_id!=Auth::user()->id) {
+                    return response()->json(["data"=>'Not Matched Tutor',],442);
+                } else {
+                    return response()->json(["data"=>'Tutor Matched'],207);
+                }
+            }
+        
+    }
+    
     /**
      * Display the specified resource.
      *
