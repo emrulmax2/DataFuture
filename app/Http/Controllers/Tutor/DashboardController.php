@@ -20,6 +20,7 @@ use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
 use App\Models\User;
+use App\Models\VenueIpAddress;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,10 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     
+    
+        
+        
+
     public function list(Request $request) {
         
         $tutorId = isset($request->id) && !empty($request->id) ? $request->id : '';
@@ -56,7 +61,7 @@ class DashboardController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'start_time', 'dir' => 'ASC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -79,7 +84,26 @@ class DashboardController extends Controller
                 
                 $end_time = date("Y-m-d ".$list->end_time);
                 $end_time = date('h:i A', strtotime($end_time));
-                
+                $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
+                $showClass = false;
+                $showClass = true;
+                if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
+
+                    $startTime = $plan_date." ".$list->start_time;
+                    $endTime = $plan_date." ".$list->end_time;
+
+                    // $startTime = date("Y-m-d ".$list->start_time);
+                    // $endTime = date("Y-m-d ".$list->end_time);
+                    $currentTime = date("Y-m-d H:i:s");
+                   
+                    $timeDiffStartPoint = (strtotime($startTime)-strtotime($currentTime))/60; //second to min
+                    $timeDiffEndPoint = (strtotime($endTime)-strtotime($currentTime))/60; //second to min
+
+                    if($timeDiffStartPoint<31 && $timeDiffEndPoint>=0) {
+                        $showClass = True;
+                    }
+
+                }
                 $data[] = [
                     'id' => $list->id,
                     'plan_id' => $list->plan_id,
@@ -100,11 +124,13 @@ class DashboardController extends Controller
                     'captured_at'=> "",
                     'join_request'=> "",
                     'status'=> "",     
+                    'showClass' => $showClass,
                     "attendance_information" => ($attendanceInformationFinder) ?? null,    
                     "foundAttendances"  => ($foundAttendances) ?? null,           
                 ];
                 $i++;
             endforeach;
+
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
 

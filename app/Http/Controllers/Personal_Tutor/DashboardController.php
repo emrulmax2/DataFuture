@@ -8,6 +8,7 @@ use App\Models\AttendanceInformation;
 use App\Models\Employee;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -82,20 +83,7 @@ class DashboardController extends Controller
         ]);
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
-        function cmp($a, $b)
-        {
-            $end_timeB = date("Y-m-d ".$b['start_time']);
-            $end_timeA = date("Y-m-d ".$a['start_time']);
-
-            return strtotime($end_timeB)> strtotime($end_timeA);
-            
-        }
         
-        usort($returnData, "cmp");
-        $ipAddresses = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
-        foreach($ipAddresses as $ip):
-            $data = true;
-        endforeach
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -106,6 +94,7 @@ class DashboardController extends Controller
             "date" => date("d-m-Y"),
             "currenTerm" => $currentTerm,
             "todaysClassList" => $returnData["data"],
+            // "venue_ips" => $ipAddresses,         
         ]);
     }
     public function latestList(Request $request) {
