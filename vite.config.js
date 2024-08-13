@@ -250,6 +250,8 @@ export default defineConfig({
                 'resources/js/user-team-holiday.js',
                 'resources/js/user-groups.js',
                 'resources/js/holiday-hour-report.js',
+
+                'resources/js/application-analysis.js',
                 
             ],
             refresh: true,

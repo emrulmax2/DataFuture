@@ -106,8 +106,14 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['dashboard']['applicant']) && $priv['dashboard']['applicant'] == 1 ? 'checked' : '') }} id="permission_dashboard_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant]">
+                            <input {{ (isset($priv['dashboard']['applicant']) && $priv['dashboard']['applicant'] == 1 ? 'checked' : '') }} id="permission_dashboard_1" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[dashboard][applicant]">
                             <label class="form-check-label ml-4" for="permission_dashboard_1">Applicant</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['dashboard']['applicant_analysis']) && $priv['dashboard']['applicant_analysis'] == 1 ? 'checked' : '') }} id="permission_application_analysis_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_analysis]">
+                                <label class="form-check-label ml-4" for="permission_application_analysis_1">Application Analysis</label>
+                            </div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-3">
