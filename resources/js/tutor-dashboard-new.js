@@ -29,7 +29,7 @@ var attendanceListTable = (function () {
                                         <div class="ml-0 mr-auto">
                                             <div class="text-base font-medium truncate w-full relative">${ data.module } </div>
                                             <div class="text-slate-400 mt-1">${ data.course }</div>
-                                            <div class="text-slate-400 mt-1">Schedule - ${ data.start_time } at ${ data.venue } - ${ data.room }</div>
+                                            <div class="text-slate-400 mt-1">Schedule - ${ data.start_time } to ${ data.end_time } at ${ data.venue } - ${ data.room }</div>
                                         </div>
                                         <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">${ data.group }</div>
                                         
@@ -47,13 +47,24 @@ var attendanceListTable = (function () {
                                             html +=`"  data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>`
                                         }
                                     } else {
+                                        if(data.showClass==true)
                                         html +=`<a data-tw-toggle="modal" data-id="${ data.id }" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>`
                                     }
                                     html +=`</div>
                                 </div>
                             </div>`;
                     })
-                    $('#todays-classlist').html(html)      
+                    $('#todays-classlist').html(html)  
+                    $(".start-punch").on("click", function (event) {
+            
+                        let data = $(this).data('id');   
+                        document.getElementById('employee_punch_number').focus();
+                        console.log(data);
+                        //let url = route('attendance.infomation.save');
+            
+                        $(".plan-datelist").val(data);
+            
+                    });    
                 }
                 
             },
@@ -113,15 +124,16 @@ var attendanceListTable = (function () {
         
 
         $(".start-punch").on("click", function (event) {
+            
             let data = $(this).data('id');   
             document.getElementById('employee_punch_number').focus();
             console.log(data);
-
+            alert("works");
             //let url = route('attendance.infomation.save');
 
             $(".plan-datelist").val(data);
 
-        });
+        });   
 
 
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
