@@ -197,7 +197,7 @@ class ApplicationAnalysisController extends Controller
                             $PDFHTML .= '<td>Cereated By</td>';
                             $PDFHTML .= '<td>';
                                 $PDFHTML .= (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name);
-                                $PDFHTML .= ' on '.date('jS M, Y').' at '.date('h:i A');
+                                $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
                             $PDFHTML .= '</td>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</table>';
