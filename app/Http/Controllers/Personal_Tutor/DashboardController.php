@@ -84,11 +84,11 @@ class DashboardController extends Controller
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
         
-        usort($returnData, "cmp");
-        $ipAddresses = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
-        foreach($ipAddresses as $ip):
-            $data = true;
-        endforeach;
+        // usort($returnData, "cmp");
+        // $ipAddresses = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
+        // foreach($ipAddresses as $ip):
+        //     $data = true;
+        // endforeach;
         
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',

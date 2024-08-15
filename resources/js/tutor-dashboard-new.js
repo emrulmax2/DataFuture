@@ -128,7 +128,6 @@ var attendanceListTable = (function () {
             let data = $(this).data('id');   
             document.getElementById('employee_punch_number').focus();
             console.log(data);
-            alert("works");
             //let url = route('attendance.infomation.save');
 
             $(".plan-datelist").val(data);
