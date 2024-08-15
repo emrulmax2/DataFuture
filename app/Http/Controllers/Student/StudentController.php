@@ -217,8 +217,8 @@ class StudentController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $studentList = Student::with('disability')->where('id',$list->id)->get()->first();
-                if ($list->photo !== null && Storage::disk('local')->exists('public/applicants/'.$list->applicant_id.'/'.$list->photo)) {
-                    $photo_url = Storage::disk('local')->url('public/applicants/'.$list->applicant_id.'/'.$list->photo);
+                if ($list->photo !== null && Storage::disk('local')->exists('public/students/'.$list->id.'/'.$list->photo)) {
+                    $photo_url = Storage::disk('local')->url('public/students/'.$list->id.'/'.$list->photo);
                 } else {
                     $photo_url = asset('build/assets/images/user_avatar.png');
                 }
@@ -414,10 +414,10 @@ class StudentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$applicant_id, $imageName, 'local');
+        $path = $document->storeAs('public/students/'.$student_id, $imageName, 'local');
         if(!empty($oldPhoto)):
-            if (Storage::disk('local')->exists('public/applicants/'.$applicant_id.'/'.$oldPhoto)):
-                Storage::delete('public/applicants/'.$applicant_id.'/'.$oldPhoto);
+            if (Storage::disk('local')->exists('public/students/'.$student_id.'/'.$oldPhoto)):
+                Storage::delete('public/students/'.$student_id.'/'.$oldPhoto);
             endif;
         endif;
 
@@ -1216,5 +1216,52 @@ class StudentController extends Controller
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
         return $pdf->download($fileName);
+    }
+
+
+    public function studentCopyProfilePhoto($page = 1, $limit = 500){
+        if($page > 0 && $limit > 0):
+            $offset = ($page - 1) * $limit;
+            $students = Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->offset($offset)->limit($limit)->orderBy('id', 'ASC')->get();
+            if(!empty($students)):
+                foreach($students as $std):
+                    if(isset($std->photo) && !empty($std->photo)):
+                        $student_id = $std->id;
+                        $photo = $std->photo;
+
+                        $file_url = 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/student_files/'.$student_id.'/'.$photo;
+                        if($this->remote_file_exists($file_url)):
+                            if(!Storage::disk('local')->exists('public/students/'.$student_id)){
+                                Storage::disk('local')->makeDirectory('public/students/'.$student_id);
+                            }
+                            if(!Storage::disk('local')->exists('public/students/'.$student_id.'/'.$photo)):
+                                copy($file_url, Storage::disk('local')->path('public/students/'.$student_id.'/'.$photo));
+                            endif;
+                        endif;
+                    endif;
+                endforeach;
+            endif;
+        endif;
+
+        return view('pages.students.live.copy-profile-photo', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Students Live', 'href' => 'javascript:void(0);'],
+                ['label' => 'Copy Photo', 'href' => 'javascript:void(0);']
+            ],
+            'student' => Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->get()->count(),
+            'page' => $page,
+            'limit' => $limit
+        ]);
+    }
+
+    function remote_file_exists($url){
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if( $httpCode == 200 ){return true;}
     }
 }

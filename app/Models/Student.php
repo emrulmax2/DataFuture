@@ -44,8 +44,8 @@ class Student extends Model
 
     public function getPhotoUrlAttribute()
     {
-        if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->applicant_id.'/'.$this->photo)) {
-            return Storage::disk('local')->url('public/applicants/'.$this->applicant_id.'/'.$this->photo);
+        if ($this->photo !== null && Storage::disk('local')->exists('public/students/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('local')->url('public/students/'.$this->id.'/'.$this->photo);
         } else {
             return asset('build/assets/images/user_avatar.png');
         }
