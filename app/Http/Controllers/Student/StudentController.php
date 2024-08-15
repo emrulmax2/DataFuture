@@ -126,40 +126,46 @@ class StudentController extends Controller
 
         $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
 
-        $Query = DB::table('students as std')
-                    ->select('std.*', 'sts.name as status_name', 'scn.id as scn_id', 'scr.id as scr_id', 'scr.course_creation_id', 'cc.course_id', 'cc.semester_id', 'cr.name as course_name', 'sm.name as semester_name', 'si.name as sexid_name','spc.full_time')
-                    ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
-                    ->leftJoin('student_contacts as scn', 'std.id', 'scn.student_id')
-                    ->leftJoin('student_users as su', 'std.student_user_id', 'su.id')
-                    ->leftJoin('student_course_relations as scr', function($join){
-                            $join->on('std.id', '=', 'scr.student_id');
-                            $join->on('scr.active', '=', DB::raw(1));
-                    })
-                    ->leftJoin('student_awarding_body_details as sabd', 'scr.id', 'sabd.student_course_relation_id')
-                    ->leftJoin('course_creations as cc', 'cc.id', 'scr.course_creation_id')
-                    ->leftJoin('courses as cr', 'cr.id', 'cc.course_id')
-                    ->leftJoin('semesters as sm', 'sm.id', 'cc.semester_id')
-                    ->leftJoin('student_proposed_courses as spc', 'spc.student_course_relation_id', 'scr.id')
-                    ->leftJoin('sex_identifiers as si', 'std.sex_identifier_id', 'si.id');
-        
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+        $Query = Student::orderByRaw(implode(',', $sorts));
         if(!empty($student_id)): $Query->where('registration_no', $student_id); endif;
         if($studentSearch):
             foreach($studentParams as $field => $value):
                 $$field = (isset($value) && !empty($value) ? ($field == 'student_dob' ? date('Y-m-d', strtotime($value)) :$value) : '');
             endforeach;
-            if(!empty($student_name)): $Query->where('std.first_name','LIKE','%'.$student_name.'%'); endif;
-            if(!empty($student_name)): $Query->where('std.last_name','LIKE','%'.$student_name.'%'); endif;
-            if(!empty($student_dob)): $Query->where('std.date_of_birth', $student_dob); endif;
-            if(!empty($student_post_code)): $Query->where('scn.term_time_post_code', $student_post_code); endif;
-            if(!empty($student_email)): $Query->where('su.email', $student_email); endif;
-            if(!empty($student_mobile)): $Query->where('scn.mobile', $student_mobile); endif;
-            if(!empty($student_uhn)): $Query->where('std.uhn_no', $student_uhn); endif;
-            if(!empty($student_ssn)): $Query->where('std.ssn_no', $student_ssn); endif;
-            if(!empty($student_abr)): $Query->where('sabd.reference', $student_abr); endif;
-            if(!empty($student_status)): $Query->whereIn('std.status_id', $student_status); endif;
+
+            if(!empty($student_name)): 
+                $Query->where(function($q) use($student_name){
+                    $q->where('first_name','LIKE','%'.$student_name.'%')->orWhere('last_name','LIKE','%'.$student_name.'%');
+                }); 
+            endif;
+            if(!empty($student_dob)): $Query->where('date_of_birth', $student_dob); endif;
+            if(!empty($student_post_code) || !empty($student_email) || !empty($student_mobile)):
+                $Query->whereHas('contact', function($qr) use($student_post_code, $student_email, $student_mobile){
+                    if(!empty($student_post_code)):
+                        $qr->where('term_time_post_code', $student_post_code);
+                    endif;
+                    if(!empty($student_email)):
+                        $qr->where(function($q) use($student_email){
+                            $q->where('personal_email', $student_email)->orWhere('institutional_email', $student_email); 
+                        });
+                    endif;
+                    if(!empty($student_mobile)):
+                        $qr->where('mobile', $student_post_code);
+                    endif;
+                });
+            endif;
+            if(!empty($student_uhn)): $Query->where('uhn_no', $student_uhn); endif;
+            if(!empty($student_ssn)): $Query->where('ssn_no', $student_ssn); endif;
+            if(!empty($application_no)): $Query->where('application_no', $application_no); endif;
+            if(!empty($student_status)): $Query->whereIn('status_id', $student_status); endif;
         endif;
 
-        if($groupSearch):
+        /*if($groupSearch):
             foreach($groupParams as $field => $value):
                 $$field = (isset($value) && !empty($value) ? $value : '');
             endforeach;
@@ -191,21 +197,15 @@ class StudentController extends Controller
             endif;
             if(!empty($group_student_status)): $Query->whereIn('std.status_id', $group_student_status); endif;
             if(!empty($studentsIds)): $Query->whereIn('std.id', $studentsIds); endif;
-        endif;
+        endif;*/
 
         $total_rows = $Query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
-
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
-        $sorts = [];
-        foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
-        endforeach;
         
         $Query = $Query->orderByRaw(implode(',', $sorts))->skip($offset)
                ->take($limit)
@@ -216,30 +216,24 @@ class StudentController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $studentList = Student::with('disability')->where('id',$list->id)->get()->first();
-                if ($list->photo !== null && Storage::disk('local')->exists('public/students/'.$list->id.'/'.$list->photo)) {
-                    $photo_url = Storage::disk('local')->url('public/students/'.$list->id.'/'.$list->photo);
-                } else {
-                    $photo_url = asset('build/assets/images/user_avatar.png');
-                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'disability' =>  (count($studentList->disability)>0 ? 1 : 0),
-                    'full_time' => ($list->full_time) ? 1 : 0, 
+                    'disability' =>  (isset($list->other->disability_status) && $list->other->disability_status > 0 ? $list->other->disability_status : 0),
+                    'full_time' => (isset($list->activeCR->propose->full_time) && $list->activeCR->propose->full_time > 0) ? $list->activeCR->propose->full_time : 0, 
                     'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
                     'first_name' => $list->first_name,
                     'last_name' => $list->last_name,
-                    'course'=> (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
-                    'semester'=> (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
-                    'status_id'=> (isset($list->status_name) && !empty($list->status_name) ? $list->status_name : ''),
+                    'course'=> (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : ''),
+                    'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
+                    'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'url' => route('student.show', $list->id),
-                    'photo_url' => $photo_url
+                    'photo_url' => $list->photo_url
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'sp' => $studentParams]);
     }
 
     public function show($studentId){

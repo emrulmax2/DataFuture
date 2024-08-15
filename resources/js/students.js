@@ -20,8 +20,8 @@ var liveStudentsListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: 50,
+            paginationSizeSelector: [true, 50, 100, 250, 500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -58,6 +58,7 @@ var liveStudentsListTable = (function () {
                     title: "Evening and Weekend / Regular",
                     field: "full_time",
                     headerHozAlign: "left",
+                    headerSort: false,
                     formatter(cell, formatterParams) {  
                         var html = '<div class="block">';
                                 html += '<div class="w-8 h-8 intro-x mr-4 inline-block">';
@@ -74,11 +75,13 @@ var liveStudentsListTable = (function () {
                 {
                     title: "Semester",
                     field: "semester",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Course",
                     field: "course",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
