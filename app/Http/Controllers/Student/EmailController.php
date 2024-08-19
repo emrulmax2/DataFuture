@@ -15,6 +15,7 @@ use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
+use App\Models\StudentEmailsDocument;
 use Illuminate\Http\Request;
 
 use Mail; 
@@ -27,6 +28,14 @@ class EmailController extends Controller
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
+        $sendTo = [];
+        if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+            $sendTo[] = $student->contact->institutional_email;
+        endif;
+        if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+            $sendTo[] = $student->contact->personal_email;
+        endif;
+        $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
 
         $studentEmail = StudentEmail::create([
             'student_id' => $student_id,
@@ -75,25 +84,20 @@ class EmailController extends Controller
                 $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
-                    $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
+                    $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
 
                     $data = [];
                     $data['student_id'] = $student_id;
+                    $data['student_email_id'] = $studentEmail->id;
                     $data['hard_copy_check'] = 0;
                     $data['doc_type'] = $document->getClientOriginalExtension();
                     $data['path'] = Storage::disk('s3')->url($path);
                     $data['display_file_name'] = $documentName;
                     $data['current_file_name'] = $documentName;
                     $data['created_by'] = auth()->user()->id;
-                    $studentDocument = StudentDocument::create($data);
+                    $studentEmailDocument = StudentEmailsDocument::create($data);
 
-                    if($studentDocument):
-                        $noteUpdate = StudentEmailsAttachment::create([
-                            'student_email_id' => $studentEmail->id,
-                            'student_document_id' => $studentDocument->id,
-                            'created_by' => auth()->user()->id
-                        ]);
-
+                    if($studentEmailDocument):
                         $attachmentInfo[$docCounter++] = [
                             "pathinfo" => $path,
                             "nameinfo" => $document->getClientOriginalName(),
@@ -103,9 +107,9 @@ class EmailController extends Controller
                         $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
             else:
-                UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($request->subject, $MAILHTML, []));
+                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, []));
             endif;
             return response()->json(['message' => 'Email successfully sent to Student'], 200);
         else:
@@ -169,12 +173,7 @@ class EmailController extends Controller
         $student_id = $request->student;
         $recordid = $request->recordid;
 
-        $studentMailAttachments = StudentEmailsAttachment::where('student_email_id', $recordid)->get();
-        if(!empty($studentMailAttachments)):
-            foreach($studentMailAttachments as $attachment):
-                $studentDoc = StudentDocument::find($attachment->student_document_id)->delete();
-            endforeach;
-        endif;
+        StudentEmailsDocument::where('student_id', $student_id)->where('student_email_id', $recordid)->delete();
         StudentEmail::find($recordid)->delete();
 
         return response()->json(['message' => 'Successfully deleted'], 200);
@@ -185,12 +184,8 @@ class EmailController extends Controller
         $recordid = $request->recordid;
 
         StudentEmail::where('id', $recordid)->withTrashed()->restore();
-        $studentMailAttachments = StudentEmailsAttachment::where('student_email_id', $recordid)->get();
-        if(!empty($studentMailAttachments)):
-            foreach($studentMailAttachments as $attachment):
-                $studentDoc = StudentDocument::where('id', $attachment->student_document_id)->withTrashed()->restore();
-            endforeach;
-        endif;
+        StudentEmailsDocument::where('student_id', $student_id)->where('student_email_id', $recordid)->withTrashed()->restore();
+        
         return response()->json(['message' => 'Successfully restored'], 200);
     }
 
@@ -243,5 +238,13 @@ class EmailController extends Controller
         $html .= '</div>';
 
         return response()->json(['heading' => $heading, 'html' => $html], 200);
+    }
+
+    public function studentEmailAttachmentDownload(Request $request){ 
+        $row_id = $request->row_id;
+
+        $studentEmailDoc = StudentEmailsDocument::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmailDoc->student_id.'/'.$studentEmailDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

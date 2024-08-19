@@ -13,7 +13,6 @@ class StudentNote extends Model
     protected $fillable = [
         'student_id',
         'term_declaration_id',
-        'student_document_id',
         'opening_date',
         'note',
         'phase',
@@ -34,10 +33,6 @@ class StudentNote extends Model
 
     public function term() {
         return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
-    }
-
-    public function document() {
-        return $this->belongsTo(StudentDocument::class, 'student_document_id');
     }
     
     public function user(){
@@ -70,5 +65,9 @@ class StudentNote extends Model
     
     public function followed(){
         return $this->belongsTo(User::class, 'follow_up_by');
+    }
+
+    public function document(){
+        return $this->hasOne(StudentNotesDocument::class, 'student_note_id', 'id')->latestOfMany();
     }
 }

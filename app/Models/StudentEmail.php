@@ -39,11 +39,15 @@ class StudentEmail extends Model
         return $this->belongsTo(ComonSmtp::class, 'common_smtp_id');
     }
 
-    public function documents(){
-        return $this->belongsToMany(StudentDocument::class, 'student_emails_attachments');
-    }
+    // public function documents(){
+    //     return $this->belongsToMany(StudentDocument::class, 'student_emails_attachments');
+    // }
     
     public function template(){
         return $this->belongsTo(EmailTemplate::class, 'email_template_id');
+    }
+    
+    public function documents(){
+        return $this->hasMany(StudentEmailsDocument::class, 'student_email_id', 'id');
     }
 }

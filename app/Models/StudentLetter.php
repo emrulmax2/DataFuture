@@ -17,7 +17,6 @@ class StudentLetter extends Model
         'signatory_id',
         'comon_smtp_id',
         'is_email_or_attachment',
-        'student_document_id',
         'issued_by',
         'issued_date',
         'created_by',
@@ -35,10 +34,6 @@ class StudentLetter extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function document(){
-        return $this->belongsTo(StudentDocument::class, 'student_document_id');
-    }
-
     public function signatory(){
         return $this->belongsTo(Signatory::class, 'signatory_id');
     }
@@ -49,5 +44,9 @@ class StudentLetter extends Model
 
     public function issuedBy(){
         return $this->belongsTo(User::class, 'issued_by');
+    }
+
+    public function document(){
+        return $this->hasOne(StudentLettersDocument::class, 'student_letter_id', 'id')->latestOfMany();
     }
 }
