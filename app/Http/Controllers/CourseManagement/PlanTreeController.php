@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PlanAssignParticipantRequest;
 use App\Http\Requests\PlansUpdateRequest;
 use App\Models\AcademicYear;
+use App\Models\Assign;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
@@ -374,6 +375,13 @@ class PlanTreeController extends Controller
                 }elseif($list->fri == 1){
                     $day = 'Fri';
                 }
+                $iActiveStudentCount = 0;
+                $assignStudentListForPlans = Assign::where('plan_id',$list->id)->get();
+                foreach($assignStudentListForPlans as $student):
+                        if($student->attendance!==0)
+                            $iActiveStudentCount++;
+                endforeach;
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -391,7 +399,7 @@ class PlanTreeController extends Controller
                     'day'=> $day,
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? $list->dates->count() : 0,
-                    'on_of_student' => '0/0'
+                    'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count()
                 ];
                 $i++;
             endforeach;
