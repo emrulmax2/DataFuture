@@ -455,7 +455,7 @@ var studentCommEmailListTable = (function () {
 
         axios({
             method: "post",
-            url: route('student.document.download'), 
+            url: route('student.email.attachment.download'), 
             data: {row_id : row_id},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
