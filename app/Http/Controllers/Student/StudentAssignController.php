@@ -52,13 +52,18 @@ class StudentAssignController extends Controller
             $i = 1;
             foreach($Query as $list):
                 if(isset($list->student)) {
+                    $list2 = $list->student;
+                    $list2Other = $list2->other;
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
-                        'name' => (isset($list->student->full_name) && !empty($list->student->full_name)) ?  $list->student->title->name." ".$list->student->full_name :$list->student->title->name." ".$list->student->first_name . " ". $list->student->last_name,
-                        'register_no' => ($list->student->registration_no),
-                        'images' => (isset($list->student->photo) && !empty($list->student->photo) && Storage::disk('s3')->exists('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) ? Storage::disk('s3')->url('public/applicants/'.$list->student->applicant_id.'/'.$list->student->photo) : asset('build/assets/images/avater.png')),
-                        'status' => '',
+                        'disability' =>  (isset($list2Other->disability_status) && $list2Other->disability_status > 0 ? $list2Other->disability_status : 0),
+                        'registration_no' => (!empty($list2->registration_no) ? $list2->registration_no : $list2->application_no),
+                        'first_name' => $list2->first_name,
+                        'last_name' => $list2->last_name,
+                        'status_id'=> (isset($list2->status->name) && !empty($list2->status->name) ? $list2->status->name : ''),
+                        'url' => route('student.show', $list2->id),
+                        'photo_url' => $list2->photo_url,
                         'deleted_at' => $list->deleted_at,
                     ];
                     $i++;
