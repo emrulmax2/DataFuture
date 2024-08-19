@@ -16,16 +16,17 @@ class SmsController extends Controller
     public function store(SendSmsRequest $request){
         $student_id = $request->student_id;
         $smsTemplateID = (isset($request->sms_template_id) && $request->sms_template_id > 0 ? $request->sms_template_id : NULL);
+        $studentContact = StudentContact::where('student_id', $student_id)->get()->first();
         $studentSms = StudentSms::create([
             'student_id' => $student_id,
             'sms_template_id' => $smsTemplateID,
+            'phone' => $studentContact->mobile,
             'subject' => $request->subject,
             'sms' => $request->sms,
             'created_by' => auth()->user()->id,
         ]);
         
         if($studentSms):
-            $studentContact = StudentContact::where('student_id', $student_id)->get()->first();
             if(isset($studentContact->mobile) && !empty($studentContact->mobile)):
                 $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
                 $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
@@ -99,6 +100,7 @@ class SmsController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'template' => isset($list->template->sms_title) && !empty($list->template->sms_title) ? $list->template->sms_title : '',
+                    'phone' => (isset($list->phone) && !empty($list->phone) ? $list->phone : ''),
                     'subject' => $list->subject,
                     'sms' => (strlen(strip_tags($list->sms)) > 40 ? substr(strip_tags($list->sms), 0, 40).'...' : strip_tags($list->sms)),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),

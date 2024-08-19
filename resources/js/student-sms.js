@@ -32,6 +32,19 @@ var studentCommSMSListTable = (function () {
                     width: "120",
                 },
                 {
+                    title: "Mobile Number",
+                    field: "phone",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div>';
+                            html += cell.getData().phone;
+                        html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
                     title: "Subject",
                     field: "subject",
                     headerHozAlign: "left",

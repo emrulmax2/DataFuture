@@ -71,6 +71,7 @@ use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
+use App\Models\StudentEmailsAttachment;
 use App\Models\StudentLetter;
 use App\Models\StudentProposedCourse;
 use App\Models\Title;
@@ -1213,8 +1214,8 @@ class StudentController extends Controller
     }
 
 
-    public function studentCopyProfilePhoto($page = 1, $limit = 500){
-        if($page > 0 && $limit > 0):
+    public function studentCopyProfilePhoto($page = 1, $limit = 3000){
+        /*if($page > 0 && $limit > 0):
             $offset = ($page - 1) * $limit;
             $students = Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->offset($offset)->limit($limit)->orderBy('id', 'ASC')->get();
             if(!empty($students)):
@@ -1235,7 +1236,74 @@ class StudentController extends Controller
                     endif;
                 endforeach;
             endif;
-        endif;
+        endif;*/
+
+        /*$attachmentsCount = DB::table('email_issuing')->whereNotNull('attachments')->where('attachments', '!=', '')->count();
+        if($page > 0 && $limit > 0):
+            $offset = ($page - 1) * $limit;
+            $attachments = DB::table('email_issuing')->whereNotNull('attachments')->where('attachments', '!=', '')->orderBy('id', 'ASC')->skip($offset)
+                            ->take($limit)->get();
+            if(!empty($attachments)):
+                foreach($attachments as $atch):
+                    if(isset($atch->attachments) && !empty($atch->attachments)):
+                        $email_row_id = $atch->id;
+                        $student_id = $atch->student_data_id;
+                        $subject = $atch->subject;
+                        $attachments_arr = explode(',', $atch->attachments);
+                        if(!empty($attachments_arr)):
+                            foreach($attachments_arr as $atr):
+                                $fileNames = explode('.', $atr);
+                                $ext = end($fileNames);
+                                $data = [];
+                                $data['student_id'] = $student_id;
+                                $data['hard_copy_check'] = 0;
+                                $data['doc_type'] = $ext;
+                                $data['path'] = trim($atr);
+                                $data['display_file_name'] = $subject;
+                                $data['current_file_name'] = trim($atr);
+                                $data['created_by'] = $atch->issued_by;
+                                $studentDocument = StudentDocument::create($data);
+                                if($studentDocument):
+                                    StudentEmailsAttachment::create([
+                                        'student_email_id' => $email_row_id,
+                                        'student_document_id' => $studentDocument->id,
+                                        'created_by' => $atch->issued_by
+                                    ]);
+                                endif;
+                            endforeach;
+                        endif;
+                    endif;
+                endforeach;
+            endif;
+        endif;*/
+
+        /*$letterPDFS = DB::table('letter_issuing')->whereNotNull('pdf_name')->where('pdf_name', '!=', '')->where('letter_id', '>', 0)->count();
+        if($page > 0 && $limit > 0):
+            $offset = ($page - 1) * $limit;
+            $pdfs = DB::table('letter_issuing')->whereNotNull('pdf_name')->where('pdf_name', '!=', '')->where('letter_id', '>', 0)->orderBy('id', 'ASC')->skip($offset)
+                            ->take($limit)->get();
+            if(!empty($pdfs)):
+                foreach($pdfs as $pdf):
+                    $letter = LetterSet::find($pdf->letter_id);
+                    $data = [];
+                    $data['student_id'] = $pdf->student_data_id;
+                    $data['hard_copy_check'] = 0;
+                    $data['doc_type'] = 'pdf';
+                    $data['path'] = $pdf->pdf_name;
+                    $data['display_file_name'] = (isset($letter->letter_title) && !empty($letter->letter_title) ? $letter->letter_title : $pdf->pdf_name);
+                    $data['current_file_name'] = $pdf->pdf_name;
+                    $data['created_by'] = $pdf->issued_by;
+                    $studentDocument = StudentDocument::create($data);
+
+                    if($studentDocument):
+                        $noteUpdate = StudentLetter::where('id', $pdf->id)->update([
+                            'student_document_id' => $studentDocument->id
+                        ]);
+                    endif;
+                endforeach;
+            endif;
+        endif;*/
+        
 
         return view('pages.students.live.copy-profile-photo', [
             'title' => 'Live Students - London Churchill College',
@@ -1243,7 +1311,9 @@ class StudentController extends Controller
                 ['label' => 'Students Live', 'href' => 'javascript:void(0);'],
                 ['label' => 'Copy Photo', 'href' => 'javascript:void(0);']
             ],
-            'student' => Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->get()->count(),
+            //'student' => Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->get()->count(),
+            //'student' => $attachmentsCount,
+            'student' => $letterPDFS,
             'page' => $page,
             'limit' => $limit
         ]);

@@ -13,6 +13,7 @@ class StudentSms extends Model
     protected $fillable = [
         'student_id',
         'sms_template_id',
+        'phone',
         'subject',
         'sms',
         'created_by',
