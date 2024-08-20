@@ -37,8 +37,7 @@ var liveStudentsListTable = (function () {
                                 html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -13px;">';
                                     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
-                                    if(cell.getData().disability==1)
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap"><i data-lucide="accessibility" class="w-4 h-4"></i></div>';
+                                    
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -60,14 +59,21 @@ var liveStudentsListTable = (function () {
                     headerHozAlign: "left",
                     headerSort: false,
                     formatter(cell, formatterParams) {  
-                        var html = '<div class="block">';
-                                html += '<div class="w-8 h-8 intro-x mr-4 inline-block">';
+                        let day=false;
+                        if(cell.getData().full_time==1) 
+                            day = 'text-slate-900' 
+                        else  
+                            day = 'text-yellow-400'
+                        var html = '<div class="flex">';
+                                html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
                                 if(cell.getData().full_time==1)
-                                    html += '<i data-lucide="sunset" class="w-5 h-5"></i>';
+                                    html += '<i data-lucide="sunset" class="w-6 h-6"></i>';
                                 else
-                                html += '<i data-lucide="sun" class="w-5 h-5"></i>';
-
+                                html += '<i data-lucide="sun" class="w-6 h-6"></i>';
                                 html += '</div>';
+                            if(cell.getData().disability==1)
+                                html += '<div class="inline-flex intro-x  text-red-600 "><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                            
                             html += '</div>';
                         return html;
                     }

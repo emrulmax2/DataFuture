@@ -7,8 +7,26 @@
                         <i class="w-4 h-4 text-white" data-lucide="camera"></i>
                     </button>
                 </div>
+                @php
+                
+                if($student->course->full_time==1) 
+                            $day = 'text-slate-900' ;
+                        else  
+                            $day = 'text-yellow-400';
+                        $html = '<div class="inline-flex ml-auto">';
+                            $html .= '<div class="w-8 h-8 '.$day.' intro-x inline-flex">';
+                                if($student->course->full_time==1) 
+                                $html .= '<i data-lucide="sunset" class="w-6 h-6"></i>';
+                                else
+                                $html .= '<i data-lucide="sun" class="w-6 h-6"></i>';
+                                $html .= '</div>';
+                if($student->other->disability_status==1)
+                    $html .= '<div class="inline-flex  intro-x text-red-600 ml-auto"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                            
+                $html .= '</div>';
+                @endphp
                 <div class="ml-5">
-                    <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }}</div>
+                    <div class="w-full flex truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }} {!! $html !!} </div>
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} <span class="font-black">{{ $student->last_name }}</span></div>
                     <div class="text-slate-500">
                         @if(Session::has('student_temp_course_relation_'.$student->id) && Session::get('student_temp_course_relation_'.$student->id) > 0) <span class="bg-danger text-white inline pl-1 pr-1"> @endif
