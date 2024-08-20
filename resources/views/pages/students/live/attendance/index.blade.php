@@ -5,9 +5,6 @@
 @endsection
 
 @section('subcontent')
-<div class="intro-y flex items-center mt-8">
-    <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
-</div>
 
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')

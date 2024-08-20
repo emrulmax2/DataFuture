@@ -1,3 +1,13 @@
+    <div class="intro-y flex items-center mt-8">
+        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
+        <div class="ml-auto flex justify-end">
+            <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
+                {{ $student->status->name }}
+            </button>
+            <!-- <a style="float: right;" href="{{ route('applicantprofile.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-success text-white w-auto">Download Pdf</a> -->
+            <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+        </div>
+    </div>
     <div class="intro-y box px-5 pt-5 mt-5">
         <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
             <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
@@ -12,7 +22,7 @@
                 if($student->course->full_time==1) 
                             $day = 'text-slate-900' ;
                         else  
-                            $day = 'text-yellow-400';
+                            $day = 'text-amber-600';
                         $html = '<div class="inline-flex ml-auto">';
                             $html .= '<div class="w-8 h-8 '.$day.' intro-x inline-flex">';
                                 if($student->course->full_time==1) 
@@ -21,7 +31,7 @@
                                 $html .= '<i data-lucide="sun" class="w-6 h-6"></i>';
                                 $html .= '</div>';
                 if($student->other->disability_status==1)
-                    $html .= '<div class="inline-flex  intro-x text-red-600 ml-auto"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                    $html .= '<div class="inline-flex  intro-x  ml-auto" style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
                             
                 $html .= '</div>';
                 @endphp

@@ -8,8 +8,6 @@ import TomSelect from "tom-select";
 var liveStudentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        //const form = document.getElementById('studentSearchForm');
-        //let form_data = new FormData(form);
         let form_data = $('#studentSearchForm').serialize();
 
         let tableContent = new Tabulator("#liveStudentsListTable", {
@@ -21,7 +19,7 @@ var liveStudentsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 50,
-            paginationSizeSelector: [true, 50, 100, 250, 500],
+            paginationSizeSelector: [50, 100, 250, 500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -54,7 +52,7 @@ var liveStudentsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Evening and Weekend / Regular",
+                    title: "",
                     field: "full_time",
                     headerHozAlign: "left",
                     headerSort: false,
@@ -63,7 +61,7 @@ var liveStudentsListTable = (function () {
                         if(cell.getData().full_time==1) 
                             day = 'text-slate-900' 
                         else  
-                            day = 'text-yellow-400'
+                            day = 'text-amber-600'
                         var html = '<div class="flex">';
                                 html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
                                 if(cell.getData().full_time==1)
@@ -72,7 +70,7 @@ var liveStudentsListTable = (function () {
                                 html += '<i data-lucide="sun" class="w-6 h-6"></i>';
                                 html += '</div>';
                             if(cell.getData().disability==1)
-                                html += '<div class="inline-flex intro-x  text-red-600 "><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                                html += '<div class="inline-flex intro-x " style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
                             
                             html += '</div>';
                         return html;
