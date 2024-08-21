@@ -23,7 +23,8 @@
             <!-- BEGIN: Display Information -->
             <div class="grid grid-cols-12 gap-6 lg:mt-5">
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('semester') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('semester') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>
@@ -34,7 +35,8 @@
                     </a>
                 </div>
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('courses') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('courses') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>
@@ -45,7 +47,8 @@
                     </a>
                 </div>
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('term-declaration.index') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('term-declaration.index') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>
@@ -56,7 +59,8 @@
                     </a>
                 </div>
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('term.module.creation') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('term.module.creation') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>
@@ -67,7 +71,8 @@
                     </a>
                 </div>
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('groups') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('groups') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>
@@ -78,7 +83,8 @@
                     </a>
                 </div>
                 <div class="col-span-12 sm:col-span-6 xl:col-span-4 intro-y">
-                    <a href="{{ route('class.plan') }}" class="report-box zoom-in">
+                    {{--<a href="{{ route('class.plan') }}" class="report-box zoom-in">--}}
+                    <a href="javascript:void(0);" class="report-box zoom-in">
                         <div class="box p-5">
                             <div class="flex">
                                 <i data-lucide="check-circle" class="report-box__icon text-success"></i>

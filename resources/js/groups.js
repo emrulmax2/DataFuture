@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
  
 ("use strict");
 var table = (function () {
@@ -195,6 +196,22 @@ var table = (function () {
             $("#status").val("1");
             filterHTMLForm();
         });
+        
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: true,
+            create: false,
+            allowEmptyOption: false,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+    
+        let course_id = new TomSelect('#course_id', tomOptions);
+        let edit_course_id = new TomSelect('#edit_course_id', tomOptions);
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
@@ -213,6 +230,8 @@ var table = (function () {
             $('#addModal input[name="name"]').val('');
             $('#addModal select').val('');
             $('#addModal input[name="evening_and_weekend"]').prop('checked', false);
+            $('#addModal input[name="active"]').prop('checked', true);
+            course_id.clear(true);
         });
         
         const editModalEl = document.getElementById('editModal')
@@ -221,7 +240,9 @@ var table = (function () {
             $('#editModal input[name="name"]').val('');
             $('#editModal select').val('');
             $('#editModal input[name="evening_and_weekend"]').prop('checked', false);
+            $('#addModal input[name="active"]').prop('checked', false);
             $('#editModal input[name="id"]').val('0');
+            edit_course_id.clear(true);
         });
 
         document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
@@ -288,13 +309,23 @@ var table = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     $('#editModal select[name="term_declaration_id"]').val(dataset.term_declaration_id ? dataset.term_declaration_id : '');
-                    $('#editModal select[name="course_id"]').val(dataset.course_id ? dataset.course_id : '');
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                    if(dataset.course_id > 0){
+                        edit_course_id.addItem(dataset.course_id, true);
+                    }else{
+                        edit_course_id.clear(true);
+                    }
 
                     if(dataset.evening_and_weekend == 1){
                         $('#editModal input[name="evening_and_weekend"]').prop('checked', true);
                     }else{
                         $('#editModal input[name="evening_and_weekend"]').prop('checked', false);
+                    }
+
+                    if(dataset.active == 1){
+                        $('#editModal input[name="active"]').prop('checked', true);
+                    }else{
+                        $('#editModal input[name="active"]').prop('checked', false);
                     }
 
                     $('#editModal input[name="id"]').val(editId);

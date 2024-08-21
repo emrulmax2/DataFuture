@@ -1461,6 +1461,7 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('course-management/courses/delete/{id}', 'destroy')->name('courses.destory');
         Route::post('course-management/courses/restore/{id}', 'restore')->name('courses.restore');
+        Route::post('course-management/courses/update-status/{id}', 'updateStatus')->name('courses.update.status');
     });
    
     Route::controller(SemesterController::class)->group(function() {

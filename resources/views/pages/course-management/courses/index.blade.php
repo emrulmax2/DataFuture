@@ -38,6 +38,7 @@
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
                             </div>
@@ -132,8 +133,12 @@
                         </div>       
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="active">Active</label>
+                            <input id="active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
+                        </div>
+
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="save" class="btn btn-primary w-auto">
                             Save
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -208,8 +213,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="edit_active">Active</label>
+                            <input id="edit_active" class="form-check-input m-0" name="active" value="1" type="checkbox">
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="update" class="btn btn-primary w-auto">
                             Update
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

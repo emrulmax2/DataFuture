@@ -72,6 +72,7 @@ use App\Models\StudentCourseRelation;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
+use App\Models\StudentEmailsDocument;
 use App\Models\StudentLetter;
 use App\Models\StudentProposedCourse;
 use App\Models\Title;
@@ -1214,7 +1215,7 @@ class StudentController extends Controller
     }
 
 
-    public function studentCopyProfilePhoto($page = 1, $limit = 3000){
+    public function studentCopyProfilePhoto($page = 1, $limit = 2000){
         /*if($page > 0 && $limit > 0):
             $offset = ($page - 1) * $limit;
             $students = Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->offset($offset)->limit($limit)->orderBy('id', 'ASC')->get();
@@ -1224,7 +1225,7 @@ class StudentController extends Controller
                         $student_id = $std->id;
                         $photo = $std->photo;
 
-                        $file_url = 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/student_files/'.$student_id.'/'.$photo;
+                        $file_url = 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/student_files/'.$student_id.'/'.urlencode($photo);
                         if($this->remote_file_exists($file_url)):
                             if(!Storage::disk('local')->exists('public/students/'.$student_id)){
                                 Storage::disk('local')->makeDirectory('public/students/'.$student_id);
@@ -1252,23 +1253,19 @@ class StudentController extends Controller
                         $attachments_arr = explode(',', $atch->attachments);
                         if(!empty($attachments_arr)):
                             foreach($attachments_arr as $atr):
-                                $fileNames = explode('.', $atr);
-                                $ext = end($fileNames);
-                                $data = [];
-                                $data['student_id'] = $student_id;
-                                $data['hard_copy_check'] = 0;
-                                $data['doc_type'] = $ext;
-                                $data['path'] = trim($atr);
-                                $data['display_file_name'] = $subject;
-                                $data['current_file_name'] = trim($atr);
-                                $data['created_by'] = $atch->issued_by;
-                                $studentDocument = StudentDocument::create($data);
-                                if($studentDocument):
-                                    StudentEmailsAttachment::create([
-                                        'student_email_id' => $email_row_id,
-                                        'student_document_id' => $studentDocument->id,
-                                        'created_by' => $atch->issued_by
-                                    ]);
+                                if(!empty($atr)):
+                                    $fileNames = explode('.', $atr);
+                                    $ext = end($fileNames);
+                                    $data = [];
+                                    $data['student_id'] = $student_id;
+                                    $data['student_email_id'] = $email_row_id;
+                                    $data['doc_type'] = $ext;
+                                    $data['path'] = trim($atr);
+                                    $data['display_file_name'] = $subject;
+                                    $data['current_file_name'] = trim($atr);
+                                    $data['created_by'] = $atch->issued_by;
+                                    $data['created_at'] = (isset($atch->issued_date) && !empty($atch->issued_date) ? date('Y-m-d', strtotime($atch->issued_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
+                                    $studentDocument = StudentEmailsDocument::create($data);
                                 endif;
                             endforeach;
                         endif;
@@ -1303,7 +1300,6 @@ class StudentController extends Controller
                 endforeach;
             endif;
         endif;*/
-        
 
         return view('pages.students.live.copy-profile-photo', [
             'title' => 'Live Students - London Churchill College',
@@ -1311,21 +1307,16 @@ class StudentController extends Controller
                 ['label' => 'Students Live', 'href' => 'javascript:void(0);'],
                 ['label' => 'Copy Photo', 'href' => 'javascript:void(0);']
             ],
-            //'student' => Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->get()->count(),
+            'student' => Student::whereNotNull('photo')->where('photo', 'not like', "%uploads/files%")->where('photo', 'not like', "%uploads/student_files%")->get()->count(),
             //'student' => $attachmentsCount,
-            'student' => $letterPDFS,
+            //'student' => $letterPDFS,
+            'student' => 0,
             'page' => $page,
             'limit' => $limit
         ]);
     }
 
     function remote_file_exists($url){
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_NOBODY, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if( $httpCode == 200 ){return true;}
+        return str_contains(get_headers($url)[0], "200 OK");
     }
 }
