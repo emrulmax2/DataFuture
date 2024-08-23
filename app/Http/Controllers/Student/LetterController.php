@@ -22,9 +22,12 @@ use Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\GenerateStudentLetterTrait;
 
 class LetterController extends Controller
 {
+    use GenerateStudentLetterTrait;
+
     public function getLetterSet(Request $request){
         $letterSetId = $request->letterSetId;
         $letterSet = LetterSet::find($letterSetId);
@@ -65,103 +68,16 @@ class LetterController extends Controller
         $letter = StudentLetter::create($data);
         $attachmentFiles = [];
         if($letter):
-            /* Generate PDF Start */
-            $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
-            $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-            $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
-            $PDFHTML = '';
-            $PDFHTML .= '<html>';
-                $PDFHTML .= '<head>';
-                    $PDFHTML .= '<title>'.$letter_title.'</title>';
-                    $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                    $PDFHTML .= '<style>
-                                    table{margin-left: 0px;}
-                                    figure{margin: 0;}
-                                    @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
-                                    header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
-                                    footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
-                                    .pageCounter{position: relative;}
-                                    .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
-                                    .pinRow td{border-bottom: 1px solid gray;}
-                                    .text-center{text-align: center;}
-                                    .text-left{text-align: left;}
-                                    .text-right{text-align: right;}
-                                </style>';
-                $PDFHTML .= '</head>';
-                $PDFHTML .= '<body>';
-                    if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
-                        $PDFHTML .= '<header>';
-                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
-                        $PDFHTML .= '</header>';
-                    endif;
-
-                    $PDFHTML .= '<footer>';
-                        $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
-                                    font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
-                            if($LetterFooters->count() > 0):
-                                $PDFHTML .= '<tr>';
-                                    $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
-                                        $numberOfPartners = $LetterFooters->count();
-                                        $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
-
-                                        foreach($LetterFooters as $lf):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
-                                        endforeach;
-                                    $PDFHTML .= '</td>';
-                                $PDFHTML .= '</tr>';
-                            endif;
-                            $PDFHTML .= '<tr class="pinRow">';
-                                $PDFHTML .= '<td style="padding-bottom: 3px;">';
-                                    $PDFHTML .= '<span class="pageCounter text-left"></span>';
-                                $PDFHTML .= '</td>';
-                                $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
-                                    $PDFHTML .= 'pin - '.$pin;
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-
-                            if(!empty($companyReg) && isset($companyReg->value) && !empty($companyReg->value)):
-                            $PDFHTML .= '<tr class="regInfoRow">';
-                                $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
-                                    $PDFHTML .= $companyReg->value;
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-                            endif;
-                        $PDFHTML .= '</table>';
-                    $PDFHTML .= '</footer>';
-
-                    $PDFHTML .= $letter_body;
-                    if($signatory_id > 0):
-                        $signatory = Signatory::find($signatory_id);
-                        $PDFHTML .= '<p>';
-                            $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
-                                $signatureImage = Storage::disk('local')->url('public/signatories/'.$signatory->signature); 
-                                $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
-                            endif;
-                            $PDFHTML .= $signatory->signatory_name.'<br/>';
-                            $PDFHTML .= $signatory->signatory_post.'<br/>';
-                            $PDFHTML .= 'London Churchill College';
-                        $PDFHTML .= '</p>';
-                    endif;
-                $PDFHTML .= '</body>';
-            $PDFHTML .= '</html>';
-
-            $fileName = time().'_'.$student_id.'_Letter.pdf';
-            $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
-                ->setPaper('a4', 'portrait')
-                ->setWarnings(false);
-            $content = $pdf->output();
-            Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
-
+            $generatedLetter = $this->generateLetter($student_id, $letter_title, $letter_body, $issued_date, $pin, $signatory_id);
 
             $data = [];
             $data['student_id'] = $student_id;
             $data['student_letter_id'] = $letter->id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName);
+            $data['path'] = Storage::disk('s3')->url('public/students/'.$student_id.'/'.$generatedLetter['filename']);
             $data['display_file_name'] = $letter_title;
-            $data['current_file_name'] = $fileName;
+            $data['current_file_name'] = $generatedLetter['filename'];
             $data['created_by'] = auth()->user()->id;
             $letterDocument = StudentLettersDocument::create($data);
             /* Generate PDF End */
@@ -194,8 +110,8 @@ class LetterController extends Controller
                 $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
 
                 $attachmentFiles[] = [
-                    "pathinfo" => 'public/students/'.$student_id.'/'.$fileName,
-                    "nameinfo" => $fileName,
+                    "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
+                    "nameinfo" => $generatedLetter['filename'],
                     "mimeinfo" => 'application/pdf',
                     "disk" => 's3'
                 ];

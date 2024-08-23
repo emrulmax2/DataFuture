@@ -10,24 +10,27 @@ use App\Mail\CommunicationSendMail;
 use App\Models\ApplicantEmailsAttachment;
 use App\Models\ComonSmtp;
 use App\Models\EmailTemplate;
+use App\Models\Employee;
 use App\Models\LetterHeaderFooter;
+use App\Models\Option;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
 use App\Models\StudentEmailsDocument;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 use Mail; 
 use Hash;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmailController extends Controller
 {
     public function store(SendEmailRequest $request){
         $student_id = $request->student_id;
         $student = Student::find($student_id);
-        $studentApplicantId = $student->applicant_id;
         $sendTo = [];
         if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
             $sendTo[] = $student->contact->institutional_email;
@@ -37,17 +40,16 @@ class EmailController extends Controller
         endif;
         $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
 
+
         $studentEmail = StudentEmail::create([
             'student_id' => $student_id,
             'common_smtp_id' => $request->comon_smtp_id,
             'email_template_id' => (isset($request->email_template_id) && $request->email_template_id > 0 ? $request->email_template_id : NULL),
             'subject' => $request->subject,
-            'body' => $request->body,
             'created_by' => auth()->user()->id,
         ]);
 
         $commonSmtp = ComonSmtp::find($request->comon_smtp_id);
-
         $configuration = [
             'smtp_host'    => $commonSmtp->smtp_host,
             'smtp_port'    => $commonSmtp->smtp_port,
@@ -60,23 +62,10 @@ class EmailController extends Controller
         ];
 
         if($studentEmail):
-            $emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get()->first();
+            $this->generateEmailPdf($studentEmail->id, $student_id, $request->subject, $request->body);
 
             $MAILHTML = '';
-            if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
-                $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
-                    $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
-                $MAILHTML .= '</div>';
-            endif;
             $MAILHTML .= $request->body;
-            if(isset($emailFooters->current_file_name) && !empty($emailFooters->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$emailFooters->current_file_name)):
-                $MAILHTML .= '<div style="text-align: center; vertical-align: middle; margin: 20px 0 0 0;">';
-                    if(Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$emailFooters->current_file_name)):
-                        $MAILHTML .= '<img style=" max-width: 100%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$emailFooters->current_file_name).'" alt="'.$emailFooters->name.'"/>';
-                    endif;
-                $MAILHTML .= '</div>';
-            endif;
 
             if($request->hasFile('documents')):
                 $documents = $request->file('documents');
@@ -117,6 +106,59 @@ class EmailController extends Controller
         endif;
     }
 
+    public function generateEmailPdf($student_email_id, $student_id, $subject, $body){
+        $user = User::where('id', auth()->user()->id)->get()->first();
+
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>'.$subject.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
+                                table{margin-left: 0px; width: 100%;}
+                                figure{margin: 0;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
+                                .vtop{vertical-align: top;}
+                                .mailContentTable tr th, .mailContentTable tr td{ padding: 0 0 10px 0; vertical-align: top;}
+                            </style>';
+            $PDFHTML .= '</head>';
+            $PDFHTML .= '<body>';
+                $PDFHTML .= '<table class="mailContentTable">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued Date</th>';
+                            $PDFHTML .= '<td>'.date('d-m-Y').'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued BY</th>';
+                            $PDFHTML .= '<td>'.(isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name).'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Email Body</th>';
+                            $PDFHTML .= '<td>'.$body.'</td>';
+                        $PDFHTML .= '</tr>';
+                $PDFHTML .= '</table>';
+                
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = $student_email_id.'_'.$student_id.'.pdf';
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'portrait')
+            ->setWarnings(false);
+        $content = $pdf->output();
+        Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
+
+        $studentEmail = StudentEmail::where('id', $student_email_id)->update([
+            'mail_pdf_file' => $fileName
+        ]);
+        return $studentEmail;
+    }
+
     public function list(Request $request){
         $student_id = (isset($request->studentId) && !empty($request->studentId) ? $request->studentId : 0);
         $queryStr = (isset($request->queryStrCME) && $request->queryStrCME != '' ? $request->queryStrCME : '');
@@ -131,7 +173,6 @@ class EmailController extends Controller
         $query = StudentEmail::orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
         if(!empty($queryStr)):
             $query->where('subject','LIKE','%'.$queryStr.'%');
-            $query->orWhere('body','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -161,7 +202,9 @@ class EmailController extends Controller
                     'smtp' => (isset($list->smtp->smtp_user) && !empty($list->smtp->smtp_user) ? $list->smtp->smtp_user : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'mail_pdf_file' => (isset($list->mail_pdf_file) && !empty($list->mail_pdf_file) ? $list->mail_pdf_file : ''),
+                    'document_list' => (isset($list->document_list) && !empty($list->document_list) ? $list->document_list : []),
                 ];
                 $i++;
             endforeach;
@@ -196,48 +239,12 @@ class EmailController extends Controller
         return response()->json(['row' => $emailTemplate], 200);
     }
 
-    public function show(Request $request){
-        $mailId = $request->recordId;
-        $mail = StudentEmail::find($mailId);
-        $student_id = $mail->student_id;
-        $student = Student::find($student_id);
-        $studentApplicantId = $student->applicant_id;
-        $heading = 'Mail Subject: <u>'.$mail->subject.'</u>';
-        $html = '';
-        $html .= '<div class="grid grid-cols-12 gap-4">';
-            $html .= '<div class="col-span-3">';
-                $html .= '<div class="text-slate-500 font-medium">Issued Date</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-9">';
-                $html .= '<div>'.(isset($mail->created_at) && !empty($mail->created_at) ? date('jS F, Y', strtotime($mail->created_at)) : '').'</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-3">';
-                $html .= '<div class="text-slate-500 font-medium">Issued By</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-9">';
-                $html .= '<div>'.(isset($mail->user->name) ? $mail->user->name : 'Unknown').'</div>';
-            $html .= '</div>';
-            if(isset($mail->documents) && !empty($mail->documents)):
-                $html .= '<div class="col-span-3">';
-                    $html .= '<div class="text-slate-500 font-medium">Attachments</div>';
-                $html .= '</div>';
-                $html .= '<div class="col-span-9">';
-                    foreach($mail->documents as $doc):
-                        if(isset($doc->current_file_name) && !empty($doc->current_file_name)):
-                            $html .= '<a data-id="'.$doc->id.'" class="downloadDoc mb-1 text-primary font-medium flex justify-start items-center" href="javascript:void(0);"><i data-lucide="disc" class="w-3 h3 mr-2"></i>'.$doc->current_file_name.'</a>';
-                        endif;
-                    endforeach;
-                $html .= '</div>';
-            endif;
-            $html .= '<div class="col-span-3">';
-                $html .= '<div class="text-slate-500 font-medium">Mail Description</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-9">';
-                $html .= '<div class="mailContent">'.$mail->body.'</div>';
-            $html .= '</div>';
-        $html .= '</div>';
+    public function studentEmailPdfDownload(Request $request){ 
+        $row_id = $request->row_id;
 
-        return response()->json(['heading' => $heading, 'html' => $html], 200);
+        $studentEmail = StudentEmail::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmail->student_id.'/'.$studentEmail->mail_pdf_file, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 
     public function studentEmailAttachmentDownload(Request $request){ 

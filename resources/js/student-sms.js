@@ -47,6 +47,7 @@ var studentCommSMSListTable = (function () {
                 {
                     title: "Subject",
                     field: "subject",
+                    headerSort: false,
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         var html = '';
@@ -61,6 +62,7 @@ var studentCommSMSListTable = (function () {
                     title: "Template",
                     field: "template",
                     headerHozAlign: "left",
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -191,8 +193,8 @@ var studentCommSMSListTable = (function () {
         placeholder: 'Search Here...',
         //persist: false,
         create: false,
-        allowEmptyOption: false,
-        maxItems: null,
+        allowEmptyOption: true,
+        //maxItems: null,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
@@ -266,7 +268,7 @@ var studentCommSMSListTable = (function () {
     });
 
 
-    $('#smsSMSForm [name="sms_template_id"]').on('change', function(){
+    $('#smsSMSForm #sms_template_id').on('change', function(){
         var smsTemplateId = $(this).val();
         if(smsTemplateId != ''){
             axios({
@@ -275,9 +277,13 @@ var studentCommSMSListTable = (function () {
                 data: {smsTemplateId : smsTemplateId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                $('#smsSMSForm #smsTextArea').val(response.data.row.description ? response.data.row.description : '').trigger('keyup');
+                if (response.status == 200) {
+                    $('#smsSMSForm #smsTextArea').val(response.data.row.description ? response.data.row.description : '').trigger('keyup');
+                }
             }).catch(error => {
-                //console.log('error');
+                if (error.response) {
+                    console.log('error');
+                }
             })
         }else{
             $('#smsSMSForm #smsTextArea').val('');
@@ -303,7 +309,6 @@ var studentCommSMSListTable = (function () {
             document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
 
             if (response.status == 200) {
-                //console.log(response.data);
                 smsSMSModal.hide();
 
                 successModal.show(); 

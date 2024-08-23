@@ -271,7 +271,7 @@
                             <label for="sms_template_id" class="form-label">Template</label>
                             <select id="sms_template_id" name="sms_template_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
-                                @if(!empty($smsTemplates))
+                                @if($smsTemplates->count() > 0)
                                     @foreach($smsTemplates as $st)
                                         <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
                                     @endforeach

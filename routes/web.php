@@ -791,11 +791,11 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmailController::class)->group(function() {
         Route::post('student/send-mail', 'store')->name('student.send.mail');
         Route::get('student/mail-list', 'list')->name('student.mail.list');
-        Route::post('student/mail-show', 'show')->name('student.mail.show');
         Route::delete('student/destory-mail', 'destroy')->name('student.mail.destroy');
         Route::post('student/restore-mail', 'restore')->name('student.mail.restore');
         Route::post('student/get-mail-template', 'getEmailTemplate')->name('student.get.mail.template');
 
+        Route::post('student/download-email-pdf', 'studentEmailPdfDownload')->name('student.email.pdf.download');
         Route::post('student/download-email-attachment', 'studentEmailAttachmentDownload')->name('student.email.attachment.download');
     });
 

@@ -1918,17 +1918,17 @@ class AdmissionController extends Controller
         ];
 
         if($applicantEmail):
-            $emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
 
             $MAILHTML = '';
+            /*$emailHeader = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
+            $emailFooters = LetterHeaderFooter::where('for_email', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
             if(isset($emailHeader->current_file_name) && !empty($emailHeader->current_file_name) && Storage::disk('s3')->exists('public/letterheaderfooter/header/'.$emailHeader->current_file_name)):
                 $MAILHTML .= '<div style="margin: 0 0 30px 0;">';
                     $MAILHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('s3')->url('public/letterheaderfooter/header/'.$emailHeader->current_file_name).'"/>';
                 $MAILHTML .= '</div>';
-            endif;
+            endif;*/
             $MAILHTML .= $request->body;
-            if($emailFooters->count() > 0):
+            /*if($emailFooters->count() > 0):
                 $MAILHTML .= '<div style="text-align: center; vertical-align: middle; margin: 20px 0 0 0;">';
                     $numberOfPartners = $emailFooters->count();
                     $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
@@ -1939,7 +1939,7 @@ class AdmissionController extends Controller
                         endif;
                     endforeach;
                 $MAILHTML .= '</div>';
-            endif;
+            endif;*/
 
             if($request->hasFile('documents')):
                 $documents = $request->file('documents');

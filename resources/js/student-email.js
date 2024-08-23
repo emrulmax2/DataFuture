@@ -67,8 +67,25 @@ var studentCommEmailListTable = (function () {
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
+                        var document_list = cell.getData().document_list;
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewCommunicationModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
+                            if(cell.getData().mail_pdf_file != ''){
+                                btns += '<button data-id="' + cell.getData().id + '" class="downloadEmailPdf btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
+                            }
+                            if(!$.isEmptyObject(document_list)){
+                                btns += '<div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">';
+                                    btns += '<button class="dropdown-toggle btn btn-success text-white btn-rounded ml-1 p-0 w-9 h-9" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="paperclip" class="w-4 h-4"></i></button>';
+                                    btns += '<div class="dropdown-menu w-auto">';
+                                        btns += '<ul class="dropdown-content">';
+                                            $.each( document_list, function( id, name ) {
+                                                btns += '<li>';
+                                                    btns += '<a data-id="'+id+'" href="javascript:void(0);" class="downloadAttachedDoc dropdown-item">'+name+'</a>';
+                                                btns += '</li>';
+                                            });
+                                        btns += '</ul>';
+                                    btns += '</div>';
+                                btns += '</div>';
+                            }
                             btns += '<button data-id="' + cell.getData().id + '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }else if(cell.getData().deleted_at != null) {
                             btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -355,33 +372,6 @@ var studentCommEmailListTable = (function () {
         });
     });
 
-    $('#studentCommEmailListTable').on('click', '.view_btn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
-
-        viewCommunicationModal.show();
-        axios({
-            method: 'post',
-            url: route('student.mail.show'),
-            data: {recordId : recordId},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                $('#viewCommunicationModal .modal-header h2').html(response.data.heading);
-                $('#viewCommunicationModal .modal-body').html(response.data.html);
-
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-            }
-        }).catch(error =>{
-            console.log(error)
-        });
-    });
-
     $('#confirmModal .agreeWith').on('click', function(e){
         e.preventDefault();
         let $agreeBTN = $(this);
@@ -446,7 +436,36 @@ var studentCommEmailListTable = (function () {
         }
     });
 
-    $('#viewCommunicationModal').on('click', '.downloadDoc', function(e){
+    $(document).on('click', '.downloadEmailPdf', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('student.email.pdf.download'), 
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
+
+    $(document).on('click', '.downloadAttachedDoc', function(e){
         e.preventDefault();
         var $theLink = $(this);
         var row_id = $theLink.attr('data-id');
