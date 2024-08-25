@@ -134,7 +134,7 @@ class StudentController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
         $Query = Student::orderByRaw(implode(',', $sorts));
-        if(!empty($student_id)): $Query->where('registration_no', $student_id); endif;
+        if(!empty($student_id)): $Query->where('registration_no', 'LIKE', '%'.$student_id.'%'); endif;
         if($studentSearch):
             foreach($studentParams as $field => $value):
                 $$field = (isset($value) && !empty($value) ? ($field == 'student_dob' ? date('Y-m-d', strtotime($value)) :$value) : '');

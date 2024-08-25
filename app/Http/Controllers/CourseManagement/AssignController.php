@@ -45,6 +45,7 @@ class AssignController extends Controller
                 ['label' => 'Assign / Deassign', 'href' => 'javascript:void(0);']
             ],
             'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'semesters' => Semester::orderBy('id', 'DESC')->get(),
             'statuses' => $statuses,
 
             'theAcademicYear' => AcademicYear::find($acid),
@@ -63,10 +64,12 @@ class AssignController extends Controller
         $unsignedTerm = (isset($request->unsignedTerm) && !empty($request->unsignedTerm) ? $request->unsignedTerm : 0);
         $unsignedStatuses = (isset($request->unsignedStatuses) && !empty($request->unsignedStatuses) ? $request->unsignedStatuses : []);
 
+        $courseCreations = CourseCreation::where('semester_id', $unsignedTerm)->pluck('id')->unique()->toArray();
         $excludedStudentids = DB::table('plans as p')
                               ->select('a.student_id')
                               ->leftJoin('assigns as a', 'p.id', '=', 'a.plan_id')
-                              ->where('p.term_declaration_id', $unsignedTerm)
+                              //->where('p.term_declaration_id', $unsignedTerm)
+                              ->whereIn('p.course_creation_id', $courseCreations)
                               ->groupBy('a.student_id')
                               ->orderBy('a.student_id', 'ASC')
                               ->pluck('a.student_id')->unique()->toArray();

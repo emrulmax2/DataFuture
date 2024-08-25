@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import IMask from 'imask';
+import TomSelect from "tom-select";
 
 
 
@@ -76,7 +77,7 @@ var termModuleCreationsListTable = (function () {
                         if(cell.getData().modules_count > 0) {
                             btns += '<a href="'+route('term.module.creation.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1 mr-2w"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                             if(cell.getData().planTasks_count == 0) {
-                            btns += '<a data-instanceTermid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" class="callModalPlanTask btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="list-restart" class="w-4 h-4"></i></a>';
+                                btns += '<a data-instanceTermid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" class="callModalPlanTask btn-rounded btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="list-restart" class="w-4 h-4"></i></a>';
                             } else {
                                 btns += '<a data-instanceTermid="'+cell.getData().id+'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" class="callModalPlanTask btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-1"><i data-lucide="info" class="w-4 h-4"></i></a>';    
                             }
@@ -360,11 +361,27 @@ var termModuleListTable = (function () {
             $("#status-TMC").val("1");
             moduleFilterHTMLForm();
         });
+        
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: true,
+            create: false,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+    
+        let creation_module_id = new TomSelect('#creation_module_id', tomOptions);
 
         const successModalMCAS = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalMCAS"));
         const viewModuleAssessmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewModuleAssessmentModal"));
         const addModuleAssessmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModuleAssessmentModal"));
         const editModuleCreationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModuleCreationModal"));
+        const addModuleCreationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModuleCreationModal"));
 
         const editModuleCreationModalEl = document.getElementById('editModuleCreationModal')
         editModuleCreationModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -392,6 +409,14 @@ var termModuleListTable = (function () {
                 $('#addModuleAssessmentModal .theLoader').css('display', 'flex');
             });
             $('#addModuleAssessmentModal input[name="module_creation_id"]').val(0);
+        });
+
+        const addModuleCreationModalEl = document.getElementById('addModuleCreationModal')
+        addModuleCreationModalEl.addEventListener('hide.tw.modal', function(event) {
+            creation_module_id.clear(true);
+            $('#addModuleCreationModal .moduleAssessMentWrap').fadeOut('fast', function(){
+                $('#addModuleCreationModal .moduleAssessMentWrap table tbody').html('');
+            });
         });
 
         $('#termModuleListTable').on('click', '.view_assessment', function(e){
@@ -665,6 +690,112 @@ var termModuleListTable = (function () {
                 }
             });
 
+        });
+
+
+        $('#addModuleCreationModal [name="course_module_id"]').on('change', function(e){
+            var $theSelect = $(this);
+            var course_module_id = $theSelect.val();
+
+            if(course_module_id > 0){
+                axios({
+                    method: "POST",
+                    url: route("term.module.get.base.assessment"),
+                    data: {course_module_id : course_module_id},
+                    headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+                }).then((response) => {
+                    if (response.status == 200) {
+                        $('#addModuleCreationModal .moduleAssessMentWrap').fadeIn('fast', function(){
+                            $('#addModuleCreationModal .moduleAssessMentWrap table tbody').html(response.data.htm);
+                        });
+
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    }
+                }).catch((error) => {
+                    if (error.response) {
+                        $('#addModuleCreationModal .moduleAssessMentWrap').fadeOut('fast', function(){
+                            $('#addModuleCreationModal .moduleAssessMentWrap table tbody').html('');
+                        });
+                        console.log(error);
+                    }
+                });
+            }else{
+                $('#addModuleCreationModal .moduleAssessMentWrap').fadeOut('fast', function(){
+                    $('#addModuleCreationModal .moduleAssessMentWrap table tbody').html('');
+                });
+            }
+        });
+
+        $('#addModuleCreationForm').on('submit', function(e){
+            e.preventDefault();
+            var $form = $(this);
+            const form = document.getElementById('addModuleCreationForm');
+    
+            document.querySelector('#saveModuleCreation').setAttribute('disabled', 'disabled');
+            document.querySelector('#saveModuleCreation svg').style.cssText = 'display: inline-block;';
+    
+            var assessmentLength = $form.find('input.cmb_assessment_indv:checked').length;
+            let form_data = new FormData(form);
+            if(assessmentLength > 0){
+                axios({
+                    method: "post",
+                    url: route('term.module.creation.store.individual'),
+                    data: form_data,
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    document.querySelector('#saveModuleCreation').removeAttribute('disabled');
+                    document.querySelector('#saveModuleCreation svg').style.cssText = 'display: none;';
+                    
+                    if (response.status == 200) {
+                        addModuleCreationModal.hide();
+                        termModuleListTable.init();
+                        
+                        successModalMCAS.show();
+                        document.getElementById('successModalMCAS').addEventListener('shown.tw.modal', function(event){
+                            $('#successModalMCAS .successModalTitleMCAS').html('Congratulations!');
+                            $('#successModalMCAS .successModalDescMCAS').html('Module Creation successfully completed.');
+                        });
+
+                        setTimeout(function(){
+                            successModalMCAS.hide();
+                        }, 2000)
+                    }
+                    
+                }).catch(error => {
+                    document.querySelector('#saveModuleCreation').removeAttribute('disabled');
+                    document.querySelector('#saveModuleCreation svg').style.cssText = 'display: none;';
+                    if (error.response) {
+                        if (error.response.status == 422) {
+                            for (const [key, val] of Object.entries(error.response.data.errors)) {
+                                $(`#addForm .${key}`).addClass('border-danger')
+                                $(`#addForm  .error-${key}`).html(val)
+                            }
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+            }else{
+                document.querySelector('#saveModuleCreation').removeAttribute('disabled');
+                document.querySelector('#saveModuleCreation svg').style.cssText = 'display: none;';
+
+                $('.df_alert', $form).remove();
+                $('.modal-content', $form).prepend('<div class="df_alert alert alert-danger-soft show flex items-start" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp; Assessments are required. Please Select a module and checked at least 1 assessment for the selected module.</div>')
+                
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+    
+                setTimeout(function(){
+                    $('.df_alert', $form).remove();
+                }, 2000);
+            }
         });
     }
 

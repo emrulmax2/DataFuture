@@ -1164,9 +1164,10 @@ var classPlanListTable = (function () {
             e.preventDefault();
             var $this = $(this);
             var $inputFields = $this.parent('.inputFields');
+            var label = $inputFields.attr('data-label');
             var $btn = $inputFields.find('.inputToggles')
             $inputFields.attr('data-id', 0);
-            $btn.find('span').html('Enrollment Key');
+            $btn.find('span').html(label);
             $inputFields.removeClass('active');
         });
 

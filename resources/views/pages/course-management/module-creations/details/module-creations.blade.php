@@ -18,44 +18,81 @@
             </div>
         </form>
         <div class="flex mt-5 sm:mt-0">
-            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+            <button class="btn btn-primary w-auto" data-tw-toggle="modal" data-tw-target="#addModuleCreationModal">
+                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Module
             </button>
-            <div class="dropdown w-1/2 sm:w-auto">
-                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                </button>
-                <div class="dropdown-menu w-40">
-                    <ul class="dropdown-content">
-                        <li>
-                            <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                            </a>
-                        </li>
-                        {{-- <li>
-                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                            </a>
-                        </li> --}}
-                        <li>
-                            <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                            </a>
-                        </li>
-                        {{-- <li>
-                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                            </a>
-                        </li> --}}
-                    </ul>
-                </div>
-            </div>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
         <div id="termModuleListTable" data-terminstanceid="{{ $term->id }}" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
+
+<!-- BEGIN: Add Module Creation Modal -->
+<div id="addModuleCreationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="#" id="addModuleCreationForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Add Module Creation</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="creation_module_id" class="form-label">Module <span class="text-danger">*</span></label>
+                        <select id="creation_module_id" name="course_module_id" class="tom-selects w-full">
+                            <option value="">Please Select</option>
+                            @if($modules->count() > 0)
+                                @foreach($modules as $mod)
+                                    <option value="{{ $mod->id }}">{{ $mod->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-course_module_id text-danger mt-2"></div>
+                    </div> 
+                    <div class="mt-3 moduleAssessMentWrap" style="display: none;">
+                        <table class="table  table-striped border-t table-sm">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap">#</th>
+                                    <th class="whitespace-nowrap">Name</th>
+                                    <th class="whitespace-nowrap">Code</th>
+                                    <th class="whitespace-nowrap">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="saveModuleCreation" class="btn btn-primary w-auto">
+                        Save
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="instance_term_id" value="{{ $term->id }}"/>
+                    <input type="hidden" name="course_id" value="{{ $course->id }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Add Module Creation Modal -->
 
 <!-- BEGIN: Edit or View Assessment Modal -->
 <div id="viewModuleAssessmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

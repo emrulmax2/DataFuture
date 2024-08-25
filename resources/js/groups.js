@@ -114,7 +114,7 @@ var table = (function () {
             },
             selectableCheck:function(row){
                 return row.getData().id > 0; //allow selection of rows where the age is greater than 18
-            },
+            }
         });
 
         // Redraw table onresize
