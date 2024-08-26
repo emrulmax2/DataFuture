@@ -107,7 +107,8 @@ class NoteController extends Controller
                     'followed' => (isset($list->followed->employee->full_name) && !empty($list->followed->employee->full_name) ? $list->followed->employee->full_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'is_ownere' => (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0)
                 ];
                 $i++;
             endforeach;
