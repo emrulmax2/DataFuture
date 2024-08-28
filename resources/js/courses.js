@@ -25,7 +25,7 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "80",
                 },
                 {
                     title: "Course Name",
@@ -51,6 +51,15 @@ var table = (function () {
                     title: "Pre Qualification",
                     field: "pre_qualification",
                     headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    width: "100",
+                    formatter(cell, formatterParams){
+                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
                 },
                 {
                     title: "Actions",
@@ -165,21 +174,29 @@ var table = (function () {
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+        const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
+        
+        document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
+            $('#confirmModal .agreeWith').attr('data-id', '0');
+            $('#confirmModal .agreeWith').attr('data-action', 'none');
+        });
 
         const addModalEl = document.getElementById('addModal')
         addModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addModal .acc__input-error').html('');
-            $('#addModal input').val('');
+            $('#addModal input:not([type="checkbox"])').val('');
             $('#addModal select').val('');
+            $('#addModal input[type="checkbox"]').prop('checked', true);
         });
         
         const editModalEl = document.getElementById('editModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editModal .acc__input-error').html('');
-            $('#editModal input').val('');
+            $('#editModal input:not([type="checkbox"])').val('');
             $('#editModal select').val('');
             $('#editModal input[name="id"]').val('0');
+            $('#editModal input[type="checkbox"]').prop('checked', false);
         });
 
         $('#addForm').on('submit', function(e){
@@ -248,6 +265,11 @@ var table = (function () {
                     $('#editModal select[name="source_tuition_fee_id"]').val(dataset.source_tuition_fee_id ? dataset.source_tuition_fee_id : '');
 
                     $('#editModal input[name="id"]').val(editId);
+                    if(dataset.active == 1){
+                        $('#editModal input[name="active"]').prop('checked', true);
+                    }else{
+                        $('#editModal input[name="active"]').prop('checked', false);
+                    }
                 }
             }).catch((error) => {
                 console.log(error);
@@ -363,16 +385,45 @@ var table = (function () {
                 }).catch(error =>{
                     console.log(error)
                 });
+            }else if(action == 'CHANGESTAT'){
+                axios({
+                    method: 'post',
+                    url: route('courses.update.status', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('WOW!');
+                            $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        });
+                    }
+                    table.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
             }
-        })
+        });
+
+
+        $('#courseTableId').on('click', '.status_updater', function(){
+            let $statusBTN = $(this);
+            let rowID = $statusBTN.attr('data-id');
+
+            confModal.show();
+            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+                $('#confirmModal .confModTitle').html(confModalDelTitle);
+                $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+                $('#confirmModal .agreeWith').attr('data-id', rowID);
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
+            });
+        });
 
         // Delete Course
         $('#courseTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -387,11 +438,6 @@ var table = (function () {
 
         // Restore Course
         $('#courseTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 

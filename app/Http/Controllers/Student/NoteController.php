@@ -8,6 +8,7 @@ use App\Http\Requests\StudentNoteRequest;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentNote;
+use App\Models\StudentNotesDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,23 +35,18 @@ class NoteController extends Controller
             if($request->hasFile('document')):
                 $document = $request->file('document');
                 $documentName = time().'_'.$document->getClientOriginalName();
-                $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
+                $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
 
                 $data = [];
                 $data['student_id'] = $student_id;
+                $data['student_note_id'] = $note->id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $document->getClientOriginalExtension();
                 $data['path'] = Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
-                $studentDocument = StudentDocument::create($data);
-
-                if($studentDocument):
-                    $noteUpdate = StudentNote::where('id', $note->id)->update([
-                        'student_document_id' => $studentDocument->id
-                    ]);
-                endif;
+                $studentNoteDocument = StudentNotesDocument::create($data);
             endif;
             return response()->json(['message' => 'Student Note successfully created'], 200);
         else:
@@ -98,24 +94,21 @@ class NoteController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                $docURL = '';
-                /*if(isset($list->student_document_id) && isset($list->document)):
-                    $docURL = (isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$list->document->current_file_name) : '');
-                endif;*/
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'term' => (isset($list->term->name) && !empty($list->term->name) ? $list->term->name : ''),
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
-                    'student_document_id' => (isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->document->current_file_name) && !empty($list->document->current_file_name) ? $list->student_document_id : 0),
+                    'note_document_id' => (isset($list->document->id) && $list->document->id > 0 ? $list->document->id : 0),
                     'followed_up' => (isset($list->followed_up) && !empty($list->followed_up) ? $list->followed_up : 'no'),
                     'follow_up_start' => (isset($list->follow_up_start) && !empty($list->follow_up_start) ? date('jS F, Y', strtotime($list->follow_up_start)) : ''),
                     'follow_up_end' => (isset($list->follow_up_end) && !empty($list->follow_up_end) ? date('jS F, Y', strtotime($list->follow_up_end)) : ''),
                     'followed' => (isset($list->followed->employee->full_name) && !empty($list->followed->employee->full_name) ? $list->followed->employee->full_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'is_ownere' => (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0)
                 ];
                 $i++;
             endforeach;
@@ -134,8 +127,8 @@ class NoteController extends Controller
             $html .= '<div>';
                 $html .= $note->note;
             $html .= '</div>';
-            if(isset($note->student_document_id) && $note->student_document_id > 0 && isset($note->document->current_file_name) && !empty($note->document->current_file_name)):
-                $btns .= '<a data-id="'.$note->student_document_id.'" href="javascript:void(0);" class="downloadDoc btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
+            if(isset($note->document->id) && $note->document->id > 0 && isset($note->document->current_file_name) && !empty($note->document->current_file_name)):
+                $btns .= '<a data-id="'.$note->document->id.'" href="javascript:void(0);" class="downloadDoc btn btn-primary w-auto inline-flex"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-2"></i>Download Attachment</a>';
             endif;
         else:
             $html .= '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert">
@@ -166,7 +159,6 @@ class NoteController extends Controller
         $studentApplicantId = $student->applicant_id;
         $noteId = $request->id;
         $oleNote = StudentNote::find($noteId);
-        $studentDocumentId = (isset($oleNote->student_document_id) && $oleNote->student_document_id > 0 ? $oleNote->student_document_id : 0);
 
         $followed_up = (isset($request->followed_up) && $request->followed_up > 0 ? 'yes' : 'no');
         $note = StudentNote::where('id', $noteId)->where('student_id', $student_id)->Update([
@@ -182,33 +174,29 @@ class NoteController extends Controller
             'updated_by' => auth()->user()->id
         ]);
         if($request->hasFile('document')):
-            if($studentDocumentId > 0 && isset($oleNote->document->current_file_name) && !empty($oleNote->document->current_file_name)):
-                if (Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name)):
-                    Storage::disk('s3')->delete('public/applicants/'.$studentApplicantId.'/'.$oleNote->document->current_file_name);
+            $noteDocument = StudentNotesDocument::where('student_id', $student_id)->where('student_note_id', $noteId)->get()->first();
+            if(isset($noteDocument->id) && $noteDocument->id > 0):
+                if (Storage::disk('s3')->exists('public/students/'.$student_id.'/'.$noteDocument->current_file_name)):
+                    Storage::disk('s3')->delete('public/students/'.$student_id.'/'.$noteDocument->current_file_name);
                 endif;
 
-                $ad = StudentDocument::where('id', $studentDocumentId)->forceDelete();
+                StudentDocument::where('student_id', $student_id)->where('student_note_id', $noteId)->where('id', $noteDocument->id)->forceDelete();
             endif;
 
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
-            $path = $document->storeAs('public/applicants/'.$studentApplicantId, $documentName, 's3');
+            $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
 
             $data = [];
             $data['student_id'] = $student_id;
+            $data['student_note_id'] = $noteId;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
             $data['path'] = Storage::disk('s3')->url($path);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
             $data['created_by'] = auth()->user()->id;
-            $studentDocument = StudentDocument::create($data);
-
-            if($studentDocument):
-                $noteUpdate = StudentNote::where('id', $noteId)->update([
-                    'student_document_id' => $studentDocument->id
-                ]);
-            endif;
+            $studentDocument = StudentNotesDocument::create($data);
         endif;
         return response()->json(['message' => 'Applicant Note successfully updated'], 200);
     }
@@ -217,11 +205,10 @@ class NoteController extends Controller
         $student = $request->student;
         $recordid = $request->recordid;
         $studentNote = StudentNote::find($recordid);
-        $studentDocumentID = (isset($studentNote->student_document_id) && $studentNote->student_document_id > 0 ? $studentNote->student_document_id : 0);
         StudentNote::find($recordid)->delete();
 
-        if($studentDocumentID > 0):
-            StudentDocument::find($studentDocumentID)->delete();
+        if(isset($studentNote->document->id) && $studentNote->document->id > 0):
+            StudentNotesDocument::find($studentNote->document->id)->delete();
         endif;
 
         return response()->json(['message' => 'Successfully deleted'], 200);
@@ -232,10 +219,17 @@ class NoteController extends Controller
         $recordid = $request->recordid;
         $data = StudentNote::where('id', $recordid)->withTrashed()->restore();
         $studentNote = StudentNote::find($recordid);
-        $studentDocumentID = (isset($studentNote->student_document_id) && $studentNote->student_document_id > 0 ? $studentNote->student_document_id : 0);
-        if($studentDocumentID > 0):
-            StudentDocument::where('id', $studentDocumentID)->withTrashed()->restore();
+        if(isset($studentNote->document->id) && $studentNote->document->id > 0):
+            StudentNotesDocument::where('id', $studentNote->document->id)->withTrashed()->restore();
         endif;
         return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function studentNoteDocumentDownload(Request $request){ 
+        $row_id = $request->row_id;
+
+        $studentNoteDoc = StudentNotesDocument::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentNoteDoc->student_id.'/'.$studentNoteDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

@@ -622,6 +622,9 @@ Route::middleware('auth')->group(function() {
         Route::get('course-management/module-creation/edit/{id}', 'edit')->name('term.module.creation.edit');
         Route::post('course-management/module-creation/update', 'update')->name('term.module.creation.update');
         Route::post('course-management/module-creation/plan-taskupdate/{id}', 'updatePlanTask')->name('term.module.creation.plantask-update');
+
+        Route::post('course-management/module-creation/get-modul-base-assessment', 'getModulesBaseAssessments')->name('term.module.get.base.assessment');
+        Route::post('course-management/term-module-creation/store-individual', 'storeIndividually')->name('term.module.creation.store.individual');
         
     });
 
@@ -784,15 +787,19 @@ Route::middleware('auth')->group(function() {
         Route::get('student/letter-list', 'list')->name('student.letter.list');
         Route::delete('student/letter-delete', 'destroy')->name('student.letter.destroy');
         Route::post('student/restore-letter', 'restore')->name('student.letter.restore');
+
+        Route::post('student/download-letter', 'studentLetterDownload')->name('student.letter.download');
     });
 
     Route::controller(EmailController::class)->group(function() {
         Route::post('student/send-mail', 'store')->name('student.send.mail');
         Route::get('student/mail-list', 'list')->name('student.mail.list');
-        Route::post('student/mail-show', 'show')->name('student.mail.show');
         Route::delete('student/destory-mail', 'destroy')->name('student.mail.destroy');
         Route::post('student/restore-mail', 'restore')->name('student.mail.restore');
         Route::post('student/get-mail-template', 'getEmailTemplate')->name('student.get.mail.template');
+
+        Route::post('student/download-email-pdf', 'studentEmailPdfDownload')->name('student.email.pdf.download');
+        Route::post('student/download-email-attachment', 'studentEmailAttachmentDownload')->name('student.email.attachment.download');
     });
 
     Route::controller(SmsController::class)->group(function() {
@@ -812,6 +819,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-note', 'update')->name('student.update.note');
         Route::delete('student/destory-note', 'destroy')->name('student.destory.note');
         Route::post('student/restore-note', 'restore')->name('student.resotore.note');
+
+        Route::post('student/download-note-document', 'studentNoteDocumentDownload')->name('student.note.document.download');
     });
 
     Route::controller(UploadController::class)->group(function() {
@@ -1455,6 +1464,7 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('course-management/courses/delete/{id}', 'destroy')->name('courses.destory');
         Route::post('course-management/courses/restore/{id}', 'restore')->name('courses.restore');
+        Route::post('course-management/courses/update-status/{id}', 'updateStatus')->name('courses.update.status');
     });
    
     Route::controller(SemesterController::class)->group(function() {

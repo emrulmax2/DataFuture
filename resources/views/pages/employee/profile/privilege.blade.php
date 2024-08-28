@@ -73,8 +73,22 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['top_menue']['course_manage']) && $priv['top_menue']['course_manage'] == 1 ? 'checked' : '') }} id="permission_menue_1" class="form-check-input" type="checkbox" value="1" name="permission[top_menue][course_manage]">
+                            <input {{ (isset($priv['top_menue']['course_manage']) && $priv['top_menue']['course_manage'] == 1 ? 'checked' : '') }} id="permission_menue_1" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[top_menue][course_manage]">
                             <label class="form-check-label ml-4" for="permission_menue_1">Course Management</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['course_managements']['course_and_semesters']) && $priv['course_managements']['course_and_semesters'] == 1 ? 'checked' : '') }} id="permission_course_management_1" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][course_and_semesters]">
+                                <label class="form-check-label ml-4" for="permission_course_management_1">Course & Semesters</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['course_managements']['terms_and_modules']) && $priv['course_managements']['terms_and_modules'] == 1 ? 'checked' : '') }} id="permission_course_management_2" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][terms_and_modules]">
+                                <label class="form-check-label ml-4" for="permission_course_management_2">Terms & Modules</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['course_managements']['plans']) && $priv['course_managements']['plans'] == 1 ? 'checked' : '') }} id="permission_course_management_3" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][plans]">
+                                <label class="form-check-label ml-4" for="permission_course_management_3">Plans</label>
+                            </div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-3">

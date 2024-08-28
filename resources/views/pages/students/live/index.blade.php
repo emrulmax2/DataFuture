@@ -83,8 +83,8 @@
                                                 <input type="text" value="" id="student_ssn" class="form-control" name="student[student_ssn]">
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="student_abr" class="form-label">Awarding Body Ref</label>
-                                                <input type="text" value="" id="student_abr" class="form-control" name="student[student_abr]">
+                                                <label for="application_no" class="form-label">Application Ref. No.</label>
+                                                <input type="text" value="" id="application_no" class="form-control" name="student[application_no]">
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="student_status" class="form-label">Student Status</label>

@@ -125,7 +125,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="course_id" class="form-label">Course <span class="text-danger">*</span></label>
-                            <select id="course_id" name="course_id" class="form-control w-full">
+                            <select id="course_id" name="course_id" class="tom-selects w-full">
                                 <option value="">Please Select</option>
                                 @if(!empty($courses))
                                     @foreach($courses as $cr)
@@ -148,8 +148,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="active">Active</label>
+                            <input id="active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
+                        </div>
+                        
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="save" class="btn btn-primary w-auto">
                             Save
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -196,7 +200,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="edit_course_id" class="form-label">Course <span class="text-danger">*</span></label>
-                            <select id="edit_course_id" name="course_id" class="form-control w-full">
+                            <select id="edit_course_id" name="course_id" class="tom-selects w-full">
                                 <option value="">Please Select</option>
                                 @if(!empty($courses))
                                     @foreach($courses as $cr)
@@ -219,8 +223,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="edit_active">Active</label>
+                            <input id="edit_active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
+                        </div>
+
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="update" class="btn btn-primary w-auto">
                             Update
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

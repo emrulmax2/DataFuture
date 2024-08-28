@@ -24,13 +24,15 @@ class CourseController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Courses', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'bodies' => AwardingBody::orderBy('name', 'asc')->get(),
+            'fees' => SourceTuitionFee::orderBy('name', 'asc')->get(),
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
   
         $total_rows = $count = Course::count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -54,6 +56,8 @@ class CourseController extends Controller
         endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
         $Query= $query->skip($offset)
                ->take($limit)
@@ -71,6 +75,7 @@ class CourseController extends Controller
                     'fees' => $list->fee->name,
                     'degree_offered' => $list->degree_offered,
                     'pre_qualification'=> $list->pre_qualification,
+                    'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -80,7 +85,9 @@ class CourseController extends Controller
     }
 
     public function store(CourseRequests $request){
-        $request->request->add(['created_by' => auth()->user()->id]);
+        $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
+        $request->request->remove('active');
+        $request->request->add(['created_by' => auth()->user()->id, 'active' => $active]);
         $course = Course::create($request->all());
 
         $courseAll = Course::all()->sortByAsc("name");
@@ -107,10 +114,11 @@ class CourseController extends Controller
             'pre_qualification'=> $request->pre_qualification,
             'awarding_body_id'=> $request->awarding_body_id,
             'source_tuition_fee_id'=> $request->source_tuition_fee_id,
+            'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 
-        $courseAll = Course::all()->sortByAsc("name");
+        $courseAll = Course::orderBy('name', 'asc')->get();
         Cache::forever('courses', $courseAll);
 
         return response()->json($data);
@@ -155,5 +163,17 @@ class CourseController extends Controller
         Cache::forever('courses', $courseAll);
 
         response()->json($data);
+    }
+
+    public function updateStatus($id){
+        $course = Course::find($id);
+        $active = (isset($course->active) && $course->active == 1 ? 0 : 1);
+
+        Course::where('id', $id)->update([
+            'active'=> $active,
+            'updated_by' => auth()->user()->id
+        ]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
     }
 }

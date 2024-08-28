@@ -8,6 +8,7 @@ use App\Models\Option;
 use App\Models\SmsTemplate;
 use App\Models\StudentContact;
 use App\Models\StudentSms;
+use App\Models\StudentSmsContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -16,16 +17,23 @@ class SmsController extends Controller
     public function store(SendSmsRequest $request){
         $student_id = $request->student_id;
         $smsTemplateID = (isset($request->sms_template_id) && $request->sms_template_id > 0 ? $request->sms_template_id : NULL);
-        $studentSms = StudentSms::create([
-            'student_id' => $student_id,
+        $studentContact = StudentContact::where('student_id', $student_id)->get()->first();
+        $studentSmsContent = StudentSmsContent::create([
             'sms_template_id' => $smsTemplateID,
             'subject' => $request->subject,
             'sms' => $request->sms,
-            'created_by' => auth()->user()->id,
         ]);
         
-        if($studentSms):
-            $studentContact = StudentContact::where('student_id', $student_id)->get()->first();
+        if($studentSmsContent):
+            $studentSms = StudentSms::create([
+                'student_id' => $student_id,
+                //'sms_template_id' => $smsTemplateID,
+                'student_sms_content_id' => $studentSmsContent->id,
+                'phone' => $studentContact->mobile,
+                //'subject' => $request->subject,
+                //'sms' => $request->sms,
+                'created_by' => auth()->user()->id,
+            ]);
             if(isset($studentContact->mobile) && !empty($studentContact->mobile)):
                 $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
                 $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
@@ -71,8 +79,9 @@ class SmsController extends Controller
 
         $query = StudentSms::orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
         if(!empty($queryStr)):
-            $query->where('subject','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sms','LIKE','%'.$queryStr.'%');
+            $query->whereHas('sms', function($q) use($queryStr){
+                $q->where('subject','LIKE','%'.$queryStr.'%')->orWhere('sms','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -98,10 +107,11 @@ class SmsController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'template' => isset($list->template->sms_title) && !empty($list->template->sms_title) ? $list->template->sms_title : '',
-                    'subject' => $list->subject,
-                    'sms' => (strlen(strip_tags($list->sms)) > 40 ? substr(strip_tags($list->sms), 0, 40).'...' : strip_tags($list->sms)),
-                    'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
+                    'template' => isset($list->sms->template->sms_title) && !empty($list->sms->template->sms_title) ? $list->sms->template->sms_title : '',
+                    'phone' => (isset($list->phone) && !empty($list->phone) ? $list->phone : ''),
+                    'subject' => (isset($list->sms->subject) && !empty($list->sms->subject) ? $list->sms->subject : ''),
+                    'sms' => (isset($list->sms->sms) && !empty($list->sms->sms) ? (strlen(strip_tags($list->sms->sms)) > 40 ? substr(strip_tags($list->sms->sms), 0, 40).'...' : strip_tags($list->sms->sms)) : ''),
+                    'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
                 ];
@@ -129,7 +139,7 @@ class SmsController extends Controller
 
     public function getSmsTemplate(Request $request){
         $smsTemplateId = $request->smsTemplateId;
-        $smsTemplate = SmsTemplate::find($smsTemplateId);
+        $smsTemplate = SmsTemplate::where('id', $smsTemplateId)->get()->first();
 
         return response()->json(['row' => $smsTemplate], 200);
     }
@@ -140,12 +150,12 @@ class SmsController extends Controller
         $heading = 'Mail Subject: <u>'.$sms->subject.'</u>';
         $html = '';
         $html .= '<div class="grid grid-cols-12 gap-4">';
-            if(isset($sms->template->sms_title) && !empty($sms->template->sms_title)):
+            if(isset($sms->sms->template->sms_title) && !empty($sms->sms->template->sms_title)):
                 $html .= '<div class="col-span-3">';
                     $html .= '<div class="text-slate-500 font-medium">Template</div>';
                 $html .= '</div>';
                 $html .= '<div class="col-span-9">';
-                    $html .= '<div>'.(isset($sms->template->sms_title) ? $sms->template->sms_title : 'Unknown').'</div>';
+                    $html .= '<div>'.(isset($sms->sms->template->sms_title) ? $sms->sms->template->sms_title : 'Unknown').'</div>';
                 $html .= '</div>';
             endif;
             $html .= '<div class="col-span-3">';
@@ -158,13 +168,13 @@ class SmsController extends Controller
                 $html .= '<div class="text-slate-500 font-medium">Issued By</div>';
             $html .= '</div>';
             $html .= '<div class="col-span-9">';
-                $html .= '<div>'.(isset($sms->user->name) ? $sms->user->name : 'Unknown').'</div>';
+                $html .= '<div>'.(isset($sms->user->employee->full_name) ? $sms->user->employee->full_name : 'Unknown').'</div>';
             $html .= '</div>';
             $html .= '<div class="col-span-3">';
                 $html .= '<div class="text-slate-500 font-medium">SMS Text</div>';
             $html .= '</div>';
             $html .= '<div class="col-span-9">';
-                $html .= '<div class="mailContent">'.$sms->sms.'</div>';
+                $html .= '<div class="mailContent">'.$sms->sms->sms.'</div>';
             $html .= '</div>';
         $html .= '</div>';
 

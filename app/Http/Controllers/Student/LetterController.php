@@ -14,6 +14,7 @@ use App\Models\Signatory;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentLetter;
+use App\Models\StudentLettersDocument;
 use Illuminate\Http\Request;
 
 use Mail; 
@@ -21,9 +22,12 @@ use Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\GenerateStudentLetterTrait;
 
 class LetterController extends Controller
 {
+    use GenerateStudentLetterTrait;
+
     public function getLetterSet(Request $request){
         $letterSetId = $request->letterSetId;
         $letterSet = LetterSet::find($letterSetId);
@@ -64,110 +68,18 @@ class LetterController extends Controller
         $letter = StudentLetter::create($data);
         $attachmentFiles = [];
         if($letter):
-            /* Generate PDF Start */
-            $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
-            $LetterHeader = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-            $LetterFooters = LetterHeaderFooter::where('for_letter', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get();
-            $PDFHTML = '';
-            $PDFHTML .= '<html>';
-                $PDFHTML .= '<head>';
-                    $PDFHTML .= '<title>'.$letter_title.'</title>';
-                    $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                    $PDFHTML .= '<style>
-                                    table{margin-left: 0px;}
-                                    figure{margin: 0;}
-                                    @page{margin-top: 95px;margin-left: 30px;margin-right: 30px;margin-bottom: 95px;}
-                                    header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -70px;}
-                                    footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
-                                    .pageCounter{position: relative;}
-                                    .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
-                                    .pinRow td{border-bottom: 1px solid gray;}
-                                    .text-center{text-align: center;}
-                                    .text-left{text-align: left;}
-                                    .text-right{text-align: right;}
-                                </style>';
-                $PDFHTML .= '</head>';
-                $PDFHTML .= '<body>';
-                    if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name)):
-                        $PDFHTML .= '<header>';
-                            $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
-                        $PDFHTML .= '</header>';
-                    endif;
-
-                    $PDFHTML .= '<footer>';
-                        $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; font-family: serif; 
-                                    font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
-                            if($LetterFooters->count() > 0):
-                                $PDFHTML .= '<tr>';
-                                    $PDFHTML .= '<td colspan="2" class="footerPartners" style="text-align: center; vertical-align: middle;">';
-                                        $numberOfPartners = $LetterFooters->count();
-                                        $pertnerWidth = ((100 - 2) - (int) $numberOfPartners) / (int) $numberOfPartners;
-
-                                        foreach($LetterFooters as $lf):
-                                            $PDFHTML .= '<img style=" width: '.$pertnerWidth.'%; height: auto; margin-left:.5%; margin-right:.5%;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$lf->current_file_name).'" alt="'.$lf->name.'"/>';
-                                        endforeach;
-                                    $PDFHTML .= '</td>';
-                                $PDFHTML .= '</tr>';
-                            endif;
-                            $PDFHTML .= '<tr class="pinRow">';
-                                $PDFHTML .= '<td style="padding-bottom: 3px;">';
-                                    $PDFHTML .= '<span class="pageCounter text-left"></span>';
-                                $PDFHTML .= '</td>';
-                                $PDFHTML .= '<td class="pinNumber text-right" style="padding-bottom: 3px;">';
-                                    $PDFHTML .= 'pin - '.$pin;
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-
-                            if(!empty($companyReg) && isset($companyReg->value) && !empty($companyReg->value)):
-                            $PDFHTML .= '<tr class="regInfoRow">';
-                                $PDFHTML .= '<td colspan="2" class="text-center" style="padding-top: 3px;">';
-                                    $PDFHTML .= $companyReg->value;
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-                            endif;
-                        $PDFHTML .= '</table>';
-                    $PDFHTML .= '</footer>';
-
-                    $PDFHTML .= $letter_body;
-                    if($signatory_id > 0):
-                        $signatory = Signatory::find($signatory_id);
-                        $PDFHTML .= '<p>';
-                            $PDFHTML .= '<strong>Best Regards,</strong><br/>';
-                            if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
-                                $signatureImage = Storage::disk('local')->url('public/signatories/'.$signatory->signature); 
-                                $PDFHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto;" alt=""/><br/>';
-                            endif;
-                            $PDFHTML .= $signatory->signatory_name.'<br/>';
-                            $PDFHTML .= $signatory->signatory_post.'<br/>';
-                            $PDFHTML .= 'London Churchill College';
-                        $PDFHTML .= '</p>';
-                    endif;
-                $PDFHTML .= '</body>';
-            $PDFHTML .= '</html>';
-
-            $fileName = time().'_'.$student_id.'_Letter.pdf';
-            $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'dpi' => 72])
-                ->setPaper('a4', 'portrait')
-                ->setWarnings(false);
-            $content = $pdf->output();
-            Storage::disk('s3')->put('public/applicants/'.$studentApplicantId.'/'.$fileName, $content );
-
+            $generatedLetter = $this->generateLetter($student_id, $letter_title, $letter_body, $issued_date, $pin, $signatory_id);
 
             $data = [];
             $data['student_id'] = $student_id;
+            $data['student_letter_id'] = $letter->id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = 'pdf';
-            $data['path'] = Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$fileName);
+            $data['path'] = Storage::disk('s3')->url('public/students/'.$student_id.'/'.$generatedLetter['filename']);
             $data['display_file_name'] = $letter_title;
-            $data['current_file_name'] = $fileName;
+            $data['current_file_name'] = $generatedLetter['filename'];
             $data['created_by'] = auth()->user()->id;
-            $studentDocument = StudentDocument::create($data);
-
-            if($studentDocument):
-                $noteUpdate = StudentLetter::where('id', $letter->id)->update([
-                    'student_document_id' => $studentDocument->id
-                ]);
-            endif;
+            $letterDocument = StudentLettersDocument::create($data);
             /* Generate PDF End */
 
 
@@ -198,8 +110,8 @@ class LetterController extends Controller
                 $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
 
                 $attachmentFiles[] = [
-                    "pathinfo" => 'public/applicants/'.$studentApplicantId.'/'.$fileName,
-                    "nameinfo" => $fileName,
+                    "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
+                    "nameinfo" => $generatedLetter['filename'],
                     "mimeinfo" => 'application/pdf',
                     "disk" => 's3'
                 ];
@@ -218,8 +130,16 @@ class LetterController extends Controller
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
             ];
+            $sendTo = [];
+            if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+                $sendTo[] = $student->contact->institutional_email;
+            endif;
+            if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+                $sendTo[] = $student->contact->personal_email;
+            endif;
+            $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
 
-            UserMailerJob::dispatch($configuration, [$student->users->email], new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+            UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
 
             return response()->json(['message' => 'Letter successfully generated and distributed.'], 200);
         else:
@@ -241,11 +161,11 @@ class LetterController extends Controller
         endforeach;
 
         $query = DB::table('student_letters as sl')
-                        ->select('sl.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'sdc.current_file_name')
+                        ->select('sl.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'sld.id as letter_doc_id', 'sld.current_file_name')
                         ->leftJoin('letter_sets as ls', 'sl.letter_set_id', '=', 'ls.id')
                         ->leftJoin('signatories as sg', 'sl.signatory_id', '=', 'sg.id')
                         ->leftJoin('users as ur', 'sl.issued_by', '=', 'ur.id')
-                        ->leftJoin('student_documents as sdc', 'sl.student_document_id', '=', 'sdc.id')
+                        ->leftJoin('student_letters_documents as sld', 'sl.id', '=', 'sld.student_letter_id')
                         ->where('sl.student_id', '=', $student_id);
         if(!empty($queryStr)):
             $query->where('ls.letter_type','LIKE','%'.$queryStr.'%');
@@ -278,8 +198,8 @@ class LetterController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $docURL = '';
-                if(isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->current_file_name)):
-                    $docURL = (!empty($list->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name) : '');
+                if(isset($list->current_file_name) && !empty($list->current_file_name)):
+                    $docURL = (!empty($list->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student_id.'/'.$list->current_file_name) ? Storage::disk('s3')->url('public/students/'.$student_id.'/'.$list->current_file_name) : '');
                 endif;
                 $data[] = [
                     'id' => $list->id,
@@ -287,7 +207,7 @@ class LetterController extends Controller
                     'letter_type' => $list->letter_type,
                     'letter_title' => $list->letter_title,
                     'signatory_name' => (isset($list->signatory_name) && !empty($list->signatory_name) ? $list->signatory_name : ''),
-                    'student_document_id' => (isset($list->student_document_id) && $list->student_document_id > 0 && isset($list->current_file_name) && !empty($list->current_file_name) ? $list->student_document_id : 0),
+                    'letter_doc_id' => (isset($list->letter_doc_id) && $list->letter_doc_id > 0 ? $list->letter_doc_id : 0),
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at
@@ -302,6 +222,7 @@ class LetterController extends Controller
         $applicant = $request->applicant;
         $recordid = $request->recordid;
 
+        StudentLettersDocument::where('student_letter_id', $recordid)->delete();
         StudentLetter::find($recordid)->delete();
 
         return response()->json(['message' => 'Successfully deleted'], 200);
@@ -312,6 +233,16 @@ class LetterController extends Controller
         $recordid = $request->recordid;
 
         StudentLetter::where('id', $recordid)->withTrashed()->restore();
+        StudentLettersDocument::where('student_letter_id', $recordid)->withTrashed()->restore();
+        
         return response()->json(['message' => 'Successfully restored'], 200);
+    }
+
+    public function studentLetterDownload(Request $request){ 
+        $row_id = $request->row_id;
+
+        $studentLetterDoc = StudentLettersDocument::find($row_id);
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentLetterDoc->student_id.'/'.$studentLetterDoc->current_file_name, now()->addMinutes(5));
+        return response()->json(['res' => $tmpURL], 200);
     }
 }

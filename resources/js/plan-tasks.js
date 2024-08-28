@@ -351,8 +351,8 @@ var classStudentListTutorModuleTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: 50,
+            paginationSizeSelector: [true, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -371,62 +371,38 @@ var classStudentListTutorModuleTable = (function () {
                     }
                 },
                 {
-                    title: "#",
-                    field: "sl",
-                    
-                    headerSort: false,
-                    width: "180",
+                    title: "Reg. No",
+                    field: "registration_no",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
+                                html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -13px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
+                                    if(cell.getData().disability==1)
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap"><i data-lucide="accessibility" class="w-4 h-4"></i></div>';
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
-                
                 {
-                    title: "PHOTO",
-                    minWidth: 200,
-                    field: "images",
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    vertAlign: "middle",
-                    print: false,
-                    download: false,
-                    formatter(cell, formatterParams) {
-                        return `<div class="flex lg:justify-center">
-                            <div class="intro-x w-10 h-10 image-fit">
-                                <img  class="rounded-full" src="${
-                                    cell.getData().images
-                                }">
-                            </div>
-                        </div>`;
-                    },
+                    title: "First Name",
+                    field: "first_name",
+                    headerHozAlign: "left",
                 },
-                
                 {
-                    title: "NAME",
-                    field: "name",
-                    vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().name
-                            }</div>
-                        </div>`;
-                    },
+                    title: "Last Name",
+                    field: "last_name",
+                    headerHozAlign: "left",
                 },
-                
                 {
-                    title: "REGESTER NO",
-                    field: "name",
-                    vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().register_no
-                            }</div>
-                        </div>`;
-                    },
-                },
+                    title: "Status",
+                    field: "status_id",
+                    headerHozAlign: "left",
+                }
                 
             ],
             renderComplete() {

@@ -8,8 +8,6 @@ import TomSelect from "tom-select";
 var liveStudentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        //const form = document.getElementById('studentSearchForm');
-        //let form_data = new FormData(form);
         let form_data = $('#studentSearchForm').serialize();
 
         let tableContent = new Tabulator("#liveStudentsListTable", {
@@ -20,8 +18,8 @@ var liveStudentsListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: 50,
+            paginationSizeSelector: [50, 100, 250],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -37,8 +35,7 @@ var liveStudentsListTable = (function () {
                                 html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -13px;">';
                                     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
-                                    if(cell.getData().disability==1)
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap"><i data-lucide="accessibility" class="w-4 h-4"></i></div>';
+                                    
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -55,30 +52,43 @@ var liveStudentsListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Evening and Weekend / Regular",
+                    title: "",
                     field: "full_time",
                     headerHozAlign: "left",
+                    headerSort: false,
                     formatter(cell, formatterParams) {  
-                        var html = '<div class="block">';
-                                html += '<div class="w-8 h-8 intro-x mr-4 inline-block">';
+                        let day=false;
+                        if(cell.getData().full_time==1) 
+                            day = 'text-slate-900' 
+                        else  
+                            day = 'text-amber-600'
+                        var html = '<div class="flex">';
+                                html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
                                 if(cell.getData().full_time==1)
-                                    html += '<i data-lucide="sunset" class="w-5 h-5"></i>';
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>';
                                 else
-                                html += '<i data-lucide="sun" class="w-5 h-5"></i>';
-
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+                                
                                 html += '</div>';
+                            if(cell.getData().disability==1)
+                                html += '<div class="inline-flex intro-x " style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                            
                             html += '</div>';
+                            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide"});
+
                         return html;
                     }
                 },
                 {
                     title: "Semester",
                     field: "semester",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
                     title: "Course",
                     field: "course",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {

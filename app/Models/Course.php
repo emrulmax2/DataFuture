@@ -18,6 +18,7 @@ class Course extends Model
         'pre_qualification',
         'awarding_body_id',
         'source_tuition_fee_id',
+        'active',
         'created_by',
         'updated_by',
     ];

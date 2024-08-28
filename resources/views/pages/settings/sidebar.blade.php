@@ -28,10 +28,10 @@
                 </ul>
             </li>
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'coursequalification' || Route::currentRouteName() == 'sourcetutionfees' || Route::currentRouteName() == 'awardingbody' || Route::currentRouteName() == 'academicyears' || Route::currentRouteName() == 'academicyears.show' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'term-type.index' || Route::currentRouteName() == 'assessment-type.index' || Route::currentRouteName() == 'coursequalification' || Route::currentRouteName() == 'sourcetutionfees' || Route::currentRouteName() == 'awardingbody' || Route::currentRouteName() == 'academicyears' || Route::currentRouteName() == 'academicyears.show' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="hash" class="w-4 h-4 mr-2"></i> Course Parameters <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'coursequalification' || Route::currentRouteName() == 'sourcetutionfees' || Route::currentRouteName() == 'awardingbody' || Route::currentRouteName() == 'academicyears' || Route::currentRouteName() == 'academicyears.show' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'term-type.index' || Route::currentRouteName() == 'assessment-type.index' || Route::currentRouteName() == 'coursequalification' || Route::currentRouteName() == 'sourcetutionfees' || Route::currentRouteName() == 'awardingbody' || Route::currentRouteName() == 'academicyears' || Route::currentRouteName() == 'academicyears.show' ? 'block' : 'none' }};">
                     <li>
                         <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'awardingbody' ? 'active text-primary' : '' }}" href="{{ route('awardingbody') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Awarding Body

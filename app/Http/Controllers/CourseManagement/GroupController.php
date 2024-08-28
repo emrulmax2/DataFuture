@@ -22,7 +22,7 @@ class GroupController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Groups', 'href' => 'javascript:void(0);']
             ],
-            'courses' => Course::orderBy('name', 'ASC')->get(),
+            'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
             'term_decs' => TermDeclaration::orderBy('id', 'DESC')->get(),
 
         ]);
@@ -89,7 +89,7 @@ class GroupController extends Controller
             'name'=> $request->name,
             'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
             'created_by' => auth()->user()->id,
-            'active' => 1
+            'active' => (isset($request->active) && $request->active > 0 ? $request->active : 0)
         ]);
         return response()->json($data);
     }
@@ -110,6 +110,7 @@ class GroupController extends Controller
             'course_id'=> $request->course_id,
             'name'=> $request->name,
             'evening_and_weekend'=> (isset($request->evening_and_weekend) && $request->evening_and_weekend > 0 ? $request->evening_and_weekend : 0),
+            'active' => (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
 

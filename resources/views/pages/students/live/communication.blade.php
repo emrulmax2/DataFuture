@@ -5,10 +5,7 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
-    </div>
-    
+
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
@@ -274,7 +271,7 @@
                             <label for="sms_template_id" class="form-label">Template</label>
                             <select id="sms_template_id" name="sms_template_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
-                                @if(!empty($smsTemplates))
+                                @if($smsTemplates->count() > 0)
                                     @foreach($smsTemplates as $st)
                                         <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
                                     @endforeach

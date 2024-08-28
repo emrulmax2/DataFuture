@@ -6,19 +6,6 @@
 
 @section('subcontent')
 
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
-        
-        <div class="ml-auto flex justify-end">
-            <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
-                {{ $student->status->name }}
-            </button>
-            <!-- <a style="float: right;" href="{{ route('applicantprofile.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-success text-white w-auto">Download Pdf</a> -->
-            <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
-        </div>
-        
-    </div>
-
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->

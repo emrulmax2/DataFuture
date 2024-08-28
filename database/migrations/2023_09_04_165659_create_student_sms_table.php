@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->index('student_id');
             $table->bigInteger('student_id')->unsigned();
-            $table->string('subject',191);
+            $table->string('subject', 191);
             $table->text('sms');
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CourseManagement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndividualModulCreationRequest;
 use Illuminate\Http\Request;
 use App\Models\ModuleCreation;
 use App\Models\InstanceTerm;
@@ -200,6 +201,8 @@ class TermModuleCreationController extends Controller
     }
 
     public function show($instanceTermId){
+        $instance_term = InstanceTerm::find($instanceTermId);
+        $courseId = $instance_term->instance->creation->course_id;
         $termRow = DB::table('instance_terms as it')
                     ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name')
                     ->leftJoin('course_creation_instances as cci', 'it.course_creation_instance_id', '=', 'cci.id')
@@ -216,7 +219,9 @@ class TermModuleCreationController extends Controller
                 ['label' => 'Term Modules', 'href' => route('term.module.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']
             ],
-            'term' => $termRow
+            'term' => $termRow,
+            'course' => Course::find($courseId),
+            'modules' => CourseModule::where('course_id', $courseId)->where('active', 1)->get(),
         ]);
     }
 
@@ -395,6 +400,94 @@ class TermModuleCreationController extends Controller
         }else{
             return response()->json(['message' => 'something went wrong'], 422);
         }
+    }
+
+
+    public function getModulesBaseAssessments(Request $request){
+        $course_module_id = $request->course_module_id;
+        $moduleAssessment = CourseModuleBaseAssesment::where('course_module_id', $course_module_id)->orderBy('id', 'ASC')->get();
+
+        $html = '';
+        if($moduleAssessment->count() > 0):
+            $i = 1;
+            foreach($moduleAssessment as $ass):
+                $html .= '<tr>';
+                    $html .= '<td class="whitespace-nowrap">'.$i.'</td>';
+                    $html .= '<td class="whitespace-nowrap">'.$ass->assesment_name.'</td>';
+                    $html .= '<td class="whitespace-nowrap">'.$ass->assesment_code.'</td>';
+                    $html .= '<td class="whitespace-nowrap">';
+                        $html .= '<div class="form-check form-switch">';
+                            $html .= '<input class="cmb_assessment_indv form-check-input" id="cmb_assessment_indv_'.$course_module_id.'_'.$ass->id.'" name="cmb_assessment[]" value="'.$ass->id.'" type="checkbox">';
+                        $html .= '</div>';
+                    $html .= '</td>';
+                $html .= '</tr>';
+
+                $i++;
+            endforeach;
+        else:
+            $html .= '<tr>';
+                $html .= '<td colspan="4">';
+                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Module base assessments not found.';
+                    $html .= '</div>';
+                $html .= '</td>';
+            $html .= '</tr>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
+    }
+
+    public function storeIndividually(IndividualModulCreationRequest $request){
+        $course_module_id = $request->course_module_id;
+        $instance_term_id = $request->instance_term_id;
+        $course_id = $request->course_id;
+        $cmb_assessment = (isset($request->cmb_assessment) && !empty($request->cmb_assessment) ? $request->cmb_assessment : []);
+
+        $courseModule = CourseModule::find($course_module_id);
+        $data = [];
+        $data['instance_term_id'] = $instance_term_id;
+        $data['course_module_id'] = $course_module_id;
+        $data['module_level_id'] = (isset($courseModule->module_level_id) && $courseModule->module_level_id > 0 ? $courseModule->module_level_id : null);
+        $data['module_name'] = (isset($courseModule->name) && !empty($courseModule->name) ? $courseModule->name : null);
+        $data['code'] = (isset($courseModule->code) && !empty($courseModule->code) ? $courseModule->code : null);
+        $data['status'] = (isset($courseModule->status) && !empty($courseModule->status) ? $courseModule->status : 'optional');
+        $data['credit_value'] = (isset($courseModule->credit_value) && !empty($courseModule->credit_value) ? $courseModule->credit_value : '');
+        $data['unit_value'] = (isset($courseModule->unit_value) && !empty($courseModule->unit_value) ? $courseModule->unit_value : '');
+        $data['created_by'] = auth()->user()->id;
+        $moduleCreation = ModuleCreation::create($data);
+
+        if($moduleCreation):
+            $eLearningActivitys = ELearningActivitySetting::all();
+            foreach($eLearningActivitys as $eLearningActivity) :
+                $planTask = new PlanTask();
+                $planTask->name = $eLearningActivity->category;
+                $planTask->description = $eLearningActivity->category;
+                $planTask->category = $eLearningActivity->category;
+                $planTask->module_creation_id = $moduleCreation->id;
+                $planTask->logo = $eLearningActivity->logo;
+                $planTask->days_reminder = $eLearningActivity->days_reminder;
+                $planTask->is_mandatory = $eLearningActivity->is_mandatory;
+                $planTask->e_learning_activity_setting_id = $eLearningActivity->id;
+                $planTask->created_by = auth()->user()->id;
+                $planTask->save();
+            endforeach;
+
+            if(!empty($cmb_assessment)):
+                foreach($cmb_assessment as $assementID):
+                    $moduleBaseAssessment = CourseModuleBaseAssesment::find($assementID);
+    
+                    $data = [];
+                    $data['module_creation_id'] = $moduleCreation->id;
+                    $data['course_module_base_assesment_id'] = $assementID;
+                    $data['assessment_name'] = $moduleBaseAssessment->assesment_name;
+                    $data['assessment_code'] = $moduleBaseAssessment->assesment_code;
+                    $data['created_by'] = auth()->user()->id;
+                    
+                    Assessment::create($data);
+                endforeach;
+            endif;
+        endif;
+        return response()->json(['res' => 'Modul creation successfully completed.'], 200);
     }
 
 }
