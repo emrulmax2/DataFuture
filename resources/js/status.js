@@ -37,7 +37,14 @@ var settingsListTable = (function () {
                     title: "Type",
                     field: "type",
                     headerHozAlign: "left",
-                },{
+                },
+                {
+                    title: "Process",
+                    field: "process",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                },
+                {
                     title: "Letter/Email",
                     field: "id",
                     headerSort: false,
@@ -183,6 +190,9 @@ var settingsListTable = (function () {
         let signatory_id = new TomSelect('#signatory_id', tomOptions);
         let edit_signatory_id = new TomSelect('#edit_signatory_id', tomOptions);
 
+        let process_list_id = new TomSelect('#process_list_id', tomOptions);
+        let edit_process_list_id = new TomSelect('#edit_process_list_id', tomOptions);
+
         const addSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSettingsModal"));
         const editSettingsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSettingsModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -200,6 +210,9 @@ var settingsListTable = (function () {
                 signatory_id.clear(true);
             });
             email_template_id.clear(true);
+
+            process_list_id.clear(true);
+            process_list_id.clearOptions(); 
         });
         
         const editSettingsModalEl = document.getElementById('editSettingsModal')
@@ -214,7 +227,47 @@ var settingsListTable = (function () {
                 edit_signatory_id.clear(true);
             });
             edit_email_template_id.clear(true);
+
+            edit_process_list_id.clear(true);
+            edit_process_list_id.clearOptions(); 
         });
+
+        $('#addSettingsForm #type').on('change', function(e){
+            var $theType = $(this);
+            var theType = $theType.val();
+
+            process_list_id.clear(true);
+            process_list_id.clearOptions(); 
+            process_list_id.disable(); 
+            if(theType != ''){
+                axios({
+                    method: "post",
+                    url: route('statuses.get.process'),
+                    data: {theType : theType},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    process_list_id.enable();
+                    if(response.status == 200){  
+                        $.each(response.data.res, function(index, row) {
+                            process_list_id.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        process_list_id.refreshOptions();
+                    }
+                }).catch(error => {
+                    process_list_id.enable();
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+            }
+        })
 
         $('#letter_set_id').on('change', function(e){
             email_template_id.clear(true);
@@ -317,6 +370,24 @@ var settingsListTable = (function () {
                         }else{
                             edit_email_template_id.clear(true);
                         }
+
+                        if(dataset.processes){
+                            edit_process_list_id.clear(true);
+                            edit_process_list_id.clearOptions(); 
+
+                            $.each(dataset.processes, function(index, row) {
+                                edit_process_list_id.addOption({
+                                    value: row.id,
+                                    text: row.name,
+                                });
+                            });
+                            if(dataset.process_list_id > 0){
+                                edit_process_list_id.addItem(dataset.process_list_id, true); 
+                            }
+                        }else{
+                            edit_process_list_id.clear(true);
+                            edit_process_list_id.clearOptions(); 
+                        }
                     }
                 })
                 .catch((error) => {
@@ -337,6 +408,43 @@ var settingsListTable = (function () {
                 edit_signatory_id.clear(true);
             });
         })
+
+        $('#editSettingsForm #type').on('change', function(e){
+            var $theType = $(this);
+            var theType = $theType.val();
+
+            edit_process_list_id.clear(true);
+            edit_process_list_id.clearOptions(); 
+            edit_process_list_id.disable(); 
+            if(theType != ''){
+                axios({
+                    method: "post",
+                    url: route('statuses.get.process'),
+                    data: {theType : theType},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    edit_process_list_id.enable();
+                    if(response.status == 200){  
+                        $.each(response.data.res, function(index, row) {
+                            edit_process_list_id.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        edit_process_list_id.refreshOptions();
+                    }
+                }).catch(error => {
+                    edit_process_list_id.enable();
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+            }
+        });
 
         // Update Course Data
         $("#editSettingsForm").on("submit", function (e) {

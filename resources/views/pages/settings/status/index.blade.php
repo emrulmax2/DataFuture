@@ -107,6 +107,12 @@
                             <div class="acc__input-error error-type text-danger mt-2"></div>
                         </div>  
                         <div class="mt-3">
+                            <label for="process_list_id" class="form-label">Process</label>
+                            <select id="process_list_id" placeholder="Select Process" name="process_list_id" class="w-full tom-selects">
+                                <option value="">Select Process</option>
+                            </select>
+                        </div>
+                        <div class="mt-3">
                             <label for="letter_set_id" class="form-label">Letter Template</label>
                             <select id="letter_set_id" placeholder="Select Template" name="letter_set_id" class="w-full tom-selects">
                                 <option value="">Please Select a Template</option>
@@ -189,6 +195,12 @@
                                 <option value="Student">Student</option>
                             </select>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_process_list_id" class="form-label">Process</label>
+                            <select id="edit_process_list_id" placeholder="Select Process" name="process_list_id" class="w-full tom-selects">
+                                <option value="">Select Process</option>
+                            </select>
                         </div>
                         <div class="mt-3">
                             <label for="edit_letter_set_id" class="form-label">Letter Template</label>

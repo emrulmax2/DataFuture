@@ -13,6 +13,7 @@ class Status extends Model
     protected $fillable = [
         'name',
         'type',
+        'process_list_id',
         'letter_set_id',
         'signatory_id',
         'email_template_id',
@@ -26,6 +27,10 @@ class Status extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    public function process(){
+        return $this->belongsTo(ProcessList::class, 'process_list_id', 'id');
+    }
 
     public function letter(){
         return $this->belongsTo(LetterSet::class, 'letter_set_id', 'id');

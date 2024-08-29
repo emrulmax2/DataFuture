@@ -80,6 +80,7 @@ use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
 use App\Models\StudentWorkPlacement;
+use App\Models\StudyMode;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +277,8 @@ class StudentController extends Controller
             'HighestQualificationOnEntrys' => HighestQualificationOnEntry::all(),
             'HesaQualificationSubjects' => HesaQualificationSubject::all(),
             'HesaExamSittingVenues' => HesaExamSittingVenue::all(),
+            'StudyModes' => StudyMode::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -310,6 +313,7 @@ class StudentController extends Controller
             "courseQualification" =>$courseCreationQualificationData,
             "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -327,6 +331,7 @@ class StudentController extends Controller
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -340,7 +345,8 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'docSettings' => DocumentSettings::where('live', '1')->get()
+            'docSettings' => DocumentSettings::where('live', '1')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -354,7 +360,8 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'terms' => TermDeclaration::orderBy('id', 'desc')->get()
+            'terms' => TermDeclaration::orderBy('id', 'desc')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -398,7 +405,8 @@ class StudentController extends Controller
             'applicantCompletedTask' => StudentTask::where('student_id', $studentId)->where('status', 'Completed')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
 
-            'processGroup' => $processGroup
+            'processGroup' => $processGroup,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -482,7 +490,8 @@ class StudentController extends Controller
             'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get(),
             'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
-            'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first()
+            'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -503,6 +512,7 @@ class StudentController extends Controller
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
             'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -689,7 +699,8 @@ class StudentController extends Controller
             "totalFullSetFeedList"=>$totalFullSetFeedList,
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
-            "attendanceFeedStatus" =>$attendanceFeedStatus
+            "attendanceFeedStatus" =>$attendanceFeedStatus,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -748,6 +759,7 @@ class StudentController extends Controller
             "term" =>$termData,
             "grades" =>$grades,
             "planDetails" => $planDetails ?? null,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -860,7 +872,8 @@ class StudentController extends Controller
             "totalFullSetFeedList"=>$totalFullSetFeedList,
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
-            "attendanceFeedStatus" =>$attendanceFeedStatus
+            "attendanceFeedStatus" =>$attendanceFeedStatus,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -896,7 +909,8 @@ class StudentController extends Controller
             'student' => $student,
             'company' => Company::orderBy('name', 'ASC')->get(),
             'work_hours' => StudentWorkPlacement::where('student_id', $student_id)->sum('hours'),
-            'placement' => StudentWorkPlacement::all()
+            'placement' => StudentWorkPlacement::all(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 

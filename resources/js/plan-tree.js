@@ -110,9 +110,9 @@ var classPlanTreeListTable = (function () {
             rowSelectionChanged:function(data, rows){
                 var ids = [];
                 if(rows.length > 0){
-                    $('#generateDaysBtn').fadeIn();
+                    $('#generateDaysBtn, #bulkCommunication').fadeIn();
                 }else{
-                    $('#generateDaysBtn').fadeOut();
+                    $('#generateDaysBtn, #bulkCommunication').fadeOut();
                 }
             },
             renderComplete() {
@@ -890,5 +890,29 @@ var classPlanTreeListTable = (function () {
         });
     });
     /* Plan Visibility Set */
+
+    /* Bulk Communication Start */
+    $('.classPlanTreeResultWrap').on('click', '#bulkCommunication', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var ids = [];
+        
+        $('#classPlanTreeListTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.classPlanId').val());
+        });
+
+        if(ids.length > 0){
+            var url_ids = ids.join('-');
+            window.location.href = route('bulk.communication', url_ids);
+        }else{
+            warningModalCP.show();
+            document.getElementById("warningModalCP").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModalCP .warningModalTitleCP").html("Error Found!");
+                $("#warningModalCP .warningModalDescCP").html('Selected plans id not foudn. Please select some plan first or contact with the site administrator.');
+            });
+        }
+    });
+    /* Bulk Communication End */
 
 })();

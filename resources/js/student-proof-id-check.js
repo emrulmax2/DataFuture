@@ -213,7 +213,7 @@ var studentProofOfIdCheckTable = (function () {
                 });      
                 
                 setTimeout(function(){
-                    successModal.show();
+                    successModal.hide();
                 }, 2000);
             }
         }).catch(error => {
@@ -288,7 +288,7 @@ var studentProofOfIdCheckTable = (function () {
                 });
                 
                 setTimeout(function(){
-                    successModal.show();
+                    successModal.hide();
                 }, 2000);
             }
             studentProofOfIdCheckTable.init();
@@ -312,7 +312,7 @@ var studentProofOfIdCheckTable = (function () {
                     });
                 
                     setTimeout(function(){
-                        successModal.show();
+                        successModal.hide();
                     }, 2000);
                 } else {
                     console.log("error");

@@ -170,13 +170,16 @@ class PlansDateListController extends Controller
                 $teaching_end_date = $end = (isset($term->teaching_end_date) && !empty($term->teaching_end_date) ? date('Y-m-d', strtotime($term->teaching_end_date)) : '');
                 $revision_start_date = $rstart = (isset($term->revision_start_date) && !empty($term->revision_start_date) ? date('Y-m-d', strtotime($term->revision_start_date)) : '');
                 $revision_end_date = $rend = (isset($term->revision_end_date) && !empty($term->revision_end_date) ? date('Y-m-d', strtotime($term->revision_end_date)) : '');
+
+                $term_start_date = $tstart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : $teaching_start_date);
+                $term_end_date = $tend = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : $teaching_end_date);
                 
                 if($plan->dates->count() > 0):
                     $errorIDs[] = $cp_id;
                 else:
-                    if($teaching_start_date != '' && $teaching_end_date != ''):
-                        $start = $teaching_start_date;
-                        $end = $teaching_end_date;
+                    if($term_start_date != '' && $term_end_date != ''):
+                        $start = $term_start_date;
+                        $end = $term_end_date;
                         while(strtotime($start) <= strtotime($end)):
                             $dayName = strtolower(date('D', strtotime($start)));
                             $bankHolidays = BankHoliday::where('academic_year_id', $academic_year_id)->where('start_date', '>=', $start)->where('end_date', '<=', $start)->get();

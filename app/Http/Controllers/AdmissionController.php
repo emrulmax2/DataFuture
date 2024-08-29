@@ -1712,7 +1712,7 @@ class AdmissionController extends Controller
         $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
 
         $letter_body = $request->letter_body;
-        $is_email_or_attachment = (isset($request->is_email_or_attachment) && $request->is_email_or_attachment > 0 ? $request->is_email_or_attachment : 1);
+        $is_email_or_attachment = 2;
 
         $signatory_id = $request->signatory_id;
 
@@ -1772,19 +1772,15 @@ class AdmissionController extends Controller
 
             $emailHTML = '';
             $emailHTML .= 'Dear '.$applicant->first_name.' '.$applicant->last_name.', <br/>';
-            if($is_email_or_attachment == 2):
-                $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
-
-                $attachmentFiles[] = [
-                    "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$generatedLetter['filename'],
-                    "nameinfo" => $generatedLetter['filename'],
-                    "mimeinfo" => 'application/pdf',
-                    'disk'     => 's3'
-                ];
-            else:
-                $emailHTML .= $letter_body;
-            endif;
+            $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
             $emailHTML .= $signatoryHTML;
+
+            $attachmentFiles[] = [
+                "pathinfo" => 'public/applicants/'.$applicant_id.'/'.$generatedLetter['filename'],
+                "nameinfo" => $generatedLetter['filename'],
+                "mimeinfo" => 'application/pdf',
+                'disk'     => 's3'
+            ];
 
             $configuration = [
                 'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
