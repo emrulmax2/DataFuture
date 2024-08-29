@@ -113,7 +113,7 @@ class TermModuleCreationController extends Controller
                 ['label' => 'Add', 'href' => 'javascript:void(0);']
             ],
             'instanceTerm' => InstanceTerm::find($instanceTermId),
-            'modules' => CourseModule::where('course_id', $courseId)->where('active', 1)->get(),
+            'modules' => CourseModule::where('course_id', $courseId)->where('active', 1)->orderBy('name','ASC')->get(),
             'instanceTermId' => $instanceTermId,
             'courseId' => $courseId,
         ]);
