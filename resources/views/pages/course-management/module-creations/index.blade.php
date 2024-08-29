@@ -29,7 +29,7 @@
                 <div class="mt-5  p-5">
                     <form method="post" id="classPlanAddForm" action="#">
                         <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-2">
+                            <div class="col-span-3">
                                 <label for="academic-year" class="form-label inline-flex">Academic Year <span class="text-danger">*</span><span  class="ml-2 h-4 w-4 mt-1 ">
                                     <svg id="academic-loading" class="w-full h-full" style="display: none" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
                                         <circle cx="15" cy="15" r="15">
@@ -56,7 +56,7 @@
                                 </select>
                                 <div class="acc__input-error error-academic_year_id text-danger mt-2" style="display: none;"></div>
                             </div>
-                            <div id="term-declaration__box" class="col-span-2 hidden intro-y">
+                            <div id="term-declaration__box" class="col-span-4 hidden intro-y">
                                 <label for="termDeclarationId" class="form-label  inline-flex">Term Name <span class="text-danger">*</span><span  class="ml-2 h-4 w-4 mt-1 ">
                                     <svg id="termDeclarationId-loading" class="w-full h-full" style="display: none" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
                                         <circle cx="15" cy="15" r="15">
@@ -78,7 +78,7 @@
                                 </select>
                                 <div class="acc__input-error error-term_declaration_id text-danger mt-2" style="display: none;"></div>
                             </div>
-                            <div id="course__box" class="col-span-2 hidden intro-y">
+                            <div id="course__box" class="col-span-5 hidden intro-y">
                                 <label for="course_creation_id" class="form-label  inline-flex">Course <span class="text-danger">*</span><span  class="ml-2 h-4 w-4 mt-1 ">
                                     <svg id="course_creation_id-loading" class="w-full h-full" style="display: none" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
                                         <circle cx="15" cy="15" r="15">
