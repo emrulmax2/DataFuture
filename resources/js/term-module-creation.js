@@ -8,14 +8,14 @@ import TomSelect from "tom-select";
 
 ("use strict");
 var termModuleCreationsListTable = (function () {
-    var _tableGen = function () {
+    var _tableGen = function (instance_term) {
         // Setup Tabulator
-        let courses = $("#courses").val() != "" ? $("#courses").val() : "";
-        let instance_term = $("#instance_term-mc").val() != "" ? $("#instance_term-mc").val() : "";
+        //let courses = $("#courses").val() != "" ? $("#courses").val() : "";
+        
 
         let tableContent = new Tabulator("#termModuleCreationsListTable", {
             ajaxURL: route("term.module.creation.list"),
-            ajaxParams: { courses: courses, instance_term: instance_term },
+            ajaxParams: { instance_term: instance_term },
             ajaxFiltering: true,
             ajaxSorting: false,
             printAsHtml: true,
@@ -128,8 +128,8 @@ var termModuleCreationsListTable = (function () {
         });
     };
     return {
-        init: function () {
-            _tableGen();
+        init: function (instance_term) {
+            _tableGen(instance_term);
         },
     };
 })();
@@ -268,7 +268,215 @@ var termModuleListTable = (function () {
 
 
 (function(){
+    let tomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: true,
 
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    var tomSelectList = []
+    $('.lccTom').each(function(){
+        if ($(this).attr("multiple") !== undefined) {
+            tomOptions = {
+                ...tomOptions,
+                plugins: {
+                    ...tomOptions.plugins,
+                    remove_button: {
+                        title: "Remove this item",
+                    },
+                }
+            };
+        }
+        tomSelectList.push(new TomSelect(this, tomOptions));
+    })
+    
+    if($('#academic-year').length > 0) {
+        // On reset filter form
+        $("#academic-year").on("change", function (event) {
+            let tthis = $(this)
+            let academicYearData = tthis.val()
+            tomSelectList[1].clear();
+
+            $('#term-declaration__box').hide();
+            $('#course__box').hide();
+            $('#group__box').hide();
+            $(".theSubmitArea").hide();
+
+            tomSelectList[1].clear(true); 
+            tomSelectList[1].clearOptions(); 
+            tomSelectList[2].clear(true); 
+            tomSelectList[2].clearOptions(); 
+            tomSelectList[3].clear(true);
+            tomSelectList[3].clearOptions(); 
+
+            if(academicYearData) {
+                tomSelectList[0].disable()
+                document.querySelector("svg#academic-loading").style.cssText = "display: inline-block;";
+                axios({
+                    method: "post",
+                    url: route('termdeclaration.list.by.academic.year'),
+                    data: {academicYear : academicYearData},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    tomSelectList[0].enable();
+                    document.querySelector("svg#academic-loading").style.cssText = "display: none;";
+            
+                    if(response.status == 200){   
+                        $.each(response.data.res, function(index, row) {
+                            tomSelectList[1].addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        tomSelectList[1].refreshOptions()
+                    }
+                }).catch(error => {
+                    tomSelectList[0].enable();
+                    document.querySelector("svg#academic-loading").style.cssText = "display: none;";
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+                $('#term-declaration__box').show();
+            } else {
+                $('#term-declaration__box').hide();
+                $('#course__box').hide();
+                $('#group__box').hide();
+            }
+        });
+
+        $("#term-declaration__box #termDeclarationId").on("change", function (event) {
+            let tthis = $(this);
+            let term_declaration_id = tthis.val();
+            let academicYearData = $("#academic-year").val();
+
+            $('#course__box').hide();
+            $('#group__box').hide();
+            $(".theSubmitArea").hide();
+
+            tomSelectList[2].clear(true);
+            tomSelectList[2].clearOptions();
+            tomSelectList[3].clear(true); 
+            tomSelectList[3].clearOptions();
+
+            if(term_declaration_id) {
+                tomSelectList[0].disable()
+                tomSelectList[1].disable()
+                document.querySelector("svg#termDeclarationId-loading").style.cssText = "display: inline-block;";
+
+                axios({
+                    method: "post",
+                    url: route('course.list.by.academic.term'),
+                    data: {academicYear : academicYearData, term_declaration_id: term_declaration_id},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    tomSelectList[0].enable()
+                    tomSelectList[1].enable()
+                    document.querySelector("svg#termDeclarationId-loading").style.cssText = "display: none;";
+
+                    if(response.status == 200){
+                        tomSelectList[2].clearOptions();    
+
+                        $.each(response.data.res, function(index, row) {
+                            tomSelectList[2].addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        tomSelectList[2].refreshOptions()
+                    }
+                }).catch(error => {
+                    tomSelectList[0].enable()
+                    tomSelectList[1].enable()
+                    document.querySelector("svg#termDeclarationId-loading").style.cssText = "display: none;";
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+                $('#course__box').show();
+            } else {
+                $('#course__box').hide();
+                $('#group__box').hide();
+            }
+
+        });
+
+        $("#course__box #course_creation_id").on("change", function (event) {
+            let tthis = $(this);
+            let course_creation_id = tthis.val();
+            let academicYearData = $("#academic-year").val();
+            let term_declaration_id = $("#termDeclarationId").val();
+
+            $('#group__box').hide();
+            $(".theSubmitArea").hide();
+             
+            tomSelectList[3].clear(true);
+            tomSelectList[3].clearOptions();
+
+            if(term_declaration_id) {
+                tomSelectList[0].disable();
+                tomSelectList[1].disable();
+                tomSelectList[2].disable();
+                document.querySelector("svg#course_creation_id-loading").style.cssText = "display: inline-block;";
+                //getInstanceTermsListByAcademicTermCourse
+                axios({
+                    method: "post",
+                    url: route('instanceterm.list.by.academic.term.course'),
+                    data: {academicYear : academicYearData, term_declaration_id: term_declaration_id, course_creation_id : course_creation_id},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    tomSelectList[0].enable()
+                    tomSelectList[1].enable()
+                    tomSelectList[2].enable();
+                    document.querySelector("svg#course_creation_id-loading").style.cssText = "display: none;";
+                    let instance_terms = response.data.res
+                     termModuleCreationsListTable.init(instance_terms[0])
+                }).catch(error => {
+                    tomSelectList[0].enable()
+                    tomSelectList[1].enable()
+                    tomSelectList[2].enable();
+                    document.querySelector("svg#course_creation_id-loading").style.cssText = "display: none;";
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+                //$('#group__box').show();
+            } else {
+                $('#group__box').hide();
+            }
+
+        });
+        
+        $("#group__box #group_id").on("change", function (event) {
+            var $group_id = $(this);
+            var group_id = $group_id.val();
+
+            if(group_id > 0){
+                $(".theSubmitArea").show();
+            }else{
+                $(".theSubmitArea").hide();
+            }
+        });
+    }
     if($("#confirmModalPlanTask").length > 0) {
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModalPlanTask = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalPlanTask"));
@@ -1016,39 +1224,39 @@ var termModuleListTable = (function () {
 
     if($("#termModuleCreationsListTable").length) {
         // Init Table
-        termModuleCreationsListTable.init();
+        //termModuleCreationsListTable.init();
 
         // Filter function
-        function filterHTMLForm() {
-            termModuleCreationsListTable.init();
-        }
+        // function filterHTMLForm() {
+        //     termModuleCreationsListTable.init();
+        // }
 
         // On submit filter form
-        $("#tabulatorFilterForm-mc")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLForm();
-                }
-            }
-        );
+        // $("#tabulatorFilterForm-mc")[0].addEventListener(
+        //     "keypress",
+        //     function (event) {
+        //         let keycode = event.keyCode ? event.keyCode : event.which;
+        //         if (keycode == "13") {
+        //             event.preventDefault();
+        //             filterHTMLForm();
+        //         }
+        //     }
+        // );
 
-        // On click go button
-        $("#tabulator-html-filter-go-mc").on("click", function (event) {
-            filterHTMLForm();
-        });
+        // // On click go button
+        // $("#tabulator-html-filter-go-mc").on("click", function (event) {
+        //     filterHTMLForm();
+        // });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-mc").on("click", function (event) {
-            $("#query-mc").val("");
-            $("#status-mc").val("1");
-            $("#instance_term-mc").val("");
-            $("#course_module-mc").val("");
-            $("#module_level-mc").val("");
-            filterHTMLForm();
-        });
+        // $("#tabulator-html-filter-reset-mc").on("click", function (event) {
+        //     $("#query-mc").val("");
+        //     $("#status-mc").val("1");
+        //     $("#instance_term-mc").val("");
+        //     $("#course_module-mc").val("");
+        //     $("#module_level-mc").val("");
+        //     filterHTMLForm();
+        // });
 
 
         /*const addModuleCreationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModuleCreationModal"));

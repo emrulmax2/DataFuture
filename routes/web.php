@@ -657,6 +657,7 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/get-term-declaration', 'getTermDeclarationByAcademicYear')->name('termdeclaration.list.by.academic.year');
         Route::post('course-management/plans/get-course-list', 'getCourseByAcademicTerm')->name('course.list.by.academic.term');
         Route::post('course-management/plans/get-group-list', 'getGroupByAcademicTermCourse')->name('group.list.by.academic.term.course');
+        Route::post('course-management/plans/get-instanceterm-list', 'getInstanceTermsListByAcademicTermCourse')->name('instanceterm.list.by.academic.term.course');
 
         Route::post('course-management/plans/get-filtered-group', 'getFilteredGroup')->name('class.plan.get.group.filter');
     });

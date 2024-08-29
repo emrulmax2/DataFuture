@@ -4,6 +4,7 @@ namespace App\Http\Controllers\CourseManagement;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\IndividualModulCreationRequest;
+use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use App\Models\ModuleCreation;
 use App\Models\InstanceTerm;
@@ -15,6 +16,8 @@ use App\Models\CourseModuleBaseAssesment;
 use App\Models\ELearningActivitySetting;
 use App\Models\PlanTask;
 use App\Models\Semester;
+use App\Models\TermDeclaration;
+use App\Models\TermType;
 use Illuminate\Support\Facades\DB;
 
 class TermModuleCreationController extends Controller
@@ -28,14 +31,18 @@ class TermModuleCreationController extends Controller
                 ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Term Modules', 'href' => 'javascript:void(0);']
             ],
-            'terms' => InstanceTerm::orderBy('id', 'DESC')->get(),
-            'courses' => Course::orderBy('name', 'ASC')->get(),
-            'semesters' => Semester::orderBy('name', 'ASC')->get()
+
+            'semesters' => Semester::orderBy('name', 'ASC')->get(),
+            'courses' => Course::all(),
+            'academic_years' =>AcademicYear::orderBy('to_date','desc')->get(),
+            'termDeclaration' => TermDeclaration::all(),
+            'termType' => TermType::all(),
+            'terms' => InstanceTerm::all(),
         ]);
     }
 
     public function list(Request $request){
-        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : 0);
+        //$courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : 0);
         $instance_term = (isset($request->instance_term) && $request->instance_term > 0 ? $request->instance_term : 0);
 
         $query = DB::table('instance_terms as it')
@@ -46,9 +53,9 @@ class TermModuleCreationController extends Controller
                     ->leftJoin('course_creations as cc', 'cci.course_creation_id', '=', 'cc.id')
                     ->leftJoin('courses as c', 'cc.course_id', '=', 'c.id')
                     ->leftJoin('semesters as s', 'cc.semester_id', '=', 's.id');
-        if($courses > 0):
-            $query->where('c.id', '=', $courses);
-        endif;
+        // if($courses > 0):
+        //     $query->where('c.id', '=', $courses);
+        // endif;
         if($instance_term > 0):
             $query->where('it.id', '=', $instance_term);
         endif;
