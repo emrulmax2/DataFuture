@@ -921,8 +921,8 @@ class StudentController extends Controller
         $row_id = $request->row_id;
 
         $studentDoc = StudentDocument::find($row_id);
-        $applicant_id = $studentDoc->student->applicant_id;
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        $student_id = $studentDoc->student_id;
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }
 
