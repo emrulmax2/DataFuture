@@ -19,6 +19,7 @@ use App\Models\CourseCreationAvailability;
 use App\Models\Role;
 use App\Models\StudentUser;
 use App\Models\UserRole;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessStudents implements ShouldQueue
 {
@@ -64,6 +65,7 @@ class ProcessStudents implements ShouldQueue
 
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        
         $student = new Student();
         $applicantArray = [
             'applicant_id' => $this->applicant->id,
@@ -89,6 +91,20 @@ class ProcessStudents implements ShouldQueue
         $student->fill($applicantArray);
 
         $student->save();
+
+        $sourceDir = 'public/applicants/'.$this->applicant->id;
+        $destinationDir = 'public/students/'.$student->id;
+
+        Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
+
+        
+
+            $files = Storage::disk('s3')->files($sourceDir);
+
+            foreach ($files as $file) {
+                $filename = basename($file);
+                Storage::copy($file, $destinationDir . '/' . $filename);
+            }
 
     }
 }

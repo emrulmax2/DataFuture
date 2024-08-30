@@ -67,7 +67,7 @@ class ProcessStudentTask implements ShouldQueue
             $dataTask->save();
         endforeach;  
 
-        $autoProcess = ProcessList::where('auto_feed', 'Yes')->orderBy('id', 'DESC')->get()->first();
+        $autoProcess = ProcessList::where('auto_feed', 'Yes')->where('phase','Live')->orderBy('id', 'DESC')->get()->first();
         if(isset($autoProcess->id) && $autoProcess->id > 0):
             $newStudentTasks = TaskList::where('process_list_id', $autoProcess->id)->orderBy('id', 'ASC')->get();
             if(!empty($newStudentTasks) && $newStudentTasks->count() > 0):

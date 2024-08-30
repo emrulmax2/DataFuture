@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('student_other_details', function (Blueprint $table) {
             $table->unsignedBigInteger('study_mode_id')->default(1)->nullable()->after('hesa_gender_id');
-            $table->foreign('study_mode_id')->references('id')->on('study_modes')->onDelete('set null')->onUpdate('set null');
+           // $table->foreign('study_mode_id')->references('id')->on('study_modes')->onDelete('set null')->onUpdate('set null');
         });
     }
 
