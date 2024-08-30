@@ -19,6 +19,7 @@ use App\Models\CourseCreationAvailability;
 use App\Models\Role;
 use App\Models\StudentUser;
 use App\Models\UserRole;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Storage;
 
 class ProcessStudents implements ShouldQueue
@@ -101,9 +102,11 @@ class ProcessStudents implements ShouldQueue
 
             $files = Storage::disk('s3')->files($sourceDir);
 
+            Debugbar::warning($files);
             foreach ($files as $file) {
                 $filename = basename($file);
-                Storage::copy($file, $destinationDir . '/' . $filename);
+                Debugbar::warning($filename);
+                Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
             }
 
     }
