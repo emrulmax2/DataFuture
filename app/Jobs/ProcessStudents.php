@@ -52,7 +52,7 @@ class ProcessStudents implements ShouldQueue
             $year = date('Y', strtotime($availibility->admission_end_date));
             $temRegistrationNo = 'LCC'.$year;
 
-            $regedStudent = Student::where('registration_no', 'LIKE', '%'.$temRegistrationNo.'%')->orderBy('id', 'DESC')->get()->first();
+            $regedStudent = Student::where('registration_no', 'LIKE', '%'.$temRegistrationNo.'%')->orderBy('registration_no', 'DESC')->get()->first();
             if(isset($regedStudent->registration_no) && !empty($regedStudent->registration_no)):
                 $lastRegNo = substr($regedStudent->registration_no, -4);
                 $newRegNo = sprintf('%04d', intval($lastRegNo) + 1);
