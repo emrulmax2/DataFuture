@@ -172,6 +172,12 @@
                         <div class="col-span-8 font-medium">{{ isset($student->registration_no) && !empty($student->registration_no) ? $student->registration_no : '---' }}</div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">Study Modes</div>
+                        <div class="col-span-8 font-medium">{{ isset($student->other->mode->name) && !empty($student->other->mode->name) ? $student->other->mode->name : '---' }}</div>
+                    </div>
+                </div>
             </div>
 
             <div class="font-medium text-base mt-5 pt-5">Proof Of ID Checks</div>

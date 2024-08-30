@@ -20,6 +20,7 @@ use App\Models\StudentDocument;
 use App\Models\StudentTask;
 use App\Models\StudentTaskDocument;
 use App\Models\StudentUser;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessStudentTaskDocument implements ShouldQueue
 {
@@ -48,6 +49,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
         //--BEGIN: Student Document Sync
         $applicantTaskidList = [];
         $studentDocumentList = [];
+
         foreach($this->applicant->allTasks as $applicantTaskData):
             //Applicant Task wise Document capture
             $applicantTaskDocumentData = ApplicantTaskDocument::where(['applicant_task_id'=>$applicantTaskData->id])->get();
@@ -59,6 +61,8 @@ class ProcessStudentTaskDocument implements ShouldQueue
                     //find the document and put it in student document
                     // then insert it into studentDocument and applicantTaskDocument
                     //DB::enableQueryLog();
+
+                   
                     if($applicantDocument!=null) {
                         $studentDocument = new StudentDocument();
                         $applicantArray = [
@@ -79,6 +83,8 @@ class ProcessStudentTaskDocument implements ShouldQueue
                         $studentDocument->save();
                         //endDocuemnt saved
                         $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
+                        Storage::disk('s3')->copy('public/applicants/'.$this->applicant->id.'/'.$applicantDocument->current_file_name, 'public/students/'.$student->id.'/'.$applicantDocument->current_file_name);
+
                     }
                 endforeach;
                 

@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\GenerateStudentLetterTrait;
 
+use App\Exports\ArrayCollectionExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class LetterController extends Controller
 {
     use GenerateStudentLetterTrait;
@@ -47,7 +50,7 @@ class LetterController extends Controller
         $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
 
         $letter_body = $request->letter_body;
-        $is_email_or_attachment = (isset($request->is_email_or_attachment) && $request->is_email_or_attachment > 0 ? $request->is_email_or_attachment : 1);
+        $is_email_or_attachment = 2;
 
         $signatory_id = $request->signatory_id;
 
@@ -106,19 +109,15 @@ class LetterController extends Controller
 
             $emailHTML = '';
             $emailHTML .= 'Dear '.$student->first_name.' '.$student->last_name.', <br/>';
-            if($is_email_or_attachment == 2):
-                $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
-
-                $attachmentFiles[] = [
-                    "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
-                    "nameinfo" => $generatedLetter['filename'],
-                    "mimeinfo" => 'application/pdf',
-                    "disk" => 's3'
-                ];
-            else:
-                $emailHTML .= $letter_body;
-            endif;
+            $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
             $emailHTML .= $signatoryHTML;
+
+            $attachmentFiles[] = [
+                "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
+                "nameinfo" => $generatedLetter['filename'],
+                "mimeinfo" => 'application/pdf',
+                "disk" => 's3'
+            ];
 
             $configuration = [
                 'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
@@ -244,5 +243,52 @@ class LetterController extends Controller
         $studentLetterDoc = StudentLettersDocument::find($row_id);
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentLetterDoc->student_id.'/'.$studentLetterDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
+    }
+
+    public function studentExportLetterTags(){
+        $letterSet = LetterSet::orderBy('id', 'ASC')->get();
+        $letterTags = [];
+        if(!empty($letterSet)):
+            foreach($letterSet as $ls):
+                $tags = $this->perseLetterData($ls->description);
+                $letterTags = ($tags ? array_merge($letterTags, $tags) : $letterTags);
+            endforeach;
+        endif;
+
+        $theCollection = [];
+        $theCollection[1][0] = 'Old Tag';
+        $theCollection[1][1] = 'New Tag';
+        $theCollection[1][2] = 'Status';
+
+        $row = 2;
+        if(!empty($letterTags)):
+            foreach($letterTags as $tag):
+                $theCollection[$row][0] = '[DATA '.(isset($tag[0]) && !empty($tag[0]) ? $tag[0] : '').']'.(isset($tag[1]) && !empty($tag[1]) ? $tag[1] : '').'[/DATA]';
+                $theCollection[$row][1] = '';
+                $theCollection[$row][2] = '';
+                $row++;
+            endforeach;
+        endif;
+
+        return Excel::download(new ArrayCollectionExport($theCollection), 'Student_Letters_Tags.xlsx');
+    }
+
+    public function perseLetterData($content){
+        preg_match_all('/\[DATA=(.*?)\](.*?)\[\/DATA\]/', $content, $matches, PREG_SET_ORDER);
+
+        $lists = [];
+        $i = 0;
+        foreach ($matches as $val):
+
+            if (!isset($lists[$i])):
+                $lists[$i] = array();
+                $lists[$i] = array_merge($lists[$i], array($val[1], $val[2]));
+            else:
+                $lists[$i] = array_merge($lists[$i], array($val[1], $val[2]));
+            endif;
+            $i++;
+        endforeach;
+
+        return (!empty($lists) && count($lists) ? $lists : false);
     }
 }

@@ -78,7 +78,7 @@ class ProcessController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 's3');
+        $path = $document->storeAs('public/students/'.$student_id, $imageName, 's3');
         $data = [];
         $data['student_id'] = $student_id;
         $data['hard_copy_check'] = 0;

@@ -39,8 +39,8 @@ class SlcCocController extends Controller
 
         if($slcCoc && $request->hasFile('document')):
             foreach($request->file('document') as $file):
-                $documentName = 'COC_'.$student->applicant_id.'_'.time().'.'.$file->extension();
-                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 's3');
+                $documentName = 'COC_'.$studen_id.'_'.time().'.'.$file->extension();
+                $path = $file->storeAs('public/students/'.$studen_id, $documentName, 's3');
 
                 $data = [];
                 $data['student_id'] = $studen_id;
@@ -93,8 +93,8 @@ class SlcCocController extends Controller
 
         if($request->hasFile('document')):
             foreach($request->file('document') as $file):
-                $documentName = 'COC_'.$student->applicant_id.'_'.time().'.'.$file->extension();
-                $path = $file->storeAs('public/applicants/'.$student->applicant_id, $documentName, 's3');
+                $documentName = 'COC_'.$studen_id.'_'.time().'.'.$file->extension();
+                $path = $file->storeAs('public/students/'.$studen_id, $documentName, 's3');
 
                 $data = [];
                 $data['student_id'] = $studen_id;
@@ -130,8 +130,8 @@ class SlcCocController extends Controller
 
         $slcDocuments = SlcCocDocument::where('student_id', $student_id)->where('student_document_id', $coc_id)->where('student_document_id', $document_id)->forceDelete();
         if(isset($doc->id) && $doc->id > 0):
-            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name)):
-                Storage::disk('s3')->delete('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name);
+            if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name)):
+                Storage::disk('s3')->delete('public/students/'.$student->id.'/'.$doc->current_file_name);
             endif;
             StudentDocument::where('id', $document_id)->forceDelete();
         endif;

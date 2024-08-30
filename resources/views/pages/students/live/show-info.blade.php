@@ -4,6 +4,9 @@
             <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
                 {{ $student->status->name }}
             </button>
+            <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary w-auto text-white tooltip" title="Change Status">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+            </button>
             <!-- <a style="float: right;" href="{{ route('applicantprofile.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-success text-white w-auto">Download Pdf</a> -->
             <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
         </div>
@@ -148,3 +151,90 @@
         </div>
     </div>
     <!-- END: Import Modal -->
+
+    <!-- BEGIN: Status Change Modal -->
+    <div id="changeStudentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="changeStudentForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Change Student Status</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="change_status_id" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="change_status_id" name="status_id" class="tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(isset($statuses))
+                                    @foreach($statuses as $stst)
+                                        <option {{ ($stst->id == $student->status_id ? 'Selected' : '') }} value="{{ $stst->id }}">{{ $stst->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="term_declaration_id" class="form-label">Term</label>
+                            <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if($student->assigned_terms && !empty($student->assigned_terms) && $student->assigned_terms->count() > 0)
+                                    @foreach($student->assigned_terms as $term)
+                                        <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3">
+                            <label for="status_change_reason" class="form-label">Change Reason</label>
+                            <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3"></textarea>
+                        </div>
+                        <div class="mt-3">
+                            <label for="status_change_date" class="form-label">Change Date <span class="text-danger">*</span></label>
+                            <input type="text" name="status_change_date" id="status_change_date" value="<?php echo date('d-m-Y') ?>" class="form-control w-full datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateStatusBtn" class="btn btn-primary w-auto">
+                            Update Status
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Status Change Modal -->
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="successModalInfo" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalInfoTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalInfoDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="successCloser btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->

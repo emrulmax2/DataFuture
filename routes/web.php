@@ -103,6 +103,7 @@ use App\Http\Controllers\AssessmentTypeController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\AttendanceLiveController;
+use App\Http\Controllers\Communication\BulkCommunicationController;
 use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
@@ -657,6 +658,7 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/get-term-declaration', 'getTermDeclarationByAcademicYear')->name('termdeclaration.list.by.academic.year');
         Route::post('course-management/plans/get-course-list', 'getCourseByAcademicTerm')->name('course.list.by.academic.term');
         Route::post('course-management/plans/get-group-list', 'getGroupByAcademicTermCourse')->name('group.list.by.academic.term.course');
+        Route::post('course-management/plans/get-instanceterm-list', 'getInstanceTermsListByAcademicTermCourse')->name('instanceterm.list.by.academic.term.course');
 
         Route::post('course-management/plans/get-filtered-group', 'getFilteredGroup')->name('class.plan.get.group.filter');
     });
@@ -685,6 +687,8 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plan-dates/store', 'store')->name('plan.dates.store'); 
         Route::delete('course-management/plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
         Route::post('course-management/plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
+
+        Route::post('course-management/plan-dates/bulk/', 'planDatesBulkActions')->name('plan.dates.bulk.action');
     });
 
     Route::controller(StudentController::class)->group(function() {
@@ -726,6 +730,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
 
         //Route::get('student/student-copy-profile-photo/{page}/{limit}','studentCopyProfilePhoto')->name('student.copy.profile.photo');
+
+        Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -789,6 +795,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/restore-letter', 'restore')->name('student.letter.restore');
 
         Route::post('student/download-letter', 'studentLetterDownload')->name('student.letter.download');
+
+        //Route::get('student/export-letter-tags', 'studentExportLetterTags')->name('student.export.letter.tags');
     });
 
     Route::controller(EmailController::class)->group(function() {
@@ -1718,6 +1726,8 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/statuses/update', 'update')->name('statuses.update');
         Route::delete('site-settings/statuses/delete/{id}', 'destroy')->name('statuses.destory');
         Route::post('site-settings/statuses/restore/{id}', 'restore')->name('statuses.restore');
+
+        Route::post('site-settings/statuses/get-process', 'getProcess')->name('statuses.get.process');
     });
 
     Route::controller(DocumentSettingsController::class)->group(function() {
@@ -2643,5 +2653,19 @@ Route::middleware('auth')->group(function() {
     Route::controller(ApplicationAnalysisController::class)->group(function(){
         Route::any('reports/application-analysis-report', 'index')->name('report.application.analysis'); 
         Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
+    });
+
+    Route::controller(BulkCommunicationController::class)->group(function(){
+        Route::get('bulk-communication/communication/{classplans}', 'index')->name('bulk.communication'); 
+        Route::get('bulk-communication/list', 'list')->name('bulk.communication.student.list'); 
+
+        Route::post('bulk-communication/get-sms-template', 'getSmsTemplate')->name('bulk.communication.get.sms.template'); 
+        Route::post('bulk-communication/send-sms', 'sendSms')->name('bulk.communication.send.sms'); 
+
+        Route::post('bulk-communication/get-email-template', 'getEmailTemplate')->name('bulk.communication.get.mail.template'); 
+        Route::post('bulk-communication/send-email', 'sendEmail')->name('bulk.communication.send.email'); 
+
+        Route::post('bulk-communication/get-letter-template', 'getLetterTemplate')->name('bulk.communication.get.letter.set'); 
+        Route::post('bulk-communication/send-letter', 'sendLetter')->name('bulk.communication.send.letter'); 
     });
 });

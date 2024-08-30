@@ -255,6 +255,17 @@
                             <input type="text" id="registration_no" class="form-control w-full" name="registration_no" value="{{ $student->registration_no }}" placeholder="DF SID Number">
                             <div class="acc__input-error error-registration_no text-danger mt-2"></div>
                         </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="study_mode_id" class="form-label">Study Mode</label>
+                            <select name="study_mode_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if($StudyModes->count() > 0)
+                                    @foreach($StudyModes as $stm)
+                                        <option {{ isset($student->other->study_mode_id) && $student->other->study_mode_id == $stm->id ? 'Selected' : '' }} value="{{ $stm->id }}">{{ $stm->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

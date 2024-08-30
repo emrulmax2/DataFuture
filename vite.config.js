@@ -253,6 +253,8 @@ export default defineConfig({
 
                 'resources/js/application-analysis.js',
                 
+                'resources/js/bulk-communication.js',
+                
             ],
             refresh: true,
         }),

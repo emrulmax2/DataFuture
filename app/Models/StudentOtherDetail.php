@@ -21,6 +21,7 @@ class StudentOtherDetail extends Model
         'hesa_gender_id',
         'sexual_orientation_id',
         'religion_id',
+        'study_mode_id',
         'created_by',
         'updated_by',
     ];
@@ -50,5 +51,9 @@ class StudentOtherDetail extends Model
 
     public function religion(){
         return $this->belongsTo(Religion::class, 'religion_id');
+    }
+
+    public function mode(){
+        return $this->belongsTo(StudyMode::class, 'study_mode_id');
     }
 }

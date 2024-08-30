@@ -303,6 +303,7 @@ class PlanTreeController extends Controller
                                 </g>
                             </svg>
                         </button>';
+                        $html .= '<button type="button" id="bulkCommunication"  style="display: none;" class="btn btn-facebook shadow-md mr-2 w-auto text-white">Bulk Communication</button>';
                         $html .= '<a href="'.route('assign', [$academicYearId, $termDeclaredData, $courseId, $group->id]).'" id="assignStudent" class="btn btn-success shadow-md mr-2 w-auto text-white"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Assign / Deassignned Students</a>';
                     $html .= '</div>';
                 $html .= '</div>';

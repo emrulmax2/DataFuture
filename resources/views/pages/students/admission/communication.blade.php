@@ -262,7 +262,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <div class="modal-footer-left pt-2" style="float: left;">
+                        {{--<div class="modal-footer-left pt-2" style="float: left;">
                             <div class="flex flex-col sm:flex-row">
                                 <div class="form-check mr-5">
                                     <input checked id="is_send_email" name="is_email_or_attachment" class="form-check-input" type="radio" value="1">
@@ -273,7 +273,7 @@
                                     <label class="form-check-label" for="is_send_attachment">Send Attachment</label>
                                 </div>
                             </div>
-                        </div>
+                        </div>--}}
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
                             Send Letter                      

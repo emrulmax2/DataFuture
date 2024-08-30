@@ -103,6 +103,8 @@ var liveStudentsListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                
+                $(document).find('.autoFillDropdown').html('').fadeOut();
             },
             rowClick:function(e, row){
                 window.open(row.getData().url, '_blank');

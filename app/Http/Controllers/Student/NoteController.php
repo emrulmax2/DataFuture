@@ -145,8 +145,8 @@ class NoteController extends Controller
         $student = Student::find($theNote->student_id);
         $studentApplicantId = $student->applicant_id;
         $docURL = '';
-        if(isset($theNote->student_document_id) && isset($theNote->document) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name)):
-            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('s3')->url('public/applicants/'.$studentApplicantId.'/'.$theNote->document->current_file_name) : '');
+        if(isset($theNote->student_document_id) && isset($theNote->document) && Storage::disk('s3')->exists('public/students/'.$theNote->student_id.'/'.$theNote->document->current_file_name)):
+            $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('s3')->url('public/students/'.$theNote->student_id.'/'.$theNote->document->current_file_name) : '');
         endif;
         $theNote['docURL'] = $docURL;
 

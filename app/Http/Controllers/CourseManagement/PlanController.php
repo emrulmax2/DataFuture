@@ -1003,7 +1003,7 @@ class PlanController extends Controller
         endif;
     }
 
-    public function getGroupByAcademicTermCourse(Request $request){
+    public function getGroupByAcademicTermCourse(Request $request) {
         $academicYear = $request->academicYear;
         $term_declaration_id = $request->term_declaration_id;
         $course_creation_id = $request->course_creation_id;
@@ -1025,6 +1025,54 @@ class PlanController extends Controller
                 endif;
             endforeach;
         endif;
+
+        if(!empty($data)):
+            return response()->json(['res' => $data], 200);
+        else:
+            return response()->json(['res' => ''], 304);
+        endif;
+    }
+
+
+    
+    public function getInstanceTermsListByAcademicTermCourse(Request $request){
+
+        // get the correct instance instance_term is the correct result
+
+        $academicYear = $request->academicYear;
+        $term_declaration_id = $request->term_declaration_id;
+        $course_creation_id = $request->course_creation_id;
+        $course_id = CourseCreation::find($course_creation_id)->course_id;
+        $data = [];
+        $i = 0;
+        $CourseCreationInstanceData = CourseCreationInstance::where('course_creation_id', $course_creation_id)->where('academic_year_id', $academicYear)->get();
+        if(!empty($CourseCreationInstanceData)):
+            foreach ($CourseCreationInstanceData as $courseCreationInstance):
+                $courseCreationInstanceTerms = InstanceTerm::where('term_declaration_id', $term_declaration_id)->where('course_creation_instance_id',$courseCreationInstance->id)->get();
+                if(!empty($courseCreationInstanceTerms))
+                    foreach ($courseCreationInstanceTerms as $courseCreationInstanceTerm):
+                       
+                        $data[$i++] = $courseCreationInstanceTerm->id;
+                    endforeach;
+            endforeach;
+        endif;    
+        
+        sort($data);
+        //$groups = Group::where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->orderBy('name', 'ASC')->get();
+        // $groups = DB::table('groups')->select('name')->where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)
+        //           ->where('active', 1)
+        //           ->groupBy('name')->orderBy('name', 'ASC')->get();
+        // if(!empty($groups)):
+        //     $i = 1;
+        //     foreach($groups as $gr):
+        //         $group = Group::where('name', $gr->name)->where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+        //         if(!empty($group)):
+        //             $data[$i]['id'] = $group->id;
+        //             $data[$i]['name'] = $group->name;
+        //         $i++;   
+        //         endif;
+        //     endforeach;
+        // endif;
 
         if(!empty($data)):
             return response()->json(['res' => $data], 200);

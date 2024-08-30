@@ -74,6 +74,10 @@ class PersonalDetailController extends Controller
     public function updateOtherIdentificationDetails(StudentOtherIdentificationUpdateRequest $request){
         $student_id = $request->student_id;
         $studentOldRow = Student::find($student_id);
+        $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();
+
+        $study_mode_id = (isset($request->study_mode_id) && $request->study_mode_id > 0 ? $request->study_mode_id : null);
+        $request->request->remove('ethnicity_id');
 
         $student = Student::find($student_id);
         $student->fill($request->input());
@@ -87,6 +91,27 @@ class PersonalDetailController extends Controller
                 $data['table'] = 'students';
                 $data['field_name'] = $field;
                 $data['field_value'] = $studentOldRow->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+        endif;
+
+        $otherDetails = StudentOtherDetail::where('student_id', $student_id)->first();
+        $otherDetails->fill([
+            'study_mode_id' => $study_mode_id
+        ]);
+        $changes = $otherDetails->getDirty();
+        $otherDetails->save();
+
+        if($otherDetails->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'student_other_details';
+                $data['field_name'] = $field;
+                $data['field_value'] = $otherDetailsOldRow->$field;
                 $data['field_new_value'] = $value;
                 $data['created_by'] = auth()->user()->id;
 

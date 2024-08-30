@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentUpdateStatusRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\AcademicYear;
@@ -66,6 +67,7 @@ use App\Models\SmsTemplate;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentConsent;
 use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
@@ -80,6 +82,8 @@ use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
 use App\Models\StudentWorkPlacement;
+use App\Models\StudyMode;
+use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +280,8 @@ class StudentController extends Controller
             'HighestQualificationOnEntrys' => HighestQualificationOnEntry::all(),
             'HesaQualificationSubjects' => HesaQualificationSubject::all(),
             'HesaExamSittingVenues' => HesaExamSittingVenue::all(),
+            'StudyModes' => StudyMode::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -310,6 +316,7 @@ class StudentController extends Controller
             "courseQualification" =>$courseCreationQualificationData,
             "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -327,6 +334,7 @@ class StudentController extends Controller
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -340,7 +348,8 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'docSettings' => DocumentSettings::where('live', '1')->get()
+            'docSettings' => DocumentSettings::where('live', '1')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -354,7 +363,8 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'terms' => TermDeclaration::orderBy('id', 'desc')->get()
+            'terms' => TermDeclaration::orderBy('id', 'desc')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -398,7 +408,8 @@ class StudentController extends Controller
             'applicantCompletedTask' => StudentTask::where('student_id', $studentId)->where('status', 'Completed')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
 
-            'processGroup' => $processGroup
+            'processGroup' => $processGroup,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -482,7 +493,8 @@ class StudentController extends Controller
             'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get(),
             'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
-            'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first()
+            'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -503,6 +515,7 @@ class StudentController extends Controller
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
             'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -689,7 +702,8 @@ class StudentController extends Controller
             "totalFullSetFeedList"=>$totalFullSetFeedList,
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
-            "attendanceFeedStatus" =>$attendanceFeedStatus
+            "attendanceFeedStatus" =>$attendanceFeedStatus,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -748,6 +762,7 @@ class StudentController extends Controller
             "term" =>$termData,
             "grades" =>$grades,
             "planDetails" => $planDetails ?? null,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -860,7 +875,8 @@ class StudentController extends Controller
             "totalFullSetFeedList"=>$totalFullSetFeedList,
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
-            "attendanceFeedStatus" =>$attendanceFeedStatus
+            "attendanceFeedStatus" =>$attendanceFeedStatus,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -896,7 +912,8 @@ class StudentController extends Controller
             'student' => $student,
             'company' => Company::orderBy('name', 'ASC')->get(),
             'work_hours' => StudentWorkPlacement::where('student_id', $student_id)->sum('hours'),
-            'placement' => StudentWorkPlacement::all()
+            'placement' => StudentWorkPlacement::all(),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
 
@@ -904,8 +921,8 @@ class StudentController extends Controller
         $row_id = $request->row_id;
 
         $studentDoc = StudentDocument::find($row_id);
-        $applicant_id = $studentDoc->student->applicant_id;
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        $student_id = $studentDoc->student_id;
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }
 
@@ -1048,7 +1065,7 @@ class StudentController extends Controller
                                 $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
                             $PDFHTML .= '</td>';
                             $PDFHTML .= '<td class="text-right">';
-                                $PDFHTML .= '<img style="height: 55px; width: auto;" alt="'.$student->full_name.'" src="'.(isset($student->photo) && !empty($student->photo) && Storage::disk('local')->exists('public/applicants/'.$student->applicant_id.'/'.$student->photo) ? url('storage/applicants/'.$student->applicant_id.'/'.$student->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                                $PDFHTML .= '<img style="height: 55px; width: auto;" alt="'.$student->full_name.'" src="'.(isset($student->photo) && !empty($student->photo) && Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo) ? url('storage/students/'.$student->id.'/'.$student->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                                 $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.$student->full_name.'</span>';
                                 $PDFHTML .= '<span style="font-size: 10px; padding: 0 0 0; font-weight: 700; display: block;">'.(!empty($student->registration_no) ? $student->registration_no : '').'</span>';
                             $PDFHTML .= '</td>';
@@ -1318,5 +1335,64 @@ class StudentController extends Controller
 
     function remote_file_exists($url){
         return str_contains(get_headers($url)[0], "200 OK");
+    }
+
+    public function studentUpdateStatus(StudentUpdateStatusRequest $request){
+        $student_id = $request->student_id;
+        $studentOld = Student::find($student_id);
+
+        $status_id = $request->status_id;
+        $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
+        $status_change_reason = (isset($request->status_change_reason) && !empty($request->status_change_reason) ? $request->status_change_reason : null);
+        $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
+        
+        $student = Student::find($student_id);
+        $student->fill([
+            'status_id' => $status_id
+        ]);
+        $changes = $student->getDirty();
+        $student->save();
+        if($student->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'students';
+                $data['field_name'] = $field;
+                $data['field_value'] = $studentOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+
+            $data = [];
+            $data['student_id'] = $student_id;
+            $data['term_declaration_id'] = $term_declaration_id;
+            $data['status_id'] = $status_id;
+            $data['status_change_reason'] = $status_change_reason;
+            $data['status_change_date'] = $status_change_date;
+            $data['created_by'] = auth()->user()->id;
+            StudentAttendanceTermStatus::create($data);
+
+            $status = Status::find($status_id);
+            if(isset($status->process_list_id) && $status->process_list_id > 0):
+                $processTask = TaskList::where('process_list_id', $status->process_list_id)->orderBy('id', 'ASC')->get();
+                if(!empty($processTask) && $processTask->count() > 0 ):
+                    foreach($processTask as $task):
+                        $data = [];
+                        $data['student_id'] = $student_id;
+                        $data['task_list_id'] = $task->id;
+                        $data['external_link_ref'] = (isset($task->external_link_ref) && !empty($task->external_link_ref) ? $task->external_link_ref : null);
+                        $data['status'] = 'Pending';
+                        $data['created_by'] = auth()->user()->id;
+
+                        TaskList::create($data);
+                    endforeach;
+                endif;
+            endif;
+            return response()->json(['message' => 'Student status successfully changed.'], 200);
+        else:
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+        endif;
     }
 }

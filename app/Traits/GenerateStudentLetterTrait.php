@@ -26,7 +26,9 @@ trait GenerateStudentLetterTrait{
                 if($table == 'titles'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->title->name) ? $student->title->name : ''), $letter_content);
                 elseif($table == 'students'):
-                    if($field == 'first_name'):
+                    if($field == 'full_name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->full_name, $letter_content);
+                    elseif($field == 'first_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->first_name, $letter_content);
                     elseif($field == 'last_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->last_name, $letter_content);
@@ -34,12 +36,34 @@ trait GenerateStudentLetterTrait{
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->application_no, $letter_content);
                     elseif($field == 'registration_no'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->registration_no, $letter_content);
+                    elseif($field == 'date_of_birth'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $student->date_of_birth, $letter_content);
                     endif;
                 elseif($table == 'student_contacts'):
                     if($field == 'term_address'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->full_address) ? $student->contact->termaddress->full_address : ''), $letter_content);
+                    elseif($field == 'term_address_line_1'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->address_line_1) ? $student->contact->termaddress->address_line_1 : ''), $letter_content);
+                    elseif($field == 'term_address_line_2'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->address_line_2) ? $student->contact->termaddress->address_line_2 : ''), $letter_content);
+                    elseif($field == 'term_city'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->city) ? $student->contact->termaddress->city : ''), $letter_content);
+                    elseif($field == 'term_post_code'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->post_code) ? $student->contact->termaddress->post_code : ''), $letter_content);
+                    elseif($field == 'term_country'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->termaddress->country) ? $student->contact->termaddress->country : ''), $letter_content);
                     elseif($field == 'permanent_address'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->full_address) ? $student->contact->permaddress->full_address : ''), $letter_content);
+                    elseif($field == 'permanent_address_line_1'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->address_line_1) ? $student->contact->permaddress->address_line_1 : ''), $letter_content);
+                    elseif($field == 'permanent_address_line_2'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->address_line_2) ? $student->contact->permaddress->address_line_2 : ''), $letter_content);
+                    elseif($field == 'permanent_city'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->city) ? $student->contact->permaddress->city : ''), $letter_content);
+                    elseif($field == 'permanent_post_code'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->post_code) ? $student->contact->permaddress->post_code : ''), $letter_content);
+                    elseif($field == 'permanent_country'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->permaddress->country) ? $student->contact->permaddress->country : ''), $letter_content);
                     elseif($field == 'mobile'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->mobile) ? $student->contact->mobile : ''), $letter_content);
                     elseif($field == 'personal_email'):
@@ -47,22 +71,39 @@ trait GenerateStudentLetterTrait{
                     elseif($field == 'institutional_email'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->contact->institutional_email) ? $student->contact->institutional_email : ''), $letter_content);
                     endif;
+                elseif($table == 'student_kins'):
+                    if($field == 'name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->kin->name) ? $student->kin->name : ''), $letter_content);
+                    elseif($field == 'mobile'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->kin->mobile) ? $student->kin->mobile : ''), $letter_content);
+                    endif;
+                elseif($table == 'other_details'):
+                    if($field == 'mode'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->other->mode->name) ? $student->other->mode->name : ''), $letter_content);
+                    endif;
                 elseif($table == 'letter_issuing'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $issued_date, $letter_content);
                 elseif($table == 'courses'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''), $letter_content);
+                elseif($table == 'semesters'):
+                    $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->semester->name) ? $student->activeCR->creation->semester->name : ''), $letter_content);
                 elseif($table == 'student_proposed_courses'):
-                    if($field == 'full_time'):
-                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", 'Full Time', $letter_content);
-                        //(isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'Yes' : 'No')
+                    if($field == 'evening_and_weekends'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->propose->full_time) && $student->activeCR->propose->full_time == 1 ? 'Yes' : 'No'), $letter_content);
                     elseif($field == 'course_start_date'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->availability[0]->course_start_date) && !empty($student->activeCR->creation->availability[0]->course_start_date) ? date('d-m-Y', strtotime($student->activeCR->creation->availability[0]->course_start_date)) : ''), $letter_content);
                     elseif($field == 'course_end_date'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->availability[0]->course_end_date) && !empty($student->activeCR->creation->availability[0]->course_end_date) ? date('d-m-Y', strtotime($student->activeCR->creation->availability[0]->course_end_date))  : ''), $letter_content);
+                    elseif($field == 'class_startdate'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->availability[0]->course_start_date) && !empty($student->activeCR->creation->availability[0]->course_start_date) ? date('d-m-Y', strtotime($student->activeCR->creation->availability[0]->course_start_date)) : ''), $letter_content);
+                    elseif($field == 'class_enddate'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->availability[0]->course_end_date) && !empty($student->activeCR->creation->availability[0]->course_end_date) ? date('d-m-Y', strtotime($student->activeCR->creation->availability[0]->course_end_date))  : ''), $letter_content);
                     elseif($field == 'fees'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->fees) && !empty($student->activeCR->creation->fees) ? '£'.number_format($student->activeCR->creation->fees, 2)  : '£0.00'), $letter_content);
                     elseif($field == 'venue_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->propose->venue->name) && !empty($student->activeCR->propose->venue->name) ? $student->activeCR->propose->venue->name  : ''), $letter_content);
+                    elseif($field == 'awarding_body'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->course->body->name) && !empty($student->activeCR->creation->course->body->name) ? $student->activeCR->creation->course->body->name  : ''), $letter_content);
                     endif;
                 elseif($table == 'signatories'):
                     if($field == 'sign_url'):

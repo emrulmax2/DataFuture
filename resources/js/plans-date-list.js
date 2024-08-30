@@ -23,11 +23,24 @@ var classPlanDateListsTable = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            selectable:true,
             columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "120",
                 },
                 {
                     title: "Date",
@@ -69,7 +82,7 @@ var classPlanDateListsTable = (function () {
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' + cell.getData().id + '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
+                        btns += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().id+'"/>';
                         return btns;
                     },
                 },
@@ -81,6 +94,20 @@ var classPlanDateListsTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                const bulkActionsDropdown1 = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#bulkActionsDropdown"));
+                if(rows.length > 0){
+                    $('.bulkActions').removeClass('hidden');
+                    bulkActionsDropdown1.hide();
+                }else{
+                    $('.bulkActions').addClass('hidden');
+                    bulkActionsDropdown1.hide();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
+            }
         });
 
         // Redraw table onresize
@@ -253,6 +280,30 @@ var classPlanDateListsTable = (function () {
             });
         });
 
+        $('.bulkActionBtn').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var action = $theBtn.attr('data-action');
+            var ids = [];
+
+            $('#classPlanDateListsTable').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                ids.push($row.find('.ids').val());
+            });
+
+            if(ids.length > 0){
+                confirmModalDP.show();
+                document.getElementById('confirmModalDP').addEventListener('shown.tw.modal', function(event){
+                    $('#confirmModalDP .confModTitleDP').html(confModalDelTitle);
+                    $('#confirmModalDP .confModDescDP').html('Do you really want to proceed with the selected action?');
+                    $('#confirmModalDP .agreeWithDP').attr('data-id', ids.join(','));
+                    $('#confirmModalDP .agreeWithDP').attr('data-action', action);
+                });
+            }else{
+                table.init();
+            }
+        })
+
         // Confirm Modal Action
         $('#confirmModalDP .agreeWithDP').on('click', function(e){
             e.preventDefault();
@@ -296,6 +347,31 @@ var classPlanDateListsTable = (function () {
                             $("#successModalDP .successModalTitleDP").html("Congratulation!" );
                             $("#successModalDP .successModalDescDP").html('Class Plan date successfully restored to the list.');
                         }); 
+                    }
+                    classPlanDateListsTable.init();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            }else if(action == 'DELETEALL' || action == 'RESTOREALL'){
+                axios({
+                    method: 'post',
+                    url: route('plan.dates.bulk.action'),
+                    data: {ids : recordID, 'action' : action},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModalDP button').removeAttr('disabled');
+                        confirmModalDP.hide();
+
+                        successModalDP.show();
+                        document.getElementById('successModalDP').addEventListener('shown.tw.modal', function(event){
+                            $('#successModalDP .successModalTitleDP').html('Success!');
+                            $('#successModalDP .successModalDescDP').html('Bulk action successfully completed.');
+                        });
+
+                        setTimeout(function(){
+                            succModal.hide();
+                        }, 2000)
                     }
                     classPlanDateListsTable.init();
                 }).catch(error =>{

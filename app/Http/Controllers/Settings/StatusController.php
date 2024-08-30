@@ -8,6 +8,7 @@ use App\Models\Status;
 use App\Http\Requests\StatusRequest;
 use App\Models\EmailTemplate;
 use App\Models\LetterSet;
+use App\Models\ProcessList;
 use App\Models\Signatory;
 
 class StatusController extends Controller
@@ -67,6 +68,7 @@ class StatusController extends Controller
                     'sl' => $i,
                     'name' => $list->name,
                     'type' => $list->type,
+                    'process' => (isset($list->process->name) && !empty($list->process->name) ? $list->process->name : ''),
                     'letter_set_id' => $list->letter_set_id,
                     'letter_name' => (isset($list->letter->letter_title) && !empty($list->letter->letter_title) ? $list->letter->letter_title : ''),
                     'signatory_name' => (isset($list->signatory->signatory_name) && !empty($list->signatory->signatory_name) ? $list->signatory->signatory_name : ''),
@@ -87,6 +89,7 @@ class StatusController extends Controller
         $data = Status::create([
             'name'=> $request->name,
             'type'=> $request->type,
+            'process_list_id'=> (isset($request->process_list_id) && $request->process_list_id > 0 ? $request->process_list_id : null),
             'letter_set_id' => $letter_set_id,
             'signatory_id' => $signatory_id,
             'email_template_id' => $email_template_id,
@@ -96,7 +99,22 @@ class StatusController extends Controller
     }
 
     public function edit($id){
-        $data = Status::find($id);
+        $data = Status::where('id', $id)->get()->first();
+        $phase = ($data->type == 'Applicant' ? 'Applicant' : 'Live');
+        $process = ProcessList::where('phase', $phase)->where('auto_feed', 'No')->orderBy('name', 'ASC')->get();
+
+        $processes = [];
+        if(!empty($process)):
+            $i = 1;
+            $processes[0]['id'] = '';
+            $processes[0]['name'] = 'Please Select';
+            foreach($process as $prs):
+                $processes[$i]['id'] = $prs->id;
+                $processes[$i]['name'] = $prs->name;
+                $i++;
+            endforeach;
+        endif;
+        $data['processes'] = $processes;
 
         if($data){
             return response()->json($data);
@@ -112,6 +130,7 @@ class StatusController extends Controller
         $data = Status::where('id', $request->id)->update([
             'name'=> $request->name,
             'type'=> $request->type,
+            'process_list_id'=> (isset($request->process_list_id) && $request->process_list_id > 0 ? $request->process_list_id : null),
             'letter_set_id' => $letter_set_id,
             'signatory_id' => $signatory_id,
             'email_template_id' => $email_template_id,
@@ -135,5 +154,25 @@ class StatusController extends Controller
         $data = Status::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function getProcess(Request $request){
+        $theType = (isset($request->theType) && $request->theType == 'Applicant' ? 'Applicant' : 'Live');
+        $process = ProcessList::where('phase', $theType)->where('auto_feed', 'No')->orderBy('name', 'ASC')->get();
+
+        if(!empty($process)):
+            $processes = [];
+            $i = 1;
+            $processes[0]['id'] = '';
+            $processes[0]['name'] = 'Please Select';
+            foreach($process as $prs):
+                $processes[$i]['id'] = $prs->id;
+                $processes[$i]['name'] = $prs->name;
+                $i++;
+            endforeach;
+            return response()->json(['res' => $processes], 200);
+        else:
+            return response()->json(['res' => 'Nothing found!'], 304);
+        endif;
     }
 }
