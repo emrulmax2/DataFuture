@@ -1065,7 +1065,7 @@ class StudentController extends Controller
                                 $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
                             $PDFHTML .= '</td>';
                             $PDFHTML .= '<td class="text-right">';
-                                $PDFHTML .= '<img style="height: 55px; width: auto;" alt="'.$student->full_name.'" src="'.(isset($student->photo) && !empty($student->photo) && Storage::disk('local')->exists('public/applicants/'.$student->applicant_id.'/'.$student->photo) ? url('storage/applicants/'.$student->applicant_id.'/'.$student->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                                $PDFHTML .= '<img style="height: 55px; width: auto;" alt="'.$student->full_name.'" src="'.(isset($student->photo) && !empty($student->photo) && Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo) ? url('storage/students/'.$student->id.'/'.$student->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                                 $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.$student->full_name.'</span>';
                                 $PDFHTML .= '<span style="font-size: 10px; padding: 0 0 0; font-weight: 700; display: block;">'.(!empty($student->registration_no) ? $student->registration_no : '').'</span>';
                             $PDFHTML .= '</td>';

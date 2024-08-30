@@ -21,7 +21,7 @@ class UploadController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/applicants/'.$studentApplicantId, $imageName, 's3');
+        $path = $document->storeAs('public/students/'.$student_id, $imageName, 's3');
         $data = [];
         $data['student_id'] = $student_id;
         $data['document_setting_id'] = ($document_setting_id > 0 ? $document_setting_id : 0);
@@ -75,9 +75,9 @@ class UploadController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name)):
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/students/'.$list->student_id.'/'.$list->current_file_name)):
                     $disk = Storage::disk('s3');
-                    $url = $disk->url('public/applicants/'.$studentApplicantId.'/'.$list->current_file_name);
+                    $url = $disk->url('public/students/'.$list->student_id.'/'.$list->current_file_name);
                 endif;
                 $data[] = [
                     'id' => $list->id,
