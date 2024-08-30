@@ -65,6 +65,7 @@ class StudentAssignController extends Controller
                         'url' => route('student.show', $list2->id),
                         'photo_url' => $list2->photo_url,
                         'deleted_at' => $list->deleted_at,
+                        'student_id' => $list->student_id,
                     ];
                     $i++;
                 }

@@ -60,6 +60,11 @@ var courseModuleListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Class Type",
+                    field: "class_type",
+                    headerHozAlign: "left",
+                },
+                {
                     title:"Active", 
                     field:"active",
                     headerSort: false,
@@ -300,6 +305,7 @@ var courseModuleListTable = (function () {
                     $('#courseModuleEditModal input[name="credit_value"]').val(dataset.credit_value ? dataset.credit_value : '');
                     $('#courseModuleEditModal input[name="unit_value"]').val(dataset.unit_value ? dataset.unit_value : '');
                     $('#courseModuleEditModal select[name="status"]').val(dataset.status ? dataset.status : '');
+                    $('#courseModuleEditModal select[name="class_type"]').val(dataset.class_type ? dataset.class_type : '');
                     if(dataset.active == 1){
                         document.querySelector('#courseModuleEditModal input[name="active"]').checked=true;
                     }else{

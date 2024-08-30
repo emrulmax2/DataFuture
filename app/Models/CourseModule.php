@@ -19,6 +19,7 @@ class CourseModule extends Model
         'credit_value',
         'unit_value',
         'active',
+        'class_type',
         'created_by',
         'updated_by',
     ];

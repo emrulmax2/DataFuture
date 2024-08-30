@@ -7,8 +7,10 @@ use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
 use App\Models\AttendanceInformation;
+use App\Models\ComonSmtp;
 use App\Models\CourseModule;
 use App\Models\ELearningActivitySetting;
+use App\Models\EmailTemplate;
 use App\Models\Employee;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
@@ -19,6 +21,7 @@ use App\Models\PlanParticipant;
 use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
+use App\Models\SmsTemplate;
 use App\Models\User;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Client\Request as ClientRequest;
@@ -28,11 +31,6 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    
-    
-        
-        
-
     public function list(Request $request) {
         
         $tutorId = isset($request->id) && !empty($request->id) ? $request->id : '';
@@ -554,7 +552,12 @@ class DashboardController extends Controller
             'planDateList' => $planDateList,
             'eLearningActivites' => $eLearningActivites,
             'studentCount' => $studentListCount,
-            'assessmentlist' => $assessmentlist
+            'assessmentlist' => $assessmentlist, 
+
+            
+            'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
         ]);
     }
 

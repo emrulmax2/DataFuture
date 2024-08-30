@@ -64,6 +64,7 @@ class CourseModuleController extends Controller
                     'status' => ucfirst($list->status),
                     'credit_value' => $list->credit_value,
                     'unit_value' => $list->unit_value,
+                    'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : ''),
                     'active' => $list->active,
                     'level' => (isset($list->level->name) && !empty($list->level->name) ? $list->level->name : ''),
                     'deleted_at' => $list->deleted_at
@@ -131,6 +132,7 @@ class CourseModuleController extends Controller
             'credit_value'=> $request->credit_value,
             'unit_value'=> $request->unit_value,
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
+            'class_type'=> (isset($request->class_type) && !empty($request->class_type) ? $request->class_type : null),
             'updated_by' => auth()->user()->id
         ]);
 
