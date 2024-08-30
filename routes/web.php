@@ -687,6 +687,8 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plan-dates/store', 'store')->name('plan.dates.store'); 
         Route::delete('course-management/plan-dates/delete/{id}', 'destroy')->name('plan.dates.destory');
         Route::post('course-management/plan-dates/restore/{id}', 'restore')->name('plan.dates.restore');
+
+        Route::post('course-management/plan-dates/bulk/', 'planDatesBulkActions')->name('plan.dates.bulk.action');
     });
 
     Route::controller(StudentController::class)->group(function() {
@@ -728,6 +730,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
 
         //Route::get('student/student-copy-profile-photo/{page}/{limit}','studentCopyProfilePhoto')->name('student.copy.profile.photo');
+
+        Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {

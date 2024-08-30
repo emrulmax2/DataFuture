@@ -211,11 +211,12 @@ class TermModuleCreationController extends Controller
         $instance_term = InstanceTerm::find($instanceTermId);
         $courseId = $instance_term->instance->creation->course_id;
         $termRow = DB::table('instance_terms as it')
-                    ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name')
+                    ->select('it.*', 'cci.course_creation_id', 'cc.course_id', 'cc.semester_id', 'c.name as course_name', 's.name as semester_name', 'td.name as term_name')
                     ->leftJoin('course_creation_instances as cci', 'it.course_creation_instance_id', '=', 'cci.id')
                     ->leftJoin('course_creations as cc', 'cci.course_creation_id', '=', 'cc.id')
                     ->leftJoin('courses as c', 'cc.course_id', '=', 'c.id')
                     ->leftJoin('semesters as s', 'cc.semester_id', '=', 's.id')
+                    ->leftJoin('term_declarations as td', 'it.term_declaration_id', '=', 'td.id')
                     ->where('it.id', $instanceTermId)
                     ->first();
         return view('pages.course-management.module-creations.show', [

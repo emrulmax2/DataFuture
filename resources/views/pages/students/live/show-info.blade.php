@@ -168,26 +168,31 @@
                                 <option value="">Please Select</option>
                                 @if(isset($statuses))
                                     @foreach($statuses as $stst)
-                                        <option value="{{ $stst->id }}">{{ $stst->name }}</option>
+                                        <option {{ ($stst->id == $student->status_id ? 'Selected' : '') }} value="{{ $stst->id }}">{{ $stst->name }}</option>
                                     @endforeach
                                 @endif
                             </select>
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="term_declaration_id" class="form-label">Term Declaration <span class="text-danger">*</span></label>
+                            <label for="term_declaration_id" class="form-label">Term</label>
                             <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
                                 <option value="">Please Select</option>
+                                @if($student->assigned_terms && !empty($student->assigned_terms) && $student->assigned_terms->count() > 0)
+                                    @foreach($student->assigned_terms as $term)
+                                        <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <div class="acc__input-error error-type text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <label for="status_change_reason" class="form-label">Change Reason</label>
                             <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3"></textarea>
                         </div>
                         <div class="mt-3">
-                            <label for="status_change_date" class="form-label">Change Date</label>
+                            <label for="status_change_date" class="form-label">Change Date <span class="text-danger">*</span></label>
                             <input type="text" name="status_change_date" id="status_change_date" value="<?php echo date('d-m-Y') ?>" class="form-control w-full datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -214,3 +219,22 @@
         </div>
     </div>
     <!-- END: Status Change Modal -->
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="successModalInfo" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalInfoTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalInfoDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="successCloser btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->

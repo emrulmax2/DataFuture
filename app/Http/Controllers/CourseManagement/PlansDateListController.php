@@ -100,11 +100,6 @@ class PlansDateListController extends Controller
                 $i++;
             endforeach;
         endif;
-        
-        
-        
-          
-
 
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
@@ -246,5 +241,19 @@ class PlansDateListController extends Controller
         else:
             return response()->json(['Message' => 'Plan ID not found. Please select some of the plan from the list table after that submit again.', 'title' => 'Error!'], 422);
         endif;
+    }
+
+    public function planDatesBulkActions(Request $request){
+        $ids = (isset($request->ids) && !empty($request->ids) ? explode(',', $request->ids) : []);
+        $action = $request->action;
+
+        if(!empty($ids) && !empty($action)):
+            if($action == 'DELETEALL'):
+                PlansDateList::whereIn('id', $ids)->delete();
+            elseif($action == 'RESTOREALL'):
+                PlansDateList::whereIn('id', $ids)->withTrashed()->restore();
+            endif;
+        endif;
+        return response()->json(['message' => 'Data updated'], 200);
     }
 }

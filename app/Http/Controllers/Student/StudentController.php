@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentUpdateStatusRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\AcademicYear;
@@ -66,6 +67,7 @@ use App\Models\SmsTemplate;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentConsent;
 use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
@@ -81,6 +83,7 @@ use App\Models\StudentSms;
 use App\Models\StudentTask;
 use App\Models\StudentWorkPlacement;
 use App\Models\StudyMode;
+use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Illuminate\Support\Facades\DB;
@@ -1332,5 +1335,64 @@ class StudentController extends Controller
 
     function remote_file_exists($url){
         return str_contains(get_headers($url)[0], "200 OK");
+    }
+
+    public function studentUpdateStatus(StudentUpdateStatusRequest $request){
+        $student_id = $request->student_id;
+        $studentOld = Student::find($student_id);
+
+        $status_id = $request->status_id;
+        $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
+        $status_change_reason = (isset($request->status_change_reason) && !empty($request->status_change_reason) ? $request->status_change_reason : null);
+        $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
+        
+        $student = Student::find($student_id);
+        $student->fill([
+            'status_id' => $status_id
+        ]);
+        $changes = $student->getDirty();
+        $student->save();
+        if($student->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'students';
+                $data['field_name'] = $field;
+                $data['field_value'] = $studentOld->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+
+            $data = [];
+            $data['student_id'] = $student_id;
+            $data['term_declaration_id'] = $term_declaration_id;
+            $data['status_id'] = $status_id;
+            $data['status_change_reason'] = $status_change_reason;
+            $data['status_change_date'] = $status_change_date;
+            $data['created_by'] = auth()->user()->id;
+            StudentAttendanceTermStatus::create($data);
+
+            $status = Status::find($status_id);
+            if(isset($status->process_list_id) && $status->process_list_id > 0):
+                $processTask = TaskList::where('process_list_id', $status->process_list_id)->orderBy('id', 'ASC')->get();
+                if(!empty($processTask) && $processTask->count() > 0 ):
+                    foreach($processTask as $task):
+                        $data = [];
+                        $data['student_id'] = $student_id;
+                        $data['task_list_id'] = $task->id;
+                        $data['external_link_ref'] = (isset($task->external_link_ref) && !empty($task->external_link_ref) ? $task->external_link_ref : null);
+                        $data['status'] = 'Pending';
+                        $data['created_by'] = auth()->user()->id;
+
+                        TaskList::create($data);
+                    endforeach;
+                endif;
+            endif;
+            return response()->json(['message' => 'Student status successfully changed.'], 200);
+        else:
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+        endif;
     }
 }

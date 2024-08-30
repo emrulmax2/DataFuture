@@ -544,6 +544,10 @@ import TomSelect from "tom-select";
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+
+                    setTimeout(function(){
+                        $('.resultWrap').fadeOut('fast').html('');
+                    }, 5000);
                 }
             }).catch(error => {
                 if (error.response) {
@@ -620,6 +624,10 @@ import TomSelect from "tom-select";
                 $('.assignStudentsList.existingStudentList li').removeClass('active');
 
                 if (response.status == 200) {
+                    $('.resultWrap').fadeIn('fast').html('<div class="alert alert-success-soft show flex items-center mb-2 alert-dismissible" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> WOW! ('+students_id.length+') Students successfully removed from selected modules.<button type="button" class="btn-close" data-tw-dismiss="alert" aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button></div>');
+                    var existingStudentCount = $('.assignStudentsList.existingStudentList li').length;
+                    $('.existingCount').html('('+existingStudentCount+')');
+
                     var res = response.data.res;
                     if(res != ''){
                         $.each(res, function(status, row) {
@@ -643,6 +651,10 @@ import TomSelect from "tom-select";
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+
+                    setTimeout(function(){
+                        $('.resultWrap').fadeOut('fast').html('');
+                    }, 2000);
 
                     console.log(response.data.res);
                 }

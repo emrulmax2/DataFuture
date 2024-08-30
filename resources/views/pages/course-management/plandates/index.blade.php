@@ -42,23 +42,30 @@
                         </div>
                     </form>
                     <div class="flex mt-5 sm:mt-0">
-                        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                        </button>
-                        <div class="dropdown w-1/2 sm:w-auto">
-                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                        <div class="dropdown w-1/2 sm:w-auto bulkActions ml-2 hidden">
+                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" id="bulkActionsDropdown" aria-expanded="false" data-tw-toggle="dropdown">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Bulk Actions <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                             </button>
                             <div class="dropdown-menu w-40">
                                 <ul class="dropdown-content">
-                                    <li>
-                                        <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                    {{--<li>
+                                        <a id="activeSelected" data-action="ACTIVEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
+                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Mark as Active
                                         </a>
                                     </li>
                                     <li>
-                                        <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                        <a id="inactiveSelected" data-action="INACTIVEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
+                                            <i data-lucide="x-circle" class="w-4 h-4 mr-2 text-warning"></i> Mark as Inactive
+                                        </a>
+                                    </li>--}}
+                                    <li>
+                                        <a id="deleteSelected" data-action="DELETEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
+                                            <i data-lucide="trash-2" class="w-4 h-4 mr-2 text-danger"></i> Move to Archive
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="restoreSelected" data-action="RESTOREALL" href="javascript:;" class="dropdown-item bulkActionBtn">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 text-success"></i> Restore
                                         </a>
                                     </li>
                                 </ul>

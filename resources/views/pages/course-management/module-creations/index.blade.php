@@ -23,10 +23,10 @@
         <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
             
             <div class="intro-y box p-5 mt-5 ">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                <div class="flex items-center p-5 px-0 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Term Modules</h2>
                 </div>
-                <div class="mt-5  p-5">
+                <div class="p-5 px-0">
                     <form method="post" id="classPlanAddForm" action="#">
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-3">
@@ -144,8 +144,8 @@
                         </div>
                     </form>
                 </div>
-                <div class="overflow-x-auto scrollbar-hidden  p-5">
-                    <div id="termModuleCreationsListTable" class="mt-5 table-report table-report--tabulator"></div>
+                <div class="overflow-x-auto scrollbar-hidden">
+                    <div id="termModuleCreationsListTable" class=" table-report table-report--tabulator"></div>
                 </div>
             </div>
         </div>
