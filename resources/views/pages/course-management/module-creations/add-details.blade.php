@@ -87,7 +87,7 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @if(!empty($mc->module->assesments))
+                                                        @if(!empty($mc->module->assesments) && $mc->module->assesments->count() > 0)
                                                             @foreach($mc->module->assesments as $ass)
                                                                 <tr>
                                                                     <td class="whitespace-nowrap">{{ $loop->index + 1 }}</td>
@@ -102,7 +102,11 @@
                                                             @endforeach
                                                         @else
                                                             <tr>
-                                                                <td class="whitespace-nowrap" colspan="4">No Assessment Found!</td>
+                                                                <td class="whitespace-nowrap" colspan="4">
+                                                                    <div class="alert alert-pending-soft show flex items-center" role="alert">
+                                                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Assessment not Found for this module!
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                                         @endif
                                                     </tbody>

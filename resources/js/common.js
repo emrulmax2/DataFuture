@@ -1,4 +1,5 @@
 import IMask from 'imask';
+import Toastify from "toastify-js";
 
 (function(){
 
@@ -19,6 +20,25 @@ import IMask from 'imask';
             if(document.activeElement.type === "number"){
                 document.activeElement.blur();
             }
+        });
+    }
+
+    if($('.letterTags').length > 0){
+        $(document).on('click', '.letterTags li.dropdown-item', function(e){
+            var theText = $(this).text();
+            navigator.clipboard.writeText(theText);
+
+            Toastify({
+                node: $("#coppiedNodeEl")
+                    .clone()
+                    .removeClass("hidden")[0],
+                duration: 2000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
         });
     }
 })();

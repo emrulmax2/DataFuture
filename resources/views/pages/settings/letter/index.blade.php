@@ -131,7 +131,10 @@
                             <div class="acc__input-error error-letter_title text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                            <div class="flex justify-between">
+                                <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                                @include('pages.settings.letter.letter-tags')
+                            </div>
                             <div class="editor document-editor">
                                 <div class="document-editor__toolbar"></div>
                                 <div class="document-editor__editable-container">
@@ -211,7 +214,10 @@
                             <div class="acc__input-error error-letter_title text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="addEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                            <div class="flex justify-between">
+                                <label for="addEditor" class="form-label">Description <span class="text-danger">*</span></label>
+                                @include('pages.settings.letter.letter-tags')
+                            </div>
                             <div class="editor document-editor">
                                 <div class="document-editor__toolbar"></div>
                                 <div class="document-editor__editable-container">

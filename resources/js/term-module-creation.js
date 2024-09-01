@@ -948,7 +948,7 @@ var termModuleListTable = (function () {
     
             var assessmentLength = $form.find('input.cmb_assessment_indv:checked').length;
             let form_data = new FormData(form);
-            if(assessmentLength > 0){
+            /*if(assessmentLength > 0){*/
                 axios({
                     method: "post",
                     url: route('term.module.creation.store.individual'),
@@ -979,15 +979,15 @@ var termModuleListTable = (function () {
                     if (error.response) {
                         if (error.response.status == 422) {
                             for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#addForm .${key}`).addClass('border-danger')
-                                $(`#addForm  .error-${key}`).html(val)
+                                $(`#addModuleCreationForm .${key}`).addClass('border-danger')
+                                $(`#addModuleCreationForm  .error-${key}`).html(val)
                             }
                         } else {
                             console.log('error');
                         }
                     }
                 });
-            }else{
+            /*}else{
                 document.querySelector('#saveModuleCreation').removeAttribute('disabled');
                 document.querySelector('#saveModuleCreation svg').style.cssText = 'display: none;';
 
@@ -1003,7 +1003,7 @@ var termModuleListTable = (function () {
                 setTimeout(function(){
                     $('.df_alert', $form).remove();
                 }, 2000);
-            }
+            }*/
         });
     }
 
@@ -1023,14 +1023,15 @@ var termModuleListTable = (function () {
             $('svg', next).fadeIn('fast');
 
             var assessmentLength = parentFieldset.find('input.cmb_assessment:checked').length;
-            if(assessmentLength  == 0){
+            parentFieldset.find('.assessmentError').fadeOut().html('');
+            /*if(assessmentLength  == 0){
                 nextWizardStep = false;
                 parentFieldset.find('.assessmentError').fadeIn().html('Assessments are required. Please checked at least 1 assessment for this module.');
                 next.removeAttr('disabled', 'disabled');
                 $('svg', next).fadeOut('fast');
             }else{
                 parentFieldset.find('.assessmentError').fadeOut().html('');
-            }
+            }*/
             
             if (nextWizardStep) {
                 /* Save the step form */
