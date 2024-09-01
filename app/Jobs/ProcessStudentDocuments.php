@@ -52,11 +52,13 @@ class ProcessStudentDocuments implements ShouldQueue
     
         foreach($this->applicant->docses as $applicantDoc):
             //Applicant Task wise Document capture
-            $studentDocumentData = StudentDocument::where(['student_id'=>$student->id])->where(['display_file_name', $applicantDoc->display_file_name])->get()->first();
+
+ 
+            $studentDocumentData = StudentDocument::where(['student_id'=>$student->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();
             
             if(!isset($studentDocumentData->id)) {
 
-                    $applicantDocument = ApplicantDocument::where(['applicant_id'=>$this->applicant->id])->where(['display_file_name', $applicantDoc->display_file_name])->get()->first();                    
+                    $applicantDocument = ApplicantDocument::where(['applicant_id'=>$this->applicant->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();                    
                     
                     if($applicantDocument!=null) {
                         $studentDocument = new StudentDocument();
