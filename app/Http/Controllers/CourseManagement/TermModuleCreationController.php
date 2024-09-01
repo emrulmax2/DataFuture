@@ -136,6 +136,7 @@ class TermModuleCreationController extends Controller
                 $data['status'] = (isset($courseModule->status) && !empty($courseModule->status) ? $courseModule->status : 'optional');
                 $data['credit_value'] = (isset($courseModule->credit_value) && !empty($courseModule->credit_value) ? $courseModule->credit_value : '');
                 $data['unit_value'] = (isset($courseModule->unit_value) && !empty($courseModule->unit_value) ? $courseModule->unit_value : '');
+                $data['class_type'] = (isset($courseModule->class_type) && !empty($courseModule->class_type) ? $courseModule->class_type : null);
                 $data['created_by'] = auth()->user()->id;
 
 
@@ -461,6 +462,7 @@ class TermModuleCreationController extends Controller
         $data['status'] = (isset($courseModule->status) && !empty($courseModule->status) ? $courseModule->status : 'optional');
         $data['credit_value'] = (isset($courseModule->credit_value) && !empty($courseModule->credit_value) ? $courseModule->credit_value : '');
         $data['unit_value'] = (isset($courseModule->unit_value) && !empty($courseModule->unit_value) ? $courseModule->unit_value : '');
+        $data['class_type'] = (isset($courseModule->class_type) && !empty($courseModule->class_type) ? $courseModule->class_type : null);
         $data['created_by'] = auth()->user()->id;
         $moduleCreation = ModuleCreation::create($data);
 

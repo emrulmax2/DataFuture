@@ -7,6 +7,8 @@ import TomSelect from "tom-select";
 import Dropzone from "dropzone";
 import Toastify from "toastify-js";
 
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
+
 ("use strict");
 var classPlanDateListsTutorTable = (function () {
     var _tableGen = function () {
@@ -385,6 +387,7 @@ var classStudentListTutorModuleTable = (function () {
                                     html += '<div class="text-slate-500 text-xs whitespace-nowrap"><i data-lucide="accessibility" class="w-4 h-4"></i></div>';
                                 html += '</div>';
                             html += '</div>';
+                            html += '<input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().student_id+'"/>';
                         return html;
                     }
                 },
@@ -411,6 +414,17 @@ var classStudentListTutorModuleTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+            },
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                if(rows.length > 0){
+                    $('#actionButtonWrap').fadeIn();
+                }else{
+                    $('#actionButtonWrap').fadeOut();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().student_id > 0; //allow selection of rows where the age is greater than 18
             },
         });
 
@@ -747,18 +761,6 @@ var classPlanAssessmentModuleTable = (function () {
             classStudentListTutorModuleTable.init();
         }
 
-        // On submit filter form
-        $("#tabulatorFilterForm-CLTML")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormCLTML();
-                }
-            }
-        );
-
         // On click go button
         $("#tabulator-html-filter-go-CLTML").on("click", function (event) {
             filterHTMLFormCLTML();
@@ -770,6 +772,310 @@ var classPlanAssessmentModuleTable = (function () {
             $("#status-CLTML").val("1");
             filterHTMLFormCLTML();
         });
+
+        const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+        const sendBulkSmsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#sendBulkSmsModal"));
+        const sendBulkMailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#sendBulkMailModal"));
+
+        let tomOptions = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: false,
+            create: false,
+            allowEmptyOption: true,
+            //maxItems: null,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+        let sms_template_id = new TomSelect('#sms_template_id', tomOptions);
+        let email_template_id = new TomSelect('#email_template_id', tomOptions);
+    
+        let mailEditor;
+        if($("#mailEditor").length > 0){
+            const el = document.getElementById('mailEditor');
+            ClassicEditor.create(el).then((editor) => {
+                mailEditor = editor;
+                $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+
+        const sendBulkSmsModalEl = document.getElementById('sendBulkSmsModal')
+        sendBulkSmsModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#sendBulkSmsModal .acc__input-error').html('');
+            $('#sendBulkSmsModal .modal-body input, #sendBulkSmsModal .modal-body textarea').val('');
+            $('#sendBulkSmsModal .sms_countr').html('160 / 1');
+            $('#sendBulkSmsModal input[name="student_ids"]').val('');
+            sms_template_id.clear(true);
+        });
+
+        const sendBulkMailModalEl = document.getElementById('sendBulkMailModal')
+        sendBulkMailModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#sendBulkMailModal .acc__input-error').html('');
+            $('#sendBulkMailModal .modal-body input#sendMailsDocument').val('');
+            $('#sendBulkMailModal .modal-body input, #sendBulkMailModal .modal-body select').val('');
+            $('#sendBulkMailModal .sendMailsDocumentNames').html('').fadeOut();
+            $('#sendBulkMailModal input[name="student_ids"]').val('');
+
+            mailEditor.setData('');
+            email_template_id.clear(true);
+        });
+
+
+        /* Bulk SMS Start */
+        $('.sendBulkSmsBtn').on('click', function(e){
+            var $btn = $(this);
+            var ids = [];
+            
+            $('#classStudentListTutorModuleTable').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                ids.push($row.find('.student_ids').val());
+            });
+
+            if(ids.length > 0){
+                sendBulkSmsModal.show();
+                document.getElementById("sendBulkSmsModal").addEventListener("shown.tw.modal", function (event) {
+                    $('#sendBulkSmsModal [name="student_ids"]').val(ids.join(','));
+                });
+            }else{
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!");
+                    $("#warningModal .warningModalDesc").html('Selected students not foudn. Please select some students first or contact with the site administrator.');
+                });
+            }
+        });
+
+        $('#smsTextArea').on('keyup', function(){
+            var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
+            var chars = this.value.length,
+                messages = Math.ceil(chars / 160),
+                remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
+            if(chars > 0){
+                if(chars >= maxlength && maxlength > 0){
+                    $('#sendBulkSmsModal .modal-content .smsWarning').remove();
+                    $('#sendBulkSmsModal .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
+                }else{
+                    $('#sendBulkSmsModal .modal-content .smsWarning').remove();
+                }
+                $('#sendBulkSmsModal .sms_countr').html(remaining +' / '+messages);
+            }else{
+                $('#sendBulkSmsModal .sms_countr').html('160 / 1');
+                $('#sendBulkSmsModal .modal-content .smsWarning').remove();
+            }
+        });
+
+        $('#sendBulkSmsForm #sms_template_id').on('change', function(){
+            var smsTemplateId = $(this).val();
+            if(smsTemplateId != ''){
+                axios({
+                    method: "post",
+                    url: route('bulk.communication.get.sms.template'),
+                    data: {smsTemplateId : smsTemplateId},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#sendBulkSmsForm #smsTextArea').val(response.data.row.description ? response.data.row.description : '').trigger('keyup');
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                    }
+                })
+            }else{
+                $('#sendBulkSmsForm #smsTextArea').val('');
+                $('#sendBulkSmsForm .sms_countr').html('160 / 1');
+            }
+        });
+
+        $('#sendBulkSmsForm').on('submit', function(e){
+            e.preventDefault();
+            const form = document.getElementById('sendBulkSmsForm');
+        
+            document.querySelector('#sendSMSBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#sendSMSBtn svg").style.cssText ="display: inline-block;";
+
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('bulk.communication.send.sms'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#sendSMSBtn').removeAttribute('disabled');
+                document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+
+                if (response.status == 200) {
+                    sendBulkSmsModal.hide();
+
+                    successModal.show(); 
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html('Congratulation!');
+                        $("#successModal .successModalDesc").html(response.data.message);
+                    });  
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 5000);
+                }
+            }).catch(error => {
+                document.querySelector('#sendSMSBtn').removeAttribute('disabled');
+                document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#sendBulkSmsForm .${key}`).addClass('border-danger');
+                            $(`#sendBulkSmsForm  .error-${key}`).html(val);
+                        }
+                    } else if(error.response.status == 412){
+                        warningModal.show(); 
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html('Oops!');
+                            $("#warningModal .warningModalDesc").html(error.response.data.message);
+                        });
+                    
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 5000);
+                    }else {
+                        console.log('error');
+                    }
+                }
+            });
+        });
+        /* Bulk SMS End */
+
+        /* Bulk Email Start */
+        $('.sendBulkMailBtn').on('click', function(e){
+            var $btn = $(this);
+            var ids = [];
+            
+            $('#classStudentListTutorModuleTable').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                ids.push($row.find('.student_ids').val());
+            });
+
+            if(ids.length > 0){
+                sendBulkMailModal.show();
+                document.getElementById("sendBulkMailModal").addEventListener("shown.tw.modal", function (event) {
+                    $('#sendBulkMailModal [name="student_ids"]').val(ids.join(','));
+                });
+            }else{
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!");
+                    $("#warningModal .warningModalDesc").html('Selected students not foudn. Please select some students first or contact with the site administrator.');
+                });
+            }
+        });
+
+        $('#sendBulkMailForm #sendMailsDocument').on('change', function(){
+            var inputs = document.getElementById('sendMailsDocument');
+            var html = '';
+            for (var i = 0; i < inputs.files.length; ++i) {
+                var name = inputs.files.item(i).name;
+                html += '<div class="mb-1 text-primary font-medium flex justify-start items-center"><i data-lucide="disc" class="w-3 h3 mr-2"></i>'+name+'</div>';
+            }
+
+            $('#sendBulkMailForm .sendMailsDocumentNames').fadeIn().html(html);
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+        $('#sendBulkMailForm [name="email_template_id"]').on('change', function(){
+            var emailTemplateID = $(this).val();
+            if(emailTemplateID != ''){
+                axios({
+                    method: "post",
+                    url: route('bulk.communication.get.mail.template'),
+                    data: {emailTemplateID : emailTemplateID},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        if(response.data.row.description){
+                            mailEditor.setData(response.data.row.description);
+                        }else{
+                            mailEditor.setData('');
+                        }
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }else{
+                mailEditor.setData('');
+            }
+        });
+
+        $('#sendBulkMailForm').on('submit', function(e){
+            e.preventDefault();
+            const form = document.getElementById('sendBulkMailForm');
+        
+            document.querySelector('#sendEmailBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#sendEmailBtn svg").style.cssText ="display: inline-block;";
+
+            let form_data = new FormData(form);
+            form_data.append('file', $('#sendBulkMailForm input#sendMailsDocument')[0].files[0]); 
+            form_data.append("body", mailEditor.getData());
+            axios({
+                method: "post",
+                url: route('bulk.communication.send.email'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#sendEmailBtn').removeAttribute('disabled');
+                document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
+
+                if (response.status == 200) {
+                    sendBulkMailModal.hide();
+
+                    successModal.show(); 
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulation!" );
+                        $("#successModal .successModalDesc").html(response.data.message);
+                    });  
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 2000);
+                }
+            }).catch(error => {
+                document.querySelector('#sendEmailBtn').removeAttribute('disabled');
+                document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#sendBulkMailForm .${key}`).addClass('border-danger');
+                            $(`#sendBulkMailForm  .error-${key}`).html(val);
+                        }
+                    } else if(error.response.status == 412){
+                        warningModal.show(); 
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html('Oops!');
+                            $("#warningModal .warningModalDesc").html(error.response.data.message);
+                        });
+                    
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 5000);
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        });
+        /* Bulk Email End */
+
     }
     /* End Tabulator */
 

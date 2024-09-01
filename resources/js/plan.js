@@ -468,7 +468,7 @@ var classPlanListTable = (function () {
                     $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
                     $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
                     $('#editPlanModal input[name="submission_date"]').val(dataset.plan.submission_date ? dataset.plan.submission_date : '');
-                    $('#editPlanModal input[name="virtual_room"]').val(dataset.plan.virtual_room ? dataset.plan.virtual_room : '');
+                    $('#editPlanModal textarea[name="virtual_room"]').val(dataset.plan.virtual_room ? dataset.plan.virtual_room : '');
                     $('#editPlanModal textarea[name="note"]').val(dataset.plan.note ? dataset.plan.note : '');
 
                     if(dataset.plan.sat == 1){

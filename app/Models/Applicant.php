@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Applicant extends Model
 {
@@ -181,4 +182,14 @@ class Applicant extends Model
     public function reason(){
         return $this->belongsTo(ApplicationRejectedReason::class, 'application_rejected_reason_id');
     }
+
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->id.'/'.$this->photo)) {
+            return Storage::disk('local')->url('public/applicants/'.$this->id.'/'.$this->photo);
+        } else {
+            return asset('build/assets/images/user_avatar.png');
+        }
+    }
+
 }

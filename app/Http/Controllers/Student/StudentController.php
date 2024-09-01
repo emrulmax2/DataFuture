@@ -132,7 +132,7 @@ class StudentController extends Controller
 
         $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
@@ -234,7 +234,7 @@ class StudentController extends Controller
                     'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
                     'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'url' => route('student.show', $list->id),
-                    'photo_url' => $list->photo_url
+                    'photo_url' => $list->photo
                 ];
                 $i++;
             endforeach;

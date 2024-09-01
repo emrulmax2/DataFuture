@@ -39,6 +39,18 @@ var admissionListTable = (function () {
                     title: "Ref. No",
                     field: "application_no",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
+                                html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().application_no+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().full_name+'</div>';
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "First Name",

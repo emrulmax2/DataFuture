@@ -14,7 +14,7 @@ class AssessmentController extends Controller
         $module_creation_id = $request->module_creation_id;
         $cmb_assessment = (isset($request->cmb_assessment) && !empty($request->cmb_assessment) ? $request->cmb_assessment : []);
         
-        if(!empty($cmb_assessment) && $module_creation_id > 0):
+        if(!empty($cmb_assessment) && count($cmb_assessment) > 0 && $module_creation_id > 0):
             foreach($cmb_assessment as $assementID):
                 $moduleBaseAssessment = CourseModuleBaseAssesment::find($assementID);
 

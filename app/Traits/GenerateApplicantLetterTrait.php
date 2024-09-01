@@ -25,12 +25,16 @@ trait GenerateApplicantLetterTrait{
                 if($table == 'titles'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->title->name) ? $applicant->title->name : ''), $letter_content);
                 elseif($table == 'applicants'):
-                    if($field == 'first_name'):
+                    if($field == 'full_name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->full_name, $letter_content);
+                    elseif($field == 'first_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->first_name, $letter_content);
                     elseif($field == 'last_name'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->last_name, $letter_content);
                     elseif($field == 'application_no'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->application_no, $letter_content);
+                    elseif($field == 'date_of_birth'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $applicant->date_of_birth, $letter_content);
                     endif;
                 elseif($table == 'applicant_contacts'):
                     if($field == 'full_address'):

@@ -240,6 +240,9 @@
                             <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 letterEditorArea" style="display: none;">
+                            <div class="flex justify-between mb-2">
+                                <div class="ml-auto">@include('pages.settings.letter.letter-tags')</div>
+                            </div>
                             <div class="editor document-editor">
                                 <div class="document-editor__toolbar"></div>
                                 <div class="document-editor__editable-container">

@@ -1963,3 +1963,13 @@ input[type=number] {
     list-style: decimal;
     margin: 0 0 15px 15px;
 }
+.letterTags li.dropdown-item{
+    cursor: pointer;
+    padding-top: 5px !important;
+    padding-bottom: 3px !important;
+}
+.dropdown-menu.letterTags .dropdown-content{
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
