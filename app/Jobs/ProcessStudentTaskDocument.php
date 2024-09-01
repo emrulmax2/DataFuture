@@ -53,7 +53,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
         foreach($this->applicant->allTasks as $applicantTaskData):
             //Applicant Task wise Document capture
             $applicantTaskDocumentData = ApplicantTaskDocument::where(['applicant_task_id'=>$applicantTaskData->id])->get();
-            
+            if($applicantTaskData->task->interview == "No")
             if(!in_array($applicantTaskData->id, $applicantTaskidList)) {
                 array_push($applicantTaskidList,$applicantTaskData->id);
                 foreach($applicantTaskDocumentData as $applicantTaskDocument):
