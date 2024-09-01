@@ -230,6 +230,8 @@ class AdmissionController extends Controller
                     'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
                     'first_name' => ucfirst($list->first_name),
                     'last_name' => ucfirst($list->last_name),
+                    'full_name' => ucfirst($list->first_name)." ".ucfirst($list->last_name),
+                    
                     'date_of_birth'=> $list->date_of_birth,
                     'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
@@ -237,7 +239,8 @@ class AdmissionController extends Controller
                     'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
                     'url' => route('admission.show', $list->id),
-                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId)
+                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
+                    'photo_url' => $list->photo_url
                 ];
                 $i++;
             endforeach;
