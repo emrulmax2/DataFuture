@@ -234,7 +234,7 @@ class StudentController extends Controller
                     'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
                     'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'url' => route('student.show', $list->id),
-                    'photo_url' => $list->photo
+                    'photo_url' => $list->photo_url
                 ];
                 $i++;
             endforeach;
