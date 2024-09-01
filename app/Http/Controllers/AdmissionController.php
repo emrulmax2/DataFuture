@@ -76,6 +76,7 @@ use App\Jobs\ProcessStudentTaskDocument;
 use App\Jobs\ProcessStudentQualification;
 use App\Jobs\ProcessStudentContact;
 use App\Jobs\ProcessStudentDisability;
+use App\Jobs\ProcessStudentDocuments;
 use App\Jobs\ProcessStudentEmployement;
 use App\Jobs\ProcessStudentKinDetail;
 use App\Jobs\ProcessStudentProposedCourse;
@@ -2345,6 +2346,7 @@ class AdmissionController extends Controller
                     new ProcessStudentInterview($applicant),
                     new ProcessStudentEmail($applicant),
                     new ProcessStudentConsent($applicant),
+                    new ProcessStudentDocuments($applicant),
                 ])->dispatch();
                 
                 session()->put("lastBatchId",$bus->id);
