@@ -48,7 +48,7 @@ var classPlanListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "110",
+                    width: "100",
                 },
                 {
                     title: "Course",
@@ -59,6 +59,15 @@ var classPlanListTable = (function () {
                     title: "Module",
                     field: "module",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<div class="break-all whitespace-normal">';
+                            html += '<a class="font-medium text-primary whitespace-normal break-all" href="'+route('tutor-dashboard.plan.module.show', cell.getData().id)+'">';
+                                html += cell.getData().module;
+                                html += (cell.getData().class_type != '' ? '<br/>'+cell.getData().class_type : '');
+                            html += '</a>';
+                        html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Group",
@@ -71,14 +80,17 @@ var classPlanListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Day",
+                    title: "Day - Time",
                     field: "day",
                     headerHozAlign: "left",
-                },
-                {
-                    title: "Time",
-                    field: "time",
-                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div>';
+                                html += '<span>'+cell.getData().day+'</span><br/>';
+                                html += '<span>'+cell.getData().time+'</span>';
+                            html += '</div>';
+
+                        return html;
+                    }
                 },
                 {
                     title: "Submission",
@@ -132,7 +144,7 @@ var classPlanListTable = (function () {
                 });
             },
             selectableCheck:function(row){
-                return row.getData().dates < 1; //allow selection of rows where the age is greater than 18
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
             },
         });
 

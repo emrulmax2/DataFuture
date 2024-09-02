@@ -215,6 +215,7 @@
     <!-- END: Import Modal -->
 
     <div id="downloadIDCard" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">
+        <a data-tw-dismiss="modal" class="hideIDCardModalBtn btn btn-linkedin text-white btn-rounded m-0 p-0 w-9 h-9" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-white"></i></a>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
