@@ -25,6 +25,9 @@
                     <i data-lucide="book-copy" class="w-4 h-4 mr-2"></i> Courses & Semesters  <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
                 <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' || Route::currentRouteName() == 'course.module.show' || Route::currentRouteName() == 'courses.show' || Route::currentRouteName() == 'courses' || Route::is('term-declaration.index') || Route::currentRouteName() == 'semester' ? 'block' : 'none' }};">
+                    
+                
+                
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'semester' ? 'active text-primary' : '' }}" href="{{ route('semester') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Semesters

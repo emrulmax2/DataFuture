@@ -431,7 +431,7 @@ import TomSelect from "tom-select";
 
     /* Select Deselect Potential Students Start*/
     $('.assignStudentsList.potentialStudentList').on('click', 'li > label', function(){
-        if(!$(this).parent('li').hasClass('headingItem') && !$(this).parent('li').hasClass('noticeItem')){
+        if(!$(this).parent('li').hasClass('headingItem') && !$(this).parent('li').hasClass('existThere') && !$(this).parent('li').hasClass('noticeItem')){
             $(this).parent('li').toggleClass('active');
 
             var activeLength = $('.assignStudentsList.potentialStudentList').find('li.active').length;

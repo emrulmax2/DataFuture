@@ -89,11 +89,17 @@
                                     <input type="hidden" id="assignToCourseId" value="{{ $theCourse->id }}" name="assignToCourseId"/>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-12 gap-0">
+                            <div class="grid grid-cols-12 gap-0 mb-3">
                                 <div class="col-span-5 text-slate-500 font-medium">Group</div>
                                 <div class="col-span-7 font-medium">
                                     {{ $theGroup->name }}
                                     <input type="hidden" id="assignToGroupId" value="{{ $theGroup->id }}" name="assignToGroupId"/>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-12 gap-0">
+                                <div class="col-span-5 text-slate-500 font-medium">Evening and Weekend</div>
+                                <div class="col-span-7 font-medium">
+                                    {!! ($theGroup->evening_and_weekend == 1 ? '<span class="font-medium text-primary flex justify-start items-center">Yes<i data-lucide="sunset" class="w-8 h-8 ml-2"></i></span>' : '<span class="font-medium text-amber-600 flex justify-start items-center">No<i data-lucide="sun" class="w-8 h-8 ml-2"></i></span>' ) !!}
                                 </div>
                             </div>
                         </div>
