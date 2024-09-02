@@ -45,6 +45,17 @@
                                 </select>
                             </div>
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                                <label for="course_id1" class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Course</label>
+                                <select id="course_id1" name="course_id" class="form-select w-full mt-2 sm:mt-0 sm:w-auto">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($courses))
+                                        @foreach($courses as $cr)
+                                            <option value="{{ $cr->id }}">{{ $cr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                     <option value="1">Active</option>

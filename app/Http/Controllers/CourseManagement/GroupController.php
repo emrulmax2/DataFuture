@@ -32,6 +32,7 @@ class GroupController extends Controller
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
         $term = (isset($request->term) && $request->term > 0 ? $request->term : 0);
+        $courseId = (isset($request->course_id) && $request->course_id > 0 ? $request->course_id : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -44,6 +45,7 @@ class GroupController extends Controller
             $query->where('name','LIKE','%'.$queryStr.'%');
         endif;
         if($term > 0): $query->where('term_declaration_id', $term); endif;
+        if($courseId > 0): $query->where('course_id', $courseId); endif;
         if($status == 2):
             $query->onlyTrashed();
         else:

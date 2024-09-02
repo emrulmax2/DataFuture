@@ -11,6 +11,9 @@ use App\Http\Requests\CourseModuleRequests;
 use App\Models\AssessmentType;
 use App\Models\Grade;
 
+use App\Exports\ArrayCollectionExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class CourseModuleController extends Controller
 {
 
@@ -155,6 +158,41 @@ class CourseModuleController extends Controller
         $data = CourseModule::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function exportCourseModule($course_id){
+        $course = Course::find($course_id);
+        $courseModules = CourseModule::where('course_id', $course_id)->orderBy('name', 'ASC')->get();
+
+        $theCollection = [];
+        $theCollection[1][0] = 'ID';
+        $theCollection[1][1] = 'Name';
+        $theCollection[1][2] = 'Level';
+        $theCollection[1][3] = 'Code';
+        $theCollection[1][4] = 'Credit Value';
+        $theCollection[1][5] = 'Unit Value';
+        $theCollection[1][6] = 'Status';
+        $theCollection[1][7] = 'Class Type';
+        $theCollection[1][8] = 'Active';
+
+        $row = 2;
+        if(!empty($courseModules) && $courseModules->count() > 0):
+            foreach($courseModules as $cmod):
+                $theCollection[$row][0] = $cmod->ID;
+                $theCollection[$row][1] = $cmod->name;
+                $theCollection[$row][2] = (isset($cmod->level->name) && !empty($cmod->level->name) ? $cmod->level->name : '');
+                $theCollection[$row][3] = (isset($cmod->code) && !empty($cmod->code) ? $cmod->code : '');
+                $theCollection[$row][4] = (isset($cmod->credit_value) && !empty($cmod->credit_value) ? $cmod->credit_value : '');
+                $theCollection[$row][5] = (isset($cmod->unit_value) && !empty($cmod->unit_value) ? $cmod->unit_value : '');
+                $theCollection[$row][6] = (isset($cmod->status) && !empty($cmod->status) ? ucfirst($cmod->status) : '');
+                $theCollection[$row][7] = (isset($cmod->class_type) && !empty($cmod->class_type) ? ucfirst($cmod->class_type) : '');
+                $theCollection[$row][8] = (isset($cmod->active) && !empty($cmod->active) && $cmod->active == 1 ? 'Active' : 'Inactive');
+
+                $row += 1;
+            endforeach;
+        endif;
+
+        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $course).'_Modules.xlsx');
     }
 
 }
