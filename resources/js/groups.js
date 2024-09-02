@@ -206,7 +206,7 @@ var table = (function () {
             placeholder: 'Search Here...',
             //persist: true,
             create: false,
-            allowEmptyOption: false,
+            allowEmptyOption: true,
             onDelete: function (values) {
                 return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
             },
@@ -214,6 +214,7 @@ var table = (function () {
     
         let course_id = new TomSelect('#course_id', tomOptions);
         let edit_course_id = new TomSelect('#edit_course_id', tomOptions);
+        let term = new TomSelect('#term', tomOptions);
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
@@ -338,6 +339,54 @@ var table = (function () {
             });
         });
 
+        $("#term").on("change", function (event) {
+            let tthis = $(this);
+
+
+            //term.clear(true);
+            //term.clearOptions();
+
+            if(tthis.val()>0) {
+                term.disable()
+                document.querySelector("svg#term-loading").style.cssText = "display: inline-block;";
+
+                axios({
+                    method: "get",
+                    url: route('group.courselist.by.term',tthis.val()),
+                 
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    term.enable()
+                    document.querySelector("svg#term-loading").style.cssText = "display: none;";
+
+                    if(response.status == 200){
+                        course_id.clearOptions();    
+                        console.log(response.data);
+                        $.each(response.data, function(index, row) {
+                            course_id.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        course_id.refreshOptions()
+                    }
+                }).catch(error => {
+                    term.enable()
+                    document.querySelector("svg#term-loading").style.cssText = "display: none;";
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+                $('#course__box').show();
+            } else {
+                $('#course__box').hide();
+            }
+
+        });
         // Update Course Data
         $("#editForm").on("submit", function (e) {
             e.preventDefault();
