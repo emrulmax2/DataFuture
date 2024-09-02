@@ -9,11 +9,12 @@ var table = (function () {
         // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let term = $("#term").val() != "" ? $("#term").val() : "";
+        let course_id1 = $("#course_id1").val() != "" ? $("#course_id1").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "1";
 
         let tableContent = new Tabulator("#groupsTableId", {
             ajaxURL: route("groups.list"),
-            ajaxParams: { querystr: querystr, status: status, term : term},
+            ajaxParams: { querystr: querystr, status: status, term : term, course_id:course_id1 },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -193,6 +194,7 @@ var table = (function () {
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#query").val("");
             $("#term").val("");
+            $("#course_id1").val("");
             $("#status").val("1");
             filterHTMLForm();
         });
