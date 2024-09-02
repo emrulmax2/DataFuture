@@ -1481,6 +1481,10 @@
 .assignStudentsList li.existThere{
     background: rgb(var(--color-danger) / .1);
     color: rgb(var(--color-danger) / .8);
+    cursor: not-allowed;
+}
+.assignStudentsList li.existThere label{
+    cursor: not-allowed;
 }
 .assignStudentsList li.existThere a.showAllModules{
     color: rgb(var(--color-danger) / .8);

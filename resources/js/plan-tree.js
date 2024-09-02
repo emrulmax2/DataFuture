@@ -86,6 +86,19 @@ var classPlanTreeListTable = (function () {
                     }
                 },
                 {
+                    title: "Day",
+                    field: "day",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div>';
+                                html += '<span>'+cell.getData().day+'</span><br/>';
+                                html += '<span>'+cell.getData().time+'</span>';
+                            html += '</div>';
+
+                        return html;
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,

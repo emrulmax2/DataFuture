@@ -8,7 +8,8 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('class.plan') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To List</a>
+            <a href="{{ route('class.plan.add') }}" class="add_btn btn btn-primary shadow-md  mr-2">Add New Plan</a>
+            <a href="{{ route('class.plan') }}" class="add_btn btn btn-facebook shadow-md">Back To List</a>
         </div>
     </div>
 

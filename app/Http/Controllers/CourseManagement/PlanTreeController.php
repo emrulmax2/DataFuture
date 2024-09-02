@@ -147,7 +147,7 @@ class PlanTreeController extends Controller
                     $visibility = $this->getGroupVisibility($academicYearId, $termDeclaredId, $courseId, $theGroup->id);
                     
                     $html .= '<li class="hasChildren">';
-                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center text-primary font-medium">'.$theGroup->name.($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "").'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "").'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
                         $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
                             $html .= '<button data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
                             $html .= '<div class="dropdown">';
@@ -262,7 +262,7 @@ class PlanTreeController extends Controller
                         ->whereIn('group_id', $sameNameGroupIds)->get();
         
         $html = '';
-        $html .= '<div class="grid grid-cols-12 gap-4">';
+        $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
             $html .= '<div class="col-span-12 sm:col-span-4">';
                 $html .= '<div class="grid grid-cols-12 gap-0">';
                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Term</div>';
@@ -279,6 +279,14 @@ class PlanTreeController extends Controller
                 $html .= '<div class="grid grid-cols-12 gap-0">';
                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Group</div>';
                     $html .= '<div class="col-span-8 font-medium">'.$group->name.'</div>';
+                $html .= '</div>';
+            $html .= '</div>';
+            $html .= '<div class="col-span-12 sm:col-span-4">';
+                $html .= '<div class="grid grid-cols-12 gap-0 items-center">';
+                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Evening & Weekend</div>';
+                    $html .= '<div class="col-span-8 font-medium">';
+                        $html .= ($group->evening_and_weekend == 1 ? '<span class="font-medium text-primary flex justify-start items-center">Yes<i data-lucide="sunset" class="w-6 h-6 ml-2"></i></span>' : '<span class="font-medium text-amber-600 flex justify-start items-center">No<i data-lucide="sun" class="w-6 h-6 ml-2"></i></span>' );
+                    $html .= '</div>';
                 $html .= '</div>';
             $html .= '</div>';
         $html .= '</div>';
