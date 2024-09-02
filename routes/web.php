@@ -576,6 +576,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('course-management/course-module/delete/{id}', 'destroy')->name('course.module.destory');
         Route::post('course-management/course-module/restore/{id}', 'restore')->name('course.module.restore');
         
+        Route::get('course-management/course-module/restore/{course_id}', 'exportCourseModule')->name('course.module.export');
     });
 
     Route::controller(CourseBaseDatafutureCntroller::class)->group(function() {
