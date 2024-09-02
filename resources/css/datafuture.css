@@ -1977,3 +1977,10 @@ input[type=number] {
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+.hideIDCardModalBtn{
+    position: fixed;
+    top: 40px;
+    right: 40px;
+    z-index: 9999999999;
+}

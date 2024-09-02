@@ -182,11 +182,11 @@
                                     <option value="Seminar">Seminar</option>
                                 </select>
                             </div>
-                            <div class="col-span-6 sm:col-span-4">
+                            {{--<div class="col-span-6 sm:col-span-4">
                                 <label for="module_enrollment_key" class="form-label">Enrollment Key <span class="text-danger">*</span></label>
                                 <input id="module_enrollment_key" type="text" name="module_enrollment_key" class="form-control w-full">
                                 <div class="acc__input-error error-module_enrollment_key text-danger mt-2"></div>
-                            </div>
+                            </div>--}}
                             <div class="col-span-6 sm:col-span-4">
                                 <label for="start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
                                 <input id="start_time" type="text" name="start_time" class="form-control w-full theTimeField" placeholder="00:00">

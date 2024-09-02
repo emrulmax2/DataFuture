@@ -52,9 +52,12 @@ var classPlanTreeListTable = (function () {
                     field: "module",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        var html = '<a class="font-medium text-primary whitespace-normal break-all" href="'+route('tutor-dashboard.plan.module.show', cell.getData().id)+'">';
+                        var html = '<div class="break-all whitespace-normal">';
+                            html += '<a class="font-medium text-primary whitespace-normal break-all" href="'+route('tutor-dashboard.plan.module.show', cell.getData().id)+'">';
                                 html += cell.getData().module;
+                                html += (cell.getData().class_type != '' ? '<br/>'+cell.getData().class_type : '');
                             html += '</a>';
+                        html += '</div>';
                         return html;
                     }
                 },
@@ -471,7 +474,7 @@ var classPlanTreeListTable = (function () {
                 $('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                 $('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
                 $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
-                $('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
+                //$('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
                 $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
                 $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
                 $('#editPlanModal input[name="submission_date"]').val(dataset.plan.submission_date ? dataset.plan.submission_date : '');
