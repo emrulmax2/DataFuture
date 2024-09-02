@@ -526,4 +526,5 @@
 
 @section('script')
     @vite('resources/js/admission-communication.js')
+    @vite('resources/js/admission-vue.js')
 @endsection
