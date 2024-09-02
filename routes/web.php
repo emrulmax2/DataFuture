@@ -1495,6 +1495,8 @@ Route::middleware('auth')->group(function() {
         Route::delete('course-management/groups/delete/{id}', 'destroy')->name('groups.destory');
         Route::post('course-management/groups/restore/{id}', 'restore')->name('groups.restore');
 
+        Route::get('course-management/groups/courselist/{term}', 'getCourseListByTerm')->name('group.courselist.by.term');
+        
         Route::post('course-management/groups/bulk/', 'groupBulkActions')->name('groups.bulk.action');
     });
 
