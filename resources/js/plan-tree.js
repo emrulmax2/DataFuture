@@ -86,7 +86,7 @@ var classPlanTreeListTable = (function () {
                     }
                 },
                 {
-                    title: "Day",
+                    title: "Day - Time",
                     field: "day",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) {  

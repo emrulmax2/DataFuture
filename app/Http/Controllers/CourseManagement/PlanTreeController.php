@@ -398,7 +398,7 @@ class PlanTreeController extends Controller
                     'module_creation_id'=> $list->module_creation_id,
                     'module'=> isset($list->creations->module_name) ? $list->creations->module_name : '',
                     'room'=> (isset($list->venu->name) ? $list->venu->name : '').' - '.(isset($list->room->name) ? $list->room->name : ''),
-                    'time'=> $list->start_time.' - '.$list->end_time,
+                    'time'=> (!empty($list->start_time) ? date('H:i', strtotime($list->start_time)) : '').' - '.(!empty($list->end_time) ? date('H:i', strtotime($list->end_time)) : ''),
                     'module_enrollment_key'=> $list->module_enrollment_key,
                     'submission_date'=> $list->submission_date,
                     'tutor'=> (isset($list->tutor->name) ? $list->tutor->name : ''),
