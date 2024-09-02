@@ -661,7 +661,7 @@ var termModuleListTable = (function () {
             let form_data = new FormData(form);
     
             var assessmentLength = $form.find('input.cmb_assessment:checked').length;
-            if(assessmentLength > 0){
+            /*if(assessmentLength > 0){*/
                 axios({
                     method: "post",
                     url: route('assessment.update'),
@@ -708,7 +708,7 @@ var termModuleListTable = (function () {
                         }
                     }
                 });
-            }else{
+            /*}else{
                 $('.df_alert', $form).remove();
                 $('.modal-content', $form).prepend('<div class="df_alert alert alert-danger-soft show flex items-start" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp; Assessments are required. Please checked at least 1 assessment for this module.</div>')
                 
@@ -721,7 +721,7 @@ var termModuleListTable = (function () {
                 setTimeout(function(){
                     $('.df_alert', $form).remove();
                 }, 2000);
-            }
+            }*/
         });
         
 
