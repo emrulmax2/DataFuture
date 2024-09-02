@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\TermDeclaration;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class GroupController extends Controller
 {
@@ -125,7 +126,13 @@ class GroupController extends Controller
             return response()->json(['message' => 'No data Modified'], 304);
         }
     }
-
+    public function getCourseListByTerm(TermDeclaration $term) {
+        //$groups = Group::where('term_declation_id', $term->id)->get();
+        
+        $courseList = Group::select('course_id')->where('term_declaration_id', $term->id)->groupBy('course_id')->pluck('course_id')->toArray();
+        
+        return count($courseList)>0 ? Course::whereIn('id',$courseList)->get() : [];
+    }
     public function destroy($id){
         $data = Group::find($id)->delete();
         return response()->json($data);
