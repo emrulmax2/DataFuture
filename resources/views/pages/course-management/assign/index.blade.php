@@ -21,7 +21,7 @@
                 <div class="p-5">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3">
-                            <label for="unsigned_term" class="mb-2 block">Intek Semester {{--Term Declaration--}}<span class="text-danger">*</span></label>
+                            <label for="unsigned_term" class="mb-2 block">Semester {{--Term Declaration--}}<span class="text-danger">*</span></label>
                             <select id="unsigned_term" name="unsigned_term" class="form-control w-full lcc-tom-select">
                                 <option value="">Please Select</option>
                                 {{--@if($termDeclarations->count())

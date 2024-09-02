@@ -35,16 +35,40 @@ var unsignedStudentList = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Evening/Weekend",
+                    field: "std_ev_wk",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().std_ev_wk == 'Yes'){
+                            html += '<span class="text-primary flex justify-start items-center"><i data-lucide="sunset" class="w-6 h-6"></i></span>';
+                        }else{
+                            html += '<span class="text-amber-600 flex justify-start items-center"><i data-lucide="sun" class="w-6 h-6"></i></span>';
+                        }
+                        return html;
+                    }
+                },
+                {
                     title: "Group",
                     field: "group",
                     headerHozAlign: "left",
                     headerSort: false,
                 },
                 {
-                    title: "Evening/Weekend",
-                    field: "ev_wk",
+                    title: "Group Evening/Weekend",
+                    field: "group_ev_wk",
                     headerHozAlign: "left",
                     headerSort: false,
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().group_ev_wk == 'Yes'){
+                            html += '<span class="text-primary flex justify-start items-center"><i data-lucide="sunset" class="w-6 h-6"></i></span>';
+                        }else if(cell.getData().group_ev_wk == 'No'){
+                            html += '<span class="text-amber-600 flex justify-start items-center"><i data-lucide="sun" class="w-6 h-6"></i></span>';
+                        }
+                        return html;
+                    }
                 },
                 {
                     title: "Status",
