@@ -229,4 +229,5 @@
 
 @section('script')
     @vite('resources/js/admission-uploads.js')
+    @vite('resources/js/admission-vue.js')
 @endsection

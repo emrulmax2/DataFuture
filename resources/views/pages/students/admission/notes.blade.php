@@ -280,4 +280,5 @@
 
 @section('script')
     @vite('resources/js/admission-notes.js')
+    @vite('resources/js/admission-vue.js')
 @endsection

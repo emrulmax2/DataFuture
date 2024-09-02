@@ -103,7 +103,6 @@ class PlanController extends Controller
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
-        $lastQuery = DB::getQueryLog();
 
         $data = array();
 
@@ -134,7 +133,7 @@ class PlanController extends Controller
                     'course'=> isset($list->course->name) ? $list->course->name : '',
                     'module'=> isset($list->creations->module_name) ? $list->creations->module_name : '',
                     'room'=> (isset($list->venu->name) ? $list->venu->name : '').' - '.(isset($list->room->name) ? $list->room->name : ''),
-                    'time'=> $list->start_time.' - '.$list->end_time,
+                    'time'=> (!empty($list->start_time) ? date('H:i', strtotime($list->start_time)) : '').' - '.(!empty($list->end_time) ? date('H:i', strtotime($list->end_time)) : ''),
                     'module_enrollment_key'=> $list->module_enrollment_key,
                     'submission_date'=> $list->submission_date,
                     'tutor'=> (isset($list->tutor->name) ? $list->tutor->name : ''),
@@ -143,7 +142,8 @@ class PlanController extends Controller
                     'group'=> (isset($list->group->name) ? $list->group->name : ''),
                     'day'=> $day,
                     'deleted_at' => $list->deleted_at,
-                    'dates' => $list->dates->count() > 0 ? 1 : 0
+                    'dates' => $list->dates->count() > 0 ? 1 : 0,
+                    'class_type' => (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : ''),
                 ];
                 $i++;
             endforeach;

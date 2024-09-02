@@ -408,7 +408,8 @@ class PlanTreeController extends Controller
                     'day'=> $day,
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? $list->dates->count() : 0,
-                    'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count()
+                    'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count(),
+                    'class_type' => (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : ''),
                 ];
                 $i++;
             endforeach;
@@ -438,7 +439,7 @@ class PlanTreeController extends Controller
         $data['group_id'] = $plan->group_id;
         $data['start_time'] = $start_time;
         $data['end_time'] = $end_time;
-        $data['module_enrollment_key'] = $plan->module_enrollment_key;
+        //$data['module_enrollment_key'] = $plan->module_enrollment_key;
         $data['submission_date'] = $plan->submission_date;
         $data['tutor_id'] = $plan->tutor_id;
         $data['personal_tutor_id'] = $plan->personal_tutor_id;
