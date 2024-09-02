@@ -22,7 +22,7 @@ use App\Models\StudentTaskDocument;
 use App\Models\StudentUser;
 use Illuminate\Support\Facades\Storage;
 
-class ProcessStudentTaskDocument implements ShouldQueue
+class ProcessStudentDocuments implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $applicant;
@@ -49,20 +49,17 @@ class ProcessStudentTaskDocument implements ShouldQueue
         //--BEGIN: Student Document Sync
         $applicantTaskidList = [];
         $studentDocumentList = [];
-
-        foreach($this->applicant->allTasks as $applicantTaskData):
+    
+        foreach($this->applicant->docses as $applicantDoc):
             //Applicant Task wise Document capture
-            $applicantTaskDocumentData = ApplicantTaskDocument::where(['applicant_task_id'=>$applicantTaskData->id])->get();
-            if($applicantTaskData->task->interview == "No")
-            if(!in_array($applicantTaskData->id, $applicantTaskidList)) {
-                array_push($applicantTaskidList,$applicantTaskData->id);
-                foreach($applicantTaskDocumentData as $applicantTaskDocument):
-                    $applicantDocument = ApplicantDocument::find($applicantTaskDocument->applicant_document_id);
-                    //find the document and put it in student document
-                    // then insert it into studentDocument and applicantTaskDocument
-                    //DB::enableQueryLog();
 
-                   
+ 
+            $studentDocumentData = StudentDocument::where(['student_id'=>$student->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();
+            
+            if(!isset($studentDocumentData->id)) {
+
+                    $applicantDocument = ApplicantDocument::where(['applicant_id'=>$this->applicant->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();                    
+                    
                     if($applicantDocument!=null) {
                         $studentDocument = new StudentDocument();
                         $applicantArray = [
@@ -75,44 +72,18 @@ class ProcessStudentTaskDocument implements ShouldQueue
                             'current_file_name' => $applicantDocument->current_file_name,
                             'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
                         ];
+
                         if($applicantDocument->document_setting_id) {
                             $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);
                         }
                         $studentDocument->fill($applicantArray);
 
                         $studentDocument->save();
-                        //endDocuemnt saved
-                        $studentDocumentList[$applicantTaskData->id][] = $studentDocument->id;
-                        Storage::disk('s3')->copy('public/applicants/'.$this->applicant->id.'/'.$applicantDocument->current_file_name, 'public/students/'.$student->id.'/'.$applicantDocument->current_file_name);
 
                     }
-                endforeach;
                 
             }
         endforeach;
         //--END: Student Document Sync
-
-        //--BEGIN: Student Task Document Sync
-        $studentTaskList = StudentTask::where("student_id", $student->id)->get();
-        foreach($studentTaskList as $task):
-            foreach ($studentDocumentList as $applicantTaskId => $studentDocuementArray):
-                if($applicantTaskId==$task->applicant_task_id) {
-                    foreach ($studentDocuementArray as $studentDocId):
-                    $applicantArray = [
-                        'student_id' => $student->id,
-                        'student_task_id' => $task->id,
-                        'student_document_id' => $studentDocId,
-                        'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
-                    ];
-                    $data = new StudentTaskDocument();
-                    $data->fill($applicantArray);
-                    $data->save();
-                    endforeach;
-                }
-            endforeach;
-        endforeach;
-        unset($applicantArray);
-        //--END: Student Task Document Sync
-
     }
 }
