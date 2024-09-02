@@ -9,7 +9,7 @@ var table = (function () {
         // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let term = $("#term").val() != "" ? $("#term").val() : "";
-        let course_id1 = $("#course_id1").val() != "" ? $("#course_id1").val() : "";
+        let course_id1 = $("#course_id").val() != "" ? $("#course_id").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "1";
 
         let tableContent = new Tabulator("#groupsTableId", {
@@ -65,6 +65,29 @@ var table = (function () {
                     title: "Evening & Weekend",
                     field: "evening_and_weekend",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        let day=false;
+                        if(cell.getData().evening_and_weekend=='Yes') 
+                            day = 'text-slate-900' 
+                        else  
+                            day = 'text-amber-600'
+                        let html = '<div class="flex">';
+                                html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
+                                if(cell.getData().evening_and_weekend=='Yes')
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>';
+                                else
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+                                
+                                html += '</div>';
+                            // if(cell.getData().disability==1)
+                            //     html += '<div class="inline-flex intro-x " style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                            
+                            html += '</div>';
+                            //createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide"});
+
+                        return html;
+                    }
+             
                 },
                 {
                     title: "Status",
