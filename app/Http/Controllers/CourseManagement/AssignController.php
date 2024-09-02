@@ -108,13 +108,15 @@ class AssignController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $assign = Assign::where('student_id', $list->id)->orderBy('id', 'desc')->get()->first();
+                $student = Student::find($list->id);
                 $data[] = [
                     's_id' => $list->id,
                     'sl' => $i,
                     's_registration_no' => $list->registration_no,
                     'c_name' => isset($list->c_name) ? $list->c_name : '',
                     'group' => (isset($assign->plan->group->name) && !empty($assign->plan->group->name) ? $assign->plan->group->name : ''),
-                    'ev_wk' => (isset($assign->id) && $assign->id > 0 ? (isset($assign->plan->group->evening_and_weekend) && $assign->plan->group->evening_and_weekend == 1 ? 'Yes' : 'No') : ''),
+                    'group_ev_wk' => (isset($assign->id) && $assign->id > 0 ? (isset($assign->plan->group->evening_and_weekend) && $assign->plan->group->evening_and_weekend == 1 ? 'Yes' : 'No') : ''),
+                    'std_ev_wk' => (isset($student->activeCR->propose->full_time) && $student->activeCR->propose->full_time == 1 ? 'Yes' : 'No'),
                     'sts_name' => (isset($list->sts_name) ? $list->sts_name : ''),
                 ];
                 $i++;

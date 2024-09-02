@@ -20,6 +20,7 @@ use App\Models\ApplicantUser;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
+use App\Models\StudentEmailsDocument;
 use App\Models\StudentUser;
 
 class ProcessStudentEmail implements ShouldQueue
@@ -95,6 +96,12 @@ class ProcessStudentEmail implements ShouldQueue
                     $studentDocument->fill($dataArray);
                     $studentDocument->save();
             
+                    
+                    $applicantArray = array_merge($applicantArray,['student_email_id' => $dataEmail->id]);
+                    $studentEmailDocument = new StudentEmailsDocument();
+                    $studentEmailDocument->fill($applicantArray);
+                    $studentEmailDocument->save();
+
                     //add the attachments to Email Attachment
                     $studentEmailAttachment = new StudentEmailsAttachment();
                     $emailAttachmentArray  = [

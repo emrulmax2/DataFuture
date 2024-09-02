@@ -21,21 +21,18 @@
         <ul class="m-0 p-0">
             @if(isset(auth()->user()->priv()['course_and_semesters']) && auth()->user()->priv()['course_and_semesters'] == 1)
             <li class="hasChild">
-                <a class="flex items-center {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' || Route::currentRouteName() == 'course.module.show' || Route::currentRouteName() == 'courses.show' || Route::currentRouteName() == 'courses' || Route::is('term-declaration.index') || Route::currentRouteName() == 'semester' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center {{ Route::currentRouteName() == 'course.module.show' || Route::currentRouteName() == 'courses.show' || Route::currentRouteName() == 'modulelevels' || Route::currentRouteName() == 'courses' || Route::currentRouteName() == 'semester' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="book-copy" class="w-4 h-4 mr-2"></i> Courses & Semesters  <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' || Route::currentRouteName() == 'course.module.show' || Route::currentRouteName() == 'courses.show' || Route::currentRouteName() == 'courses' || Route::is('term-declaration.index') || Route::currentRouteName() == 'semester' ? 'block' : 'none' }};">
-                    
-                
-                
+                <ul class="p-0 m-0 pl-5" style="display: {{  Route::currentRouteName() == 'course.module.show' || Route::currentRouteName() == 'courses.show' || Route::currentRouteName() == 'modulelevels' || Route::currentRouteName() == 'courses' || Route::currentRouteName() == 'semester' ? 'block' : 'none' }};">
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'semester' ? 'active text-primary' : '' }}" href="{{ route('semester') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Semesters
                         </a>
                     </li>
                     <li>
-                        <a class="flex items-center mt-4 {{ Route::is('term-declaration.index') ? 'active text-primary' : '' }}" href="{{ route('term-declaration.index') }}">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Term Declarations
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'modulelevels' ? 'active text-primary' : '' }}" href="{{ route('modulelevels') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Module Levels
                         </a>
                     </li>
                     <li>
@@ -43,28 +40,28 @@
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Courses
                         </a>
                     </li>
-                    <li>
-                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' ? 'active text-primary' : '' }}" href="{{ route('course.creation') }}">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Course Creations
-                        </a>
-                    </li>
                 </ul>
             </li>
             @endif
             @if(isset(auth()->user()->priv()['terms_and_modules']) && auth()->user()->priv()['terms_and_modules'] == 1)
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'modulelevels' || Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
-                    <i data-lucide="calendar-range" class="w-4 h-4 mr-2"></i> Terms & Modules  <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' || Route::is('term-declaration.index') || Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                    <i data-lucide="calendar-range" class="w-4 h-4 mr-2"></i> Course and Term Creation  <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'modulelevels' || Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' || Route::is('term-declaration.index') || Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'block' : 'none' }};">
                     <li>
-                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'active text-primary' : '' }}" href="{{ route('term.module.creation') }}">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Term Module Creations
+                        <a class="flex items-center mt-4 {{ Route::is('term-declaration.index') ? 'active text-primary' : '' }}" href="{{ route('term-declaration.index') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Term Declarations
                         </a>
                     </li>
                     <li>
-                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'modulelevels' ? 'active text-primary' : '' }}" href="{{ route('modulelevels') }}">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Module Levels
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'course.creation.show' || Route::currentRouteName() == 'course.creation' ? 'active text-primary' : '' }}" href="{{ route('course.creation') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Course Creations
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'term.module.creation.module.details' || Route::currentRouteName() == 'term.module.creation.show' || Route::currentRouteName() == 'term.module.creation.add' || Route::currentRouteName() == 'term.module.creation' ? 'active text-primary' : '' }}" href="{{ route('term.module.creation') }}">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Term Module Creations
                         </a>
                     </li>
                 </ul>

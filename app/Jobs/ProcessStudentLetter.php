@@ -17,6 +17,7 @@ use App\Models\ApplicantUser;
 use App\Models\Student;
 use App\Models\StudentLetter;
 use App\Models\StudentDocument;
+use App\Models\StudentLettersDocument;
 use App\Models\StudentUser;
 use App\Models\User;
 
@@ -103,6 +104,14 @@ class ProcessStudentLetter implements ShouldQueue
             $data->fill($dataArray);
 
             $data->save();
+
+            $dataStudentLetterDocument = new StudentLettersDocument();
+            $applicantArray = array_merge($applicantArray,['student_letter_id' => $data->id]);
+            $dataStudentLetterDocument->fill($applicantArray);
+
+            $dataStudentLetterDocument->save();
+
+
             unset ($dataArray);
         endforeach;
        
