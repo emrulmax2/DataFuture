@@ -231,6 +231,7 @@ class TermModuleCreationController extends Controller
             'term' => $termRow,
             'course' => Course::find($courseId),
             'modules' => CourseModule::where('course_id', $courseId)->where('active', 1)->get(),
+            'existing_modules' => ModuleCreation::where('instance_term_id', $instanceTermId)->pluck('course_module_id')->unique()->toArray()
         ]);
     }
 

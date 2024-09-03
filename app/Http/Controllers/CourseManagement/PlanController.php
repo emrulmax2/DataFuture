@@ -143,7 +143,7 @@ class PlanController extends Controller
                     'day'=> $day,
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? 1 : 0,
-                    'class_type' => (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : ''),
+                    'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
                 ];
                 $i++;
             endforeach;
@@ -172,6 +172,7 @@ class PlanController extends Controller
         endforeach;
         $data['tutor_id'] = (isset($request->tutor_id) ? $request->tutor_id : null);
         $data['personal_tutor_id'] = (isset($request->personal_tutor_id) ? $request->personal_tutor_id : null);
+        $data['class_type'] = (isset($request->class_type) ? $request->class_type : null);
         //$data['module_enrollment_key'] = (isset($request->module_enrollment_key) ? $request->module_enrollment_key : null);
         $data['virtual_room'] = (isset($request->virtual_room) ? $request->virtual_room : null);
         $data['note'] = (isset($request->note) ? $request->note : null);
@@ -372,6 +373,9 @@ class PlanController extends Controller
                         foreach($boxes as $box):
                             $existing_id = (isset($box['existing_id']) && $box['existing_id'] > 0 ? $box['existing_id'] : 0);
                             $times = (isset($box['time']) && !empty($box['time']) ? explode(' - ', $box['time']) : []);
+                            $module = (isset($box['module']) && $box['module'] > 0 ? $box['module'] : 0);
+                            $moduleCreation = ModuleCreation::find($module);
+                            $mod_class_type = (isset($moduleCreation->class_type) && !empty($moduleCreation->class_type) ? $moduleCreation->class_type : null);
                             
                             $data = [];
                             $data['term_declaration_id'] = $term_declaration_id;
@@ -394,6 +398,7 @@ class PlanController extends Controller
                             $data['personal_tutor_id'] = (isset($box['personal_tutor']) ? $box['personal_tutor'] : null);
                             $data['virtual_room'] = (isset($box['virtual_room']) && !empty($box['virtual_room']) ? $box['virtual_room'] : '');
                             $data['note'] = (isset($box['note']) && !empty($box['note']) ? $box['note'] : '');
+                            $data['class_type'] = (isset($box['class_type']) && !empty($box['class_type']) ? $box['class_type'] : $mod_class_type);
 
                             if($existing_id > 0):
                                 $data['updated_by'] = auth()->user()->id;
@@ -454,7 +459,7 @@ class PlanController extends Controller
         $data['personal_tutor_id'] = $plan->personal_tutor_id;
         $data['virtual_room'] = $plan->virtual_room;
         $data['note'] = $plan->note;
-        $data['class_type'] = $plan->creations->class_type;
+        $data['class_type'] = (isset($plan->class_type) && !empty($plan->class_type) ? $plan->class_type : $plan->creations->class_type);
         $data['sat'] = $plan->sat;
         $data['sun'] = $plan->sun;
         $data['mon'] = $plan->mon;

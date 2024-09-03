@@ -35,6 +35,7 @@ class Plan extends Model
         'submission_date',
         'tutor_id',
         'personal_tutor_id',
+        'class_type',
         'virtual_room',
         'note',
         'created_by',
