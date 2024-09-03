@@ -198,7 +198,7 @@
                                 <div class="acc__input-error error-end_time text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="submission_date" class="form-label">Submission Date <span class="text-danger">*</span></label>
+                                <label for="submission_date" class="form-label">Submission Date</label>
                                 <input id="submission_date" type="text" name="submission_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
                                 <div class="acc__input-error error-submission_date text-danger mt-2"></div>
                             </div>
