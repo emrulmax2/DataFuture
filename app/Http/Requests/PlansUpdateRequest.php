@@ -32,7 +32,7 @@ class PlansUpdateRequest extends FormRequest
             //'module_enrollment_key' => 'required',
             'start_time' => 'required',
             'end_time' => 'required',
-            'submission_date' => 'required|date',
+            //'submission_date' => 'required|date',
             'class_day' => 'required|in:sat,sun,mon,tue,wed,thu,fri',
         ];
     }

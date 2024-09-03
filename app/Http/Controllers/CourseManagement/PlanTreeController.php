@@ -146,8 +146,8 @@ class PlanTreeController extends Controller
                     $theGroup = Group::where('name', $groupName)->where('course_id', $courseId)->where('term_declaration_id', $termDeclaredId)->orderBy('id', 'DESC')->get()->first();
                     $visibility = $this->getGroupVisibility($academicYearId, $termDeclaredId, $courseId, $theGroup->id);
                     
-                    $html .= '<li class="hasChildren">';
-                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "").'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                    $html .= '<li class="hasChildren">';/*($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "")*/
+                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend == 1 ? '<span><i data-lucide="sunset" class="w-4 h-4 ml-2"></i></span>' : '<span><i data-lucide="sun" class="w-4 h-4 ml-2"></i></span>').'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
                         $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
                             $html .= '<button data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
                             $html .= '<div class="dropdown">';
