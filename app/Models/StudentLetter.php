@@ -21,6 +21,7 @@ class StudentLetter extends Model
         'issued_date',
         'created_by',
         'updated_by',
+        'deleted_at',
     ];
 
     /**

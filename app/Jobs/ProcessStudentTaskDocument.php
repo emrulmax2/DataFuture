@@ -57,7 +57,7 @@ class ProcessStudentTaskDocument implements ShouldQueue
             if(!in_array($applicantTaskData->id, $applicantTaskidList)) {
                 array_push($applicantTaskidList,$applicantTaskData->id);
                 foreach($applicantTaskDocumentData as $applicantTaskDocument):
-                    $applicantDocument = ApplicantDocument::find($applicantTaskDocument->applicant_document_id);
+                    $applicantDocument = ApplicantDocument::where('id',$applicantTaskDocument->applicant_document_id)->withTrashed()->get()->first();
                     //find the document and put it in student document
                     // then insert it into studentDocument and applicantTaskDocument
                     //DB::enableQueryLog();
@@ -67,13 +67,14 @@ class ProcessStudentTaskDocument implements ShouldQueue
                         $studentDocument = new StudentDocument();
                         $applicantArray = [
                             'student_id' => $student->id,
-                            'hard_copy_check' => ($applicantDocument->hard_copy_check==1) ? 1 : 0,
+                            'hard_copy_check' => (isset($applicantDocument->hard_copy_check) && $applicantDocument->hard_copy_check > 0) ? 1 : 0,
                             'doc_type' => $applicantDocument->doc_type,
                             'disk_type' => $applicantDocument->disk_type,
                             'path' => $applicantDocument->path,
                             'display_file_name' =>	 $applicantDocument->display_file_name,
                             'current_file_name' => $applicantDocument->current_file_name,
                             'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                            'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                         ];
                         if($applicantDocument->document_setting_id) {
                             $applicantArray = array_merge($applicantArray,['document_setting_id' => $applicantDocument->document_setting_id]);

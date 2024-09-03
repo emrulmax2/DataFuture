@@ -99,7 +99,7 @@
                             <div class="grid grid-cols-12 gap-0">
                                 <div class="col-span-5 text-slate-500 font-medium">Evening and Weekend</div>
                                 <div class="col-span-7 font-medium">
-                                    {!! ($theGroup->evening_and_weekend == 1 ? '<span class="font-medium text-primary flex justify-start items-center">Yes<i data-lucide="sunset" class="w-8 h-8 ml-2"></i></span>' : '<span class="font-medium text-amber-600 flex justify-start items-center">No<i data-lucide="sun" class="w-8 h-8 ml-2"></i></span>' ) !!}
+                                    {!! ($theGroup->evening_and_weekend == 1 ? '<span class="font-medium text-primary inline-flex justify-start items-center tooltip" title="Evening & Weekend">Yes<i data-lucide="sunset" class="w-8 h-8 ml-2"></i></span>' : '<span title="Weekdays" class="font-medium text-amber-600 inline-flex justify-start items-center tooltip">No<i data-lucide="sun" class="w-8 h-8 ml-2"></i></span>' ) !!}
                                 </div>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
                                         <div class="form-check mb-2">
                                             <input checked id="assignToModuleIds_{{ $smd->id }}" class="form-check-input assignToModuleIds" name="assignToModuleIds[]" type="checkbox" value="{{ $smd->id }}">
                                             <label class="form-check-label" for="assignToModuleIds_{{ $smd->id }}">
-                                                {!! $smd->creations->module_name . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
+                                                {!! $smd->creations->module_name. (isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
                                             </label>
                                         </div>
                                     @endforeach

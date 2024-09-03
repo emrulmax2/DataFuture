@@ -72,7 +72,7 @@ class ProcessStudentEmail implements ShouldQueue
             foreach($applicantEmailAttachments as $applicantEmailAttachmentFile)
                 if($applicantEmailAttachmentFile->applicant_document_id) { 
 
-                    $applicantDocument = ApplicantDocument::find($applicantEmailAttachmentFile->applicant_document_id);
+                    $applicantDocument = ApplicantDocument::where('id',$applicantEmailAttachmentFile->applicant_document_id)->withTrashed()->get()->first();
                     $studentDocument = new StudentDocument();
 
                     $applicantArray = [
@@ -84,6 +84,7 @@ class ProcessStudentEmail implements ShouldQueue
                         'display_file_name' =>	 $applicantDocument->display_file_name,
                         'current_file_name' => $applicantDocument->current_file_name,
                         'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                        'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                     ];
 
                     if($applicantDocument->document_setting_id) {
@@ -108,6 +109,7 @@ class ProcessStudentEmail implements ShouldQueue
                         'student_email_id'=>$dataEmail->id, 
                         'student_document_id'=>$studentDocument->id, 
                         'created_by'=> ($applicantEmailAttachmentFile->updated_by) ? $applicantEmailAttachmentFile->updated_by : $applicantEmailAttachmentFile->created_by,
+                        'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                     ];
 
                     $studentEmailAttachment->fill($emailAttachmentArray);
