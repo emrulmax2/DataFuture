@@ -2550,7 +2550,7 @@ class AdmissionController extends Controller
     public function admissionDocumentDownload(Request $request){
         $row_id = $request->row_id;
 
-        $applicantDoc = ApplicantDocument::find($row_id);
+        $applicantDoc = ApplicantDocument::where('id',$row_id)->withTrashed()->get()->first();
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicantDoc->applicant_id.'/'.$applicantDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }
