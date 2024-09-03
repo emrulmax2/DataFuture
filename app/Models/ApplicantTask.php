@@ -43,7 +43,7 @@ class ApplicantTask extends Model
     }
 
     public function documents(){
-        return $this->belongsToMany(ApplicantDocument::class, 'applicant_task_documents');
+        return $this->belongsToMany(ApplicantDocument::class, 'applicant_task_documents')->orderByPivot('id','desc');
     }
 
     public function applicatnTaskStatus(){

@@ -46,7 +46,7 @@
                             <option value="">Please Select</option>
                             @if($modules->count() > 0)
                                 @foreach($modules as $mod)
-                                    <option value="{{ $mod->id }}">{{ $mod->name }}</option>
+                                    <option {{ (!empty($existing_modules) && in_array($mod->id, $existing_modules) ? 'disabled' : '')}} value="{{ $mod->id }}">{{ $mod->name }}</option>
                                 @endforeach
                             @endif
                         </select>

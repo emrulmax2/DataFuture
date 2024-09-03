@@ -147,7 +147,7 @@ class PlanTreeController extends Controller
                     $visibility = $this->getGroupVisibility($academicYearId, $termDeclaredId, $courseId, $theGroup->id);
                     
                     $html .= '<li class="hasChildren">';/*($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "")*/
-                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend == 1 ? '<span><i data-lucide="sunset" class="w-4 h-4 ml-2"></i></span>' : '<span><i data-lucide="sun" class="w-4 h-4 ml-2"></i></span>').'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend == 1 ? '<span class="tooltip" title="Evening & Weekend"><i data-lucide="sunset" class="w-4 h-4 ml-2"></i></span>' : '<span class="tooltip" title="Weekdays"><i data-lucide="sun" class="w-4 h-4 ml-2"></i></span>').'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
                         $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
                             $html .= '<button data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
                             $html .= '<div class="dropdown">';
@@ -177,70 +177,6 @@ class PlanTreeController extends Controller
             $html .= '</ul>';
         endif;
         return response()->json(['htm' => $html], 200);
-
-
-        /*$query = DB::table('plans')
-            ->select('plans.group_id')
-            ->leftJoin('groups', 'plans.group_id', '=', 'groups.id')
-            ->groupBy('plans.group_id')
-            ->where('plans.academic_year_id', '=', $academicYearId)
-            ->where('plans.term_declaration_id', '=', $termDeclaredId)
-            ->where('plans.course_id', '=', $courseId);
-        $Query = $query->orderBy('groups.name','ASC')->get();
-
-        $html = '';
-        
-        if(!$Query->isEmpty()):
-            $html .= '<ul class="theChild" data-total-group="'.count($Query).'">';
-                foreach($Query as $list):
-                        
-                        $query = DB::table('plans')
-                        ->select('instance_term_id')
-                        ->where('academic_year_id', '=', $academicYearId)
-                        ->where('term_declaration_id', '=', $termDeclaredId)
-                        ->where('group_id', '=', $list->group_id)
-                        ->where('course_id', '=', $courseId);
-                        $instance_term = $query->distinct()->get();
-                        
-                        
-                        foreach($instance_term as $term):
-                            $termId = $term->instance_term_id;
-                            $visibility = $this->getGroupVisibility($academicYearId, $termId, $courseId, $list->group_id);
-                            $theGroup = Group::find($list->group_id);
-                            $html .= '<li class="hasChildren">';
-                                $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$list->group_id.'" class="theGroup flex items-center text-primary font-medium">'.$theGroup->name.($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "").'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
-                                $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
-                                    $html .= '<button data-yearid="'.$academicYearId.'" data-termid="'.$termId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$list->group_id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
-                                    $html .= '<div class="dropdown">';
-                                        $html .= '<button class="dropdown-toggle p-0 border-0 rounded-0 text-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="settings" class="w-4 h4"></i></button>';
-                                        $html .= '<div class="dropdown-menu w-48">';
-                                            $html .= '<ul class="dropdown-content">';
-                                                $html .= '<li>';
-                                                    $html .= '<a data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$list->group_id.'" href="javascript:void(0);" class="dropdown-item assignManager">';
-                                                        $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Assign Manager';
-                                                    $html .= '</a>';
-                                                $html .= '</li>';
-                                                $html .= '<li>';
-                                                    $html .= '<a data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-termid="'.$termId.'" data-courseid="'.$courseId.'" data-groupid="'.$list->group_id.'" href="javascript:void(0);" class="dropdown-item assignCoOrdinator">';
-                                                        $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Audit User';
-                                                    $html .= '</a>';
-                                                $html .= '</li>';
-                                            $html .= '</ul>';
-                                        $html .= '</div>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</li>';
-                        endforeach;
-                    
-                endforeach;
-            $html .= '</ul>';
-        else:
-            $html .= '<ul class="errorUL theChild">';
-                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Group not foudn!</div></li>';
-            $html .= '</ul>';
-        endif;
-
-        return response()->json(['htm' => $html], 200);*/
     }
 
     public function getModule(Request $request) {
@@ -285,7 +221,7 @@ class PlanTreeController extends Controller
                 $html .= '<div class="grid grid-cols-12 gap-0 items-center">';
                     $html .= '<div class="col-span-4 text-slate-500 font-medium">Evening & Weekend</div>';
                     $html .= '<div class="col-span-8 font-medium">';
-                        $html .= ($group->evening_and_weekend == 1 ? '<span class="font-medium text-primary flex justify-start items-center">Yes<i data-lucide="sunset" class="w-6 h-6 ml-2"></i></span>' : '<span class="font-medium text-amber-600 flex justify-start items-center">No<i data-lucide="sun" class="w-6 h-6 ml-2"></i></span>' );
+                        $html .= ($group->evening_and_weekend == 1 ? '<span class="font-medium text-primary inline-flex justify-start items-center tooltip" title="Evening & Weekends">Yes<i data-lucide="sunset" class="w-6 h-6 ml-2"></i></span>' : '<span class="font-medium text-amber-600 inline-flex justify-start items-center tooltip" title="Weekdays">No<i data-lucide="sun" class="w-6 h-6 ml-2"></i></span>' );
                     $html .= '</div>';
                 $html .= '</div>';
             $html .= '</div>';
@@ -409,7 +345,7 @@ class PlanTreeController extends Controller
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? $list->dates->count() : 0,
                     'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count(),
-                    'class_type' => (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : ''),
+                    'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
                 ];
                 $i++;
             endforeach;
@@ -445,7 +381,7 @@ class PlanTreeController extends Controller
         $data['personal_tutor_id'] = $plan->personal_tutor_id;
         $data['virtual_room'] = $plan->virtual_room;
         $data['note'] = $plan->note;
-        $data['class_type'] = $plan->creations->class_type;
+        $data['class_type'] = (isset($plan->class_type) && !empty($plan->class_type) ? $plan->class_type : $plan->creations->class_type);
         $data['sat'] = $plan->sat;
         $data['sun'] = $plan->sun;
         $data['mon'] = $plan->mon;
@@ -484,6 +420,7 @@ class PlanTreeController extends Controller
         $data['note'] = (isset($request->note) ? $request->note : null);
         $data['submission_date'] = (isset($request->submission_date) && !empty($request->submission_date) ? date('Y-m-d', strtotime($request->submission_date)) : null);
         $data['updated_by'] = auth()->user()->id;
+        $data['class_type'] = (isset($request->class_type) ? $request->class_type : null);
 
         $plan = Plan::where('id', $planID)->update($data);
         if($plan):

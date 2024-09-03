@@ -23,6 +23,7 @@ use App\Models\StudentInterview;
 use App\Models\StudentKin;
 use App\Models\StudentTask;
 use App\Models\StudentUser;
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProcessStudentInterview implements ShouldQueue
 {
@@ -51,7 +52,7 @@ class ProcessStudentInterview implements ShouldQueue
         $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
 
         //Student Interview
-        $applicantSetData= ApplicantInterview::where('applicant_id',$this->applicant->id)->get();
+        $applicantSetData = ApplicantInterview::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantSetData as $applicantSet):
             $dataArray = [
                 'student_id' => $student->id,
@@ -65,7 +66,7 @@ class ProcessStudentInterview implements ShouldQueue
             ];
 
             if($applicantSet->applicant_task_id) {
-                $applicantTaskData =ApplicantTask::find($applicantSet->applicant_task_id);
+                $applicantTaskData = ApplicantTask::find($applicantSet->applicant_task_id);
 
                 $dataSet = new StudentTask();
 
@@ -85,16 +86,23 @@ class ProcessStudentInterview implements ShouldQueue
                 $dataSet->save();
 
                 $dataArray = array_merge($dataArray, ["student_task_id"=>$dataSet->id]);
+                //Debugbar::warning($applicantSet->applicant_document_id);
+                //Debugbar::warning($applicantTaskData->documents[0]->id);
             }
-            if($applicantSet->applicant_document_id) { 
 
-                $applicantDocument = ApplicantDocument::withTrashed()->where("id",$applicantSet->applicant_document_id)->get()->first();
+            
+           
+            if(isset($applicantSet->applicant_document_id) || isset($applicantTaskData->documents[0]->id)) { 
+
+                $applicantDocumentId = isset($applicantSet->applicant_document_id) ? $applicantSet->applicant_document_id : $applicantTaskData->documents[0]->id;
+                
+                $applicantDocument = ApplicantDocument::withTrashed()->where("id",$applicantDocumentId)->get()->first();
 
                     $studentDocument = new StudentDocument();
 
                     $applicantArray = [
                         'student_id' => $student->id,
-                        'hard_copy_check' => $applicantDocument->hard_copy_check,
+                        'hard_copy_check' => ($applicantDocument->hard_copy_check > 0 ? $applicantDocument->hard_copy_check : 0),
                         'doc_type' => $applicantDocument->doc_type,
                         'disk_type' => $applicantDocument->disk_type,
                         'path' => $applicantDocument->path,

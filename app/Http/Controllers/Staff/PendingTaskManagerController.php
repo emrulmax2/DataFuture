@@ -350,7 +350,7 @@ class PendingTaskManagerController extends Controller
                     $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
                     $newPassword = date('Ymd', strtotime($student->date_of_birth)).strtolower($student->last_name);
                     
-                    if($studentUserEmail != $orgEmail):
+                    /*if($studentUserEmail != $orgEmail):*/
                         $studentContact = $studentContactOld = StudentContact::find($student->contact->id);
                         $studentContact->fill([
                             //'personal_email' => $studentUserEmail, 
@@ -403,7 +403,7 @@ class PendingTaskManagerController extends Controller
                         $theCollection[$row][] = $newPassword;
 
                         $row++;
-                    endif;
+                    /*endif;*/
                 endif;
             endforeach;
 

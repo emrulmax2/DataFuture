@@ -3,6 +3,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import tippy, { roundArrow } from "tippy.js";
 
 ("use strict");
 var classPlanTreeListTable = (function () {
@@ -378,6 +379,17 @@ var classPlanTreeListTable = (function () {
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+
+                    $parent.find(".tooltip").each(function () {
+                        let toolTIpOptions = {content: $(this).attr("title"), placement: 'right' };
+                        $(this).removeAttr("title");
+                
+                        tippy(this, {
+                            arrow: roundArrow,
+                            animation: "shift-away",
+                            ...toolTIpOptions,
+                        });
+                    });
                 }
             }).catch(error => {
                 if (error.response) {
@@ -427,6 +439,17 @@ var classPlanTreeListTable = (function () {
                                 icons,
                                 "stroke-width": 1.5,
                                 nameAttr: "data-lucide",
+                            });
+
+                            $('.classPlanTreeResultWrap').find(".tooltip").each(function () {
+                                let toolTIpOptions = {content: $(this).attr("title"), placement: 'right'};
+                                $(this).removeAttr("title");
+                        
+                                tippy(this, {
+                                    arrow: roundArrow,
+                                    animation: "shift-away",
+                                    ...toolTIpOptions,
+                                });
                             });
                         })
                     });
