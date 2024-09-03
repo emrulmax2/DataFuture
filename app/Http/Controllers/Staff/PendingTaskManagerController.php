@@ -471,6 +471,11 @@ class PendingTaskManagerController extends Controller
         $task_id = $request->task_id;
 
         $student = Student::find($student_id);
+        if ($student->photo !== null && Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo)) {
+            $photoURL = url('storage/students/'.$student->id.'/'.$student->photo);
+        } else {
+            $photoURL = asset('build/assets/images/user_avatar.png');
+        }
 
         $PDFHTML = '';
         $PDFHTML .= '<div class="printBtns">';
@@ -478,8 +483,8 @@ class PendingTaskManagerController extends Controller
         $PDFHTML .= '</div>';
         $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg.jpg').');">';
             $PDFHTML .= '<div class="profilePicWrap">';
-                $PDFHTML .= '<span>';
-                    $PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
+                $PDFHTML .= '<span style="background-image: url(\''.$photoURL.'\')">';
+                    //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
                 $PDFHTML .= '</span>';
             $PDFHTML .= '</div>';
             $PDFHTML .= '<div class="profileInfWrap">';
