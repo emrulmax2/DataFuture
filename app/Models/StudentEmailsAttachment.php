@@ -15,6 +15,7 @@ class StudentEmailsAttachment extends Model
         'student_document_id',
         'created_by',
         'updated_by',
+        'deleted_at',
     ];
 
     /**

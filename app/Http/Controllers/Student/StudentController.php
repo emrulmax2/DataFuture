@@ -920,7 +920,7 @@ class StudentController extends Controller
     public function studentDocumentDownload(Request $request){ 
         $row_id = $request->row_id;
 
-        $studentDoc = StudentDocument::find($row_id);
+        $studentDoc = StudentDocument::where('id',$row_id)->withTrashed()->get()->first();
         $student_id = $studentDoc->student_id;
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);

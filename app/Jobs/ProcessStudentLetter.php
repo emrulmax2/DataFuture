@@ -20,6 +20,7 @@ use App\Models\StudentDocument;
 use App\Models\StudentLettersDocument;
 use App\Models\StudentUser;
 use App\Models\User;
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProcessStudentLetter implements ShouldQueue
 {
@@ -72,21 +73,23 @@ class ProcessStudentLetter implements ShouldQueue
             if($applicantSet->comon_smtp_id) {
                 $dataArray = array_merge($dataArray,['comon_smtp_id' => $applicantSet->comon_smtp_id]);
             }
-            $applicantDocument = ApplicantDocument::find($applicantSet->applicant_document_id);
-
+            $applicantDocument = ApplicantDocument::where('id',$applicantSet->applicant_document_id)->withTrashed()->get()->first();
+            Debugbar::warning($applicantDocument);
+            Debugbar::warning($applicantSet->applicant_document_id);
             if($applicantSet->applicant_document_id) {
 
                 $studentDocument = new StudentDocument();
 
                 $applicantArray = [
                     'student_id' => $student->id,
-                    'hard_copy_check' => ($applicantDocument->hard_copy_check > 0 ? $applicantDocument->hard_copy_check : 0),
+                    'hard_copy_check' => (isset($applicantDocument->hard_copy_check) && $applicantDocument->hard_copy_check > 0) ? $applicantDocument->hard_copy_check : 0,
                     'doc_type' => $applicantDocument->doc_type,
                     'disk_type' => $applicantDocument->disk_type,
                     'path' => $applicantDocument->path,
                     'display_file_name' =>	 $applicantDocument->display_file_name,
                     'current_file_name' => $applicantDocument->current_file_name,
                     'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                    'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                 ];
 
                 if($applicantDocument->document_setting_id) {

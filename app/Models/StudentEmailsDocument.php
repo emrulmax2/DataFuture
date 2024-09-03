@@ -20,7 +20,8 @@ class StudentEmailsDocument extends Model
         'display_file_name',
         'current_file_name',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_at',
     ];
 
     /**

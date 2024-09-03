@@ -54,11 +54,11 @@ class ProcessStudentDocuments implements ShouldQueue
             //Applicant Task wise Document capture
 
  
-            $studentDocumentData = StudentDocument::where(['student_id'=>$student->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();
+            $studentDocumentData = StudentDocument::where(['student_id'=>$student->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->withTrashed()->get()->first();
             
             if(!isset($studentDocumentData->id)) {
 
-                    $applicantDocument = ApplicantDocument::where(['applicant_id'=>$this->applicant->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->get()->first();                    
+                    $applicantDocument = ApplicantDocument::where(['applicant_id'=>$this->applicant->id])->where(['display_file_name'=>$applicantDoc->display_file_name])->withTrashed()->get()->first();                    
                     
                     if($applicantDocument!=null) {
                         $studentDocument = new StudentDocument();
@@ -71,6 +71,7 @@ class ProcessStudentDocuments implements ShouldQueue
                             'display_file_name' =>	 $applicantDocument->display_file_name,
                             'current_file_name' => $applicantDocument->current_file_name,
                             'created_by'=> ($applicantDocument->updated_by) ? $applicantDocument->updated_by : $applicantDocument->created_by,
+                            'deleted_at' => $applicantDocument->deleted_at!=null ? $applicantDocument->deleted_at : null,
                         ];
 
                         if($applicantDocument->document_setting_id) {

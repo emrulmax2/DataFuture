@@ -22,6 +22,7 @@ class StudentDocument extends Model
         'current_file_name',
         'created_by',
         'updated_by',
+        'deleted_at',
     ];
 
     /**
