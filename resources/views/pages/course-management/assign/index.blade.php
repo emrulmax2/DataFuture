@@ -111,7 +111,7 @@
                                         <div class="form-check mb-2">
                                             <input checked id="assignToModuleIds_{{ $smd->id }}" class="form-check-input assignToModuleIds" name="assignToModuleIds[]" type="checkbox" value="{{ $smd->id }}">
                                             <label class="form-check-label" for="assignToModuleIds_{{ $smd->id }}">
-                                                {!! $smd->creations->module_name . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
+                                                {!! $smd->creations->module_name. (isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
                                             </label>
                                         </div>
                                     @endforeach
