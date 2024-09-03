@@ -86,15 +86,15 @@ class ProcessStudentInterview implements ShouldQueue
                 $dataSet->save();
 
                 $dataArray = array_merge($dataArray, ["student_task_id"=>$dataSet->id]);
-                Debugbar::warning($applicantSet->applicant_document_id);
-                Debugbar::warning($applicantTaskData->applicant_document_id);
+                //Debugbar::warning($applicantSet->applicant_document_id);
+                //Debugbar::warning($applicantTaskData->documents[0]->id);
             }
 
             
            
-            if(isset($applicantSet->applicant_document_id) || isset($applicantTaskData->applicant_document_id)) { 
+            if(isset($applicantSet->applicant_document_id) || isset($applicantTaskData->documents[0]->id)) { 
 
-                $applicantDocumentId = isset($applicantSet->applicant_document_id) ? $applicantSet->applicant_document_id : $applicantTaskData->applicant_document_id;
+                $applicantDocumentId = isset($applicantSet->applicant_document_id) ? $applicantSet->applicant_document_id : $applicantTaskData->documents[0]->id;
                 
                 $applicantDocument = ApplicantDocument::withTrashed()->where("id",$applicantDocumentId)->get()->first();
 

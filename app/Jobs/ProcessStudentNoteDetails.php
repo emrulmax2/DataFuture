@@ -65,7 +65,7 @@ class ProcessStudentNoteDetails implements ShouldQueue
         //         'current_file_name' => $note->document->current_file_name,
         //         'created_by'=> ($note->document->updated_by) ? $note->document->updated_by : $note->document->created_by,
         //     ];
-        //     if($note->document->document_setting_id) {
+        //     if(isset($note->document) && isset($note->document->document_setting_id)) {
         //         $applicantArray = array_merge($applicantArray,['document_setting_id' => $note->document->document_setting_id]);
         //     }
         //     $studentDocument->fill($applicantArray);
@@ -79,9 +79,8 @@ class ProcessStudentNoteDetails implements ShouldQueue
         //     $studentNote = new StudentNote();
         //     $applicantArray = [
         //         'student_id' => $student->id,
-        //         'student_document_id' => $studentDocument->id,
         //         'note' => $note->note,
-        //         'phase'=> 'Live',
+        //         'phase'=> 'Admission',
         //         'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
         //     ];
         //     $studentNote->fill($applicantArray);
