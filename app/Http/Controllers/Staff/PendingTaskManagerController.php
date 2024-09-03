@@ -433,6 +433,7 @@ class PendingTaskManagerController extends Controller
                 $student = Student::find($id);
                 $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
                 $studentUserEmail = $student->users->email;
+                $mailTo = [];
                 $mailTo[] = $studentUserEmail;
                 if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
                     $mailTo[] = $student->contact->personal_email;
