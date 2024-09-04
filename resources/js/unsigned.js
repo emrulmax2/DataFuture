@@ -188,6 +188,7 @@ var unsignedStudentList = (function () {
         $('.unsignedStudentListWrap').fadeOut('fast', function(){
             unsignedStudentList.init();
         })
+        $('#unsignedResultCount').attr('data-total', '0').html('');
     });
 
     $('#moveToProtentialList').on('click', function(e){

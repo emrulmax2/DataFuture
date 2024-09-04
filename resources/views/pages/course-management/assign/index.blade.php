@@ -17,7 +17,7 @@
             <div class="intro-y box">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Unsignned Students</h2>
-                    <div id="unsignedResultCount" class="font-medium text-primary text-right" data-total="0"></div>
+                    <div id="unsignedResultCount" class="font-bold text-base text-right" data-total="0"></div>
                 </div>
                 <div class="p-5">
                     <div class="grid grid-cols-12 gap-4">
