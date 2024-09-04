@@ -483,7 +483,7 @@ class PendingTaskManagerController extends Controller
         $PDFHTML .= '</div>';
         $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
             $PDFHTML .= '<div class="profilePicWrap">';
-                $PDFHTML .= '<span style="background-image: url(\''.$photoURL.'\')">';
+                $PDFHTML .= '<span class="course_'.$student->activeCR->creation->course_id.'" style="background-image: url(\''.$photoURL.'\')">';
                     //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
                 $PDFHTML .= '</span>';
             $PDFHTML .= '</div>';
