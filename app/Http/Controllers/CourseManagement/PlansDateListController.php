@@ -130,7 +130,9 @@ class PlansDateListController extends Controller
         if(!empty($plan_ids)):
             
             foreach($plan_ids as $cp_id):
-                //set Plan One Time Taskes
+                $plan = Plan::find($cp_id);
+
+                /* Plan Task Start */
                 foreach($eLearningActivitySettings as $activitySetting) {
                     $planTask = PlanTask::where('e_learning_activity_setting_id',$activitySetting->id)
                                 ->where('plan_id',$cp_id)
@@ -141,19 +143,21 @@ class PlansDateListController extends Controller
 
                     }
                     if($activitySetting->has_week==0 ) {
-                        $planTask->plan_id = $cp_id;
-                        $planTask->e_learning_activity_setting_id = $activitySetting->id;
+                        $planTask->name = $activitySetting->name;
+                        $planTask->category = $activitySetting->category;
                         $planTask->logo = $activitySetting->logo;
+                        $planTask->plan_id = $cp_id;
+                        $planTask->module_creation_id = $plan->module_creation_id;
+                        $planTask->e_learning_activity_setting_id = $activitySetting->id;
                         $planTask->has_week = ($activitySetting->has_week) ?? 0;
                         $planTask->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
                         $planTask->days_reminder = ($activitySetting->days_reminder) ?? 0;
-                        $planTask->name = $activitySetting->name;
-                        $planTask->category = $activitySetting->category;
                         $planTask->created_by = Auth::user()->id;
                         $planTask->save();
                     }
                 }
-                $plan = Plan::find($cp_id);
+                /* Plan Task Start */
+
                 $creation = $plan->creations;
                 $term = $plan->creations->term;
                 $courseCreationInstance = CourseCreationInstance::find($term->course_creation_instance_id);

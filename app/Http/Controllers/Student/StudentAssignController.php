@@ -66,6 +66,7 @@ class StudentAssignController extends Controller
                         'photo_url' => $list2->photo_url,
                         'deleted_at' => $list->deleted_at,
                         'student_id' => $list->student_id,
+                        'evening_and_weekend' => (isset($list2->activeCR->propose->full_time) && $list2->activeCR->propose->full_time > 0 ? $list2->activeCR->propose->full_time : 0)
                     ];
                     $i++;
                 }

@@ -9,17 +9,18 @@ var unsignedStudentList = (function () {
         // Setup Tabulator
         let unsignedTerm = $("#unsigned_term").val() != "" ? $("#unsigned_term").val() : "";
         let unsignedStatuses = $("#unsigned_statuses").val() != "" ? $("#unsigned_statuses").val() : "";
+        let unsigned_course_id = $("#unsigned_course_id").val() != "" ? $("#unsigned_course_id").val() : "0";
 
         let tableContent = new Tabulator("#unsignedStudentList", {
             ajaxURL: route("assign.unsignned.list"),
-            ajaxParams: { unsignedTerm: unsignedTerm, unsignedStatuses: unsignedStatuses },
+            ajaxParams: { unsignedTerm: unsignedTerm, unsignedStatuses: unsignedStatuses, unsigned_course_id : unsigned_course_id },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 10, 20, 50, 100, 200],
+            paginationSize: 50,
+            paginationSizeSelector: [true, 10, 20, 50, 100, 200, 300, 500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -92,6 +93,16 @@ var unsignedStudentList = (function () {
                     }
                 },
             ],
+            ajaxResponse:function(url, params, response){
+                var total_rows = (response.total_rows && response.total_rows > 0 ? response.total_rows : 0);
+                if(total_rows > 0){
+                    $('#unsignedResultCount').attr('data-total', total_rows).html(total_rows+' Rows');
+                }else{
+                    $('#unsignedResultCount').attr('data-total', '0').html('');
+                }
+
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -101,10 +112,13 @@ var unsignedStudentList = (function () {
             },
             rowSelectionChanged:function(data, rows){
                 var ids = [];
+                var totalRows = $('#unsignedResultCount').attr('data-total') * 1;
                 if(rows.length > 0){
                     $('#moveToProtentialList').fadeIn();
+                    $('#unsignedResultCount').html(rows.length+' out of '+totalRows+' Rows');
                 }else{
                     $('#moveToProtentialList').fadeOut();
+                    $('#unsignedResultCount').html(totalRows+' Rows');
                 }
             },
             selectableCheck:function(row){
@@ -174,6 +188,7 @@ var unsignedStudentList = (function () {
         $('.unsignedStudentListWrap').fadeOut('fast', function(){
             unsignedStudentList.init();
         })
+        $('#unsignedResultCount').attr('data-total', '0').html('');
     });
 
     $('#moveToProtentialList').on('click', function(e){

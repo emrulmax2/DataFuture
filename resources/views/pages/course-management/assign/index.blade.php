@@ -17,6 +17,7 @@
             <div class="intro-y box">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Unsignned Students</h2>
+                    <div id="unsignedResultCount" class="font-bold text-base text-right" data-total="0"></div>
                 </div>
                 <div class="p-5">
                     <div class="grid grid-cols-12 gap-4">
@@ -47,6 +48,7 @@
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3 text-right sm:pt-7">
+                            <input type="hidden" name="unsigned_course_id" value="{{ $theCourse->id }}" id="unsigned_course_id"/>
                             <button id="unsignnedStudentList-go" type="button" class="btn btn-primary w-auto sm:w-16" >Go</button>
                             <button id="unsignnedStudentList-reset" type="button" class="btn btn-secondary w-auto sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                             <button id="moveToProtentialList" style="display: none;" type="button" class="btn btn-success text-white w-auto sm:ml-1">Move to Potential</button>

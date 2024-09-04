@@ -63,6 +63,7 @@ class AssignController extends Controller
     public function unsignnedList(Request $request){
         $unsignedTerm = (isset($request->unsignedTerm) && !empty($request->unsignedTerm) ? $request->unsignedTerm : 0);
         $unsignedStatuses = (isset($request->unsignedStatuses) && !empty($request->unsignedStatuses) ? $request->unsignedStatuses : []);
+        $unsigned_course_id = (isset($request->unsigned_course_id) && !empty($request->unsigned_course_id) ? $request->unsigned_course_id : 0);
 
         //$courseCreations = CourseCreation::where('semester_id', $unsignedTerm)->pluck('id')->unique()->toArray();
         $plan_ids = Plan::where('term_declaration_id', $unsignedTerm)->pluck('id')->unique()->toArray();
@@ -90,6 +91,7 @@ class AssignController extends Controller
                  ->leftJoin('courses as c', 'cc.course_id', '=', 'c.id')
                  ->whereIn('s.status_id', $unsignedStatuses)
                  ->whereNotIn('s.id', $excludedStudentids)
+                 ->where('c.id', $unsigned_course_id)
                  ->orderByRaw(implode(',', $sorts));
 
         $total_rows = $query->count();
@@ -124,7 +126,7 @@ class AssignController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);                     
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'total_rows' => $total_rows]);                     
     }
 
     public function getExistingStudentsList($planIds){

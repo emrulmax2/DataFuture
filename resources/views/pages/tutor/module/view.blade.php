@@ -116,9 +116,9 @@
     </div>
     <div id="participants" class="tab-pane " role="tabpanel"  aria-labelledby="participants-tab">
         <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
+        {{--<div class="intro-y box p-5 mt-5">
             @include('pages.tutor.module.includes.participants')
-        </div>
+        </div>--}}
         <!-- END: HTML Table Data -->
 
         <!-- BEGIN: HTML Table Data -->
