@@ -56,9 +56,9 @@ var unsignedStudentList = (function () {
                     formatter(cell, formatterParams){
                         var html = '';
                         if(cell.getData().std_ev_wk == 'Yes'){
-                            html += '<span class="text-primary flex justify-start items-center"><i data-lucide="sunset" class="w-6 h-6"></i></span>';
+                            html += '<span class="text-primary flex justify-start items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg></span>';
                         }else{
-                            html += '<span class="text-amber-600 flex justify-start items-center"><i data-lucide="sun" class="w-6 h-6"></i></span>';
+                            html += '<span class="text-amber-600 flex justify-start items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></span>';
                         }
                         return html;
                     }
@@ -77,9 +77,9 @@ var unsignedStudentList = (function () {
                     formatter(cell, formatterParams){
                         var html = '';
                         if(cell.getData().group_ev_wk == 'Yes'){
-                            html += '<span class="text-primary flex justify-start items-center"><i data-lucide="sunset" class="w-6 h-6"></i></span>';
+                            html += '<span class="text-primary flex justify-start items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg></span>';
                         }else if(cell.getData().group_ev_wk == 'No'){
-                            html += '<span class="text-amber-600 flex justify-start items-center"><i data-lucide="sun" class="w-6 h-6"></i></span>';
+                            html += '<span class="text-amber-600 flex justify-start items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></span>';
                         }
                         return html;
                     }
