@@ -64,15 +64,17 @@ class AssignController extends Controller
         $unsignedTerm = (isset($request->unsignedTerm) && !empty($request->unsignedTerm) ? $request->unsignedTerm : 0);
         $unsignedStatuses = (isset($request->unsignedStatuses) && !empty($request->unsignedStatuses) ? $request->unsignedStatuses : []);
 
-        $courseCreations = CourseCreation::where('semester_id', $unsignedTerm)->pluck('id')->unique()->toArray();
-        $excludedStudentids = DB::table('plans as p')
+        //$courseCreations = CourseCreation::where('semester_id', $unsignedTerm)->pluck('id')->unique()->toArray();
+        $plan_ids = Plan::where('term_declaration_id', $unsignedTerm)->pluck('id')->unique()->toArray();
+        $excludedStudentids = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
+        /*$excludedStudentids = DB::table('plans as p')
                               ->select('a.student_id')
                               ->leftJoin('assigns as a', 'p.id', '=', 'a.plan_id')
                               //->where('p.term_declaration_id', $unsignedTerm)
                               ->whereIn('p.course_creation_id', $courseCreations)
                               ->groupBy('a.student_id')
                               ->orderBy('a.student_id', 'ASC')
-                              ->pluck('a.student_id')->unique()->toArray();
+                              ->pluck('a.student_id')->unique()->toArray();*/
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 's_id', 'dir' => 'ASC']));
         $sorts = [];
@@ -193,6 +195,38 @@ class AssignController extends Controller
                                         ->orWhere('first_name', 'LIKE', '%'.$theValue.'%')
                                         ->orWhere('last_name', 'LIKE', '%'.$theValue.'%');
                                 })->orderBy('first_name', 'ASC')->get();
+                    if(!empty($students) && $students->count() > 0):
+                        $res['count'] += $students->count();
+                        $res['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
+                            $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
+                        $res['htm'] .= '</li>';
+                        foreach($students as $std):
+                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
+                                $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
+                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
+                            $res['htm'] .= '</li>';
+                        endforeach;
+                    endif;
+                endforeach;
+            endif;
+        endif;
+
+        return response()->json(['res' => $res], 200);
+    }
+
+    public function getPotentialStudentListFromUnsignedList(Request $request){
+        $res = [
+            'count' => 0,
+            'htm' => ''
+        ];
+        $student_ids = (isset($request->student_ids) && !empty($request->student_ids) ? $request->student_ids : []);
+        $existingStudents = (isset($request->existingStudents) && !empty($request->existingStudents) ? $request->existingStudents : []);
+        if(!empty($student_ids)):
+            $statuses = Student::whereIn('id', $student_ids)->orderBy('status_id', 'ASC')->pluck('status_id')->unique()->toArray();
+            if(!empty($statuses)):
+                foreach($statuses as $sts):
+                    $status = Status::find($sts);
+                    $students = Student::where('status_id', $sts)->whereIn('id', $student_ids)->orderBy('first_name', 'ASC')->get();
                     if(!empty($students) && $students->count() > 0):
                         $res['count'] += $students->count();
                         $res['htm'] .= '<li class="headingItem" data-status="'.$status->id.'">';
