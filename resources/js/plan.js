@@ -205,6 +205,7 @@ var classPlanListTable = (function () {
         editPlanModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editPlanModal .acc__input-error').html('');
             $('#editPlanModal .modal-body select').val('');
+            $('#editPlanModal .modal-body textarea').val('');
             $('#editPlanModal .modal-body input:not([type="radio"])').val('');
             $('#editPlanModal input[name="id"]').val('0');
             $('#editPlanModal input[type="radio"]').prop('checked', false);

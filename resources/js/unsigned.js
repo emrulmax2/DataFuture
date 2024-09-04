@@ -19,11 +19,24 @@ var unsignedStudentList = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [true, 10, 20, 50, 100, 200],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            selectable: true,
             columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
                 {
                     title: "ID",
                     field: "s_registration_no",
@@ -75,7 +88,7 @@ var unsignedStudentList = (function () {
                     field: "sts_name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return '<div class="font-medium">'+cell.getData().sts_name+'</div>';
+                        return '<div class="font-medium">'+cell.getData().sts_name+'</div><input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().s_id+'">';
                     }
                 },
             ],
@@ -86,6 +99,17 @@ var unsignedStudentList = (function () {
                     nameAttr: "data-lucide",
                 });
             },
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                if(rows.length > 0){
+                    $('#moveToProtentialList').fadeIn();
+                }else{
+                    $('#moveToProtentialList').fadeOut();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().s_id > 0; 
+            }
         });
 
         // Redraw table onresize
@@ -151,4 +175,65 @@ var unsignedStudentList = (function () {
             unsignedStudentList.init();
         })
     });
+
+    $('#moveToProtentialList').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var ids = [];
+
+        $('#unsignedStudentList').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.student_ids').val());
+        });
+
+        var existingStudents = [];
+        if($('.assignStudentsList.existingStudentList li').length > 0){
+            $('.assignStudentsList.existingStudentList li').each(function(){
+                existingStudents.push($(this).attr('data-studentid'));
+            })
+        }
+
+        if(ids.length > 0){
+            $('.assignStudentsList.potentialStudentList').addClass('loading').html('');
+            axios({
+                method: "post",
+                url: route('assign.generage.potential.list.from.unsigned.list'),
+                data: {student_ids : ids, existingStudents : existingStudents},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('html, body').animate({ scrollTop: $("#studentListArea").offset().top - 50 }, 1000);
+                $('#moveToProtentialList').fadeOut();
+                unsignedStudentList.init();
+                $('.assignStudentsList.potentialStudentList').removeClass('loading');
+                if (response.status == 200) {
+                    $('.assignStudentsList.potentialStudentList').html(response.data.res.htm);
+                    if(response.data.res.count > 0){
+                        $('.potentialCount').html(' ('+response.data.res.count+')');
+                    }else{
+                        $('.potentialCount').html('');
+                    }
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                $('html, body').animate({ scrollTop: $("#studentListArea").offset().top - 50 }, 1000);
+                $('#moveToProtentialList').fadeOut();
+                unsignedStudentList.init();
+                $('.assignStudentsList.potentialStudentList').removeClass('loading').html('');
+                $('.potentialCount').html('');
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $('.assignStudentsList.potentialStudentList').removeClass('loading').html('');
+            $('.potentialCount').html('');
+            $('#moveToProtentialList').fadeOut();
+            unsignedStudentList.init();
+        }
+    })
 })();

@@ -2418,17 +2418,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('course-management/assign/students-to-plan', 'assignStudentsToPlan')->name('assign.students.to.plan'); 
         Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
+
+        Route::post('course-management/assign/get-potential-student-list-from-unsigned-list', 'getPotentialStudentListFromUnsignedList')->name('assign.generage.potential.list.from.unsigned.list'); 
     });
 
-    // GET|HEAD        result ................................................................................................................................................... result.index › ResultController@index  
-    // POST            result ................................................................................................................................................... result.store › ResultController@store  
-    // GET|HEAD        result-list/{assessment_plan} .............................................................................................................................. result.list › ResultController@list  
-    // POST            result-list/{assessment_plan}/restore ................................................................................................................ result.restore › ResultController@restore  
-    // GET|HEAD        result/create .......................................................................................................................................... result.create › ResultController@create
-    // GET|HEAD        result/{result} ............................................................................................................................................ result.show › ResultController@show  
-    // PUT|PATCH       result/{result} ........................................................................................................................................ result.update › ResultController@update  
-    // DELETE          result/{result} ...................................................................................................................................... result.destroy › ResultController@destroy  
-    // GET|HEAD        result/{result}/edit ....................................................................................................................................... result.edit › ResultController@edit 
     Route::resource('result', ResultController::class,[
         'except' => ['index']
     ]);

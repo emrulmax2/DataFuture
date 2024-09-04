@@ -21,22 +21,22 @@
                 <div class="p-5">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3">
-                            <label for="unsigned_term" class="mb-2 block">Semester {{--Term Declaration--}}<span class="text-danger">*</span></label>
+                            <label for="unsigned_term" class="mb-2 block">Term Declaration<span class="text-danger">*</span></label>
                             <select id="unsigned_term" name="unsigned_term" class="form-control w-full lcc-tom-select">
                                 <option value="">Please Select</option>
-                                {{--@if($termDeclarations->count())
+                                @if($termDeclarations->count())
                                     @foreach($termDeclarations as $term)
                                         <option value="{{ $term->id }}">{{ $term->name }}</option>
                                     @endforeach
-                                @endif--}}
-                                @if($semesters->count())
+                                @endif
+                                {{--@if($semesters->count())
                                     @foreach($semesters as $sem)
                                         <option value="{{ $sem->id }}">{{ $sem->name }}</option>
                                     @endforeach
-                                @endif
+                                @endif--}}
                             </select>
                         </div>
-                        <div class="col-span-12 sm:col-span-7">
+                        <div class="col-span-12 sm:col-span-6">
                             <label for="unsigned_statuses" class="mb-2 block">Student Statuses<span class="text-danger">*</span></label>
                             <select id="unsigned_statuses" class="form-control w-full lcc-tom-select" name="unsigned_statuses[]" multiple>
                                 @if($statuses->count() > 0)
@@ -46,9 +46,10 @@
                                 @endif
                             </select>
                         </div>
-                        <div class="col-span-12 sm:col-span-2 text-right sm:pt-7">
-                            <button id="unsignnedStudentList-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                            <button id="unsignnedStudentList-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                        <div class="col-span-12 sm:col-span-3 text-right sm:pt-7">
+                            <button id="unsignnedStudentList-go" type="button" class="btn btn-primary w-auto sm:w-16" >Go</button>
+                            <button id="unsignnedStudentList-reset" type="button" class="btn btn-secondary w-auto sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                            <button id="moveToProtentialList" style="display: none;" type="button" class="btn btn-success text-white w-auto sm:ml-1">Move to Potential</button>
                         </div>
                     </div>
 
@@ -123,7 +124,7 @@
             </div>
         </div>
         <div class="col-span-12 resultWrap hidden"></div>
-        <div class="col-span-8">
+        <div class="col-span-8" id="studentListArea">
             <div class="intro-y box">
                 <div class="grid grid-cols-12 gap-0 relative">
                     <div class="col-span-6 assignExistingCol">
