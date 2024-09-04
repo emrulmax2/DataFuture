@@ -481,7 +481,7 @@ class PendingTaskManagerController extends Controller
         $PDFHTML .= '<div class="printBtns">';
             $PDFHTML .= '<button data-id="'.$student->registration_no.'" id="thePrintBtn_'.$student->registration_no.'" class="btn btn-success text-white thePrintBtn"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Download '.$student->registration_no.'</button>';
         $PDFHTML .= '</div>';
-        $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg.jpg').');">';
+        $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
             $PDFHTML .= '<div class="profilePicWrap">';
                 $PDFHTML .= '<span style="background-image: url(\''.$photoURL.'\')">';
                     //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
