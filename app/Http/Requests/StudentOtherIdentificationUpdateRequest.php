@@ -26,7 +26,7 @@ class StudentOtherIdentificationUpdateRequest extends FormRequest
         return [
             'application_no' => 'required',
             'ssn_no' => 'required',
-            'uhn_no' => 'required',
+            //'uhn_no' => 'required',
             'registration_no' => 'required',
         ];
     }
