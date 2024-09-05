@@ -301,6 +301,8 @@ var ELearningActivityList = (function () {
         }).then((response) => {
             if (response.status == 200) {
                 let dataset = response.data;
+
+                $('#editELearningActivityModal [name="name"]').val(dataset.name ? dataset.name : '');
                 $('#editELearningActivityModal [name="category"]').val(dataset.category ? dataset.category : '');
                 
                 if(dataset.has_week == 1){
@@ -308,7 +310,12 @@ var ELearningActivityList = (function () {
                 }else{
                     $('#editELearningActivityModal input[name="has_week"]').prop('checked', false);
                 }
-
+                if(dataset.is_mandatory == 1){
+                    $('#editELearningActivityModal input[name="is_mandatory"]').prop('checked', true);
+                }else{
+                    $('#editELearningActivityModal input[name="is_mandatory"]').prop('checked', false);
+                }
+                $('#editELearningActivityModal [name="days_reminder"]').val(dataset.days_reminder ? dataset.days_reminder : '');
                 $('#editELearningActivityModal input[name="id"]').val(editId);
                 $('#editELearningActivityModal #userImageEdit').attr('src', dataset.logoUrl).attr('alt', dataset.category);
 

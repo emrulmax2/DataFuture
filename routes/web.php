@@ -2266,6 +2266,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(StudentAssignController::class)->group(function() {
 
         Route::get('student-assign-list', 'list')->name('student-assign.list'); 
+        Route::post('student-assign-export', 'exportStudentList')->name('student.assign.export'); 
         
     });
 

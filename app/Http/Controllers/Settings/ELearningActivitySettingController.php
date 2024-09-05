@@ -111,7 +111,8 @@ class ELearningActivitySettingController extends Controller
         $id = $request->editid;
         $rowData = ELearningActivitySetting::find($id);
         if ($rowData->logo !== null && Storage::disk('s3')->exists('public/activity/'.$rowData->logo)) {
-            $logoUrl = Storage::disk('s3')->url('public/activity/'.$rowData->logo);
+            //$logoUrl = Storage::disk('s3')->url('public/activity/'.$rowData->logo);
+            $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$rowData->logo, now()->addMinutes(120));
         } else {
             $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
         }

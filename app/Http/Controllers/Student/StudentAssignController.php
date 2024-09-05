@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assign;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+
+use App\Exports\ArrayCollectionExport;
+use App\Models\Plan;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentAssignController extends Controller
 {
@@ -75,69 +80,43 @@ class StudentAssignController extends Controller
         
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+    
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function exportStudentList(Request $request){
+        $plan_id = $request->plan_id;
+        $plan = Plan::find($plan_id);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+        $student_ids = (isset($request->ids) && !empty($request->ids) ? $request->ids : []);
+        $moduleName = (isset($plan->creations->module_name) && !empty($plan->creations->module_name) ? $plan->creations->module_name : '' );
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        $theCollection = [];
+        $theCollection[1][0] = 'Registration No';
+        $theCollection[1][1] = 'First Name';
+        $theCollection[1][2] = 'Last Name';
+        $theCollection[1][3] = 'Mobile';
+        $theCollection[1][4] = 'Personal Email';
+        $theCollection[1][5] = 'Org Email';
+        $theCollection[1][6] = 'Status';
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+        $row = 2;
+        if(!empty($student_ids)):
+            $students = Student::whereIn('id', $student_ids)->orderBy('registration_no', 'ASC')->get();
+            if(!empty($students)):
+                foreach($students as $student):
+                    $theCollection[$row][0] = $student->registration_no;
+                    $theCollection[$row][1] = $student->first_name;
+                    $theCollection[$row][2] = $student->last_name;
+                    $theCollection[$row][3] = (isset($student->contact->mobile) && !empty($student->contact->mobile) ? $student->contact->mobile : '');
+                    $theCollection[$row][4] = (isset($student->contact->personal_email) && !empty($student->contact->personal_email) ? $student->contact->personal_email : '');
+                    $theCollection[$row][5] = (isset($student->contact->institutional_email) && !empty($student->contact->institutional_email) ? $student->contact->institutional_email : '');
+                    $theCollection[$row][6] = (isset($student->status->name) && !empty($student->status->name) ? $student->status->name : '');
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+                    $row += 1;
+                endforeach;
+            endif;
+        endif;
+
+        $fileName = (!empty($moduleName) ? str_replace(' ', '_', $moduleName).'_student_lists.xlsx' : 'student_lists.xlsx');
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
 }
