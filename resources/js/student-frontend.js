@@ -112,6 +112,8 @@ import {createApp} from 'vue'
                 }
                 nextWizardStep = false;
             }
+
+            
         });
         //nextWizardStep = false;
         /* Form Submission End*/
@@ -185,7 +187,10 @@ import {createApp} from 'vue'
         e.preventDefault();
         
         let addressId = $(this).data('addressid');
-        console.log(addressId);
+       
+
+        $("input[name='disagree_current_address']").val(0);
+
         $("input[name='current_address_id']").val(addressId);
         $('#currentAdressQuestion').fadeOut(300,function(e) {
             $("#currentAddress").fadeIn(150,function(e) { $("#currenAddress__yes").fadeIn(); });
@@ -197,6 +202,9 @@ import {createApp} from 'vue'
     $('#disagreeCurrentAddress').on('click', function (e) {
         e.preventDefault();
         let tthis = $(this);
+
+        $("input[name='disagree_current_address']").val(1);
+
         $('#currentAdressQuestion').fadeOut(300,function(e) {
             $("#currentAddress").fadeIn(150,function(e) { $("#currenAdress__no").fadeIn(); });
             $("#askPermanentAdress").fadeIn();
@@ -209,27 +217,52 @@ import {createApp} from 'vue'
         let addressId = $(this).data('addressid');
         let currentAddressId = $("input[name='current_address_id']").val();
         
+        $("input[name='permanent_address_id']").val(addressId);
         if(!currentAddressId) {
-            let addressHtml = $("input[name='address_line_1']").val() + ', ';
+            let addressLine1_p = $("input[name='address_line_1']").val();
+            let addressLine2_p = $("input[name='address_line_2']").val();
+            let postCode_p = $("input[name='post_code']").val();
+            let state_p = $("input[name='state']").val();
+            let country_p = $("input[name='country']").val();
+            let city_p = $("input[name='city']").val();
+            let addressHtml = "";
             addressHtml += $("input[name='address_line_2']").val() + '<br />';
             addressHtml += $("input[name='post_code']").val() + '<br />';
             addressHtml += $("input[name='state']").val() + ', ';
             addressHtml += $("input[name='city']").val() + '<br />';
             addressHtml += $("input[name='country']").val() + '';
             $("#permanentAddress__yes div").html(addressHtml)
-        }
-        $("input[name='permanent_address_id']").val(addressId);
-        $('#askPermanentAdress').fadeOut(300,function(e) {
+            if(addressLine1_p!="" && postCode_p!="" && state_p!="" && country_p!="") {
+                
+                
+                $('#askPermanentAdress').fadeOut(300,function(e) {
 
-            $("#permanentAddress__no").hide();
-            $("#permanentAdressBox").fadeIn(150,function(e) { $("#permanentAddress__yes").fadeIn();  });
-            $("#form2SaveButton").fadeIn();
-            
-        });
+                    $("#permanentAddress__no").hide();
+                    $("#permanentAdressBox").fadeIn(150,function(e) { $("#permanentAddress__yes").fadeIn();  });
+                    $("#form2SaveButton").fadeIn();
+                });
+            } else {
+                $(`#agreePermanentAddress`).addClass('border-danger');
+                $(`.error-agreePermanentAddress`).html('Adrress field required');
+            }
+
+        } else {
+
+            $('#askPermanentAdress').fadeOut(300,function(e) {
+
+                $("#permanentAddress__no").hide();
+                $("#permanentAdressBox").fadeIn(150,function(e) { $("#permanentAddress__yes").fadeIn();  });
+                $("#form2SaveButton").fadeIn();
+            });
+        
+         
+        }
+   
     });
 
     $('#disagreePermanentAddress').on('click', function (e) {
         e.preventDefault();
+        $("input[name='disagree_permanent_address']").val(1);
         $('#askPermanentAdress').fadeOut(300,function(e) {
             $("#permanentAddress__yes").hide();
             $("#permanentAdressBox").fadeIn(150,function(e) { $("#permanentAddress__no").fadeIn();  });

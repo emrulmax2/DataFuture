@@ -45,6 +45,7 @@
                                 <option {{ ($studentData["nationality"] == $country->id  ? "selected":"") }} value="{{ $country->id }}">{{ $country->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-nationality text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="nationality-tooltip" class="relative flex items-center py-1">
@@ -60,6 +61,7 @@
                                 <option  {{ ($studentData["nationality"] == $country->id  ? "selected":"") }}  value="{{ $country->id }}">{{ $country->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-birth_country text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="country-birth-tooltip" class="relative flex items-center py-1">
@@ -77,6 +79,7 @@
                                 <option {{ ($studentData["ethnicity"] == $ethnicity->id  ? "selected":"") }}  value="{{ $ethnicity->id }}">{{ $ethnicity->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-first_name text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="ethnicity-tooltip" class="relative flex items-center py-1">
@@ -86,12 +89,13 @@
                         <!-- END: Custom Tooltip Content -->
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-3" name="religion" class="w-full  lccTom lcc-tom-select">
                             @foreach($religions as $religion)
                                 <option {{ ($studentData["religion"] == $religion->id  ? "selected":"") }} value="{{ $religion->id }}">{{ $religion->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-religion text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="religion-belief-tooltip" class="relative flex items-center py-1">
@@ -102,12 +106,13 @@
                     </div>
 
                     <div class="intro-y col-span-12 sm:col-span-6 ">
-                        <label for="input-wizard-1" class="form-label inline-flex">Sexual Orientation <i data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <label for="input-wizard-1" class="form-label inline-flex">Sexual Orientation <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-1" name="sexual_orientation" class="w-full lccTom lcc-tom-select" >
                             @foreach($sexualOrientations as $sexualOrientation)
-                                <option value="{{ $sexualOrientation->id }}">{{ $sexualOrientation->name }}</option>              
+                                <option {{ ($studentData["sexualOrientation"] == $sexualOrientation->id  ? "selected":"") }} value="{{ $sexualOrientation->id }}">{{ $sexualOrientation->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-sexual_orientation text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="custom-content-tooltip" class="relative flex items-center py-1">
@@ -118,12 +123,13 @@
                     </div>
                     
                     <div class="intro-y col-span-12 sm:col-span-6">
-                        <label for="input-wizard-2" class="form-label inline-flex">Gender identity <i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
+                        <label for="input-wizard-2" class="form-label inline-flex">Gender identity <span class="text-danger"> *</span><i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-2" name="gender" class="w-full  lccTom lcc-tom-select">
                             @foreach($genderIdentities as $genderIdentity)
-                                <option value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
+                                <option  {{ ($studentData["hesa_gender_id"] == $genderIdentity->id  ? "selected":"") }} value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-gender text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="gender-identity-tooltip" class="relative flex items-center py-1">
@@ -139,6 +145,7 @@
                                 <option {{ ($studentData["sex_identifier_id"] == $sexIdentifier->id  ? "selected":"") }}  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
                             @endforeach
                         </select>
+                        <div class="acc__input-error error-sex_identifier_id text-danger mt-2"></div>
                         <!-- BEGIN: Custom Tooltip Content -->
                         <div class="tooltip-content">
                             <div id="gender-tooltip" class="relative flex items-center py-1">
@@ -192,37 +199,45 @@
                             <!-- END: Custom Tooltip Content -->
                         </div>
                         <div id="currenAdress__no" class="hidden">
+                                <input type="hidden" name="disagree_current_address" value="0" />
+
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_address_line_1" class="form-label inline-flex">Address Line 1</label>
+                                            <label for="student_address_address_line_1" class="form-label inline-flex">Address Line 1 <span class="text-danger"> *</span></label>
                                             <input id="student_address_address_line_1" autocomplete="off" type="text" name="address_line_1" value="" class="w-full text-sm" />
+                                            <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="student_address_address_line_2" class="form-label inline-flex">Address Line 2</label>
                                             <input id="student_address_address_line_2" type="text"  autocomplete="off" name="address_line_2" value="" class="w-full text-sm" />
+                                            <div class="acc__input-error error-address_line_2 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_postal_zip_code" class="form-label inline-flex">Post Code</label>
+                                            <label for="student_address_postal_zip_code" class="form-label inline-flex">Post Code <span class="text-danger"> *</span></label>
                                             <input id="student_address_postal_zip_code" type="text"  autocomplete="off" name="post_code" value="" class="w-full text-sm" />
+                                            <div class="acc__input-error error-post_code text-danger mt-2"></div>
                                         </div>
                                 
                                 </div>
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_city" class="form-label inline-flex">City</label>
+                                            <label for="student_address_city" class="form-label inline-flex">City <span class="text-danger"> *</span></label>
                                             <input id="student_address_city" type="text"  autocomplete="off" name="city" value="" class="w-full text-sm"  />
+                                            <div class="acc__input-error error-city text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_state_province_region" class="form-label inline-flex">State</label>
+                                            <label for="student_address_state_province_region" class="form-label inline-flex">State <span class="text-danger"> *</span></label>
                                             <input id="student_address_state_province_region"  autocomplete="off" type="text" name="state" value="" class="w-full text-sm" />
+                                            <div class="acc__input-error error-state text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
-                                            <label for="student_address_country" class="form-label inline-flex">Country</label>
+                                            <label for="student_address_country" class="form-label inline-flex">Country <span class="text-danger"> *</span></label>
                                             <input id="student_address_country" type="text"  autocomplete="off" name="country" value="" class="w-full text-sm" />
+                                            <div class="acc__input-error error-country text-danger mt-2"></div>
                                         </div>
                                     
                                 </div>
@@ -234,7 +249,7 @@
                         
                         <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
                             <label for="input-wizard-4" class="form-label inline-flex">Please Select your current accomodation type <span class="text-danger">*</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
-                            <select id="data-4" name="term_time_accommodation_type_id" class=" w-full lccTom lcc-tom-select ">
+                            <select id="data-4" name="term_time_accommodation_type_id" class=" w-full ">
                                 
                                 @foreach($termTimeAccomadtionTypes as $termTimeAccomadtionType)
                                     <option {{ ($studentData["term_time_accommodation_type_id"] == $termTimeAccomadtionType->id  ? "selected":"") }} value="{{ $termTimeAccomadtionType->id }}">{{ $termTimeAccomadtionType->name }}</option>              
@@ -255,7 +270,9 @@
                                 <div class="intro-y col-span-12 py-1">
                                     <label for="input-wizard-4" class="form-label inline-flex mr-2">Is the address mentioned above is your permanent residence address?</label>
                                     <button id="agreePermanentAddress" data-addressid="{{ $studentData["current_address"]->id }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
-                                    <button id="disagreePermanentAddress" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
+                                    <button id="disagreePermanentAddress" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 ">No</button>
+                                    <div class="acc__input-error error-agreePermanentAddress text-danger mt-2"></div>
+                                    <input type="hidden" name="disagree_permanent_address" value="0" />
                                 </div>
                         </div>
                     </div>
@@ -277,16 +294,19 @@
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_address_line_1" class="form-label inline-flex">Address Line 1</label>
                                             <input id="permanent_address_line_1" type="text" name="permanent_address_line_1" class="w-full text-sm" />
+                                            <div class="acc__input-error error-permanent_address_line_1 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_address_line_2" class="form-label inline-flex">Address Line 2</label>
                                             <input id="permanent_address_line_2" type="text" name="permanent_address_line_2" class="w-full text-sm" />
+                                            <div class="acc__input-error error-permanent_address_line_2 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label  for="permanent_post_code" class="form-label inline-flex">Post Code</label>
                                             <input id="permanent_post_code" type="text" name="permanent_post_code" class="w-full text-sm" />
+                                            <div class="acc__input-error error-permanent_post_code text-danger mt-2"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -294,16 +314,19 @@
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label  for="permanent_city" class="form-label inline-flex">City</label>
                                             <input id="permanent_city" type="text" name="permanent_city" class="w-full text-sm"  />
+                                            <div class="acc__input-error error-permanent_city text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_state" class="form-label inline-flex">State</label>
                                             <input id="permanent_state" type="text" name="permanent_state" class="w-full text-sm" />
+                                            <div class="acc__input-error error-permanent_state text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_country" class="form-label inline-flex">Country</label>
                                             <input id="permanent_country" type="text" name="permanent_country" class="w-full text-sm" />
+                                            <div class="acc__input-error error-permanent_country text-danger mt-2"></div>
                                         </div>
                                 </div>
                             

@@ -62,10 +62,11 @@ class DashboardController extends Controller
             "student_id" => $studentData->id,
             "nationality" => $studentData->nationality_id,
             "permanent_country" => $studentData->country_id,
-            "ethnicity" => $studentData->nationality_id,
-            "religion" => $studentData->nationality_id,
+            "ethnicity" => $studentOtherDetails->ethnicity->id,
+            "religion" => $studentOtherDetails->religion->id,
             "sex_identifier_id" => $studentData->sex_identifier_id,
-            "sexualOrientation" => "",
+            "sexualOrientation" => $studentOtherDetails->sexori->id,
+            'hesa_gender_id' => $studentOtherDetails->hesa_gender_id,
             "current_address" => $currentAddress,
             "permanent_address" => $permanentAddress,
             "consents" => $consentList,
@@ -127,8 +128,6 @@ class DashboardController extends Controller
     }
 
     public function profileView(){
-
-            
         
         $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
 
@@ -155,6 +154,7 @@ class DashboardController extends Controller
             'consent' => ConsentPolicy::all(),
             'ttacom' => TermTimeAccommodationType::where('active', 1)->get()
         ]);
+
     }
 
     protected function moduleList() {
