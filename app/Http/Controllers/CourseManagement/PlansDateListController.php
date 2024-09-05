@@ -135,7 +135,7 @@ class PlansDateListController extends Controller
                 /* Plan Task Start */
                 foreach($eLearningActivitySettings as $activitySetting) {
                     $planTask = PlanTask::where('e_learning_activity_setting_id',$activitySetting->id)
-                                ->where('plan_id',$cp_id)
+                                ->where('plan_id', $cp_id)
                                 ->get()
                                 ->first();
                     if(!$planTask) {
