@@ -130,7 +130,7 @@
             </div>
         </div>
     </div>
-    @foreach($planDateList as $dateList)
+    {{-- @foreach($planDateList as $dateList)
     <div data-tw-merge class="accordion-item bg-slate-200 py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
         <div class="accordion-header" id="faq-accordion-7">
             <button data-tw-merge data-tw-toggle="collapse" data-tw-target="#faq-accordion-7-collapse" type="button" aria-expanded="true" aria-controls="faq-accordion-7-collapse" class="accordion-button outline-none inline-flex justify-between py-4 -my-4 font-medium w-full text-left dark:text-slate-400 [&amp;:not(.collapsed)]:text-primary [&amp;:not(.collapsed)]:dark:text-slate-300 collapsed"><div class="flex-none">{{ date("F jS, Y",strtotime($dateList->date)) }} - {{ $dateList->name }}</div> <div class="accordian-lucide flex-none"><i data-lucide="plus" class="w-4 h-4"></i></div></button>
@@ -139,7 +139,7 @@
             <div data-tw-merge class="accordion-body leading-relaxed text-slate-600 dark:text-slate-500 leading-relaxed text-slate-600 dark:text-slate-500">
                 <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
                     
-                    {{-- <div class="ml-auto w-full sm:w-auto flex mt-4 sm:mt-0">
+                    <!-- <div class="ml-auto w-full sm:w-auto flex mt-4 sm:mt-0">
                         <button data-tw-merge data-module="No"  data-plandataid={{ $dateList->id }} class="activity-call transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-1 mb-2 mr-1"><i data-lucide="activity" class="w-4 h-4 mr-1"></i> Add an activity or resource
                             <span class="ml-2 h-4 w-4" style="display: none">
                                 <svg class="w-full h-full" width="25" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="1a202c">
@@ -157,7 +157,7 @@
                                     </circle>
                                 </svg>
                             </span></button>
-                    </div> --}}
+                    </div> -->
                 </div>
                 <!-- END: Activity Product List -->
                 
@@ -186,7 +186,6 @@
                                     }
                                     $rand = rand(0,1);
                                     @endphp
-                                    {{-- @if($dateList->id == $keyDate) --}}
                                         <tr class="intro-x">
                                             <td class="w-20">
                                                 <div class="flex">
@@ -206,7 +205,7 @@
                                                             
                                                         @foreach($moduleContent->taskUploads as $upload)
                                                         <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
-                                                            {{-- <div class="w-10 h-10 image-fit zoom-in"> --}}
+                                                           
                                                                 @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
                                                                     
                                                                         <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_date_list/'.$dateList->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
@@ -215,7 +214,7 @@
                                                                         <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">
                                                                     
                                                                 @endif
-                                                            {{-- </div> --}}
+                                                           
                                                         </a>
                                                         @endForeach
                                                     @else
@@ -239,7 +238,6 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    {{-- @endif --}}
                                 @endforeach
                             @endif
                         </tbody>
@@ -248,5 +246,5 @@
             </div>
         </div>
     </div>
-    @endforeach
+    @endforeach --}}
 </div>

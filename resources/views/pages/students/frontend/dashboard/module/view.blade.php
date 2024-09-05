@@ -67,6 +67,18 @@
                 <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
             </a>
         </li>
+        <li class="nav-item" role="presentation">
+            <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4 inline-flex px-0">
+                <div class="flex items-center justify-center">
+                    <div class="flex items-center justify-between  rounded-lg mr-2">
+                        <img class="h-6 pr-1 py-1" src="{{ asset('build/assets/images/mircrosoft-team-logo.png') }}"></img>
+                        <div class="flex flex-col px-2">
+                            Microsoft Teams
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </li>
         <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#class-dates" aria-controls="class-dates" aria-selected="true" role="tab" >
                 <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Class Dates
