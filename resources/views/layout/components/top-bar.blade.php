@@ -5,7 +5,9 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
 @if(Auth::guard('applicant')->check())
   
 @elseif(Auth::guard('student')->check())
-
+    @php $studentUser = cache()->get('studentCache'.Auth::id()) ?? Auth::guard('student')->user()->load('student'); 
+        //$studentInfo = Student::with('users')->where('student_user_id',Auth::guard('student')->user()->id)->withTrashed()->get()->first();
+    @endphp
 @elseif(Auth::guard('agent')->check())
 
 @else
@@ -172,11 +174,11 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                 @if(Auth::guard('applicant')->check())
                     <img src="{{ asset('build/assets/images/avater.png') }}">
                 @elseif(Auth::guard('student')->check())
-                    <img src="{{ asset('build/assets/images/avater.png') }}">
+                    <img alt="{{ $studentUser->student->title->name.' '.$studentUser->student->first_name.' '.$studentUser->student->last_name }}"  src="{{ (isset($studentUser->student->photo) && !empty($studentUser->student->photo) && Storage::disk('local')->exists('public/students/'.$studentUser->student->id.'/'.$studentUser->student->photo) ? Storage::disk('local')->url('public/students/'.$studentUser->student->id.'/'.$studentUser->student->photo) : asset('build/assets/images/avater.png')) }} />
                 @elseif(Auth::guard('agent')->check())
-                    <img src="{{ asset('build/assets/images/avater.png') }}">
+                    <img src="{{ asset('build/assets/images/avater.png') }}" >
                 @else
-                    <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}">
+                    <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}" />
                 @endif
                 
             </div>

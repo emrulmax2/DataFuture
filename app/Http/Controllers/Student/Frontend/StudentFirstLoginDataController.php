@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Student\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateStudentFirstAddress;
+use App\Http\Requests\UpdateStudentFirstLoginData;
 use App\Models\Address;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
@@ -20,7 +22,7 @@ use Illuminate\Http\Request;
 
 class StudentFirstLoginDataController extends Controller
 {
-    public function firstData(Request $request)
+    public function firstData(UpdateStudentFirstLoginData $request)
     { 
 
         $sexIdentifier = SexIdentifier::find($request->gender);
@@ -43,7 +45,7 @@ class StudentFirstLoginDataController extends Controller
         return response()->json("Data Updated");
          
     }
-    public function addressesConfirm(Request $request)
+    public function addressesConfirm(UpdateStudentFirstAddress $request)
     {
         // "address_line_1" => null
         // "address_line_2" => null

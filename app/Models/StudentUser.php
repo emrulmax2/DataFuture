@@ -82,4 +82,8 @@ class StudentUser extends Authenticatable  implements MustVerifyEmail
     public function  SendEmailVerificationNotification() {
         $this->notify(new VerifyEmailForApplicant($this));
     }
+
+    public function student(){
+        return $this->hasOne(Student::class, 'student_user_id', 'id')->latestOfMany();
+    }
 }
