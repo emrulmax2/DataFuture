@@ -199,6 +199,12 @@
                             <div class="grid grid-cols-12 gap-0 mb-3">
                                 <div class="col-span-4 text-slate-500 font-medium">Personal Email</div>
                                 <div class="col-span-8 font-medium">
+                                    {{ $student->contact->personal_email }} <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-12 gap-0 mb-3">
+                                <div class="col-span-4 text-slate-500 font-medium">Institutional/Login Email</div>
+                                <div class="col-span-8 font-medium">
                                     {{ $student->users->email }}
                                     @if ($student->users->email_verified_at == NULL)
                                         <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
@@ -211,10 +217,6 @@
                                         @endif
                                     @endif
                                 </div>
-                            </div>
-                            <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Institutional Email</div>
-                                <div class="col-span-8 font-medium">---</div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
                                 <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
