@@ -81,13 +81,14 @@
                         @foreach($todaysClassList as $list)
                             <div class="mt-5 intro-x">
                                 <div class="box zoom-in">
-                                    <div class="pt-5 px-5 flex items-center">
+                                    <div class="pt-5 px-5"><!-- flex items-center -->
+                                        <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 mb-2">{{ $list["group"] }}</div>
+                                        <!--<div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $list["group"] }}</div>-->
                                         <div class="ml-0 mr-auto">
                                             <div class="text-base font-medium truncate w-full relative">{{ $list["module"] }} </div>
                                             <div class="text-slate-400 mt-1">{{ $list["course"] }}</div>
                                             <div class="text-slate-400 mt-1">Schedule - {{ $list["start_time"] }} at {{ $list["venue"] }} - {{ $list["room"] }}</div>
                                         </div>
-                                        <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $list["group"] }}</div>
                                         {{-- @if($list["attendance_information"]!=null)
                                             @if($list["attendance_information"]!=null && $list["end_time"]==null)  
                                                 <span class="mr-1 bg-primary absolute right-0 p-1 text-xs text-white">Badge</span>
@@ -165,12 +166,13 @@
                                     @foreach($termModuleList as $termData)
                                         <a href="{{ route('tutor-dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
                                             <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
-                                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
+                                                <div class="box px-4 py-4 mb-3 zoom-in">{{-- flex items-center --}}
+                                                    <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $termData->group }}</div>
+                                                    {{--<div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>--}}
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $termData->module }}</div>
                                                         <div class="text-slate-500 text-xs mt-0.5">{{ $termData->course }}</div>
                                                     </div>
-                                                    <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>
                                                 </div>
                                             </div>
                                         </a>
