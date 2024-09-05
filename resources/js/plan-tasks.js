@@ -855,6 +855,61 @@ var classPlanAssessmentModuleTable = (function () {
         });
 
 
+        /* Export Student List Start */
+        $('#exportStudentList').on('click', function(e){
+            var $theBtn = $(this);
+            var plan_id = $theBtn.attr('data-planid');
+            var filename = $theBtn.attr('data-filename');
+
+            var ids = [];
+            $('#classStudentListTutorModuleTable').find('.tabulator-row.tabulator-selected').each(function(){
+                var $row = $(this);
+                ids.push($row.find('.student_ids').val());
+            });
+
+            $('#actionButtonWrap button').attr('disabled', 'disabled');
+            $theBtn.find('.loaders').fadeIn();
+
+            if(ids.length > 0){
+                axios({
+                    method: "post",
+                    url: route('student.assign.export'),
+                    data: {plan_id : plan_id, ids : ids},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    responseType: 'blob',
+                }).then(response => {
+                    $('#actionButtonWrap button').removeAttr('disabled');
+                    $theBtn.find('.loaders').fadeOut();
+    
+                    if (response.status == 200) {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', filename);
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                    }
+                }).catch(error => {
+                    $('#actionButtonWrap button').removeAttr('disabled');
+                    $theBtn.find('.loaders').fadeOut();
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }else{
+                $('#actionButtonWrap button').removeAttr('disabled');
+                $theBtn.find('.loaders').fadeOut();
+
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!");
+                    $("#warningModal .warningModalDesc").html('Selected students not foudn. Please select some students first or contact with the site administrator.');
+                });
+            }
+        });
+        /* Export Student List End */
+
         /* Bulk SMS Start */
         $('.sendBulkSmsBtn').on('click', function(e){
             var $btn = $(this);

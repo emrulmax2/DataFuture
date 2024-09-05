@@ -25,8 +25,8 @@ class ELearningActivitySettingsUpdateRequest extends FormRequest
     {
         return [
             'category' => 'required',
-            'name' => 'required|unique:e_learning_activity_settings,name' . ($this->name ? ",$this->name" : ''),
-            'logo' => 'required'
+            'name' => 'required|unique:e_learning_activity_settings,name,'.$this->id,
+            //'logo' => 'required'
         ];
     }
 }
