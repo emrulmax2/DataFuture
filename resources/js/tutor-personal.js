@@ -2,17 +2,14 @@
 (function(){
 
     if($('#personalTutorDashboard').length > 0){
-
         $("#load-more").on('click',function(e){
             e.preventDefault()
             $('.more').removeClass('hidden');
             $("#load-more").hide()
         })
-
-        
     }
     
-    const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
+    //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
     $('.term-select').on('click', function (e) {
         e.preventDefault();
         let tthis = $(this)
