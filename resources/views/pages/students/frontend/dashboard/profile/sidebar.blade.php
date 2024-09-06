@@ -30,28 +30,29 @@
                         <div class="tiny-slider" id="important-notes">
                             <div class="p-5">
                                 <div class="flex items-center">
-                                    <div class="font-medium text-lg">Important Update</div>
+                                    <div class="font-medium text-lg">Welcome Student! </div>
                                     <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div>
                                 </div>
-                                <div class="mt-1">20 Hours ago</div>
-                                <div class="text-justify mt-1">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</div>
+                                <div class="mt-1">1 Day ago</div>
+                                <div class="text-justify mt-1">Welcome to your new student portal.<br /> September Term will start at 09 September 2024 and
+                                    end at 22 November 2024</div>
                                 <div class="font-medium flex mt-5">
                                     <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
                                     <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
                                 </div>
                             </div>
-                            <div class="p-5">
+                            {{-- <div class="p-5">
                                 <div class="flex items-center">
-                                    <div class="font-medium text-lg">Lorem Ipsum is simply dummy text</div>
+                                    <div class="font-medium text-lg">September Term</div>
                                 </div>
                                 <div class=" mt-1">1 Day ago</div>
-                                <div class=" text-justify mt-1">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</div>
+                                <div class=" text-justify mt-1">Start  Date 09 September 2024 To End Date 22 November 2024</div>
                                 <div class="font-medium flex mt-5">
                                     <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
                                     <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
                                 </div>
-                            </div>
-                            <div class="p-5">
+                            </div> --}}
+                            {{-- <div class="p-5">
                                 <div class="flex items-center">
                                     <div class="font-medium text-lg">Lorem Ipsum is simply dummy text</div>
                                 </div>
@@ -61,7 +62,7 @@
                                     <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
                                     <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>

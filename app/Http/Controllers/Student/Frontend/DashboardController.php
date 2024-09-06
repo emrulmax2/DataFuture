@@ -180,7 +180,7 @@ class DashboardController extends Controller
         $studentData = Student::where("student_user_id",$userData->id)->get()->first();
 
         $Query = DB::table('plans as plan')
-        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','module.class_type as class_type','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','module.class_type as module_class_type','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
         ->leftJoin('courses as course', 'plan.course_id', 'course.id')
         ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
         ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
@@ -219,12 +219,14 @@ class DashboardController extends Controller
                     ];
                     $tutor = User::with('employee')->where("id",$list->tutor_id)->get()->first();
                     $pTutor = User::with('employee')->where("id",$list->personal_tutor_id)->get()->first();
+                   
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
                         'course' => $list->course_name,
-                        'tutor_photo' => $tutor->photo_url,
-                        'personal_tutor_photo' =>  $pTutor->photo_url,
+                        'tutor_photo' => isset($pTutor->employee) ? $tutor->employee->photo_url : "",
+                        'personal_tutor_photo' => isset($pTutor->employee) ? $pTutor->employee->photo_url : "",
+                        'classType' => ($list->class_type!="")  ? $list->class_type : $list->module_class_type,
                         'module' => $list->module_name,
                         'group'=> $list->group_name,           
                     ];
@@ -301,7 +303,7 @@ class DashboardController extends Controller
                         'term_name' => $moduleCreations->term->name,
                         'course' => $plan->course->name,
                         
-                        'classType' => $plan->creations->class_type,
+                        'classType' => ($plan->class_type!="")  ? $plan->class_type : $moduleCreations->class_type,
                         'module' => $plan->creations->module_name,
                         'group'=> $plan->group->name,           
                         'room'=> $plan->room->name,           

@@ -47,7 +47,7 @@
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $termData->module }}</div>
-                                                        <div class="text-slate-500 text-xs mt-0.5">{{ isset($termData->class_type) ? $termData->class_type : "No class type found" }}</div>
+                                                        <div class="text-slate-500 text-xs mt-0.5">{{ isset($termData->classType) ? $termData->classType : "No class type found" }}</div>
                                                     </div>
                                                     <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
                                                         <img alt="#" src="{{ $termData->tutor_photo }}">
