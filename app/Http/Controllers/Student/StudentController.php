@@ -1386,7 +1386,7 @@ class StudentController extends Controller
                         $data['status'] = 'Pending';
                         $data['created_by'] = auth()->user()->id;
 
-                        TaskList::create($data);
+                        StudentTask::create($data);
                     endforeach;
                 endif;
             endif;

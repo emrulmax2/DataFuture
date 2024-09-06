@@ -4,19 +4,44 @@ import { createIcons, icons } from "lucide";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+
+    $(window).on('load', function(e){
+        $('#feedAttendanceTable tbody tr.theAttendanceRow').each(function(){
+            var $theRow = $(this);
+            var label = $theRow.find('.attendanceRadio:checked').attr('data-type');
+            var color = $theRow.find('.attendanceRadio:checked').attr('data-color');
+
+            $theRow.find('.feedTypeCol').html(label).css({color: color});
+        });
+        reloadAttendanceCount();
+    })
+
+    $('#feedAttendanceTable').on('change', '.attendanceRadio', function(e){
+        var $theRadio = $(this);
+        var $theRow = $theRadio.closest('tr.theAttendanceRow');
+
+        if($theRow.find('.attendanceRadio:checked').length > 0){
+            var label = $theRow.find('.attendanceRadio:checked').attr('data-type');
+            var color = $theRow.find('.attendanceRadio:checked').attr('data-color');
+
+            $theRow.find('.feedTypeCol').html(label).css({color: color});
+        }else{
+            $theRow.find('.feedTypeCol').html('').css({color: '#1e293b'});
+        }
+        reloadAttendanceCount();
+    })
 
     $('.save').on('click', function (e) {
         e.preventDefault();
 
         var parentForm = $(this).parents('form');
-        
         var formID = parentForm.attr('id');
-        
         const form = document.getElementById(formID);
         let url = $("#"+formID+" input[name=url]").val();
         
         let form_data = new FormData(form);
-
+        console.log(form_data)
         $.ajax({
             method: 'POST',
             url: url,
@@ -29,7 +54,6 @@ import { createIcons, icons } from "lucide";
             cache: false,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             success: function(res, textStatus, xhr) {
-
                 $('.acc__input-error', parentForm).html('');
                 
                 if(xhr.status == 200){
@@ -44,7 +68,7 @@ import { createIcons, icons } from "lucide";
                     
                     setTimeout(function(){
                         successModal.hide();
-                        location.reload()
+                        window.location.reload();
                     }, 1000);
                 }
                 
@@ -65,8 +89,9 @@ import { createIcons, icons } from "lucide";
         });
         
     });
+
     let classEnd = $("#dataclassend").data("classend") *1;
-    if(classEnd ==0 ) {
+    if(classEnd == 0 ) {
 
         var minutesLabel = document.getElementById("minutes");
         var secondsLabel = document.getElementById("seconds");
@@ -96,5 +121,21 @@ import { createIcons, icons } from "lucide";
             }
         }
 
+    }
+
+    function reloadAttendanceCount(){
+        var prasentCount = 0;
+        var totalStudents = 0;
+        $('#feedAttendanceTable tbody tr.theAttendanceRow').each(function(){
+            var $theRow = $(this);
+            var attendance = $theRow.find('.attendanceRadio:checked').val();
+            if(attendance == 1 || attendance == 2 || attendance == 3 || attendance == 5){
+                prasentCount += 1;
+            }
+
+            totalStudents += 1;
+        });
+
+        $('.attendanceCountWrap').html(prasentCount+'/'+totalStudents);
     }
 })();

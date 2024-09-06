@@ -15,10 +15,17 @@ class Attendance extends Model
 
     protected $fillable = [
         "plans_date_list_id",
-        "student_id",
-        "attendance_feed_status_id",
+        "attendance_date",
+        "attendance_captured_at",
+        "class_plan_id",
+        "student_id",	
+        "attendance_feed_status_id",	
         "email_notification",	
         "sms_notification",	
+        "notofication_date",	
+        "notofied_by",	
+        "attendence_excuse_id",	
+        "class_type",	
         'created_by',
         'updated_by',
     ];

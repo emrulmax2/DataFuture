@@ -34,16 +34,19 @@ var attendanceListTable = (function () {
                                         </div>
                                     </div>
                                     <div class="mt-5 px-5 pb-5 flex font-medium justify-center">`;
-                                    if(data.attendance_information!=null) {
-                                        if(data.end_time==null) {
+                                    if(data.attendance_information != null) {
+                                        if(data.feed_given != 1) {
                                             html +=`<a data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" href="`;
                                             html+= route('tutor-dashboard.attendance',[data.tutor_id,data.id])
-                                            html +=`" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
-                                            <a data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">End Class</a>`
+                                            html +=`" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>`;
+                                            
                                         } else {
                                             html +=`<a href="`; 
                                             html += route('tutor-dashboard.attendance',[data.tutor_id,data.id])
-                                            html +=`"  data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>`
+                                            html +=`"  data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>`;
+                                            if(data.feed_given == 1 && data.attendance_information.end_time == null){
+                                                html += `<a data-attendanceinfo="${ data.attendance_information.id }" data-id="${ data.id }" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>`;
+                                            }
                                         }
                                     } else {
                                         if(data.showClass==true)
@@ -53,7 +56,14 @@ var attendanceListTable = (function () {
                                 </div>
                             </div>`;
                     })
-                    $('#todays-classlist').html(html)  
+                    $('#todays-classlist').html(html);
+                    setTimeout(function(){
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+                    }, 200);
                     $(".start-punch").on("click", function (event) {
             
                         let data = $(this).data('id');   
@@ -141,7 +151,7 @@ var attendanceListTable = (function () {
         const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
         const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
         
-        const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
+        //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
         $('.save').on('click', function (e) {
             e.preventDefault();
 
@@ -290,7 +300,7 @@ var attendanceListTable = (function () {
                     
                     $(".term-select").removeClass('dropdown-active')
                     $("#term-"+instanceTermId).addClass('dropdown-active')
-                    termDropdown.hide()
+                    //termDropdown.hide()
                     $("#TermBox").html("")
                     btnSvg.eq(1).hide()
                     btnSvg.eq(0).show()

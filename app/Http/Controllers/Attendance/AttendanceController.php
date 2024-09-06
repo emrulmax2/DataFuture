@@ -11,12 +11,16 @@ use App\Models\AttendanceFeedStatus;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Semester;
+use App\Models\Student;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PDF;
+use App\Traits\SendSmsTrait;
 
 class AttendanceController extends Controller
 {
+    use SendSmsTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -255,27 +259,61 @@ class AttendanceController extends Controller
      */
     public function store(AttendanceStoreRequest $request)
     {
-        
+        $insertCount = 0;
+        $plan_id = (isset($request->plan_id) && $request->plan_id > 0 ? $request->plan_id : 0);
+        $plan = Plan::find($plan_id);
+        $class_time = (isset($plan->start_time) && !empty($plan->start_time) ? date('h:i A', strtotime($plan->start_time)) : '');
+        $tutor_id = (isset($request->tutor_id) && $request->tutor_id > 0 ? $request->tutor_id : 0);
+        $plan_date_list_id = (isset($request->plan_date_list_id) && $request->plan_date_list_id > 0 ? $request->plan_date_list_id : 0);
+        $planDateList = PlansDateList::find($plan_date_list_id);
+        $attendance_date = (isset($planDateList->date) && !empty($planDateList->date) ? date('Y-m-d', strtotime($planDateList->date)) : date('Y-m-d'));
+        $attendances = (isset($request->attendances) && !empty($request->attendances) ? $request->attendances : []);
+        if(!empty($attendances)):
+            foreach($attendances as $planDateId => $atns):
+                foreach($atns as $atn):
+                    $attendance_feed_status_id = (isset($atn['attendance_feed_status_id']) && $atn['attendance_feed_status_id'] > 0 ? $atn['attendance_feed_status_id'] : 4);
+                    $student_id = (isset($atn['student_id']) && $atn['student_id'] > 0 ? $atn['student_id'] : 0);
+                    $data = [
+                        'plans_date_list_id' => $planDateId,
+                        'attendance_date' => $attendance_date,
+                        'attendance_captured_at' => date('Y-m-d'),
+                        'class_plan_id' => $plan_id,
+                        'student_id' => ($student_id > 0 ? $student_id : null),
+                        'attendance_feed_status_id' => $attendance_feed_status_id,
+                        'sms_notification' => ($attendance_feed_status_id == 4 ? 1 : 0),
+                        'notofication_date' => ($attendance_feed_status_id == 4 ? date('Y-m-d') : null),
+                        'notofied_by' => $tutor_id
+                    ];
 
-        foreach ( $request->get('plans_date_list_id') as $key => $value) {
-            $data = [
-                'plans_date_list_id' => $value,
-                'student_id' => $request->student_id[$key],
-                'attendance_feed_status_id' => $request->attendance_feed_status_id[$key],
-                'created_by' => Auth::user()->id,
-            ];
-            $attendance = new Attendance();
-            $attendance->fill($data);
-            $attendance->save();
-        }
-        //dd($data);
-        // $attendance = new Attendance();
-        // $attendance->fill($request->all());
-        // $attendance->save();
-        if($attendance->id) 
-            return response()->json(["data success"]);
-        else 
-            return response()->json(["data could not save.",422]);
+                    $smsStatus = false;
+                    $existAttendance = Attendance::where('plans_date_list_id', $planDateId)->where('class_plan_id', $plan_id)->where('student_id', $student_id)->get()->first();
+                    if(isset($existAttendance->id) && $existAttendance->id > 0):
+                        $smsStatus = ($existAttendance->attendance_feed_status_id != 4 &&  $data['attendance_feed_status_id'] == 4 ? true : false);
+                        $data['updated_by'] = Auth::user()->id;
+                        Attendance::where('id', $existAttendance->id)->update($data);
+                    else:
+                        $smsStatus = ($attendance_feed_status_id == 4 ? true : false);
+                        $data['created_by'] = Auth::user()->id;
+                        Attendance::create($data);
+                    endif;
+
+                    if($smsStatus):
+                        $student = Student::find($student_id);
+                        $message = 'Dear '.$student->full_name.'. You have missed class on '.date("d-m-Y",strtotime($attendance_date)).'. Module name: '.(isset($plan->creations->module_name) && !empty($plan->creations->module_name) ? $plan->creations->module_name : 'Undefined Module').', Group:'.(isset($plan->group->name) ? $plan->group->name : 'Undefined Group').', Time: '.$class_time;
+                        //$sms = $this->sendSms($student->contact->mobile, $message);
+                    endif;
+
+                    $insertCount += 1;
+                endforeach;
+            endforeach;
+        endif;
+
+        if($insertCount):
+            PlansDateList::where('id', $plan_date_list_id)->update(['feed_given' => 1]);
+            return response()->json(["data success"], 200);
+        else:
+            return response()->json(["data could not save.", 422]);
+        endif;
     }
 
     /**

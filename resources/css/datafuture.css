@@ -2058,3 +2058,52 @@ input[type=number] {
     right: 40px;
     z-index: 9999999999;
 }
+
+.attendanceCheckbox{
+    position: relative;
+    display: inline-flex;
+    overflow: hidden;
+}
+.attendanceCheckbox input[type="radio"]{
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+/*.attendanceCheckbox label{
+    opacity: .4;
+}
+.attendanceCheckbox input[type="radio"]:checked + label{
+    opacity: 1;
+}*/
+.attendanceCheckbox label span{
+    width: 16px;
+    height: 16px;
+    position: relative;
+}
+.attendanceCheckbox label span svg{
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    visibility: visible;
+
+    -moz-transition: all ease 300ms;
+    -webkit-transition: all ease 300ms;
+    transition: all ease 300ms;
+}
+.attendanceCheckbox label span svg.checkedIcon{
+    opacity: 0;
+    visibility: hidden;
+}
+.attendanceCheckbox input[type="radio"]:checked + label span svg.unCheckedIcon{
+    opacity: 0;
+    visibility: hidden;
+}
+.attendanceCheckbox input[type="radio"]:checked + label span svg.checkedIcon{
+    opacity: 1;
+    visibility: visible;
+}
