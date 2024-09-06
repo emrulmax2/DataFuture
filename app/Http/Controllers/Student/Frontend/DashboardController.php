@@ -10,6 +10,7 @@ use App\Models\AwardingBody;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseCreationVenue;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\ELearningActivitySetting;
@@ -32,9 +33,11 @@ use App\Models\SexualOrientation;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentConsent;
+use App\Models\StudentProposedCourse;
 use App\Models\StudentUser;
 use App\Models\TermTimeAccommodationType;
 use App\Models\Title;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -129,7 +132,17 @@ class DashboardController extends Controller
 
     public function profileView(){
         
-        $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
+        $student = $studentData = Student::with('crel','course')->where("student_user_id", auth('student')->user()->id)->get()->first();
+        $courseRelationCreation = $student->crel->creation;
+        $studentCourseAvailability = $courseRelationCreation->availability;
+        $courseCreationQualificationData = $courseRelationCreation->qualification;
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id',$courseRelationCreation->id)
+                        ->where('student_course_relation_id',$student->crel->id)
+                        ->get()
+                        ->first();
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
+        
 
         return view('pages.students.frontend.dashboard.profile.index', [
             'title' => 'Live Students - London Churchill College',
@@ -152,7 +165,11 @@ class DashboardController extends Controller
             'religion' => Religion::where('active', 1)->get(),
             'stdConsentIds' => StudentConsent::where('student_id', $student->id)->where('status', 'Agree')->pluck('consent_policy_id')->toArray(),
             'consent' => ConsentPolicy::all(),
-            'ttacom' => TermTimeAccommodationType::where('active', 1)->get()
+            'ttacom' => TermTimeAccommodationType::where('active', 1)->get(),
+            "courseQualification" =>$courseCreationQualificationData,
+            "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
+            "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
+            'studentCourseAvailability' => $studentCourseAvailability,
         ]);
 
     }
@@ -163,7 +180,7 @@ class DashboardController extends Controller
         $studentData = Student::where("student_user_id",$userData->id)->get()->first();
 
         $Query = DB::table('plans as plan')
-        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','module.class_type as class_type','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
         ->leftJoin('courses as course', 'plan.course_id', 'course.id')
         ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
         ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
@@ -200,11 +217,14 @@ class DashboardController extends Controller
                         "total_modules" => !isset($termData[$list->term_id]) ? 1 : $termData[$list->term_id]->total_modules,
                         
                     ];
-
+                    $tutor = User::with('employee')->where("id",$list->tutor_id)->get()->first();
+                    $pTutor = User::with('employee')->where("id",$list->personal_tutor_id)->get()->first();
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
                         'course' => $list->course_name,
+                        'tutor_photo' => $tutor->photo_url,
+                        'personal_tutor_photo' =>  $pTutor->photo_url,
                         'module' => $list->module_name,
                         'group'=> $list->group_name,           
                     ];

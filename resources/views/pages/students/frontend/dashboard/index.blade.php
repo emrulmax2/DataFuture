@@ -19,9 +19,9 @@
                         @if($termList)
                         <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
                             <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> 
                             </button>
-                            <div class="dropdown-menu w-40">
+                            {{-- <div class="dropdown-menu w-40">
                                 <ul class="dropdown-content">
                                     @foreach($termList as $term)
                                     <li>
@@ -32,7 +32,7 @@
                                     @endforeach
                                     
                                 </ul>
-                            </div>
+                            </div> --}}
                         </div>
                         @endif
                     </div>
@@ -47,14 +47,19 @@
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $termData->module }}</div>
-                                                        <div class="text-slate-500 text-xs mt-0.5"></div>
+                                                        <div class="text-slate-500 text-xs mt-0.5">{{ isset($termData->class_type) ? $termData->class_type : "No class type found" }}</div>
                                                     </div>
-
+                                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
+                                                        <img alt="#" src="{{ $termData->tutor_photo }}">
+                                                    </div>
+                                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
+                                                        <img alt="#" src="{{ $termData->personal_tutor_photo }}">
+                                                    </div>
                                                     @if(isset($termData->group) && !empty($termData->group))
                                                         @if(strlen($termData->group) > 2)
-                                                            <div class="mr-4 rounded text-lg bg-success text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">{{ $termData->group }}</div>
+                                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $termData->group }}</div>
                                                         @else
-                                                            <div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>
+                                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $termData->group }}</div>
                                                         @endif
                                                     @endif
                                                     {{-- <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div> --}}
