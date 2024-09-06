@@ -102,12 +102,14 @@
                                     </div>
                                     <div class="mt-5 px-5 pb-5 flex font-medium justify-center">
                                     
-                                    @if($list["attendance_information"]!=null)
-                                        @if($list["end_time"]==null)
+                                    @if($list["attendance_information"] != null)
+                                        @if($list["feed_given"] != 1)
                                             <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" href="{{ route("tutor-dashboard.attendance",[$list["tutor_id"],$list["id"]]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
-                                            <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">End Class</a>
                                         @else
                                             <a href="{{ route("tutor-dashboard.attendance",[$list["tutor_id"],$list["id"]]) }}"  data-attendanceinfo="{{ $list['attendance_information']->id }}" data-id="{{ $list['id'] }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
+                                            @if($list["feed_given"] == 1 && $list["attendance_information"]->end_time == null)
+                                                <a data-attendanceinfo="{{ $list["attendance_information"]->id }}" data-id="{{ $list["id"] }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>
+                                            @endif
                                         @endif
                                     @else
                                         <a data-tw-toggle="modal" data-id="{{ $list["id"] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
@@ -130,7 +132,10 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-8">
                         <div class="intro-y flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
-                            <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
+                            <button class="btn btn-primary text-white w-auto ml-auto">
+                                <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i>{{ $termList[$currenTerm]->name }}
+                            </button>
+                            <!--<div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
                                 <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
@@ -146,7 +151,7 @@
                                         
                                     </ul>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         <div id="TermBox">
                             @foreach($termList as $term)

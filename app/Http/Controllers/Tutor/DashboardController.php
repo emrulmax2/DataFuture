@@ -84,7 +84,6 @@ class DashboardController extends Controller
                 $end_time = date('h:i A', strtotime($end_time));
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
                 $showClass = false;
-                $showClass = true;
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
 
                     $startTime = $plan_date." ".$list->start_time;
@@ -97,7 +96,7 @@ class DashboardController extends Controller
                     $timeDiffStartPoint = (strtotime($startTime)-strtotime($currentTime))/60; //second to min
                     $timeDiffEndPoint = (strtotime($endTime)-strtotime($currentTime))/60; //second to min
 
-                    if($timeDiffStartPoint<31 && $timeDiffEndPoint>=0) {
+                    if($timeDiffStartPoint<31 && $timeDiffEndPoint>=0 && $list->date == date('Y-m-d')) {
                         $showClass = True;
                     }
 
@@ -110,6 +109,7 @@ class DashboardController extends Controller
                     'module' => $list->module_name,
                     'group'=> $list->group_name,
                     'tutor'=> $list->username,
+                    'feed_given'=> $list->feed_given,
                     
                     'tutor_id'=>$list->tutor_id,
                     "start_time" => $start_time,
@@ -124,7 +124,7 @@ class DashboardController extends Controller
                     'status'=> "",     
                     'showClass' => $showClass,
                     "attendance_information" => ($attendanceInformationFinder) ?? null,    
-                    "foundAttendances"  => ($foundAttendances) ?? null,           
+                    "foundAttendances"  => ($foundAttendances) ?? null,          
                 ];
                 $i++;
             endforeach;
@@ -273,7 +273,7 @@ class DashboardController extends Controller
         ]);
         $todaysList = $this->latestList($request);
         $returnData = json_decode($todaysList->getContent(),true);
-       // dd($returnData["data"]);
+        //dd($returnData["data"]);
         foreach($returnData["data"] as $index=>$dataSet){
             
             $returnData["data"][$index]["tutor_id"] = User::find($dataSet["tutor_id"]);
@@ -359,6 +359,8 @@ class DashboardController extends Controller
                     'status'=> "",     
                     "attendance_information" => ($attendanceInformationFinder) ?? null,    
                     "foundAttendances"  => ($foundAttendances) ?? null,           
+                    "feed_given"  => $list->feed_given,           
+                    "is_today"  => (isset($list->date) && !empty($list->date) && $list->date == date('Y-m-d') ? 1 : 0),           
                 ];
                 $i++;
             endforeach;
@@ -373,28 +375,27 @@ class DashboardController extends Controller
         $employee = Employee::where("user_id",$tutor->id)->get()->first();
     
         if($attendanceInformation) {
-
             if($attendanceInformation->tutor_id != Auth::user()->id) {
                 return redirect()->route('tutor-dashboard.show',Auth::user()->id);
             }
-
             $classStart = date("Y-m-d ".$attendanceInformation->start_time);
-            
-            if($attendanceInformation->end_time)
+            if($attendanceInformation->end_time):
                 $classEnd = date("Y-m-d ".$attendanceInformation->end_time);
-            else
+            else:
                 $classEnd = date("Y-m-d h:i:s",strtotime(now()));
+            endif;
 
-            if(!isset($attendanceInformation->end_time))
+            if(!isset($attendanceInformation->end_time)):
                 $now = strtotime($classEnd) - strtotime($classStart);
-            else 
+            else:
                 $now = strtotime($classEnd) - strtotime($attendanceInformation->start_time);
+            endif;
 
         
         }
         
         $Query = DB::table('plans_date_lists as datelist')
-                    ->select('datelist.*','terms.name as term_name','terms.term as term','plan.id as plan_id','plan.tutor_id','plan.start_time','plan.end_time','plan.virtual_room','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+                    ->select('datelist.*','termdec.name as term_dec_name', 'terms.name as term_name','terms.term as term','plan.id as plan_id','plan.tutor_id','plan.start_time','plan.end_time','plan.virtual_room','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
                     ->leftJoin('plans as plan', 'datelist.plan_id', 'plan.id')
                     ->leftJoin('courses as course', 'plan.course_id', 'course.id')
                     ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
@@ -403,6 +404,7 @@ class DashboardController extends Controller
                     ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
                     ->leftJoin('groups as group', 'plan.group_id', 'group.id')
                     ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
+                    ->leftJoin('term_declarations as termdec', 'plan.term_declaration_id', 'termdec.id')
                     ->where('datelist.id', $plandate->id);
 
         $Query = $Query->get();  
@@ -437,6 +439,7 @@ class DashboardController extends Controller
                 'plan_id' => $list->plan_id,
                 'id' => $list->id,
                 'plan' => $plan,
+                'term_dec_name' => $list->term_dec_name,
                 'term_name' => $list->term_name,
                 'term' => $list->term,
                 'date' => date("l jS \of F Y",strtotime($list->date)),

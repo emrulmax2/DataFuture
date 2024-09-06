@@ -74,7 +74,7 @@ class TutorAttendanceController extends Controller
                         return response()->json(["data"=>"Class Ended"],200);
                     }
                 } else {
-                    return response()->json(["data"=>"You are out of College. Please return to college to end your class"],422);
+                    return response()->json(["data"=>"You are out of College. Please return to college to end your class"], 322);
                 }  
             }
         

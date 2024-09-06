@@ -36,10 +36,7 @@
                             <thead>
                                 <tr>
                                     <th class="whitespace-nowrap w-20">#</th>
-                                    <th class="whitespace-nowrap">NAME</th>
-                                    <th class="text-center whitespace-nowrap">UPLOADS</th>
-                                    <th class="text-center whitespace-nowrap">CREATED BY</th>
-                                    <th class="text-center whitespace-nowrap">ACTIONS</th>
+                                    <th colspan="4" class="whitespace-nowrap">NAME</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,12 +49,19 @@
                                     $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
                                 }
 
-                                //dd($task->task->user);
+                                //dd($task->task);
 
-                                $FullName = $task->task->user->employee->full_name;
+                                $FullName = (isset($task->task->user)) ? $task->task->user->employee->full_name : "";
                                 $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
                                 $rand = rand(0,1);
+                                if($task->taskUploads->isNotEmpty())
+                                    $upload = $task->taskUploads[0];
+                                else
+                                    $upload = null;
                                 @endphp
+                                    @if($upload)
+                                    <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >              
+                                    @endif
                                     <tr class="intro-x">
                                         <td class="w-20">
                                             <div class="flex">
@@ -71,7 +75,7 @@
                                             <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $task->task->category }}</div>
                                         </td>
                                         <td class="w-40">
-                                            <div class="flex">
+                                            {{-- <div class="flex">
                                                 @if(($task->taskUploads))
                                                     @foreach($task->taskUploads as $upload)
                                                         <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
@@ -92,13 +96,13 @@
                                                             No Upload File Found
                                                     </div>
                                                 @endif
-                                            </div>
+                                            </div> --}}
                                         </td>
                                         
                                         <td>
-                                            <div class="flex items-center px-5 py-5">
+                                            {{-- <div class="flex items-center px-5 py-5">
                                                 <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
-                                                    <img src="https://enigma-laravel.left4code.com/build/assets/profile-3-614e7dcb.jpg" alt="Midone Tailwind HTML Admin Template">
+                                                    <img src="" alt="">
                                                 </div>
                                                 <div class="ml-4 mr-auto">
                                                     <div class="font-medium">{{ $FullName }}</div>
@@ -109,17 +113,20 @@
                                                 <div class="text-success">
                                                     <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                         </td>
-                                        <td class="table-report__action w-56">
+                                        {{-- <td class="table-report__action w-56">
                                             <div class="flex justify-center items-center">
                                                 <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" data-plantaskid="{{ $task->task->id }}" class="flex items-center mr-3 task-upload__Button" href="">
                                                     <i data-lucide="upload-cloud" class="w-4 h-4 mr-1"></i> upload
                                                 </button>
                                             </div>
-                                        </td>
+                                        </td> --}}
 
                                     </tr>
+                                    @if($upload)
+                                    </a>             
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
