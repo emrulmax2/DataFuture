@@ -27,10 +27,6 @@
                 <div class="truncate sm:whitespace-normal flex items-center">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Group:</span> <span class="font-medium ml-2">{{ $data->group }}</span>
                 </div>
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="users" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Student : </span> <span class="font-medium ml-2">{{ $studentCount }}</span>
-                </div>
-                
                 
                 <div class="truncate sm:whitespace-normal flex items-center mt-3">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Class Type</span> <span class="font-medium ml-2">{{ $data->classType }}</span>
