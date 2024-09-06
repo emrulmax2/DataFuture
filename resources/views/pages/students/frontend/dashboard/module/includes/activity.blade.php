@@ -29,7 +29,6 @@
                                 </span></button> --}}
                         </div>
                     </div>
-                    
                     <!-- END: Activity Product List -->
                     <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
                         <table class="table table-report sm:mt-2">

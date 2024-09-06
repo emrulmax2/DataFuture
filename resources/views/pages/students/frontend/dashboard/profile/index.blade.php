@@ -12,7 +12,7 @@
             @include('pages.students.frontend.dashboard.show-info')
             <!-- END: Profile Info -->
             <div class="intro-y mt-5 col-span-12">
-                <div class="intro-y box p-5">
+                <div class="intro-y box p-5 ">
                     <div class="grid grid-cols-12 gap-0 items-center">
                         <div class="col-span-6">
                             <div class="font-medium text-base">Personal Information</div>
@@ -239,9 +239,8 @@
                 </div>
                 <div class="intro-y box p-5 mt-5">
                     <div class="grid grid-cols-12 gap-0 items-center">
-                        <div class="col-span-6">
                             <div class="font-medium text-base">Course Details</div>
-                        </div>
+                        
                     </div>
                     <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                     <div class="grid grid-cols-12 gap-4"> 
