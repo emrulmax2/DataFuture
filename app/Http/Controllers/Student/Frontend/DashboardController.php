@@ -17,6 +17,7 @@ use App\Models\ELearningActivitySetting;
 use App\Models\Employee;
 use App\Models\Ethnicity;
 use App\Models\FeeEligibility;
+use App\Models\FormsTable;
 use App\Models\HesaGender;
 use App\Models\KinsRelation;
 use App\Models\ModuleCreation;
@@ -94,7 +95,7 @@ class DashboardController extends Controller
         else:
             $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
             $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
-            
+            $DoItOnline = FormsTable::all();
             if($studentAssigned)
              $dataBox = $this->moduleList();
             else {
@@ -125,6 +126,7 @@ class DashboardController extends Controller
                 "termList" =>$dataBox["termList"],
                 "data" => $dataBox["data"],
                 "currenTerm" => $dataBox["currenTerm"],
+                "doItOnline" => $DoItOnline,
             ]);
         endif;
 

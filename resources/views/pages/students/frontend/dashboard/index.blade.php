@@ -90,38 +90,49 @@
                     @endif
                 </div>
                 <!-- END: Sales Report -->
+
                 <!-- BEGIN: Weekly Top Seller -->
                 <div class="col-span-12 sm:col-span-6 lg:col-span-3 mt-8">
                     <div class="intro-y flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Results</h2>
                         <a href="" class="ml-auto text-primary truncate">Show More</a>
                     </div>
-                    <div class="intro-y box p-5 mt-5">
+                    <div class="intro-y box p-5 mt-5  bg-rose-700">
                         <div class="mt-3">
-                            <div class="h-[213px]">
-                                <canvas id="report-pie-chart"></canvas>
+                            <div class="h-[213px]  transform text-slate-100   ml-10 ">
+                                <div class=""><i data-lucide="volume-2" class="w-24 h-24 font-bold"></i></div>
+                                <div class="font-bold text-5xl">COMMING<br/>SOON</div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <!-- END: Weekly Top Seller -->
-                <!-- BEGIN: Sales Report -->
+
+                <!-- BEGIN: Transactions -->
                 <div class="col-span-12 sm:col-span-6 lg:col-span-3 mt-8">
-                    <div class="intro-y flex items-center h-10">
+                    <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Do it Online</h2>
                         <a href="" class="ml-auto text-primary truncate">Show More</a>
                     </div>
-                    <div class="intro-y box p-5 mt-5">
-                        <div class="mt-3">
-                            <div class="h-[213px]">
-                                <canvas id="report-donut-chart"></canvas>
-                            </div>
-                        </div>
-                        
+                    <div class="mt-5">
+                        @php $iCountTotal =0 ;  @endphp
+                        @foreach ($doItOnline as $onlineWork)
+                            @if($iCountTotal==4) <div id="doitOnlineSecondBox" class="hidden"> @endif
+                            <a id="doitOnline{{ $iCountTotal++; }}" href="{{ $onlineWork->form_link }}" class="intro-x inline-block w-full" >
+                                <div class="box px-5 py-3 mb-3 flex items-center zoom-in w-full">
+                                    <div class="mr-auto">
+                                        <div class="font-medium">{{ $onlineWork->form_name }}</div>
+                                        <div class="text-slate-500 text-xs mt-0.5">{{ $onlineWork->form_description }}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                        @if($iCountTotal>4) </div> @endif
+                        <a href="#"  class="doitOnlineSecondBoxToggle intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
                     </div>
                 </div>
-                <!-- END: Sales Report -->
+                <!-- END: Transactions -->
+
                 <!-- BEGIN: Official Store -->
                 <div class="col-span-12 xl:col-span-8 mt-6 hidden">
                     <div class="intro-y block sm:flex items-center h-10">
