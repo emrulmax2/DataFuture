@@ -21,4 +21,11 @@ if($('.liveStudentMainMenu').length > 0){
         }
     })
 }
+
+if($('.doitOnlineSecondBoxToggle').length > 0) {
+    $(".doitOnlineSecondBoxToggle").on('click', function(e){
+        e.preventDefault();
+        $("#doitOnlineSecondBox").toggle("slow");
+      });
+}
 /* Profile Menu End */
