@@ -162,7 +162,7 @@ import Dropzone from "dropzone";
                 successModalInfo.show(); 
                 document.getElementById("successModalInfo").addEventListener("shown.tw.modal", function (event) {
                     $("#successModalInfo .successModalInfoTitle").html("Congratulation!" );
-                    $("#successModalInfo .successModalInfoDesc").html('Letter successfully generated and send.');
+                    $("#successModalInfo .successModalInfoDesc").html('Student status successfully updated.');
                 });  
                 
                 setTimeout(function(){
