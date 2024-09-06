@@ -24,6 +24,7 @@ use App\Models\PlanTaskUpload;
 use App\Models\SmsTemplate;
 use App\Models\User;
 use App\Models\VenueIpAddress;
+use DateTime;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -374,24 +375,25 @@ class DashboardController extends Controller
         $attendanceInformation = AttendanceInformation::where("plans_date_list_id",$plandate->id)->get()->first();
         $employee = Employee::where("user_id",$tutor->id)->get()->first();
     
+        $h = $m = $s = 0;
         if($attendanceInformation) {
             if($attendanceInformation->tutor_id != Auth::user()->id) {
                 return redirect()->route('tutor-dashboard.show',Auth::user()->id);
             }
-            $classStart = date("Y-m-d ".$attendanceInformation->start_time);
-            if($attendanceInformation->end_time):
-                $classEnd = date("Y-m-d ".$attendanceInformation->end_time);
+            $classStart = date("Y-m-d ").$attendanceInformation->start_time;
+            if(isset($attendanceInformation->end_time) && !empty($attendanceInformation->end_time)):
+                $classEnd = date("Y-m-d").' '.$attendanceInformation->end_time;
             else:
-                $classEnd = date("Y-m-d h:i:s",strtotime(now()));
+                $classEnd = date("Y-m-d H:i:s");
             endif;
 
-            if(!isset($attendanceInformation->end_time)):
-                $now = strtotime($classEnd) - strtotime($classStart);
-            else:
-                $now = strtotime($classEnd) - strtotime($attendanceInformation->start_time);
-            endif;
-
-        
+            $classStart = date('Y-m-d').' '.$attendanceInformation->start_time;
+            $started_at = new DateTime($classStart);
+            $diff_with = new DateTime($classEnd);
+            $diff = $started_at->diff($diff_with);
+            $h = $diff->format('%h');
+            $m = $diff->format('%i');
+            $s = $diff->format('%s');
         }
         
         $Query = DB::table('plans_date_lists as datelist')
@@ -464,9 +466,9 @@ class DashboardController extends Controller
                 'attendanceFeed' => $attendance, 
                 'employee' => $employee,
                 'attendanceInformation' => $attendanceInformation ,
-                'classTakenTimeMin' => date('i', ($now)),      
-                'classTakenTimeSeconds' => date('s', ($now)),   
-                'classTakenTimeHour' => date('h', ($now)),     
+                'classTakenTimeMin' => $m,      
+                'classTakenTimeSeconds' => $s,
+                'classTakenTimeHour' => $h,
             ];
         endforeach;
         return view('pages.tutor.attendance.create', [

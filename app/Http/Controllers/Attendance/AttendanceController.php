@@ -300,7 +300,7 @@ class AttendanceController extends Controller
                     if($smsStatus):
                         $student = Student::find($student_id);
                         $message = 'Dear '.$student->full_name.'. You have missed class on '.date("d-m-Y",strtotime($attendance_date)).'. Module name: '.(isset($plan->creations->module_name) && !empty($plan->creations->module_name) ? $plan->creations->module_name : 'Undefined Module').', Group:'.(isset($plan->group->name) ? $plan->group->name : 'Undefined Group').', Time: '.$class_time;
-                        //$sms = $this->sendSms($student->contact->mobile, $message);
+                        $sms = $this->sendSms($student->contact->mobile, $message);
                     endif;
 
                     $insertCount += 1;
