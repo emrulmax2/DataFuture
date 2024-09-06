@@ -492,11 +492,11 @@ class DashboardController extends Controller
         $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
         
         $planTask = PlanTask::where("plan_id",$plan->id)
-                    ->orWhere('module_creation_id',$moduleCreation->id)->get();  
+                    ->where('module_creation_id',$moduleCreation->id)->get();  
         
         $studentAssign = Assign::where('plan_id', $plan->id)->get();
         $studentListCount = $studentAssign->count();
-
+        
         $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
         $eLearningActivites = ELearningActivitySetting::all();
         $planDateWiseContent = [];
@@ -512,6 +512,7 @@ class DashboardController extends Controller
             }
             
         }
+        
         $allPlanTasks = [];
 
             foreach($planTask as $task){

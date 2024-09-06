@@ -9,6 +9,7 @@
     <h2 class="text-lg font-medium mr-auto">Module Details</h2>
     <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
         <a href="{{ route('students.dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
+        
     </div>
 </div>
 <!-- BEGIN: Profile Info -->
