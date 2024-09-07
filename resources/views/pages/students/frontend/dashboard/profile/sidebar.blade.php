@@ -75,20 +75,32 @@
                     <a href="" class="ml-auto text-primary truncate">Show More</a>
                 </div>
                 <div class="mt-5">
-                    @foreach (array_slice($fakers, 0, 5) as $faker)
-                        <div class="intro-x">
-                            <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
-                                <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                    <img alt="London Churchill College" src="{{ asset('build/assets/images/' . $faker['photos'][0]) }}">
+                    @php $icountData=0; @endphp
+                   
+                        @foreach($datewiseClasses as $keyDate => $dataSet)
+                            @foreach ($dataSet as $data)
+                            {{-- {{ dd( $data) }} --}}
+                            @php
+                                $upcommingDate = strtotime(date("Y-m-d",strtotime($keyDate)));
+                                $currentDate = strtotime(date("Y-m-d"));
+                            @endphp
+                            @if( $upcommingDate > $currentDate)
+                                @if($icountData<7)
+                                <div id="dates-{{ $icountData++ }}" class="intro-x">
+                                    <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
+                                        <div class="ml-4 mr-auto">
+                                            <div class="font-medium">{{ $data->module }} - {{ $data->classType }} </div>
+                                            <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
+                                            <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
+                                        </div>
+                                        <div class=""></div>
+                                    </div>
                                 </div>
-                                <div class="ml-4 mr-auto">
-                                    <div class="font-medium">{{ $faker['users'][0]['name'] }}</div>
-                                    <div class="text-slate-500 text-xs mt-0.5">{{ $faker['dates'][0] }}</div>
-                                </div>
-                                <div class="{{ $faker['true_false'][0] ? 'text-success' : 'text-danger' }}">{{ $faker['true_false'][0] ? '+' : '-' }}${{ $faker['totals'][0] }}</div>
-                            </div>
-                        </div>
-                    @endforeach
+                                @endif
+                            @endif
+                            {{-- @endif --}}
+                            @endforeach
+                        @endforeach
                     <a href="" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
                 </div>
             </div>
