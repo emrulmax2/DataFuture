@@ -212,7 +212,7 @@ class DashboardController extends Controller
                     
                     if($currentTerm==0)
                         $currentTerm = $list->term_id;
-
+                        //PlansDateList::
                     $termData[$list->term_id] = (object) [ 
                         'id' =>$list->term_id,
                         'name' => $list->term_name,   
@@ -221,7 +221,9 @@ class DashboardController extends Controller
                     ];
                     $tutor = User::with('employee')->where("id",$list->tutor_id)->get()->first();
                     $pTutor = User::with('employee')->where("id",$list->personal_tutor_id)->get()->first();
-                   
+                    
+                    $data[$list->term_id][] = PlansDateList::where('plan_id',$list->id)->get();
+
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
@@ -232,7 +234,7 @@ class DashboardController extends Controller
                         'module' => $list->module_name,
                         'group'=> $list->group_name,           
                     ];
-
+                    
                     if(isset($termData[$list->term_id]))  
                         $termData[$list->term_id]->total_modules = count($data[$list->term_id]);
                     else 
@@ -241,14 +243,8 @@ class DashboardController extends Controller
         
             endforeach;
         endif;
-        // $request = new Request();
 
-        // $request->merge([
-        //     'plan_date' => "13-09-2023",
-        //     'id' =>$id,
-        // ]);
-        // $todaysList = $this->latestList($request);
-        // $returnData = json_decode($todaysList->getContent(),true);
+        usort($data[$currentTerm], fn($a, $b) => strcmp($a->module, $b->module));
 
         return $dataSet = ["termList" =>$termData,
             "data" => $data,
