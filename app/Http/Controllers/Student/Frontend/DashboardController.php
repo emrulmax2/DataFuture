@@ -29,6 +29,7 @@ use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
 use App\Models\ReferralCode;
 use App\Models\Religion;
+use App\Models\Room;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Status;
@@ -39,6 +40,7 @@ use App\Models\StudentUser;
 use App\Models\TermTimeAccommodationType;
 use App\Models\Title;
 use App\Models\User;
+use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +103,30 @@ class DashboardController extends Controller
             else {
                 $dataBox = ["termList" =>[],"data" => [],"currenTerm" => [] ];
             }
+
+            $allData = $dataBox["data"];
+            $currenTerm = $dataBox["currenTerm"];
+            //dd($allData[$currenTerm]);
+            
+            foreach($allData[$currenTerm] as $key => $data):
+               foreach($data->plan_dates as $dateData):
+                $upcommingDate = strtotime(date("Y-m-d",strtotime($dateData->date)));
+                $currentDate = strtotime(date("Y-m-d"));
+                $hr_date = date('F jS, Y',$upcommingDate);
+                $dateWiseClassList[date("Y-m-d",strtotime($dateData->date))][] = (object) [
+                    "module" => $data->module,
+                    "classType" => $data->classType,
+                    "hr_date" =>$hr_date,
+                    "hr_time" => $data->start_time."-".$data->end_time,
+                    "venue_room" => $data->venue->name.", ".$data->room->name,
+                ];
+                    
+               endforeach;
+            endforeach;
+            uksort($dateWiseClassList, function($a, $b) {
+                return strtotime($a) - strtotime($b);
+            });
+            //dd($dateWiseClassList);
             return view('pages.students.frontend.dashboard.index', [
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
@@ -127,6 +153,7 @@ class DashboardController extends Controller
                 "data" => $dataBox["data"],
                 "currenTerm" => $dataBox["currenTerm"],
                 "doItOnline" => $DoItOnline,
+                "datewiseClasses" => $dateWiseClassList,
             ]);
         endif;
 
@@ -221,9 +248,14 @@ class DashboardController extends Controller
                     ];
                     $tutor = User::with('employee')->where("id",$list->tutor_id)->get()->first();
                     $pTutor = User::with('employee')->where("id",$list->personal_tutor_id)->get()->first();
-                    
-                    $data[$list->term_id][] = PlansDateList::where('plan_id',$list->id)->get();
 
+                    $getClassDatesForStudent =  PlansDateList::where('plan_id',$list->id)->get();
+                    
+                    $start_time = date("Y-m-d ".$list->start_time);
+                    $start_time = date('h:i A', strtotime($start_time));
+                    
+                    $end_time = date("Y-m-d ".$list->end_time);
+                    $end_time = date('h:i A', strtotime($end_time));
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
@@ -232,7 +264,12 @@ class DashboardController extends Controller
                         'personal_tutor_photo' => isset($pTutor->employee) ? $pTutor->employee->photo_url : "",
                         'classType' => ($list->class_type!="")  ? $list->class_type : $list->module_class_type,
                         'module' => $list->module_name,
-                        'group'=> $list->group_name,           
+                        'group'=> $list->group_name,
+                        'venue' =>Venue::find($list->venue_id),           
+                        'room' =>Room::find($list->rooms_id),   
+                        'plan_dates' => $getClassDatesForStudent,
+                        'start_time' =>$start_time,           
+                        'end_time' =>$end_time,                    
                     ];
                     
                     if(isset($termData[$list->term_id]))  
