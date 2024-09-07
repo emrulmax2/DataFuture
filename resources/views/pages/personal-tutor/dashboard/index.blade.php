@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Dashboard - Enigma - Tailwind HTML Admin Template</title>
+    <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
@@ -11,7 +11,7 @@
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8">
                     <div class="intro-y flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Welcome Mr Personal Tutor</h2>
+                        <h2 class="text-lg font-medium truncate mr-5">Welcome {{ $employee->full_name }}</h2>
                     </div>
                     <div class="report-box-2 intro-y mt-5">
                         <div class="box grid grid-cols-12">
@@ -19,27 +19,12 @@
                                 <i data-lucide="pie-chart" class="w-10 h-10 text-pending"></i>
                                 <div class="justify-start flex items-center text-slate-600 dark:text-slate-300 mt-12">
                                     Current Term
-                                    <i data-lucide="alert-circle" class="tooltip w-4 h-4 ml-1.5" title="Total value of your sales: $158.409.416"></i>
+                                    <!--<i data-lucide="alert-circle" class="tooltip w-4 h-4 ml-1.5" title="Total value of your sales: $158.409.416"></i>-->
                                 </div>
                                 <div class="flex items-center justify-start mt-4">
-                                    <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto mr-auto">
-                                        <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                        </button>
-                                        <div class="dropdown-menu w-40">
-                                            <ul class="dropdown-content">
-                                                
-                                                @foreach($termList as $term)
-                                                <li>
-                                                    <a  id="term-{{ $term->id }}" data-tutor_id="{{ $employee->user_id }}"  data-instance_term_id="{{ $term->id }}" data-instance_term="{{ $term->name }}" href="javascript:;" class="dropdown-item term-select {{ ($termList[$currenTerm]->name==$term->name) ? " dropdown-active " : ""}}">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>  {{ $term->name }}
-                                                    </a>
-                                                </li>
-                                                @endforeach
-                                                
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <button id="selected-term" class="btn btn-primary text-white w-full sm:w-auto">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <span>{{ $current_term->name }}</span>
+                                    </button>
                                 </div>
                                 <div class="mt-4 text-slate-500 text-xs">Last updated 1 hour ago</div>
                                 <button class="btn btn-outline-secondary relative justify-start rounded-full mt-12">
@@ -53,33 +38,10 @@
                                 </div>
                             </div>
                             <div class="col-span-12 lg:col-span-8 p-8 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
-                                <ul
-                                    class="
-                                        nav
-                                        nav-pills
-                                        w-60
-                                        border
-                                        border-slate-300
-                                        dark:border-darkmode-300
-                                        border-dashed
-                                        rounded-md
-                                        mx-auto
-                                        p-1
-                                        mb-8
-                                    "
-                                    role="tablist"
-                                >
+                                <ul class="nav nav-pills w-60 border border-slate-300 dark:border-darkmode-300 border-dashed rounded-md mx-auto p-1 mb-8" role="tablist">
                                     <li id="selectedTermButton" class="nav-item flex-1" role="presentation">
-                                        <button 
-                                            class="nav-link w-full py-1.5 px-2 active"
-                                            data-tw-toggle="pill"
-                                            data-tw-target="#weekly-report"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="weekly-report"
-                                            aria-selected="true"
-                                        >
-                                        {{ $termList[$currenTerm]->name }}
+                                        <button class="nav-link w-full py-1.5 px-2 active" data-tw-toggle="pill" data-tw-target="#weekly-report" type="button" role="tab" aria-controls="weekly-report" aria-selected="true" >
+                                            {{ $current_term->name }}
                                         </button>
                                     </li>
                                 </ul>
@@ -88,25 +50,25 @@
                                         <div class="col-span-6 sm:col-span-6">
                                             <div class="text-slate-500">No of Module</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div id="totalModule" class="text-base">{{ $termList[$currenTerm]->total_modules }}</div>
+                                                <div id="totalModule" class="text-base">{{ $modules->count() }}</div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">No of Student</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">120</div>
+                                                <div class="text-base">{{ $no_of_assigned }}</div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Expected Assignments</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">640</div>
+                                                <div class="text-base">0</div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Average Attendance</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">62.92%</div>
+                                                <div class="text-base">0%</div>
                                             </div>
                                         </div>
 
@@ -115,7 +77,7 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Attendance Bellow 60%</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">25</div>
+                                                <div class="text-base">0</div>
                                             </div>
                                         </div>
                                         
@@ -247,66 +209,39 @@
                         </div>
                         
                         <div id="personalTutormoduleList" class="mt-5">
-                            @foreach($data as $termId => $termModuleList)
-                                @if($termList[$currenTerm]->id == $termId)
-                                    @php $i=0 @endphp
-                                    @foreach($termModuleList as $termData)
-                                     @php $i++ @endphp
-                                        <a @if($i>4) @class(['more','hidden']) @endif href="{{ route('tutor-dashboard.plan.module.show',$termData->id) }}" target="_blank" style="inline-block">
-                                            <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
-                                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                                    <div class="ml-4 mr-auto">
-                                                        <div class="font-medium">{{ $termData->module }}</div>
-                                                        <div class="text-slate-500 text-xs mt-0.5">{{ $termData->course }}</div>
-                                                    </div>
-                                                    <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">{{ $termData->group }}</div>
+                            @if($modules->count() > 0)
+                                @php $i = 1; @endphp
+                                @foreach($modules as $mod)
+                                    <a class="{{ $i > 4 ? 'more hidden' : 'inline-block' }}" href="{{ route('tutor-dashboard.plan.module.show', $mod->id) }}" target="_blank">
+                                        <div id="moduleset-{{ $mod->id }}" class="intro-y module-details_{{ $mod->id }}">
+                                            <div class="box px-4 py-4 mb-3 zoom-in">
+                                                <div class="flex justify-start items-center mb-2 pl-4">
+                                                    <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">{{ $mod->group->name }}</div>
+                                                    <button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
+                                                        {{ (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown')) }}
+                                                    </button>
+                                                </div>
+                                                <div class="ml-4 mr-auto">
+                                                    <div class="font-medium">{{ $mod->creations->module_name }}</div>
+                                                    <div class="text-slate-500 text-xs mt-0.5">{{ $mod->course->name }}</div>
                                                 </div>
                                             </div>
-                                        </a>
-                                    @endforeach
+                                        </div>
+                                    </a>
+                                    @php $i += 1; @endphp
+                                @endforeach
+                                @if($modules->count() > 4)
+                                    <a href="javascript:void(0);" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
                                 @endif
-                            @endforeach
-                            <a href="#" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                            @else 
+                                <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Modules not found!
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <!-- END: Important Notes -->
-                    <!-- BEGIN: Recent Activities -->
-                    {{-- <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
-                        <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Todays Classes</h2>
-                            <a href="" class="ml-auto text-primary truncate">Show More</a>
-                        </div>
-                        <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="box px-5 py-3 ml-0 flex-1 zoom-in bg-danger-soft">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">Business Environment (B)</div>
-                                        <div class="text-xs text-slate-500 ml-auto">10:00 AM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Mahin Talukder</div>
-                                </div>
-                            </div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="box px-5 py-3 ml-0 flex-1 zoom-in bg-warning-soft">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">Business Environment (B)</div>
-                                        <div class="text-xs text-slate-500 ml-auto">10:00 AM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Mahin Talukder</div>
-                                </div>
-                            </div>
-                            <div class="intro-x relative flex items-center mb-3">
-                                <div class="box px-5 py-3 ml-0 flex-1 zoom-in bg-success-soft">
-                                    <div class="flex items-center">
-                                        <div class="font-medium">Business Environment (B)</div>
-                                        <div class="text-xs text-slate-500 ml-auto">10:00 AM</div>
-                                    </div>
-                                    <div class="text-slate-500 mt-1">Mahin Talukder</div>
-                                </div>
-                            </div>
-                        </div>
-                    </dCTRL + SHIFT + FCTRL + SHIFT + Fiv> --}}
-                    <!-- END: Recent Activities -->
+
                     <!-- BEGIN: Recent Activities -->
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
@@ -316,23 +251,31 @@
                                 <input id="tutor-calendar-date" value="{{ date('d-m-Y') }}" type="text" class="form-control sm:w-56 box pl-10 " placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true">
                                 <input name="tutor_id" value="{{ $user->id }}" type="hidden" />
                             </div>
-                            
                         </div>  
                         <div id="todays-classlist">
                             <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
-                                
-                                @foreach($todaysClassList as $list)
+                                @if($todays_classes->count() > 0)
+                                    @foreach($todays_classes as $class)
                                         <div class="intro-x relative flex items-center mb-3">
-                                            <div class="box px-5 py-3 ml-0 flex-1 zoom-in bg-warning-soft">
-                                                <div class="flex items-center">
-                                                    <div class="font-medium">{{ $list["module"] }} ({{ $list["group"] }})</div>
-                                                    <div class="text-xs text-slate-500 ml-auto">{{ $list["start_time"] }}</div>
+                                            <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
+                                                <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                                                    <img alt="{{ (isset($class->plan->tutor->employee->full_name) && !empty($class->plan->tutor->employee->full_name) ? $class->plan->tutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->tutor->employee->photo_url) && !empty($class->plan->tutor->employee->photo_url) ? $class->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                 </div>
-                                                <div class="text-slate-500 mt-1">{{ $list["course"] }}</div>
+                                            </div>
+                                            <div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">
+                                                <div class="flex items-center">
+                                                    <div class="font-medium">{{ $class->plan->creations->module_name }} ({{ $class->plan->group->name }})</div>
+                                                    <div class="text-xs text-slate-500 ml-auto">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
+                                                </div>
+                                                <div class="text-slate-500 mt-1">{{ (isset($class->plan->course->name) ? $class->plan->course->name : '') }}</div>
                                             </div>
                                         </div>
-                                    
-                                @endforeach
+                                    @endforeach
+                                @else 
+                                    <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No Class found for the day.
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
