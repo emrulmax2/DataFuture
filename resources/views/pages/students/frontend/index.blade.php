@@ -333,7 +333,7 @@
                         </div>
                         <div id="permanentAddress__yes" class="hidden" >
                             <input name="permanent_address_id" type="hidden" value="" />
-                            <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 ? $studentData["current_address"]->address_line_2."," : '' }} {{ $studentData["current_address"]->post_code }}, {{ isset($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}</div>
+                            <div class="font-medium text-base"><b>{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 ? $studentData["current_address"]->address_line_2."," : '' }} {{ $studentData["current_address"]->post_code }}, {{ isset($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }} </b></div>
                         </div>
                     </div>
                     <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
