@@ -2285,6 +2285,8 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(DashboardController::class)->group(function() {
         Route::get('personal-tutor-dashboard/{id}', 'index')->name('pt.dashboard'); 
+        Route::post('personal-tutor-dashboard/get-classes', 'getClassess')->name('pt.get.classes'); 
+        Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
     });
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {
