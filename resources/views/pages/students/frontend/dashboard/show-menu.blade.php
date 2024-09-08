@@ -10,4 +10,10 @@
             Profile
         </a>
     </li>
+    
+    <li class="nav-item" role="presentation">
+        <a href="javascript::void()" class="nav-link py-4">
+            Result
+        </a>
+    </li>
 </ul>
