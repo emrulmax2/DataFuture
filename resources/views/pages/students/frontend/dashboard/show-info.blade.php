@@ -19,7 +19,8 @@
                             
                         </div>
                         <div class="ml-10">
-                            <div class="w-auto truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} {{ $student->last_name }} - <span class="font-black">{{ $student->registration_no }}</span></div>
+                            <div class="w-auto truncate sm:whitespace-normal font-medium text-lg"><span class="font-black">{{ $student->registration_no }}</span></div>
+                            <div class="w-auto truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} {{ $student->last_name }}</div>
                             <div class="text-slate-500 mb-3">{{ isset($student->crel->creation->course->name) ? $student->crel->creation->course->name : '' }} - {{ isset($student->crel->propose->semester->name) ? $student->crel->propose->semester->name : '' }}</div>
                             
                         </div>

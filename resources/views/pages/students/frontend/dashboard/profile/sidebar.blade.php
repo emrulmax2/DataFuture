@@ -36,10 +36,10 @@
                                 <div class="mt-1">1 Day ago</div>
                                 <div class="text-justify mt-1">Welcome to your new student portal.<br /> September Term will start at 09 September 2024 and
                                     end at 22 November 2024</div>
-                                <div class="font-medium flex mt-5">
+                                {{-- <div class="font-medium flex mt-5">
                                     <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
                                     <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
-                                </div>
+                                </div> --}}
                             </div>
                             {{-- <div class="p-5">
                                 <div class="flex items-center">
@@ -89,7 +89,8 @@
                                 <div id="dates-{{ $icountData++ }}" class="intro-x">
                                     <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
                                         <div class="ml-4 mr-auto">
-                                            <div class="font-medium">{{ $data->module }} - {{ $data->classType }} </div>
+                                            <div class="font-medium">{{ $data->module }}  </div>
+                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $data->classType }}</div>
                                             <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
                                         </div>
@@ -106,7 +107,7 @@
             </div>
             <!-- END: Transactions -->
             <!-- BEGIN: Recent Activities -->
-            <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
+            <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 hidden">
                 <div class="intro-x flex items-center h-10">
                     <h2 class="text-lg font-medium truncate mr-5">Recent Activities</h2>
                     <a href="" class="ml-auto text-primary truncate">Show More</a>
