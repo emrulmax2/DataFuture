@@ -238,6 +238,9 @@
                                                     <button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
                                                         {{ (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown')) }}
                                                     </button>
+                                                    <button class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
+                                                        {{ $mod->activeAssign->count() }}
+                                                    </button>
                                                 </div>
                                                 <div class="ml-4 mr-auto">
                                                     <div class="font-medium">{{ $mod->creations->module_name }}</div>

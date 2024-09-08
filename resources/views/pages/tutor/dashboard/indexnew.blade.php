@@ -108,9 +108,11 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-8">
                         <div class="intro-y flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
+                            @if(isset($termList[$currenTerm]->name) && !empty($termList[$currenTerm]->name))
                             <button class="btn btn-primary text-white w-auto ml-auto">
                                 <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i>{{ (isset($termList[$currenTerm]->name) && !empty($termList[$currenTerm]->name) ? $termList[$currenTerm]->name : '') }}
                             </button>
+                            @endif
                             <!--<div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
                                 <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ (isset($termList[$currenTerm]->name) && !empty($termList[$currenTerm]->name) ? $termList[$currenTerm]->name : '') }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
@@ -161,6 +163,7 @@
                                 @endif
                             @endforeach
                         </div>
+
                     </div>
                     <!-- END: Visitors -->
                 </div>
