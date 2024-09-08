@@ -26,7 +26,7 @@ class DashboardController extends Controller
         $latestTerm = Plan::where('personal_tutor_id', $id)->orderBy('term_declaration_id', 'DESC')->get()->first();
         $latestTermId = (isset($latestTerm->term_declaration_id) && $latestTerm->term_declaration_id > 0 ? $latestTerm->term_declaration_id : 0);
         $theTermDeclaration = TermDeclaration::find($latestTermId);
-        $modules = Plan::where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)->orderBy('id', 'ASC')->get();
+        $modules = Plan::with('activeAssign', 'tutor')->where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)->orderBy('id', 'ASC')->get();
         $plan_ids = $modules->pluck('id')->unique()->toArray();
         $assigns = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
             $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
