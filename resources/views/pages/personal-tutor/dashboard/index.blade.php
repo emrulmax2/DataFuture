@@ -16,17 +16,19 @@
                     <div class="report-box-2 intro-y mt-5">
                         <div class="box grid grid-cols-12">
                             <div class="col-span-12 lg:col-span-4 px-8 py-12 flex flex-col justify-center">
-                                <i data-lucide="pie-chart" class="w-10 h-10 text-pending"></i>
-                                <div class="justify-start flex items-center text-slate-600 dark:text-slate-300 mt-12">
-                                    Current Term
-                                    <!--<i data-lucide="alert-circle" class="tooltip w-4 h-4 ml-1.5" title="Total value of your sales: $158.409.416"></i>-->
+                                <div class="pr-8 pt-12 flex flex-col justify-center flex-1">
+                                    <div class="w-30 h-30 flex-none image-fit rounded-full overflow-hidden">
+                                        <img alt="{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}" class="rounded-full" src="{{ (isset($employee->photo) && !empty($employee->photo) && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo) ? Storage::disk('local')->url('public/employees/'.$employee->id.'/'.$employee->photo) : asset('build/assets/images/avater.png')) }}">
+                                    </div>
+                                    <div class="relative text-3xl font-medium mt-5">
+                                        {{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}
+                                    </div>
+                                    <div class="text-slate-500">
+                                        {{ $employee->user->email }}<br/>
+                                        {{-- $employee->email --}}
+                                    </div>
                                 </div>
-                                <div class="flex items-center justify-start mt-4">
-                                    <button id="selected-term" class="btn btn-primary text-white w-full sm:w-auto">
-                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <span>{{ $current_term->name }}</span>
-                                    </button>
-                                </div>
-                                <div class="mt-4 text-slate-500 text-xs">Last updated 1 hour ago</div>
+                                
                                 <form class="relative justify-start flex mt-12" method="post" action="#">
                                     <div class="autoCompleteField w-full h-full rounded-full" data-table="students">
                                         <input type="text" autocomplete="off" id="registration_no" name="student_id" class="form-control rounded-full registration_no" value="" placeholder="Search Student By ID"/>
@@ -228,7 +230,7 @@
                             @if($modules->count() > 0)
                                 @php $i = 1; @endphp
                                 @foreach($modules as $mod)
-                                    <a class="{{ $i > 4 ? 'more hidden' : 'inline-block' }}" href="{{ route('tutor-dashboard.plan.module.show', $mod->id) }}" target="_blank">
+                                    <a class="{{ $i > 4 ? 'more hidden' : 'block' }}" href="{{ route('tutor-dashboard.plan.module.show', $mod->id) }}" target="_blank">
                                         <div id="moduleset-{{ $mod->id }}" class="intro-y module-details_{{ $mod->id }}">
                                             <div class="box px-4 py-4 mb-3 zoom-in">
                                                 <div class="flex justify-start items-center mb-2 pl-4">

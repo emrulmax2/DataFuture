@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index($id){
+    public function index(){
+        $id = auth()->user()->id;
         $userData = User::find($id);
         $employee = Employee::where("user_id", $userData->id)->get()->first();
 
