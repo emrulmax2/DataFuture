@@ -9,7 +9,7 @@
         <div class="col-span-12 2xl:col-span-9">
             <div class="grid grid-cols-12 gap-6">
                 <!-- BEGIN: General Report -->
-                <div class="col-span-12 mt-8">
+                <div class="col-span-12 mt-8 relative z-20">
                     <div class="intro-y flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Welcome {{ $employee->full_name }}</h2>
                     </div>
@@ -27,15 +27,31 @@
                                     </button>
                                 </div>
                                 <div class="mt-4 text-slate-500 text-xs">Last updated 1 hour ago</div>
-                                <button class="btn btn-outline-secondary relative justify-start rounded-full mt-12">
-                                    Search Student By ID
-                                    <span class="w-8 h-8 absolute flex justify-center items-center bg-primary text-white rounded-full right-0 top-0 bottom-0 my-auto ml-auto mr-0.5">
-                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                    </span>
-                                </button>
-                                <div class="text-right pt-2">
+                                <form class="relative justify-start flex mt-12" method="post" action="#">
+                                    <div class="autoCompleteField w-full h-full rounded-full" data-table="students">
+                                        <input type="text" autocomplete="off" id="registration_no" name="student_id" class="form-control rounded-full registration_no" value="" placeholder="Search Student By ID"/>
+                                        <ul class="autoFillDropdown"></ul>
+                                        <input type="hidden" id="profileUrl" name="profile_url"/>
+                                    </div>
+                                    <button disabled id="viewStudentBtn" type="button" class="w-8 h-8 disabled:cursor-not-allowed disabled:opacity-70 absolute flex justify-center items-center bg-primary text-white rounded-full right-0 top-0 bottom-0 my-auto ml-auto mr-0.5">
+                                        <i data-lucide="search" class="w-4 h-4 svgSearch"></i><!--arrow-right-->
+                                        <svg style="opacity: 0;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                            stroke="white" class="w-4 h-4 ml-2 svgLoader absolute l-0 t-0 b-0 r-0 m-auto">
+                                            <g fill="none" fill-rule="evenodd">
+                                                <g transform="translate(1 1)" stroke-width="4">
+                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                    </path>
+                                                </g>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </form>
+                                <!--<div class="text-right pt-2">
                                     <a href="{{ route('student') }}" class="text-primary text-small">Advance Search</a>
-                                </div>
+                                </div>-->
                             </div>
                             <div class="col-span-12 lg:col-span-8 p-8 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
                                 <ul class="nav nav-pills w-60 border border-slate-300 dark:border-darkmode-300 border-dashed rounded-md mx-auto p-1 mb-8" role="tablist">
@@ -90,7 +106,7 @@
                 <!-- END: General Report -->
                 
                 <!-- BEGIN: Weekly Top Products -->
-                <div class="col-span-12 mt-6">
+                <div class="col-span-12 mt-6 relative z-10">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Students Work List</h2>
                         <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
@@ -248,12 +264,11 @@
                             <h2 class="text-lg font-medium truncate mr-auto">Todays Classes</h2>
                             <div class="sm:ml-auto mt-3 sm:mt-0 relative text-slate-500">
                                 <i class="w-4 h-4 z-10 absolute my-auto inset-y-0 ml-3 left-0" data-lucide="calendar-days"></i>
-                                <input id="tutor-calendar-date" value="{{ date('d-m-Y') }}" type="text" class="form-control sm:w-56 box pl-10 " placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true">
-                                <input name="tutor_id" value="{{ $user->id }}" type="hidden" />
+                                <input data-pt="{{ $user->id }}" id="personalTutorCalendar" value="{{ date('d-m-Y') }}" type="text" class="form-control sm:w-56 box pl-10 " placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
                         </div>  
                         <div id="todays-classlist">
-                            <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                            <div id="todaysClassListWrap" class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                                 @if($todays_classes->count() > 0)
                                     @foreach($todays_classes as $class)
                                         <div class="intro-x relative flex items-center mb-3">
