@@ -95,5 +95,11 @@ class Plan extends Model
     public function assign(){
         return $this->hasMany(Assign::class, 'plan_id', 'id');
     }
+
+    public function activeAssign(){
+        return $this->hasMany(Assign::class, 'plan_id', 'id')->where(function($q){
+            $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+        });
+    }
     
 }

@@ -179,10 +179,12 @@
                 <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">    
                     <div id="currentAdressQuestion"  class="col-span-12">
                         <div class="col-span-12">
-                                <div class="intro-y col-span-12 py-1">
-                                    <label for="input-wizard-4" class="form-label inline-flex mr-2">When you submitted your application, you supplied us with the address {{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 ? $studentData["current_address"]->address_line_2."," : '' }} {{ $studentData["current_address"]->post_code }}, {{ isset($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}. Is this the address where you will be residing during your study term?</label>
-                                    <button id="agreeCurrentAddress" data-addressid="{{ $studentData["current_address"]->id }}"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-32 mb-2 mr-2 w-32">Yes</button>
-                                    <button id="disagreeCurrentAddress"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 mb-2 mr-2 w-32">No</button>
+                                <div class="intro-y col-span-12 py-1 text-center">
+                                    <label for="input-wizard-4" class="form-label mr-2">When you submitted your application, you supplied us with the address <span class="ml-1 text-xl font-medium">{{ $studentData["current_address"]->address_line_1 }},{{ !empty($studentData["current_address"]->address_line_2) ? $studentData["current_address"]->address_line_2."," : '' }} {{ !empty($studentData["current_address"]->post_code) ? $studentData["current_address"]->post_code."," : '' }} {{ !empty($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}</span>. Could you please confirm if this is the address at which you will be residing during your study term?</label>
+                                    <div class="col-span-12  mt-4">
+                                    <button id="agreeCurrentAddress" data-addressid="{{ $studentData["current_address"]->id }}"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32">Yes</button>
+                                    <button id="disagreeCurrentAddress"  class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-2 w-32 ">No</button>
+                                    </div>
                                 </div>
                         </div>
                     </div>
@@ -244,7 +246,7 @@
                         </div>
                         <div id="currenAddress__yes" class="hidden">
                             <input name="current_address_id" type="hidden" value="" />
-                            <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 ? $studentData["current_address"]->address_line_2."," : '' }} {{ $studentData["current_address"]->post_code }}, {{ isset($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}</div>
+                            <div class="font-medium text-base"> {{ $studentData["current_address"]->address_line_1 }},{{ !empty($studentData["current_address"]->address_line_2) ? $studentData["current_address"]->address_line_2."," : '' }} {{  !empty($studentData["current_address"]->post_code) ? $studentData["current_address"]->post_code."," : '' }} {{ !empty($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}</div>
                         </div>
                         
                         <div id="accomodationType__next" class="intro-y col-span-12 sm:col-span-6 hidden my-10" >
@@ -333,7 +335,7 @@
                         </div>
                         <div id="permanentAddress__yes" class="hidden" >
                             <input name="permanent_address_id" type="hidden" value="" />
-                            <div class="font-medium text-base">{{ $studentData["current_address"]->address_line_1 }},{{ $studentData["current_address"]->address_line_2 ? $studentData["current_address"]->address_line_2."," : '' }} {{ $studentData["current_address"]->post_code }}, {{ isset($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }}</div>
+                            <div class="font-medium text-base"><b>{{ $studentData["current_address"]->address_line_1 }},{{ !empty($studentData["current_address"]->address_line_2) ? $studentData["current_address"]->address_line_2."," : '' }} {{ !empty($studentData["current_address"]->post_code) ? $studentData["current_address"]->post_code."," : '' }} {{ !empty($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }} </b></div>
                         </div>
                     </div>
                     <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
@@ -407,7 +409,7 @@
                         Back
                     </button>
                     <button type="button" class="btn btn-primary w-auto  form-wizard-next-btn">
-                        Review & Done 
+                        Submit
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2 svg_2">
                             <g fill="none" fill-rule="evenodd">

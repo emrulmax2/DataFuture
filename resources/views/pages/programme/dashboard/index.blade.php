@@ -76,21 +76,29 @@
                 <div class="col-span-12 sm:col-span-6">
                     <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Tutors <span class="tutorCount">{{ isset($classTutor['count']) ? ' ('.$classTutor['count'].')' : ' (0)' }}</span></h2>
+                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
                         <a href="{{ route('programme.dashboard.tutors', $theTerm->term_declaration_id) }}" class="ml-auto text-primary truncate">Show More</a>
+                        @endif
                     </div>
                     <div class="mt-5 tutorWrap relative">
                         <div class="theHolder">{!! $classTutor['html'] !!}</div>
+                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
                         <a href="{{ route('programme.dashboard.tutors', $theTerm->term_declaration_id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                        @endif
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-6">
                     <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Personal Tutors <span class="personalTutorCount">{{ isset($classPTutor['count']) ? ' ('.$classPTutor['count'].')' : ' (0)' }}</span></h2>
+                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
                         <a href="{{ route('programme.dashboard.personal.tutors', $theTerm->term_declaration_id) }}" class="ml-auto text-primary truncate">Show More</a>
+                        @endif
                     </div>
                     <div class="mt-5 personalTutorWrap relative">
                         <div class="theHolder">{!! $classPTutor['html'] !!}</div>
+                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
                         <a href="{{ route('programme.dashboard.personal.tutors', $theTerm->term_declaration_id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                        @endif
                     </div>
                 </div>
             </div>
