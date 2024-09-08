@@ -123,9 +123,12 @@ class DashboardController extends Controller
                     
                endforeach;
             endforeach;
-            uksort($dateWiseClassList, function($a, $b) {
-                return strtotime($a) - strtotime($b);
-            });
+            if(isset($dateWiseClassList))
+                uksort($dateWiseClassList, function($a, $b) {
+                    return strtotime($a) - strtotime($b);
+                });
+            else
+            $dateWiseClassList = [];
             //dd($dateWiseClassList);
             return view('pages.students.frontend.dashboard.index', [
                 'title' => 'Live Students - London Churchill College',

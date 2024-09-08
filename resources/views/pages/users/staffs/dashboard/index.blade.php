@@ -37,12 +37,12 @@
                         </a>
                         @endif
                         @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['tutor_2']) && auth()->user()->priv()['tutor_2'] == 1)
-                        <a href="{{ route('tutor-dashboard.show.new', 32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                        <a href="{{ route('tutor-dashboard.show.new') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Tutor-logos.jpeg') }}">
                         </a>
                         @endif
                         @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['personal_tutor']) && auth()->user()->priv()['personal_tutor'] == 1)
-                        <a href="{{ route('pt.dashboard',32) }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                        <a href="{{ route('pt.dashboard') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/personal_tutor-logos.jpeg') }}">
                         </a>
                         @endif

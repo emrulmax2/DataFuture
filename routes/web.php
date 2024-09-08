@@ -2170,11 +2170,11 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/list', 'list')->name('tutor-dashboard.list'); 
         //Route::get('tutor-dashboard/term/list', 'tutorTermShowsList')->name('tutor-dashboard.term.list'); 
         Route::get('tutor-dashboard/term/list/{instance_term}/{tutor}', 'tutorTermlistShowByInstance')->name('tutor-dashboard.tutor.modulelist');
-        Route::get('tutor-dashboard/show/{tutor}', 'show')->name('tutor-dashboard.show'); 
+        Route::get('tutor-dashboard/show', 'show')->name('tutor-dashboard.show'); 
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
-        Route::get('tutor-dashboard/show-new/{tutor}', 'showNew')->name('tutor-dashboard.show.new'); 
+        Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
     });
 
     Route::resource('plan-assessment', AssessmentPlanController::class);
@@ -2284,7 +2284,7 @@ Route::middleware('auth')->group(function() {
 
 
     Route::controller(DashboardController::class)->group(function() {
-        Route::get('personal-tutor-dashboard/{id}', 'index')->name('pt.dashboard'); 
+        Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
         Route::post('personal-tutor-dashboard/get-classes', 'getClassess')->name('pt.get.classes'); 
         Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
     });

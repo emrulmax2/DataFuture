@@ -140,9 +140,9 @@ class DashboardController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show()
     {
-        //
+        $id = auth()->user()->id;
         $userData = User::find($id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
@@ -201,14 +201,14 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,
-            "termList" =>$termData,
+            "termList" => (isset($termData) ? $termData : []),
             "data" => $data,
             "date" => date("d-m-Y"),
         ]);
     }
     
-    public function showNew($id) {
-
+    public function showNew() {
+        $id = auth()->user()->id;
         $userData = User::find($id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
@@ -291,7 +291,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
             "user" => $userData,
             "employee" => $employee,
-            "termList" =>$termData,
+            "termList" =>(isset($termData) ? $termData : []),
             "data" => $data,
             "date" => date("d-m-Y"),
             "currenTerm" => $currentTerm,

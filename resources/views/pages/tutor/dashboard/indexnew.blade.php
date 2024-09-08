@@ -23,43 +23,19 @@
                                 <div class="relative text-3xl font-medium mt-5">
                                     {{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}
                                 </div>
-                                <div class="mt-4 text-slate-500">
-                                    @if(isset($employee->address->address_line_1) && $employee->address->address_line_1 > 0)
-                                        @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
-                                            <span class="font-medium">{{ $employee->address->address_line_1 }}</span><br/>
-                                        @endif
-                                        @if(isset($employee->address->address_line_2) && !empty($employee->address->address_line_2))
-                                            <span class="font-medium">{{ $employee->address->address_line_2 }}</span><br/>
-                                        @endif
-                                        @if(isset($employee->address->city) && !empty($employee->address->city))
-                                            <span class="font-medium">{{ $employee->address->city }}</span>,
-                                        @endif
-                                        @if(isset($employee->address->state) && !empty($employee->address->state))
-                                            <span class="font-medium">{{ $employee->address->state }}</span>, 
-                                        @endif
-                                        @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
-                                            <span class="font-medium">{{ $employee->address->post_code }}</span>,<br/>
-                                        @endif
-                                        @if(isset($employee->address->country) && !empty($employee->address->country))
-                                            <span class="font-medium">{{ strtoupper($employee->address->country) }}</span><br/>
-                                        @endif
-                                    @else 
-                                        <span class="font-medium text-warning">Not Set Yet!</span><br/>
-                                    @endif
-                                </div>
                             </div>
                             <div class="px-8 py-12 flex flex-col justify-center flex-1 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
                                 <div class="text-slate-500 text-xs">Email</div>
                                 <div class="mt-1.5 flex items-center">
                                     <div class="text-base">
                                         {{ $employee->user->email }}<br/>
-                                        {{ $employee->email }}
+                                        {{-- $employee->email --}}
                                     </div>
                                 </div>
-                                <div class="text-slate-500 text-xs mt-5">Mobile</div>
+                                <!--<div class="text-slate-500 text-xs mt-5">Mobile</div>
                                 <div class="mt-1.5 flex items-center">
                                     <div class="text-base">{{ $employee->mobile }}</div>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -133,17 +109,17 @@
                         <div class="intro-y flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
                             <button class="btn btn-primary text-white w-auto ml-auto">
-                                <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i>{{ $termList[$currenTerm]->name }}
+                                <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i>{{ (isset($termList[$currenTerm]->name) && !empty($termList[$currenTerm]->name) ? $termList[$currenTerm]->name : '') }}
                             </button>
                             <!--<div id="term-dropdown" class="dropdown w-1/2 sm:w-auto ml-auto">
                                 <button id="selected-term" class="dropdown-toggle btn btn-primary text-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termList[$currenTerm]->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                    <i  data-lucide="file-text" class="w-4 h-4 mr-2 "></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ (isset($termList[$currenTerm]->name) && !empty($termList[$currenTerm]->name) ? $termList[$currenTerm]->name : '') }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
                                     <ul class="dropdown-content">
                                         @foreach($termList as $term)
                                         <li>
-                                            <a  id="term-{{ $term->id }}" data-tutor_id="{{ $employee->user_id }}"  data-instance_term_id="{{ $term->id }}" data-instance_term="{{ $term->name }}" href="javascript:;" class="dropdown-item term-select {{ ($termList[$currenTerm]->name==$term->name) ? " dropdown-active " : ""}}">
+                                            <a  id="term-{{ $term->id }}" data-tutor_id="{{ $employee->user_id }}"  data-instance_term_id="{{ $term->id }}" data-instance_term="{{ $term->name }}" href="javascript:;" class="dropdown-item term-select {{ ($termList[$currenTerm]->name == $term->name) ? " dropdown-active " : ""}}">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> {{ $term->name }}
                                             </a>
                                         </li>
