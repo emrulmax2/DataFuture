@@ -95,12 +95,12 @@ class DashboardController extends Controller
         $SearchVal = $request->SearchVal;
 
         $html = '';
-        $Query = Student::orderBy('registration_no', 'ASC')->where('registration_no', 'LIKE', '%'.$SearchVal.'%')->get();
+        $Query = Student::with('title')->orderBy('registration_no', 'ASC')->where('registration_no', 'LIKE', '%'.$SearchVal.'%')->get();
         
         if($Query->count() > 0):
             foreach($Query as $qr):
                 $html .= '<li>';
-                    $html .= '<a href="'.route('student.show', $qr->id).'" data-label="'.$qr->registration_no.' - '.$qr->full_name.'" class="dropdown-item">'.$qr->registration_no.' - '.$qr->full_name.'</a>';
+                    $html .= '<a href="'.route('student.show', $qr->id).'" data-label="'.$qr->registration_no.' - '.' '.$qr->title->name.$qr->first_name.' '.$qr->last_name.'" class="dropdown-item">'.$qr->registration_no.' - '.$qr->full_name.'</a>';
                 $html .= '</li>';
             endforeach;
         else:
