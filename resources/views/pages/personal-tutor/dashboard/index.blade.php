@@ -105,7 +105,7 @@
                 </div>
                 <!-- END: General Report -->
                 
-                <!-- BEGIN: Weekly Top Products -->
+                <!-- BEGIN: Weekly Top Products
                 <div class="col-span-12 mt-6 relative z-10">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Students Work List</h2>
@@ -212,7 +212,7 @@
                         </select>
                     </div>
                 </div>
-                <!-- END: Weekly Top Products -->
+                END: Weekly Top Products -->
             </div>
         </div>
         <div class="col-span-12 2xl:col-span-3">
