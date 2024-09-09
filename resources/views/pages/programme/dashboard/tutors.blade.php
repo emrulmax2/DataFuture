@@ -63,7 +63,9 @@
                                             endif;
                                         @endphp
                                     </td>
-                                    <td class="text-left"></td>
+                                    <td class="text-left">
+                                        0.0%
+                                    </td>
                                 </tr>
                             @endforeach
                         @else 
