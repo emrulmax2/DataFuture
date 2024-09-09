@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     public function index(){
-        $id = auth()->user()->id;
+        $id = 304; //auth()->user()->id;
         $userData = User::find($id);
         $employee = Employee::where("user_id", $userData->id)->get()->first();
 
@@ -44,9 +44,11 @@ class DashboardController extends Controller
             'current_term' => $theTermDeclaration,
             'modules' => $modules,
             'no_of_assigned' => $assigns,
-            'todays_classes' => PlansDateList::where('date', date('Y-m-d'))->whereHas('plan', function($q) use($id){
+            'todays_classes' => PlansDateList::with('attendanceInformation', 'attendances')->where('date', date('Y-m-d'))->whereHas('plan', function($q) use($id){
                                     $q->where('personal_tutor_id', $id);
-                                })->orderBy('id', 'ASC')->get(),
+                                })->get()->sortBy(function($classes, $key) {
+                                    return $classes->plan->start_time;
+                                }),
         ]);
     }
 
@@ -57,9 +59,11 @@ class DashboardController extends Controller
 
         $html = '';
         if(!empty($plan_date) && $personalTutorId > 0):
-            $classes = PlansDateList::where('date', $plan_date)->whereHas('plan', function($q) use($personalTutorId){
+            $classes = PlansDateList::with('attendanceInformation', 'attendances')->where('date', $plan_date)->whereHas('plan', function($q) use($personalTutorId){
                         $q->where('personal_tutor_id', $personalTutorId);
-                    })->orderBy('id', 'ASC')->get();
+                    })->get()->get()->sortBy(function($myClasses, $key) {
+                        return $myClasses->plan->start_time;
+                    });
             if($classes->count() > 0):
                 foreach($classes as $class):
                     $html .= '<div class="intro-x relative flex items-center mb-3">';
@@ -69,11 +73,25 @@ class DashboardController extends Controller
                             $html .= '</div>';
                         $html .= '</div>';
                         $html .= '<div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">';
-                            $html .= '<div class="flex items-center">';
-                                $html .= '<div class="font-medium">'.$class->plan->creations->module_name.' ('. $class->plan->group->name.')</div>';
+                            $html .= '<div class="flex items-center mb-3">';
+                                $html .= '<div class="font-medium">'.$class->plan->creations->module_name.' ('. $class->plan->group->name.')'.(isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '').'</div>';
                                 $html .= '<div class="text-xs text-slate-500 ml-auto">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
                             $html .= '</div>';
-                            $html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
+                            //$html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
+                            if($class->plan->tutor_id == $personalTutorId):
+                                if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
+                                    if($class->feed_given == 1):
+                                        $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';
+                                    else:
+                                        $html .= '<a href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]).'"  data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                        if($class->feed_given == 1 && $class->attendanceInformation->end_time == null):
+                                            $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>';
+                                        endif;
+                                    endif;
+                                else:
+                                    $html .= '<a data-tw-toggle="modal" data-id="'.$class['id'].'" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>';
+                                endif;
+                            endif;
                         $html .= '</div>';
                     $html .= '</div>';
                 endforeach;
