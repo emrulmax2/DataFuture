@@ -162,7 +162,7 @@ class DashboardController extends Controller
 
     }
 
-    public function profileView(){
+    public function profileView() {
         
         $student = $studentData = Student::with('crel','course')->where("student_user_id", auth('student')->user()->id)->get()->first();
         $courseRelationCreation = $student->crel->creation;
