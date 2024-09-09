@@ -168,6 +168,33 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
         </div>
         <!-- END: Notifications -->
         @endif --}}
+        <div class="intro-x relative">
+        @if(Auth::guard('agent')->check())
+            @impersonating($guard='agent')
+                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto mr-4 sm:mr-6">
+                    Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
+                </a>
+            @endImpersonating
+        @elseif(Auth::guard('applicant')->check())
+            @impersonating($guard='applicant')
+                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6">
+                    Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
+                </a>
+            @endImpersonating
+        @elseif(Auth::guard('student')->check())
+            @impersonating($guard='student')
+                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6">
+                    Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
+                </a>
+            @endImpersonating
+        @else
+            @impersonating($guard=null)
+                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto mr-4  sm:mr-6">
+                    Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
+                </a>
+            @endImpersonating
+        @endif
+        </div>
         <!-- BEGIN: Account Menu -->
         <div class="intro-x dropdown w-8 h-8">
             <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in scale-110" role="button" aria-expanded="false" data-tw-toggle="dropdown">

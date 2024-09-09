@@ -267,7 +267,7 @@ Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::post('punch/store-attendance', 'store')->name('attendance.punch.store');
     Route::post('punch/store-attendance-dif', 'storeAttendance')->name('attendance.punch.store.dif');
 });
-
+Route::impersonate();
 //All applicant have a prefix route name applicant.* value
 Route::prefix('/applicant')->name('applicant.')->group(function() {
 
