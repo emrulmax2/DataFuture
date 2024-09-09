@@ -56,6 +56,7 @@
                                 </div>-->
                             </div>
                             <div class="col-span-12 lg:col-span-8 p-8 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
+                                @if(isset($current_term->id) && $current_term->id > 0)
                                 <ul class="nav nav-pills w-60 border border-slate-300 dark:border-darkmode-300 border-dashed rounded-md mx-auto p-1 mb-8" role="tablist">
                                     <li id="selectedTermButton" class="nav-item flex-1" role="presentation">
                                         <button class="nav-link w-full py-1.5 px-2 active" data-tw-toggle="pill" data-tw-target="#weekly-report" type="button" role="tab" aria-controls="weekly-report" aria-selected="true" >
@@ -101,6 +102,11 @@
                                         
                                     </div>
                                 </div>
+                                @else 
+                                    <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Assigned terms not found.
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -286,11 +292,29 @@
                                                 </div>
                                             </div>
                                             <div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">
-                                                <div class="flex items-center">
-                                                    <div class="font-medium">{{ $class->plan->creations->module_name }} ({{ $class->plan->group->name }})</div>
+                                                <div class="flex items-center  mb-3">
+                                                    <div class="font-medium">
+                                                        {{ $class->plan->creations->module_name }} 
+                                                        ({{ $class->plan->group->name }})
+                                                        {{ (isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '') }}
+                                                    </div>
                                                     <div class="text-xs text-slate-500 ml-auto">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                <div class="text-slate-500 mt-1">{{ (isset($class->plan->course->name) ? $class->plan->course->name : '') }}</div>
+                                                @if($class->plan->tutor_id == $user->id)
+                                                    @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
+                                                        @if($class->feed_given == 1)
+                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
+                                                        @else
+                                                            <a href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
+                                                            @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null)
+                                                                <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>
+                                                            @endif
+                                                        @endif
+                                                    @else
+                                                        <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                                    @endif
+                                                @endif
+                                                {{--<div class="text-slate-500 mt-1">{{ (isset($class->plan->course->name) ? $class->plan->course->name : '') }}</div>--}}
                                             </div>
                                         </div>
                                     @endforeach

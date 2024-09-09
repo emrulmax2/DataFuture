@@ -10,10 +10,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\VerifyEmailForApplicant;
+use Lab404\Impersonate\Models\Impersonate;
 
 class StudentUser extends Authenticatable  implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes,Impersonate;
 
     /**
      * The attributes that are mass assignable.
