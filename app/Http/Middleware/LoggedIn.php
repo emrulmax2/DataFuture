@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 
 class LoggedIn
 {
@@ -16,6 +17,10 @@ class LoggedIn
     {
         if (!is_null(request()->user())) {
             return redirect('/');
+        }else if (!is_null(Auth::guard('student')->user())) {
+            
+            return redirect()->route('students.login');
+
         } else {
             return $next($request);
         }
