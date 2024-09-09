@@ -285,6 +285,11 @@
                             <div id="todaysClassListWrap" class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                                 @if($todays_classes->count() > 0)
                                     @foreach($todays_classes as $class)
+                                        @php 
+                                            $startTime = strtotime(date('Y-m-d').' '.$class->plan->start_time);
+                                            $currentTime = strtotime(date('Y-m-d H:i:s'));
+                                            $theDifference = round(($startTime - $currentTime) / 60, 2);
+                                        @endphp
                                         <div class="intro-x relative flex items-center mb-3">
                                             <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                                 <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
@@ -292,20 +297,20 @@
                                                 </div>
                                             </div>
                                             <div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">
-                                                <div class="flex items-center  mb-3">
+                                                <div class="flex items-center mb-3">
                                                     <div class="font-medium">
                                                         {{ $class->plan->creations->module_name }} 
                                                         ({{ $class->plan->group->name }})
                                                         {{ (isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '') }}
                                                     </div>
-                                                    <div class="text-xs text-slate-500 ml-auto">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
+                                                    <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                @if($class->plan->tutor_id == $user->id)
+                                                @if($class->plan->tutor_id == $user->id && $theDifference < 31 && $theDifference >= 0)
                                                     @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
                                                         @if($class->feed_given == 1)
-                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
+                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
                                                         @else
-                                                            <a href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
+                                                            <a href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
                                                             @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null)
                                                                 <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>
                                                             @endif
@@ -331,6 +336,7 @@
             </div>
         </div>
     </div>
+    @include('pages.personal-tutor.dashboard.modals')
 @endsection
 
 @section('script')

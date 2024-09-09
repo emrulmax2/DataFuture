@@ -165,14 +165,23 @@ class EmploymentHistoryController extends Controller
             'address_id' => (isset($request->address_id) ? $request->address_id : null),
             'updated_by' => auth()->user()->id
         ]);
-        $reference = StudentEmploymentReference::where('id', $referenceID)->update([
-            'name' => $request->contact_name,
-            'position' => $request->contact_position,
-            'phone' => $request->contact_phone,
-            'email' => (isset($request->contact_email) ? $request->contact_email : null),
-            'updated_by' => auth()->user()->id
-        ]);
-
+        if($referenceID>0)
+            $reference = StudentEmploymentReference::where('id', $referenceID)->update([
+                'name' => $request->contact_name,
+                'position' => $request->contact_position,
+                'phone' => $request->contact_phone,
+                'email' => (isset($request->contact_email) ? $request->contact_email : null),
+                'updated_by' => auth()->user()->id
+            ]);
+        else
+            $reference = StudentEmploymentReference::create([
+                'name' => $request->contact_name,
+                'student_employment_id' => $employmentID,
+                'position' => $request->contact_position,
+                'phone' => $request->contact_phone,
+                'email' => (isset($request->contact_email) ? $request->contact_email : null),
+                'created_by' => auth()->user()->id
+            ]);
 
         if($employment){
             return response()->json(['message' => 'Data updated'], 200);
