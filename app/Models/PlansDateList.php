@@ -14,6 +14,7 @@ class PlansDateList extends Model
         'plan_id',
         'name',
         'date',
+        'feed_given',
         'created_by',
         'updated_by'
     ];

@@ -83,13 +83,12 @@ class DashboardController extends Controller
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td class="text-left text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
-                        $html .= '<div class="block">';
-                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                        $html .= '<div class="flex justify-start items-center">';
+                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
                                 $html .= '<img src="'.(isset($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'LCC').'">';
                             $html .= '</div>';
-                            $html .= '<div class="inline-block relative" style="top: -13px;">';
-                                $html .= '<div class="font-medium whitespace-nowrap uppercase">'.(isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : $pln->tutor->name).'</div>';
-                                
+                            $html .= '<div class="inline-block font-medium relative">';
+                                $html .= (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : $pln->tutor->name);
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
