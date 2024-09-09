@@ -14,7 +14,7 @@ use Lab404\Impersonate\Models\Impersonate;
 
 class StudentUser extends Authenticatable  implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes,Impersonate;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, Impersonate;
 
     /**
      * The attributes that are mass assignable.

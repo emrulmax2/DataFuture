@@ -1,9 +1,9 @@
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
         <div class="ml-auto flex justify-end">
-            {{-- <a href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-success text-white w-auto mr-1 mb-0">
+            <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-success text-white w-auto mr-1 mb-0">
                     Login As User <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
-            </a> --}}
+            </a>
             <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
                 {{ $student->status->name }}
             </button>
@@ -70,7 +70,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
                 <div class="font-medium text-center lg:text-left lg:mt-5">Address</div>
                 <div class="flex flex-col justify-center items-center lg:items-start mt-4">
