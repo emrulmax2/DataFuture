@@ -79,12 +79,10 @@ class DashboardController extends Controller
             })->orderBy('name', 'ASC')->get()
         ]);
     }
-
     public function getAccountDashBoard()
     {
         return view('pages.accounting.dashboard.index');
     }
-
     public function parentLinkBox($id)
     {
         $userData = \Auth::guard('web')->user();
@@ -108,7 +106,6 @@ class DashboardController extends Controller
             'internal_link_buttons' => $this->getInternalChildLinkBtns($id),
         ]);
     }
-
     public function getUserPendingTask(){
         $result = [];
         $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
