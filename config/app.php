@@ -200,6 +200,9 @@ return [
         Laravel\Socialite\SocialiteServiceProvider::class,
         App\Providers\GoogleDriveServiceProvider::class,
 
+        //Impersonate
+        Lab404\Impersonate\ImpersonateServiceProvider::class,
+
     ],
 
     /*

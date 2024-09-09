@@ -72,7 +72,7 @@ class EmployeeController extends Controller
 
         $query = DB::table('employees as emp')
                  ->select(
-                    'emp.id', 'emp.first_name', 'emp.last_name', 'emp.mobile', 'emp.email', 'emp.deleted_at', 'emp.status', 'emp.photo',
+                    'emp.id', 'emp.first_name', 'emp.last_name', 'emp.mobile', 'emp.email', 'emp.deleted_at', 'emp.status', 'emp.photo','emp.user_id',
                     'ttl.name as emp_title',
                     'empt.works_number as empt_works_number', 
                     'ejt.name as ejt_name',
@@ -131,7 +131,8 @@ class EmployeeController extends Controller
                     'empt_works_number' => (isset($list->empt_works_number) ? $list->empt_works_number : ''),
                     'status' => $list->status,
                     'deleted_at' => $list->deleted_at,
-                    'url' => route('profile.employee.view', $list->id)
+                    'url' => route('profile.employee.view', $list->id),
+                    
                 ];
                 $i++;
             endforeach;
