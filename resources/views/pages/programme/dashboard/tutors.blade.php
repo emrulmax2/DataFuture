@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Programme Dashboard - Welcome to London churchill college</title>
+    <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
