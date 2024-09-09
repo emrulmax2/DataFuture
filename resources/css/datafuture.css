@@ -2107,3 +2107,26 @@ input[type=number] {
     opacity: 1;
     visibility: visible;
 }
+
+
+.flashingText {
+    animation: flashing 1s linear infinite;
+}
+@keyframes flashing {
+    50% {
+        opacity: 0;
+    }
+}
+#dailyClassInfoTable.table thead tr th,
+#dailyClassInfoTable.table tbody tr td{
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
+#dailyClassInfoTable.table thead tr th:first-child,
+#dailyClassInfoTable.table tbody tr td:first-child{
+    padding-left: 1rem;
+}
+#dailyClassInfoTable.table thead tr th:last-child,
+#dailyClassInfoTable.table tbody tr td:last-child{
+    padding-right: 1rem;
+}

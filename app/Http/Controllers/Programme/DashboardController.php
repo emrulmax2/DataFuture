@@ -29,7 +29,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
 
             'theDate' => date('d-m-Y', strtotime($theDate)),
-            'theTerm' => Plan::whereIn('id', $classPlanIds)->orderBy('id', 'DESC')->get()->first(),
+            'theTerm' => Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first(),
             'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
             'classInformation' => $this->getClassInfoHtml($theDate),
             'classTutor' => $this->getClassTutorsHtml($theDate),
@@ -60,7 +60,7 @@ class DashboardController extends Controller
         endif;
         $query = $query->orderBy('start_time', 'ASC')->get();*/
 
-        $plans = PlansDateList::with('plan')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
+        $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
             if($course_id > 0):
                 $q->where('course_id', $course_id);
             endif;
@@ -69,9 +69,35 @@ class DashboardController extends Controller
         });
 
         if(!empty($plans) && $plans->count() > 0):
+            $currentTime = date('Y-m-d H:i:s', strtotime($theDate.' '.date('H:i:s')));
             foreach($plans as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $tutorEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
+
+                $classStatus = 0;
+                $classLabel = '';
+                $orgStart = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->start_time));
+                $orgEnd = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->end_time));
+                if($currentTime < $orgStart && !isset($pln->attendanceInformation->id)):
+                    $classLabel = '<span class="text-danger font-medium">Starting Shortly</span>';
+                elseif($currentTime > $orgStart && $currentTime < $orgEnd && !isset($pln->attendanceInformation->id)):
+                    $classLabel = '<span class="text-pending font-medium flashingText">Starting Shortly</span>';
+                elseif(isset($pln->attendanceInformation->id)):
+                    if($pln->feed_given == 1 && $pln->attendances->count() > 0):
+                        $classLabel .= '<span class="btn-rounded btn font-medium btn-success text-white p-0 w-9 h-9 mr-1" style="flex: 0 0 36px;">A</span>';
+                    endif;
+                    if(!empty($pln->attendanceInformation->start_time) && empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'</span>';
+                    elseif(!empty($pln->attendanceInformation->start_time) && !empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">';
+                            $classLabel .= 'Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
+                            $classLabel .= 'Finished '.date('h:i A', strtotime($pln->attendanceInformation->end_time)); 
+                        $classLabel .= '</span>';
+                    endif;
+                elseif($currentTime > $orgEnd && !isset($pln->attendanceInformation->id)):
+                    $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
+                endif;
+
                 $html .= '<tr class="intro-x">';
                     $html .= '<td>';
                         $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
@@ -98,6 +124,7 @@ class DashboardController extends Controller
                             $html .= '</div>';
                             $html .= '<div class="inline-block font-medium relative">';
                                 $html .= (isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : $pln->plan->tutor->name);
+                                $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->tutor->employee->mobile) && !empty($pln->plan->tutor->employee->mobile) ? '<br/>'.$pln->plan->tutor->employee->mobile : '');
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
@@ -105,10 +132,12 @@ class DashboardController extends Controller
                         $html .= (isset($pln->plan->room->name) && !empty($pln->plan->room->name) ? $pln->plan->room->name : '');
                     $html .= '</td>';
                     $html .= '<td class="text-left">';
-                        $html .= '<span class="font-medium text-danger">Starting Shortly</span>';
+                        $html .= '<span class="flex justify-start items-center">';
+                            $html .= $classLabel;
+                        $html .= '</span>';
                     $html .= '</td>';
                     $html .= '<td class="text-right">';
-                        $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></a>';
+                        $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
                     $html .= '</td>';
                 $html .= '</tr>';
             endforeach;
@@ -281,7 +310,7 @@ class DashboardController extends Controller
         endif;
         
         return view('pages.programme.dashboard.tutors', [
-            'title' => 'Programme Dashboard - London Churchill College',
+            'title' => 'Programme Dashboard - Welcome to London churchill college',
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
