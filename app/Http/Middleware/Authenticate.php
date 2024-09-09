@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 use Closure;
 
@@ -16,7 +17,11 @@ class Authenticate
     {
         if (!is_null(request()->user())) {
             return $next($request);
-        } else {
+        }else if (!is_null(Auth::guard('student')->user())) {
+            
+            return redirect()->route('students.login');
+
+        }  else {
             return redirect('login');
         }
     }

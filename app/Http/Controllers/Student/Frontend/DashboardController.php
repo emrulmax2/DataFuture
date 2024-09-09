@@ -129,7 +129,7 @@ class DashboardController extends Controller
                 });
             else
             $dateWiseClassList = [];
-            //dd($dateWiseClassList);
+
             return view('pages.students.frontend.dashboard.index', [
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
@@ -174,7 +174,7 @@ class DashboardController extends Controller
                         ->get()
                         ->first();
         $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
-        
+        $dateWiseClassList = $this->upcommingClass($student->id);
 
         return view('pages.students.frontend.dashboard.profile.index', [
             'title' => 'Live Students - London Churchill College',
@@ -202,6 +202,7 @@ class DashboardController extends Controller
             "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
             'studentCourseAvailability' => $studentCourseAvailability,
+            "datewiseClasses" => $dateWiseClassList,
         ]);
 
     }
@@ -291,6 +292,43 @@ class DashboardController extends Controller
             "currenTerm" => $currentTerm ];
     }
 
+    protected function upcommingClass($student_id) {
+        $studentAssigned = Assign::where('student_id',$student_id)->get()->first();
+        if($studentAssigned)
+        $dataBox = $this->moduleList();
+       else {
+           $dataBox = ["termList" =>[],"data" => [],"currenTerm" => [] ];
+       }
+
+       $allData = $dataBox["data"];
+       $currenTerm = $dataBox["currenTerm"];
+       //dd($allData[$currenTerm]);
+       
+       foreach($allData[$currenTerm] as $key => $data):
+          foreach($data->plan_dates as $dateData):
+           $upcommingDate = strtotime(date("Y-m-d",strtotime($dateData->date)));
+           $currentDate = strtotime(date("Y-m-d"));
+           $hr_date = date('F jS, Y',$upcommingDate);
+           $dateWiseClassList[date("Y-m-d",strtotime($dateData->date))][] = (object) [
+               "module" => $data->module,
+               "classType" => $data->classType,
+               "hr_date" =>$hr_date,
+               "hr_time" => $data->start_time."-".$data->end_time,
+               "venue_room" => $data->venue->name.", ".$data->room->name,
+           ];
+               
+          endforeach;
+       endforeach;
+       if(isset($dateWiseClassList))
+           uksort($dateWiseClassList, function($a, $b) {
+               return strtotime($a) - strtotime($b);
+           });
+       else
+          $dateWiseClassList = [];
+
+       return $dateWiseClassList;
+
+    }
     public function showCourseContent(Plan $plan) {
 
         $userData = StudentUser::find(Auth::guard('student')->user()->id);
