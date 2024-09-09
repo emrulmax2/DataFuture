@@ -233,6 +233,12 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_5">Login As User</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['hr_portal']['login_as_student']) && $priv['hr_portal']['login_as_student'] == 1 ? 'checked' : '') }} id="permission_hr_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][login_as_student]">
+                            <label class="form-check-label ml-4" for="permission_hr_portal_6">Login as Student</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
