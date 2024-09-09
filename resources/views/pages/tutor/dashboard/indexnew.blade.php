@@ -55,6 +55,9 @@
                     </div>  
                     <div id="todays-classlist">
                         @foreach($todaysClassList as $list)
+                            @php 
+                                $classStart = date('H:i:s', strtotime('-15 minutes', strtotime($list['start_time'])));
+                            @endphp
                             <div class="mt-5 intro-x">
                                 <div class="box zoom-in">
                                     <div class="pt-5 px-5"><!-- flex items-center -->
@@ -88,7 +91,13 @@
                                             @endif
                                         @endif
                                     @else
-                                        <a data-tw-toggle="modal" data-id="{{ $list["id"] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                        @if($list['showClass'] == 1)
+                                            <a data-tw-toggle="modal" data-id="{{ $list["id"] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                        @elseif(date('H:i:s') < $classStart)
+                                            <div class="alert alert-pending-soft show flex items-start" role="alert">
+                                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
+                                            </div>
+                                        @endif
                                     @endif
                                     </div>
                                 </div>

@@ -83,25 +83,22 @@ class DashboardController extends Controller
                 
                 $end_time = date("Y-m-d ".$list->end_time);
                 $end_time = date('h:i A', strtotime($end_time));
+                
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
-                $showClass = false;
+                $showClass = 0;
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
-
-                    $startTime = $plan_date." ".$list->start_time;
-                    $endTime = $plan_date." ".$list->end_time;
-
-                    // $startTime = date("Y-m-d ".$list->start_time);
-                    // $endTime = date("Y-m-d ".$list->end_time);
-                    $currentTime = date("Y-m-d H:i:s");
-                   
-                    $timeDiffStartPoint = (strtotime($startTime)-strtotime($currentTime))/60; //second to min
-                    $timeDiffEndPoint = (strtotime($endTime)-strtotime($currentTime))/60; //second to min
-
-                    if($timeDiffStartPoint<31 && $timeDiffEndPoint>=0 && $list->date == date('Y-m-d')) {
-                        $showClass = True;
-                    }
-
+                    $listStart = $plan_date.' '.$list->start_time;
+                    $listEnd = $plan_date.' '.$list->end_time;
+                    $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
+                    $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
+                    $currentTime = date('Y-m-d H:i:s');
+                    if($currentTime >= $classStart && $currentTime <= $classEnd):
+                        $showClass = 1;
+                    elseif($currentTime < $classStart):
+                        $showClass = 2;
+                    endif;
                 }
+
                 $data[] = [
                     'id' => $list->id,
                     'plan_id' => $list->plan_id,
@@ -330,13 +327,27 @@ class DashboardController extends Controller
             
             foreach($Query as $list):
                 
-                $attendanceInformationFinder = AttendanceInformation::where("plans_date_list_id",$list->id)->get()->first();
+                $attendanceInformationFinder = AttendanceInformation::where("plans_date_list_id", $list->id)->get()->first();
                 $foundAttendances = Attendance::where("plans_date_list_id",$list->id)->get()->first();
                 $start_time = date("Y-m-d ".$list->start_time);
                 $start_time = date('h:i A', strtotime($start_time));
                 
                 $end_time = date("Y-m-d ".$list->end_time);
                 $end_time = date('h:i A', strtotime($end_time));
+
+                $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
+                $showClass = false;
+                if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
+                    $listStart = $plan_date.' '.$list->start_time;
+                    $listEnd = $plan_date.' '.$list->end_time;
+                    $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
+                    $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
+                    $currentTime = date('Y-m-d H:i:s');
+                    $showClass = $classStart.' - '.$classEnd.' - '.$currentTime;
+                    if($currentTime >= $classStart && $currentTime <= $classEnd):
+                        $showClass = true;
+                    endif;
+                }
                 
                 $data[] = [
                     'id' => $list->id,
@@ -361,7 +372,8 @@ class DashboardController extends Controller
                     "attendance_information" => ($attendanceInformationFinder) ?? null,    
                     "foundAttendances"  => ($foundAttendances) ?? null,           
                     "feed_given"  => $list->feed_given,           
-                    "is_today"  => (isset($list->date) && !empty($list->date) && $list->date == date('Y-m-d') ? 1 : 0),           
+                    "is_today"  => (isset($list->date) && !empty($list->date) && $list->date == date('Y-m-d') ? 1 : 0),  
+                    'showClass' => $showClass,         
                 ];
                 $i++;
             endforeach;

@@ -51,59 +51,70 @@ class DashboardController extends Controller
 
     public function getClassInfoHtml($theDate = null, $course_id = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-        $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
 
         $html = '';
+        /*$classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
         $query = Plan::with('tutor')->whereIn('id', $classPlanIds); 
         if($course_id > 0):
             $query->where('course_id', $course_id);
         endif;
-        $query = $query->orderBy('start_time', 'ASC')->get();
+        $query = $query->orderBy('start_time', 'ASC')->get();*/
 
-        if(!empty($query) && $query->count() > 0):
-            foreach($query as $pln):
-                $tutorEmployeeId = (isset($pln->tutor->employee->id) && $pln->tutor->employee->id > 0 ? $pln->tutor->employee->id : 0);
+        $plans = PlansDateList::with('plan')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
+            if($course_id > 0):
+                $q->where('course_id', $course_id);
+            endif;
+        })->get()->sortBy(function($planDates, $key) {
+            return $planDates->plan->start_time;
+        });
+
+        if(!empty($plans) && $plans->count() > 0):
+            foreach($plans as $pln):
+                $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $tutorEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
                 $html .= '<tr class="intro-x">';
                     $html .= '<td>';
-                        $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->start_time)).'</span>';
+                        $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
                     $html .= '</td>';
                     $html .= '<td>';
                         $html .= '<div class="flex items-center">';
-                            if(isset($pln->group->name) && !empty($pln->group->name)):
-                                if(strlen($pln->group->name) > 2):
-                                    $html .= '<div class="mr-4 rounded text-lg bg-success whitespace-nowrap text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->group->name.'</div>';
+                            if(isset($pln->plan->group->name) && !empty($pln->plan->group->name)):
+                                if(strlen($pln->plan->group->name) > 2):
+                                    $html .= '<div class="mr-4 rounded text-lg bg-success whitespace-nowrap text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
                                 else:
-                                    $html .= '<div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->group->name.'</div>';
+                                    $html .= '<div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
                                 endif;
                             endif;
                             $html .= '<div>';
-                                $html .= '<a href="" class="font-medium whitespace-nowrap">'.(isset($pln->creations->module->name) && !empty($pln->creations->module->name) ? $pln->creations->module->name : 'Unknown').(isset($plan->class_type) && !empty($plan->class_type) ? ' - '.$plan->class_type : '').'</a>';
-                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->course->name) && !empty($pln->course->name) ? $pln->course->name : 'Unknown').'</div>';
+                                $html .= '<a href="" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
+                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td class="text-left text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
                         $html .= '<div class="flex justify-start items-center">';
                             $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
-                                $html .= '<img src="'.(isset($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'LCC').'">';
+                                $html .= '<img src="'.(isset($pln->plan->tutor->employee->photo_url) ? $pln->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : 'LCC').'">';
                             $html .= '</div>';
                             $html .= '<div class="inline-block font-medium relative">';
-                                $html .= (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : $pln->tutor->name);
+                                $html .= (isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : $pln->plan->tutor->name);
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td class="text-left">';
-                        $html .= (isset($pln->room->name) && !empty($pln->room->name) ? $pln->room->name : '');
+                        $html .= (isset($pln->plan->room->name) && !empty($pln->plan->room->name) ? $pln->plan->room->name : '');
                     $html .= '</td>';
                     $html .= '<td class="text-left">';
                         $html .= '<span class="font-medium text-danger">Starting Shortly</span>';
+                    $html .= '</td>';
+                    $html .= '<td class="text-right">';
+                        $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></a>';
                     $html .= '</td>';
                 $html .= '</tr>';
             endforeach;
         else:
             $html .= '<tr class="intro-x">';
-                $html .= '<td colspan="5">';
+                $html .= '<td colspan="6">';
                     $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan found for the selected date.</div>';
                 $html .= '</td>';
             $html .= '</tr>';
