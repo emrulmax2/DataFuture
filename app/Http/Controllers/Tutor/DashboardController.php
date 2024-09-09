@@ -370,7 +370,7 @@ class DashboardController extends Controller
         return response()->json(['data' => $data]);
 
     }
-    public function attendanceFeedShow(User $tutor,PlansDateList $plandate)
+    public function attendanceFeedShow(User $tutor,PlansDateList $plandate, $type = 0)
     {
         $attendanceInformation = AttendanceInformation::where("plans_date_list_id",$plandate->id)->get()->first();
         $employee = Employee::where("user_id",$tutor->id)->get()->first();
@@ -477,6 +477,7 @@ class DashboardController extends Controller
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
             'data' => $data,
+            'type' => $type
         ]);
     }
 

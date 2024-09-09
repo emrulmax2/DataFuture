@@ -10,7 +10,7 @@
 			@if($data["attendanceInformation"]->end_time != null)
 				<div class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer border-success text-success mb-2 sm:mb-0 mr-1  w-auto  ">Class Ended</div>    
 			@endif
-			<a href="{{ route('tutor-dashboard.show.new',[$data["tutor_id"]]) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 sm:mb-0 mr-1 ">Back to Dashboard</a>
+			<a href="{{ ($type == 1 ? route('pt.dashboard') : route('tutor-dashboard.show.new')) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 sm:mb-0 mr-1 ">Back to Dashboard</a>
         </div>
     </div>
 

@@ -62,7 +62,8 @@ class DashboardController extends Controller
 
         if(!empty($query) && $query->count() > 0):
             foreach($query as $pln):
-                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $pln->tutor_id)->where('date', $theDate)->where('attendance_type', 1)->get();
+                $tutorEmployeeId = (isset($pln->tutor->employee->id) && $pln->tutor->employee->id > 0 ? $pln->tutor->employee->id : 0);
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $tutorEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
                 $html .= '<tr class="intro-x">';
                     $html .= '<td>';
                         $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->start_time)).'</span>';

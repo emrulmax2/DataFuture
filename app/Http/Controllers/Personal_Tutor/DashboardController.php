@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     public function index(){
-        $id = auth()->user()->id;
+        $id = auth()->user()->id; //304; 
         $userData = User::find($id);
         $employee = Employee::where("user_id", $userData->id)->get()->first();
 
@@ -61,11 +61,15 @@ class DashboardController extends Controller
         if(!empty($plan_date) && $personalTutorId > 0):
             $classes = PlansDateList::with('attendanceInformation', 'attendances')->where('date', $plan_date)->whereHas('plan', function($q) use($personalTutorId){
                         $q->where('personal_tutor_id', $personalTutorId);
-                    })->get()->get()->sortBy(function($myClasses, $key) {
+                    })->get()->sortBy(function($myClasses, $key) {
                         return $myClasses->plan->start_time;
                     });
             if($classes->count() > 0):
                 foreach($classes as $class):
+                    $startTime = strtotime(date('Y-m-d').' '.$class->plan->start_time);
+                    $currentTime = strtotime(date('Y-m-d H:i:s'));
+                    $theDifference = round(($startTime - $currentTime) / 60, 2);
+
                     $html .= '<div class="intro-x relative flex items-center mb-3">';
                         $html .= '<div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">';
                             $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
@@ -78,12 +82,12 @@ class DashboardController extends Controller
                                 $html .= '<div class="text-xs text-slate-500 ml-auto">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
                             $html .= '</div>';
                             //$html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
-                            if($class->plan->tutor_id == $personalTutorId):
+                            if($class->plan->tutor_id == $personalTutorId && $theDifference < 31 && $theDifference >= 0):
                                 if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
                                     if($class->feed_given == 1):
-                                        $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';
+                                        $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';
                                     else:
-                                        $html .= '<a href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id]).'"  data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                        $html .= '<a href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'"  data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
                                         if($class->feed_given == 1 && $class->attendanceInformation->end_time == null):
                                             $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>';
                                         endif;

@@ -2172,7 +2172,7 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/term/list/{instance_term}/{tutor}', 'tutorTermlistShowByInstance')->name('tutor-dashboard.tutor.modulelist');
         Route::get('tutor-dashboard/show', 'show')->name('tutor-dashboard.show'); 
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
-        Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
+        Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}/{type?}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
         Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
     });

@@ -138,7 +138,6 @@ var attendanceListTable = (function () {
             document.getElementById('employee_punch_number').focus();
             console.log(data);
             //let url = route('attendance.infomation.save');
-
             $(".plan-datelist").val(data);
 
         });   

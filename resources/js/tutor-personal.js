@@ -119,90 +119,97 @@ import moment from 'moment';
         var profile_url = $(this).attr('href');
         var label = $(this).attr('data-label');
         window.location.href = profile_url;
-
-        /*$(this).parent('li').parent('ul.autoFillDropdown').siblings('.registration_no').val(label);
-        $(this).parent('li').parent('ul.autoFillDropdown').siblings('#profileUrl').val(profile_url);
-        $(this).parent('li').parent('ul.autoFillDropdown').parent('.autoCompleteField').siblings('#viewStudentBtn').removeAttr('disabled');
-        $(this).parent('li').parent('.autoFillDropdown').html('').fadeOut();*/
     });
 
-    /*$('#viewStudentBtn').on('click', function(e){
-        e.preventDefault();
-        var profileUrl = $('#profileUrl').val();
-        if(profileUrl != ''){
-            window.location.href = profileUrl;
-        }else{
-            $('#viewStudentBtn').attr('disabled', 'disabled');
-        }
-    })*/
+    $(".start-punch").on("click", function (event) {
+        let data = $(this).data('id');   
+        document.getElementById('employee_punch_number').focus();
+        console.log(data);
+        //let url = route('attendance.infomation.save');
+        $(".plan-datelist").val(data);
+
+    }); 
+
+
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const editPunchNumberDeteilsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPunchNumberDeteilsModal"));
+    
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
+    const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
     
     //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
-    /*$('.term-select').on('click', function (e) {
+    $('.save').on('click', function (e) {
         e.preventDefault();
-        let tthis = $(this)
-        let btnSvg = $("#selected-term svg")
-        let selectedText = $("#selected-term span")
-        let selectedButtonText = $("#selectedTermButton button")
-        let totalModule = $("#totalModule")
-        let termname = tthis.text()
-        let instanceTermId = tthis.data('instance_term_id')
-        let tutorId = tthis.data('tutor_id')
-        btnSvg.eq(0).hide()
-        btnSvg.eq(1).show()
-        axios({
-            method: "get",
-            url: route("tutor-dashboard.tutor.modulelist",[instanceTermId,tutorId]),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        var parentForm = $(this).parents('form');
+        var formID = parentForm.attr('id');
+        const form = document.getElementById(formID);
+        let url = $("#"+formID+" input[name=url]").val();
+        
+        let form_data = new FormData(form);
+        $.ajax({
+            method: 'POST',
+            url: url,
+            data: form_data,
+            dataType: 'json',
+            async: false,
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            cache: false,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            success: function(res, textStatus, xhr) {
+                $('.acc__input-error', parentForm).html('');
+                if(xhr.status == 206){
+                    //update Alert
+                    editPunchNumberDeteilsModal.hide();
+                    successModal.show();
+                    confirmModal.hide();
+                    errorModal.hide()
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulations!");
+                        $("#successModal .successModalDesc").html('Data updated.');
+                    });                
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        location.href= route("tutor-dashboard.attendance",[res.data.tutor, res.data.plandate, res.data.type])
+                    }, 1000);
+
+                }if(xhr.status == 207){
+                    //update Alert
+                    editPunchNumberDeteilsModal.hide();
+                    successModal.hide();
+                    startClassConfirmModal.show();
+                    errorModal.hide();
+
+                }  else if(xhr.status == 200){
+                    //update Alert
+                    editPunchNumberDeteilsModal.hide();
+                    successModal.show();
+                    confirmModal.hide();
+                    errorModal.hide()
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulations!");
+                        $("#successModal .successModalDesc").html('Data updated.');
+                    });                
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        location.reload();
+                    }, 1000);
+                }
+                
             },
-        }).then((response) => {
-            if (response.status == 200) {
-                let dataset = response.data;
-                selectedText.html(termname)
-                selectedButtonText.html(termname)
-                totalModule.html(dataset.current_term[instanceTermId].total_modules)
+            error: function (jqXHR, textStatus, errorThrown) {
+                $('.acc__input-error').html('');
                 
-                $(".term-select").removeClass('dropdown-active')
-                $("#term-"+instanceTermId).addClass('dropdown-active')
-                termDropdown.hide()
-                btnSvg.eq(1).hide()
-                btnSvg.eq(0).show()
-                
-                    let html = "";
-                    $(dataset.module_data[instanceTermId]).each(function(index, dataSet){
-                        
-                        
-                        $(dataSet).each(function(index, data){
-                            console.log(data.id)
-                            html +=`<a href="${ route('tutor-dashboard.plan.module.show',data.id) }" target="_blank" style="inline-block">
-                                    <div id="moduleset-${data.id}" class="intro-y module-details_${data.id} ">
-                                        <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
-                                            <div class="ml-4 mr-auto">
-                                                <div class="font-medium">${ data.module }</div>
-                                                <div class="text-slate-500 text-xs mt-0.5">${ data.course }</div>
-                                            </div>
-                                            <div class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-12 h-10 inline-flex justify-center items-center">${ data.group }</div>
-                                        </div>
-                                    </div>
-                                </a>`
-
-                        })
-                    })
-                    
-                    $("#personalTutormoduleList").html(html)
-                    
-
-            }
-        }).catch((error) => {
-            btnSvg.eq(1).hide()
-            btnSvg.eq(0).show()
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addSmtpForm .${key}`).addClass('border-danger')
-                        $(`#addSmtpForm  .error-${key}`).html(val)
+                if(jqXHR.status == 422){
+                    for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
+                        $(`#${formID} .${key}`).addClass('border-danger');
+                        $(`#${formID}  .error-${key}`).html(val);
                     }
-                }else if(error.response.status == 303){
+                }else if(jqXHR.status == 443){
 
                     document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
                         $("#confirmModal .confModTitle").html("End Class!");
@@ -211,12 +218,44 @@ import moment from 'moment';
                     confirmModal.show();
                     editPunchNumberDeteilsModal.hide();
 
-                } else {
-                    console.log('error');
+                }else if(jqXHR.status == 442)
+                {
+                    document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#confirmModal .confModTitle").html("Different Tutor ?");
+                        $("#confirmModal .confModDesc").html('Please Put a note Below, why are you taking this class?');
+                    });  
+                    editPunchNumberDeteilsModal.hide();
+                    confirmModal.show();
+                }else if(jqXHR.status == 444)
+                {
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html("Wrong Punch Number");
+                        $("#errorModal .errorModalDesc").html('It is not your punch number');
+                    });  
+                    editPunchNumberDeteilsModal.hide();
+                    errorModal.show();
+                    setTimeout(function(){
+                        errorModal.hide();
+                        editPunchNumberDeteilsModal.show();
+                    }, 1000);
+                }else if(jqXHR.status == 402)
+                {
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html("Invalid Punch");
+                        $("#errorModal .errorModalDesc").html('Invalid Punch Number');
+                    });  
+                    editPunchNumberDeteilsModal.hide();
+                    errorModal.show();
+                    setTimeout(function(){
+                        errorModal.hide();
+                        editPunchNumberDeteilsModal.show();
+                    }, 1000);
+                }else{
+                    console.log(textStatus+' => '+errorThrown);
                 }
+                
             }
         });
         
-    });*/
-    
+    });
 })();

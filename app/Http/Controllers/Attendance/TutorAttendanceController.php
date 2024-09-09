@@ -49,6 +49,7 @@ class TutorAttendanceController extends Controller
     {
         // 
         $PlansDateList = PlansDateList::find($request->plan_date_list_id);
+        $type = (isset($request->type) && $request->type > 0 ? $request->type : 0);
 
         $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
             if(!$attendanceFind) {
@@ -60,7 +61,7 @@ class TutorAttendanceController extends Controller
                     'note' => (isset($request->note)) ? $request->note : null,
                     'created_by' => Auth::user()->id
                 ]);
-                return response()->json(["data"=>["msg"=>"Class started",'tutor' =>8,'plandate'=>$request->plan_date_list_id]],206);
+                return response()->json(["data"=>["msg"=>"Class started",'tutor' => Auth::user()->id,'plandate'=>$request->plan_date_list_id, 'type' => $type]],206);
             } else {
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
                
@@ -82,7 +83,7 @@ class TutorAttendanceController extends Controller
     }
     public function check(Request $request)
     {
-        $employment = Employment::where("punch_number",$request->punch_number)->get()->first();
+        $employment = Employment::where("punch_number", $request->punch_number)->get()->first();
         if($employment) {
             // if($employment->employee->user_id != Auth::user()->id) {
             //     return response()->json(["data"=>'It is not your punch number'],444);
@@ -105,20 +106,18 @@ class TutorAttendanceController extends Controller
             return response()->json(["punch_number"=>'Invalid Punch Number'],402);
         }
     }
-    public function startClass(Request $request)
-    {
-        
+    public function startClass(Request $request){
             $planDateList = PlansDateList::find($request->plan_date_list_id);
             $plan = Plan::find($planDateList->plan_id);
             
             $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
-            if($attendanceFind) {
-                return response()->json(["data"=>'Attendance Start Found'],443);
-            } else {
-                if($plan->tutor_id!=Auth::user()->id) {
-                    return response()->json(["data"=>'Not Matched Tutor',],442);
+            if($attendanceFind){
+                return response()->json(["data"=>'Attendance Start Found'], 443);
+            }else{
+                if($plan->tutor_id != Auth::user()->id) {
+                    return response()->json(["data"=>'Not Matched Tutor',], 442);
                 } else {
-                    return response()->json(["data"=>'Tutor Matched'],207);
+                    return response()->json(["data"=>'Tutor Matched'], 207);
                 }
             }
         
