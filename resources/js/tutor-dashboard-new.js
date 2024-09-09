@@ -49,8 +49,13 @@ var attendanceListTable = (function () {
                                             }
                                         }
                                     } else {
-                                        if(data.showClass==true)
-                                        html +=`<a data-tw-toggle="modal" data-id="${ data.id }" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>`
+                                        if(data.showClass == 1){
+                                            html +=`<a data-tw-toggle="modal" data-id="${ data.id }" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>`
+                                        }else if(data.showClass == 2){
+                                            html += '<div class="alert alert-pending-soft show flex items-start" role="alert">\
+                                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.\
+                                                    </div>';
+                                        }
                                     }
                                     html +=`</div>
                                 </div>

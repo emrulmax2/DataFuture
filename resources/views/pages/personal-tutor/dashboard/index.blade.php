@@ -286,9 +286,19 @@
                                 @if($todays_classes->count() > 0)
                                     @foreach($todays_classes as $class)
                                         @php 
-                                            $startTime = strtotime(date('Y-m-d').' '.$class->plan->start_time);
-                                            $currentTime = strtotime(date('Y-m-d H:i:s'));
-                                            $theDifference = round(($startTime - $currentTime) / 60, 2);
+                                            $showClass = 0;
+                                            if(in_array(auth()->user()->last_login_ip, $venue_ips)):
+                                                $listStart = date('Y-m-d').' '.$class->plan->start_time;
+                                                $listEnd = date('Y-m-d').' '.$class->plan->end_time;
+                                                $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
+                                                $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
+                                                $currentTime = date('Y-m-d H:i:s');
+                                                if($currentTime >= $classStart && $currentTime <= $classEnd):
+                                                    $showClass = 1;
+                                                elseif($currentTime < $classStart):
+                                                    $showClass = 2;
+                                                endif;
+                                            endif;
                                         @endphp
                                         <div class="intro-x relative flex items-center mb-3">
                                             <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
@@ -305,7 +315,7 @@
                                                     </div>
                                                     <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                @if($class->plan->tutor_id == $user->id && $theDifference < 31 && $theDifference >= 0)
+                                                @if($class->plan->tutor_id == $user->id)
                                                     @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
                                                         @if($class->feed_given == 1)
                                                             <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
@@ -316,7 +326,13 @@
                                                             @endif
                                                         @endif
                                                     @else
-                                                        <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                                        @if($showClass == 1)
+                                                            <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                                        @elseif($showClass == 2)
+                                                            <div class="alert alert-danger-soft show flex items-start" role="alert">
+                                                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 @endif
                                                 {{--<div class="text-slate-500 mt-1">{{ (isset($class->plan->course->name) ? $class->plan->course->name : '') }}</div>--}}

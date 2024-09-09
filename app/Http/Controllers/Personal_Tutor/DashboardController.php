@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     public function index(){
-        $id = auth()->user()->id; //304; 
+        $id = 304; //auth()->user()->id; //304; 
         $userData = User::find($id);
         $employee = Employee::where("user_id", $userData->id)->get()->first();
 
@@ -44,6 +44,7 @@ class DashboardController extends Controller
             'current_term' => $theTermDeclaration,
             'modules' => $modules,
             'no_of_assigned' => $assigns,
+            'venue_ips' => VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray(),
             'todays_classes' => PlansDateList::with('attendanceInformation', 'attendances')->where('date', date('Y-m-d'))->whereHas('plan', function($q) use($id){
                                     $q->where('personal_tutor_id', $id);
                                 })->get()->sortBy(function($classes, $key) {
@@ -56,6 +57,7 @@ class DashboardController extends Controller
     public function getClassess(Request $request){
         $personalTutorId = (isset($request->personalTutorId) && $request->personalTutorId > 0 ? $request->personalTutorId : 0);
         $plan_date = (isset($request->plan_date) && !empty($request->plan_date) ? date('Y-m-d', strtotime($request->plan_date)) : '');
+        $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
 
         $html = '';
         if(!empty($plan_date) && $personalTutorId > 0):
@@ -66,9 +68,19 @@ class DashboardController extends Controller
                     });
             if($classes->count() > 0):
                 foreach($classes as $class):
-                    $startTime = strtotime(date('Y-m-d').' '.$class->plan->start_time);
-                    $currentTime = strtotime(date('Y-m-d H:i:s'));
-                    $theDifference = round(($startTime - $currentTime) / 60, 2);
+                    $showClass = 0;
+                    if(in_array(auth()->user()->last_login_ip, $venue_ips)):
+                        $listStart = $plan_date.' '.$class->plan->start_time;
+                        $listEnd = $plan_date.' '.$class->plan->end_time;
+                        $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
+                        $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
+                        $currentTime = date('Y-m-d H:i:s');
+                        if($currentTime >= $classStart && $currentTime <= $classEnd):
+                            $showClass = 1;
+                        elseif($currentTime < $classStart):
+                            $showClass = 2;
+                        endif;
+                    endif;
 
                     $html .= '<div class="intro-x relative flex items-center mb-3">';
                         $html .= '<div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">';
@@ -82,7 +94,7 @@ class DashboardController extends Controller
                                 $html .= '<div class="text-xs text-slate-500 ml-auto">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
                             $html .= '</div>';
                             //$html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
-                            if($class->plan->tutor_id == $personalTutorId && $theDifference < 31 && $theDifference >= 0):
+                            if($class->plan->tutor_id == $personalTutorId):
                                 if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
                                     if($class->feed_given == 1):
                                         $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';
@@ -93,7 +105,13 @@ class DashboardController extends Controller
                                         endif;
                                     endif;
                                 else:
-                                    $html .= '<a data-tw-toggle="modal" data-id="'.$class['id'].'" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>';
+                                    if($showClass == 1):
+                                        $html .= '<a data-tw-toggle="modal" data-id="'.$class['id'].'" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>';
+                                    elseif($showClass == 2):
+                                        $html .= '<div class="alert alert-danger-soft show flex items-start" role="alert">
+                                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
+                                                </div>';
+                                    endif;
                                 endif;
                             endif;
                         $html .= '</div>';
