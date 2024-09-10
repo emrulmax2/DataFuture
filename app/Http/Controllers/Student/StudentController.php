@@ -618,6 +618,7 @@ class StudentController extends Controller
         $totalFullSetFeedList = $returnSet["totalFullSetFeedList"];
         $avarageTermDetails = $returnSet["avarageTermDetails"];
         $totalClassFullSet = $returnSet["totalClassFullSet"];
+        $termAttendanceFound = $returnSet["termAttendanceFound"];
 
         
         return view('pages.students.live.attendance.index', [
@@ -637,6 +638,7 @@ class StudentController extends Controller
             "totalClassFullSet" =>$totalClassFullSet,
             "attendanceFeedStatus" =>$attendanceFeedStatus,
             "moduleNameList" =>$moduleNameList,
+            "termAttendanceFound" =>$termAttendanceFound,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
@@ -662,13 +664,15 @@ class StudentController extends Controller
                             ->orderBy("pdl.date",'desc')
                             ->get();
                             $attendanceFeedStatus = AttendanceFeedStatus::all();
+                $termAttendanceFound = [];
+                $i=0;
                 if($QueryInner->isNotEmpty())
                     foreach($QueryInner as $list):
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
                         $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                        
+                        $termAttendanceFound[$list->term_id] = false;
                         if(isset($attendance)) {
-
+                            $termAttendanceFound[$list->term_id] = true;
                             $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
                             if(isset($attendanceInformation->tutor))
                                 $attendanceInformation->tutor->load(["employee"]);
@@ -810,7 +814,7 @@ class StudentController extends Controller
                             $avarageTermDetails[$list->term_id] = $avarage;
                         }
                     endforeach;
-            return ["termData" => $termData,"data" => $data ,"planDetails" => $planDetails,"avarageDetails" => $avarageDetails,"totalFeedListSet" => $totalFeedListSet,
+            return ["termData" => $termData,"data" => $data ,"planDetails" => $planDetails,"avarageDetails" => $avarageDetails,"totalFeedListSet" => $totalFeedListSet, "termAttendanceFound" =>$termAttendanceFound,
                     "totalFullSetFeedList" => $totalFullSetFeedList,"avarageTermDetails" => $avarageTermDetails,"totalClassFullSet" => $totalClassFullSet ,"moduleNameList" =>$moduleNameList];
     }
     
@@ -891,36 +895,37 @@ class StudentController extends Controller
                             ->get();
                 foreach($QueryInner as $list):
                     $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                    
+                    $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
                     if($attendance) {
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
-                        $attendanceInformation->tutor->load(["employee"]);
+                        if(isset($attendanceInformation->tutor))
+                            $attendanceInformation->tutor->load(["employee"]);
                         
-                        if(!isset($arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code])) {
-                            $arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code] = 0;
+                        if(!isset($arryBox[$list->term_id][$list->plan_id][$attendance->feed->code])) {
+                            $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] = 0;
                         }
-                        if(!isset($totalPresentFound[$list->term_id][$list->module_name."-".$list->module_code])) {
-                            $totalPresentFound[$list->term_id][$list->module_name."-".$list->module_code] = 0;
+                        if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
+                            $totalPresentFound[$list->term_id][$list->plan_id] = 0;
                         }
-                        if(!isset($totalAbsentFound[$list->term_id][$list->module_name."-".$list->module_code])) {
-                            $totalAbsentFound[$list->term_id][$list->module_name."-".$list->module_code]=0;
+                        if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                            $totalAbsentFound[$list->term_id][$list->plan_id]=0;
                         }
 
-                        $arryBox[$list->term_id][$list->module_name."-".$list->module_code][$attendance->feed->code] += 1;
-                        $totalPresentFound[$list->term_id][$list->module_name."-".$list->module_code] += $attendance->feed->attendance_count;
-                        $totalAbsentFound[$list->term_id][$list->module_name."-".$list->module_code] += ($attendance->feed->attendance_count==0)? 1 : 0;
+                        $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] += 1;
+                        $totalPresentFound[$list->term_id][$list->plan_id] += $attendance->feed->attendance_count;
+                        $totalAbsentFound[$list->term_id][$list->plan_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
 
-                        $json = json_encode ($arryBox[$list->term_id][$list->module_name."-".$list->module_code], JSON_FORCE_OBJECT);
+                        $json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
                         $replace = array('{', '}', "'", '"');
                         $totalFeedList = str_replace ($replace, "", $json);
-                        $total = $totalPresentFound[$list->term_id][$list->module_name."-".$list->module_code] + $totalAbsentFound[$list->term_id][$list->module_name."-".$list->module_code];
+                        $total = $totalPresentFound[$list->term_id][$list->plan_id] + $totalAbsentFound[$list->term_id][$list->plan_id];
 
-                        $avaragePercentage[$list->term_id][$list->module_name."-".$list->module_code] = (($totalPresentFound[$list->term_id][$list->module_name."-".$list->module_code]/$total)*100);
+                        $avaragePercentage[$list->term_id][$list->plan_id] = (($totalPresentFound[$list->term_id][$list->plan_id]/$total)*100);
                         $precision = 2;
-                        $avarage = number_format($avaragePercentage[$list->term_id][$list->module_name."-".$list->module_code], $precision, '.', '');
+                        $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
                     
 
-                    $data[$list->term_id][$list->module_name."-".$list->module_code][$list ->date] = [
+                    $data[$list->term_id][$list->plan_id][$list ->date] = [
                             "id" => $list->id,
                             "date" => date("d-m-Y", strtotime($list ->date)),
                             "attendance_information" => ($attendanceInformation) ?? null,
@@ -935,11 +940,11 @@ class StudentController extends Controller
                         "start_date" => $list->start_date,
                         "end_date" => $list->end_date,
                     ];
-                    $planDetails[$list->term_id][$list->module_name."-".$list->module_code] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
+                    $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
                     
                     
-                    $avarageDetails[$list->term_id][$list->module_name."-".$list->module_code] = $avarage;
-                    $totalFeedListSet[$list->term_id][$list->module_name."-".$list->module_code] = $totalFeedList;
+                    $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
+                    $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
 
                     //total code list and total class list
                     if(!isset($totalBox[$list->term_id][$attendance->feed->code])) {
@@ -984,6 +989,7 @@ class StudentController extends Controller
             "avarageTotalPercentage"=>$avarageTermDetails,
             "totalClassFullSet" =>$totalClassFullSet,
             "attendanceFeedStatus" =>$attendanceFeedStatus,
+            "moduleNameList" =>$moduleNameList,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
