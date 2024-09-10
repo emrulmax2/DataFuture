@@ -15,13 +15,18 @@ use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Student;
+use App\Models\StudentSms;
+use App\Models\StudentSmsContent;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\SendSmsTrait;
 
 class DashboardController extends Controller
 {
+    use SendSmsTrait;
+
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
@@ -468,6 +473,7 @@ class DashboardController extends Controller
         $moduleName = (isset($plan->creations->module_name) ? $plan->creations->module_name : '');
         $groupName = (isset($plan->group->name) ? $plan->group->name : '');
         $classTime = date('h:i A', strtotime($plan->start_time)).' - '.date('h:i A', strtotime($plan->end_time));
+        $tutorName = (isset($plan->tutor->employee->full_name) && !empty($plan->tutor->employee->full_name) ? $plan->tutor->employee->full_name : (isset($plan->personalTutor->employee->full_name) && !empty($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : ''));
 
         $notify_student = (isset($request->notify_student) && $request->notify_student > 0 ? true : false);
         $notify_tutors = (isset($request->notify_tutors) && $request->notify_tutors > 0 ? true : false);
@@ -494,8 +500,33 @@ class DashboardController extends Controller
                         $emails[] = $student->contact->institutional_email; 
                     endif;
 
-                    $sms_body = 'Dear '.$student->full_name.', this is a class cancellation notice: Course name: '.$courseName.', Module name: '.$moduleName.', Group: '.$groupName.', Time: '.$classTime.', Tutor name: $tutor_name. $sms_text';
+                    $sms_body = 'Dear '.$student->full_name.', this is a class cancellation notice: Course name: '.$courseName.', Module name: '.$moduleName.', Group: '.$groupName.', Time: '.$classTime.', Tutor name: '.$tutorName;
+                    $studentSmsContent = StudentSmsContent::create([
+                        'sms_template_id' => null,
+                        'subject' => $sms_subject,
+                        'sms' => $sms_body
+                    ]);
+                    if($studentSmsContent):
+                        $studentSms = StudentSms::create([
+                            'student_id' => $student->id,
+                            'student_sms_content_id' => $studentSmsContent->id,
+                            'phone' => $mobile,
+                            'created_by' => auth()->user()->id
+                        ]);
 
+                        //$sms = $this->sendSms($mobile, $sms_body, $company_name);
+                    endif;
+                    
+                    $email_body = 'Dear '.$student->full_name.',<br/><br/>';
+                    $email_body .= 'This is a class cancellation notice:<br/>';
+                    $email_body .= 'Course Name: '.$courseName.'<br/>';
+                    $email_body .= 'Module Name: '.$moduleName.'<br/>';
+                    $email_body .= 'Group Name: '.$groupName.'<br/>';
+                    $email_body .= 'Time: '.$classTime.'<br/>';
+                    $email_body .= 'Tutor Name: '.$tutorName.'<br/><br/>';
+                    $email_body .= 'Thanks & Regards <br/>'.$company_name;
+
+                    
                 endforeach;
             endif;
         endif;

@@ -209,6 +209,10 @@ var classPlanListTable = (function () {
             $('#editPlanModal .modal-body input:not([type="radio"])').val('');
             $('#editPlanModal input[name="id"]').val('0');
             $('#editPlanModal input[type="radio"]').prop('checked', false);
+
+            tutorId.clear(true);
+            personalTutorId.clear(true);
+
         });
 
         $('.theTimeField').each(function(){
@@ -272,6 +276,8 @@ var classPlanListTable = (function () {
         var ptutorCPL = new TomSelect('#ptutor-CPL', topOptionsMultiple);
         var roomCPL = new TomSelect('#room-CPL', topOptionsMultiple);
         var daysCPL = new TomSelect('#days-CPL', topOptionsMultiple);
+        let tutorId = new TomSelect(document.getElementById('tutor_id'), tomOptions);
+        let personalTutorId = new TomSelect(document.getElementById('personal_tutor_id'), tomOptions);
 
         // Init Table
         classPlanListTable.init();
@@ -478,11 +484,13 @@ var classPlanListTable = (function () {
                     $('#editPlanModal select[name="class_type"]').val(classType);
                     if(classType == 'Tutorial' || classType == 'Seminar'){
                         $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                            $('#editPlanModal [name="tutor_id"]').val('');
+                            //$('#editPlanModal [name="tutor_id"]').val('');
+                            tutorId.clear(true)
                         });
                     }else{
                         $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
-                            $('#editPlanModal [name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+                            //$('#editPlanModal [name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+                            tutorId.addItem(dataset.plan.tutor_id);
                         });
                     }
                     //$('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
@@ -524,11 +532,13 @@ var classPlanListTable = (function () {
     
             if(classType == 'Tutorial' || classType == 'Seminar'){
                 $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                    $('#editPlanModal [name="tutor_id"]').val('');
+                    //$('#editPlanModal [name="tutor_id"]').val('');
+                    tutorId.clear(true);
                 });
             }else{
                 $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
-                    $('#editPlanModal [name="tutor_id"]').val('');
+                    //$('#editPlanModal [name="tutor_id"]').val('');
+                    tutorId.clear(true)
                 });
             }
         })
