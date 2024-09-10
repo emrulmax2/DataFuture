@@ -22,6 +22,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\SendSmsTrait;
+use DateTime;
 
 class DashboardController extends Controller
 {
@@ -178,14 +179,14 @@ class DashboardController extends Controller
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
                             $html .= '<img alt="'.(isset($tut->employee->full_name) ? $tut->employee->full_name : '').'" src="'.(isset($tut->employee->photo_url) ? $tut->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                         $html .= '</div>';
                         $html .= '<div class="ml-4 mr-auto">';
-                            $html .= '<div class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</div>';
+                            $html .= '<a href="'.route('programme.dashboard.personal.tutors.details', [$termDecId, $tut->id]).'" class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</a>';
                         $html .= '</div>';
                         $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
                     $html .= '</div>';
@@ -308,6 +309,25 @@ class DashboardController extends Controller
     }
 
 
+    public function calculateTutorHours($tutor, $term_declaration_id){
+        $minutes = 0;
+        $activePlans = Plan::where('tutor_id', $tutor)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+        if(!empty($activePlans)):
+            foreach($activePlans as $pln):
+                $startTime = date('Y-m-d').' '.$pln->start_time;
+                $endTime = date('Y-m-d').' '.$pln->end_time;
+                $start = new DateTime($startTime);
+                $end = new DateTime($endTime);
+                $diff_in_seconds = $end->getTimestamp() - $start->getTimestamp();
+                $minute = floor($diff_in_seconds / 60);
+
+                $minutes += $minute;
+            endforeach;
+        endif;
+
+        return $minutes;
+    }
+
     public function tutors($term_declaration_id){
         $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('tutor_id')->unique()->toArray();
 
@@ -315,10 +335,21 @@ class DashboardController extends Controller
         $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
         if(!empty($tutors)):
             foreach($tutors as $tut):
-                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
+                $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
+                $classMinutes = $this->calculateTutorHours($tut->id, $term_declaration_id);
+
+                $activePlans = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+                $plan_ids = $activePlans->pluck('id')->unique()->toArray();
+                $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
+                $moduleCreations = $activePlans->pluck('module_creation_id')->toArray();
+                $groups = $activePlans->pluck('group_id')->unique()->toArray();
+
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1);
+                $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
+                $res[$tut->id]['class_minutes'] = $classMinutes;
+                $res[$tut->id]['class_hours'] = $this->calculateHourMinute($classMinutes);
             endforeach;
         endif;
         
@@ -365,7 +396,7 @@ class DashboardController extends Controller
                 $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
-                $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = $activePlans->pluck('module_creation_id')->toArray();
                 $groups = $activePlans->pluck('group_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $tut['no_of_assigned'] = (!empty($assigns) ? count($assigns) : 0);
