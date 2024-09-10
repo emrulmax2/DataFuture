@@ -120,7 +120,7 @@
                                 <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                     
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                        {{ $planDateList["id"] }}
+                                        {{ $planDateList["attendance"]->id }}
                                     </td>
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }}
