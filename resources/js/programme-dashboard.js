@@ -4,6 +4,17 @@ import Litepicker from "litepicker";
 import { createIcons, icons } from "lucide";
 
 (function(){
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const cancelClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#cancelClassModal"));
+
+    const cancelClassModalEl = document.getElementById('cancelClassModal')
+    cancelClassModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#cancelClassModal .acc__input-error').html('');
+        $('#cancelClassModal .modal-body textarea').val('');
+
+        $('#cancelClassModal input[name="plan_id"]').val('0');
+        $('#cancelClassModal input[name="plans_date_list_id"]').val('0');
+    });
 
     let dateOption = {
         autoApply: true,
@@ -113,4 +124,62 @@ import { createIcons, icons } from "lucide";
         // print clock js in div #clock.
         $("#theClock").html(currentTimeString);
     }
+
+    /* Cancel Class Start */
+    $('#dailyClassInfoTable').on('click', '.cancelClass', function(e){
+        var $theBtn = $(this);
+        var planid = $theBtn.attr('data-planid');
+        var plandateid = $theBtn.attr('data-plandateid');
+
+        $('#cancelClassModal input[name="plan_id"]').val(planid);
+        $('#cancelClassModal input[name="plans_date_list_id"]').val(plandateid);
+    });
+
+    $('#cancelClassForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('cancelClassForm');
+        
+        document.querySelector('#saveCancelBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveCancelBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('programme.dashboard.cancel.class'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveCancelBtn').removeAttribute('disabled');
+            document.querySelector("#saveCancelBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                cancelClassModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Class status updated to CANCELED.');
+                });     
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveCancelBtn').removeAttribute('disabled');
+            document.querySelector("#saveCancelBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#cancelClassForm .${key}`).addClass('border-danger');
+                        $(`#cancelClassForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* Cancel Class End */
 })();

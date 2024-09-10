@@ -315,7 +315,7 @@
                                                     </div>
                                                     <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                @if($class->plan->tutor_id == $user->id)
+                                                @if($class->plan->class_type == 'Tutorial')
                                                     @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
                                                         @if($class->feed_given == 1)
                                                             <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>

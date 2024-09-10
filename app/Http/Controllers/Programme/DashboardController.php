@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Programme;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CancelClassRequest;
 use App\Models\Assign;
 use App\Models\Course;
 use App\Models\Employee;
@@ -10,8 +11,10 @@ use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeLeaveDay;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
+use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\Student;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -137,7 +140,12 @@ class DashboardController extends Controller
                         $html .= '</span>';
                     $html .= '</td>';
                     $html .= '<td class="text-right">';
-                        $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
+                        if($pln->status == 'Schedule'):
+                            $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
+                        endif;
+                        if($pln->status == 'Schedule' || $pln->status == 'Unknown'):
+                            $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" type="button" class="cancelClass ml-1 btn-rounded btn btn-danger text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></button>';
+                        endif;
                     $html .= '</td>';
                 $html .= '</tr>';
             endforeach;
@@ -389,11 +397,11 @@ class DashboardController extends Controller
 
     public function getTermAttendanceRate($term_declaration_id, $tutor_id, $type = 1){
         $tutor_field = ($type == 2 ? 'personal_tutor_id' : 'tutor_id');
-        $plan_date_ids = PlansDateList::whereHas('plan', function($q) use($term_declaration_id, $tutor_field, $tutor_id){
+        $planDateLists = PlansDateList::whereHas('plan', function($q) use($term_declaration_id, $tutor_field, $tutor_id){
             $q->where('term_declaration_id', $term_declaration_id)->where($tutor_field, $tutor_id);
         })->get();
-        $plan_ids = $plan_date_ids->pluck('plan_id')->unique()->toArray();
-        $date_ids = $plan_date_ids->pluck('id')->unique()->toArray();
+        $plan_ids = $planDateLists->pluck('plan_id')->unique()->toArray();
+        $date_ids = $planDateLists->pluck('id')->unique()->toArray();
         
         $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
         $query = DB::table('attendances as atn')
@@ -439,5 +447,57 @@ class DashboardController extends Controller
         $attendance = $query->get()->first();
 
         return $attendance;
+    }
+
+    public function cancelClass(CancelClassRequest $request){
+        $plan_id = $request->plan_id;
+        $plan = Plan::find($plan_id);
+        $plans_date_list_id = $request->plans_date_list_id;
+        $canceled_reason = $request->canceled_reason;
+        $siteSettings = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->get()->first();
+        $company_name = (isset($siteSettings->value) && !empty($siteSettings->value) ? $siteSettings->value : 'London Churchill College');
+        $courseName = (isset($plan->course->name) ? $plan->course->name : '');
+        $moduleName = (isset($plan->creations->module_name) ? $plan->creations->module_name : '');
+        $groupName = (isset($plan->group->name) ? $plan->group->name : '');
+        $classTime = date('h:i A', strtotime($plan->start_time)).' - '.date('h:i A', strtotime($plan->end_time));
+
+        $notify_student = (isset($request->notify_student) && $request->notify_student > 0 ? true : false);
+        $notify_tutors = (isset($request->notify_tutors) && $request->notify_tutors > 0 ? true : false);
+
+        $data = [];
+        $data['status'] = 'Canceled';
+        $data['canceled_reason'] = $canceled_reason;
+        $data['canceled_by'] = auth()->user()->id;
+        $data['canceled_at'] = date('Y-m-d H:i:s');
+
+        PlansDateList::where('id', $plans_date_list_id)->update($data);
+
+        if($notify_student):
+            if(isset($plan->assign) && $plan->assign->count() > 0):
+                $sms_subject = 'Class cancellation notice';
+                foreach($plan->assign as $assign):
+                    $student = Student::with('title', 'contact')->where('id', $assign->student_id)->get()->first();
+                    $mobile = (isset($student->contact->mobile) && !empty($student->contact->mobile) ? $student->contact->mobile : '');
+                    $emails = [];
+                    if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)): 
+                        $emails[] = $student->contact->personal_email; 
+                    endif;
+                    if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)): 
+                        $emails[] = $student->contact->institutional_email; 
+                    endif;
+
+                    $sms_body = 'Dear '.$student->full_name.', this is a class cancellation notice: Course name: '.$courseName.', Module name: '.$moduleName.', Group: '.$groupName.', Time: '.$classTime.', Tutor name: $tutor_name. $sms_text';
+
+                endforeach;
+            endif;
+        endif;
+
+        if($notify_tutors):
+            //$sub = "Class cancellation notice from ".$settings['company_name']." account.";
+            //$from = $settings['company_name']." Staff <".$settings['smtp_user'].">";
+            //$msg = 'Dear '.$staff_name.', <br/> You got a class cancellation notice: <br/><br/> '.$email_text.'<br/> Course Name: '.$course_name.'<br/> Module Name: '.$module_name.'<br/> Group: '.$group_name.'<br/> Time: '.$class_time.'<br/> Tutor Name: '.$tutor_name.'<br/><br/> Regards<br/>'.$settings['company_name'];
+        endif;
+
+        return response()->json(['message' => 'Class status updated to canceled.'], 200);
     }
 }
