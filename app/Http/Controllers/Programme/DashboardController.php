@@ -534,6 +534,14 @@ class DashboardController extends Controller
             'from_email'    => $commonSmtp->smtp_user,
             'from_name'    =>  $company_name,
         ];
+        $MAILHTML = 'This is a class cancellation notice:<br/>';
+        $MAILHTML .= 'Course Name: '.$courseName.'<br/>';
+        $MAILHTML .= 'Module Name: '.$moduleName.'<br/>';
+        $MAILHTML .= 'Group Name: '.$groupName.'<br/>';
+        $MAILHTML .= 'Time: '.$classTime.'<br/>';
+        $MAILHTML .= 'Tutor Name: '.$tutorName.'<br/><br/>';
+        $MAILHTML .= 'Thanks & Regards <br/>'.$company_name;
+
         if($notify_student):
             if(isset($plan->assign) && $plan->assign->count() > 0):
                 $sms_subject = 'Class Cancellation Notice';
@@ -565,15 +573,7 @@ class DashboardController extends Controller
                         $sms = $this->sendSms($mobile, $sms_body, $company_name);
                     endif;
                     
-                    $MAILHTML = 'Dear '.$student->full_name.',<br/><br/>';
-                    $MAILHTML .= 'This is a class cancellation notice:<br/>';
-                    $MAILHTML .= 'Course Name: '.$courseName.'<br/>';
-                    $MAILHTML .= 'Module Name: '.$moduleName.'<br/>';
-                    $MAILHTML .= 'Group Name: '.$groupName.'<br/>';
-                    $MAILHTML .= 'Time: '.$classTime.'<br/>';
-                    $MAILHTML .= 'Tutor Name: '.$tutorName.'<br/><br/>';
-                    $MAILHTML .= 'Thanks & Regards <br/>'.$company_name;
-
+                    $NEWMAILHTML = 'Dear '.$student->full_name.',<br/><br/>'.$MAILHTML;
                     $studentEmail = StudentEmail::create([
                         'student_id' => $student->id,
                         'common_smtp_id' => (isset($commonSmtp->id) && $commonSmtp->id > 0 ? $commonSmtp->id : null),
@@ -582,12 +582,12 @@ class DashboardController extends Controller
                         'created_by' => auth()->user()->id,
                     ]);
                     if($studentEmail->id):
-                        $emailPdf = $this->generateEmailPdf($studentEmail->id, $student->id, $sms_subject, $MAILHTML);
+                        $emailPdf = $this->generateEmailPdf($studentEmail->id, $student->id, $sms_subject, $NEWMAILHTML);
                         $studentEmail = StudentEmail::where('id', $studentEmail->id)->update([
                             'mail_pdf_file' => $emailPdf
                         ]);
 
-                        UserMailerJob::dispatch($configuration, $emails, new CommunicationSendMail($sms_subject, $MAILHTML, []));
+                        UserMailerJob::dispatch($configuration, $emails, new CommunicationSendMail($sms_subject, $NEWMAILHTML, []));
                     endif;
                 endforeach;
             endif;
@@ -595,14 +595,6 @@ class DashboardController extends Controller
 
         if($notify_tutors):
             $SUBJECT = 'Class Cancellation Notice From '.$company_name.' Account.';
-            //$MAILHTML = 'Dear '.$tutorName.',<br/><br/>';
-            $MAILHTML = 'This is a class cancellation notice:<br/>';
-            $MAILHTML .= 'Course Name: '.$courseName.'<br/>';
-            $MAILHTML .= 'Module Name: '.$moduleName.'<br/>';
-            $MAILHTML .= 'Group Name: '.$groupName.'<br/>';
-            $MAILHTML .= 'Time: '.$classTime.'<br/>';
-            $MAILHTML .= 'Tutor Name: '.$tutorName.'<br/><br/>';
-            $MAILHTML .= 'Thanks & Regards <br/>'.$company_name;
             if(isset($plan->tutor_id) && $plan->tutor_id > 0):
                 $NEWMAILHTML = 'Dear '.$plan->tutor->employee->full_name.',<br/><br/>'.$MAILHTML;
                 $TEMAILS = [];
@@ -612,6 +604,20 @@ class DashboardController extends Controller
                 if(isset($plan->tutor->employee->employment->email) && !empty($plan->tutor->employee->employment->email)):
                     $TEMAILS[] = $plan->tutor->employee->employment->email;
                 endif;
+
+                UserMailerJob::dispatch($configuration, $TEMAILS, new CommunicationSendMail($SUBJECT, $NEWMAILHTML, []));
+            endif;
+            if(isset($plan->personal_tutor_id) && $plan->personal_tutor_id > 0):
+                $NEWMAILHTML = 'Dear '.$plan->personalTutor->employee->full_name.',<br/><br/>'.$MAILHTML;
+                $TEMAILS = [];
+                if(isset($plan->personalTutor->employee->email) && !empty($plan->personalTutor->employee->email)):
+                    $TEMAILS[] = $plan->personalTutor->employee->email;
+                endif;
+                if(isset($plan->personalTutor->employee->employment->email) && !empty($plan->personalTutor->employee->employment->email)):
+                    $TEMAILS[] = $plan->personalTutor->employee->employment->email;
+                endif;
+
+                UserMailerJob::dispatch($configuration, $TEMAILS, new CommunicationSendMail($SUBJECT, $NEWMAILHTML, []));
             endif;
         endif;
 
