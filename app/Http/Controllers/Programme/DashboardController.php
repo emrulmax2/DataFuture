@@ -208,7 +208,7 @@ class DashboardController extends Controller
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
@@ -357,12 +357,14 @@ class DashboardController extends Controller
         if(!empty($tutors)):
             foreach($tutors as $tut):
                 $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
-                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->get();
+                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
                 $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
+                $groups = $activePlans->pluck('group_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $tut['no_of_assigned'] = (!empty($assigns) ? count($assigns) : 0);
+                $tut['no_of_group'] = (!empty($groups) ? count($groups) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
