@@ -497,7 +497,7 @@ var classPlanTreeListTable = (function () {
 
                 var classType = dataset.plan.class_type ? dataset.plan.class_type : '';
                 $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
-                if(classType == 'Tutorial'){
+                if(classType == 'Tutorial' || classType == 'Seminar'){
                     $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
                         $('#editPlanModal [name="tutor_id"]').val('');
                     });
@@ -543,7 +543,7 @@ var classPlanTreeListTable = (function () {
         var $classType = $(this);
         var classType = $classType.val();
 
-        if(classType == 'Tutorial'){
+        if(classType == 'Tutorial' || classType == 'Seminar'){
             $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
                 $('#editPlanModal [name="tutor_id"]').val('');
             });

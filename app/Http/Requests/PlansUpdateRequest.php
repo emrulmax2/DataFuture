@@ -27,7 +27,7 @@ class PlansUpdateRequest extends FormRequest
             //'group_id' => 'required',
             'rooms_id' => 'required',
             'class_type' => 'required',
-            'tutor_id' => 'required_unless:class_type,Tutorial',
+            'tutor_id' => 'required_unless:class_type,Tutorial,Seminar',
             'personal_tutor_id' => 'required',
             'module_creation_id' => 'required',
             //'module_enrollment_key' => 'required',
