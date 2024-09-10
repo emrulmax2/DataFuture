@@ -21,7 +21,7 @@
                             <th class="text-center whitespace-nowrap uppercase">Contracted Hour</th>
                             <th class="text-center whitespace-nowrap uppercase">Assigned Students</th>
                             <th class="text-center whitespace-nowrap uppercase">Load</th>
-                            <th class="text-center whitespace-nowrap uppercase">No of Module</th>
+                            <th class="text-center whitespace-nowrap uppercase">No of Modules / Groups</th>
                             <th class="text-left whitespace-nowrap uppercase">Attendance Rate</th>
                             <th class="text-left whitespace-nowrap uppercase">Outstanding Call</th>
                             <th class="text-left whitespace-nowrap uppercase">Submission Rate</th>
@@ -68,6 +68,9 @@
                                     <td class="text-center">
                                         <span class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
                                             {{ (isset($tut->no_of_module) && $tut->no_of_module > 0 ? $tut->no_of_module : '0') }}
+                                        </span>
+                                        <span class="rounded-full text-lg bg-info text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                            {{ (isset($tut->no_of_group) && $tut->no_of_group > 0 ? $tut->no_of_group : '0') }}
                                         </span>
                                     </td>
                                     <td class="text-left">

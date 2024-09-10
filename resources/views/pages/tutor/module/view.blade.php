@@ -60,11 +60,13 @@
         </div>
     </div>
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
+        @if($plan->class_type != 'Tutorial')
         <li id="availabilty-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#availabilty" aria-controls="availabilty" aria-selected="true" role="tab" >
                 <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
             </a>
         </li>
+        @endif
         <li class="nav-item" role="presentation">
             <a href="https://teams.microsoft.com/v2/"  class="nav-link py-4 inline-flex px-0">
                 <div class="flex items-center justify-center">
@@ -78,7 +80,7 @@
             </a>
         </li>
         <li id="class-dates-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#class-dates" aria-controls="class-dates" aria-selected="true" role="tab" >
+            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 {{ ($plan->class_type == 'Tutorial' ? 'active' : '') }}" data-tw-target="#class-dates" aria-controls="class-dates" aria-selected="{{ ($plan->class_type == 'Tutorial' ? 'true' : 'false') }}" role="tab" >
                 <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Class Dates
             </a>
         </li>
@@ -87,6 +89,7 @@
                 <i data-lucide="users" class="w-4 h-4 mr-2"></i> Participants
             </a>
         </li>
+        @if($plan->class_type != 'Tutorial')
         <li id="assessment-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
                 <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
@@ -97,15 +100,18 @@
                 <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
             </a>
         </li>
+        @endif
     </ul>
 </div>
 <div class="intro-y tab-content mt-5">
+    @if($plan->class_type != 'Tutorial')
     <div id="availabilty" class="tab-pane active" role="tabpanel" aria-labelledby="availabilty-tab">
         <div class="intro-y box p-5 mt-5">
             @include('pages.tutor.module.includes.activity')
         </div>
     </div>
-    <div id="class-dates" class="tab-pane " role="tabpanel" aria-labelledby="classDates-tab">
+    @endif
+    <div id="class-dates" class="tab-pane {{ ($plan->class_type == 'Tutorial' ? 'active' : '') }}" role="tabpanel" aria-labelledby="classDates-tab">
         
         <!-- BEGIN: HTML Table Data -->
         <div class="intro-y box p-5 mt-5">
@@ -127,7 +133,7 @@
         </div>
         <!-- END: HTML Table Data -->
     </div>
-
+    @if($plan->class_type != 'Tutorial')
     <div id="assessment" class="tab-pane " role="tabpanel"  aria-labelledby="assessment-tab">
         <!-- BEGIN: HTML Table Data -->
         <div class="intro-y box p-5 mt-5">
@@ -142,6 +148,7 @@
         </div>
         <!-- END: HTML Table Data -->
     </div>
+    @endif
 </div>
 @include('pages.tutor.module.component.modal')
 @endsection

@@ -161,7 +161,7 @@
                             </div>
                             <div class="col-span-6 sm:col-span-4 tutorWrap" style="display: none;">
                                 <label for="tutor_id" class="form-label">Tutor <span class="text-danger">*</span></label>
-                                <select id="tutor_id" name="tutor_id" class="form-control w-full">
+                                <select id="tutor_id" name="tutor_id" class="tom-selects w-full">
                                     <option value="">Please Select</option>
                                     @if(!empty($tutor))
                                         @foreach($tutor as $tr)
@@ -173,7 +173,7 @@
                             </div>
                             <div class="col-span-6 sm:col-span-4 PersonalTutorWrap">
                                 <label for="personal_tutor_id" class="form-label">Personal Tutor <span class="text-danger">*</span></label>
-                                <select id="personal_tutor_id" name="personal_tutor_id" class="form-control w-full">
+                                <select id="personal_tutor_id" name="personal_tutor_id" class="tom-selects w-full">
                                     <option value="">Please Select</option>
                                     @if(!empty($ptutor))
                                         @foreach($ptutor as $ptr)

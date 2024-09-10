@@ -205,7 +205,24 @@ var classPlanTreeListTable = (function () {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
+
+    let tomOptionsSingle = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let tomOptionMult;
     let assigned_user_ids = new TomSelect(document.getElementById('assigned_user_ids'), tomOptions);
+    let tutorId = new TomSelect(document.getElementById('tutor_id'), tomOptionsSingle);
+    let personalTutorId = new TomSelect(document.getElementById('personal_tutor_id'), tomOptionsSingle);
 
     const warningModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModalCP"));
     const successModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalCP"));
@@ -230,6 +247,8 @@ var classPlanTreeListTable = (function () {
         $('#editPlanModal .modal-body input:not([type="radio"])').val('');
         $('#editPlanModal input[name="id"]').val('0');
         $('#editPlanModal input[type="radio"]').prop('checked', false);
+        tutorId.clear(true);
+        personalTutorId.clear(true);
     });
 
 
@@ -497,9 +516,9 @@ var classPlanTreeListTable = (function () {
 
                 var classType = dataset.plan.class_type ? dataset.plan.class_type : '';
                 $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
-                if(classType == 'Tutorial'){
+                if(classType == 'Tutorial' || classType == 'Seminar'){
                     $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                        $('#editPlanModal [name="tutor_id"]').val('');
+                        tutorId.clear(true)
                     });
                 }else if(classType == 'Seminar'){
                     $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
@@ -507,7 +526,7 @@ var classPlanTreeListTable = (function () {
                     });
                 }else{
                     $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
-                        $('#editPlanModal [name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+                        tutorId.addItem(dataset.plan.tutor_id)
                     });
                 }
                 //$('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
@@ -547,9 +566,9 @@ var classPlanTreeListTable = (function () {
         var $classType = $(this);
         var classType = $classType.val();
 
-        if(classType == 'Tutorial'){
+        if(classType == 'Tutorial' || classType == 'Seminar'){
             $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                $('#editPlanModal [name="tutor_id"]').val('');
+                tutorId.clear(true)
             });
         }else if(classType == 'Seminar'){
             $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
@@ -557,7 +576,7 @@ var classPlanTreeListTable = (function () {
             });
         }else{
             $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
-                $('#editPlanModal [name="tutor_id"]').val('');
+                tutorId.clear(true)
             });
         }
     })

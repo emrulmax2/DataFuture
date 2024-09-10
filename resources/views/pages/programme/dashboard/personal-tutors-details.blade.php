@@ -59,6 +59,7 @@
                                             <td class="font-medium">
                                                 {{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}
                                                 {{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}
+                                                {{ (isset($pln->class_type) && !empty($pln->class_type) ? ' - '.$pln->class_type : '') }}
                                             </td>
                                             <td class="font-medium">
                                                 @if(isset($pln->group->name) && !empty($pln->group->name))
