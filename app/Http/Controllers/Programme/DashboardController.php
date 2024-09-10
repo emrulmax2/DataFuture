@@ -15,13 +15,18 @@ use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Student;
+use App\Models\StudentSms;
+use App\Models\StudentSmsContent;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\SendSmsTrait;
 
 class DashboardController extends Controller
 {
+    use SendSmsTrait;
+
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
@@ -208,7 +213,7 @@ class DashboardController extends Controller
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
@@ -357,12 +362,14 @@ class DashboardController extends Controller
         if(!empty($tutors)):
             foreach($tutors as $tut):
                 $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
-                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->get();
+                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
                 $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
+                $groups = $activePlans->pluck('group_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $tut['no_of_assigned'] = (!empty($assigns) ? count($assigns) : 0);
+                $tut['no_of_group'] = (!empty($groups) ? count($groups) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
@@ -466,6 +473,7 @@ class DashboardController extends Controller
         $moduleName = (isset($plan->creations->module_name) ? $plan->creations->module_name : '');
         $groupName = (isset($plan->group->name) ? $plan->group->name : '');
         $classTime = date('h:i A', strtotime($plan->start_time)).' - '.date('h:i A', strtotime($plan->end_time));
+        $tutorName = (isset($plan->tutor->employee->full_name) && !empty($plan->tutor->employee->full_name) ? $plan->tutor->employee->full_name : (isset($plan->personalTutor->employee->full_name) && !empty($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : ''));
 
         $notify_student = (isset($request->notify_student) && $request->notify_student > 0 ? true : false);
         $notify_tutors = (isset($request->notify_tutors) && $request->notify_tutors > 0 ? true : false);
@@ -492,8 +500,33 @@ class DashboardController extends Controller
                         $emails[] = $student->contact->institutional_email; 
                     endif;
 
-                    $sms_body = 'Dear '.$student->full_name.', this is a class cancellation notice: Course name: '.$courseName.', Module name: '.$moduleName.', Group: '.$groupName.', Time: '.$classTime.', Tutor name: $tutor_name. $sms_text';
+                    $sms_body = 'Dear '.$student->full_name.', this is a class cancellation notice: Course name: '.$courseName.', Module name: '.$moduleName.', Group: '.$groupName.', Time: '.$classTime.', Tutor name: '.$tutorName;
+                    $studentSmsContent = StudentSmsContent::create([
+                        'sms_template_id' => null,
+                        'subject' => $sms_subject,
+                        'sms' => $sms_body
+                    ]);
+                    if($studentSmsContent):
+                        $studentSms = StudentSms::create([
+                            'student_id' => $student->id,
+                            'student_sms_content_id' => $studentSmsContent->id,
+                            'phone' => $mobile,
+                            'created_by' => auth()->user()->id
+                        ]);
 
+                        //$sms = $this->sendSms($mobile, $sms_body, $company_name);
+                    endif;
+                    
+                    $email_body = 'Dear '.$student->full_name.',<br/><br/>';
+                    $email_body .= 'This is a class cancellation notice:<br/>';
+                    $email_body .= 'Course Name: '.$courseName.'<br/>';
+                    $email_body .= 'Module Name: '.$moduleName.'<br/>';
+                    $email_body .= 'Group Name: '.$groupName.'<br/>';
+                    $email_body .= 'Time: '.$classTime.'<br/>';
+                    $email_body .= 'Tutor Name: '.$tutorName.'<br/><br/>';
+                    $email_body .= 'Thanks & Regards <br/>'.$company_name;
+
+                    
                 endforeach;
             endif;
         endif;
