@@ -68,8 +68,8 @@
                         
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
-                        <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
-                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ !empty($planDetails[$termId][$moduleDetails]->tutor->employee) ? $planDetails[$termId][$moduleDetails]->tutor->employee->full_name : "Tutor Not Found" }} <span class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 mb-2">{{ $planDetails[$termId][$moduleDetails]->group->name }}</span></div>
+                        <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2">{{ $planDetails[$termId][$moduleDetails]->group->name }}</span></a>
+                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ !empty($planDetails[$termId][$moduleDetails]->tutor->employee) ? $planDetails[$termId][$moduleDetails]->tutor->employee->full_name : "Tutor Not Found" }} </div>
                     </div>
                     <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$moduleDetails] }}%</div>
                     <div class="flex-none"></div>
