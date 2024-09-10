@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Programme;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelClassRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\Assign;
+use App\Models\ComonSmtp;
 use App\Models\Course;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
@@ -15,6 +18,7 @@ use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Student;
+use App\Models\StudentEmail;
 use App\Models\StudentSms;
 use App\Models\StudentSmsContent;
 use App\Models\TermDeclaration;
@@ -23,10 +27,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\SendSmsTrait;
 use DateTime;
+use App\Traits\GenerateEmailPdfTrait;
 
 class DashboardController extends Controller
 {
-    use SendSmsTrait;
+    use SendSmsTrait, GenerateEmailPdfTrait;
 
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
@@ -314,8 +319,9 @@ class DashboardController extends Controller
         $activePlans = Plan::where('tutor_id', $tutor)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
         if(!empty($activePlans)):
             foreach($activePlans as $pln):
-                $startTime = date('Y-m-d').' '.$pln->start_time;
-                $endTime = date('Y-m-d').' '.$pln->end_time;
+                $startTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d').' '.$pln->start_time));
+                $endTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d').' '.$pln->end_time));
+
                 $start = new DateTime($startTime);
                 $end = new DateTime($endTime);
                 $diff_in_seconds = $end->getTimestamp() - $start->getTimestamp();
@@ -517,9 +523,20 @@ class DashboardController extends Controller
 
         PlansDateList::where('id', $plans_date_list_id)->update($data);
 
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  $company_name,
+        ];
         if($notify_student):
             if(isset($plan->assign) && $plan->assign->count() > 0):
-                $sms_subject = 'Class cancellation notice';
+                $sms_subject = 'Class Cancellation Notice';
                 foreach($plan->assign as $assign):
                     $student = Student::with('title', 'contact')->where('id', $assign->student_id)->get()->first();
                     $mobile = (isset($student->contact->mobile) && !empty($student->contact->mobile) ? $student->contact->mobile : '');
@@ -545,27 +562,57 @@ class DashboardController extends Controller
                             'created_by' => auth()->user()->id
                         ]);
 
-                        //$sms = $this->sendSms($mobile, $sms_body, $company_name);
+                        $sms = $this->sendSms($mobile, $sms_body, $company_name);
                     endif;
                     
-                    $email_body = 'Dear '.$student->full_name.',<br/><br/>';
-                    $email_body .= 'This is a class cancellation notice:<br/>';
-                    $email_body .= 'Course Name: '.$courseName.'<br/>';
-                    $email_body .= 'Module Name: '.$moduleName.'<br/>';
-                    $email_body .= 'Group Name: '.$groupName.'<br/>';
-                    $email_body .= 'Time: '.$classTime.'<br/>';
-                    $email_body .= 'Tutor Name: '.$tutorName.'<br/><br/>';
-                    $email_body .= 'Thanks & Regards <br/>'.$company_name;
+                    $MAILHTML = 'Dear '.$student->full_name.',<br/><br/>';
+                    $MAILHTML .= 'This is a class cancellation notice:<br/>';
+                    $MAILHTML .= 'Course Name: '.$courseName.'<br/>';
+                    $MAILHTML .= 'Module Name: '.$moduleName.'<br/>';
+                    $MAILHTML .= 'Group Name: '.$groupName.'<br/>';
+                    $MAILHTML .= 'Time: '.$classTime.'<br/>';
+                    $MAILHTML .= 'Tutor Name: '.$tutorName.'<br/><br/>';
+                    $MAILHTML .= 'Thanks & Regards <br/>'.$company_name;
 
-                    
+                    $studentEmail = StudentEmail::create([
+                        'student_id' => $student->id,
+                        'common_smtp_id' => (isset($commonSmtp->id) && $commonSmtp->id > 0 ? $commonSmtp->id : null),
+                        'email_template_id' => null,
+                        'subject' => $sms_subject,
+                        'created_by' => auth()->user()->id,
+                    ]);
+                    if($studentEmail->id):
+                        $emailPdf = $this->generateEmailPdf($studentEmail->id, $student->id, $sms_subject, $MAILHTML);
+                        $studentEmail = StudentEmail::where('id', $studentEmail->id)->update([
+                            'mail_pdf_file' => $emailPdf
+                        ]);
+
+                        UserMailerJob::dispatch($configuration, $emails, new CommunicationSendMail($sms_subject, $MAILHTML, []));
+                    endif;
                 endforeach;
             endif;
         endif;
 
         if($notify_tutors):
-            //$sub = "Class cancellation notice from ".$settings['company_name']." account.";
-            //$from = $settings['company_name']." Staff <".$settings['smtp_user'].">";
-            //$msg = 'Dear '.$staff_name.', <br/> You got a class cancellation notice: <br/><br/> '.$email_text.'<br/> Course Name: '.$course_name.'<br/> Module Name: '.$module_name.'<br/> Group: '.$group_name.'<br/> Time: '.$class_time.'<br/> Tutor Name: '.$tutor_name.'<br/><br/> Regards<br/>'.$settings['company_name'];
+            $SUBJECT = 'Class Cancellation Notice From '.$company_name.' Account.';
+            //$MAILHTML = 'Dear '.$tutorName.',<br/><br/>';
+            $MAILHTML = 'This is a class cancellation notice:<br/>';
+            $MAILHTML .= 'Course Name: '.$courseName.'<br/>';
+            $MAILHTML .= 'Module Name: '.$moduleName.'<br/>';
+            $MAILHTML .= 'Group Name: '.$groupName.'<br/>';
+            $MAILHTML .= 'Time: '.$classTime.'<br/>';
+            $MAILHTML .= 'Tutor Name: '.$tutorName.'<br/><br/>';
+            $MAILHTML .= 'Thanks & Regards <br/>'.$company_name;
+            if(isset($plan->tutor_id) && $plan->tutor_id > 0):
+                $NEWMAILHTML = 'Dear '.$plan->tutor->employee->full_name.',<br/><br/>'.$MAILHTML;
+                $TEMAILS = [];
+                if(isset($plan->tutor->employee->email) && !empty($plan->tutor->employee->email)):
+                    $TEMAILS[] = $plan->tutor->employee->email;
+                endif;
+                if(isset($plan->tutor->employee->employment->email) && !empty($plan->tutor->employee->employment->email)):
+                    $TEMAILS[] = $plan->tutor->employee->employment->email;
+                endif;
+            endif;
         endif;
 
         return response()->json(['message' => 'Class status updated to canceled.'], 200);
