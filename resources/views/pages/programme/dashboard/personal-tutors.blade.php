@@ -18,6 +18,9 @@
                     <thead>
                         <tr>
                             <th class="whitespace-nowrap uppercase">Personal Tutor</th>
+                            <th class="text-center whitespace-nowrap uppercase">Contracted Hour</th>
+                            <th class="text-center whitespace-nowrap uppercase">Assigned Students</th>
+                            <th class="text-center whitespace-nowrap uppercase">Load</th>
                             <th class="text-center whitespace-nowrap uppercase">No of Module</th>
                             <th class="text-left whitespace-nowrap uppercase">Attendance Rate</th>
                             <th class="text-left whitespace-nowrap uppercase">Outstanding Call</th>
@@ -27,6 +30,14 @@
                     <tbody>
                         @if(!empty($tutors))
                             @foreach($tutors as $tut)
+                                @php 
+                                    $contracted_hour = (isset($tut->contracted_hour) && !empty($tut->contracted_hour) ? $tut->contracted_hour : '');
+                                    $hours = (!empty($contracted_hour) ? explode(':', $contracted_hour) : []);
+                                    $hour = (isset($hours[0]) ? (int) $hours[0] : 0);
+                                    $hour += (isset($hours[1]) ? (int) $hours[1] / 60 : 0);
+                                    $no_of_assigned = (isset($tut->no_of_assigned) && $tut->no_of_assigned > 0 ? $tut->no_of_assigned : 0);
+                                    $load = ($hour > 0 && $no_of_assigned > 0 ? $no_of_assigned / $hour : 0)
+                                @endphp
                                 <tr class="intro-x">
                                     <td>
                                         <div class="flex items-center justify-start">
@@ -38,6 +49,21 @@
                                                 <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5"></div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="font-medium">
+                                            {{ (!empty($contracted_hour) ? $contracted_hour : '00:00') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="font-medium">
+                                            {{ $no_of_assigned }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="font-medium">
+                                            {{ number_format($load, 2) }}
+                                        </span>
                                     </td>
                                     <td class="text-center">
                                         <span class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">

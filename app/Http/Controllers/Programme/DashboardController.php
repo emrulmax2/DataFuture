@@ -356,10 +356,16 @@ class DashboardController extends Controller
         $tutors = User::whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
         if(!empty($tutors)):
             foreach($tutors as $tut):
-                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->pluck('module_creation_id')->unique()->toArray();
+                $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
+                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->get();
+                $plan_ids = $activePlans->pluck('id')->unique()->toArray();
+                $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
+                $moduleCreations = $activePlans->pluck('module_creation_id')->unique()->toArray();
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
+                $tut['no_of_assigned'] = (!empty($assigns) ? count($assigns) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
+                $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
             endforeach;
         endif;
 

@@ -136,7 +136,7 @@ class Employee extends Model
     }
 
     public function workingPattern(){
-        return $this->hasOne(EmployeeWorkingPattern::class, 'employee_id', 'id')->latestOfMany();
+        return $this->hasOne(EmployeeWorkingPattern::class, 'employee_id', 'id')->where('active', 1)->latestOfMany();
     }
     
     public function eligibilities(){
