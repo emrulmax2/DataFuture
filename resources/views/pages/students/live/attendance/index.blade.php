@@ -50,7 +50,7 @@
                 </a>
                 @endif
             </div>
-            @foreach($dataStartPoint as $moduleDetails => $data)
+            @foreach($dataStartPoint as $planId => $data)
             
             <div class="p-5">
 
@@ -60,24 +60,24 @@
                             <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                     </div>
                     @php
-                        $start_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->start_time);
+                        $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
                         $start_time = date('h:i A', strtotime($start_time));
                         
-                        $end_time = date("Y-m-d ".$planDetails[$termId][$moduleDetails]->end_time);
+                        $end_time = date("Y-m-d ".$planDetails[$termId][$planId]->end_time);
                         $end_time = date('h:i A', strtotime($end_time));  
                         
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
-                        <a href="" class="font-medium flex">{{ $moduleDetails }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$moduleDetails]->group->name }}</span></a>
+                        <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
                         
-                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ !empty($planDetails[$termId][$moduleDetails]->tutor->employee) ? $planDetails[$termId][$moduleDetails]->tutor->employee->full_name : "Tutor Not Found" }} </div>
+                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "Tutor Not Found" }} </div>
                     </div>
-                    <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$moduleDetails]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$moduleDetails] }}%</div>
+                    <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$planId] }}%</div>
                     <div class="flex-none"></div>
                 </div>
                 
                 
-                <div id="tabledata{{ $planDetails[$termId][$moduleDetails]->id }}" class="tabledataset overflow-x-auto p-5 pt-0" style="display: none;">
+                <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto p-5 pt-0" style="display: none;">
                     <table data-tw-merge class="w-full text-left">
                         <thead data-tw-merge class="">
                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
@@ -139,7 +139,7 @@
                         <tfoot>
                             <tr class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                 <th colspan="3" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">Total</th>
-                                <th colspan="4" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">{{ $totalFeedList[$termId][$moduleDetails] }}</th>
+                                <th colspan="4" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">{{ $totalFeedList[$termId][$planId] }}</th>
                             </tr>
                         </tfoot>
                     </table>
