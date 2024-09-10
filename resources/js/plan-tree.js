@@ -520,10 +520,6 @@ var classPlanTreeListTable = (function () {
                     $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
                         tutorId.clear(true)
                     });
-                }else if(classType == 'Seminar'){
-                    $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                        $('#editPlanModal [name="tutor_id"]').val('');
-                    });
                 }else{
                     $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
                         tutorId.addItem(dataset.plan.tutor_id)
@@ -569,10 +565,6 @@ var classPlanTreeListTable = (function () {
         if(classType == 'Tutorial' || classType == 'Seminar'){
             $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
                 tutorId.clear(true)
-            });
-        }else if(classType == 'Seminar'){
-            $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
-                $('#editPlanModal [name="tutor_id"]').val('');
             });
         }else{
             $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
