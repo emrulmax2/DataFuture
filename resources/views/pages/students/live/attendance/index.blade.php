@@ -31,7 +31,8 @@
                                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                                 </a>
                             </li>
-                            @if($termstart==1)
+                            @if($termstart==1 && $termAttendanceFound[$termId]===true)
+                            
                             <li>
                                 <a href="{{ route('student.attendance.edit',$student->id) }}" class="dropdown-item">
                                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
@@ -44,7 +45,7 @@
                 <button class="btn btn-outline-secondary hidden sm:flex">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print Now
                 </button>
-                @if($termstart==1)
+                @if($termstart==1 && $termAttendanceFound[$termId]===true)
                 <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
                 </a>
