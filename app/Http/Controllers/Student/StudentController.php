@@ -652,6 +652,7 @@ class StudentController extends Controller
             $avarageTermDetails = [];
             $totalClassFullSet = [];
             $moduleNameList = [];
+            $arryBox = [];
                 $QueryInner = DB::table('plans_date_lists as pdl')
                             ->select( 'pdl.*','td.id as term_id',    'td.name as term_name','instance_terms.start_date','instance_terms.end_date', 'plan.module_creation_id as module_creation_id' , 'mc.module_name','mc.code as module_code', 'plan.id as plan_id' , 'gp.name as group_name', 'gp.id as group_id' )
                             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
@@ -745,10 +746,10 @@ class StudentController extends Controller
                             $avarage= number_format($avarageTotalPercentage[$list->term_id], $precision, '.', '');
                             $avarageTermDetails[$list->term_id] = $avarage;
                         } else {
+                            // if($list->plan_id==2365) {
+                            //     dd($list->id);
+                            // }
                             
-                            foreach ($attendanceFeedStatus as $feedStatus):
-                                $arryBox[$list->term_id][$list->plan_id][$feedStatus->code] =0;
-                            endforeach;
 
                             if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
                                 $totalPresentFound[$list->term_id][$list->plan_id] = 0;
@@ -756,18 +757,21 @@ class StudentController extends Controller
                             if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
                                 $totalAbsentFound[$list->term_id][$list->plan_id]=0;
                             }
-
-                            $totalPresentFound[$list->term_id][$list->plan_id] = 0;
-                            $totalAbsentFound[$list->term_id][$list->plan_id] = 0;
-
-                            $json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
-                            $replace = array('{', '}', "'", '"');
-                            $totalFeedList = str_replace ($replace, "", $json);
-                            $total = 0;
-
-                            $avaragePercentage[$list->term_id][$list->plan_id] = 0;
-                            $precision = 2;
-                            $avarage =0;
+                            if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
+                                $totalPresentFound[$list->term_id][$list->plan_id] = 0;
+                            }
+                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                                $totalAbsentFound[$list->term_id][$list->plan_id] = 0;
+                            }
+                            //$json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
+                            //$replace = array('{', '}', "'", '"');
+                            //$totalFeedList = "";
+                            //$total = 0;
+                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                                $avaragePercentage[$list->term_id][$list->plan_id] = 0;
+                            }
+                            //$precision = 2;
+                            //$avarage =0;
                         
 
                             $data[$list->term_id][$list->plan_id][$list ->date] = [
@@ -787,13 +791,20 @@ class StudentController extends Controller
                             ];
                             $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
                             
-                            
-                            $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
-                            $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
+                            if(!isset($totalFeedListSet[$list->term_id][$list->plan_id])) {
+                                
+                                $totalFeedListSet[$list->term_id][$list->plan_id] = "";
+                            }
+
+                            if(!isset($avarageDetails[$list->term_id][$list->plan_id])) {
+                                $avarageDetails[$list->term_id][$list->plan_id] = 0;
+                            }
 
                             //total code list and total class list
                             foreach ($attendanceFeedStatus as $feedStatus):
-                                $totalBox[$list->term_id][$feedStatus->code] = 0;
+                                if(!isset($totalBox[$list->term_id][$feedStatus->code])) {
+                                    $totalBox[$list->term_id][$feedStatus->code] = 0;
+                                }
                             endforeach;
                             
                             if(!isset($totalBoxPresentFound[$list->term_id])) {
@@ -802,16 +813,22 @@ class StudentController extends Controller
                             if(!isset($totalBoxAbsentFound[$list->term_id])) {
                                 $totalBoxAbsentFound[$list->term_id]=0;
                             }
-
-                            $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
-                            $replace = array('{', '}', "'", '"');
-                            $totalFullSetFeedList[$list->term_id] = str_replace ($replace, "", $json);
-                            $totalClassFullSet[$list->term_id] = 0;
-
-                            $avarageTotalPercentage[$list->term_id] = 0;
                             
-                            $avarage= number_format($avarageTotalPercentage[$list->term_id], $precision, '.', '');
-                            $avarageTermDetails[$list->term_id] = $avarage;
+                            $replace = array('{', '}', "'", '"');
+                            
+                            if(!isset($totalFullSetFeedList[$list->term_id])) {
+                                $totalFullSetFeedList[$list->term_id] = "";
+                            }
+                            if(!isset($totalClassFullSet[$list->term_id])) {
+                                $totalClassFullSet[$list->term_id] = 0;
+                            }
+                            if(!isset($avarageTotalPercentage[$list->term_id])) {
+                                $avarageTotalPercentage[$list->term_id] = 0;
+                            }
+                            
+                            if(!isset($avarageTermDetails[$list->term_id])) {
+                                $avarageTermDetails[$list->term_id] = 0;
+                            }
                         }
                     endforeach;
             return ["termData" => $termData,"data" => $data ,"planDetails" => $planDetails,"avarageDetails" => $avarageDetails,"totalFeedListSet" => $totalFeedListSet, "termAttendanceFound" =>$termAttendanceFound,
