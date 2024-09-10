@@ -53,7 +53,7 @@ class TutorAttendanceController extends Controller
 
         $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
             if(!$attendanceFind) {
-                
+                PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Ongoing']);
                 AttendanceInformation::create([
                     'plans_date_list_id' =>$request->plan_date_list_id,
                     'tutor_id' => Auth::user()->id,
@@ -66,6 +66,7 @@ class TutorAttendanceController extends Controller
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
                
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
+                    PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Held']);
                     $attendanceInformation = AttendanceInformation::find($attendanceFind->id);
                     $attendanceInformation->end_time = now();
                     $attendanceInformation->updated_by = Auth::user()->id;

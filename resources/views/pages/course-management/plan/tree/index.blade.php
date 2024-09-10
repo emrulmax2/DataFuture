@@ -149,6 +149,17 @@
                                 <div class="acc__input-error error-rooms_id text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
+                                <label for="class_type" class="form-label">Class Type <span class="text-danger">*</span></label>
+                                <select id="class_type" name="class_type" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    <option value="Theory">Theory</option>
+                                    <option value="Practical">Practical</option>
+                                    <option value="Tutorial">Tutorial</option>
+                                    <option value="Seminar">Seminar</option>
+                                </select>
+                                <div class="acc__input-error error-class_type text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4 tutorWrap" style="display: none;">
                                 <label for="tutor_id" class="form-label">Tutor <span class="text-danger">*</span></label>
                                 <select id="tutor_id" name="tutor_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -160,7 +171,7 @@
                                 </select>
                                 <div class="acc__input-error error-tutor_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6 sm:col-span-4">
+                            <div class="col-span-6 sm:col-span-4 PersonalTutorWrap">
                                 <label for="personal_tutor_id" class="form-label">Personal Tutor <span class="text-danger">*</span></label>
                                 <select id="personal_tutor_id" name="personal_tutor_id" class="form-control w-full">
                                     <option value="">Please Select</option>
@@ -171,16 +182,6 @@
                                     @endif
                                 </select>
                                 <div class="acc__input-error error-personal_tutor_id text-danger mt-2"></div>
-                            </div>
-                            <div class="col-span-6 sm:col-span-4">
-                                <label for="class_type" class="form-label">Class Type</label>
-                                <select id="class_type" name="class_type" class="form-control w-full">
-                                    <option value="">Please Select</option>
-                                    <option value="Theory">Theory</option>
-                                    <option value="Practical">Practical</option>
-                                    <option value="Tutorial">Tutorial</option>
-                                    <option value="Seminar">Seminar</option>
-                                </select>
                             </div>
                             {{--<div class="col-span-6 sm:col-span-4">
                                 <label for="module_enrollment_key" class="form-label">Enrollment Key <span class="text-danger">*</span></label>

@@ -2175,6 +2175,10 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}/{type?}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
         Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
+
+        Route::post('tutor-dashboard/get-plan-assigned-students', 'getAssignedStudentList')->name('tutor-dashboard.get.assigned.std.list'); 
+        Route::post('tutor-dashboard/get-student-attendance', 'getStudentAttendance')->name('tutor-dashboard.get.student.attendance'); 
+        Route::post('tutor-dashboard/store-single-attendance', 'storeSingleAttendance')->name('tutor-dashboard.store.single.attendance'); 
     });
 
     Route::resource('plan-assessment', AssessmentPlanController::class);
@@ -2298,6 +2302,8 @@ Route::middleware('auth')->group(function() {
 
         Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
+
+        Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {

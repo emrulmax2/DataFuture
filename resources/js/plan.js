@@ -472,11 +472,21 @@ var classPlanListTable = (function () {
                     $('#editPlanModal .groupName').html(dataset.plan.group ? dataset.plan.group : '');
 
                     $('#editPlanModal select[name="module_creation_id"]').html(dataset.plan.modules ? dataset.plan.modules : '');
-
                     $('#editPlanModal select[name="rooms_id"]').val(dataset.plan.rooms_id ? dataset.plan.rooms_id : '');
-                    $('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+
+                    var classType = dataset.plan.class_type ? dataset.plan.class_type : '';
+                    $('#editPlanModal select[name="class_type"]').val(classType);
+                    if(classType == 'Tutorial'){
+                        $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
+                            $('#editPlanModal [name="tutor_id"]').val('');
+                        });
+                    }else{
+                        $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
+                            $('#editPlanModal [name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
+                        });
+                    }
+                    //$('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                     $('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
-                    $('#editPlanModal select[name="class_type"]').val(dataset.plan.class_type ? dataset.plan.class_type : '');
                     //$('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
                     $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
                     $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
@@ -506,6 +516,22 @@ var classPlanListTable = (function () {
                 console.log(error);
             });
         });
+
+
+        $('#editPlanModal [name="class_type"]').on('change', function(e){
+            var $classType = $(this);
+            var classType = $classType.val();
+    
+            if(classType == 'Tutorial'){
+                $('#editPlanModal .tutorWrap').fadeOut('fast', function(){
+                    $('#editPlanModal [name="tutor_id"]').val('');
+                });
+            }else{
+                $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
+                    $('#editPlanModal [name="tutor_id"]').val('');
+                });
+            }
+        })
 
 
         $('#editPlanForm').on('submit', function(e){

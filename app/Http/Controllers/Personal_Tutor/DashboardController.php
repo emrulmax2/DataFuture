@@ -94,7 +94,7 @@ class DashboardController extends Controller
                                 $html .= '<div class="text-xs text-slate-500 ml-auto">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
                             $html .= '</div>';
                             //$html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
-                            if($class->plan->tutor_id == $personalTutorId):
+                            if($class->plan->class_type == 'Tutorial'):
                                 if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
                                     if($class->feed_given == 1):
                                         $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';

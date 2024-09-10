@@ -44,7 +44,7 @@ class PlansDateListController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = PlansDateList::orderByRaw(implode(',', $sorts));
+        $query = PlansDateList::with('attendanceInformation', 'attendances')->orderByRaw(implode(',', $sorts));
         if(!empty($planid)): $query->where('plan_id', $planid); endif;
         if(!empty($dates)): $query->where('date', $dates); endif;
         if($status == 2): $query->onlyTrashed(); endif;
@@ -85,7 +85,7 @@ class PlansDateListController extends Controller
                     'date'=> date('l jS M, Y', strtotime($list->date)),
                     'room' => (isset($list->plan->room->name) && !empty($list->plan->room->name) ? $list->plan->room->name : ''),
                     'time' => (isset($list->plan->start_time) && !empty($list->plan->start_time) ? date('H:i', strtotime($list->plan->start_time)) : 'Unknown').' - '.(isset($list->plan->end_time) && !empty($list->plan->end_time) ? date('H:i', strtotime($list->plan->end_time)) : 'Unknown'),
-                    'status' => '',
+                    'status' => (isset($list->status) ? $list->status : 'Unknown'),
                     'deleted_at' => $list->deleted_at,
                     'tutor_id'=>$list->plan->tutor_id,
                     "start_time" => $start_time,
@@ -96,6 +96,7 @@ class PlansDateListController extends Controller
                     'upcomming_status' => $upcommingStatus, 
                     "attendance_information" => ($list->attendanceInformation) ?? null,    
                     "foundAttendances"  => ($list->attendances) ?? null, 
+                    "feed_given"  => (isset($list->feed_given) && $list->feed_given > 0 ? $list->feed_given : 0), 
                 ];
                 $i++;
             endforeach;
@@ -195,6 +196,7 @@ class PlansDateListController extends Controller
                                 $data['plan_id'] = $cp_id;
                                 $data['name'] = $name;
                                 $data['date'] = $start;
+                                $data['status'] = 'Schedule';
                                 $data['created_by'] = auth()->user()->id;
 
                                 $plandateList = PlansDateList::create($data);

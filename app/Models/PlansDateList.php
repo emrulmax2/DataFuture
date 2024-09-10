@@ -15,6 +15,10 @@ class PlansDateList extends Model
         'name',
         'date',
         'feed_given',
+        'status',
+        'canceled_reason',
+        'canceled_by',
+        'canceled_at',
         'created_by',
         'updated_by'
     ];

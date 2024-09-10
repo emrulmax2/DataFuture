@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tutor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSingleAttendanceRequest;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
@@ -386,7 +387,7 @@ class DashboardController extends Controller
     {
         $attendanceInformation = AttendanceInformation::where("plans_date_list_id",$plandate->id)->get()->first();
         $employee = Employee::where("user_id",$tutor->id)->get()->first();
-    
+        
         $h = $m = $s = 0;
         if($attendanceInformation) {
             if($attendanceInformation->tutor_id != Auth::user()->id) {
@@ -577,6 +578,8 @@ class DashboardController extends Controller
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+
+            'attendanceStatus' => AttendanceFeedStatus::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -677,5 +680,65 @@ class DashboardController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getAssignedStudentList(Request $request){
+        $plan_date_list_id = $request->plan_date_list_id;
+        $planDateList = PlansDateList::find($plan_date_list_id);
+        $assign_students = Assign::where('plan_id', $planDateList->plan_id)->orderBy('student_id', 'ASC')->get();
+
+        $list = [];
+        if($assign_students->count() > 0):
+            $i = 1;
+            foreach($assign_students as $std):
+                $list[$i]['id'] = $std->student_id;
+                $list[$i]['label'] = $std->student->registration_no.' - '.$std->student->first_name.' '.$std->student->last_name;
+
+                $i++;
+            endforeach;
+        endif;
+
+        return response()->json(['res' => $list], 200);
+    }
+
+    public function getStudentAttendance(Request $request){
+        $student_id = $request->student_id;
+        $plan_date_List_id = $request->plan_date_List_id;
+
+        $attendance = Attendance::where('plans_date_list_id', $plan_date_List_id)->where('student_id', $student_id)->get()->first();
+        $feed_status = (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id > 0 ? $attendance->attendance_feed_status_id : 4);
+
+        return response()->json(['status' => $feed_status], 200);
+    }
+
+    public function storeSingleAttendance(StoreSingleAttendanceRequest $request){
+        $student_id = $request->student_id;
+        $attendance_feed_status_id = (isset($request->attendance_feed_status_id) && $request->attendance_feed_status_id > 0 ? $request->attendance_feed_status_id : 4);
+        $plan_date_list_id = $request->plan_date_list_id;
+        $planDate = PlansDateList::find($plan_date_list_id);
+        $plan_id = $planDate->plan_id;
+
+        $data = [];
+        $data = [
+            'plans_date_list_id' => $plan_date_list_id,
+            'attendance_date' => (isset($planDate->date) && !empty($planDate->date) ? date('Y-m-d', strtotime($planDate->date)) : date('Y-m-d')),
+            'attendance_captured_at' => date('Y-m-d'),
+            'class_plan_id' => $plan_id,
+            'student_id' => $student_id,
+            'attendance_feed_status_id' => $attendance_feed_status_id,
+            'sms_notification' => ($attendance_feed_status_id == 4 ? 1 : 0),
+            'notofication_date' => ($attendance_feed_status_id == 4 ? date('Y-m-d') : null),
+            'notofied_by' => auth()->user()->id
+        ];
+        $attendance = Attendance::where('plans_date_list_id', $plan_date_list_id)->where('student_id', $student_id)->get()->first();
+        if(isset($attendance->id)):
+            $data['updated_by'] = auth()->user()->id;
+            Attendance::where('id', $attendance->id)->update($data);
+        else:
+            $data['created_by'] = auth()->user()->id;
+            Attendance::create($data);
+        endif;
+
+        return response()->json(['message' => 'Attendance successfully feeded.'], 200);
     }
 }

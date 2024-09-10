@@ -2130,3 +2130,6 @@ input[type=number] {
 #dailyClassInfoTable.table tbody tr td:last-child{
     padding-right: 1rem;
 }
+.border-info{
+    border-color: #06b6d4;
+}
