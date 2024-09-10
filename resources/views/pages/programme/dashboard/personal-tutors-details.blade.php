@@ -33,7 +33,7 @@
                         <table class="table table-report sm:mt-2">
                             <thead>
                                 <tr>
-                                    <th class="whitespace-nowrap">Moudel Name</th>
+                                    <th class="whitespace-nowrap">Tutor - Moudel Name</th>
                                     <th class="whitespace-nowrap">Group</th>
                                     <th class="whitespace-nowrap">Attendance Rate</th>
                                     <th class="whitespace-nowrap">Submission Rate</th>
@@ -57,9 +57,15 @@
                                     @foreach($plans as $pln)
                                         <tr class="intro-x">
                                             <td class="font-medium">
-                                                {{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}
-                                                {{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}
-                                                {{ (isset($pln->class_type) && !empty($pln->class_type) ? ' - '.$pln->class_type : '') }}
+                                                <div class="block">
+                                                    <div class="w-10 h-10 intro-x image-fit mr-4 inline-block">
+                                                        <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    </div>
+                                                    <div class="inline-block relative" style="top: -5px;">
+                                                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}</div>
+                                                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->class_type) && !empty($pln->class_type) ? $pln->class_type : '') }}</div>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="font-medium">
                                                 @if(isset($pln->group->name) && !empty($pln->group->name))

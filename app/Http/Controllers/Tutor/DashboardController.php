@@ -391,7 +391,7 @@ class DashboardController extends Controller
         $h = $m = $s = 0;
         if($attendanceInformation) {
             if($attendanceInformation->tutor_id != Auth::user()->id) {
-                return redirect()->route('tutor-dashboard.show',Auth::user()->id);
+                //return redirect()->route('tutor-dashboard.show', Auth::user()->id);
             }
             $classStart = date("Y-m-d ").$attendanceInformation->start_time;
             if(isset($attendanceInformation->end_time) && !empty($attendanceInformation->end_time)):

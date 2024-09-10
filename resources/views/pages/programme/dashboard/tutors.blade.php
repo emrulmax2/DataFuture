@@ -18,6 +18,9 @@
                     <thead>
                         <tr>
                             <th class="whitespace-nowrap uppercase">Tutor</th>
+                            <th class="text-center whitespace-nowrap uppercase">Contracted Hour</th>
+                            <th class="text-center whitespace-nowrap uppercase">Class Hour</th>
+                            <th class="text-center whitespace-nowrap uppercase">Load</th>
                             <th class="text-center whitespace-nowrap uppercase">No of Module</th>
                             <th class="text-left whitespace-nowrap uppercase">Attendance Rate</th>
                             <th class="text-left whitespace-nowrap uppercase">Submission Rate</th>
@@ -26,6 +29,19 @@
                     <tbody>
                         @if(!empty($tutors))
                             @foreach($tutors as $tut)
+                                @php 
+                                    $contracted_hour = (isset($tut->contracted_hour) && !empty($tut->contracted_hour) ? $tut->contracted_hour : '00:00');
+                                    $chours = (!empty($contracted_hour) ? explode(':', $contracted_hour) : []);
+                                    $cHour = (isset($chours[0]) ? (int) $chours[0] : 0);
+                                    $cHour += (isset($chours[1]) ? (int) $chours[1] / 60 : 0);
+
+                                    $class_hour = (isset($tut->class_hours) && !empty($tut->class_hours) ? $tut->class_hours : '00:00');
+                                    $clhours = (!empty($class_hour) ? explode(':', $class_hour) : []);
+                                    $clHour = (isset($clhours[0]) ? (int) $clhours[0] : 0);
+                                    $clHour += (isset($clhours[1]) ? (int) $clhours[1] / 60 : 0);
+
+                                    $load = ($cHour > 0 && $clHour > 0 ? $clHour / $cHour : 0)
+                                @endphp
                                 <tr class="intro-x">
                                     <td>
                                         <div class="flex items-center justify-start">
@@ -37,6 +53,17 @@
                                                 <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ isset($tut->employee->employment->employeeWorkType->name) && !empty($tut->employee->employment->employeeWorkType->name) ? $tut->employee->employment->employeeWorkType->name : '' }}</div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="text-center font-medium">
+                                        {{ (isset($tut->contracted_hour) && !empty($tut->contracted_hour) ? $tut->contracted_hour : '00:00') }}
+                                    </td>
+                                    <td class="text-center font-medium">
+                                        {{ (isset($tut->class_hours) && !empty($tut->class_hours) ? $tut->class_hours : '00:00') }}
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="font-medium">
+                                            {{ number_format($load, 2) }}
+                                        </span>
                                     </td>
                                     <td class="text-center">
                                         <span class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
