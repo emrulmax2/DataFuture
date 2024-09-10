@@ -503,9 +503,8 @@ class DashboardController extends Controller
         $userData = User::find(Auth::user()->id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
-        $tutor = Employee::where("user_id",$plan->tutor->id)->get()->first();
-        
-        $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
+        $tutor = (isset($plan->tutor_id) && $plan->tutor_id > 0 ? Employee::where('user_id', $plan->tutor_id)->get()->first() : '');
+        $personalTutor = isset($plan->personal_tutor_id) && $plan->personal_tutor_id > 0 ? Employee::where('user_id', $plan->personal_tutor_id)->get()->first() : "";
         
         $planTask = PlanTask::where("plan_id",$plan->id)
                     ->where('module_creation_id',$moduleCreation->id)->get();  
