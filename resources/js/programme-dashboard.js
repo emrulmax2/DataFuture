@@ -3,6 +3,10 @@ import dayjs from "dayjs";
 import Litepicker from "litepicker";
 import { createIcons, icons } from "lucide";
 
+import helper from "./helper";
+import colors from "./colors";
+import Chart from "chart.js/auto";
+
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const cancelClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#cancelClassModal"));
@@ -124,6 +128,47 @@ import { createIcons, icons } from "lucide";
         // print clock js in div #clock.
         $("#theClock").html(currentTimeString);
     }
+
+    /* Attendance Rate Chart Start*/
+    if ($('#attendanceRateChart').length) {
+        let rates = $('#attendanceRateChart').attr('data-rate') * 1;
+        let outOf = (100 - rates);
+        let ctx = $("#attendanceRateChart")[0].getContext("2d");
+        let myDoughnutChart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: [
+                    "",
+                    "Term Atendance Rate",
+                ],
+                datasets: [
+                    {
+                        data: [outOf, rates],
+                        backgroundColor: [
+                            '#f1f5f9',
+                            colors.primary(0.9),
+                        ],
+                        hoverBackgroundColor: [
+                            '#f1f5f9',
+                            colors.primary(0.9),
+                        ],
+                        borderWidth: 5,
+                        borderColor: colors.white,
+                    },
+                ],
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                },
+                cutout: "80%",
+            },
+        });
+    }
+    /* Attendance Rate Chart End*/
 
     /* Cancel Class Start */
     $('#dailyClassInfoTable').on('click', '.cancelClass', function(e){

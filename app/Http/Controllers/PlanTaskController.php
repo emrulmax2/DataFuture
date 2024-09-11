@@ -140,7 +140,7 @@ class PlanTaskController extends Controller
                 $planTask->module_creation_id = $plan->module_creation_id;
                 $planTask->plan_id = $plan->id;
                 $planTask->logo = $eLearningActivity->logo;
-                $planTask->days_reminder = $eLearningActivity->days_reminder;
+                $planTask->days_reminder = isset($eLearningActivity->days_reminder) && $eLearningActivity->days_reminder > 0 ? $eLearningActivity->days_reminder : 0;
                 $planTask->is_mandatory = $eLearningActivity->is_mandatory;
                 $planTask->e_learning_activity_setting_id = $eLearningActivity->id;
                 $planTask->created_by = auth()->user()->id;

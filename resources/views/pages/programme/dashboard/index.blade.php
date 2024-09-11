@@ -116,15 +116,15 @@
                             <div class="report-box-2 before:hidden xl:before:block intro-y mt-5">
                                 <div class="box p-5">
                                     <div class="mt-3">
-                                        <div class="h-[196px]">
-                                            <canvas id="report-donut-chart"></canvas>
+                                        <div class="h-[196px]"> 
+                                            <canvas data-rate="{{ $termAttendanceRates }}" id="attendanceRateChart"></canvas>
                                         </div>
                                     </div>
                                     <div class="w-52 sm:w-auto mx-auto mt-8">
                                         <div class="flex items-center">
                                             <div class="w-2 h-2 bg-primary rounded-full mr-3"></div>
-                                            <span class="truncate">May 2023 HND</span>
-                                            <span class="font-medium ml-auto">62%</span>
+                                            <span class="truncate">{{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? $theTerm->attenTerm->name : 'Current Term')}}</span>
+                                            <span class="font-medium ml-auto">{{$termAttendanceRates}}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -190,11 +190,11 @@
                         <div class="mt-3">
                             <label>Send Notifications</label>
                             <div class="flex flex-col sm:flex-row mt-2">
-                                <div class="form-check mr-2">
+                                <div class="form-check mr-5">
                                     <input id="notify_student" class="form-check-input" name="notify_student" type="checkbox" value="1">
                                     <label class="form-check-label" for="notify_student">Notify Students</label>
                                 </div>
-                                <div class="form-check mr-2">
+                                <div class="form-check mr-5">
                                     <input id="notify_tutors" class="form-check-input" type="checkbox" name="notify_tutors" value="1">
                                     <label class="form-check-label" for="notify_tutors">Notify Tutors</label>
                                 </div>
