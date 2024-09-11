@@ -65,4 +65,26 @@ import { createIcons, icons } from "lucide";
         });
         
     });
+
+    $(window).on('load', function(e){
+        $('#feedAttendanceTable tbody tr.theAttendanceRow').each(function(){
+            var $theRow = $(this);
+            var label = $theRow.find('.attendanceRadio:checked').attr('data-type');
+            var color = $theRow.find('.attendanceRadio:checked').attr('data-color');
+
+            $theRow.find('.feedTypeCol').html(label).css({color: color});
+        });
+        reloadAttendanceCount();
+    })
+
+    function reloadAttendanceCount(){
+        $('#feedAttendanceTable .attendanceButon').each(function(){
+            let $theBtn = $(this);
+            let typeId = $theBtn.attr('.data-id');
+            console.log(typeId)
+            let typeAttendanceCount = $('#feedAttendanceTable tbody .attendanceRadio_'+typeId+':checked').length;
+
+            $theBtn.find('.attendanceHeaderCount_'+typeId).html(typeAttendanceCount);
+        })
+    }
 })();

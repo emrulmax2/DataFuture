@@ -166,7 +166,7 @@ class AttendanceController extends Controller
                 'join_request'=> "",
                 'status'=> "",   
                 'assignStudentList' => $assignStudentList,  
-                'AttendanceFeedStatus' => $attendanceFeedStatus,             
+                'AttendanceFeedStatus' => $attendanceFeedStatus         
             ];
         endforeach;
         return view('pages.attendance.create', [
@@ -214,6 +214,11 @@ class AttendanceController extends Controller
             $attendanceFeedByAttendance = AttendanceFeedStatus::find($attendance[0]['id']);
 
             $semester = Semester::find($list->semester_id);
+
+            $esiting_attendance = [];
+            foreach($attendance  as $feed){
+                $esiting_attendance[$feed->student_id] =$feed->attendance_feed_status_id;
+            }
             //dd($semster);
             $data = [
                 'plan_id' => $list->plan_id,
@@ -238,6 +243,7 @@ class AttendanceController extends Controller
                 'status'=> "",   
                 'assignStudentList' => $assignStudentList,  
                 'AttendanceFeedStatus' => $attendanceFeedStatus,            
+                'exist_attendances' => $esiting_attendance,            
             ];
         endforeach;
         $pdf = PDF::loadView(

@@ -339,11 +339,11 @@
                         <div class="col-span-4 text-slate-500 font-medium">Login Email</div>
                         <div class="col-span-8 font-medium">
                             {{ $student->users->email }} 
-                            @if ($student->users->email_verified_at == NULL)
+                            {{--@if ($student->users->email_verified_at == NULL)
                                 <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
                             @else
                                 <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
-                            @endif
+                            @endif--}}
                         </div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
