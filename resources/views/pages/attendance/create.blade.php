@@ -176,12 +176,12 @@
                                 </td>
                                 <td style="width: 150px;">
                                     <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox"  class="form-check-input" id="checkbox-switch-3" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="1" />
+                                        <input type="checkbox"  class="form-check-input checkEmailNotify" id="email_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="1" />
                                     </div>
                                 </td>
                                 <td style="width: 150px;">
                                     <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox" class="form-check-input" id="checkbox-switch-4" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="1" />
+                                        <input type="checkbox" class="form-check-input checkSmsNotify" id="sms_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="1" />
                                     </div>
                                 </td>
                             </tr>   

@@ -66,6 +66,27 @@ import { createIcons, icons } from "lucide";
         
     });
 
+    $('#feedAttendanceTable').on('change', '.checkAllEmailNotify', function(){
+        let $theEmailCheck = $(this);
+
+        if($theEmailCheck.prop('checked')){
+            $('#feedAttendanceTable').find('.checkEmailNotify').prop('checked', true);
+        }else{
+            $('#feedAttendanceTable').find('.checkEmailNotify').prop('checked', false);
+        }
+    });
+
+    $('#feedAttendanceTable').on('change', '.checkEmailNotify', function(){
+        var allLength = $('#feedAttendanceTable').find('.checkEmailNotify').length;
+        var checkedLength = $('#feedAttendanceTable').find('.checkEmailNotify:checked').length;
+
+        if(allLength == checkedLength){
+            $('#feedAttendanceTable').find('.checkAllEmailNotify').prop('checked', true);
+        }else{
+            $('#feedAttendanceTable').find('.checkAllEmailNotify').prop('checked', false);
+        }
+    });
+
     $(window).on('load', function(e){
         $('#feedAttendanceTable tbody tr.theAttendanceRow').each(function(){
             var $theRow = $(this);
@@ -75,13 +96,27 @@ import { createIcons, icons } from "lucide";
             $theRow.find('.feedTypeCol').html(label).css({color: color});
         });
         reloadAttendanceCount();
+    });
+
+    $('#feedAttendanceTable').on('change', '.attendanceRadio', function(e){
+        var $theRadio = $(this);
+        var $theRow = $theRadio.closest('tr.theAttendanceRow');
+
+        if($theRow.find('.attendanceRadio:checked').length > 0){
+            var label = $theRow.find('.attendanceRadio:checked').attr('data-type');
+            var color = $theRow.find('.attendanceRadio:checked').attr('data-color');
+
+            $theRow.find('.feedTypeCol').html(label).css({color: color});
+        }else{
+            $theRow.find('.feedTypeCol').html('').css({color: '#1e293b'});
+        }
+        reloadAttendanceCount();
     })
 
     function reloadAttendanceCount(){
         $('#feedAttendanceTable .attendanceButon').each(function(){
             let $theBtn = $(this);
-            let typeId = $theBtn.attr('.data-id');
-            console.log(typeId)
+            let typeId = $theBtn.attr('data-id');
             let typeAttendanceCount = $('#feedAttendanceTable tbody .attendanceRadio_'+typeId+':checked').length;
 
             $theBtn.find('.attendanceHeaderCount_'+typeId).html(typeAttendanceCount);

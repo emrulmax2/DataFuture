@@ -138,7 +138,12 @@
                         <input type="hidden" name="student_id" value="{{ $student->id }}"/>
                         <input type="hidden" name="document_setting_id" value="0"/>
                         <input type="hidden" name="hard_copy_check" value="0"/>
+                        <input type="hidden" name="display_file_name" value=""/>
                     </form>
+                    <div class="mt-3">
+                        <label class="form-label">Document Name</label>
+                        <input type="text" name="display_name" value="" class="form-control w-full"/>
+                    </div>
                     <div class="mt-3">
                         <label>Hard Copy Checked?</label>
                         <div class="form-check mt-2">

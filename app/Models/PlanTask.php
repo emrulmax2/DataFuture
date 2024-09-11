@@ -32,5 +32,10 @@ class PlanTask extends Model
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }
+
+    public function eLearn(): BelongsTo
+    {
+        return $this->belongsTo(ELearningActivitySetting::class, 'e_learning_activity_setting_id');
+    }
     
 }
