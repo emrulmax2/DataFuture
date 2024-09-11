@@ -435,7 +435,7 @@
                                     <option value="">Please Select</option>
                                     @if($ttacom->count() > 0)
                                         @foreach($ttacom as $ttc)
-                                            <option {{ (isset($student->contact->term_time_accommodation_type) && $ttc->id == $student->contact->term_time_accommodation_type ? 'Selected' : '') }} value="{{ $ttc->id }}">{{ $ttc->name }}</option>
+                                            <option {{ (isset($student->contact->term_time_accommodation_type_id) && $ttc->id == $student->contact->term_time_accommodation_type_id ? 'Selected' : '') }} value="{{ $ttc->id }}">{{ $ttc->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>

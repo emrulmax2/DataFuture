@@ -117,19 +117,23 @@ var classPlanDateListsTutorTable = (function () {
                     formatter(cell, formatterParams) {
                         let btn = '';
                         if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
-                            btn += '<button data-plandateid="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#addCustomFeedModal" type="button"  class="addCustomFeed btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</button>';
+                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</a>';
                         }else{
-                            if(cell.getData().status == 'Scheduled' || cell.getData().status == 'Canceled' || cell.getData().status == 'Unknown'){
+                            if(cell.getData().status == 'Scheduled'){
                                 btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
+                            }else if(cell.getData().status == 'Canceled'){
+                                btn = '<span class="btn btn-danger w-auto"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Canceled</span>';
+                            }else if(cell.getData().status == 'Unknown'){
+                                btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
                             }else{
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
                                 }
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
                                     btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
                                 }
                                 if(cell.getData().status == 'Completed'){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
                                 }
                             }
                         }
@@ -652,136 +656,6 @@ var classPlanAssessmentModuleTable = (function () {
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 
-    /* Feed Custom Attendance Start */
-    if($('#addCustomFeedModal').length > 0){
-        const addCustomFeedModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCustomFeedModal"));
-
-        let feeTomOpt = {
-            plugins: {
-                dropdown_input: {}
-            },
-            placeholder: 'Search Here...',
-            //persist: false,
-            create: false,
-            allowEmptyOption: true,
-            //maxItems: null,
-            onDelete: function (values) {
-                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-            },
-        };
-        let attn_student_id = new TomSelect('#attn_student_id', feeTomOpt);
-
-        $('#classPlanDateListsTutorTable').on('click', '.addCustomFeed', function(e){
-            var $theBtn = $(this);
-            var plan_date_list_id = $theBtn.attr('data-plandateid');
-
-            attn_student_id.clear(true);
-            attn_student_id.clearOptions(true);
-            attn_student_id.disable();
-            axios({
-                method: "post",
-                url: route('tutor-dashboard.get.assigned.std.list'), 
-                data: {plan_date_list_id : plan_date_list_id},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                attn_student_id.enable();
-                if(response.status == 200){   
-                    $.each(response.data.res, function(index, row) {
-                        attn_student_id.addOption({
-                            value: row.id,
-                            text: row.label,
-                        });
-                    });
-                    attn_student_id.refreshOptions();
-
-                    $('#addCustomFeedModal input[name="plan_date_list_id"]').val(plan_date_list_id);
-                }
-            }).catch(error => {
-                attn_student_id.enable();
-                if (error.response) {
-                    if (error.response.status == 304) {
-                        console.log('content not found');
-                    } else {
-                        console.log('error');
-                    }
-                }
-            });
-        });
-
-        $('#addCustomFeedModal [name="student_id"]').on('change', function(e){
-            var $studentList = $(this);
-            var student_id = $studentList.val();
-            var plan_date_List_id = $('#addCustomFeedModal input[name="plan_date_list_id"]').val();
-
-            axios({
-                method: "post",
-                url: route('tutor-dashboard.get.student.attendance'), 
-                data: {student_id : student_id, plan_date_List_id : plan_date_List_id},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if(response.status == 200){   
-                    let status = response.data.status;
-                    $('#addCustomFeedModal input[name="attendance_feed_status_id"][value="'+status+'"]').prop('checked', true);
-                }
-            }).catch(error => {
-                if (error.response) {
-                    console.log('error');
-                }
-            });
-        });
-
-        $('#addCustomFeedForm').on('submit', function(e){
-            e.preventDefault();
-            const form = document.getElementById('addCustomFeedForm');
-
-            $('#addCustomFeedForm').find('input').removeClass('border-danger')
-            $('#addCustomFeedForm').find('.acc__input-error').html('')
-
-            document.querySelector('#saveAttendance').setAttribute('disabled', 'disabled');
-            document.querySelector('#saveAttendance svg').style.cssText = 'display: inline-block;';
-
-            let form_data = new FormData(form);
-            axios({
-                method: "post",
-                url: route('tutor-dashboard.store.single.attendance'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                document.querySelector('#saveAttendance').removeAttribute('disabled');
-                document.querySelector('#saveAttendance svg').style.cssText = 'display: none;';
-                
-                if (response.status == 200) {
-                    addCustomFeedModal.hide();
-                    
-                    succModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulations!');
-                        $('#successModal .successModalDesc').html('Student attendance successfully inserted.');
-                    });
-
-                    setTimeout(function(){
-                        succModal.hide();
-                        //window.location.reload();
-                    }, 1000);
-                }
-                classPlanDateListsTutorTable.init();
-            }).catch(error => {
-                document.querySelector('#saveAttendance').removeAttribute('disabled');
-                document.querySelector('#saveAttendance svg').style.cssText = 'display: none;';
-                if(error.response){
-                    if(error.response.status == 422){
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addCustomFeedForm .${key}`).addClass('border-danger')
-                            $(`#addCustomFeedForm  .error-${key}`).html(val)
-                        }
-                    }else{
-                        console.log('error');
-                    }
-                }
-            });
-        })
-    }
-    /* Feed Custom Attendance End */
     
     let confModalDelTitle = 'Are you sure?';
     if ($("#classParticipantsTutorTable").length) {

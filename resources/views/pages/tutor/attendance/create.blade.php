@@ -7,10 +7,10 @@
 	<div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Attendance Tracking</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-			@if($data["attendanceInformation"]->end_time != null)
+			@if(isset($data["attendanceInformation"]->end_time) && $data["attendanceInformation"]->end_time != null)
 				<div class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer border-success text-success mb-2 sm:mb-0 mr-1  w-auto  ">Class Ended</div>    
 			@endif
-			<a href="{{ ($type == 1 ? route('pt.dashboard') : route('tutor-dashboard.show.new')) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 sm:mb-0 mr-1 ">Back to Dashboard</a>
+			<a href="{{ ($type == 1 ? route('pt.dashboard') : ($type == 2 ? route('tutor-dashboard.plan.module.show', $data['plan_id']) :route('tutor-dashboard.show.new'))) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 sm:mb-0 mr-1 ">Back to Dashboard</a>
         </div>
     </div>
 
@@ -72,60 +72,6 @@
 		</div>
 	</div>
 
-    <!--<div class="intro-y box p-5 mt-5">
-        <div class="overflow-x-auto">
-            <table data-tw-merge class="table w-full text-left table-bordered">
-                <tbody>
-                    <tr data-tw-merge >
-                        <td class="font-medium">Term</td>
-                        <td class="border-r">
-                            <div class="font-medium whitespace-nowrap">{{ $data["term_name"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["term"] }}</div>
-                        </td>
-                        <td class="border-r font-medium text-center">Status</td>
-                        <td class="font-medium">Schedule Date & Time</td>
-                        <td class="border-r">
-                            <div class="font-medium whitespace-nowrap">{{ $data["date"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["start_time"] }} - {{ $data["end_time"] }}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-medium">Course & Module</td>
-                        <td class="border-r">
-                            <div class="font-medium whitespace-nowrap">{{ $data["course"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["module"] }}</div>
-                        </td>
-                        <td class="border-r font-medium  text-center">Started 
-                            <div class="font-medium whitespace-nowrap">{{ date('h:i A', strtotime($data["attendanceInformation"]->start_time));  }} TO</div>
-                        @if($data["attendanceInformation"]->end_time!=null)
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ date('h:i A', strtotime($data["attendanceInformation"]->end_time));  }}</div>
-                        @else 
-                            <div class="text-slate-500 text-xs whitespace-nowrap">Continuing..</div>
-                        @endif
-                        </td>
-                        
-                        <td class="font-medium ">Room</td>
-                        <td>
-                            <div class="font-medium whitespace-nowrap">{{ $data["venue"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["room"] }}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-medium">Group</td>
-                        <td class="border-r">{{ $data["group"] }}</td>
-                        <td rowspan="2" class="border-r text-center">
-                            <h4 class="font-medium whitespace-nowrap text-4xl"> 
-                                
-                                <label id="hours">{{ $data["classTakenTimeHour"] }}</label>:<label id="minutes">{{ $data["classTakenTimeMin"] }}</label>:<label id="seconds">{{ $data["classTakenTimeSeconds"] }}</label>
-                            </h4>
-                        </td>
-                        <td class="font-medium ">Tutor</td>
-                        <td>{{ $data["tutor"] }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>-->
     
     @if($data["attendanceInformation"]->end_time==null)
     <form id="attendanceFeed" method="post" >

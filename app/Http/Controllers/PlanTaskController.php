@@ -134,7 +134,7 @@ class PlanTaskController extends Controller
                 if(!$planTask)  
                     $planTask = new PlanTask();
 
-                $planTask->name = $eLearningActivity->category;
+                $planTask->name = $eLearningActivity->name;
                 $planTask->description = $eLearningActivity->category;
                 $planTask->category = $eLearningActivity->category;
                 $planTask->module_creation_id = $plan->module_creation_id;

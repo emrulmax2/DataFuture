@@ -20,7 +20,7 @@
                     $rand = rand(0,1);
 
                     $required_date = '';
-                    $days_reminder = (isset($task->days_reminder) && $task->days_reminder > 0 ? $task->days_reminder : 0);
+                    $days_reminder = (isset($task->task->days_reminder) && $task->task->days_reminder > 0 ? $task->task->days_reminder : 0);
                     $class_start = (isset($plan->attenTerm->start_date) && !empty($plan->attenTerm->start_date) ? date('Y-m-d', strtotime($plan->attenTerm->start_date)) : '');
                     if(!empty($class_start)):
                         $required_date = date('jS F, Y', strtotime('+'.$days_reminder.' days', strtotime($class_start)));
@@ -38,7 +38,7 @@
                                 </span>--}}
                                 <div class="absolute bottom-0 z-10 px-5 pb-6 text-white">
                                     <a class="block text-base font-medium mt-3 " href="">
-                                        <span class="text-xs text-white/90">{{ $task->task->name }}</span>
+                                        <span class="text-lg text-white/90">{{ $task->task->name }}</span>
                                     </a>
                                 </div>
                             </div>

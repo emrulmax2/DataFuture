@@ -171,6 +171,8 @@ var studentUploadListTable = (function () {
         $('#uploadDocumentModal input[name="document_setting_id"]').val('0');
         $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
         $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
+        $('#uploadDocumentModal input[name="display_file_name"]').val('');
+        $('#uploadDocumentModal input[name="display_name"]').val('');
         document.querySelector('#uploadDocBtn').removeAttribute('disabled', 'disabled');
         document.querySelector("#uploadDocBtn svg").style.cssText ="display: none;";
     });
@@ -302,6 +304,10 @@ var studentUploadListTable = (function () {
                     //window.location.reload();
                 }, 2000);
             }
+        })
+
+        $('#uploadDocumentModal [name="display_name"]').on('keyup', function(){
+            $('#uploadDocumentModal [name="display_file_name"]').val($(this).val());
         })
 
         $('#uploadDocBtn').on('click', function(e){
