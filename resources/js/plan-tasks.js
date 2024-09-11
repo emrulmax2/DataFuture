@@ -89,35 +89,16 @@ var classPlanDateListsTutorTable = (function () {
                     headerHozAlign: "center",
                     formatter(cell, formatterParams) {
                         let labels = '';
-                        if(cell.getData().status != ''){
-                            //New & Dynamic Code 'Schedule', 'Ongoing', 'Held', 'Canceled', 'Unknown'
-                            if(cell.getData().status == 'Schedule'){
-                                labels = '<span class="btn btn-outline-secondary text-info border-info w-24 inline-block">Schedule</span>';
-                            }else if(cell.getData().status == 'Ongoing'){
-                                labels = '<span class="btn btn-outline-primary w-24 inline-block">Ongoing</span>';
-                            }else if(cell.getData().status == 'Held'){
-                                labels = '<span class="btn btn-outline-success w-24 inline-block">Held</span>';
-                            }else if(cell.getData().status == 'Canceled'){
-                                labels = '<span class="btn btn-outline-danger w-24 inline-block">Canceled</span>';
-                            }else{
-                                labels = '<span class="btn btn-outline-warning w-24 inline-block">Unknown</span>';
-                            }
+                        if(cell.getData().status == 'Scheduled'){
+                            labels = '<span class="btn btn-outline-secondary text-info border-info w-24 inline-block">Scheduled</span>';
+                        }else if(cell.getData().status == 'Ongoing'){
+                            labels = '<span class="btn btn-outline-primary w-24 inline-block">Ongoing</span>';
+                        }else if(cell.getData().status == 'Completed'){
+                            labels = '<span class="btn btn-outline-success w-24 inline-block">Completed</span>';
+                        }else if(cell.getData().status == 'Canceled'){
+                            labels = '<span class="btn btn-outline-danger w-24 inline-block">Canceled</span>';
                         }else{
-                            // Static Status Code
-                            let attendanceInformation = cell.getData().attendance_information
-                            if(attendanceInformation != null) {
-                                if(attendanceInformation.end_time == null) { 
-                                    labels =`<div data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&amp;:hover:not(:disabled)]:bg-success/10 mb-2 mr-1  w-24">Class on going...</div>`;
-                                } else {
-                                    labels =`<div data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-primary text-primary dark:border-primary [&amp;:hover:not(:disabled)]:bg-primary/10 mb-2 mr-1  w-24 ">Held</div>`;  
-                                }
-                            }else {
-                                if(cell.getData().upcomming_status=="Upcomming"){
-                                    labels =`<div class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-pending text-pending dark:border-pending [&amp;:hover:not(:disabled)]:bg-pending/10 mb-2 mr-1  w-24 ">Upcomming</div>`;
-                                }else{
-                                    labels =`<div class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&amp;:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1  w-24 ">Unknown</div>`;
-                                }
-                            }
+                            labels = '<span class="btn btn-outline-warning w-24 inline-block">Unknown</span>';
                         }
                         return labels;
                     },
@@ -135,18 +116,21 @@ var classPlanDateListsTutorTable = (function () {
                     download: false,
                     formatter(cell, formatterParams) {
                         let btn = '';
-                        if(cell.getData().status == 'Schedule' || cell.getData().status == 'Canceled' || cell.getData().status == 'Unknown'){
-                            btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
+                        if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
+                            btn += '<button data-plandateid="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#addCustomFeedModal" type="button"  class="addCustomFeed btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</button>';
                         }else{
-                            if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0){
-                                btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
-                            }
-                            if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
-                                btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
-                            }
-                            if(cell.getData().status == 'Held'){
-                                btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
-                                btn += '<button data-plandateid="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#addCustomFeedModal" type="button"  class="addCustomFeed btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</button>';
+                            if(cell.getData().status == 'Scheduled' || cell.getData().status == 'Canceled' || cell.getData().status == 'Unknown'){
+                                btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
+                            }else{
+                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
+                                }
+                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
+                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
+                                }
+                                if(cell.getData().status == 'Completed'){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                }
                             }
                         }
 

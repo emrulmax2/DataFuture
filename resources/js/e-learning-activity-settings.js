@@ -33,15 +33,14 @@ var ELearningActivityList = (function () {
                     title: "Label",
                     field: "name",
                     headerHozAlign: "left",
-                    
-                    width: "250",
+                    width: "300",
                     formatter(cell, formatterParams){
                         var html = '';
-                        html += '<div class="flex lg:justify-start items-center">';
-                            html += '<div class="intro-x w-10 h-10 image-fit mr-3">';
-                                html += '<img alt="'+cell.getData().name+'" class="rounded-full" src="'+cell.getData().logo_url+'">';
+                        html += '<div class="flex justify-start items-center">';
+                            html += '<div class="inline-block w-auto mr-3">';
+                                html += '<img alt="'+cell.getData().name+'" class="rounded-0 h-10 w-auto" style="max-width: 120px;" src="'+cell.getData().logo_url+'">';
                             html += '</div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
+                            html += '<div class="inline-block font-medium whitespace-normal">'+cell.getData().name+'</div>';
                         html += '</div>';
 
                         return html;
@@ -51,8 +50,6 @@ var ELearningActivityList = (function () {
                     title: "Category",
                     field: "category",
                     headerHozAlign: "left",
-                    
-                    width: "150",
                 },
                 {
                     title: "Repeat Weekly",

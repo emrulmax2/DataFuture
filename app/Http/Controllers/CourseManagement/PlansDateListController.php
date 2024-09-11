@@ -73,8 +73,10 @@ class PlansDateListController extends Controller
                 
                 $end_day = date($theDay." ".$list->plan->end_time);
                 $end_time = date('h:i A', strtotime($end_day));
-                if(strtotime(now())> strtotime($end_day)) {
+                $timePassed = 0;
+                if(strtotime(now()) > strtotime($end_day)) {
                     $upcommingStatus = "Unknown";
+                    $timePassed = 1;
                 } else {
                     $upcommingStatus = "Upcomming";
                 }
@@ -98,6 +100,7 @@ class PlansDateListController extends Controller
                     "attendance_information" => ($list->attendanceInformation) ?? null,    
                     "foundAttendances"  => ($list->attendances) ?? null, 
                     "feed_given"  => (isset($list->feed_given) && $list->feed_given > 0 ? $list->feed_given : 0), 
+                    "time_passed"  => $timePassed, 
                 ];
                 $i++;
             endforeach;

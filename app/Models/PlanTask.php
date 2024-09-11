@@ -27,5 +27,10 @@ class PlanTask extends Model
     {
         return $this->belongsTo(User::class,'created_by');
     }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
     
 }

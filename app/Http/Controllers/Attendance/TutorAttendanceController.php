@@ -66,7 +66,7 @@ class TutorAttendanceController extends Controller
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
                
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
-                    PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Held']);
+                    PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Completed']);
                     $attendanceInformation = AttendanceInformation::find($attendanceFind->id);
                     $attendanceInformation->end_time = now();
                     $attendanceInformation->updated_by = Auth::user()->id;
