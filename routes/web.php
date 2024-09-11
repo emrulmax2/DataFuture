@@ -2174,11 +2174,7 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}/{type?}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
-        Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new'); 
-
-        Route::post('tutor-dashboard/get-plan-assigned-students', 'getAssignedStudentList')->name('tutor-dashboard.get.assigned.std.list'); 
-        Route::post('tutor-dashboard/get-student-attendance', 'getStudentAttendance')->name('tutor-dashboard.get.student.attendance'); 
-        Route::post('tutor-dashboard/store-single-attendance', 'storeSingleAttendance')->name('tutor-dashboard.store.single.attendance'); 
+        Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new');  
     });
 
     Route::resource('plan-assessment', AssessmentPlanController::class);

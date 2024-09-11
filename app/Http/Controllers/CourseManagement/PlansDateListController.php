@@ -101,6 +101,7 @@ class PlansDateListController extends Controller
                     "foundAttendances"  => ($list->attendances) ?? null, 
                     "feed_given"  => (isset($list->feed_given) && $list->feed_given > 0 ? $list->feed_given : 0), 
                     "time_passed"  => $timePassed, 
+                    "plan_id"  => $list->plan_id, 
                 ];
                 $i++;
             endforeach;

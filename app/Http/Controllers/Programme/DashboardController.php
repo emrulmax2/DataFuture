@@ -86,7 +86,7 @@ class DashboardController extends Controller
         });
 
         if(!empty($plans) && $plans->count() > 0):
-            $currentTime = date('Y-m-d H:i:s', strtotime($theDate.' '.date('H:i:s')));
+            $currentTime = date('Y-m-d H:i:s');
             foreach($plans as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $tutorEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
@@ -158,10 +158,10 @@ class DashboardController extends Controller
                         $html .= '</span>';
                     $html .= '</td>';
                     $html .= '<td class="text-right">';
-                        if($pln->status == 'Schedule'):
+                        if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
                             $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
                         endif;
-                        if($pln->status == 'Schedule' || $pln->status == 'Unknown'):
+                        if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
                             $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" type="button" class="cancelClass ml-1 btn-rounded btn btn-danger text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></button>';
                         endif;
                     $html .= '</td>';
@@ -431,8 +431,8 @@ class DashboardController extends Controller
 
 
     public function personalTutorDetails($term_declaration_id, $tutorid){
-        $plans = [];
-        $tutorPlans = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->where('class_type', 'Tutorial')->get();
+        $plans = [];//->where('class_type', 'Tutorial')
+        $tutorPlans = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->get();
         if($tutorPlans->count() > 0):
             foreach($tutorPlans as $tp):
                 $plans[$tp->id] = $tp;
