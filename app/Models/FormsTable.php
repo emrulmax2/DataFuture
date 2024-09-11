@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FormsTable extends Model
 {
     use HasFactory;
-    protected $table = 'form_table';
+    protected $table = 'forms_table';
     protected $guarded = ['id']; 
     /**
     * The attributes that should be mutated to dates.
