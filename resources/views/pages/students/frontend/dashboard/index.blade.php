@@ -49,12 +49,17 @@
                                                         <div class="font-medium">{{ $termData->module }}</div>
                                                         <div class="text-slate-500 text-xs mt-0.5">{{ isset($termData->classType) ? $termData->classType : "No class type found" }}</div>
                                                     </div>
-                                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
-                                                        <img alt="#" src="{{ $termData->tutor_photo }}">
-                                                    </div>
-                                                    <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
-                                                        <img alt="#" src="{{ $termData->personal_tutor_photo }}">
-                                                    </div>
+                                                    @if($termData->tutor_photo != "")
+                                                        <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
+                                                            
+                                                            <img alt="#" src="{{ $termData->tutor_photo }}">
+                                                        </div>
+                                                    @endif
+                                                    @if($termData->personal_tutor_photo!="")
+                                                        <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
+                                                            <img alt="#" src="{{ $termData->personal_tutor_photo }}">
+                                                        </div>
+                                                    @endif
                                                     @if(isset($termData->group) && !empty($termData->group))
                                                         @if(strlen($termData->group) > 2)
                                                             <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $termData->group }}</div>
