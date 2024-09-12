@@ -1238,10 +1238,10 @@ class StudentController extends Controller
         // foreach ($CourseCreationsList as $coursesData): 
         //     $course[$courses->course->id] = $coursesData->id;
         // endforeach;
-        if(isset($groups) && isset($courses)) {
+        if(isset($groups) && count($groups) >0 && isset($courses) && count($courses)>0) {
             $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
             $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
-        }elseif(isset($courses)) {
+        }elseif(isset($courses)&& count($courses)>0) {
             
             $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
 

@@ -345,27 +345,27 @@ var liveGroupListTable = (function () {
             }
         };
         var student_status = new TomSelect('#student_status', tomOptionsMul);
-        var academic_year = new TomSelect('#academic_year', tomOptions);
-        var intake_semester = new TomSelect('#intake_semester', tomOptions);
-        var attendance_semester = new TomSelect('#attendance_semester', tomOptions);
-            attendance_semester.clear(true)
+        var academic_year = new TomSelect('#academic_year', tomOptionsMul);
+        var intake_semester = new TomSelect('#intake_semester', tomOptionsMul);
+        var attendance_semester = new TomSelect('#attendance_semester', tomOptionsMul);
+            attendance_semester.clear()
             attendance_semester.disable();
-        var course = new TomSelect('#course', tomOptions);
+        var course = new TomSelect('#course', tomOptionsMul);
             course.clear(true)
             course.disable();
-        var group = new TomSelect('#group', tomOptions);
+        var group = new TomSelect('#group', tomOptionsMul);
             group.clear(true)
             group.disable();
         var term_status = new TomSelect('#term_status', tomOptionsMul);
-        var student_type = new TomSelect('#student_type', tomOptions);
+        var student_type = new TomSelect('#student_type', tomOptionsMul);
         var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
         ///course.list.by.academic.term
         academic_year.on('item_add', function(e) {
             let academicList = academic_year.getValue();
             
-            attendance_semester.clear(true)
-            attendance_semester.clearOptions();
-            attendance_semester.disable();
+            //attendance_semester.clear(true)
+            //attendance_semester.clearOptions();
+            //attendance_semester.disable();
             if(academicList.length > 0 ){
                 axios({
                     method: "post",
@@ -450,6 +450,7 @@ var liveGroupListTable = (function () {
             course.clearOptions();
 
             if(List1.length > 0 ){
+                
                 axios({
                     method: "post",
                     url: route('student.get.coureses.by.terms'),
@@ -477,10 +478,53 @@ var liveGroupListTable = (function () {
 
                     }
                 });
+
+                /* catch the Status */
+                let List3 = course.getValue();
+                let List4 = group.getValue();
+                group_student_status.clear(true)
+                group_student_status.disable();
+                group_student_status.clearOptions();
+
+                if(List1.length > 0 ) {
+                    axios({
+                        method: "post",
+                        url: route('student.get.status.by.groups'),
+                        data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3, groups: List4 },
+                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    }).then(response => {
+                        if (response.status == 200) {
+                            var res = response.data.res;
+                            group_student_status.enable();
+                            $.each(res, function(index, row) {
+                                group_student_status.addOption({
+                                    value: row.id,
+                                    text: row.name,
+                                });
+                            });
+                            group.refreshOptions();
+                        }
+                    }).catch(error => {
+
+                        if (error.response) {
+
+                            group_student_status.enable();
+                            group_student_status.clear();
+                            group_student_status.clearOptions();
+                            group_student_status.log('error');
+
+                        }
+                    });
+                } else {
+                    group_student_status.clear(true)
+                    group_student_status.clearOptions();
+                    group_student_status.disable();
+                }
+                    /* End status */
             }else{
-                group.clear(true)
-                group.clearOptions();
-                group.disable();
+                group_student_status.clear(true)
+                group_student_status.clearOptions();
+                group_student_status.disable();
             }
         })
 
