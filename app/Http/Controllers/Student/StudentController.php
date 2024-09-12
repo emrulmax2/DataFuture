@@ -258,7 +258,8 @@ class StudentController extends Controller
                 $$field = (isset($value) && !empty($value) ? $value : '');
             endforeach;
             $studentsIds = [];
-                if(count($group)>0 && count($course)>0) {
+                if(isset($group) && isset($course)) {
+                    
                 $groupsIDList = Group::select('id')
                                         ->whereIn('term_declaration_id', $attendance_semester)
                                         ->whereIn('course_id',$course)
@@ -274,7 +275,7 @@ class StudentController extends Controller
                                 ->whereIn('group_id',$groupsIDList)
                                 ->orderBy('id', 'ASC')->get();
 
-                }else if(count($course)>0) {
+                }else if(isset($course) && count($course)>0) {
                     $planList = Plan::with("assign")
                                 ->whereIn('term_declaration_id', $attendance_semester)
                                 ->whereIn('course_id',$course)
