@@ -14,48 +14,104 @@
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         <div class="overflow-x-auto">
-            <table data-tw-merge class="table w-full text-left">
-                <thead data-tw-merge class="">
-                    <tr data-tw-merge class="">
-                        
-                            <th>Class Plan ID</th>                                                
-                            <th>Term</th>
-                            <th>Course & Module</th>
-                            <th>Group</th>
-                            <th>Tutor name</th>
-                            <th>Time</th>
-                            <th>Room</th>
-                            <th>Date</th>
-                        
+            <table class="table w-full text-left">
+                <thead class="">
+                    <tr class="">
+                        <th>Class Plan ID</th>                                                
+                        <th>Term</th>
+                        <th>Course & Module</th>
+                        <th>Group</th>
+                        @if(isset($data['plan']->class_type) && ($data['plan']->class_type == 'Tutorial' || $data['plan']->class_type == 'Seminar'))
+                        <th>Personal Tutor</th>
+                        @else
+                        <th>Tutor</th>
+                        @endif
+                        <th>Date & Time</th>
+                        <th>Room</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-tw-merge class="">
+                    <tr class="">
                         <td>{{ $data["plan_id"] }}</td>
                         <td>
-                            <div class="font-medium whitespace-nowrap">{{ $data["term_name"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["term"] }}</div>
+                            <div class="font-medium whitespace-nowrap">{{ isset($data["plan"]->attenTerm->name) && !empty($data["plan"]->attenTerm->name) ? $data["plan"]->attenTerm->name : '' }}</div>
                         </td>
                         <td>
-                            <div class="font-medium whitespace-nowrap">{{ $data["course"] }}</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["module"] }}</div>
+                            <div class="font-medium whitespace-nowrap">{{ $data["module"] }}{{ (isset($data['plan']->class_type) && !empty($data['plan']->class_type) ? ' - '.$data['plan']->class_type : '')}}</div>
+                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["course"] }}</div>
                         </td>
                         <td>{{ $data["group"] }}</td>
-                        <td>{{ $data["tutor"] }}</td>
-                        <td>{{ $data["start_time"] }} - {{ $data["end_time"] }}</td>
+                        @if(isset($data['plan']->class_type) && ($data['plan']->class_type == 'Tutorial' || $data['plan']->class_type == 'Seminar'))
+                            <td>{{ (isset($data['plan']->personalTutor->employee->full_name) ? $data['plan']->personalTutor->employee->full_name : '') }}</td>
+                        @else
+                            <td>{{ (isset($data['plan']->tutor->employee->full_name) ? $data['plan']->tutor->employee->full_name : '') }}</td>
+                        @endif
+                        <td>
+                            {{ $data["date"] }}<br/>
+                            {{ $data["start_time"] }} - {{ $data["end_time"] }}
+                        </td>
                         <td>
                             <div class="font-medium whitespace-nowrap">{{ $data["venue"] }}</div>
                             <div class="text-slate-500 text-xs whitespace-nowrap">{{ $data["room"] }}</div>
                         </td>
-                        <td>{{ $data["date"] }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <form id="attendanceFeedForm" method="post" action="#">
+        <div class="intro-y box mt-5 relative z-20">
+            <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                <h2 class="font-medium text-base mr-auto">Attendance Informations</h2>
+            </div>
+            <div class="p-5">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 sm:col-span-3">
+                        <label class="form-label">Tutor</label>
+                        <select id="tutor_id" name="attendanceInfo_tutor_id" class="tom-selects w-full">
+                            <option value="">Please Select</option>
+                            @if($users->count() > 0)
+                                @foreach($users as $usr)
+                                    <option {{ (isset($atninfo->tutor_id) && $atninfo->tutor_id == $usr->id ? 'Selected' : '') }} value="{{ $usr->id }}">{{ (isset($usr->employee->full_name) && !empty($usr->employee->full_name) ? $usr->employee->full_name : $usr->name )}}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-attendanceInfo_tutor_id text-danger mt-2"></div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-2">
+                        <label class="form-label">Start Time</label>
+                        <input type="text" name="attendanceInfo_start_time" class="form-control timePicker w-full" value="{{ (isset($atninfo->start_time) && !empty($atninfo->start_time) ? date('H:i', strtotime($atninfo->start_time)) : '') }}" placeholder="14:30"/>
+                        <div class="acc__input-error error-attendanceInfo_start_time text-danger mt-2"></div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-2">
+                        <label class="form-label">End Time</label>
+                        <input type="text" name="attendanceInfo_end_time" class="form-control timePicker w-full" value="{{ (isset($atninfo->end_time) && !empty($atninfo->end_time) ? date('H:i', strtotime($atninfo->end_time)) : '') }}" placeholder="16:30"/>
+                        <div class="acc__input-error error-attendanceInfo_end_time text-danger mt-2"></div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <label class="form-label">Short Note</label>
+                        <textarea type="text" name="attendanceInfo_note" rows="1" class="form-control w-full">{{ (isset($atninfo->note) && !empty($atninfo->note) ? $atninfo->note : '') }}</textarea>
+                    </div>
+                    <div class="col-span-12 sm:col-span-2">
+                        <label class="form-label">Day Status</label>
+                        <select name="plans_date_list_status" class="form-control w-full">
+                            <option value="">Please Select</option>
+                            <option {{ ($data['status'] == 'Scheduled' ? 'Selected' : '') }} value="Scheduled">Scheduled</option>
+                            <option {{ ($data['status'] == 'Ongoing' ? 'Selected' : '') }} value="Ongoing">Ongoing</option>
+                            <option {{ ($data['status'] == 'Completed' ? 'Selected' : '') }} value="Completed">Completed</option>
+                            <option {{ ($data['status'] == 'Canceled' ? 'Selected' : '') }} value="Canceled">Canceled</option>
+                            <option {{ ($data['status'] == 'Unknown' ? 'Selected' : '') }} value="Unknown">Unknown</option>
+                        </select>
+                        <div class="acc__input-error error-plans_date_list_status text-danger mt-2"></div>
+                    </div>
+                    <input type="hidden" name="attendanceInfo_id" value="{{ (isset($atninfo->id) && $atninfo->id > 0 ? $atninfo->id : '0') }}"/>
+                </div>
+            </div>
+        </div>
     
-    <form id="attendanceFeed" method="post" action="#">
-        <div class="intro-y box p-5 mt-5">
+    
+        <div class="intro-y box p-5 mt-5 relative z-10">
             <div class="overflow-x-auto">
                 <table class="table table-bordered w-full text-left" id="feedAttendanceTable">
                     <thead>
@@ -176,12 +232,12 @@
                                 </td>
                                 <td style="width: 150px;">
                                     <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox"  class="form-check-input checkEmailNotify" id="email_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="1" />
+                                        <input type="checkbox"  class="form-check-input checkEmailNotify" id="email_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="{{ $list->student->id }}" />
                                     </div>
                                 </td>
                                 <td style="width: 150px;">
                                     <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox" class="form-check-input checkSmsNotify" id="sms_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="1" />
+                                        <input type="checkbox" class="form-check-input checkSmsNotify" id="sms_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="{{ $list->student->id }}" />
                                     </div>
                                 </td>
                             </tr>   
@@ -195,7 +251,7 @@
                 </table>
             </div>
             <div class="flex justify-end mt-5">
-                <button type="submit" class="save btn btn-success shadow-md text-white">Save Attendance
+                <button type="submit" id="saveAtnBtn" class="btn btn-success shadow-md text-white">Save Attendance
                     <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                         stroke="white" class="w-4 h-4 ml-2">
                         <g fill="none" fill-rule="evenodd">
@@ -209,7 +265,7 @@
                         </g>
                     </svg>
                 </button>
-                <input type="hidden" name="url" value="{{ route('attendance.store') }}" />
+
                 <input type="hidden" name="plan_date_list_id" value="{{ $data['id'] }}" />
                 <input type="hidden" name="plan_id" value="{{ $data['plan_id'] }}" />
                 <input type="hidden" name="tutor_id" value="{{ $data['plan']->tutor_id }}" />

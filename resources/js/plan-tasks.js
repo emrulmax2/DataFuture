@@ -116,6 +116,7 @@ var classPlanDateListsTutorTable = (function () {
                     download: false,
                     formatter(cell, formatterParams) {
                         let btn = '';
+                        let attendanceInformation = cell.getData().attendance_information;
                         if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
                             btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</a>';
                         }else{
