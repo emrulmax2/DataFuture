@@ -1,70 +1,68 @@
 import { createIcons, icons } from "lucide";
+import TomSelect from "tom-select";
+import IMask from 'imask';
 
 ("use strict");
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
-    $('.save').on('click', function (e) {
-        e.preventDefault();
+    let tomOptionsSingle = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    let tutor_id = new TomSelect(document.getElementById('tutor_id'), tomOptionsSingle);
 
-        var parentForm = $(this).parents('form');
-        
-        var formID = parentForm.attr('id');
-        
-        const form = document.getElementById(formID);
-        let url = $("#"+formID+" input[name=url]").val();
-        
-        let form_data = new FormData(form);
-
-        $.ajax({
-            method: 'POST',
-            url: url,
-            data: form_data,
-            dataType: 'json',
-            async: false,
-            enctype: 'multipart/form-data',
-            processData: false,
-            contentType: false,
-            cache: false,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            success: function(res, textStatus, xhr) {
-
-                $('.acc__input-error', parentForm).html('');
-                
-                if(xhr.status == 200){
-                    //update Alert
-
-                    successModal.show();
-
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Successfull!");
-                        $("#successModal .successModalDesc").html('Attendance Captured.');
-                    });                
-                    
-                    setTimeout(function(){
-                        successModal.hide();
-                        location.reload()
-                    }, 1000);
-                }
-                
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $('.acc__input-error').html('');
-                
-                if(jqXHR.status == 422){
-                    for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
-                        $(`#${formID} .${key}`).addClass('border-danger');
-                        $(`#${formID}  .error-${key}`).html(val);
+    if($('.timePicker').length > 0){
+        $('.timePicker').each(function(){
+            var timeMask = IMask(
+                this,
+                {
+                    overwrite: true,
+                    autofix: true,
+                    mask: 'HH:MM - HH2:MM2',
+                    blocks: {
+                        HH: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'HH',
+                            from: 0,
+                            to: 23,
+                            maxLength: 2
+                        },
+                        MM: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'MM',
+                            from: 0,
+                            to: 59,
+                            maxLength: 2
+                        },
+                        HH2: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'HH',
+                            from: 0,
+                            to: 23,
+                            maxLength: 2
+                        },
+                        MM2: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'MM',
+                            from: 0,
+                            to: 59,
+                            maxLength: 2
+                        },
                     }
-                }else{
-                    console.log(textStatus+' => '+errorThrown);
                 }
-                
-            }
+            );
         });
-        
-    });
+    }
 
     $('#feedAttendanceTable').on('change', '.checkAllEmailNotify', function(){
         let $theEmailCheck = $(this);
@@ -84,6 +82,27 @@ import { createIcons, icons } from "lucide";
             $('#feedAttendanceTable').find('.checkAllEmailNotify').prop('checked', true);
         }else{
             $('#feedAttendanceTable').find('.checkAllEmailNotify').prop('checked', false);
+        }
+    });
+
+    $('#feedAttendanceTable').on('change', '.checkAllSmsNotify', function(){
+        let $theEmailCheck = $(this);
+
+        if($theEmailCheck.prop('checked')){
+            $('#feedAttendanceTable').find('.checkSmsNotify').prop('checked', true);
+        }else{
+            $('#feedAttendanceTable').find('.checkSmsNotify').prop('checked', false);
+        }
+    });
+
+    $('#feedAttendanceTable').on('change', '.checkSmsNotify', function(){
+        var allLength = $('#feedAttendanceTable').find('.checkSmsNotify').length;
+        var checkedLength = $('#feedAttendanceTable').find('.checkSmsNotify:checked').length;
+
+        if(allLength == checkedLength){
+            $('#feedAttendanceTable').find('.checkAllSmsNotify').prop('checked', true);
+        }else{
+            $('#feedAttendanceTable').find('.checkAllSmsNotify').prop('checked', false);
         }
     });
 
@@ -122,4 +141,53 @@ import { createIcons, icons } from "lucide";
             $theBtn.find('.attendanceHeaderCount_'+typeId).html(typeAttendanceCount);
         })
     }
+
+    $('#attendanceFeedForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('attendanceFeedForm');
+    
+        document.querySelector('#saveAtnBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveAtnBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('attendance.create.and.store'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveAtnBtn').removeAttribute('disabled');
+            document.querySelector("#saveAtnBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                document.querySelector('#saveAtnBtn').removeAttribute('disabled');
+                document.querySelector("#saveAtnBtn svg").style.cssText = "display: none;";
+                
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Success!" );
+                    $("#successModal .successModalDesc").html('Attendance successfully feeded.');
+                });                
+                    
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveAtnBtn').removeAttribute('disabled');
+            document.querySelector("#saveAtnBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#attendanceFeedForm .${key}`).addClass('border-danger')
+                        $(`#attendanceFeedForm  .error-${key}`).html(val)
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+        
+    })
 })();

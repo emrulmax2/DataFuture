@@ -99,6 +99,10 @@ class SlcAttendanceController extends Controller
     public function edit(Request $request){
         $attendance_id = $request->attendance_id;
         $slcAttendance = SlcAttendance::find($attendance_id);
+        $regYear = (isset($slcAttendance->registration->registration_year) && $slcAttendance->registration->registration_year > 0 ? $slcAttendance->registration->registration_year : 0);
+        if(isset($slcAttendance->attendance_year) && ($slcAttendance->attendance_year == 0 || empty($slcAttendance->attendance_year))):
+            $slcAttendance->attendance_year = $regYear;
+        endif;
 
         return response()->json(['res' => $slcAttendance], 200);
     }
@@ -221,5 +225,27 @@ class SlcAttendanceController extends Controller
         SlcAttendance::where('student_id', $student_id)->where('id', $recordid)->delete();
 
         return response()->json(['res' => 'Success'], 200);
+    }
+
+    public function syncAttendance(Request $request){
+        $student = $request->student;
+        $ids = (isset($request->recordid) && !empty($request->recordid) ? explode('_', $request->recordid) : []);
+        if(!empty($ids) && count($ids) == 2):
+            $slc_reg_id = (isset($ids[0]) && $ids[0] > 0 ? $ids[0] : 0);
+            $slc_atn_id = (isset($ids[1]) && $ids[1] > 0 ? $ids[1] : 0);
+            if($slc_reg_id > 0 && $slc_atn_id > 0):
+                $slcReg = SlcRegistration::find($slc_reg_id);
+                $data = [];
+                $data['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
+                $data['slc_registration_id'] = $slcReg->id;
+                SlcAttendance::where('id', $slc_atn_id)->update($data);
+
+                return response()->json(['res' => 'Success'], 200);
+            else:
+                return response()->json(['res' => 'Error'], 422);
+            endif;
+        else:
+            return response()->json(['res' => 'Error'], 422);
+        endif;
     }
 }

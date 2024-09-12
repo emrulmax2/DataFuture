@@ -37,6 +37,14 @@
                     <div class="grid grid-cols-12 gap-2">
                         <div class="col-span-12 sm:col-span-4">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-4 text-slate-500 font-medium">#ID</div>
+                                <div class="col-span-8 font-medium">
+                                    {{ (!empty($regs->id) ? $regs->id : '---') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
                                 <div class="col-span-4 text-slate-500 font-medium">Confirmation Date</div>
                                 <div class="col-span-8 font-medium">
                                     {{ (!empty($regs->confirmation_date) ? date('jS M, Y', strtotime($regs->confirmation_date)) : '---') }}
@@ -222,6 +230,159 @@
             </div>
         @endforeach
     @endif
+
+    @if($undefinedSlcAttendances->count() > 0)
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Attendance at SLC is unspecified</div>
+                </div>
+                <div class="col-span-6 text-right relative"></div>
+            </div>
+            <div class="intro-y mt-5">
+                <table class="table table-bordered table-sm mt-3" id="undefinedAttendanceTable">
+                    <thead>
+                        <tr>
+                            <th class="whitespace-nowrap">ID</th>
+                            <th class="whitespace-nowrap">Confirmation Date</th>
+                            <th class="whitespace-nowrap">Attendance Semester</th>
+                            <th class="whitespace-nowrap">Session Term</th>
+                            <th class="whitespace-nowrap">Code</th>
+                            <th class="whitespace-nowrap">Note</th>
+                            <th class="whitespace-nowrap text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($undefinedSlcAttendances as $atn)
+                            <tr>
+                                <td>{{ $atn->id }}</td>
+                                <td>
+                                    <span>
+                                        {{ (!empty($atn->confirmation_date) ? date('jS M, Y', strtotime($atn->confirmation_date)) : '') }}
+                                        {!! (isset($atn->user->employee->full_name) && !empty($atn->user->employee->full_name) ? 'by '.$atn->user->employee->full_name : '') !!}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ isset($atn->term->name) && !empty($atn->term->name) ? $atn->term->name : '' }}
+                                    {{ isset($atn->term->termType->name) && !empty($atn->term->termType->name) ? ' - '.$atn->term->termType->name : '' }}
+                                </td>
+                                <td>{{ !empty($atn->session_term) ? 'Term '.$atn->session_term : '' }}</td>
+                                <td><span class="font-medium">{{ isset($atn->code->code) && !empty($atn->code->code) ? $atn->code->code : '' }}</span></td>
+                                <td>{{ !empty($atn->note) ? $atn->note : '' }}</td>
+                                <td class="text-right">
+                                    @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
+                                        <div class="dropdown inline-block" data-tw-placement="bottom-end">
+                                            <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
+                                            <div class="dropdown-menu w-64">
+                                                <ul class="dropdown-content">
+                                                    @foreach($slcRegistrations as $regs)
+                                                        <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-atn="{{ $atn->id }}" class="dropdown-item assignAttendanceToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
+    <div class="intro-y box p-5 mt-5">
+        <div class="grid grid-cols-12 gap-0 items-center">
+            <div class="col-span-6">
+                <div class="font-medium text-base">COC at SLC is unspecified</div>
+            </div>
+            <div class="col-span-6 text-right relative">
+                <button  data-regid="0" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
+            </div>
+        </div>
+        <div class="intro-y mt-5">
+            <table class="table table-bordered table-sm mt-3">
+                <thead>
+                    <tr>
+                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Confirmation Date</th>
+                        <th class="whitespace-nowrap">Type</th>
+                        <th class="whitespace-nowrap">Reason</th>
+                        <th class="whitespace-nowrap">Actioned</th>
+                        <th class="whitespace-nowrap">Submitted By</th>
+                        <th class="whitespace-nowrap">Documents</th>
+                        <th class="whitespace-nowrap text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(isset($undefinedSlcCocs) && $undefinedSlcCocs->count() > 0)
+                        @foreach($undefinedSlcCocs as $coc)
+                            <tr>
+                                <td>
+                                    {{ $coc->id.(isset($coc->slc_attendance_id) && $coc->slc_attendance_id > 0 ? ' - '.$coc->slc_attendance_id : '') }}
+                                </td>
+                                <td>
+                                    {{ (!empty($coc->confirmation_date) ? date('jS F, Y', strtotime($coc->confirmation_date)) : '') }}
+                                </td>
+                                <td>{{ $coc->coc_type }}</td>
+                                <td>{{ $coc->reason }}</td>
+                                <td>{{ ucfirst($coc->actioned) }}</td>
+                                <td>{{ (isset($coc->user->employee->full_name) ? $coc->user->employee->full_name : '') }}</td>
+                                <td>
+                                    @if($coc->documents->count() > 0)
+                                        <div class="dropdown">
+                                            <button class="dropdown-toggle inline-flex justify-start items-center font-medium text-success" aria-expanded="false" data-tw-toggle="dropdown">
+                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                                Available Documents
+                                                <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                                            </button>
+                                            <div class="dropdown-menu w-80">
+                                                <ul class="dropdown-content">
+                                                    @foreach($coc->documents as $doc)
+                                                    <li>
+                                                        <span class="dropdown-item">
+                                                            <i data-lucide="check-check" class="w-4 h-4 mr-2"></i> {{ $doc->display_file_name }}
+                                                            <span class="ml-auto inline-flex justify-end items-center">
+                                                                @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name))
+                                                                    <a href="{{ Storage::disk('s3')->url('public/applicants/'.$student->applicant_id.'/'.$doc->current_file_name) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
+                                                                @endif
+                                                                <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                                                            </span>
+                                                        </span>
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="text-right">
+                                    <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
+                                    <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    @if(!empty($studentAttendanceIds) && !empty($studentAttendanceIds))
+                                        <div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">
+                                            <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
+                                            <div class="dropdown-menu w-64">
+                                                <ul class="dropdown-content">
+                                                    @foreach($studentAttendanceIds as $atnId)
+                                                        <li><a href="javascript:void(0);" data-atn="{{ $atnId }}" data-coc="{{ $coc->id }}" class="dropdown-item assignCocToAttendance text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Move to Attendance &nbsp;<strong>#{{ $atnId }}</strong></a></li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="8" class="text-center">Unspecified COC history not found!</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- BEGIN: Add Registration Modal -->
     <div id="addRegistrationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -991,4 +1152,5 @@
     @vite('resources/js/student-slc-registration.js')
     @vite('resources/js/student-slc-attedance.js')
     @vite('resources/js/student-slc-coc.js')
+    @vite('resources/js/student-slc-history-merge.js')
 @endsection

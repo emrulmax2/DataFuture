@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers\Attendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AttendanceCreateAndStoreRequest;
 use App\Http\Requests\AttendanceDateSearchRequest;
 use App\Http\Requests\AttendanceStoreRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\Assign;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
+use App\Models\AttendanceInformation;
+use App\Models\ComonSmtp;
+use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Semester;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PDF;
@@ -116,7 +123,7 @@ class AttendanceController extends Controller
      */
     public function create(PlansDateList $data)
     {
-        
+        $planDateListId = $data->id;
         $Query = DB::table('plans_date_lists as datelist')
                     ->select('datelist.*','terms.name as term_name','terms.term as term','plan.id as plan_id','plan.start_time','plan.end_time','plan.virtual_room','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
                     ->leftJoin('plans as plan', 'datelist.plan_id', 'plan.id')
@@ -127,7 +134,7 @@ class AttendanceController extends Controller
                     ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
                     ->leftJoin('groups as group', 'plan.group_id', 'group.id')
                     ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
-                    ->where('datelist.id', $data->id);
+                    ->where('datelist.id', $planDateListId);
 
         $Query = $Query->get();  
         
@@ -150,7 +157,7 @@ class AttendanceController extends Controller
                 'plan' => $plan,
                 'term_name' => $list->term_name,
                 'term' => $list->term,
-                'date' => date("d-m-Y",strtotime($list->date)),
+                'date' => date("l jS \of F Y",strtotime($list->date)),
                 'course' => $list->course_name,
                 'module' => $list->module_name,
                 'group'=> $list->group_name,
@@ -164,7 +171,7 @@ class AttendanceController extends Controller
                 'captured_by'=> "",
                 'captured_at'=> "",
                 'join_request'=> "",
-                'status'=> "",   
+                'status'=> (isset($list->status) && !empty($list->status) ? $list->status : 'Unknown'),   
                 'assignStudentList' => $assignStudentList,  
                 'AttendanceFeedStatus' => $attendanceFeedStatus         
             ];
@@ -175,7 +182,9 @@ class AttendanceController extends Controller
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
             'data' => $data,
-            'dateListId' => PlansDateList::find($list->id)
+            'dateListId' => PlansDateList::find($planDateListId),
+            'atninfo' => AttendanceInformation::where('plans_date_list_id', $planDateListId)->get()->first(),
+            'users' => User::with('employee')->where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
 
@@ -316,6 +325,129 @@ class AttendanceController extends Controller
 
         if($insertCount):
             PlansDateList::where('id', $plan_date_list_id)->update(['feed_given' => 1]);
+            return response()->json(["data success"], 200);
+        else:
+            return response()->json(["data could not save.", 422]);
+        endif;
+    }
+
+    public function createAndStore(AttendanceCreateAndStoreRequest $request){
+        $ai_id = $request->attendanceInfo_id;
+        $ai_tutor_id = $request->attendanceInfo_tutor_id;
+        $ai_start_time = $request->attendanceInfo_start_time;
+        $ai_end_time = $request->attendanceInfo_end_time;
+        $ai_note = $request->attendanceInfo_note;
+
+        $plans_date_list_status = $request->plans_date_list_status;
+        $plan_date_list_id = $request->plan_date_list_id;
+        $plan_id = $request->plan_id;
+        $plan_tutor_id = $request->tutor_id;
+        $attendances = (isset($request->attendances) && !empty($request->attendances) ? $request->attendances : []);
+
+        $plan = Plan::find($plan_id);
+        $class_time = (isset($plan->start_time) && !empty($plan->start_time) ? date('h:i A', strtotime($plan->start_time)) : '');
+        $tutor_id = (isset($request->tutor_id) && $request->tutor_id > 0 ? $request->tutor_id : 0);
+        $planDateList = PlansDateList::find($plan_date_list_id);
+        $attendance_date = (isset($planDateList->date) && !empty($planDateList->date) ? date('Y-m-d', strtotime($planDateList->date)) : date('Y-m-d'));
+
+        /* Insert or Update Attendance Informations Start */
+        $attendanceInfoData = [];
+        $attendanceInfoData['plans_date_list_id'] = $plan_date_list_id;
+        $attendanceInfoData['tutor_id'] = $ai_tutor_id;
+        $attendanceInfoData['start_time'] = $ai_start_time.':00';
+        $attendanceInfoData['end_time'] = $ai_end_time.':00';
+        $attendanceInfoData['note'] = $ai_note;
+        if($ai_id > 0):
+            $attendanceInfoData['updated_by'] = auth()->user()->id;
+            AttendanceInformation::where('id', $ai_id)->update($attendanceInfoData);
+        else:
+            $attendanceInfoData['created_by'] = auth()->user()->id;
+            AttendanceInformation::create($attendanceInfoData);
+        endif;
+        /* Insert or Update Attendance Informations Start */
+
+        /* Feed Attendance Start */
+        $insertCount = 0;
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
+        ];
+        $siteSettings = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->get()->first();
+        $company_name = (isset($siteSettings->value) && !empty($siteSettings->value) ? $siteSettings->value : 'London Churchill College');
+        if(!empty($attendances)):
+            foreach($attendances as $planDateId => $atns):
+                foreach($atns as $atn):
+                    $attendance_feed_status_id = (isset($atn['attendance_feed_status_id']) && $atn['attendance_feed_status_id'] > 0 ? $atn['attendance_feed_status_id'] : 4);
+                    $student_id = (isset($atn['student_id']) && $atn['student_id'] > 0 ? $atn['student_id'] : 0);
+                    $student = Student::find($student_id);
+
+                    $notifyEmail = (isset($atn['email_notify']) && $atn['email_notify'] > 0 && $attendance_feed_status_id == 4 ? true : false);
+                    $notifySms = (isset($atn['sms_notify']) && $atn['sms_notify'] > 0 && $attendance_feed_status_id == 4 ? true : false);
+                    $NOTIFICATION = 'Dear '.$student->full_name.'. <br/><br/>';
+                    $NOTIFICATION .= 'You have missed class on '.date("d-m-Y",strtotime($attendance_date)).'. <br/>';
+                    $NOTIFICATION .= 'Module name: '.(isset($plan->creations->module_name) && !empty($plan->creations->module_name) ? $plan->creations->module_name : 'Undefined Module').'. <br/>';
+                    $NOTIFICATION .= 'Group:'.(isset($plan->group->name) ? $plan->group->name : 'Undefined Group').' <br/>';
+                    $NOTIFICATION .= 'Time: '.$class_time;
+
+                    $data = [
+                        'plans_date_list_id' => $planDateId,
+                        'attendance_date' => $attendance_date,
+                        'attendance_captured_at' => date('Y-m-d'),
+                        'class_plan_id' => $plan_id,
+                        'student_id' => ($student_id > 0 ? $student_id : null),
+                        'attendance_feed_status_id' => $attendance_feed_status_id,
+                        'sms_notification' => ($attendance_feed_status_id == 4 ? 1 : 0),
+                        'notofication_date' => ($attendance_feed_status_id == 4 ? date('Y-m-d') : null),
+                        'notofied_by' => $tutor_id
+                    ];
+
+                    $existAttendance = Attendance::where('plans_date_list_id', $planDateId)->where('student_id', $student_id)->get()->first();
+                    if(isset($existAttendance->id) && $existAttendance->id > 0):
+                        $data['updated_by'] = Auth::user()->id;
+                        Attendance::where('id', $existAttendance->id)->update($data);
+                    else:
+                        $data['created_by'] = Auth::user()->id;
+                        Attendance::create($data);
+                    endif;
+
+                    if($notifySms):
+                        $mobile = (isset($student->contact->mobile) && !empty($student->contact->mobile) ? $student->contact->mobile : '');
+                        $SMSNOTIFICATION = str_replace('<br/>', ' ', $NOTIFICATION);
+                        $sms = $this->sendSms($mobile, $SMSNOTIFICATION);
+                    endif;
+
+                    if($notifyEmail):
+                        $NOTIFICATION .= '<br/><br/>Thanks & Regards<br/>'.$company_name;
+                        $sendTo = [];
+                        if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+                            $sendTo[] = $student->contact->institutional_email;
+                        endif;
+                        if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+                            $sendTo[] = $student->contact->personal_email;
+                        endif;
+                        $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
+
+                        UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail('Class Absence Notification', $NOTIFICATION, []));
+                    endif;
+
+                    $insertCount += 1;
+                endforeach;
+            endforeach;
+        endif;
+        /* Feed Attendance End */
+        
+        /* Update Date List Status */
+        PlansDateList::where('id', $plan_date_list_id)->update(['feed_given' => 1, 'status' => $plans_date_list_status, 'updated_by' => auth()->user()->id]);
+        /* Update Date List Status */
+
+        if($insertCount):
             return response()->json(["data success"], 200);
         else:
             return response()->json(["data could not save.", 422]);

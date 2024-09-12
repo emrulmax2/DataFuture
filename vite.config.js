@@ -254,6 +254,7 @@ export default defineConfig({
                 'resources/js/application-analysis.js',
                 
                 'resources/js/bulk-communication.js',
+                'resources/js/student-slc-history-merge.js',
                 
             ],
             refresh: true,

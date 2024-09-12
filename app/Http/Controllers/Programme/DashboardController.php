@@ -95,7 +95,10 @@ class DashboardController extends Controller
                 $classLabel = '';
                 $orgStart = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->start_time));
                 $orgEnd = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->end_time));
-                if($currentTime < $orgStart && !isset($pln->attendanceInformation->id)):
+
+                if(date('Y-m-d', strtotime($currentTime)) < date('Y-m-d', strtotime($orgStart))):
+                    $classLabel = '<span class="text-info font-medium">Scheduled</span>';
+                elseif($currentTime < $orgStart && !isset($pln->attendanceInformation->id)):
                     $classLabel = '<span class="text-danger font-medium">Starting Shortly</span>';
                 elseif($currentTime > $orgStart && $currentTime < $orgEnd && !isset($pln->attendanceInformation->id)):
                     $classLabel = '<span class="text-pending font-medium flashingText">Starting Shortly</span>';
@@ -158,12 +161,35 @@ class DashboardController extends Controller
                         $html .= '</span>';
                     $html .= '</td>';
                     $html .= '<td class="text-right">';
-                        if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
+                        if($pln->statu != 'Ongoing'):
+                            $html .= '<div class="dropdown inline-block" data-tw-placement="bottom-end">';
+                                $html .= '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-5 h-5 text-slate-500"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></a>';
+                                $html .= '<div class="dropdown-menu w-48">';
+                                    $html .= '<ul class="dropdown-content">';
+                                        if((($pln->status == 'Scheduled' && $pln->feed_given != 1) || $pln->status == 'Completed') && $orgEnd < $currentTime):
+                                            $html .= '<li>';
+                                                $html .= '<a href="'.route('attendance.create', $pln->id).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->status == 'Completed' ? 'View Feed' : 'Feed Attendance').'</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                        if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
+                                            $html .= '<li>';
+                                                $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                        if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
+                                            $html .= '<li>';
+                                                $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" href="javascript:void(0);" class="cancelClass text-danger dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Cancel Class</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                    $html .= '</ul>';
+                            $html .= '</div>';
+                        endif;
+                        /*if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
                             $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
                         endif;
                         if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
                             $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" type="button" class="cancelClass ml-1 btn-rounded btn btn-danger text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></button>';
-                        endif;
+                        endif;*/
                     $html .= '</td>';
                 $html .= '</tr>';
             endforeach;

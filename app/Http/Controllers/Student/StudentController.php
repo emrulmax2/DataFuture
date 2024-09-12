@@ -61,6 +61,8 @@ use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Signatory;
 use App\Models\SlcAgreement;
+use App\Models\SlcAttendance;
+use App\Models\SlcCoc;
 use App\Models\SlcPaymentMethod;
 use App\Models\SlcRegistration;
 use App\Models\SlcRegistrationStatus;
@@ -620,7 +622,13 @@ class StudentController extends Controller
             'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $studentId)->orderBy('id', 'desc')->get()->first(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+
+            'undefinedSlcAttendances' => SlcAttendance::where('student_id', $studentId)->where('slc_registration_id', 0)->orderBy('id', 'DESC')->get(),
+            'undefinedSlcCocs' => SlcCoc::where('student_id', $student->id)->where(function($q){
+                                    $q->where('slc_registration_id', 0)->orWhereNull('slc_registration_id');
+                                })->orderBy('id', 'DESC')->get(),
+            'studentAttendanceIds' => SlcAttendance::where('student_id', $studentId)->pluck('id')->unique()->toArray()
         ]);
     }
 

@@ -892,6 +892,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/store-slc-installment-exist', 'checkInstallmentExistence')->name('student.installment.existence');
         Route::post('student/slc-attendance-has-data', 'hasData')->name('student.slc.attendance.has.data');
         Route::delete('student/slc-attendance-destory', 'destroy')->name('student.slc.attendance.destroy');
+
+        Route::post('student/slc-attendance-sync', 'syncAttendance')->name('student.slc.attendance.sync.to.registration');
     });
 
     Route::controller(SlcAgreementController::class)->group(function() {
@@ -2151,6 +2153,7 @@ Route::middleware('auth')->group(function() {
         Route::get('attendance/list', 'list')->name('attendance.list'); 
         Route::get('attendance/create/{data}', 'create')->name('attendance.create'); 
         Route::post('attendance/save', 'store')->name('attendance.store'); 
+        Route::post('attendance/create-and-store', 'createAndStore')->name('attendance.create.and.store'); 
         Route::post('attendance/update-all', 'updateAll')->name('attendance.update.all'); 
         Route::delete('attendance/delete/{id}', 'destroy')->name('attendance.destory');
         Route::post('attendance/restore', 'restore')->name('attendance.restore');
