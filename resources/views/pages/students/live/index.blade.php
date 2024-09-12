@@ -129,7 +129,7 @@
                                                 <div class="acc__input-error error-academic_year text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="intake_semester" class="form-label">Intake Semester <span class="text-danger">*</span></label>
+                                                <label for="intake_semester" class="form-label">Intake Semester </label>
                                                 <select id="intake_semester" class="w-full tom-selects" multiple name="group[intake_semester][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($semesters))
@@ -149,7 +149,7 @@
                                                 <div class="acc__input-error error-attendance_semester text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="course" class="form-label">Course <span class="text-danger">*</span></label>
+                                                <label for="course" class="form-label">Course </label>
                                                 <select id="course" class="w-full tom-selects" multiple name="group[course][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($courses))
