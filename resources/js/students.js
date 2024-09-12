@@ -796,7 +796,7 @@ var liveGroupListTable = (function () {
                 let List3 = course.getValue();
                 let List4 = group.getValue();
 
-                if(List1.length>0 && List2.length>0 && List3.length>0){
+                if(List1.length>0 && List2.length>0 ){
                     filterStudentGroupTable();
                 }else{
                     if($academic_year.val() != ''){
@@ -810,11 +810,11 @@ var liveGroupListTable = (function () {
                     }else{
                         $termDeclaration.siblings('.acc__input-error').html('')
                     }
-                    if($course.val() != ''){
-                        $course.siblings('.acc__input-error').html('This field is required.')
-                    }else{
-                        $course.siblings('.acc__input-error').html('')
-                    }
+                    // if($course.val() != ''){
+                    //     $course.siblings('.acc__input-error').html('This field is required.')
+                    // }else{
+                    //     $course.siblings('.acc__input-error').html('')
+                    // }
                 }
             });
 

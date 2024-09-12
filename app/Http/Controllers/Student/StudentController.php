@@ -1238,11 +1238,20 @@ class StudentController extends Controller
         // foreach ($CourseCreationsList as $coursesData): 
         //     $course[$courses->course->id] = $coursesData->id;
         // endforeach;
-        $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
+        if(isset($groups) && isset($courses)) {
+            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
+            $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
+        }elseif(isset($courses)) {
+            
+            $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
 
-        
-        $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
-        
+            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereIn('course_id',$courses)->pluck('course_creation_id')->unique()->toArray();
+
+            $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_creation_id',$courseCreationIds)->whereIn('course_id',$courses)->orderBy('id', 'ASC')->get();
+
+        } else {
+            $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->orderBy('id', 'ASC')->get();
+        }
             if($planList->isNotEmpty()):
                 
                 $studentsIds = [];
@@ -1258,12 +1267,13 @@ class StudentController extends Controller
                 endforeach;
                 
                 $i = 1;
-                $ListStudent = Student::with('status')->whereIn('id',$studentsIds)->get();
-                foreach ($ListStudent as $student):
+                $ListStudentStatus = Student::whereIn('id',$studentsIds)->get()->pluck('status_id')->unique()->toArray();
+                $ListStudent = Status::whereIn('id',$ListStudentStatus)->get();
+                foreach ($ListStudent as $status):
                     //dd(array_search($student->status->name, array_column($res, 'name')));
                     //if(array_search($student->status->name, array_column($res, 'name')) !== false) {
-                        $res[$i]['id'] = $student->status->id;
-                        $res[$i]['name'] = $student->status->name;
+                        $res[$i]['id'] = $status->id;
+                        $res[$i]['name'] = $status->name;
                         $i++;
                     //}
                 endforeach;
