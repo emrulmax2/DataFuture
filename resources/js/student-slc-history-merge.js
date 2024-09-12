@@ -106,6 +106,46 @@ import Tabulator from "tabulator-tables";
                     console.log('error');
                 }
             });
+        }else if(action == 'ASSIGNCOCTOATN'){
+            axios({
+                method: 'post',
+                url: route('student.slc.coc.sync.to.attendance'),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s SLC COC sync successfully with selected Attendance.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                confirmModal.hide();
+                if(error.response.status == 422){
+                    warningModal.show();
+                    document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                        $('#warningModal .warningModalTitle').html('Oops!');
+                        $('#warningModal .warningModalDesc').html('Something went wrong. Please try later or contact with the administrator.');
+                        $('#warningModal .warningCloser').attr('data-action', 'NONE');
+                    });
+
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000);
+                }else{
+                    console.log('error');
+                }
+            });
         }else{
             confirmModal.hide();
         }
