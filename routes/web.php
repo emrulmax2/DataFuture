@@ -925,6 +925,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/destory-slc-coc-doc', 'destroyCocDocument')->name('student.destory.coc.document');
         Route::delete('student/destory-slc-coc', 'destroy')->name('student.destory.coc');
+
+        Route::post('student/sync-coc-to-attendance', 'syncCocToAttendance')->name('student.slc.coc.sync.to.attendance');
     });
 
     Route::controller(SlcMoneyReceiptController::class)->group(function() {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SlcCocUpdateRequest;
+use App\Models\SlcAttendance;
 use App\Models\SlcCoc;
 use App\Models\SlcCocDocument;
 use App\Models\SlcRegistration;
@@ -147,5 +148,25 @@ class SlcCocController extends Controller
         SlcCoc::where('student_id', $student_id)->where('id', $coc_id)->delete();
 
         return response()->json(['res' => 'Success'], 200);
+    }
+
+    public function syncCocToAttendance(Request $request){
+        $student = $request->student;
+        $ids = (isset($request->recordid) && !empty($request->recordid) ? explode('_', $request->recordid) : []);
+        if(!empty($ids) && count($ids)):
+            $atn_id = (isset($ids[0]) && $ids[0] > 0 ? $ids[0] : 0);
+            $coc_id = (isset($ids[1]) && $ids[1] > 0 ? $ids[1] : 0);
+            if($atn_id > 0 && $coc_id > 0):
+                $attendance = SlcAttendance::find($atn_id);
+                $slc_registration_id = (isset($attendance->slc_registration_id) && $attendance->slc_registration_id > 0 ? $attendance->slc_registration_id : null);
+
+                SlcCoc::where('id', $coc_id)->update(['slc_registration_id' => $slc_registration_id, 'slc_attendance_id' => $atn_id]);
+                return response()->json(['res' => 'Error'], 200);
+            else:
+                return response()->json(['res' => 'Error'], 422);
+            endif;
+        else:
+            return response()->json(['res' => 'Error'], 422);
+        endif;
     }
 }
