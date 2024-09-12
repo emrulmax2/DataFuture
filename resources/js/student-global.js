@@ -18,8 +18,9 @@ import Dropzone from "dropzone";
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
-    let change_status_id = new TomSelect('#change_status_id', tomOptionsGlobal);
-
+    if($("#change_status_id").length > 0){
+        let change_status_id = new TomSelect('#change_status_id', tomOptionsGlobal);
+    }
 
     /* Start Dropzone */
     if($("#addStudentPhotoModal").length > 0){
@@ -137,66 +138,68 @@ import Dropzone from "dropzone";
     /* Profile Menu End */
 
     /* Student Status Update */
-    const changeStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#changeStudentModal"));
-    const successModalInfo = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalInfo"));
-    $('#changeStudentForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('changeStudentForm');
-    
-        document.querySelector('#updateStatusBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#updateStatusBtn svg").style.cssText ="display: inline-block;";
+    if($("#changeStudentModal").length > 0) {
+        const changeStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#changeStudentModal"));
+        const successModalInfo = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalInfo"));
+        $('#changeStudentForm').on('submit', function(e){
+            e.preventDefault();
+            const form = document.getElementById('changeStudentForm');
+        
+            document.querySelector('#updateStatusBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#updateStatusBtn svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('student.update.status'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#updateStatusBtn').removeAttribute('disabled');
-            document.querySelector("#updateStatusBtn svg").style.cssText = "display: none;";
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('student.update.status'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#updateStatusBtn').removeAttribute('disabled');
+                document.querySelector("#updateStatusBtn svg").style.cssText = "display: none;";
 
-            if (response.status == 200) {
-                changeStudentModal.hide();
-
-                successModalInfo.show(); 
-                document.getElementById("successModalInfo").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModalInfo .successModalInfoTitle").html("Congratulation!" );
-                    $("#successModalInfo .successModalInfoDesc").html('Student status successfully updated.');
-                });  
-                
-                setTimeout(function(){
-                    successModalInfo.hide();
-                    window.location.reload();
-                }, 2000);
-            }
-        }).catch(error => {
-            document.querySelector('#updateStatusBtn').removeAttribute('disabled');
-            document.querySelector("#updateStatusBtn svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#changeStudentForm .${key}`).addClass('border-danger');
-                        $(`#changeStudentForm  .error-${key}`).html(val);
-                    }
-                } else if(error.response.status == 304){
+                if (response.status == 200) {
                     changeStudentModal.hide();
 
                     successModalInfo.show(); 
                     document.getElementById("successModalInfo").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModalInfo .successModalInfoTitle").html("Oops!" );
-                        $("#successModalInfo .successModalInfoDesc").html('Nothing was changed. Please try again later.');
+                        $("#successModalInfo .successModalInfoTitle").html("Congratulation!" );
+                        $("#successModalInfo .successModalInfoDesc").html('Student status successfully updated.');
                     });  
                     
                     setTimeout(function(){
                         successModalInfo.hide();
                         window.location.reload();
                     }, 2000);
-                } else {
-                    console.log('error');
                 }
-            }
+            }).catch(error => {
+                document.querySelector('#updateStatusBtn').removeAttribute('disabled');
+                document.querySelector("#updateStatusBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#changeStudentForm .${key}`).addClass('border-danger');
+                            $(`#changeStudentForm  .error-${key}`).html(val);
+                        }
+                    } else if(error.response.status == 304){
+                        changeStudentModal.hide();
+
+                        successModalInfo.show(); 
+                        document.getElementById("successModalInfo").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModalInfo .successModalInfoTitle").html("Oops!" );
+                            $("#successModalInfo .successModalInfoDesc").html('Nothing was changed. Please try again later.');
+                        });  
+                        
+                        setTimeout(function(){
+                            successModalInfo.hide();
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
         });
-    });
+    }
     /* Student Status Update */
 })();

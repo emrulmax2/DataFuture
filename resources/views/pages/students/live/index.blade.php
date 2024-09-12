@@ -118,7 +118,7 @@
                                         <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="academic_year" class="form-label">Academic Year <span class="text-danger">*</span></label>
-                                                <select id="academic_year" class="w-full tom-selects" name="group[academic_year]">
+                                                <select id="academic_year" class="w-full tom-selects" multiple name="group[academic_year][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($academicYear))
                                                         @foreach($academicYear as $acy)
@@ -130,7 +130,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="intake_semester" class="form-label">Intake Semester <span class="text-danger">*</span></label>
-                                                <select id="intake_semester" class="w-full tom-selects" name="group[intake_semester]">
+                                                <select id="intake_semester" class="w-full tom-selects" multiple name="group[intake_semester][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($semesters))
                                                         @foreach($semesters as $sem)
@@ -142,19 +142,15 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="attendance_semester" class="form-label">Attendance Semester <span class="text-danger">*</span></label>
-                                                <select id="attendance_semester" class="w-full tom-selects" name="group[attendance_semester]">
+                                                <select id="attendance_semester" class="w-full tom-selects" multiple name="group[attendance_semester][]">
                                                     <option value="">Please Select</option>
-                                                    @if(!empty($terms))
-                                                        @foreach($terms as $trm)
-                                                            <option value="{{ $trm->id }}">{{ $trm->name }}</option>
-                                                        @endforeach
-                                                    @endif
+                                                    
                                                 </select>
                                                 <div class="acc__input-error error-attendance_semester text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="course" class="form-label">Course <span class="text-danger">*</span></label>
-                                                <select id="course" class="w-full tom-selects" name="group[course]">
+                                                <select id="course" class="w-full tom-selects" multiple name="group[course][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($courses))
                                                         @foreach($courses as $crs)
@@ -166,13 +162,13 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="group" class="form-label">Master Group</label>
-                                                <select id="group" class="w-full tom-selects" name="group[group]">
+                                                <select id="group" class="w-full tom-selects" multiple name="group[group][]">
                                                     <option value="">Please Select</option>
                                                 </select>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="evening_weekend" class="form-label">Evening / Weekend</label>
-                                                <select id="evening_weekend" class="form-control" name="group[evening_weekend]">
+                                                <select id="evening_weekend" class="w-full tom-selects" name="group[evening_weekend][]">
                                                     <option value="">Please Select</option>
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>
@@ -180,7 +176,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="student_type" class="form-label">Student Type</label>
-                                                <select id="student_type" class="w-full tom-selects" name="group[student_type]">
+                                                <select id="student_type" class="w-full tom-selects" multiple name="group[student_type][]">
                                                     <option value="">Please Select</option>
                                                     <option value="UK">UK</option>
                                                     <option value="BOTH">BOTH</option>
@@ -189,7 +185,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="term_status" class="form-label">Student Term Status</label>
-                                                <select id="term_status" class="w-full tom-selects" name="group[term_status][]" multiple>
+                                                <select id="term_status" class="w-full tom-selects" multiple name="group[term_status][]" multiple>
                                                     <option value="">Please Select</option>
                                                 </select>
                                             </div>
