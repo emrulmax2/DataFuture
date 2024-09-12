@@ -695,6 +695,8 @@ Route::middleware('auth')->group(function() {
     Route::controller(StudentController::class)->group(function() {
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
+        Route::get('student/groupsearch-list', 'groupSearchList')->name('student.list.by.groupsearch'); 
+        
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
         Route::get('student/attendance/{student}', 'AttendanceDetails')->name('student.attendance');
@@ -722,6 +724,10 @@ Route::middleware('auth')->group(function() {
         Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
 
         Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
+        
+        Route::post('student/temm-by-academic', 'getAllTerms')->name('student.get.term.by.academics');
+        Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
+        Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
 
         Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
 
