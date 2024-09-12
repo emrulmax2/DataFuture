@@ -315,19 +315,17 @@ class StudentController extends Controller
             //     $studentsIds = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)->where('active', 1)->pluck('student_id')->unique()->toArray();
             // }
 
-            if(!empty($evening_weekend)): 
-                $ew = StudentProposedCourse::where('full_time', $evening_weekend);
-                if(!empty($studentsIds)):
-                    $ew->whereIn('student_id', $studentsIds);
-                endif;
-                $studentslist= $ew->pluck('student_id')->unique()->toArray();
+            // if(!empty($evening_weekend)): 
+            //     $ew = StudentProposedCourse::where('full_time', $evening_weekend)->whereIn('student_id', $studentsIds);
+               
+            //     $studentslist= $ew->pluck('student_id')->unique()->toArray();
                 
-                foreach ($studentslist as $studentT):
-                    if(!in_array($studentT, $studentsIds))
-                        $studentsIds[] = $studentT;
-                endforeach;
+            //     foreach ($studentslist as $studentT):
+            //         if(!in_array($studentT, $studentsIds))
+            //             $studentsIds[] = $studentT;
+            //     endforeach;
 
-            endif;
+            // endif;
 
             if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
             if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
