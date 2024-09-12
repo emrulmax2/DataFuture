@@ -1793,7 +1793,7 @@ var classPlanAssessmentModuleTable = (function () {
             maxFiles: 1,
             maxFilesize: 5,
             parallelUploads: 1,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif",
+            acceptedFiles: ".jpeg,.jpg,.png,.gif,.pdf",
             addRemoveLinks: true,
             //thumbnailWidth: 100,
             //thumbnailHeight: 100,

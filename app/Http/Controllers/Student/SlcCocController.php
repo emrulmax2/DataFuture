@@ -19,15 +19,15 @@ class SlcCocController extends Controller
         $studen_id = $request->studen_id;
         $student = Student::find($studen_id);
 
-        $slc_registration_id = $request->slc_registration_id;
+        $slc_registration_id = (isset($request->slc_registration_id) && $request->slc_registration_id > 0 ? $request->slc_registration_id : 0);
         $slcRegistration = SlcRegistration::find($slc_registration_id);
         $slc_attendance_id = $request->slc_attendance_id;
 
         $cocData = [
             'student_id' => $studen_id,
-            'student_course_relation_id' => $slcRegistration->student_course_relation_id,
-            'course_creation_instance_id' => $slcRegistration->course_creation_instance_id,
-            'slc_registration_id' => $slc_registration_id,
+            'student_course_relation_id' => (isset($slcRegistration->student_course_relation_id) && $slcRegistration->student_course_relation_id > 0 ? $slcRegistration->student_course_relation_id : (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : null)),
+            'course_creation_instance_id' => (isset($slcRegistration->course_creation_instance_id) && $slcRegistration->course_creation_instance_id > 0 ? $slcRegistration->course_creation_instance_id : null),
+            'slc_registration_id' => ($slc_registration_id > 0 ? $slc_registration_id : null),
             'slc_attendance_id' => ($slc_attendance_id > 0 ? $slc_attendance_id : null),
             'confirmation_date' => (isset($request->confirmation_date) && !empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null),
             'coc_type' => $request->coc_type,
