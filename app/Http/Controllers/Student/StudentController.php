@@ -258,11 +258,32 @@ class StudentController extends Controller
                 $$field = (isset($value) && !empty($value) ? $value : '');
             endforeach;
             $studentsIds = [];
-            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $attendance_semester)->whereIn('course_id',$course)->whereIn('name',$group)->groupBy('id')->get()->pluck('id')->toArray();
-
-        
-            $planList = Plan::with("assign")->whereIn('term_declaration_id', $attendance_semester)->whereIn('course_id',$course)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
+                if(count($group)>0 && count($course)>0) {
+                $groupsIDList = Group::select('id')
+                                        ->whereIn('term_declaration_id', $attendance_semester)
+                                        ->whereIn('course_id',$course)
+                                        ->whereIn('name',$group)
+                                        ->groupBy('id')
+                                        ->get()
+                                        ->pluck('id')
+                                        ->toArray();
             
+                $planList = Plan::with("assign")
+                                ->whereIn('term_declaration_id', $attendance_semester)
+                                ->whereIn('course_id',$course)
+                                ->whereIn('group_id',$groupsIDList)
+                                ->orderBy('id', 'ASC')->get();
+
+                }else if(count($course)>0) {
+                    $planList = Plan::with("assign")
+                                ->whereIn('term_declaration_id', $attendance_semester)
+                                ->whereIn('course_id',$course)
+                                ->orderBy('id', 'ASC')->get();
+                }else {
+                    $planList = Plan::with("assign")
+                                ->whereIn('term_declaration_id', $attendance_semester)
+                                ->orderBy('id', 'ASC')->get();
+                }
                 if($planList->isNotEmpty()):
                     $i = 1;
     
@@ -293,18 +314,20 @@ class StudentController extends Controller
             //                    ->where('course_id', $course)->pluck('id')->unique()->toArray();
             //     $studentsIds = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)->where('active', 1)->pluck('student_id')->unique()->toArray();
             // }
-            // if(!empty($evening_weekend)): 
-            //     $ew = StudentProposedCourse::where('full_time', $evening_weekend);
-            //     if(!empty($studentsIds)):
-            //         $ew->whereIn('student_id', $studentsIds);
-            //     endif;
-            //     $studentsIds = $ew->pluck('student_id')->unique()->toArray();
-            //     if(empty($studentsIds)):
-            //         $studentsIds = [0];
-            //     endif;
-            // else:
-            //     $studentsIds = !empty($studentsIds) ? $studentsIds : [0];
-            // endif;
+
+            if(!empty($evening_weekend)): 
+                $ew = StudentProposedCourse::where('full_time', $evening_weekend);
+                if(!empty($studentsIds)):
+                    $ew->whereIn('student_id', $studentsIds);
+                endif;
+                $studentslist= $ew->pluck('student_id')->unique()->toArray();
+                
+                foreach ($studentslist as $studentT):
+                    if(!in_array($studentT, $studentsIds))
+                        $studentsIds[] = $studentT;
+                endforeach;
+
+            endif;
 
             if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
             if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
