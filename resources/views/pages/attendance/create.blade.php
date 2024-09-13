@@ -173,7 +173,7 @@
                         @endphp
                         @foreach($data["assignStudentList"] as $list) 
                             @php 
-								$existAttendance = (isset($data['exist_attendances'][$list->student->id]) && $data['exist_attendances'][$list->student->id] > 0 ? $data['exist_attendances'][$list->student->id] : 0);
+								$existAttendance = (isset($data['existAttendances'][$list->student->id]) && $data['existAttendances'][$list->student->id] > 0 ? $data['existAttendances'][$list->student->id] : 0);
 							@endphp      
                             <tr class="theAttendanceRow">
                                 <td width="100px">{{ $serial }}</td>

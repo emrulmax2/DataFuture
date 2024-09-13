@@ -70,6 +70,7 @@ class ELearningActivitySettingController extends Controller
                     'sl' => $i,
                     'category' => $list->category,
                     'name' => $list->name,
+                    'short_code' => (isset($list->short_code) && !empty($list->short_code) ? $list->short_code : ''),
                     'logo_url' => $logoUrl,
                     'has_week' => (isset($list->has_week) && $list->has_week > 0 ? $list->has_week : 0),
                     'days_reminder'=> (isset($list->days_reminder) ? $list->days_reminder : NULL),
@@ -87,6 +88,7 @@ class ELearningActivitySettingController extends Controller
         $eLearning = ELearningActivitySetting::create([
             'category'=> $request->category,
             'name' => $request->name,
+            'short_code' => $request->short_code,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
             'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
             'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
@@ -132,6 +134,7 @@ class ELearningActivitySettingController extends Controller
             'category'=> $request->category,
             'has_week'=> (isset($request->has_week) && $request->has_week > 0 ? $request->has_week : 0),
             'name' => $request->name,
+            'short_code' => $request->short_code,
             'days_reminder'=> (isset($request->days_reminder) ? $request->days_reminder : NULL),
             'is_mandatory'=> (isset($request->is_mandatory) && $request->is_mandatory > 0 ? $request->is_mandatory : 0),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),

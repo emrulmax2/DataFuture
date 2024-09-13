@@ -134,6 +134,21 @@ class DashboardController extends Controller
                             $html .= '<div>';
                                 $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
                                 $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
+                                if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
+                                    $html .= '<div class="flex flex-start pt-1">';
+                                    foreach($pln->plan->tasks as $tsk):
+                                        $sc_class = 'btn-success';
+                                        if($tsk->uploads->count() == 0):
+                                            if($tsk->last_date && $tsk->last_date > date('Y-m-d')):
+                                                $sc_class = 'btn-warning';
+                                            elseif($tsk->last_date && $tsk->last_date <= date('Y-m-d')):
+                                                $sc_class = 'btn-danger';
+                                            endif;
+                                        endif;
+                                        $html .= '<span class="btn btn-sm px-2 py-0.5 text-white '.$sc_class.' mr-1">'.$tsk->eLearn->short_code.'</span>';
+                                    endforeach;
+                                    $html .= '</div>';
+                                endif;
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
@@ -146,6 +161,16 @@ class DashboardController extends Controller
                                 $html .= '<div class="inline-block font-medium relative">';
                                     $html .= (isset($pln->plan->tutor->employee->full_name) && !empty($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : (isset($pln->plan->tutor->name) ? $pln->plan->tutor->name : 'LCC'));
                                     $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->tutor->employee->mobile) && !empty($pln->plan->tutor->employee->mobile) ? '<br/>'.$pln->plan->tutor->employee->mobile : '');
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        elseif($pln->plan->personal_tutor_id > 0):
+                            $html .= '<div class="flex justify-start items-center">';
+                                $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
+                                    $html .= '<img src="'.(isset($pln->plan->personalTutor->employee->photo_url) ? $pln->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : 'LCC').'">';
+                                $html .= '</div>';
+                                $html .= '<div class="inline-block font-medium relative">';
+                                    $html .= (isset($pln->plan->personalTutor->employee->full_name) && !empty($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : (isset($pln->plan->personalTutor->name) ? $pln->plan->personalTutor->name : 'LCC'));
+                                    $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->personalTutor->employee->mobile) && !empty($pln->plan->personalTutor->employee->mobile) ? '<br/>'.$pln->plan->personalTutor->employee->mobile : '');
                                 $html .= '</div>';
                             $html .= '</div>';
                         else:
@@ -166,9 +191,14 @@ class DashboardController extends Controller
                                 $html .= '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-5 h-5 text-slate-500"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></a>';
                                 $html .= '<div class="dropdown-menu w-48">';
                                     $html .= '<ul class="dropdown-content">';
-                                        if((($pln->status == 'Scheduled' && $pln->feed_given != 1) || $pln->status == 'Completed') && $orgEnd < $currentTime):
+                                        if($pln->status == 'Scheduled' && $pln->feed_given != 1 && $orgEnd < $currentTime):
                                             $html .= '<li>';
-                                                $html .= '<a href="'.route('attendance.create', $pln->id).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->status == 'Completed' ? 'View Feed' : 'Feed Attendance').'</a>';
+                                                $html .= '<a href="'.route('attendance.create', $pln->id).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> Feed Attendance</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                        if($pln->status == 'Completed'):
+                                            $html .= '<li>';
+                                                $html .= '<a href="'.route('tutor-dashboard.attendance', [$pln->plan->tutor_id, $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> View Feed</a>';
                                             $html .= '</li>';
                                         endif;
                                         if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
@@ -179,6 +209,11 @@ class DashboardController extends Controller
                                         if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
                                             $html .= '<li>';
                                                 $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" href="javascript:void(0);" class="cancelClass text-danger dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Cancel Class</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                        if($pln->status == 'Ongoing' && $pln->feed_given != 1):
+                                            $html .= '<li>';
+                                                $html .= '<a href="'.route('tutor-dashboard.attendance', [$pln->plan->tutor_id, $pln->id, 2]).'" class="cancelClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Feed Attendance</a>';
                                             $html .= '</li>';
                                         endif;
                                     $html .= '</ul>';

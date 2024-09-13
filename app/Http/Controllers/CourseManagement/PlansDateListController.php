@@ -99,7 +99,7 @@ class PlansDateListController extends Controller
                     'upcomming_status' => $upcommingStatus, 
                     "attendance_information" => ($list->attendanceInformation) ?? null,    
                     "foundAttendances"  => ($list->attendances) ?? null, 
-                    "feed_given"  => (isset($list->feed_given) && $list->feed_given > 0 ? $list->feed_given : 0), 
+                    "feed_given"  => (isset($list->feed_given) && $list->feed_given > 0 && (isset($list->attendances) && $list->attendances->count() > 0) ? 1 : 0), 
                     "time_passed"  => $timePassed, 
                     "plan_id"  => $list->plan_id, 
                 ];
