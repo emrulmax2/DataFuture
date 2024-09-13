@@ -124,13 +124,6 @@ class DashboardController extends Controller
                     $html .= '</td>';
                     $html .= '<td>';
                         $html .= '<div class="flex items-center">';
-                            if(isset($pln->plan->group->name) && !empty($pln->plan->group->name)):
-                                if(strlen($pln->plan->group->name) > 2):
-                                    $html .= '<div class="mr-4 rounded text-lg bg-success whitespace-nowrap text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
-                                else:
-                                    $html .= '<div class="mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
-                                endif;
-                            endif;
                             $html .= '<div>';
                                 $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
                                 $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
@@ -150,6 +143,13 @@ class DashboardController extends Controller
                                     $html .= '</div>';
                                 endif;
                             $html .= '</div>';
+                            if(isset($pln->plan->group->name) && !empty($pln->plan->group->name)):
+                                if(strlen($pln->plan->group->name) > 2):
+                                    $html .= '<div class="ml-auto mr-4 rounded text-lg bg-success whitespace-nowrap text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
+                                else:
+                                    $html .= '<div class="ml-auto mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
+                                endif;
+                            endif;
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td class="text-left text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
