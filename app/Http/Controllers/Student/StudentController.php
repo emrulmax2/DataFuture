@@ -644,7 +644,9 @@ class StudentController extends Controller
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
-            'agreements' => SlcAgreement::with('installments')->where('student_id', $student_id)->where('student_course_relation_id', $courseRelationId)->orderBy('id', 'ASC')->get(),
+            'agreements' => SlcAgreement::with('installments')->where('student_id', $student_id)->where(function($q) use($courseRelationId){
+                                $q->where('student_course_relation_id', $courseRelationId)->orWhere('student_course_relation_id', 0)->orWhereNull('student_course_relation_id');
+                            })->orderBy('id', 'ASC')->get(),
             'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),

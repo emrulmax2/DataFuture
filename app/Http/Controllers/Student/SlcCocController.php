@@ -45,22 +45,14 @@ class SlcCocController extends Controller
 
                 $data = [];
                 $data['student_id'] = $studen_id;
+                $data['slc_coc_id'] = $slcCoc->id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $file->getClientOriginalExtension();
                 $data['path'] = Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
-                $studentDocument = StudentDocument::create($data);
-
-                if($studentDocument):
-                    $cocDocument = SlcCocDocument::create([
-                        'student_id' => $studen_id,
-                        'slc_coc_id' => $slcCoc->id,
-                        'student_document_id' => $studentDocument->id,
-                        'created_by' => auth()->user()->id
-                    ]);
-                endif;
+                $SlcCocDocument = SlcCocDocument::create($data);
             endforeach;
         endif;
 
@@ -99,22 +91,14 @@ class SlcCocController extends Controller
 
                 $data = [];
                 $data['student_id'] = $studen_id;
+                $data['slc_coc_id'] = $slc_coc_id;
                 $data['hard_copy_check'] = 0;
                 $data['doc_type'] = $file->getClientOriginalExtension();
                 $data['path'] = Storage::disk('s3')->url($path);
                 $data['display_file_name'] = $documentName;
                 $data['current_file_name'] = $documentName;
                 $data['created_by'] = auth()->user()->id;
-                $studentDocument = StudentDocument::create($data);
-
-                if($studentDocument):
-                    $cocDocument = SlcCocDocument::create([
-                        'student_id' => $studen_id,
-                        'slc_coc_id' => $slc_coc_id,
-                        'student_document_id' => $studentDocument->id,
-                        'created_by' => auth()->user()->id
-                    ]);
-                endif;
+                $SlcCocDocument = SlcCocDocument::create($data);
             endforeach;
         endif;
 
@@ -127,14 +111,13 @@ class SlcCocController extends Controller
         $theids = explode('_', $request->recordid);
         $coc_id = $theids[0];
         $document_id = $theids[1];
-        $doc = StudentDocument::find($document_id);
+        $doc = SlcCocDocument::find($document_id);
 
-        $slcDocuments = SlcCocDocument::where('student_id', $student_id)->where('student_document_id', $coc_id)->where('student_document_id', $document_id)->forceDelete();
         if(isset($doc->id) && $doc->id > 0):
             if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name)):
                 Storage::disk('s3')->delete('public/students/'.$student->id.'/'.$doc->current_file_name);
             endif;
-            StudentDocument::where('id', $document_id)->forceDelete();
+            SlcCocDocument::where('id', $doc->id)->forceDelete();
         endif;
 
         return response()->json(['res' => 'Success'], 200);

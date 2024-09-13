@@ -13,7 +13,12 @@ class SlcCocDocument extends Model
     protected $fillable = [
         'student_id',
         'slc_coc_id',
-        'student_document_id',
+        'hard_copy_check',
+        'doc_type',
+        'disk_type',
+        'path',
+        'display_file_name',
+        'current_file_name',
         
         'created_by',
         'updated_by',
@@ -34,7 +39,7 @@ class SlcCocDocument extends Model
         return $this->belongsTo(SlcCoc::class, 'slc_coc_id');
     }
     
-    public function stddoc(){
+    /*public function stddoc(){
         return $this->belongsTo(StudentDocument::class, 'student_document_id');
-    }
+    }*/
 }
