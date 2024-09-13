@@ -6,9 +6,11 @@
                         Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
                 </a>
             @endif
-            <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
-                {{ $student->status->name }}
-            </button>
+            @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
+                <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
+                    {{ $student->status->name }}
+                </button>
+            @endif
             <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary w-auto text-white tooltip" title="Change Status">
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
             </button>
