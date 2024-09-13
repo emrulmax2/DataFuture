@@ -200,8 +200,8 @@
                                                     @endif
                                                 </select>
                                             </div>
-                                            <div class="col-span-12 sm:col-span-6 text-right pt-7">
-                                                <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                            <div class="col-span-12 sm:col-span-9 ml-auto mt-auto">
+                                                <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-auto w-96"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
                                             </div>
                                             <input type="hidden" id="groupSearchStatus" value="0" class="form-control" name="group[stataus]">
                                         </div>
@@ -213,7 +213,9 @@
                 </div>
             </div>
         </form>
-
+        <div id="studentListFound" class="flex items-center  ">
+            <div id="unsignedResultCount" class="font-bold text-base text-right ml-auto p-5 border-b border-slate-200/60 dark:border-darkmode-400" data-total="0"></div>
+        </div>
         <div class="overflow-x-auto scrollbar-hidden">
             <div id="liveStudentsListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
