@@ -59,4 +59,30 @@ class SlcAgreement extends Model
     public function payments(){
         return $this->hasMany(SlcMoneyReceipt::class, 'slc_agreement_id', 'id');
     }
+
+    public function getClaimAmountAttribute(){
+        $claimAmount = 0;
+        if(isset($this->installments) && $this->installments->count() > 0):
+            foreach($this->installments as $inst):
+                $claimAmount += $inst->amount;
+            endforeach;
+        endif;
+
+        return $claimAmount;
+    }
+
+    public function getReceivedAmountAttribute(){
+        $receivedAmount = 0;
+        if(isset($this->payments) && $this->payments->count() > 0):
+            foreach($this->payments as $pay):
+                if($pay->payment_type == 'Refund'):
+                    $receivedAmount -= $pay->amount;
+                else:
+                    $receivedAmount += $pay->amount;
+                endif;
+            endforeach;
+        endif;
+
+        return $receivedAmount;
+    }
 }
