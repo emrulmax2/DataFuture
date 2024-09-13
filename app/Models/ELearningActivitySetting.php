@@ -20,6 +20,7 @@ class ELearningActivitySetting extends Model
         'active',
         'created_by',
         'updated_by',
+        'short_code',
     ];
 
     /**

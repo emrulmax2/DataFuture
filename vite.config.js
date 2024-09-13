@@ -255,6 +255,8 @@ export default defineConfig({
                 
                 'resources/js/bulk-communication.js',
                 'resources/js/student-slc-history-merge.js',
+                'resources/js/student-group-search-form.js',
+                'resources/js/student-attendance-reports.js',
                 
             ],
             refresh: true,

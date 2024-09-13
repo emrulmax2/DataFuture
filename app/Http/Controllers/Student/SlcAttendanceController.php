@@ -157,10 +157,10 @@ class SlcAttendanceController extends Controller
                                 Storage::disk('s3')->delete('public/students/'.$student->id.'/'.$cdc->current_file_name);
                             endif;
                         endforeach;
-                        SlcCocDocument::where('slc_coc_id', $coc->id)->forceDelete();
+                        SlcCocDocument::where('slc_coc_id', $coc->id)->delete();
                     endif;
                 endforeach;
-                SlcCoc::where('slc_attendance_id', $slc_attendance_id)->forceDelete();
+                SlcCoc::where('slc_attendance_id', $slc_attendance_id)->delete();
             endif;
         endif;
 

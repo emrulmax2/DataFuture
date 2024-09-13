@@ -101,5 +101,9 @@ class Plan extends Model
             $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
         });
     }
+
+    public function tasks(){
+        return $this->hasMany(PlanTask::class, 'plan_id', 'id');
+    }
     
 }

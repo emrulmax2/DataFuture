@@ -5,10 +5,6 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
-    </div>
-
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
@@ -101,7 +97,7 @@
                                 <div class="col-span-4 text-slate-500 font-medium">Balance</div>
                                 <div class="col-span-8 font-medium">
                                     <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">- £'.number_format(str_replace('-', '', $balance), 2).'</span>') !!}
+                                    {!! ($balance > 0 ? '<span class="text-danger">£'.number_format($balance, 2).'</span>' : '<span class="text-success">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
                                 </div>
                             </div>
                         </div>
