@@ -180,7 +180,7 @@ var taskAssignedStudentTable = (function () {
                                 if(cell.getData().task_status == 'Pending'){
                                     html += '<div class="flex justify-end ml-3">';
                                         html += '<div class="dropdown">';
-                                            html += '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="more-vertical" class="w-5 h-5 text-slate-500"></i></a>';
+                                            html += '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-5 h-5 text-slate-500"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></a>';
                                             html += '<div class="dropdown-menu w-64">';
                                                 html += '<ul class="dropdown-content">';
                                                     if(cell.getData().has_task_status == 'Yes'){

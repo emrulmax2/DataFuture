@@ -233,16 +233,42 @@
                             <label class="form-check-label ml-4" for="permission_hr_portal_5">Login As User</label>
                         </div>
                     </div>
-                    <div class="col-span-12 sm:col-span-3">
+                    {{-- <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['hr_portal']['login_as_student']) && $priv['hr_portal']['login_as_student'] == 1 ? 'checked' : '') }} id="permission_hr_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[hr_portal][login_as_student]">
                             <label class="form-check-label ml-4" for="permission_hr_portal_6">Login as Student</label>
+                        </div>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Live Student Portal Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['student_live_portal']['edit_student_status']) && $priv['student_live_portal']['edit_student_status'] == 1 ? 'checked' : '') }} id="permission_student_portal_1" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][edit_student_status]">
+                            <label class="form-check-label ml-4" for="permission_student_portal_1">Change Status </label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['student_live_portal']['login_as_student']) && $priv['student_live_portal']['login_as_student'] == 1 ? 'checked' : '') }} id="permission_student_portal_2" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][login_as_student]">
+                            <label class="form-check-label ml-4" for="permission_student_portal_2">Login as Student</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
