@@ -34,7 +34,7 @@
                     endforeach;
                 endif;
             @endphp
-            <div class="intro-y box p-5 mt-5">
+            <div class="intro-y box p-5 mt-5 {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'bg-danger-soft') }}">
                 <div class="grid grid-cols-12 gap-0 items-center">
                     <div class="col-span-6">
                         <div class="font-medium text-base">

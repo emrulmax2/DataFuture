@@ -693,6 +693,7 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(StudentController::class)->group(function() {
+        
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
         Route::get('student/groupsearch-list', 'groupSearchList')->name('student.list.by.groupsearch'); 
@@ -726,6 +727,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
         
         Route::post('student/temm-by-academic', 'getAllTerms')->name('student.get.term.by.academics');
+        Route::post('student/get-student-type', 'getAllStudentType')->name('student.get.all.student.type');
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
 
@@ -925,6 +927,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/destory-slc-coc-doc', 'destroyCocDocument')->name('student.destory.coc.document');
         Route::delete('student/destory-slc-coc', 'destroy')->name('student.destory.coc');
+
+        Route::post('student/sync-coc-to-attendance', 'syncCocToAttendance')->name('student.slc.coc.sync.to.attendance');
     });
 
     Route::controller(SlcMoneyReceiptController::class)->group(function() {
