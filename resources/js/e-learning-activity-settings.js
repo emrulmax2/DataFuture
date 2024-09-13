@@ -40,7 +40,12 @@ var ELearningActivityList = (function () {
                             html += '<div class="inline-block w-auto mr-3">';
                                 html += '<img alt="'+cell.getData().name+'" class="rounded-0 h-10 w-auto" style="max-width: 120px;" src="'+cell.getData().logo_url+'">';
                             html += '</div>';
-                            html += '<div class="inline-block font-medium whitespace-normal">'+cell.getData().name+'</div>';
+                            html += '<div class="inline-block font-medium whitespace-normal">';
+                                html += cell.getData().name;
+                                if(cell.getData().short_code != ''){
+                                    html += ' - <span class="text-success">'+cell.getData().short_code+'</span>';
+                                }
+                            html +='</div>';
                         html += '</div>';
 
                         return html;
@@ -300,6 +305,7 @@ var ELearningActivityList = (function () {
                 let dataset = response.data;
 
                 $('#editELearningActivityModal [name="name"]').val(dataset.name ? dataset.name : '');
+                $('#editELearningActivityModal [name="short_code"]').val(dataset.short_code ? dataset.short_code : '');
                 $('#editELearningActivityModal [name="category"]').val(dataset.category ? dataset.category : '');
                 
                 if(dataset.has_week == 1){

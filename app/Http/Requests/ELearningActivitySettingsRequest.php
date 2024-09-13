@@ -26,6 +26,7 @@ class ELearningActivitySettingsRequest extends FormRequest
         return [
             'category' => 'required',
             'name' => 'required|unique:e_learning_activity_settings,name',
+            'short_code' => 'required',
             'logo' => 'required'
         ];
     }

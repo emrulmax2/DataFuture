@@ -22,4 +22,9 @@ class PlanTaskUpload extends Model
     {
         return $this->belongsTo(User::class,'created_by');
     }
+
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(PlanTask::class,'plan_task_id');
+    }
 }

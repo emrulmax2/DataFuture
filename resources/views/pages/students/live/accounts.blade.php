@@ -101,7 +101,7 @@
                                 <div class="col-span-4 text-slate-500 font-medium">Balance</div>
                                 <div class="col-span-8 font-medium">
                                     <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">- £'.number_format(str_replace('-', '', $balance), 2).'</span>') !!}
+                                    {!! ($balance > 0 ? '<span class="text-danger">£'.number_format($balance, 2).'</span>' : '<span class="text-success">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
                                 </div>
                             </div>
                         </div>

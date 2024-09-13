@@ -120,6 +120,11 @@
                                     <input id="days_name" type="text" name="name" class="form-control w-full">
                                     <div class="acc__input-error error-name text-danger mt-2"></div>
                                 </div>
+                                <div class="mt-3">
+                                    <label for="short_code" class="form-label">Short Code <span class="text-danger">*</span></label>
+                                    <input id="short_code" type="text" name="short_code" class="form-control w-full">
+                                    <div class="acc__input-error error-short_code text-danger mt-2"></div>
+                                </div>
                                 <div  class="mt-3">
                                     <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
                                     <select id="category" name="category" class="form-control w-full">
@@ -208,6 +213,11 @@
                                     <label for="name" class="form-label">Activity Label <span class="text-danger">*</span></label>
                                     <input id="days_name" type="text" name="name" class="form-control w-full">
                                     <div class="acc__input-error error-name text-danger mt-2"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="edit_short_code" class="form-label">Short Code <span class="text-danger">*</span></label>
+                                    <input id="edit_short_code" type="text" name="short_code" class="form-control w-full">
+                                    <div class="acc__input-error error-short_code text-danger mt-2"></div>
                                 </div>
                                 <div >
                                     <label for="edit_category" class="form-label">Category <span class="text-danger">*</span></label>

@@ -210,6 +210,7 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
+use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -2681,5 +2682,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('bulk-communication/get-letter-template', 'getLetterTemplate')->name('bulk.communication.get.letter.set'); 
         Route::post('bulk-communication/send-letter', 'sendLetter')->name('bulk.communication.send.letter'); 
+    });
+
+    Route::controller(ReportsAttendanceReportController::class)->group(function(){
+        Route::any('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
+        //Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
     });
 });

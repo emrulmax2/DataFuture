@@ -173,7 +173,8 @@ class AttendanceController extends Controller
                 'join_request'=> "",
                 'status'=> (isset($list->status) && !empty($list->status) ? $list->status : 'Unknown'),   
                 'assignStudentList' => $assignStudentList,  
-                'AttendanceFeedStatus' => $attendanceFeedStatus         
+                'AttendanceFeedStatus' => $attendanceFeedStatus,
+                'existAttendances' => Attendance::where('plans_date_list_id', $list->id)->pluck('attendance_feed_status_id', 'student_id')        
             ];
         endforeach;
         return view('pages.attendance.create', [
