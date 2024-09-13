@@ -168,7 +168,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="evening_weekend" class="form-label">Evening / Weekend</label>
-                                                <select id="evening_weekend" class="w-full tom-selects" name="group[evening_weekend][]">
+                                                <select id="evening_weekend" class="w-full tom-selects" name="group[evening_weekend]">
                                                     <option value="">Please Select</option>
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>

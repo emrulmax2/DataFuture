@@ -6,14 +6,15 @@
                         Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
                 </a>
             @endif
-            @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
                 <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
                     {{ $student->status->name }}
                 </button>
-            @endif
+            
+            @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
             <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary w-auto text-white tooltip" title="Change Status">
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
             </button>
+            @endif
             <!-- <a style="float: right;" href="{{ route('applicantprofile.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-success text-white w-auto">Download Pdf</a> -->
             <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
         </div>
