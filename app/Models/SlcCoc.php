@@ -47,6 +47,6 @@ class SlcCoc extends Model
     }
 
     public function documents(){
-        return $this->belongsToMany(StudentDocument::class, 'slc_coc_documents');
+        return $this->hasMany(SlcCocDocument::class, 'slc_coc_id');
     }
 }
