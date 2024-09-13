@@ -822,6 +822,7 @@ var liveGroupListTable = (function () {
         }
 
         function resetStudentSearch(){
+            
             student_status.clear(true);
             $('#studentSearchStatus').val('0');
             $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
@@ -892,7 +893,7 @@ var liveGroupListTable = (function () {
                 resetStudentSearch();
                 resetGroupSearch();
                 resetStudentIDSearch();
-
+                location.reload();
                 //filterStudentListTable();
                 $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
             });
