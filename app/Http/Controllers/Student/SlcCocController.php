@@ -117,7 +117,7 @@ class SlcCocController extends Controller
             if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name)):
                 Storage::disk('s3')->delete('public/students/'.$student->id.'/'.$doc->current_file_name);
             endif;
-            SlcCocDocument::where('id', $doc->id)->forceDelete();
+            SlcCocDocument::where('id', $doc->id)->delete();
         endif;
 
         return response()->json(['res' => 'Success'], 200);
