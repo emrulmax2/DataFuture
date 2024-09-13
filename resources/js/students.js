@@ -246,6 +246,17 @@ var liveGroupListTable = (function () {
                     headerHozAlign: "left",
                 }
             ],
+            ajaxResponse:function(url, params, response){
+                
+                var total_rows = (response.all_rows && response.all_rows > 0 ? response.all_rows : 0);
+                if(total_rows > 0){
+                    $('#unsignedResultCount').attr('data-total', total_rows).html(total_rows+' students found');
+                }else{
+                    $('#unsignedResultCount').attr('data-total', '0').html('');
+                }
+
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -442,14 +453,14 @@ var liveGroupListTable = (function () {
             }
         })
         attendance_semester.on('item_add', function(e) {
+
             let List1 = attendance_semester.getValue();
             let List2 = academic_year.getValue();
-            
             course.clear(true)
             course.disable();
             course.clearOptions();
 
-            if(List1.length > 0 ){
+            if(List1.length > 0 ) {
                 
                 axios({
                     method: "post",
@@ -457,6 +468,7 @@ var liveGroupListTable = (function () {
                     data: { academic_years : List2, term_declaration_ids :  List1},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
+
                     if (response.status == 200) {
                         var res = response.data.res;
                         course.enable();
@@ -468,7 +480,9 @@ var liveGroupListTable = (function () {
                         });
                         course.refreshOptions();
                     }
+
                 }).catch(error => {
+
                     if (error.response) {
 
                         course.enable();
@@ -477,6 +491,7 @@ var liveGroupListTable = (function () {
                         console.log('error');
 
                     }
+
                 });
 
                 /* catch the Status */
@@ -487,13 +502,16 @@ var liveGroupListTable = (function () {
                 group_student_status.clearOptions();
 
                 if(List1.length > 0 ) {
+
                     axios({
                         method: "post",
                         url: route('student.get.status.by.groups'),
                         data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3, groups: List4 },
                         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                     }).then(response => {
+
                         if (response.status == 200) {
+
                             var res = response.data.res;
                             group_student_status.enable();
                             $.each(res, function(index, row) {
@@ -504,8 +522,8 @@ var liveGroupListTable = (function () {
                             });
                             group.refreshOptions();
                         }
-                    }).catch(error => {
 
+                    }).catch(error => {
                         if (error.response) {
 
                             group_student_status.enable();
@@ -515,12 +533,15 @@ var liveGroupListTable = (function () {
 
                         }
                     });
+
                 } else {
+
                     group_student_status.clear(true)
                     group_student_status.clearOptions();
                     group_student_status.disable();
+
                 }
-                    /* End status */
+                /* End catch the Status */
             }else{
                 group_student_status.clear(true)
                 group_student_status.clearOptions();
@@ -758,6 +779,7 @@ var liveGroupListTable = (function () {
             group_student_status.clearOptions();
 
             if(List1.length > 0 ) {
+
                 axios({
                     method: "post",
                     url: route('student.get.status.by.groups'),
@@ -785,10 +807,13 @@ var liveGroupListTable = (function () {
 
                     }
                 });
+
             }else{
+
                 group_student_status.clear(true)
                 group_student_status.clearOptions();
                 group_student_status.disable();
+
             }
         })
         // Reset Tom Select
@@ -802,7 +827,7 @@ var liveGroupListTable = (function () {
             $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
         }
 
-        function resetGroupSearch(){
+        function resetGroupSearch() {
             academic_year.clear(true);
             intake_semester.clear(true);
             attendance_semester.clear(true);
@@ -814,6 +839,7 @@ var liveGroupListTable = (function () {
             group_student_status.clear(true);
             $('#evening_weekend').val('');
             $('#groupSearchStatus').val('0'); 
+
         }
 
         /* Start List Table Inits */
