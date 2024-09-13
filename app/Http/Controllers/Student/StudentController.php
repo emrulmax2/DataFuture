@@ -278,7 +278,7 @@ class StudentController extends Controller
                                 ->orderBy('id', 'ASC')
                                 ->get();
 
-                }else if(isset($course) && count($course)>0) {
+                }else if((isset($course) && count($course)>0)&& (isset($attendance_semester))) {
                     $planList = Plan::with("assign")
                                 ->whereIn('term_declaration_id', $attendance_semester)
                                 ->whereIn('course_id',$course)
@@ -290,7 +290,8 @@ class StudentController extends Controller
                                 ->orderBy('id', 'ASC')
                                 ->get();
                 }
-                if($planList->isNotEmpty()):
+
+                if(isset($planList) && $planList->isNotEmpty()):
                     foreach($planList as $plan):
                         if(isset($plan->assign)):
                             foreach($plan->assign as $assingData):
@@ -303,54 +304,85 @@ class StudentController extends Controller
     
 
             if(isset($attendance_semester) && count($attendance_semester)>0) {
+
                 $course_creation_instance_ids = InstanceTerm::where('term_declaration_id', $attendance_semester)->pluck('course_creation_instance_id')->unique()->toArray();
                 $course_creation_ids = CourseCreationInstance::where('academic_year_id', $academic_year)->whereIn('id', $course_creation_instance_ids)->pluck('course_creation_id')->unique()->toArray();
+            
             }
-            if(!empty($student_type)):
+
+            if(!empty($student_type) && count($studentsIds)==0):
+
                 $tmp_cc_ids = CourseCreationAvailability::where('type', $student_type)->pluck('course_creation_id')->unique()->toArray();
+
                 if(!empty($tmp_cc_ids)):
-                    $course_creation_ids = array_merge($course_creation_ids, $tmp_cc_ids);
+                    foreach ($tmp_cc_ids as $tmp_cc_id):
+                        if(!in_array($tmp_cc_id, $course_creation_ids))
+                            $course_creation_ids[] = $tmp_cc_id;
+                      endforeach;
                 endif;
+
                 $studentslist = StudentCourseRelation::whereIn('course_creation_id', $course_creation_ids)->pluck('student_id')->unique()->toArray();
+
                 foreach ($studentslist as $studentT):
                     if(!in_array($studentT, $studentsIds))
                         $studentsIds[] = $studentT;
                   endforeach;
+
+            elseif(!empty($student_type) && count($studentsIds)>0):
+
+                $course_creation_ids = StudentCourseRelation::whereIn('student_id', $studentsIds)->pluck('course_creation_id')->unique()->toArray();
+                $course_creation_ids = CourseCreationAvailability::where('type', $student_type)->whereIn('course_creation_id',$course_creation_ids)->pluck('course_creation_id')->unique()->toArray();
+                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $course_creation_ids)->pluck('student_id')->unique()->toArray();
+                $studentsIdTemp = [];
+                foreach ($studentslist as $studentT):
+                        if(in_array($studentT, $studentsIds))
+                        $studentsIdTemp[] = $studentT;
+                endforeach;
+                $studentsIds = $studentsIdTemp;
+
             endif;
+            
 
-            if(isset($intake_semester) && isset($course) && count($course)>0)  {
-                $courseCreations = CourseCreation::whereIn('id', $course_creation_ids)->where('semester_id', $intake_semester)
-                               ->where('course_id', $course)->pluck('id')->unique()->toArray();
+            if(isset($intake_semester) && isset($course) && count($course)>0 && isset($attendance_semester) )  {
+                $courseCreations = CourseCreation::whereIn('id', $course_creation_ids)->whereIns('semester_id', $intake_semester)
+                               ->whereIn('course_id', $course)->pluck('id')->unique()->toArray();
                 $studentslist = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)->pluck('student_id')->unique()->toArray();
+                $studentsIdTemp = [];
                 foreach ($studentslist as $studentT):
-                    if(!in_array($studentT, $studentsIds))
-                        $studentsIds[] = $studentT;
-                  endforeach;
-            }elseif(isset($intake_semester) && isset($academic_year_id) && count($academic_year_id)>0)  {
+                        if(in_array($studentT, $studentsIds))
+                        $studentsIdTemp[] = $studentT;
+                endforeach;
+                $studentsIds = $studentsIdTemp;
 
-              $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year_id)->where('semester_id', $intake_semester)->pluck('student_id')->unique()->toArray();
+            }elseif(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && !isset($attendance_semester) && count($studentsIds)==0)  {
+            
+                
+
+              $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)->whereIn('semester_id', $intake_semester)->pluck('student_id')->unique()->toArray();
+              
               foreach ($studentslist as $studentT):
                 if(!in_array($studentT, $studentsIds))
                     $studentsIds[] = $studentT;
               endforeach;
             }
 
-            if(!empty($evening_weekend)): 
+            if(!empty($evening_weekend)&& count($studentsIds)>0): 
                 $ew = StudentProposedCourse::where('full_time', $evening_weekend)->whereIn('student_id', $studentsIds);
                
                 $studentslist= $ew->pluck('student_id')->unique()->toArray();
                 
+                $studentsIdTemp = [];
                 foreach ($studentslist as $studentT):
-                    if(!in_array($studentT, $studentsIds))
-                        $studentsIds[] = $studentT;
+                        if(in_array($studentT, $studentsIds))
+                        $studentsIdTemp[] = $studentT;
                 endforeach;
+                $studentsIds = $studentsIdTemp;
 
             endif;
-
             if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
             if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
         endif;
-
+        if(isset($studentsIds) && count($studentsIds)>0) {
         $total_rows = $Query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
@@ -385,7 +417,9 @@ class StudentController extends Controller
                 $i++;
             endforeach;
         endif;
-
+        } else {
+            return response()->json(['last_page' => 0, 'data' => [], 'all_rows' => 0, 'sp' => $studentParams ]);
+        }
         return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'sp' => $studentParams ]);
 
     }
@@ -1349,19 +1383,25 @@ class StudentController extends Controller
                     endforeach;
                     
                     $i = 1;
-                    $ListStudentStatus = Student::whereIn('id',$studentsIds)->get()->pluck('status_id')->unique()->toArray();
-                    $ListStudent = Status::whereIn('id',$ListStudentStatus)->get();
-                    foreach ($ListStudent as $status):
+                    //$ListStudentStatus = Student::whereIn('id',$studentsIds)->get()->pluck('status_id')->unique()->toArray();
+                    //$ListStudent = Status::whereIn('id',$ListStudentStatus)->get();
+
+
+                    $course_creation_ids = StudentCourseRelation::whereIn('student_id', $studentsIds)->pluck('course_creation_id')->unique()->toArray();
+                    $typelist = CourseCreationAvailability::whereIn('course_creation_id',$course_creation_ids)->pluck('type')->unique()->toArray();
+
+
+
+
+                    foreach ($typelist as $type):
                         
-                            $res[$i]['id'] = $status->id;
-                            $res[$i]['name'] = $status->name;
+                            $res[$i]['id'] = $type;
+                            $res[$i]['name'] = $type;
                             $i++;
                         //}
                     endforeach;
                 endif;
             
-        } else {
-
         }
         return response()->json(['res' => $res], 200);
         
