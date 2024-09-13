@@ -366,7 +366,7 @@ class StudentController extends Controller
               endforeach;
             }
 
-            if(!empty($evening_weekend)&& count($studentsIds)>0): 
+            if($evening_weekend == 1  && count($studentsIds)>0): 
                 $ew = StudentProposedCourse::where('full_time', $evening_weekend)->whereIn('student_id', $studentsIds);
                
                 $studentslist= $ew->pluck('student_id')->unique()->toArray();
