@@ -42,8 +42,8 @@ class DailyClassReminder extends Command
      */
     public function handle()
     {
-        $today = '2024-09-16'; //date('Y-m-d');
-        $plan_ids = PlansDateList::where('plan_id', 3183)->where('date', $today)->where('status', 'Scheduled')->where('feed_given', '!=', 1)->pluck('plan_id')->unique()->toArray();
+        $today = date('Y-m-d');
+        $plan_ids = PlansDateList::where('date', $today)->where('status', 'Scheduled')->where('feed_given', '!=', 1)->pluck('plan_id')->unique()->toArray();
         if(!empty($plan_ids) && count($plan_ids) > 0):
             foreach($plan_ids as $plan_id):
                 $plan = Plan::with('activeAssign')->find($plan_id);
@@ -63,23 +63,23 @@ class DailyClassReminder extends Command
                 endif;
                 $assigns = $plan->activeAssign;
                 if($assigns->count() > 0):
-                    /*$smsContent = StudentSmsContent::create([
+                    $smsContent = StudentSmsContent::create([
                         'sms_template_id' => null,
                         'subject' => $subject,
                         'sms' => $message
-                    ]);*/
+                    ]);
                     $mobileNumbers = [];
                     $i = 1;
                     foreach($assigns as $asign):
                         if(isset($asign->student->contact->mobile) && !empty($asign->student->contact->mobile)):
-                            $mobileNumbers[$i] = '07931926852'; //$asign->student->contact->mobile;
+                            $mobileNumbers[$i] = $asign->student->contact->mobile;
 
-                            /*$studentSms = StudentSms::create([
+                            $studentSms = StudentSms::create([
                                 'student_id' => $asign->student_id,
                                 'student_sms_content_id' => $smsContent->id,
                                 'phone' => $asign->student->contact->mobile,
                                 'created_by' => auth()->user()->id,
-                            ]);*/
+                            ]);
 
                             $i++;
                         endif;
