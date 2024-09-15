@@ -67,6 +67,17 @@ class ApplicationController extends Controller
         ]);
     }
 
+    public function CourseCreationList($id) {
+       
+        $data = CourseCreation::with('venues')->where('id',$id)->get()->first();
+        
+        if($data){
+            return response()->json($data);
+        }else{
+            return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+        }
+    }
+
     public function storePersonalDetails(ApplicationPersonalDetailsRequest $request){
         $lastApplicantRow = Applicant::orderBy('id', 'DESC')->get()->first();
         $lastApplicantId = (isset($lastApplicantRow->id) && !empty($lastApplicantRow->id));
