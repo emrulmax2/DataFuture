@@ -7,6 +7,7 @@ use App\Http\Requests\CancelClassRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Assign;
+use App\Models\AttendanceInformation;
 use App\Models\ComonSmtp;
 use App\Models\Course;
 use App\Models\Employee;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\SendSmsTrait;
 use DateTime;
 use App\Traits\GenerateEmailPdfTrait;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -62,6 +64,8 @@ class DashboardController extends Controller
 
         $res = [];
         $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId);
+        $res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
+        $res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
 
         return response()->json(['res' => $res], 200);
     }
@@ -198,7 +202,7 @@ class DashboardController extends Controller
                                         endif;
                                         if($pln->status == 'Completed'):
                                             $html .= '<li>';
-                                                $html .= '<a href="'.route('tutor-dashboard.attendance', [$pln->plan->tutor_id, $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> View Feed</a>';
+                                                $html .= '<a href="'.route('tutor-dashboard.attendance', [$pln->plan->tutor_id, $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->feed_given == 1 && $pln->attendances->count() > 0 ? 'View Feed' : 'Feed Attendance').'</a>';
                                             $html .= '</li>';
                                         endif;
                                         if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
@@ -214,6 +218,11 @@ class DashboardController extends Controller
                                         if($pln->status == 'Ongoing' && $pln->feed_given != 1):
                                             $html .= '<li>';
                                                 $html .= '<a href="'.route('tutor-dashboard.attendance', [$pln->plan->tutor_id, $pln->id, 2]).'" class="cancelClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Feed Attendance</a>';
+                                            $html .= '</li>';
+                                        endif;
+                                        if($pln->status == 'Ongoing' && $pln->feed_given == 1 && $orgEnd < $currentTime):
+                                            $html .= '<li>';
+                                                $html .= '<a data-attendanceinfo="'.$pln->attendanceInformation->id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" href="javascript:void(0);" class="endClassBtn text-danger dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> End Class</a>';
                                             $html .= '</li>';
                                         endif;
                                     $html .= '</ul>';
@@ -239,13 +248,20 @@ class DashboardController extends Controller
         return $html;
     }
 
-    public function getClassTutorsHtml($theDate = null){
+    public function getClassTutorsHtml($theDate = null, $course_id = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $termDecs = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
+        $termDecs = Plan::whereIn('id', $classPlanIds);
+        if($course_id > 0):
+            $termDecs->where('course_id', $course_id);
+        endif;
+        $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
         $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
         
         $query = Plan::where('term_declaration_id', $termDecId);
+        if($course_id > 0):
+            $query->where('course_id', $course_id);
+        endif;
         $classTutors = $query->pluck('tutor_id')->unique()->toArray();
         
         $html = '';
@@ -274,13 +290,20 @@ class DashboardController extends Controller
         return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
     }
 
-    public function getClassPersonalTutorsHtml($theDate = null){
+    public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $termDecs = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
+        $termDecs = Plan::whereIn('id', $classPlanIds);
+        if($course_id > 0):
+            $termDecs->where('course_id', $course_id);
+        endif;
+        $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
         $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
 
         $query = Plan::where('term_declaration_id', $termDecId);
+        if($course_id > 0):
+            $query->where('course_id', $course_id);
+        endif;
         $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
 
         $html = '';
@@ -740,6 +763,25 @@ class DashboardController extends Controller
             endif;
         else:
             return 0;
+        endif;
+    }
+
+    public function endClass(Request $request){
+        $plan_date_list_id = $request->plan_date_list_id;
+        $attendance_information_id = $request->attendance_information_id;
+
+        $planDate = PlansDateList::with('plan')->find($plan_date_list_id);
+        $endTime = (isset($planDate->plan->end_time) && !empty($planDate->plan->end_time) ? $planDate->plan->end_time : date('H:i:s'));
+
+        $attendanceInformation = AttendanceInformation::find($attendance_information_id);
+        $attendanceInformation->end_time = $endTime;
+        $attendanceInformation->updated_by = Auth::user()->id;
+        if($attendanceInformation->isDirty()):
+            $attendanceInformation->save();
+            PlansDateList::where('id', $plan_date_list_id)->update(['status' => 'Completed']);
+            return response()->json(['data' => 'Class Ended' ], 200);
+        else:
+            return response()->json(['data' => 'error found' ], 422);
         endif;
     }
 }

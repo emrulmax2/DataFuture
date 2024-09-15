@@ -73,7 +73,7 @@
 	</div>
 
     
-    @if($data["attendanceInformation"]->end_time==null)
+    @if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
     <form id="attendanceFeed" method="post" >
     @endif
     	<div class="intro-y box p-5 mt-5">
@@ -285,7 +285,7 @@
             		</tbody>
         		</table>-->
       		</div>
-			@if($data["attendanceInformation"]->end_time == null)
+			@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
 			<div class="intro-y flex flex-col sm:flex-row items-center justify-end mt-5">
 				<div class="w-full sm:w-auto flex mt-4 sm:mt-0">
 					<button type="submit" class="save btn btn-success text-white shadow-md">Save Attendance
@@ -310,7 +310,7 @@
 			</div>
 			@endif
     	</div>
-	@if($data["attendanceInformation"]->end_time == null)
+	@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
 	</form>
 	@endif
 
