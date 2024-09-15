@@ -311,6 +311,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
             Route::post('application/store-course-details', 'storeCourseDetails')->name('application.store.course');
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::post('application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
 
@@ -697,7 +698,6 @@ Route::middleware('auth')->group(function() {
         
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
-        Route::get('student/groupsearch-list', 'groupSearchList')->name('student.list.by.groupsearch'); 
         
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
