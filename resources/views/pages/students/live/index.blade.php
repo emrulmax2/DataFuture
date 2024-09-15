@@ -214,7 +214,7 @@
             </div>
         </form>
         <div id="studentListFound" class="flex items-center  ">
-            <div id="unsignedResultCount" class="font-bold text-base text-right ml-auto p-5 border-b border-slate-200/60 dark:border-darkmode-400" data-total="0"></div>
+            <div id="unsignedResultCount" class="font-bold text-base text-right ml-auto p-5 border-b border-slate-200/60 dark:border-darkmode-400 hidden" data-total="0"></div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
             <div id="liveStudentsListTable" class="mt-5 table-report table-report--tabulator"></div>

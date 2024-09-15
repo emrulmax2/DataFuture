@@ -318,7 +318,7 @@ import TomSelect from "tom-select";
         }else 
             axios({
                 method: "get",
-                url: route("global.course.creation.edit", SelectedValue),
+                url: route("course.creation.edit", SelectedValue),
                 headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
             }).then((response) => {
                 if (response.status == 200) {
