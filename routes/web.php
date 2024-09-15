@@ -732,6 +732,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
 
+        Route::post('student/courses-by-intake', 'getCoursesByIntakeOrTerm')->name('student.get.coureses.by.intake.or.term');
+        Route::post('student/group-by-courses', 'getGroupByCourseAndTerms')->name('student.get.groups.by.course');
+
         Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
 
         Route::post('student/send-email-verification-code','sendEmailVerificationCode')->name('student.send.email.verification.code');
@@ -2314,6 +2317,7 @@ Route::middleware('auth')->group(function() {
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
 
         Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
+        Route::post('programme-dashboard/end-class', 'endClass')->name('programme.dashboard.end.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {
@@ -2685,7 +2689,8 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
-        Route::any('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
-        //Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
+        Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
+        Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
+        Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
     });
 });

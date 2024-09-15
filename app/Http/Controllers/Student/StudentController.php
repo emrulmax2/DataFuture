@@ -1211,13 +1211,15 @@ class StudentController extends Controller
         //     $course[$courses->course->id] = $coursesData->id;
         // endforeach;
         if(isset($groups) && count($groups) >0 && isset($courses) && count($courses)>0) {
-            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
+            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id', $courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
             $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
         }elseif(isset($courses)&& count($courses)>0) {
             
             $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
 
-            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereIn('course_id',$courses)->pluck('course_creation_id')->unique()->toArray();
+            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereHas('creation', function($q) use($courses){
+                                    $q->whereIn('course_id', $courses);
+                                })->pluck('course_creation_id')->unique()->toArray();
 
             $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_creation_id',$courseCreationIds)->whereIn('course_id',$courses)->orderBy('id', 'ASC')->get();
 
@@ -1819,5 +1821,67 @@ class StudentController extends Controller
         else:
             return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
         endif;
+    }
+
+    public function getCoursesByIntakeOrTerm(Request $request){
+        $intakeSemester = (isset($request->intakeSemester) && !empty($request->intakeSemester) ? $request->intakeSemester : []);
+        $attenSemesters = (isset($request->attenSemesters) && !empty($request->attenSemesters) ? $request->attenSemesters : []);
+        $course_ids = [];
+        if(!empty($intakeSemester)):
+            $course_ids = CourseCreation::whereIn('semester_id', $intakeSemester)->whereHas('course', function($q){
+                        $q->where('active', DB::raw('1'));
+                    })->pluck('course_id')->unique()->toArray();
+        elseif($attenSemesters):
+            $courseCreationInst = InstanceTerm::whereIn('term_declaration_id', $attenSemesters)->pluck('course_creation_instance_id')->unique()->toArray();
+            if(!empty($courseCreationInst)):
+                $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInst)->pluck('course_creation_id')->unique()->toArray();
+                if(!empty($courseCreationIds)):
+                    $course_ids = CourseCreation::whereIn('id', $courseCreationIds)->whereHas('course', function($q){
+                        $q->where('active', DB::raw('1'));
+                    })->pluck('course_id')->unique()->toArray();
+                endif;
+            endif;
+        endif;
+        $courses = [];
+        if(!empty($course_ids)):
+            $i = 1;
+            foreach($course_ids as $cr):
+                $course = Course::find($cr);
+                $courses[$i]['id'] = $cr;
+                $courses[$i]['name'] = $course->name;
+
+                $i += 1;
+            endforeach;
+        endif;
+
+        if(!empty($courses)):
+            return response()->json(['res' => $courses], 200);
+        else:
+            return response()->json(['res' => 'Error!'], 422);
+        endif;
+    }
+
+    public function getGroupByCourseAndTerms(Request $request){
+        $terms = (isset($request->attenSemesters) && count($request->attenSemesters) > 0 ? $request->attenSemesters : []);
+        $courses = (isset($request->courses) && count($request->courses) > 0 ? $request->courses : []);
+            
+        $groups = Group::select('name')->whereIn('course_id', $courses);
+        if(!empty($terms) && count($terms) > 0):
+            $groups->whereIn('term_declaration_id', $terms);
+        endif;
+        $groups = $groups->groupBy('name')->orderBy('name', 'ASC')->get();
+        $res = [];
+        if(!empty($groups)):
+            $i = 1;
+            foreach($groups as $gr):
+                $res[$i]['id'] = $gr->name;
+                $res[$i]['name'] = $gr->name;
+
+                $i++;
+            endforeach;
+        endif;
+
+        
+        return response()->json(['res' => $res], 200);
     }
 }

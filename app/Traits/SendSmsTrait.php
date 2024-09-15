@@ -10,6 +10,7 @@ trait SendSmsTrait{
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
         if($active_api == 1 && !empty($textlocal_api)):
+            $phone = (is_array($phone) ? implode(',', $phone) : $phone);
             $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
                 'apikey' => $textlocal_api, 
                 'message' => $message, 
@@ -17,13 +18,14 @@ trait SendSmsTrait{
                 'numbers' => $phone
             ]);
         elseif($active_api == 2 && !empty($smseagle_api)):
+            $phone = (is_array($phone) ? $phone : [$phone]);
             $response = Http::withHeaders([
                     'access-token' => $smseagle_api,
                     'Content-Type' => 'application/json',
                 ])->withoutVerifying()->withOptions([
                     "verify" => false
                 ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                    'to' => [$phone],
+                    'to' => $phone,
                     'text' => $message
                 ]);
         endif;

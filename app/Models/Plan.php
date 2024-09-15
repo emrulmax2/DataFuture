@@ -49,6 +49,9 @@ class Plan extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function cCreation(){
+        return $this->belongsTo(CourseCreation::class, 'course_creation_id');
+    }
     public function course(){
         return $this->belongsTo(Course::class, 'course_id');
     }
