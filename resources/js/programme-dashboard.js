@@ -8,8 +8,10 @@ import colors from "./colors";
 import Chart from "chart.js/auto";
 
 (function(){
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const cancelClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#cancelClassModal"));
+    const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
 
     const cancelClassModalEl = document.getElementById('cancelClassModal')
     cancelClassModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -18,6 +20,12 @@ import Chart from "chart.js/auto";
 
         $('#cancelClassModal input[name="plan_id"]').val('0');
         $('#cancelClassModal input[name="plans_date_list_id"]').val('0');
+    });
+
+    const endClassModalEl = document.getElementById('endClassModal')
+    endClassModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#endClassModal .plan_date_list_id').val('');
+        $('#endClassModal .attendance_information_id').val('');
     });
 
     let dateOption = {
@@ -61,6 +69,13 @@ import Chart from "chart.js/auto";
                 $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
                 var res = response.data.res;
                 $('#dailyClassInfoTable tbody').html(res.planTable);
+
+                $('.tutorCount').html('('+res.tutors.count+')');
+                $('.tutorWrap .theHolder').html(res.tutors.html);
+                
+                $('.personalTutorCount').html('('+res.ptutors.count+')');
+                $('.personalTutorWrap .theHolder').html(res.ptutors.html);
+
             }
         }).catch(error =>{
             $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
@@ -86,10 +101,10 @@ import Chart from "chart.js/auto";
                 var res = response.data.res;
                 $('#dailyClassInfoTable tbody').html(res.planTable);
 
-                $('.tutorCount').html(res.tutors.count);
+                $('.tutorCount').html('('+res.tutors.count+')');
                 $('.tutorWrap .theHolder').html(res.tutors.html);
                 
-                $('.personalTutorCount').html(res.ptutors.count);
+                $('.personalTutorCount').html('('+res.ptutors.count+')');
                 $('.personalTutorWrap .theHolder').html(res.ptutors.html);
             }
         }).catch(error =>{
@@ -171,7 +186,7 @@ import Chart from "chart.js/auto";
     /* Attendance Rate Chart End*/
 
     /* Cancel Class Start */
-    $('#dailyClassInfoTable').on('click', '.cancelClass', function(e){
+    $(document).on('click', '.cancelClass', function(e){
         var $theBtn = $(this);
         var planid = $theBtn.attr('data-planid');
         var plandateid = $theBtn.attr('data-plandateid');
@@ -227,4 +242,68 @@ import Chart from "chart.js/auto";
         });
     });
     /* Cancel Class End */
+
+    /* End Class Start */
+    $(document).on('click', '.endClassBtn', function(e){
+        var $theBtn = $(this);
+        var plandateid = $theBtn.attr('data-plandateid');
+        var attendanceinfo = $theBtn.attr('data-attendanceinfo');
+
+        $('#endClassModal input[name="plan_date_list_id"]').val(plandateid);
+        $('#endClassModal input[name="attendance_information_id"]').val(attendanceinfo);
+    });
+
+
+    $('#endClassModalForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('endClassModalForm');
+        
+        document.querySelector('#endClassBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#endClassBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('programme.dashboard.end.class'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#endClassBtn').removeAttribute('disabled');
+            document.querySelector("#endClassBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200){
+                endClassModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "WOW!" );
+                    $("#successModal .successModalDesc").html('Class successfully ended.');
+                });     
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#endClassBtn').removeAttribute('disabled');
+            document.querySelector("#endClassBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if(error.response.status == 422){
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "Oops!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact with the administrator.');
+                    });     
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 1000);
+                }else{
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* End Class End */
 })();

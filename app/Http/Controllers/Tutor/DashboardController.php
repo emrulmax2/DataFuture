@@ -476,6 +476,8 @@ class DashboardController extends Controller
                 'assignStudentList' => $assignStudentList,  
                 'AttendanceFeedStatus' => $attendanceFeedStatus,    
                 "feedCount" => $FeedCount,
+                "feed_given" => (isset($list->feed_given) && $list->feed_given > 0 ? $list->feed_given : 0),
+                "feed_count" => (isset($attendanceFeed) && $attendanceFeed->count() > 0 ? $attendanceFeed->count() : 0),
                 'attendanceFeed' => $attendance, 
                 'employee' => $employee,
                 'attendanceInformation' => $attendanceInformation ,

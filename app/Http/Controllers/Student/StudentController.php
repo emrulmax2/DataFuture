@@ -113,7 +113,9 @@ class StudentController extends Controller
         return view('pages.students.live.index', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
+
                 ['label' => 'Students Live', 'href' => 'javascript:void(0);']
+
             ],
             'semesters' => $semesters,
             'courses' => $courses,
@@ -125,6 +127,7 @@ class StudentController extends Controller
     }
 
     public function list(Request $request){
+
         parse_str($request->form_data, $form);
         $student_id = isset($form['student_id']) && !empty($form['student_id']) ? $form['student_id'] : '';
 
@@ -173,88 +176,6 @@ class StudentController extends Controller
             if(!empty($application_no)): $Query->where('application_no', $application_no); endif;
             if(!empty($student_status)): $Query->whereIn('status_id', $student_status); endif;
         endif;
-
-        if($groupSearch):
-
-            foreach($groupParams as $field => $value):
-                $$field = (isset($value) && !empty($value) ? $value : '');
-            endforeach;
-            $studentsIds = [];
-            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $attendance_semester)->whereIn('course_id',$course)->whereIn('name',$group)->groupBy('id')->get()->pluck('id')->toArray();
-
-        
-            $planList = Plan::with("assign")->whereIn('term_declaration_id', $attendance_semester)->whereIn('course_id',$course)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
-            
-                if($planList->isNotEmpty()):
-                    $i = 1;
-                    foreach($planList as $plan):
-                        if(isset($plan->assign)):
-                            foreach($plan->assign as $assingData):
-                                if(!in_array($assingData->student_id, $studentsIds))
-                                $studentsIds[] = $assingData->student_id;
-                            endforeach;
-                        endif;
-                    endforeach;
-                endif;
-            if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
-            if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
-        endif;
-
-        $total_rows = $Query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
-        
-        $Query = $Query->orderByRaw(implode(',', $sorts))->skip($offset)
-               ->take($limit)
-               ->get();
-
-        $data = array();
-
-        if(!empty($Query)):
-            $i = 1;
-            foreach($Query as $list):
-                $data[] = [
-                    'id' => $list->id,
-                    'sl' => $i,
-                    'disability' =>  (isset($list->other->disability_status) && $list->other->disability_status > 0 ? $list->other->disability_status : 0),
-                    'full_time' => (isset($list->activeCR->propose->full_time) && $list->activeCR->propose->full_time > 0) ? $list->activeCR->propose->full_time : 0, 
-                    'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
-                    'first_name' => $list->first_name,
-                    'last_name' => $list->last_name,
-                    'course'=> (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : ''),
-                    'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
-                    'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
-                    'url' => route('student.show', $list->id),
-                    'photo_url' => $list->photo_url
-                ];
-                $i++;
-            endforeach;
-        endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'sp' => $studentParams]);
-    }
-    
-    public function groupSearchList(Request $request){
-        parse_str($request->form_data, $form);
-        $student_id = isset($form['student_id']) && !empty($form['student_id']) ? $form['student_id'] : '';
-
-        $studentParams = isset($form['student']) && !empty($form['student']) ? $form['student'] : [];
-        $groupParams = isset($form['group']) && !empty($form['group']) ? $form['group'] : [];
-        $studentSearch = (isset($studentParams['stataus']) && $studentParams['stataus'] == 1 ? true : false);
-        $groupSearch = (isset($groupParams['stataus']) && $groupParams['stataus'] == 1 ? true : false);
-
-        $student_id = ($studentSearch ? $studentParams['student_id'] : ($groupSearch ? '' : $student_id));
-
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
-        $sorts = [];
-        foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
-        endforeach;
-        $Query = Student::orderByRaw(implode(',', $sorts));
-
         if($groupSearch):
             foreach($groupParams as $field => $value):
                 $$field = (isset($value) && !empty($value) ? $value : '');
@@ -366,7 +287,7 @@ class StudentController extends Controller
               endforeach;
             }
 
-            if(!empty($evening_weekend)&& count($studentsIds)>0): 
+            if($evening_weekend == 1  && count($studentsIds)>0): 
                 $ew = StudentProposedCourse::where('full_time', $evening_weekend)->whereIn('student_id', $studentsIds);
                
                 $studentslist= $ew->pluck('student_id')->unique()->toArray();
@@ -382,7 +303,6 @@ class StudentController extends Controller
             if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
             if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
         endif;
-        if(isset($studentsIds) && count($studentsIds)>0) {
         $total_rows = $Query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
@@ -417,12 +337,9 @@ class StudentController extends Controller
                 $i++;
             endforeach;
         endif;
-        } else {
-            return response()->json(['last_page' => 0, 'data' => [], 'all_rows' => 0, 'sp' => $studentParams ]);
-        }
-        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'sp' => $studentParams ]);
-
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'sp' => $studentParams]);
     }
+
     public function show($studentId){
         $student = Student::find($studentId);
         $referral = [];
@@ -1294,13 +1211,15 @@ class StudentController extends Controller
         //     $course[$courses->course->id] = $coursesData->id;
         // endforeach;
         if(isset($groups) && count($groups) >0 && isset($courses) && count($courses)>0) {
-            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
+            $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id', $courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
             $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
         }elseif(isset($courses)&& count($courses)>0) {
             
             $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
 
-            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereIn('course_id',$courses)->pluck('course_creation_id')->unique()->toArray();
+            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereHas('creation', function($q) use($courses){
+                                    $q->whereIn('course_id', $courses);
+                                })->pluck('course_creation_id')->unique()->toArray();
 
             $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_creation_id',$courseCreationIds)->whereIn('course_id',$courses)->orderBy('id', 'ASC')->get();
 
@@ -1902,5 +1821,67 @@ class StudentController extends Controller
         else:
             return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
         endif;
+    }
+
+    public function getCoursesByIntakeOrTerm(Request $request){
+        $intakeSemester = (isset($request->intakeSemester) && !empty($request->intakeSemester) ? $request->intakeSemester : []);
+        $attenSemesters = (isset($request->attenSemesters) && !empty($request->attenSemesters) ? $request->attenSemesters : []);
+        $course_ids = [];
+        if(!empty($intakeSemester)):
+            $course_ids = CourseCreation::whereIn('semester_id', $intakeSemester)->whereHas('course', function($q){
+                        $q->where('active', DB::raw('1'));
+                    })->pluck('course_id')->unique()->toArray();
+        elseif($attenSemesters):
+            $courseCreationInst = InstanceTerm::whereIn('term_declaration_id', $attenSemesters)->pluck('course_creation_instance_id')->unique()->toArray();
+            if(!empty($courseCreationInst)):
+                $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInst)->pluck('course_creation_id')->unique()->toArray();
+                if(!empty($courseCreationIds)):
+                    $course_ids = CourseCreation::whereIn('id', $courseCreationIds)->whereHas('course', function($q){
+                        $q->where('active', DB::raw('1'));
+                    })->pluck('course_id')->unique()->toArray();
+                endif;
+            endif;
+        endif;
+        $courses = [];
+        if(!empty($course_ids)):
+            $i = 1;
+            foreach($course_ids as $cr):
+                $course = Course::find($cr);
+                $courses[$i]['id'] = $cr;
+                $courses[$i]['name'] = $course->name;
+
+                $i += 1;
+            endforeach;
+        endif;
+
+        if(!empty($courses)):
+            return response()->json(['res' => $courses], 200);
+        else:
+            return response()->json(['res' => 'Error!'], 422);
+        endif;
+    }
+
+    public function getGroupByCourseAndTerms(Request $request){
+        $terms = (isset($request->attenSemesters) && count($request->attenSemesters) > 0 ? $request->attenSemesters : []);
+        $courses = (isset($request->courses) && count($request->courses) > 0 ? $request->courses : []);
+            
+        $groups = Group::select('name')->whereIn('course_id', $courses);
+        if(!empty($terms) && count($terms) > 0):
+            $groups->whereIn('term_declaration_id', $terms);
+        endif;
+        $groups = $groups->groupBy('name')->orderBy('name', 'ASC')->get();
+        $res = [];
+        if(!empty($groups)):
+            $i = 1;
+            foreach($groups as $gr):
+                $res[$i]['id'] = $gr->name;
+                $res[$i]['name'] = $gr->name;
+
+                $i++;
+            endforeach;
+        endif;
+
+        
+        return response()->json(['res' => $res], 200);
     }
 }

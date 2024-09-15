@@ -311,6 +311,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
             Route::post('application/store-course-details', 'storeCourseDetails')->name('application.store.course');
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::post('application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
 
@@ -697,7 +698,6 @@ Route::middleware('auth')->group(function() {
         
         Route::get('student', 'index')->name('student'); 
         Route::get('student/list', 'list')->name('student.list'); 
-        Route::get('student/groupsearch-list', 'groupSearchList')->name('student.list.by.groupsearch'); 
         
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
@@ -731,6 +731,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/get-student-type', 'getAllStudentType')->name('student.get.all.student.type');
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
+
+        Route::post('student/courses-by-intake', 'getCoursesByIntakeOrTerm')->name('student.get.coureses.by.intake.or.term');
+        Route::post('student/group-by-courses', 'getGroupByCourseAndTerms')->name('student.get.groups.by.course');
 
         Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
 
@@ -2314,6 +2317,7 @@ Route::middleware('auth')->group(function() {
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
 
         Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
+        Route::post('programme-dashboard/end-class', 'endClass')->name('programme.dashboard.end.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {
@@ -2685,7 +2689,8 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
-        Route::any('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
-        //Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
+        Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
+        Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
+        Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
     });
 });
