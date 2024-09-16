@@ -305,7 +305,7 @@
                                         <div class="intro-x relative flex items-center mb-3">
                                             <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                                 <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                                    @if($lcass->plan->tutor_id > 0)
+                                                    @if($class->plan->tutor_id > 0)
                                                         <img alt="{{ (isset($class->plan->tutor->employee->full_name) && !empty($class->plan->tutor->employee->full_name) ? $class->plan->tutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->tutor->employee->photo_url) && !empty($class->plan->tutor->employee->photo_url) ? $class->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                     @else
                                                         <img alt="{{ (isset($class->plan->personalTutor->employee->full_name) && !empty($class->plan->personalTutor->employee->full_name) ? $class->plan->personalTutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->personalTutor->employee->photo_url) && !empty($class->plan->personalTutor->employee->photo_url) ? $class->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
