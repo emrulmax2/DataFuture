@@ -97,7 +97,7 @@ class DashboardController extends Controller
             foreach($plans as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
-                $classTutor = ($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : ($pln->plan->personal_tutor_id > 0 ? $pln->plan->personal_tutor_id : 0));
+                $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
                 $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $theDate)->where('attendance_type', 1)->get();
 
                 $classStatus = 0;
