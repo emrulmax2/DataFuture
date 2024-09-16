@@ -35,6 +35,7 @@
         </div>
         <div class="flex flex-1 px-5 items-center justify-center lg:justify-start border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0">
             <div class="grid grid-cols-12 gap-6 mt-0">
+                @if(isset($data->tutor) && $data->tutor!=null)
                 <div class="relative flex items-center w-full col-span-12">
                     <div class="w-12 h-12 flex-none image-fit">
                         <img alt="{{ $data->tutor->title->name.' '.$data->tutor->first_name.' '.$data->tutor->last_name }}" class="rounded-full" src="{{ (isset($data->tutor->photo) && !empty($data->tutor->photo) && Storage::disk('local')->exists('public/employees/'.$data->tutor->id.'/'.$data->tutor->photo) ? Storage::disk('local')->url('public/employees/'.$data->tutor->id.'/'.$data->tutor->photo) : asset('build/assets/images/avater.png')) }}">
@@ -45,6 +46,8 @@
                     </div>
                     {{-- <div class="font-medium text-slate-600 dark:text-slate-500">+5</div> --}}
                 </div>
+                @endif
+                @if(isset($data->personalTutor) && $data->personalTutor!=null)
                 <div class="relative flex items-center mt-2 w-full col-span-12">
                     <div class="w-12 h-12 flex-none image-fit">
                         <img alt="{{ $data->personalTutor->name.' '.$data->personalTutor->first_name.' '.$data->personalTutor->last_name }}" class="rounded-full" src="{{ (isset($data->personalTutor->photo) && !empty($data->personalTutor->photo) && Storage::disk('local')->exists('public/employees/'.$data->personalTutor->id.'/'.$data->personalTutor->photo) ? Storage::disk('local')->url('public/employees/'.$data->personalTutor->id.'/'.$data->personalTutor->photo) : asset('build/assets/images/avater.png')) }}">
@@ -55,6 +58,7 @@
                     </div>
                     {{-- <div class="font-medium text-slate-600 dark:text-slate-500">+2</div> --}}
                 </div>
+                @endif
             </div>
         </div>
     </div>
