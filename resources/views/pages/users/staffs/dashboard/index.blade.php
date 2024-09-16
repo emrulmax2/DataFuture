@@ -261,29 +261,29 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
-
-    @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
-    <!-- BEGIN: Confirm Modal Content -->
-    <div id="attendanceHistoryLocModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5">{{ ($work_history_lock_no == 1 ? 'Oops!' : 'Hi '.Auth::user()->load('employee')->full_name) }}</div>
-                        <div class="text-slate-500 mt-2">{{ ($work_history_lock_no == 1 ? 'Looks like you are not clocked in. Would you like to clock in now?' : 'It seems you\'re on break. Are you returning to work now?') }}</div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disagreeWith actionBtn btn btn-danger text-white w-40 mr-1">No</button>
-                        <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn btn btn-success text-white w-48 h-20">Yes</button>
+    @if(!auth()->user()->isImpersonated())
+        @if($work_history_lock && $work_history_lock_no > 0 && (Session::has('work_history_lock_first_time') == null || Session::get('work_history_lock_first_time') != 1) && ((!in_array(auth()->user()->last_login_ip, $venue_ips) && isset($home_work) && $home_work) || (in_array(auth()->user()->last_login_ip, $venue_ips) && isset($desktop_login) && $desktop_login)))
+        <!-- BEGIN: Confirm Modal Content -->
+        <div id="attendanceHistoryLocModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="p-5 text-center">
+                            <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                            <div class="text-3xl mt-5">{{ ($work_history_lock_no == 1 ? 'Oops!' : 'Hi '.Auth::user()->load('employee')->full_name) }}</div>
+                            <div class="text-slate-500 mt-2">{{ ($work_history_lock_no == 1 ? 'Looks like you are not clocked in. Would you like to clock in now?' : 'It seems you\'re on break. Are you returning to work now?') }}</div>
+                        </div>
+                        <div class="px-5 pb-8 text-center">
+                            <button type="button" class="disagreeWith actionBtn btn btn-danger text-white w-40 mr-1">No</button>
+                            <button type="button" data-value="{{$work_history_lock_no}}" class="agreeWith actionBtn btn btn-success text-white w-48 h-20">Yes</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- END: Confirm Modal Content -->
+        <!-- END: Confirm Modal Content -->
+        @endif
     @endif
-
     
 @endsection
 

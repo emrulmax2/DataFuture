@@ -258,9 +258,9 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::post('login', 'login')->name('login.check');
 });
 
-Route::controller(CoursCreationController::class)->group(function() {
-    Route::get('global/course-creation/edit/{id}', 'edit')->name('global.course.creation.edit');
-});
+// Route::controller(CoursCreationController::class)->group(function() {
+//     Route::get('global/course-creation/edit/{id}', 'edit')->name('global.course.creation.edit');
+// });
 
 Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::get('punch', 'index')->name('attendance.punch');
