@@ -1,6 +1,6 @@
 #!/bin/sh
 # Change to the project directory
-cd ~/path/to/project
+cd ~/home/datafuture2lcc/datafuture/
 
 # Pull the latest changes from the git repository
 git pull origin main
