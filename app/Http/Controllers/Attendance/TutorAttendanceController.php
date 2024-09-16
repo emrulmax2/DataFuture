@@ -115,10 +115,10 @@ class TutorAttendanceController extends Controller
             if($attendanceFind){
                 return response()->json(["data"=>'Attendance Start Found'], 443);
             }else{
-                if($plan->tutor_id != Auth::user()->id) {
-                    return response()->json(["data"=>'Not Matched Tutor',], 442);
-                } else {
+                if(($plan->tutor_id > 0 && $plan->tutor_id == Auth::user()->id) || ($plan->personal_tutor_id > 0 && $plan->personal_tutor_id == Auth::user()->id)) {
                     return response()->json(["data"=>'Tutor Matched'], 207);
+                } else {
+                    return response()->json(["data"=>'Not Matched Tutor',], 442);
                 }
             }
         

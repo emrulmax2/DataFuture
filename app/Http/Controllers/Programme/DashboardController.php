@@ -54,6 +54,9 @@ class DashboardController extends Controller
             'classPTutor' => $this->getClassPersonalTutorsHtml($theDate),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
             'termAttendanceRates' => $this->getTermAttendanceRateFull($theTermId),
+            'tutors' => User::with('employee')->whereHas('employee', function($q){
+                $q->where('status', 1);
+            })->orderBy('name', 'ASC')->get()
         ]);
     }
 
@@ -93,7 +96,9 @@ class DashboardController extends Controller
             $currentTime = date('Y-m-d H:i:s');
             foreach($plans as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
-                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $tutorEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
+                $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
+                $classTutor = ($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : ($pln->plan->personal_tutor_id > 0 ? $pln->plan->personal_tutor_id : 0));
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $theDate)->where('attendance_type', 1)->get();
 
                 $classStatus = 0;
                 $classLabel = '';
