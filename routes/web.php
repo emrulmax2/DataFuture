@@ -2287,8 +2287,7 @@ Route::middleware('auth')->group(function() {
         
     });
 
-    Route::resource('term-declaration',TermDeclarationController::class);
-    
+
     Route::resource('term-declaration', TermDeclarationController::class,[
         'except' => ['create','update']
     ]);
