@@ -320,7 +320,7 @@
                                                 @if($class->plan->class_type == 'Tutorial' || $class->plan->class_type == 'Seminar')
                                                     @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
                                                         @if($class->feed_given == 1)
-                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
+                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">View Attendance</a>
                                                         @else
                                                             <a href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
                                                             @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null)
