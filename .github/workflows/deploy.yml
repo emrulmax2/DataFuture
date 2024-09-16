@@ -27,4 +27,4 @@ jobs:
 
     - name: Deploy
       run: |
-        ssh datafuture2lcc@${{ secrets.SERVER_IP }} 'bash -s' < /home/datafuture2lcc/datafuture/.github/workflows/deploy.sh
+        ssh datafuture2lcc@${{ secrets.SERVER_IP }} 'bash -s' < ${{ github.workspace }}/.github/workflows/deploy.sh
