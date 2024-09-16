@@ -364,7 +364,7 @@ import Chart from "chart.js/auto";
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "WOW!" );
-                    $("#successModal .successModalDesc").html('Class successfully ended.');
+                    $("#successModal .successModalDesc").html('Class successfully re-assigned to the new tutor.');
                 });     
 
                 setTimeout(function(){

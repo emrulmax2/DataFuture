@@ -321,7 +321,7 @@
                                                     </div>
                                                     <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                @if($class->plan->class_type == 'Tutorial' || $class->plan->class_type == 'Seminar')
+                                                @if($class->plan->class_type == 'Tutorial' || $class->plan->class_type == 'Seminar' && ($class->proxy_tutor_id == null || $class->proxy_tutor_id == 0))
                                                     <div class="flex justify-start items-center">
                                                         @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
                                                             @if($class->feed_given == 1)

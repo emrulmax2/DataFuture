@@ -9,6 +9,7 @@ use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
 use App\Models\TaskList;
 use App\Models\ApplicantTask;
+use App\Models\AttendanceInformation;
 use App\Models\ComonSmtp;
 use App\Models\Department;
 use App\Models\Employee;
@@ -17,6 +18,7 @@ use App\Models\EmployeeGroup;
 use App\Models\EmployeeGroupMember;
 use App\Models\Employment;
 use App\Models\InternalLink;
+use App\Models\PlansDateList;
 use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentTask;
@@ -25,6 +27,7 @@ use App\Models\User;
 use App\Models\UserPrivilege;
 use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 
@@ -83,7 +86,8 @@ class DashboardController extends Controller
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
             'groups' => EmployeeGroup::where('type', 2)->orWhere(function($q) use($userEmployeeId){
                 $q->where('employee_id', $userEmployeeId)->whereIn('type', [1, 2]);
-            })->orderBy('name', 'ASC')->get()
+            })->orderBy('name', 'ASC')->get(),
+            'proxyClasses' => $this->getMyProxyClassForTheDay()
         ]);
     }
     public function getAccountDashBoard()
@@ -550,4 +554,53 @@ class DashboardController extends Controller
         endif;
     }
     
+    public function getMyProxyClassForTheDay($theDate = ''){
+        $theDate = (!empty($theDate) ? date('Y-m-d', strtotime(($theDate))) : date('Y-m-d'));
+        $proxyTutorId = auth()->user()->id;
+
+        return PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)
+                ->where('proxy_tutor_id', $proxyTutorId)->orderBy('id', 'ASC')->get()->sortBy(function($classes, $key) {
+                    return $classes->plan->start_time;
+                });
+    }
+
+    public function startProxyClass(Request $request){
+        $proxy_class_tutor_note = (isset($request->proxy_class_tutor_note) && !empty($request->proxy_class_tutor_note) ? $request->proxy_class_tutor_note : null);
+        $plan_date_list_id = $request->plan_date_list_id;
+        $employee_id = $request->employee_id;
+        $user_id = $request->user_id;
+        $type = (isset($request->type) && $request->type > 0 ? $request->type : 3);
+
+        $PlansDateList = PlansDateList::find($plan_date_list_id);
+
+        PlansDateList::where('id', $plan_date_list_id)->update(['status' => 'Ongoing', 'proxy_class_tutor_note' => $proxy_class_tutor_note]);
+        AttendanceInformation::create([
+            'plans_date_list_id' => $plan_date_list_id,
+            'tutor_id' => $PlansDateList->proxy_tutor_id,
+            'start_time' => now(),
+            'note' => $proxy_class_tutor_note,
+            'created_by' => Auth::user()->id
+        ]);
+        
+        return response()->json(['message' => 'Class successfully started.'], 200);
+    }
+
+    public function endProxyClass(Request $request){
+        $plan_date_list_id = $request->plan_date_list_id;
+        $attendance_information_id = $request->attendance_information_id;
+
+        $planDate = PlansDateList::with('plan')->find($plan_date_list_id);
+        $endTime = (isset($planDate->plan->end_time) && !empty($planDate->plan->end_time) ? $planDate->plan->end_time : date('H:i:s'));
+
+        $attendanceInformation = AttendanceInformation::find($attendance_information_id);
+        $attendanceInformation->end_time = $endTime;
+        $attendanceInformation->updated_by = Auth::user()->id;
+        if($attendanceInformation->isDirty()):
+            $attendanceInformation->save();
+            PlansDateList::where('id', $plan_date_list_id)->update(['status' => 'Completed']);
+            return response()->json(['data' => 'Class Ended' ], 200);
+        else:
+            return response()->json(['data' => 'error found' ], 422);
+        endif;
+    }
 }
