@@ -50,12 +50,19 @@ class DashboardController extends Controller
                 }
             }
         }
-
+        
+        
         $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
         $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
         $workHistory = $this->getUserAttendanceLiveBtns();
+
+        if(auth()->user()->isImpersonated()) {
+            $workHistory['loc'] = false;
+            $workHistory['loc_no'] = 0;
+            Session::put('work_history_lock_first_time', 1);
+        }
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],

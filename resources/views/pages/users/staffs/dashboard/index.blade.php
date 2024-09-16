@@ -283,7 +283,6 @@
     </div>
     <!-- END: Confirm Modal Content -->
     @endif
-
     
 @endsection
 
