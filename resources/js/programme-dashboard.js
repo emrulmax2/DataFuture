@@ -2,16 +2,32 @@
 import dayjs from "dayjs";
 import Litepicker from "litepicker";
 import { createIcons, icons } from "lucide";
+import TomSelect from "tom-select";
 
 import helper from "./helper";
 import colors from "./colors";
 import Chart from "chart.js/auto";
 
 (function(){
+    let pgdTomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    var proxyTutorId = new TomSelect('#proxy_tutor_id', pgdTomOptions); 
+
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const cancelClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#cancelClassModal"));
     const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
+    const proxyClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#proxyClassModal"));
 
     const cancelClassModalEl = document.getElementById('cancelClassModal')
     cancelClassModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -26,6 +42,13 @@ import Chart from "chart.js/auto";
     endClassModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#endClassModal .plan_date_list_id').val('');
         $('#endClassModal .attendance_information_id').val('');
+    });
+
+    const proxyClassModalEl = document.getElementById('proxyClassModal')
+    proxyClassModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#proxyClassModal .plan_id').val('0');
+        $('#proxyClassModal .plans_date_list_id').val('0');
+        proxyTutorId.clear(true);
     });
 
     let dateOption = {
@@ -306,4 +329,15 @@ import Chart from "chart.js/auto";
         });
     });
     /* End Class End */
+
+    /* Proxy Class Start */
+    $(document).on('click', '.proxyClass', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        let plan_id = '';
+        
+        $('#proxyClassModal .plan_id').val('0');
+        $('#proxyClassModal .plans_date_list_id').val('0');
+    })
+    /* Proxy Class End */
 })();
