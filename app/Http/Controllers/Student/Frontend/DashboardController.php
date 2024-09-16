@@ -119,7 +119,7 @@ class DashboardController extends Controller
                     "hr_date" =>$hr_date,
                     "hr_time" => $data->start_time."-".$data->end_time,
                     "venue_room" => $data->venue->name.", ".$data->room->name,
-                    "virtual_room" => $data->virtual_room.", ".$data->virtual_room,
+                    "virtual_room" => $data->virtual_room,
                 ];
                     
                endforeach;
@@ -336,7 +336,7 @@ class DashboardController extends Controller
         $userData = StudentUser::find(Auth::guard('student')->user()->id);
         //$employee = Employee::where("user_id",$userData->id)->get()->first();
 
-        $tutor = Employee::where("user_id",$plan->tutor->id)->get()->first();
+        $tutor = isset($plan->tutor) ? Employee::where("user_id",$plan->tutor->id)->get()->first() : null;
         
         $personalTutor = isset($plan->personalTutor->id) ? Employee::where("user_id",$plan->personalTutor->id)->get()->first() : "";
         
