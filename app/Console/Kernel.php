@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('employeeappraisal:cron')->weeklyOn(7, '23:40');
 
         $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');
-        $schedule->command('dailyclassreminder:cron')->dailyAt('08:00');
+        $schedule->command('dailyclassreminder:cron')->everyThirtyMinutes();
         
 
         // $schedule->command('passportexpiry:cron')->everyMinute();

@@ -326,8 +326,8 @@ class AttendanceReportController extends Controller
                 $theCollection[$row][17] = $list->L;
                 $theCollection[$row][18] = $list->LE;
                 $theCollection[$row][19] = $list->TOTAL;
-                $theCollection[$row][20] = (isset($list->percentage_withexcuse) && !empty($list->percentage_withexcuse) ? number_format($list->percentage_withexcuse, 2).'%' : '0%');
-                $theCollection[$row][21] = (isset($list->percentage_withoutexcuse) && !empty($list->percentage_withoutexcuse) ? number_format($list->percentage_withoutexcuse, 2).'%' : '0%');
+                $theCollection[$row][20] = (isset($list->percentage_withexcuse) && !empty($list->percentage_withexcuse) ? number_format($list->percentage_withexcuse, 2) : '0');
+                $theCollection[$row][21] = (isset($list->percentage_withoutexcuse) && !empty($list->percentage_withoutexcuse) ? number_format($list->percentage_withoutexcuse, 2) : '0');
                 $row += 1;
             endforeach;
         endif;
