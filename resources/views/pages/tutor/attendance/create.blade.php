@@ -28,8 +28,8 @@
 						<div class="col-span-8 font-medium">{{ $data['module'].(isset($data['group']) && !empty($data['group']) ? ' - '.$data['group'] : '') }}</div>
 					</div>
 					<div class="grid grid-cols-12 gap-0">
-						<div class="col-span-4 text-slate-500 font-medium">Tutor</div>
-						<div class="col-span-8 font-medium">{{ $data['tutor'] }}</div>
+						<div class="col-span-4 text-slate-500 font-medium">{{ ($data['tutor_id'] > 0 ? 'Tutor' : ($data['personal_tutor_id'] > 0 ? 'Personal Tutor' : 'Tutor')) }}</div>
+						<div class="col-span-8 font-medium">{{ ($data['tutor_id'] > 0 ? $data['tutor'] : ($data['personal_tutor_id'] > 0 ? $data['personal_tutor'] : 'Unknown')) }}</div>
 					</div>
 				</div>
 			</div>

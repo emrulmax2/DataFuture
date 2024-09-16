@@ -278,8 +278,15 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="edit_name" class="form-label">Title <span class="text-danger">*</span></label>
-                            <input id="edit_name" type="text" name="name" class="form-control w-full">
+                            <label for="proxy_tutor_id" class="form-label">Title <span class="text-danger">*</span></label>
+                            <select id="edit_name" type="text" name="name" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if($tutors->count() > 0)
+                                    @foreach($tutors as $tut)
+                                        <option value="{{ $tut->id }}">{{ $tut->employee->full_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
                     </div>
