@@ -415,6 +415,8 @@ class StudentController extends Controller
             "slcCode" =>(!empty($CourseCreationVenue)) ? $CourseCreationVenue->slc_code : "UNKNOWN",
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            "CourseRelation" => $student->crel,
         ]);
     }
 
