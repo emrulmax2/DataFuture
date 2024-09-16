@@ -279,7 +279,7 @@
                     <div class="modal-body">
                         <div>
                             <label for="proxy_tutor_id" class="form-label">Title <span class="text-danger">*</span></label>
-                            <select id="edit_name" type="text" name="name" class="form-control w-full">
+                            <select id="proxy_tutor_id" name="proxy_tutor_id" class="tom-selects w-full">
                                 <option value="">Please Select</option>
                                 @if($tutors->count() > 0)
                                     @foreach($tutors as $tut)
