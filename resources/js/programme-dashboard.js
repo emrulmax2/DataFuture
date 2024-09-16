@@ -334,10 +334,58 @@ import Chart from "chart.js/auto";
     $(document).on('click', '.proxyClass', function(e){
         e.preventDefault();
         let $theLink = $(this);
-        let plan_id = '';
+        let plan_id = $theLink.attr('data-planid');
+        let plan_date_id = $theLink.attr('data-plandateid');
         
-        $('#proxyClassModal .plan_id').val('0');
-        $('#proxyClassModal .plans_date_list_id').val('0');
-    })
+        $('#proxyClassModal input[name="plan_id"]').val(plan_id);
+        $('#proxyClassModal input[name="plans_date_list_id"]').val(plan_date_id);
+    });
+
+    $('#proxyClassForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('proxyClassForm');
+        
+        document.querySelector('#saveReAsignBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveReAsignBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('programme.dashboard.reassign.class'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
+            document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200){
+                proxyClassModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "WOW!" );
+                    $("#successModal .successModalDesc").html('Class successfully ended.');
+                });     
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
+            document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if(error.response.status == 422){
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#proxyClassForm .${key}`).addClass('border-danger')
+                        $(`#proxyClassForm  .error-${key}`).html(val)
+                    }
+                }else{
+                    console.log('error');
+                }
+            }
+        });
+    });
     /* Proxy Class End */
 })();

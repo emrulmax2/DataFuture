@@ -2318,6 +2318,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
         Route::post('programme-dashboard/end-class', 'endClass')->name('programme.dashboard.end.class'); 
+
+        Route::post('programme-dashboard/reassign-class', 'reAssignClass')->name('programme.dashboard.reassign.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {

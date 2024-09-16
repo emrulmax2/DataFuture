@@ -305,7 +305,11 @@
                                         <div class="intro-x relative flex items-center mb-3">
                                             <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
                                                 <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                                    <img alt="{{ (isset($class->plan->tutor->employee->full_name) && !empty($class->plan->tutor->employee->full_name) ? $class->plan->tutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->tutor->employee->photo_url) && !empty($class->plan->tutor->employee->photo_url) ? $class->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    @if($class->plan->tutor_id > 0)
+                                                        <img alt="{{ (isset($class->plan->tutor->employee->full_name) && !empty($class->plan->tutor->employee->full_name) ? $class->plan->tutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->tutor->employee->photo_url) && !empty($class->plan->tutor->employee->photo_url) ? $class->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    @else
+                                                        <img alt="{{ (isset($class->plan->personalTutor->employee->full_name) && !empty($class->plan->personalTutor->employee->full_name) ? $class->plan->personalTutor->employee->full_name : 'London Churchill College') }}" src="{{ (isset($class->plan->personalTutor->employee->photo_url) && !empty($class->plan->personalTutor->employee->photo_url) ? $class->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">
@@ -317,25 +321,27 @@
                                                     </div>
                                                     <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
                                                 </div>
-                                                @if($class->plan->class_type == 'Tutorial')
-                                                    @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
-                                                        @if($class->feed_given == 1)
-                                                            <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>
-                                                        @else
-                                                            <a href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>
-                                                            @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null)
+                                                @if($class->plan->class_type == 'Tutorial' || $class->plan->class_type == 'Seminar')
+                                                    <div class="flex justify-start items-center">
+                                                        @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
+                                                            @if($class->feed_given == 1)
+                                                                <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3"><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Attendance</a>
+                                                            @else
+                                                                <a href="{{ route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>
+                                                            @endif
+                                                            @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null && $class->status == 'Ongoing')
                                                                 <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>
                                                             @endif
+                                                        @else
+                                                            @if($showClass == 1)
+                                                                <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
+                                                            @elseif($showClass == 2)
+                                                                <div class="alert alert-danger-soft show flex items-start" role="alert">
+                                                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
+                                                                </div>
+                                                            @endif
                                                         @endif
-                                                    @else
-                                                        @if($showClass == 1)
-                                                            <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>
-                                                        @elseif($showClass == 2)
-                                                            <div class="alert alert-danger-soft show flex items-start" role="alert">
-                                                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
-                                                            </div>
-                                                        @endif
-                                                    @endif
+                                                    </div>
                                                 @endif
                                                 {{--<div class="text-slate-500 mt-1">{{ (isset($class->plan->course->name) ? $class->plan->course->name : '') }}</div>--}}
                                             </div>
