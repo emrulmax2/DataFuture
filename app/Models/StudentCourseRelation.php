@@ -12,6 +12,9 @@ class StudentCourseRelation extends Model
 
     protected $fillable = [
         'course_creation_id',
+        'course_start_date',
+        'course_end_date',
+        'type',
         'student_id',
         'active',
         'created_by',
@@ -23,7 +26,7 @@ class StudentCourseRelation extends Model
      *
      * @var array
      */
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at','course_start_date','course_end_date'];
 
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
@@ -44,4 +47,21 @@ class StudentCourseRelation extends Model
     public function feeeligibility(){
         return $this->hasOne(StudentFeeEligibility::class, 'student_course_relation_id', 'id')->latestOfMany();
     }
+
+    public function setCourseStartDateAttribute($value) {  
+        $this->attributes['course_start_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getCourseStartDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setCourseEndDateAttribute($value) {  
+        $this->attributes['course_end_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+    }
+
+    public function getCourseEndDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
 }

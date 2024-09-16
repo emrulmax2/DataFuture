@@ -141,7 +141,7 @@
                                                 <div class="acc__input-error error-intake_semester text-danger mt-2"></div>
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
-                                                <label for="attendance_semester" class="form-label">Attendance Semester <span class="text-danger">*</span></label>
+                                                <label for="attendance_semester" class="form-label">Attendance Semester </label>
                                                 <select id="attendance_semester" class="w-full tom-selects" multiple name="group[attendance_semester][]">
                                                     <option value="">Please Select</option>
                                                     
