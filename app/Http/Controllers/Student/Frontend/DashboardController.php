@@ -119,6 +119,7 @@ class DashboardController extends Controller
                     "hr_date" =>$hr_date,
                     "hr_time" => $data->start_time."-".$data->end_time,
                     "venue_room" => $data->venue->name.", ".$data->room->name,
+                    "virtual_room" => $data->virtual_room.", ".$data->virtual_room,
                 ];
                     
                endforeach;
@@ -271,6 +272,7 @@ class DashboardController extends Controller
                         'group'=> $list->group_name,
                         'venue' =>Venue::find($list->venue_id),           
                         'room' =>Room::find($list->rooms_id),   
+                        'virtual_room' =>$list->virtual_room,   
                         'plan_dates' => $getClassDatesForStudent,
                         'start_time' =>$start_time,           
                         'end_time' =>$end_time,                    
