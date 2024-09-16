@@ -94,7 +94,7 @@
                                             <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
                                         </div>
-                                        @if($data->virtual_room)
+                                        @if(isset($data->virtual_room) && $data->virtual_room!="")
                                             <a href="{{ $data->virtual_room }}" target="_blank"  class="btn-primary btn text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="video" class="w-4 h-4"></i></a>
                                         @endif
                                     </div>
@@ -134,7 +134,7 @@
                                             <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
                                         </div>
-                                        @if($data->virtual_room)
+                                        @if(isset($data->virtual_room) && $data->virtual_room!="")
                                             <a href="{{ $data->virtual_room }}" target="_blank"  class="btn-primary btn text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="video" class="w-4 h-4"></i></a>
                                         @endif
                                     </div>
