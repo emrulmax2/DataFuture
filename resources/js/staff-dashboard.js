@@ -13,6 +13,8 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const senGroupMailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#senGroupMailModal"));
+    const startProxyClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startProxyClassModal"));
+    const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
         if($(this).attr('data-action') == 'RELOAD'){
@@ -65,6 +67,18 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
         department_ids.clear(true);
         groups_ids.clear(true);
         employee_ids.clear(true);
+    });
+
+    const startProxyClassModalEl = document.getElementById('startProxyClassModal')
+    startProxyClassModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#startProxyClassModal .modal-body [name="plan_date_list_id"]').val('0');
+        $('#startProxyClassModal .modal-body [name="proxy_class_tutor_note"]').val('0');
+    });
+
+    const endClassModalEl = document.getElementById('endClassModal')
+    endClassModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#endClassModal .plan_date_list_id').val('');
+        $('#endClassModal .attendance_information_id').val('');
     });
 
     
@@ -335,5 +349,121 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
             }
         })
     }
+
+    /* Proxy Class Start */
+    $(document).on('click', '.startClassBtn', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        var plan_date_id = $theLink.attr('data-id');
+
+        $('#startProxyClassModal input[name="plan_date_list_id"]').val(plan_date_id);
+    });
+
+    $('#startProxyClassForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('startProxyClassForm');
+        
+        document.querySelector('#startProxyBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#startProxyBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: 'POST',
+            url: route('dashboard.start.proxy.class'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#startProxyBtn').removeAttribute('disabled');
+            document.querySelector("#startProxyBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                startProxyClassModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Class successfully started');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });    
+                
+                setTimeout(() => {
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#startProxyBtn').removeAttribute('disabled');
+            document.querySelector("#startProxyBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+    /* Proxy Class End*/
+
+    /* End Class Start */
+    $(document).on('click', '.endClassBtn', function(e){
+        var $theBtn = $(this);
+        var plandateid = $theBtn.attr('data-id');
+        var attendanceinfo = $theBtn.attr('data-attendanceinfo');
+
+        $('#endClassModal input[name="plan_date_list_id"]').val(plandateid);
+        $('#endClassModal input[name="attendance_information_id"]').val(attendanceinfo);
+    });
+
+
+    $('#endClassModalForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('endClassModalForm');
+        
+        document.querySelector('#endClassBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#endClassBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('dashboard.end.proxy.class'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#endClassBtn').removeAttribute('disabled');
+            document.querySelector("#endClassBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200){
+                endClassModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "WOW!" );
+                    $("#successModal .successModalDesc").html('Class successfully ended.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });     
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#endClassBtn').removeAttribute('disabled');
+            document.querySelector("#endClassBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if(error.response.status == 422){
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "Oops!" );
+                        $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact with the administrator.');
+                    });     
+
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 1000);
+                }else{
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* End Class End */
 
 })();

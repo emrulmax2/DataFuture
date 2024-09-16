@@ -110,7 +110,7 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-12 mt-3 2xl:mt-5">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Student Attendance</h2>
-                            <a href="{{ route('report.attendance.reports') }}" class="ml-auto text-primary truncate">Attendance Report</a>
+                            <a href="{{ route('reports') }}" class="ml-auto text-white btn btn-sm btn-primary truncate"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Reports</a>
                         </div>
                         <div class="mt-5 intro-x">
                             <div class="report-box-2 before:hidden xl:before:block intro-y mt-5">

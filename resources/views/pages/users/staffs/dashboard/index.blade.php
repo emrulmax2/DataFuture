@@ -93,15 +93,70 @@
                 </div>
             </div>
         </div> 
-        @if(!empty($myPendingTask))
+        @if(!empty($myPendingTask) || $proxyClasses->count() > 0)
         <div class="col-span-12 2xl:col-span-3">
              <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-6">
                         <div class="grid grid-cols-12 gap-5 gap-y-0">
+                            @if($proxyClasses->count() > 0)
+                                <div class="col-span-12 mb-5">
+                                    <div class="grid grid-cols-12 gap-5">
+                                        @foreach($proxyClasses as $class)
+                                            @php 
+                                                $showClass = 0;
+                                                if(in_array(auth()->user()->last_login_ip, $venue_ips)):
+                                                    $listStart = date('Y-m-d').' '.$class->plan->start_time;
+                                                    $listEnd = date('Y-m-d').' '.$class->plan->end_time;
+                                                    $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
+                                                    $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
+                                                    $currentTime = date('Y-m-d H:i:s');
+                                                    if($currentTime >= $classStart && $currentTime <= $classEnd):
+                                                        $showClass = 1;
+                                                    elseif($currentTime < $classStart):
+                                                        $showClass = 2;
+                                                    endif;
+                                                endif;
+                                            @endphp
+                                            <div class="col-span-12">
+                                                <div class="box zoom-in bg-success-soft px-5 py-3">
+                                                    <div class="flex items-start">
+                                                        <div class="font-medium">
+                                                            {{ $class->plan->creations->module_name }} 
+                                                            ({{ $class->plan->group->name }})
+                                                            {{ (isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '') }}
+                                                        </div>
+                                                        <div class="text-xs text-slate-500 ml-auto text-right" style="flex: 0 0 70px">{{ (isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '') }}</div>
+                                                    </div>
+                                                    <div class="flex justify-start items-center mt-3">
+                                                        @if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0)
+                                                            @if($class->feed_given == 1)
+                                                                <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" href="{{ route('tutor-dashboard.attendance', [$class->proxy_tutor_id, $class->id, 3]) }}" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-1.5 px-2"><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Attendance</a>
+                                                            @else
+                                                                <a href="{{ route('tutor-dashboard.attendance', [$class->proxy_tutor_id, $class->id, 3]) }}"  data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-1.5 px-2 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>
+                                                            @endif
+                                                            @if($class->feed_given == 1 && $class->attendanceInformation->end_time == null && $class->status == 'Ongoing')
+                                                                <a data-attendanceinfo="{{ $class->attendanceInformation->id }}" data-id="{{ $class->id }}" data-tw-toggle="modal" data-tw-target="#endClassModal" class="endClassBtn transition duration-200 btn btn-sm btn-danger text-white py-1.5 px-2 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>
+                                                            @endif
+                                                        @else
+                                                            @if($showClass == 1)
+                                                                <a data-tw-toggle="modal" data-id="{{ $class['id'] }}" data-tw-target="#startProxyClassModal" class="startClassBtn transition duration-200 btn btn-sm btn-primary text-white py-1.5 px-2">Start Class</a>
+                                                            @elseif($showClass == 2)
+                                                                <div class="alert alert-danger-soft show flex items-start px-2 py-2" role="alert">
+                                                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
+                                                                </div>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                             @if(!$work_history_lock)
                                 @foreach($myPendingTask as $process_id => $process)
-                                    <div class="col-span-12 {{ !$loop->first ? 'border-t pt-5 mt-3' : '' }}">
+                                    <div class="col-span-12 {{ !$loop->first && $process['outstanding_tasks'] > 0 ? 'border-t pt-5 mt-3' : '' }}">
                                         <div class="grid grid-cols-12 gap-5">
                                             @if($process['outstanding_tasks'] > 0)
                                                 <a href="javascript:void(0);" class="block relative col-span-6 2xl:col-span-4 mb-3 processParents process_{{$process_id}}" data-process="{{$process_id}}">
@@ -135,6 +190,86 @@
         </div>
         @endif
     </div>
+
+    <!-- BEGIN: Class Start Modal Start -->
+    <div id="startProxyClassModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="startProxyClassForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="p-5 pt-0 text-center">
+                            <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                            <div class="text-3xl font-medium mt-3 px-2 confModTitle">Do you want to start the class now ?</div>
+                        </div>
+                        <div class="mt-2">
+                            <textarea name="proxy_class_tutor_note" class="form-control w-full" placeholder="Note (Optional)" rows="3"></textarea>
+                        </div>
+                        <input class="plan-datelist" type="hidden" name="plan_date_list_id" value="">
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-danger text-white w-auto mr-1">Not Now</button>
+                        <button type="submit" id="startProxyBtn" class="btn btn-success text-white w-auto save">     
+                            Start Class                    
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" value="{{ $user->employee->id }}" name="employee_id"/>
+                        <input type="hidden" name="user_id" value="{{ $user->id }}" />
+                        <input type="hidden" name="type" value="3" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Class Start Modal End -->
+
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="endClassModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="endClassModalForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="p-5 text-center">
+                            <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                            <div class="text-3xl mt-5 confModTitle">End Now?</div>
+                            <div class="text-slate-500 mt-2 mb-2 confModDesc">Do you want to end this class?</div>
+                        </div>
+                        <div class="px-5 pb-8 text-center">
+                            <input class="plan_date_list_id" type="hidden" name="plan_date_list_id" value="0">
+                            <input class="attendance_information_id" type="hidden" name="attendance_information_id" value="0">
+
+                            <button type="submit" id="endClassBtn" class="btn btn-danger w-auto">
+                                Yes, I do
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                    stroke="white" class="w-4 h-4 ml-2">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
 
     <!-- BEGIN: Send Group Mail Modal -->
     <div id="senGroupMailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -284,6 +419,8 @@
         <!-- END: Confirm Modal Content -->
         @endif
     @endif
+
+
     
 @endsection
 
