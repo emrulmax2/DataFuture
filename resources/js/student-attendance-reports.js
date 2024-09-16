@@ -231,9 +231,33 @@ var attendanceReportListTable = (function () {
     if($('#attendanceReportListTable').length > 0){
         $('#studentGroupSearchBtn').on('click', function(e){
             e.preventDefault();
+            let intakeSemester = $('#intake_semester').val();
+            let attendSemester = $('#attendance_semester').val();
 
-            $('.attendanceReportListTableWrap').fadeIn();
-            attendanceReportListTable.init();
+            if(intakeSemester.length > 0 || attendSemester.length > 0){
+                $('#studentGroupSearchForm .reportAlert').remove();
+                $('.attendanceReportListTableWrap').fadeIn();
+                attendanceReportListTable.init();
+            }else{
+                $('#studentGroupSearchForm .reportAlert').remove();
+                $('#studentGroupSearchForm').prepend('<div class="alert reportAlert alert-danger-soft show flex items-start mb-5" role="alert">\
+                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong>&nbsp; Validation error found! Please select <span class="font-medium underline">Intake</span> or  <span class="font-medium underline">Attendance</span> Semester. </span>\
+                </div>');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                $('.attendanceReportListTableWrap').fadeOut('fast', function(){
+                    $('#attendanceReportListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+                });
+
+                setTimeout(() => {
+                    $('#studentGroupSearchForm .reportAlert').remove();
+                }, 5000);
+            }
         });
 
         $('#attendanceReportExcelBtn').on('click', function(e){

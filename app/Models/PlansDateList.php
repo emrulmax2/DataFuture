@@ -17,6 +17,10 @@ class PlansDateList extends Model
         'feed_given',
         'status',
         'canceled_reason',
+        'proxy_tutor_id',
+        'proxy_assigned_by',
+        'proxy_assigned_at',
+        'proxy_class_tutor_note',
         'canceled_by',
         'canceled_at',
         'created_by',
@@ -34,10 +38,13 @@ class PlansDateList extends Model
         return $this->belongsTo(Plan::class, 'plan_id');
     }
     public function attendanceInformation() {
-        return $this->hasOne(AttendanceInformation::class);
+        return $this->hasOne(AttendanceInformation::class, 'plans_date_list_id');
     }
     public function attendances() {
-        return $this->hasMany(Attendance::class);
+        return $this->hasMany(Attendance::class, 'plans_date_list_id');
+    }
+    public function proxy() {
+        return $this->belongsTo(User::class, 'proxy_tutor_id');
     }
 
     public function setDateAttribute($value) {  

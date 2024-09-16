@@ -374,7 +374,8 @@ class DashboardController extends Controller
                     "foundAttendances"  => ($foundAttendances) ?? null,           
                     "feed_given"  => $list->feed_given,           
                     "is_today"  => (isset($list->date) && !empty($list->date) && $list->date == date('Y-m-d') ? 1 : 0),  
-                    'showClass' => $showClass,         
+                    'showClass' => $showClass,     
+                    'proxy_tutor_id' => $list->proxy_tutor_id    
                 ];
                 $i++;
             endforeach;

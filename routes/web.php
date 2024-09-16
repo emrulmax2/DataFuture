@@ -211,6 +211,7 @@ use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -1388,6 +1389,9 @@ Route::middleware('auth')->group(function() {
 
         Route::post('/dashboard/get-departments-employees', 'getDeptEmployeeIds')->name('dashboard.get.dept.employee.ids');
         Route::post('/dashboard/send-group-mail', 'sendGroupEmail')->name('dashboard.get.send.group.mail');
+
+        Route::post('/dashboard/start-proxy-class', 'startProxyClass')->name('dashboard.start.proxy.class');
+        Route::post('/dashboard/end-proxy-class', 'endProxyClass')->name('dashboard.end.proxy.class');
     });
 
 
@@ -2693,5 +2697,9 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
         Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
         Route::post('reports/attendance-excel-download', 'excelDownload')->name('report.attendance.reports.excel'); 
+    });
+
+    Route::controller(SystemReportController::class)->group(function(){
+        Route::get('reports', 'index')->name('reports'); 
     });
 });

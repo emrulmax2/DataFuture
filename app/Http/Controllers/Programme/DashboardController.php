@@ -101,6 +101,9 @@ class DashboardController extends Controller
                 $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
                 $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $theDate)->where('attendance_type', 1)->get();
 
+                $proxyEmployeeId = (isset($pln->proxy->employee->id) && $pln->proxy->employee->id > 0 ? $pln->proxy->employee->id : 0);
+                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
+
                 $classStatus = 0;
                 $classLabel = '';
                 $orgStart = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->start_time));
@@ -109,7 +112,7 @@ class DashboardController extends Controller
                 if(date('Y-m-d', strtotime($currentTime)) < date('Y-m-d', strtotime($orgStart))):
                     $classLabel = '<span class="text-info font-medium">Scheduled</span>';
                 elseif($currentTime < $orgStart && !isset($pln->attendanceInformation->id)):
-                    $classLabel = '<span class="text-danger font-medium">Starting Shortly</span>';
+                    $classLabel = '<span class="text-info font-medium">Scheduled</span>';
                 elseif($currentTime > $orgStart && $currentTime < $orgEnd && !isset($pln->attendanceInformation->id)):
                     $classLabel = '<span class="text-pending font-medium flashingText">Starting Shortly</span>';
                 elseif(isset($pln->attendanceInformation->id)):
@@ -162,26 +165,44 @@ class DashboardController extends Controller
                             endif;
                         $html .= '</div>';
                     $html .= '</td>';
-                    $html .= '<td class="text-left text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
+                    $html .= '<td class="text-left">';
                         if($pln->plan->tutor_id > 0):
                             $html .= '<div class="flex justify-start items-center">';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
-                                    $html .= '<img src="'.(isset($pln->plan->tutor->employee->photo_url) ? $pln->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : 'LCC').'">';
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                    else:
+                                        $html .= '<img src="'.(isset($pln->plan->tutor->employee->photo_url) ? $pln->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : 'LCC').'">';
+                                    endif;
                                 $html .= '</div>';
-                                $html .= '<div class="inline-block font-medium relative">';
-                                    $html .= (isset($pln->plan->tutor->employee->full_name) && !empty($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : (isset($pln->plan->tutor->name) ? $pln->plan->tutor->name : 'LCC'));
-                                    $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->tutor->employee->mobile) && !empty($pln->plan->tutor->employee->mobile) ? '<br/>'.$pln->plan->tutor->employee->mobile : '');
+                                $html .= '<div class="inline-block font-medium relative text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
+                                    $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->tutor->employee->full_name) && !empty($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : (isset($pln->plan->tutor->name) ? $pln->plan->tutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
+                                        $html .= ($proxyAttendanceLive->count() == 0 && isset($pln->proxy->employee->mobile) && !empty($pln->proxy->employee->mobile) ? '<br/><span class="text-danger">'.$pln->proxy->employee->mobile.'</span>' : '');
+                                    else:
+                                        $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->tutor->employee->mobile) && !empty($pln->plan->tutor->employee->mobile) ? '<br/>'.$pln->plan->tutor->employee->mobile : '');
+                                    endif;
                                 $html .= '</div>';
                             $html .= '</div>';
                         elseif($pln->plan->personal_tutor_id > 0):
                             $html .= '<div class="flex justify-start items-center">';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
-                                    $html .= '<img src="'.(isset($pln->plan->personalTutor->employee->photo_url) ? $pln->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : 'LCC').'">';
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                    else:
+                                        $html .= '<img src="'.(isset($pln->plan->personalTutor->employee->photo_url) ? $pln->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : 'LCC').'">';
+                                    endif;
                                 $html .= '</div>';
-                                $html .= '<div class="inline-block font-medium relative">';
-                                    $html .= (isset($pln->plan->personalTutor->employee->full_name) && !empty($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : (isset($pln->plan->personalTutor->name) ? $pln->plan->personalTutor->name : 'LCC'));
-                                    $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->personalTutor->employee->mobile) && !empty($pln->plan->personalTutor->employee->mobile) ? '<br/>'.$pln->plan->personalTutor->employee->mobile : '');
-                                $html .= '</div>';
+                                $html .= '<div class="inline-block font-medium relative text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
+                                    $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->personalTutor->employee->full_name) && !empty($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : (isset($pln->plan->personalTutor->name) ? $pln->plan->personalTutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
+                                        $html .= ($proxyAttendanceLive->count() == 0 && isset($pln->proxy->employee->mobile) && !empty($pln->proxy->employee->mobile) ? '<br/><span class="text-danger">'.$pln->proxy->employee->mobile.'</span>' : '');
+                                    else:
+                                        $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->personalTutor->employee->mobile) && !empty($pln->plan->personalTutor->employee->mobile) ? '<br/>'.$pln->plan->personalTutor->employee->mobile : '');
+                                    endif;
+                                    $html .= '</div>';
                             $html .= '</div>';
                         else:
                             $html .= '<span>N/A</span>';
@@ -211,7 +232,7 @@ class DashboardController extends Controller
                                                 $html .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->feed_given == 1 && $pln->attendances->count() > 0 ? 'View Feed' : 'Feed Attendance').'</a>';
                                             $html .= '</li>';
                                         endif;
-                                        if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
+                                        if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime)) && ($pln->proxy_tutor_id == null || $pln->proxy_tutor_id == 0)):
                                             $html .= '<li>';
                                                 $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
                                             $html .= '</li>';
@@ -795,5 +816,14 @@ class DashboardController extends Controller
         $proxy_tutor_id = $request->proxy_tutor_id;
         $plan_id = $request->plan_id;
         $plans_date_list_id = $request->plans_date_list_id;
+
+        $data = [];
+        $data['proxy_tutor_id'] = $proxy_tutor_id;
+        $data['proxy_assigned_by'] = auth()->user()->id;
+        $data['proxy_assigned_at'] = date('Y-m-d H:i:s');
+
+        PlansDateList::where('id', $plans_date_list_id)->where('plan_id', $plan_id)->update($data);
+
+        return response()->json(['message' => 'Class successfully re-assigned to new tutor.'], 200);
     }
 }
