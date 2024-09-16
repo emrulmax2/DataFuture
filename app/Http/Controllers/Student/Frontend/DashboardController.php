@@ -119,7 +119,7 @@ class DashboardController extends Controller
                     "hr_date" =>$hr_date,
                     "hr_time" => $data->start_time."-".$data->end_time,
                     "venue_room" => $data->venue->name.", ".$data->room->name,
-                    "virtual_room" => $data->virtual_room.", ".$data->virtual_room,
+                    "virtual_room" => $data->virtual_room,
                 ];
                     
                endforeach;
