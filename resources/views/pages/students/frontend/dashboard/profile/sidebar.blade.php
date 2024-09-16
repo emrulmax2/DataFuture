@@ -71,6 +71,46 @@
             <!-- BEGIN: Transactions -->
             <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 2xl:mt-8">
                 <div class="intro-x flex items-center h-10">
+                    <h2 class="text-lg font-medium truncate mr-5">Today's Classes</h2>
+                    <a href="" class="ml-auto text-primary truncate">Show More</a>
+                </div>
+                <div class="mt-5">
+                    @php $icountData=0; @endphp
+                   
+                        @foreach($datewiseClasses as $keyDate => $dataSet)
+                            @foreach ($dataSet as $data)
+                            {{-- {{ dd( $data) }} --}}
+                            @php
+                                $upcommingDate = strtotime(date("Y-m-d",strtotime($keyDate)));
+                                $currentDate = strtotime(date("Y-m-d"));
+                            @endphp
+                            @if( $upcommingDate == $currentDate)
+                                @if($icountData<7)
+                                <div id="dates-{{ $icountData++ }}" class="intro-x">
+                                    <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
+                                        <div class="ml-4 mr-auto">
+                                            <div class="font-medium">{{ $data->module }}  </div>
+                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $data->classType }}</div>
+                                            <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
+                                            <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
+                                        </div>
+                                        @if($data->virtual_room)
+                                            <a href="{{ $data->virtual_room }}" target="_blank"  class="btn-primary btn text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="video" class="w-4 h-4"></i></a>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
+                            @endif
+                            {{-- @endif --}}
+                            @endforeach
+                        @endforeach
+                    <a href="" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                </div>
+            </div>
+            <!-- END: Transactions -->
+            <!-- BEGIN: Transactions -->
+            <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 2xl:mt-8">
+                <div class="intro-x flex items-center h-10">
                     <h2 class="text-lg font-medium truncate mr-5">Upcomming Classes</h2>
                     <a href="" class="ml-auto text-primary truncate">Show More</a>
                 </div>
@@ -94,7 +134,9 @@
                                             <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
                                         </div>
-                                        <div class=""></div>
+                                        @if($data->virtual_room)
+                                            <a href="{{ $data->virtual_room }}" target="_blank"  class="btn-primary btn text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="video" class="w-4 h-4"></i></a>
+                                        @endif
                                     </div>
                                 </div>
                                 @endif
