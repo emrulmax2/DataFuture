@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Programme;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelClassRequest;
+use App\Http\Requests\ReAssignClassRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Assign;
@@ -788,5 +789,11 @@ class DashboardController extends Controller
         else:
             return response()->json(['data' => 'error found' ], 422);
         endif;
+    }
+
+    public function reAssignClass(ReAssignClassRequest $request){
+        $proxy_tutor_id = $request->proxy_tutor_id;
+        $plan_id = $request->plan_id;
+        $plans_date_list_id = $request->plans_date_list_id;
     }
 }
