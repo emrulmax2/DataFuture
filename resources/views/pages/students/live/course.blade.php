@@ -46,13 +46,13 @@
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Course Start</div>
-                            <div class="col-span-8 font-medium">{{ $availability->course_start_date }}</div>
+                            <div class="col-span-8 font-medium">{{ ($CourseRelation->course_start_date!=null) ?  $CourseRelation->course_start_date : $availability->course_start_date }}</div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">
                             <div class="col-span-4 text-slate-500 font-medium">Course End</div>
-                            <div class="col-span-8 font-medium">{{ $availability->course_end_date }}</div>
+                            <div class="col-span-8 font-medium">{{ ($CourseRelation->course_end_date!=null) ?  $CourseRelation->course_end_date : $availability->course_end_date }}</div>
                         </div>
                     </div>
                     
@@ -337,6 +337,38 @@
                                             @endif
                                         </select>
                                         <div class="acc__input-error error-fee_eligibility_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="course_start_date" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course Start Date <span class="text-danger">*</span></label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                    <input id="course_start_date" value="{{ ($CourseRelation->course_start_date!=null) ?  $CourseRelation->course_start_date : $availability->course_start_date }}" name="course_start_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                    <div class="acc__input-error error-course_start_date text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                <label for="course_end_date" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Course End Date <span class="text-danger">*</span></label>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <input id="course_end_date" value="{{ ($CourseRelation->course_end_date!=null) ?  $CourseRelation->course_end_date : $availability->course_end_date }}" name="course_end_date" type="text" class="form-control datepicker" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                    <div class="acc__input-error error-course_end_date text-danger mt-2"></div>
+                                </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="student_type" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Type</label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <select id="student_type" class="lcc-tom-select lccTom w-full" name="student_type">
+                                            <option value="">Please Select</option>
+                                            <option {{ ($CourseRelation->type!=null && $CourseRelation->type=="UK")  ?  'selected' : ($availability->type=="UK" ? 'selected' : "") }} value="UK">UK</option>
+                                            <option {{ ($CourseRelation->type!=null && $CourseRelation->type=="OVERSEAS")  ?  'selected' : ($availability->type=="OVERSEAS" ? 'selected' : "") }} value="OVERSEAS">OVERSEAS</option>
+                                            <option {{ ($CourseRelation->type!=null && $CourseRelation->type=="BOTH")  ?  'selected' : ($availability->type=="BOTH" ? 'selected' : "") }} value="BOTH">BOTH</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

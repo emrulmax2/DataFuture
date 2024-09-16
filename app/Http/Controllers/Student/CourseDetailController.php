@@ -22,6 +22,29 @@ class CourseDetailController extends Controller
     public function update(StudentCourseDetailsRequest $request){
         $student_id = $request->student_id;
         $student_course_relation_id = $request->student_course_relation_id;
+
+
+        $studentCourseRelation = StudentCourseRelation::find($student_course_relation_id);
+        $studentCourseRelation->course_start_date = $request->course_start_date;
+        $studentCourseRelation->course_end_date = $request->course_end_date;
+        $studentCourseRelation->type = $request->student_type;
+        $changes = $studentCourseRelation->getDirty();
+        $studentCourseRelation->save();
+
+        if($studentCourseRelation->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                $data = [];
+                $data['student_id'] = $student_id;
+                $data['table'] = 'student_proposed_courses';
+                $data['field_name'] = $field;
+                $data['field_value'] = $studentCourseRelation->$field;
+                $data['field_new_value'] = $value;
+                $data['created_by'] = auth()->user()->id;
+
+                StudentArchive::create($data);
+            endforeach;
+        endif;
+
         $ProposedCourseOldRow = StudentProposedCourse::find($request->id);
 
         $proposedCourse = StudentProposedCourse::find($request->id);
