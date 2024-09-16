@@ -1,6 +1,6 @@
 #!/bin/sh
 # Change to the project directory
-cd /home/datafuture2lcc/datafuture/
+cd /home/smslccuk/datafuture/
 
 # Pull the latest changes from the git repository
 git pull origin main
@@ -25,3 +25,5 @@ php artisan view:cache
 
 #Clear all
 php artisan optimize:clear
+
+
