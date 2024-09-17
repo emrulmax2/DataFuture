@@ -188,27 +188,23 @@ class DashboardController extends Controller
         return response()->json(['htm' => $html], 200);
     }
 
-    public function getClassInfoHtml($theDate = null, $course_id = 0, $personalTutorId=0){
+    public function getClassInfoHtml($theDate = null, $course_id = 0, ){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-        if($personalTutorId==0) {
-            $personalTutorId = Auth::user()->id;
-        }
+        
+            $personalTutorId = auth()->user()->id; //304; 
+        
         $html = '';
-        /*$classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $query = Plan::with('tutor')->whereIn('id', $classPlanIds); 
-        if($course_id > 0):
-            $query->where('course_id', $course_id);
-        endif;
-        $query = $query->orderBy('start_time', 'ASC')->get();*/
+
 
         $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id, $personalTutorId){
-            if($course_id > 0 && $personalTutorId>0):
-                $q->where('course_id', $course_id)->where('personal_tutor_id', $personalTutorId);
+            if($course_id > 0):
+                $q->where('course_id', $course_id);
             endif;
+                $q->where('personal_tutor_id', $personalTutorId);
+
         })->get()->sortBy(function($planDates, $key) {
             return $planDates->plan->start_time;
         });
-
         if(!empty($plans) && $plans->count() > 0):
             $currentTime = date('Y-m-d H:i:s');
             foreach($plans as $pln):
@@ -246,7 +242,7 @@ class DashboardController extends Controller
                 elseif($currentTime > $orgEnd && !isset($pln->attendanceInformation->id)):
                     $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
                 endif;
-                if($pln->plan->class_type=="Theory" && isset($PerTutorEmployeeId) && $PerTutorEmployeeId==Auth::user()->id):
+                if($pln->plan->class_type=="Theory"):
                     $html .= '<tr class="intro-x">';
                         $html .= '<td>';
                             $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
