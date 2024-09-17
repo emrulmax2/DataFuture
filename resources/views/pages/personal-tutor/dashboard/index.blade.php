@@ -240,17 +240,6 @@
                                 </select>
                             </div>
                             <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
-                                <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
-                                <select class="form-control w-full border-0" name="course_id" id="planCourseId" style="max-width: 230px;">
-                                    <option value="0">All Course</option>
-                                    @if(!empty($courses))
-                                        @foreach($courses as $cr)
-                                            <option value="{{ $cr->id }}">{{ $cr->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
                                 <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
                                 <input type="text" name="class_date" class="w-full form-control border-0 classDate" id="theClassDate" value="{{ $theDate }}" style="max-width: 110px;"/>
                             </div>
