@@ -201,6 +201,7 @@ class DashboardController extends Controller
                 $q->where('course_id', $course_id);
             endif;
                 $q->where('personal_tutor_id', $personalTutorId);
+                $q->where('class_type', "Theory");
 
         })->get()->sortBy(function($planDates, $key) {
             return $planDates->plan->start_time;
@@ -242,7 +243,6 @@ class DashboardController extends Controller
                 elseif($currentTime > $orgEnd && !isset($pln->attendanceInformation->id)):
                     $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
                 endif;
-                if($pln->plan->class_type=="Theory"):
                     $html .= '<tr class="intro-x">';
                         $html .= '<td>';
                             $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
@@ -330,7 +330,7 @@ class DashboardController extends Controller
                         $html .= '</td>';
                         $html .= '<td class="text-right">';
                             if($pln->statu != 'Ongoing'):
-                                $html .= '<div class="dropdown inline-block" data-tw-placement="bottom-end">';
+                                $html .= '<div class="dropdown hidden" data-tw-placement="bottom-end">';
                                     $html .= '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-5 h-5 text-slate-500"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></a>';
                                     $html .= '<div class="dropdown-menu w-48">';
                                         $html .= '<ul class="dropdown-content">';
@@ -375,7 +375,7 @@ class DashboardController extends Controller
                             endif;*/
                         $html .= '</td>';
                     $html .= '</tr>';
-                endif;
+              
             endforeach;
         else:
             $html .= '<tr class="intro-x">';
@@ -387,7 +387,18 @@ class DashboardController extends Controller
 
         return $html;
     }
+    public function getClassInformations(Request $request){
+        $planClassStatus = $request->planClassStatus;
+        $planCourseId = (isset($request->planCourseId) && $request->planCourseId > 0 ? $request->planCourseId : 0);
+        $theClassDate = (isset($request->theClassDate) && !empty($request->theClassDate) ? date('Y-m-d', strtotime($request->theClassDate)) : date('Y-m-d'));
 
+        $res = [];
+        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId);
+        //$res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
+        //$res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
+
+        return response()->json(['res' => $res], 200);
+    }
     // public function getClassTutorsHtml($theDate = null, $course_id = 0){
     //     $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
     //     $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();

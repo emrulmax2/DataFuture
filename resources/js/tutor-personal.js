@@ -258,4 +258,60 @@ import moment from 'moment';
         });
         
     });
+
+
+    let dateOption1 = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: false,
+        inlineMode: false,
+        format: "DD-MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+    const theClassDate = new Litepicker({
+        element: document.getElementById('theClassDate'),
+        ...dateOption1
+    });
+
+    /* On Change The Calendar */
+    theClassDate.on('selected', (date) => {
+        let theYear = date.getFullYear();
+        let theMonth = date.getMonth() + 1;
+        let theDay = date.getDate();
+
+        let theDate = theYear+'-'+theMonth+'-'+theDay;
+        var planClassStatus = $('#planClassStatus').val();
+        var planCourseId = $('#planCourseId').val();
+        
+        $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
+        axios({
+            method: 'post',
+            url: route('pt.dashboard.class.info'),
+            data: {planClassStatus : planClassStatus, planCourseId : planCourseId, theClassDate : theDate},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
+                var res = response.data.res;
+                $('#dailyClassInfoTable tbody').html(res.planTable);
+
+                // $('.tutorCount').html('('+res.tutors.count+')');
+                // $('.tutorWrap .theHolder').html(res.tutors.html);
+                
+                // $('.personalTutorCount').html('('+res.ptutors.count+')');
+                // $('.personalTutorWrap .theHolder').html(res.ptutors.html);
+
+            }
+        }).catch(error =>{
+            $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
+            console.log(error)
+        });
+    });
 })();
