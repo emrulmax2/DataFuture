@@ -89,6 +89,7 @@ use App\Models\StudyMode;
 use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -263,11 +264,26 @@ class StudentController extends Controller
 
             endif;
             
+            if(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && isset($course) && count($course)>0 && isset($attendance_semester) )  {
 
-            if(isset($intake_semester) && isset($course) && count($course)>0 && isset($attendance_semester) )  {
-                $courseCreations = CourseCreation::whereIn('id', $course_creation_ids)->whereIns('semester_id', $intake_semester)
-                               ->whereIn('course_id', $course)->pluck('id')->unique()->toArray();
-                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)->pluck('student_id')->unique()->toArray();
+                $intakeStudentslist = StudentProposedCourse::whereIn('course_creation_id',$course_creation_ids)
+                                        ->whereIn('semester_id', $intake_semester)
+                                        ->whereIn('academic_year_id',$academic_year)
+                                        ->pluck('student_id')
+                                        ->unique()
+                                        ->toArray();
+
+                $courseCreations = CourseCreation::whereIn('id', $course_creation_ids)->whereIn('semester_id', $intake_semester)
+                                    ->whereIn('course_id', $course)
+                                    ->pluck('id')
+                                    ->unique()
+                                    ->toArray();
+                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)
+                                    ->whereIn('student_id',$intakeStudentslist)
+                                    ->pluck('student_id')
+                                    ->unique()
+                                    ->toArray();
+
                 $studentsIdTemp = [];
                 foreach ($studentslist as $studentT):
                         if(in_array($studentT, $studentsIds))
@@ -278,13 +294,59 @@ class StudentController extends Controller
             }elseif(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && !isset($attendance_semester) && count($studentsIds)==0)  {
             
                 
+              if(isset($course) && count($course)>0) {
 
-              $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)->whereIn('semester_id', $intake_semester)->pluck('student_id')->unique()->toArray();
-              
+                    $courseCreations = CourseCreation::whereIn('semester_id', $intake_semester)
+                                    ->whereIn('course_id', $course)
+                                    ->pluck('id')
+                                    ->unique()
+                                    ->toArray();
+                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
+                                    ->whereIn('semester_id', $intake_semester)
+                                    ->whereIn('course_creation_id', $courseCreations)
+                                    ->pluck('student_id')
+                                    ->unique()
+                                    ->toArray();
+                } else {
+                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
+                                    ->whereIn('semester_id', $intake_semester)
+                                    ->pluck('student_id')
+                                    ->unique()
+                                    ->toArray();
+                }
               foreach ($studentslist as $studentT):
                 if(!in_array($studentT, $studentsIds))
                     $studentsIds[] = $studentT;
               endforeach;
+            }elseif(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && !isset($attendance_semester) && count($studentsIds)>0)  {
+
+                if(isset($course) && count($course)>0) {
+
+                    $courseCreations = CourseCreation::whereIn('semester_id', $intake_semester)
+                                    ->whereIn('course_id', $course)
+                                    ->pluck('id')
+                                    ->unique()
+                                    ->toArray();
+                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
+                                    ->whereIn('semester_id', $intake_semester)
+                                    ->whereIn('course_creation_id', $courseCreations)
+                                    ->pluck('student_id')
+                                    ->unique()
+                                    ->toArray();
+                } else {
+                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
+                                    ->whereIn('semester_id', $intake_semester)
+                                    ->pluck('student_id')
+                                    ->unique()
+                                    ->toArray();
+                }
+            
+              $studentsIdTemp = [];
+                foreach ($studentslist as $studentT):
+                        if(in_array($studentT, $studentsIds))
+                        $studentsIdTemp[] = $studentT;
+                endforeach;
+                $studentsIds = $studentsIdTemp;
             }
 
             if($evening_weekend == 1  && count($studentsIds)>0): 
@@ -725,7 +787,8 @@ class StudentController extends Controller
         $avarageTermDetails = $returnSet["avarageTermDetails"];
         $totalClassFullSet = $returnSet["totalClassFullSet"];
         $termAttendanceFound = $returnSet["termAttendanceFound"];
-
+        $lastAttendanceDate = $returnSet["lastAttendanceDate"];
+        
         
         return view('pages.students.live.attendance.index', [
             'title' => 'Live Students - London Churchill College',
@@ -745,11 +808,13 @@ class StudentController extends Controller
             "attendanceFeedStatus" =>$attendanceFeedStatus,
             "moduleNameList" =>$moduleNameList,
             "termAttendanceFound" =>$termAttendanceFound,
+            "lastAttendanceDate"=>$lastAttendanceDate,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
             $termData = [];
+            $lastAttendanceDate = [];
             $data = [];
             $planDetails = [];
             $avarageDetails = [];
@@ -822,6 +887,29 @@ class StudentController extends Controller
                                 "start_date" => $list->start_date,
                                 "end_date" => $list->end_date,
                             ];
+                            
+                            if(!isset($lastAttendanceDate[$list->term_id])) {
+
+                                
+                                $lastAttendanceDate[$list->term_id] = "1970-01-01";
+                                
+                                
+                            }
+                            
+                            if($attendance->feed->attendance_count==1) {
+
+                                
+                                if(strtotime($list->date) >strtotime($lastAttendanceDate[$list->term_id])) {
+                                    
+                                        //Debugbar::addMessage($list->term_id);
+                                        //Debugbar::warning("attendance Date: ".$list->date);
+                                        //Debugbar::info("term current previous attendance: ".$lastAttendanceDate[$list->term_id]);
+                                        $lastAttendanceDate[$list->term_id] = $list->date;
+                                        //Debugbar::info("term current last attendance: ".$lastAttendanceDate[$list->term_id]);
+                                }
+
+                            }
+                        
                             $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$list->plan_id)->get()->first();
                             
                             
@@ -852,10 +940,6 @@ class StudentController extends Controller
                             $avarage= number_format($avarageTotalPercentage[$list->term_id], $precision, '.', '');
                             $avarageTermDetails[$list->term_id] = $avarage;
                         } else {
-                            // if($list->plan_id==2365) {
-                            //     dd($list->id);
-                            // }
-                            
 
                             if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
                                 $totalPresentFound[$list->term_id][$list->plan_id] = 0;
@@ -869,16 +953,10 @@ class StudentController extends Controller
                             if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
                                 $totalAbsentFound[$list->term_id][$list->plan_id] = 0;
                             }
-                            //$json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
-                            //$replace = array('{', '}', "'", '"');
-                            //$totalFeedList = "";
-                            //$total = 0;
+                            
                             if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
                                 $avaragePercentage[$list->term_id][$list->plan_id] = 0;
                             }
-                            //$precision = 2;
-                            //$avarage =0;
-                        
 
                             $data[$list->term_id][$list->plan_id][$list ->date] = [
                                     "id" => $list->id,
@@ -937,8 +1015,17 @@ class StudentController extends Controller
                             }
                         }
                     endforeach;
-            return ["termData" => $termData,"data" => $data ,"planDetails" => $planDetails,"avarageDetails" => $avarageDetails,"totalFeedListSet" => $totalFeedListSet, "termAttendanceFound" =>$termAttendanceFound,
-                    "totalFullSetFeedList" => $totalFullSetFeedList,"avarageTermDetails" => $avarageTermDetails,"totalClassFullSet" => $totalClassFullSet ,"moduleNameList" =>$moduleNameList];
+            return [ "lastAttendanceDate"=>$lastAttendanceDate,
+                     "termData" => $termData,
+                     "data" => $data ,
+                     "planDetails" => $planDetails,
+                     "avarageDetails" => $avarageDetails,
+                     "totalFeedListSet" => $totalFeedListSet, 
+                     "termAttendanceFound" =>$termAttendanceFound,
+                     "totalFullSetFeedList" => $totalFullSetFeedList,
+                     "avarageTermDetails" => $avarageTermDetails,
+                     "totalClassFullSet" => $totalClassFullSet ,
+                     "moduleNameList" =>$moduleNameList];
     }
     
 
@@ -1134,6 +1221,52 @@ class StudentController extends Controller
 
         return response()->json(['res' => $res], 200);
     }
+
+    public function getAllIntakes(Request $request) {
+        $academicYearList = $request->academic_years;
+        $term_declaration_ids = $request->term_declaration_ids;
+        $courses = $request->course;
+
+        $res = [];
+
+        $termDeclarationIds = TermDeclaration::where('academic_year_id', $academicYearList)->pluck('id')->unique()->toArray();
+        
+        if(!empty($termDeclarationIds)):
+            
+            $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $termDeclarationIds)->pluck('course_creation_instance_id')->unique()->toArray();
+           
+            if(!empty($courseCreationInstanceIds)):
+                $courseCreationIds = CourseCreationInstance::where('academic_year_id', $academicYearList)->whereIn('id', $courseCreationInstanceIds)->pluck('course_creation_id')->unique()->toArray();
+                if(!empty($courseCreationIds)):
+                    if(!empty($courses)) {
+                       
+                        $semesterIds = CourseCreation::whereIn('id', $courseCreationIds)->whereIn('course_id',$courses)->pluck('semester_id')->unique()->toArray();
+                    } else
+                        $semesterIds = CourseCreation::whereIn('id', $courseCreationIds)->pluck('semester_id')->unique()->toArray();
+
+                    if(!empty($semesterIds)):
+                        $semesters = Semester::whereIn('id', $semesterIds)->orderBy('id', 'DESC')->get();
+                        if(!empty($semesters)):
+                            $i = 1;
+                            foreach($semesters as $sem):
+                                $res[$i]['id'] = $sem->id;
+                                $res[$i]['name'] = $sem->name;
+                                $i++;
+                            endforeach;
+                        endif;
+                    endif;
+                endif;
+            endif;
+        endif;
+
+        if(!empty($res)):
+            return response()->json(['res' => $res], 200);
+        else:
+            return response()->json(["message"=> "No relation Found","errors"=>["academic_year_id"=> "No Relation Found"]], 422);
+        endif;
+    }
+
+    
 
     public function getAllCourses(Request $request) {
             $academicYears = $request->academic_years;

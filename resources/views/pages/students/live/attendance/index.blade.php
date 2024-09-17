@@ -19,7 +19,14 @@
                 <h2 class="font-medium text-base mr-auto">{{ $term[$termId]["name"] }} <div class="font-medium dark:text-slate-500 bg-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }}/20 text-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
                     <div class="text-slate-500 sm:mr-5 ml-auto text-sm mt-2">{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ".$totalClassFullSet[$termId]. " days class" : "No class found" }} </div>
                 </h2>
-                <div class="text-slate-500 sm:mr-5 ml-auto">Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} </div>
+                <div class="text-slate-500 sm:mr-5 ml-auto">
+                    Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} 
+                    <div class="col-span-12">
+                        <div class="grid grid-cols-12 gap-0">
+                            <div class="col-span-12 text-slate-500 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId]) ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="dropdown ml-auto sm:hidden">
                     <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
                         <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
