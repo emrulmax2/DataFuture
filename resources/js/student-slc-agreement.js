@@ -251,7 +251,7 @@ import Tabulator from "tabulator-tables";
                     document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
                         $("#confirmModal .confModTitle").html("Are you sure?" );
                         $("#confirmModal .confModDesc").html('Want to delete this agreement from the list? Please click on agree to continue.');
-                        $("#confirmModal .agreeWith").attr('data-recordid', slc_attendance_id);
+                        $("#confirmModal .agreeWith").attr('data-recordid', slc_agreement_id);
                         $("#confirmModal .agreeWith").attr('data-status', 'DELETEAGR');
                     });
                 }
