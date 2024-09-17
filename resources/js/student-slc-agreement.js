@@ -271,7 +271,7 @@ import Tabulator from "tabulator-tables";
 
         $('#confirmModal button').attr('disabled', 'disabled');
 
-        if(action == 'DELETE'){
+        if(action == 'DELETEAGR'){
             axios({
                 method: 'delete',
                 url: route('student.destory.slc.agreement'),
