@@ -222,7 +222,77 @@
                 </div>
                 END: Weekly Top Products -->
             </div>
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 pt-5 relative">
+                    <div class="intro-y block sm:flex items-center h-10">
+                        <h2 class="text-lg font-medium truncate mr-5">
+                            Daily Class Information 
+                            {{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? '['.$theTerm->attenTerm->name.']' : '') }}
+                        </h2>
+                        <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
+                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
+                                <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
+                                <select class="form-control w-full border-0" name="plan_status" id="planClassStatus" style="max-width: 230px;">
+                                    <option value="0">All</option>
+                                    <option value="1">Scheduled</option>
+                                    <option value="2">Started</option>
+                                    <option value="3">Finished</option>
+                                </select>
+                            </div>
+                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                                <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
+                                <select class="form-control w-full border-0" name="course_id" id="planCourseId" style="max-width: 230px;">
+                                    <option value="0">All Course</option>
+                                    @if(!empty($courses))
+                                        @foreach($courses as $cr)
+                                            <option value="{{ $cr->id }}">{{ $cr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
+                                <input type="text" name="class_date" class="w-full form-control border-0 classDate" id="theClassDate" value="{{ $theDate }}" style="max-width: 110px;"/>
+                            </div>
+                            <button class="ml-3 btn box flex items-center text-slate-600 dark:text-slate-300">
+                                <i data-lucide="calendar-clock" class="hidden sm:block w-4 h-4 mr-2"></i> <span id="theClock">{{ date('H:i:s') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0 relative dailyClassInfoTableWrap">
+                        <div class="leaveTableLoader">
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <table class="table table-report sm:mt-2" id="dailyClassInfoTable">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap uppercase">Schedule</th>
+                                    <th class="whitespace-nowrap uppercase">Module</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Tutor</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Room</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Status</th>
+                                    <th class="text-right">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {!! $classInformation !!}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
+        
         <div class="col-span-12 2xl:col-span-3">
             <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
