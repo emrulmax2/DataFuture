@@ -14,6 +14,11 @@
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
                 <div class="font-medium text-base">SLC History</div>
+                <div class="col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-12 text-slate-500 font-medium"">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</div>
+                    </div>
+                </div>
             </div>
             <div class="col-span-6 text-right relative">
                 <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button>
