@@ -228,13 +228,45 @@ var liveStudentsListTable = (function () {
         var student_type = new TomSelect('#student_type', tomOptionsMul);
         var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
         ///course.list.by.academic.term
-        academic_year.on('item_add', function(e) {
+        academic_year.on('change', function(e) {
             let academicList = academic_year.getValue();
             
             attendance_semester.clear(true)
             attendance_semester.clearOptions();
             attendance_semester.disable();
+            
             if(academicList.length > 0 ){
+                
+                intake_semester.clear(true)
+                intake_semester.clearOptions();
+                intake_semester.disable();
+                axios({
+                    method: "post",
+                    url: route('student.get.intake.by.academics'),
+                    data: { academic_years : academicList },
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        var res = response.data.res;
+                        intake_semester.enable();
+                        $.each(res, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        intake_semester.refreshOptions();
+                    }
+                }).catch(error => {
+                    if (error.response) {
+
+                        intake_semester.enable();
+                        intake_semester.clear();
+                        intake_semester.clearOptions();
+                        console.log('error');
+
+                    }
+                });
                 axios({
                     method: "post",
                     url: route('student.get.term.by.academics'),
@@ -270,48 +302,45 @@ var liveStudentsListTable = (function () {
                 attendance_semester.disable();
             }
         })
-        academic_year.on('item_remove', function(e) {
+        intake_semester.on('change', function(){
+            let intakeSemester = intake_semester.getValue();
+            attendance_semester.clear(true);
+            course.clear(true);
+            course.clearOptions();
+            course.disable();
 
-            let academicList = academic_year.getValue();
-            
-            attendance_semester.clear(true)
-            attendance_semester.clearOptions();
-            attendance_semester.disable();
-            if(academicList.length > 0 ){
+            if(intakeSemester.length > 0){
                 axios({
                     method: "post",
-                    url: route('student.get.term.by.academics'),
-                    data: { academic_years : academicList },
+                    url: route('student.get.coureses.by.intake.or.term'),
+                    data: {intakeSemester : intakeSemester},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
                         var res = response.data.res;
-                        attendance_semester.enable();
+                        course.enable();
                         $.each(res, function(index, row) {
-                            attendance_semester.addOption({
+                            course.addOption({
                                 value: row.id,
                                 text: row.name,
                             });
                         });
-                        attendance_semester.refreshOptions();
+                        course.refreshOptions();
                     }
+
                 }).catch(error => {
                     if (error.response) {
-
-                        attendance_semester.enable();
-                        attendance_semester.clear();
-                        attendance_semester.clearOptions();
                         console.log('error');
-
+                        course.enable();
+                        course.clear(true);
+                        course.clearOptions();
                     }
+
                 });
-            }else{
-                attendance_semester.clear(true)
-                attendance_semester.clearOptions();
-                attendance_semester.disable();
             }
-        })
-        attendance_semester.on('item_add', function(e) {
+        });
+        
+        attendance_semester.on('change', function(e) {
 
             let List1 = attendance_semester.getValue();
             let List2 = academic_year.getValue();
@@ -441,83 +470,7 @@ var liveStudentsListTable = (function () {
             }
         })
 
-        attendance_semester.on('item_remove', function(e) {
-
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            
-            course.clear(true)
-            course.disable();
-            course.clearOptions();
-            
-            if(List1.length > 0 ){
-                axios({
-                    method: "post",
-                    url: route('student.get.coureses.by.terms'),
-                    data: { academic_years : List2, term_declaration_ids :  List1},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        course.enable();
-                        $.each(res, function(index, row) {
-                            course.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        }); 
-                        course.refreshOptions(); 
-                        /* Student Type Start */
-                            student_type.clear(true)
-                            student_type.clearOptions();
-                            student_type.disable();
-                            axios({
-                                method: "post",
-                                url: route('student.get.all.student.type'),
-                                data: { academic_years : List2 , term_declaration_ids: List1},
-                                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                            }).then(response => {
-                                if (response.status == 200) {
-                                    let res = response.data.res;
-                                    student_type.enable();
-                                    $.each(res, function(index, row) {
-                                        student_type.addOption({
-                                            value: row.id,
-                                            text: row.name,
-                                        });
-                                    });
-                                }
-                            }).catch(error => {
-                                if (error.response) {
-            
-                                    student_type.enable();
-                                    student_type.clear();
-                                    student_type.clearOptions();
-                                    console.log('error');
-            
-                                }
-                            });
-                        /* Student Type End */
-                    }
-                    
-                }).catch(error => {
-                    if (error.response) {
-
-                        course.enable();
-                        course.clear();
-                        course.clearOptions();
-                        console.log('error');
-
-                    }
-                });
-            }else{
-                group.clear(true)
-                group.clearOptions();
-                group.disable();
-            }
-        })
-
-        course.on('item_add', function(e) {
+        course.on('change', function(e) {
             let List1 = attendance_semester.getValue();
             let List2 = academic_year.getValue();
             let List3 = course.getValue();
@@ -592,54 +545,7 @@ var liveStudentsListTable = (function () {
             }
         })
 
-        course.on('item_remove', function(e) {
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            let List3 = course.getValue();
-            
-            group.clear(true)
-            group.disable();
-            group.clearOptions();
-
-            if(List1.length > 0 ){
-                axios({
-                    method: "post",
-                    url: route('student.get.groups'),
-                    data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        group.enable();
-                        $.each(res, function(index, row) {
-                            group.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        group.refreshOptions();
-                    }
-                }).catch(error => {
-                    if (error.response) {
-
-                        group.enable();
-                        group.clear();
-                        group.clearOptions();
-                        group.log('error');
-
-                    }
-                });
-            }else{
-                group.clear(true)
-                group.clearOptions();
-                group.disable();
-            }
-        })
-
-
-      
-
-        group.on('item_add', function(e) {
+        group.on('change', function(e) {
             let List1 = attendance_semester.getValue();
             let List2 = academic_year.getValue();
             let List3 = course.getValue();
@@ -682,54 +588,6 @@ var liveStudentsListTable = (function () {
                 group_student_status.disable();
             }
         })
-        group.on('item_remove', function(e) {
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            let List3 = course.getValue();
-            let List4 = group.getValue();
-            group_student_status.clear(true)
-            group_student_status.disable();
-            group_student_status.clearOptions();
-
-            if(List1.length > 0 ) {
-
-                axios({
-                    method: "post",
-                    url: route('student.get.status.by.groups'),
-                    data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3, groups: List4 },
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        group_student_status.enable();
-                        $.each(res, function(index, row) {
-                            group_student_status.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        group.refreshOptions();
-                    }
-                }).catch(error => {
-                    if (error.response) {
-
-                        group_student_status.enable();
-                        group_student_status.clear();
-                        group_student_status.clearOptions();
-                        group_student_status.log('error');
-
-                    }
-                });
-
-            }else{
-
-                group_student_status.clear(true)
-                group_student_status.clearOptions();
-                group_student_status.disable();
-
-            }
-        })
-
                     
         
         // Reset Tom Select
@@ -789,11 +647,11 @@ var liveStudentsListTable = (function () {
                     }else{
                         $academic_year.siblings('.acc__input-error').html('')
                     }
-                    if(List1.length>0){
-                        $termDeclaration.siblings('.acc__input-error').html('This field is required.')
-                    }else{
-                        $termDeclaration.siblings('.acc__input-error').html('')
-                    }
+                    // if(List1.length>0){
+                    //     $termDeclaration.siblings('.acc__input-error').html('This field is required.')
+                    // }else{
+                    //     $termDeclaration.siblings('.acc__input-error').html('')
+                    // }
                     
                 }
             });

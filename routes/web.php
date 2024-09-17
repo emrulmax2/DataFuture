@@ -729,6 +729,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
         
         Route::post('student/temm-by-academic', 'getAllTerms')->name('student.get.term.by.academics');
+        Route::post('student/intake-by-academic-or-term', 'getAllIntakes')->name('student.get.intake.by.academics');
         Route::post('student/get-student-type', 'getAllStudentType')->name('student.get.all.student.type');
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');

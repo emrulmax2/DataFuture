@@ -16,7 +16,7 @@
                 <div class="font-medium text-base">SLC History</div>
                 <div class="col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium"">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</div>
+                        <div class="col-span-12 text-slate-500 font-medium">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</div>
                     </div>
                 </div>
             </div>
