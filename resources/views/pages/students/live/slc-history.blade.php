@@ -16,7 +16,7 @@
                 <div class="font-medium text-base">SLC History</div>
                 <div class="col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</div>
+                        <div class="col-span-12 text-slate-500 font-medium"><a target="_blank" href="https://auth.uim.slcsvc.co.uk/login?response_type=code&scope=openid&client_id=3lppkvq4jfbfk4r2d8hta5scon&state=ploPoWBGdpKE5QuRA6KJ-7ZcFGc&redirect_uri=https://secure.heservices.slc.co.uk/redirect_uri&nonce=bWjY_a6eji9c1wC_JynAcxuvt_jPB4P53o7KMKmclQM">{{ isset($student->ssn_no) && !empty($student->ssn_no) ? $student->ssn_no : '---' }}</a></div>
                     </div>
                 </div>
             </div>
