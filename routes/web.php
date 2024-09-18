@@ -733,8 +733,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/get-student-type', 'getAllStudentType')->name('student.get.all.student.type');
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
-
         Route::post('student/courses-by-intake', 'getCoursesByIntakeOrTerm')->name('student.get.coureses.by.intake.or.term');
+        
         Route::post('student/group-by-courses', 'getGroupByCourseAndTerms')->name('student.get.groups.by.course');
 
         Route::post('student/download-document', 'studentDocumentDownload')->name('student.document.download');
@@ -2308,6 +2308,7 @@ Route::middleware('auth')->group(function() {
         Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
         Route::post('personal-tutor-dashboard/get-classes', 'getClassess')->name('pt.get.classes'); 
         Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
+        Route::post('personal-tutor-dashboard/get-class-info', 'getClassInformations')->name('pt.dashboard.class.info'); 
     });
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {
