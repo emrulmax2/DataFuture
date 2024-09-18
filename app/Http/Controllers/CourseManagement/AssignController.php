@@ -630,7 +630,6 @@ class AssignController extends Controller
         $course_id = $request->course_id;
         $old_group_id = $request->group_id;
 
-        return response()->json(['o' => $oldAssignedPlans, 'n' => $newAssigndPlans], 200);
         $error = 0;
         $error_ids = [];
         if(!empty($oldAssignedPlans) && count($oldAssignedPlans) > 0):
