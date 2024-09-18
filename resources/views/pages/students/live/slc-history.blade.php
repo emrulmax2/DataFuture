@@ -84,30 +84,30 @@
                         </div>
                         @endif
                     </div>
-                    <div class="attendanceWrap mt-7">
-                        <div class="grid grid-cols-12 gap-0 items-center">
-                            <div class="col-span-6">
-                                <h3 class="font-medium text-base">Attendances</h3>
+                    @if(!empty($regs->attendances) && $regs->attendances->count() > 0)
+                        <div class="attendanceWrap mt-7">
+                            <div class="grid grid-cols-12 gap-0 items-center">
+                                <div class="col-span-6">
+                                    <h3 class="font-medium text-base">Attendances</h3>
+                                </div>
+                                <div class="col-span-6 text-right">
+                                    <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                                </div>
                             </div>
-                            <div class="col-span-6 text-right">
-                                <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
-                            </div>
-                        </div>
-                        <table class="table table-bordered table-sm mt-3">
-                            <thead>
-                                <tr>
-                                    <th class="whitespace-nowrap">ID</th>
-                                    <th class="whitespace-nowrap">Confirmation Date</th>
-                                    <th class="whitespace-nowrap">Attendance Semester</th>
-                                    <th class="whitespace-nowrap">Session Term</th>
-                                    <th class="whitespace-nowrap">Code</th>
-                                    <th class="whitespace-nowrap">Note</th>
-                                    <th class="whitespace-nowrap">COC</th>
-                                    <th class="whitespace-nowrap">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(!empty($regs->attendances) && $regs->attendances->count() > 0)
+                            <table class="table table-bordered table-sm mt-3">
+                                <thead>
+                                    <tr>
+                                        <th class="whitespace-nowrap">ID</th>
+                                        <th class="whitespace-nowrap">Confirmation Date</th>
+                                        <th class="whitespace-nowrap">Attendance Semester</th>
+                                        <th class="whitespace-nowrap">Session Term</th>
+                                        <th class="whitespace-nowrap">Code</th>
+                                        <th class="whitespace-nowrap">Note</th>
+                                        <th class="whitespace-nowrap">COC</th>
+                                        <th class="whitespace-nowrap">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach($regs->attendances as $atn)
                                         <tr>
                                             <td>{{ $atn->id }}</td>
@@ -144,15 +144,19 @@
                                             </td>
                                         </tr>
                                     @endforeach
-                                @else 
-                                    <tr>
-                                        <td colspan="8" class="text-center">SLC Attendance not found!</td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    @else 
+                        <div class="alert alert-pending-soft show flex items-center mt-7" role="alert">
+                            <span class="inline-flex items-center">
+                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Attendance recored not found!
+                            </span>
+                            <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                        </div>
+                    @endif
 
+                    @if(isset($regs->cocs) && $regs->cocs->count() > 0)
                     <div class="cocWraps mt-7">
                         <div class="grid grid-cols-12 gap-0 items-center">
                             <div class="col-span-6">
@@ -176,61 +180,63 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if(isset($regs->cocs) && $regs->cocs->count() > 0)
-                                    @foreach($regs->cocs as $coc)
-                                        <tr>
-                                            <td>
-                                                {{ $coc->id.(isset($coc->slc_attendance_id) && $coc->slc_attendance_id > 0 ? ' - '.$coc->slc_attendance_id : '') }}
-                                            </td>
-                                            <td>
-                                                {{ (!empty($coc->confirmation_date) ? date('jS F, Y', strtotime($coc->confirmation_date)) : '') }}
-                                            </td>
-                                            <td>{{ $coc->coc_type }}</td>
-                                            <td>{{ $coc->reason }}</td>
-                                            <td>{{ ucfirst($coc->actioned) }}</td>
-                                            <td>{{ (isset($coc->user->employee->full_name) ? $coc->user->employee->full_name : '') }}</td>
-                                            <td>
-                                                @if($coc->documents->count() > 0)
-                                                    <div class="dropdown">
-                                                        <button class="dropdown-toggle inline-flex justify-start items-center font-medium text-success" aria-expanded="false" data-tw-toggle="dropdown">
-                                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
-                                                            Available Documents
-                                                            <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
-                                                        </button>
-                                                        <div class="dropdown-menu w-80">
-                                                            <ul class="dropdown-content">
-                                                                @foreach($coc->documents as $doc)
-                                                                <li>
-                                                                    <span class="dropdown-item">
-                                                                        <i data-lucide="check-check" class="w-4 h-4 mr-2"></i> {{ $doc->display_file_name }}
-                                                                        <span class="ml-auto inline-flex justify-end items-center">
-                                                                            @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/students/'.$doc->student_id.'/'.$doc->current_file_name, now()->addMinutes(60)) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
-                                                                            @endif
-                                                                            <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
-                                                                        </span>
-                                                                    </span>
-                                                                </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                                                <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @else 
+                                @foreach($regs->cocs as $coc)
                                     <tr>
-                                        <td colspan="8" class="text-center">COC history not found!</td>
+                                        <td>
+                                            {{ $coc->id.(isset($coc->slc_attendance_id) && $coc->slc_attendance_id > 0 ? ' - '.$coc->slc_attendance_id : '') }}
+                                        </td>
+                                        <td>
+                                            {{ (!empty($coc->confirmation_date) ? date('jS F, Y', strtotime($coc->confirmation_date)) : '') }}
+                                        </td>
+                                        <td>{{ $coc->coc_type }}</td>
+                                        <td>{{ $coc->reason }}</td>
+                                        <td>{{ ucfirst($coc->actioned) }}</td>
+                                        <td>{{ (isset($coc->user->employee->full_name) ? $coc->user->employee->full_name : '') }}</td>
+                                        <td>
+                                            @if($coc->documents->count() > 0)
+                                                <div class="dropdown">
+                                                    <button class="dropdown-toggle inline-flex justify-start items-center font-medium text-success" aria-expanded="false" data-tw-toggle="dropdown">
+                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                                        Available Documents
+                                                        <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu w-80">
+                                                        <ul class="dropdown-content">
+                                                            @foreach($coc->documents as $doc)
+                                                            <li>
+                                                                <span class="dropdown-item">
+                                                                    <i data-lucide="check-check" class="w-4 h-4 mr-2"></i> {{ $doc->display_file_name }}
+                                                                    <span class="ml-auto inline-flex justify-end items-center">
+                                                                        @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
+                                                                            <a href="{{ Storage::disk('s3')->temporaryUrl('public/students/'.$doc->student_id.'/'.$doc->current_file_name, now()->addMinutes(60)) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
+                                                                        @endif
+                                                                        <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                                                                    </span>
+                                                                </span>
+                                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
+                                            <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
                                     </tr>
-                                @endif
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
+                    @else 
+                        <div class="alert alert-pending-soft show flex items-center mt-7" role="alert">
+                            <span class="inline-flex items-center">
+                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> COC recored not found!
+                            </span>
+                            <button  data-regid="{{ $regs->id }}" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
+                        </div>
+                    @endif
                 </div>
             </div>
         @endforeach
