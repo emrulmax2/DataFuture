@@ -293,7 +293,7 @@ class AttendanceController extends Controller
                         'plans_date_list_id' => $planDateId,
                         'attendance_date' => $attendance_date,
                         'attendance_captured_at' => date('Y-m-d'),
-                        'class_plan_id' => $plan_id,
+                        'plan_id' => $plan_id,
                         'student_id' => ($student_id > 0 ? $student_id : null),
                         'attendance_feed_status_id' => $attendance_feed_status_id,
                         'sms_notification' => ($attendance_feed_status_id == 4 ? 1 : 0),
@@ -302,7 +302,7 @@ class AttendanceController extends Controller
                     ];
 
                     $smsStatus = false;
-                    $existAttendance = Attendance::where('plans_date_list_id', $planDateId)->where('class_plan_id', $plan_id)->where('student_id', $student_id)->get()->first();
+                    $existAttendance = Attendance::where('plans_date_list_id', $planDateId)->where('plan_id', $plan_id)->where('student_id', $student_id)->get()->first();
                     if(isset($existAttendance->id) && $existAttendance->id > 0):
                         $smsStatus = ($existAttendance->attendance_feed_status_id != 4 &&  $data['attendance_feed_status_id'] == 4 ? true : false);
                         $data['updated_by'] = Auth::user()->id;
@@ -401,7 +401,7 @@ class AttendanceController extends Controller
                         'plans_date_list_id' => $planDateId,
                         'attendance_date' => $attendance_date,
                         'attendance_captured_at' => date('Y-m-d'),
-                        'class_plan_id' => $plan_id,
+                        'plan_id' => $plan_id,
                         'student_id' => ($student_id > 0 ? $student_id : null),
                         'attendance_feed_status_id' => $attendance_feed_status_id,
                         'sms_notification' => ($attendance_feed_status_id == 4 ? 1 : 0),

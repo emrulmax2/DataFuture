@@ -635,7 +635,7 @@ class AssignController extends Controller
         if(!empty($oldAssignedPlans) && count($oldAssignedPlans) > 0):
             foreach($oldAssignedPlans as $module_id => $modules):
                 foreach($modules as $classType => $plan_ids):
-                    $attendanceCount = Attendance::whereIn('class_plan_id', $plan_ids)->where('student_id', $student_id)->get()->count();
+                    $attendanceCount = Attendance::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->get()->count();
                     if($attendanceCount > 0 && (!isset($newAssigndPlans[$module_id][$classType]) || (isset($newAssigndPlans[$module_id][$classType]) && count($plan_ids) != count($newAssigndPlans[$module_id][$classType])))):
                         $error += 1;
                         foreach($plan_ids as $plan_id):
@@ -654,12 +654,12 @@ class AssignController extends Controller
                         $newPlanId = (isset($newAssigndPlans[$module_id][$classType][$i]) && $newAssigndPlans[$module_id][$classType][$i] > 0 ? $newAssigndPlans[$module_id][$classType][$i] : 0);
                         Assign::where('student_id', $student_id)->where('plan_id', $plan_id)->forceDelete();
                         
-                        $attendances = Attendance::where('class_plan_id', $plan_id)->where('student_id', $student_id)->get();
+                        $attendances = Attendance::where('plan_id', $plan_id)->where('student_id', $student_id)->get();
                         if($attendances->count() > 0):
                             foreach($attendances as $atn):
                                 $data = [];
-                                $data['class_plan_id'] = $newPlanId;
-                                $data['prev_plan_id'] = $atn->class_plan_id;
+                                $data['plan_id'] = $newPlanId;
+                                $data['prev_plan_id'] = $atn->plan_id;
                                 Attendance::where('id', $atn->id)->update($data);
                             endforeach;
                         endif;

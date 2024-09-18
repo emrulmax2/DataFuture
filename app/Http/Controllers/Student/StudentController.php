@@ -826,7 +826,15 @@ class StudentController extends Controller
             $moduleNameList = [];
             $arryBox = [];
                 $QueryInner = DB::table('plans_date_lists as pdl')
-                            ->select( 'pdl.*','td.id as term_id',    'td.name as term_name','instance_terms.start_date','instance_terms.end_date', 'plan.module_creation_id as module_creation_id' , 'mc.module_name','mc.code as module_code', 'plan.id as plan_id' , 'gp.name as group_name', 'gp.id as group_id' )
+                            ->select( 'pdl.*','td.id as term_id',
+                                        'td.name as term_name',
+                                        'instance_terms.start_date',
+                                        'instance_terms.end_date', 
+                                        'plan.module_creation_id as module_creation_id' , 
+                                        'mc.module_name','mc.code as module_code', 
+                                        'plan.id as plan_id' , 
+                                        'gp.name as group_name', 
+                                        'gp.id as group_id')
                             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
                             ->leftJoin('instance_terms', 'instance_terms.id', 'plan.instance_term_id')
                             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
@@ -836,186 +844,308 @@ class StudentController extends Controller
                             ->where('assign.student_id', $student->id)
                             ->orderBy("pdl.date",'desc')
                             ->get();
+                            
                             $attendanceFeedStatus = AttendanceFeedStatus::all();
                 $termAttendanceFound = [];
                 $i=0;
                 if($QueryInner->isNotEmpty())
-                    foreach($QueryInner as $list):
-                        $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
-                        $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                        $termAttendanceFound[$list->term_id] = false;
-                        if(isset($attendance)) {
-                            $termAttendanceFound[$list->term_id] = true;
-                            $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
-                            if(isset($attendanceInformation->tutor))
-                                $attendanceInformation->tutor->load(["employee"]);
-                            if(!isset($arryBox[$list->term_id][$list->plan_id][$attendance->feed->code])) {
-                                $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] = 0;
-                            }
-                            if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
-                                $totalPresentFound[$list->term_id][$list->plan_id] = 0;
-                            }
-                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
-                                $totalAbsentFound[$list->term_id][$list->plan_id]=0;
-                            }
+                foreach($QueryInner as $list):
+                    
+                    
+                    $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
+                    
+                    $termAttendanceFound[$list->term_id] = false;
+                    if(isset($attendance)) {
 
-                            $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] += 1;
-                            $totalPresentFound[$list->term_id][$list->plan_id] += $attendance->feed->attendance_count;
-                            $totalAbsentFound[$list->term_id][$list->plan_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
-
-                            $json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
-                            $replace = array('{', '}', "'", '"');
-                            $totalFeedList = str_replace ($replace, "", $json);
-                            $total = $totalPresentFound[$list->term_id][$list->plan_id] + $totalAbsentFound[$list->term_id][$list->plan_id];
-
-                            $avaragePercentage[$list->term_id][$list->plan_id] = (($totalPresentFound[$list->term_id][$list->plan_id]/$total)*100);
-                            $precision = 2;
-                            $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
-                        
-
-                            $data[$list->term_id][$list->plan_id][$list ->date] = [
-                                    "id" => $list->id,
-                                    "date" => date("d-m-Y", strtotime($list ->date)),
-                                    "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
-                                    "attendance"=> ($attendance) ?? null,
-                                    "term_id"=> $list->term_id,
-                                    "module_creation_id"=>$list->module_creation_id,
-                                    "plan_id" => $list->plan_id,
-                            ];
-                            
-                            $termData[$list->term_id] = [
-                                "name" => $list->term_name,
-                                "start_date" => $list->start_date,
-                                "end_date" => $list->end_date,
-                            ];
-                            
-                            if(!isset($lastAttendanceDate[$list->term_id])) {
-
-                                
-                                $lastAttendanceDate[$list->term_id] = "1970-01-01";
-                                
-                                
-                            }
-                            
-                            if($attendance->feed->attendance_count==1) {
-
-                                
-                                if(strtotime($list->date) >strtotime($lastAttendanceDate[$list->term_id])) {
-                                    
-                                        //Debugbar::addMessage($list->term_id);
-                                        //Debugbar::warning("attendance Date: ".$list->date);
-                                        //Debugbar::info("term current previous attendance: ".$lastAttendanceDate[$list->term_id]);
-                                        $lastAttendanceDate[$list->term_id] = $list->date;
-                                        //Debugbar::info("term current last attendance: ".$lastAttendanceDate[$list->term_id]);
-                                }
-
-                            }
-                        
-                            $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$list->plan_id)->get()->first();
-                            
-                            
-                            $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
-                            $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
-
-                            //total code list and total class list
-                            if(!isset($totalBox[$list->term_id][$attendance->feed->code])) {
-                                $totalBox[$list->term_id][$attendance->feed->code] = 0;
-                            }
-                            if(!isset($totalBoxPresentFound[$list->term_id])) {
-                                $totalBoxPresentFound[$list->term_id] = 0;
-                            }
-                            if(!isset($totalBoxAbsentFound[$list->term_id])) {
-                                $totalBoxAbsentFound[$list->term_id]=0;
-                            }
-                            $totalBox[$list->term_id][$attendance->feed->code] += 1;
-                            $totalBoxPresentFound[$list->term_id] += $attendance->feed->attendance_count;
-                            $totalBoxAbsentFound[$list->term_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
-
-                            $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
-                            $replace = array('{', '}', "'", '"');
-                            $totalFullSetFeedList[$list->term_id] = str_replace ($replace, "", $json);
-                            $totalClassFullSet[$list->term_id] = $totalBoxPresentFound[$list->term_id] + $totalBoxAbsentFound[$list->term_id];
-
-                            $avarageTotalPercentage[$list->term_id] = (($totalBoxPresentFound[$list->term_id]/$totalClassFullSet[$list->term_id])*100);
-                            
-                            $avarage= number_format($avarageTotalPercentage[$list->term_id], $precision, '.', '');
-                            $avarageTermDetails[$list->term_id] = $avarage;
-                        } else {
-
-                            if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
-                                $totalPresentFound[$list->term_id][$list->plan_id] = 0;
-                            }
-                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
-                                $totalAbsentFound[$list->term_id][$list->plan_id]=0;
-                            }
-                            if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
-                                $totalPresentFound[$list->term_id][$list->plan_id] = 0;
-                            }
-                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
-                                $totalAbsentFound[$list->term_id][$list->plan_id] = 0;
-                            }
-                            
-                            if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
-                                $avaragePercentage[$list->term_id][$list->plan_id] = 0;
-                            }
-
-                            $data[$list->term_id][$list->plan_id][$list ->date] = [
-                                    "id" => $list->id,
-                                    "date" => date("d-m-Y", strtotime($list ->date)),
-                                    "attendance_information" => null,
-                                    "attendance"=> null,
-                                    "term_id"=> $list->term_id,
-                                    "module_creation_id"=>$list->module_creation_id,
-                                    "plan_id" => $list->plan_id,
-                            ];
-                            
-                            $termData[$list->term_id] = [
-                                "name" => $list->term_name,
-                                "start_date" => $list->start_date,
-                                "end_date" => $list->end_date,
-                            ];
-                            $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
-                            
-                            if(!isset($totalFeedListSet[$list->term_id][$list->plan_id])) {
-                                
-                                $totalFeedListSet[$list->term_id][$list->plan_id] = "";
-                            }
-
-                            if(!isset($avarageDetails[$list->term_id][$list->plan_id])) {
-                                $avarageDetails[$list->term_id][$list->plan_id] = 0;
-                            }
-
-                            //total code list and total class list
-                            foreach ($attendanceFeedStatus as $feedStatus):
-                                if(!isset($totalBox[$list->term_id][$feedStatus->code])) {
-                                    $totalBox[$list->term_id][$feedStatus->code] = 0;
-                                }
-                            endforeach;
-                            
-                            if(!isset($totalBoxPresentFound[$list->term_id])) {
-                                $totalBoxPresentFound[$list->term_id] = 0;
-                            }
-                            if(!isset($totalBoxAbsentFound[$list->term_id])) {
-                                $totalBoxAbsentFound[$list->term_id]=0;
-                            }
-                            
-                            $replace = array('{', '}', "'", '"');
-                            
-                            if(!isset($totalFullSetFeedList[$list->term_id])) {
-                                $totalFullSetFeedList[$list->term_id] = "";
-                            }
-                            if(!isset($totalClassFullSet[$list->term_id])) {
-                                $totalClassFullSet[$list->term_id] = 0;
-                            }
-                            if(!isset($avarageTotalPercentage[$list->term_id])) {
-                                $avarageTotalPercentage[$list->term_id] = 0;
-                            }
-                            
-                            if(!isset($avarageTermDetails[$list->term_id])) {
-                                $avarageTermDetails[$list->term_id] = 0;
-                            }
+                        if($attendance->prev_plan_id !=null){
+                            $list->plan_id = $attendance->plan_id;
+                            dd($attendance->prev_plan_id);
                         }
-                    endforeach;
+
+                        $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
+                        
+                        
+                        $termAttendanceFound[$list->term_id] = true;
+                        $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
+                        if(isset($attendanceInformation->tutor))
+                            $attendanceInformation->tutor->load(["employee"]);
+                        if(!isset($arryBox[$list->term_id][$list->plan_id][$attendance->feed->code])) {
+                            $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] = 0;
+                        }
+                        if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
+                            $totalPresentFound[$list->term_id][$list->plan_id] = 0;
+                        }
+                        if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                            $totalAbsentFound[$list->term_id][$list->plan_id]=0;
+                        }
+
+                        $arryBox[$list->term_id][$list->plan_id][$attendance->feed->code] += 1;
+                        $totalPresentFound[$list->term_id][$list->plan_id] += $attendance->feed->attendance_count;
+                        $totalAbsentFound[$list->term_id][$list->plan_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
+
+                        $json = json_encode ($arryBox[$list->term_id][$list->plan_id], JSON_FORCE_OBJECT);
+                        $replace = array('{', '}', "'", '"');
+                        $totalFeedList = str_replace ($replace, "", $json);
+                        $total = $totalPresentFound[$list->term_id][$list->plan_id] + $totalAbsentFound[$list->term_id][$list->plan_id];
+
+                        $avaragePercentage[$list->term_id][$list->plan_id] = (($totalPresentFound[$list->term_id][$list->plan_id]/$total)*100);
+                        $precision = 2;
+                        $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
+                    
+
+                        $data[$list->term_id][$list->plan_id][$list ->date] = [
+                                "id" => $list->id,
+                                "date" => date("d-m-Y", strtotime($list ->date)),
+                                "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
+                                "attendance"=> ($attendance) ?? null,
+                                "term_id"=> $list->term_id,
+                                "module_creation_id"=>$list->module_creation_id,
+                                "plan_id" => $list->plan_id,
+                        ];
+                        
+                        $termData[$list->term_id] = [
+                            "name" => $list->term_name,
+                            "start_date" => $list->start_date,
+                            "end_date" => $list->end_date,
+                        ];
+                        
+                        if(!isset($lastAttendanceDate[$list->term_id])) {
+
+                            
+                            $lastAttendanceDate[$list->term_id] = "1970-01-01";
+                            
+                            
+                        }
+                        
+                        if($attendance->feed->attendance_count==1) {
+
+                            
+                            if(strtotime($list->date) >strtotime($lastAttendanceDate[$list->term_id])) {
+                                
+                                    //Debugbar::addMessage($list->term_id);
+                                    //Debugbar::warning("attendance Date: ".$list->date);
+                                    //Debugbar::info("term current previous attendance: ".$lastAttendanceDate[$list->term_id]);
+                                    $lastAttendanceDate[$list->term_id] = $list->date;
+                                    //Debugbar::info("term current last attendance: ".$lastAttendanceDate[$list->term_id]);
+                            }
+
+                        }
+                    
+                        $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$list->plan_id)->get()->first();
+                        
+                        
+                        $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
+                        $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
+
+                        //total code list and total class list
+                        if(!isset($totalBox[$list->term_id][$attendance->feed->code])) {
+                            $totalBox[$list->term_id][$attendance->feed->code] = 0;
+                        }
+                        if(!isset($totalBoxPresentFound[$list->term_id])) {
+                            $totalBoxPresentFound[$list->term_id] = 0;
+                        }
+                        if(!isset($totalBoxAbsentFound[$list->term_id])) {
+                            $totalBoxAbsentFound[$list->term_id]=0;
+                        }
+                        $totalBox[$list->term_id][$attendance->feed->code] += 1;
+                        $totalBoxPresentFound[$list->term_id] += $attendance->feed->attendance_count;
+                        $totalBoxAbsentFound[$list->term_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
+
+                        $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
+                        $replace = array('{', '}', "'", '"');
+                        $totalFullSetFeedList[$list->term_id] = str_replace ($replace, "", $json);
+                        $totalClassFullSet[$list->term_id] = $totalBoxPresentFound[$list->term_id] + $totalBoxAbsentFound[$list->term_id];
+
+                        $avarageTotalPercentage[$list->term_id] = (($totalBoxPresentFound[$list->term_id]/$totalClassFullSet[$list->term_id])*100);
+                        
+                        $avarage= number_format($avarageTotalPercentage[$list->term_id], $precision, '.', '');
+                        $avarageTermDetails[$list->term_id] = $avarage;
+                    } else {
+                        $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
+                        if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
+                            $totalPresentFound[$list->term_id][$list->plan_id] = 0;
+                        }
+                        if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                            $totalAbsentFound[$list->term_id][$list->plan_id]=0;
+                        }
+                        if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
+                            $totalPresentFound[$list->term_id][$list->plan_id] = 0;
+                        }
+                        if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                            $totalAbsentFound[$list->term_id][$list->plan_id] = 0;
+                        }
+                        
+                        if(!isset($totalAbsentFound[$list->term_id][$list->plan_id])) {
+                            $avaragePercentage[$list->term_id][$list->plan_id] = 0;
+                        }
+
+                        $data[$list->term_id][$list->plan_id][$list ->date] = [
+                                "id" => $list->id,
+                                "date" => date("d-m-Y", strtotime($list ->date)),
+                                "attendance_information" => null,
+                                "attendance"=> null,
+                                "term_id"=> $list->term_id,
+                                "module_creation_id"=>$list->module_creation_id,
+                                "plan_id" => $list->plan_id,
+                        ];
+                        
+                        $termData[$list->term_id] = [
+                            "name" => $list->term_name,
+                            "start_date" => $list->start_date,
+                            "end_date" => $list->end_date,
+                        ];
+                        $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
+                        
+                        if(!isset($totalFeedListSet[$list->term_id][$list->plan_id])) {
+                            
+                            $totalFeedListSet[$list->term_id][$list->plan_id] = "";
+                        }
+
+                        if(!isset($avarageDetails[$list->term_id][$list->plan_id])) {
+                            $avarageDetails[$list->term_id][$list->plan_id] = 0;
+                        }
+
+                        //total code list and total class list
+                        foreach ($attendanceFeedStatus as $feedStatus):
+                            if(!isset($totalBox[$list->term_id][$feedStatus->code])) {
+                                $totalBox[$list->term_id][$feedStatus->code] = 0;
+                            }
+                        endforeach;
+                        
+                        if(!isset($totalBoxPresentFound[$list->term_id])) {
+                            $totalBoxPresentFound[$list->term_id] = 0;
+                        }
+                        if(!isset($totalBoxAbsentFound[$list->term_id])) {
+                            $totalBoxAbsentFound[$list->term_id]=0;
+                        }
+                        
+                        $replace = array('{', '}', "'", '"');
+                        
+                        if(!isset($totalFullSetFeedList[$list->term_id])) {
+                            $totalFullSetFeedList[$list->term_id] = "";
+                        }
+                        if(!isset($totalClassFullSet[$list->term_id])) {
+                            $totalClassFullSet[$list->term_id] = 0;
+                        }
+                        if(!isset($avarageTotalPercentage[$list->term_id])) {
+                            $avarageTotalPercentage[$list->term_id] = 0;
+                        }
+                        
+                        if(!isset($avarageTermDetails[$list->term_id])) {
+                            $avarageTermDetails[$list->term_id] = 0;
+                        }
+                    }
+                endforeach;
+
+                $attendance4prev = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->WhereNotNull("prev_plan_id")->get();   
+
+                foreach($attendance4prev as $attendance):
+                        $list = PlansDateList::with('plan')->where('id',$attendance->plans_date_list_id )->get()->first();
+                        $plan = Plan::find($attendance->plan_id);
+                        $termAttendanceFound[$plan->term_declaration_id] = true;
+                    
+
+                        $moduleNameList[$plan->id] = (isset($plan->creations->module)) ? $plan->creations->module->name."-".$plan->creations->module->code : $plan->creations->module->name;
+                        
+                        
+                        $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$attendance->plans_date_list_id)->get()->first();
+                        if(isset($attendanceInformation->tutor))
+                            $attendanceInformation->tutor->load(["employee"]);
+                        if(!isset($arryBox[$plan->term_declaration_id][$plan->id][$attendance->feed->code])) {
+                            $arryBox[$plan->term_declaration_id][$plan->id][$attendance->feed->code] = 0;
+                        }
+                        if(!isset($totalPresentFound[$plan->term_declaration_id][$plan->id])) {
+                            $totalPresentFound[$plan->term_declaration_id][$plan->id] = 0;
+                        }
+                        if(!isset($totalAbsentFound[$plan->term_declaration_id][$plan->id])) {
+                            $totalAbsentFound[$plan->term_declaration_id][$plan->id]=0;
+                        }
+
+                        $arryBox[$plan->term_declaration_id][$plan->id][$attendance->feed->code] += 1;
+                        $totalPresentFound[$plan->term_declaration_id][$plan->id] += $attendance->feed->attendance_count;
+                        $totalAbsentFound[$plan->term_declaration_id][$plan->id] += ($attendance->feed->attendance_count==0)? 1 : 0;
+
+                        $json = json_encode ($arryBox[$plan->term_declaration_id][$plan->id], JSON_FORCE_OBJECT);
+                        $replace = array('{', '}', "'", '"');
+                        $totalFeedList = str_replace ($replace, "", $json);
+                        $total = $totalPresentFound[$plan->term_declaration_id][$plan->id] + $totalAbsentFound[$plan->term_declaration_id][$plan->id];
+
+                        $avaragePercentage[$plan->term_declaration_id][$plan->id] = (($totalPresentFound[$plan->term_declaration_id][$plan->id]/$total)*100);
+                        $precision = 2;
+                        $avarage = number_format($avaragePercentage[$plan->term_declaration_id][$plan->id], $precision, '.', '');
+                    
+                        $data[$plan->term_declaration_id][$plan->id][$list->date] = [
+                                "id" => $list->id,
+                                "date" => date("d-m-Y", strtotime($list->date)),
+                                "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
+                                "attendance"=> ($attendance) ?? null,
+                                "term_id"=> $plan->term_declaration_id,
+                                "module_creation_id"=>$list->module_creation_id,
+                                "plan_id" => $plan->id,
+                        ];
+                        
+                        $termData[$plan->term_declaration_id] = [
+                            "name" => $plan->attenTerm->name,
+                            "start_date" => $plan->creations->term->start_date,
+                            "end_date" => $plan->creations->term->end_date,
+                        ];
+                        
+                        if(!isset($lastAttendanceDate[$plan->term_declaration_id])) {
+
+                            
+                            $lastAttendanceDate[$plan->term_declaration_id] = "1970-01-01";
+                            
+                            
+                        }
+                        
+                        if($attendance->feed->attendance_count==1) {
+
+                            
+                            if(strtotime($list->date) >strtotime($lastAttendanceDate[$plan->term_declaration_id])) {
+                                
+                                    //Debugbar::addMessage($plan->term_declaration_id);
+                                    //Debugbar::warning("attendance Date: ".$list->date);
+                                    //Debugbar::info("term current previous attendance: ".$lastAttendanceDate[$plan->term_declaration_id]);
+                                    $lastAttendanceDate[$plan->term_declaration_id] = $list->date;
+                                    //Debugbar::info("term current last attendance: ".$lastAttendanceDate[$plan->term_declaration_id]);
+                            }
+
+                        }
+                        
+
+                        $planDetails[$plan->term_declaration_id][$plan->id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$plan->id)->get()->first();
+                        
+                        
+                        $avarageDetails[$plan->term_declaration_id][$plan->id] = $avarage;
+                        $totalFeedListSet[$plan->term_declaration_id][$plan->id] = $totalFeedList;
+
+                        //total code list and total class list
+                        if(!isset($totalBox[$plan->term_declaration_id][$attendance->feed->code])) {
+                            $totalBox[$plan->term_declaration_id][$attendance->feed->code] = 0;
+                        }
+                        
+                        if(!isset($totalBoxPresentFound[$plan->term_declaration_id])) {
+                            $totalBoxPresentFound[$plan->term_declaration_id] = 0;
+                        }
+                        if(!isset($totalBoxAbsentFound[$plan->term_declaration_id])) {
+                            $totalBoxAbsentFound[$plan->term_declaration_id]=0;
+                        }
+                        $totalBox[$plan->term_declaration_id][$attendance->feed->code] += 1;
+                        $totalBoxPresentFound[$plan->term_declaration_id] += $attendance->feed->attendance_count;
+                        $totalBoxAbsentFound[$plan->term_declaration_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
+
+                        $json = json_encode ($totalBox[$plan->term_declaration_id], JSON_FORCE_OBJECT);
+                        $replace = array('{', '}', "'", '"');
+                        $totalFullSetFeedList[$plan->term_declaration_id] = str_replace ($replace, "", $json);
+                        $totalClassFullSet[$plan->term_declaration_id] = $totalBoxPresentFound[$plan->term_declaration_id] + $totalBoxAbsentFound[$plan->term_declaration_id];
+
+                        $avarageTotalPercentage[$plan->term_declaration_id] = (($totalBoxPresentFound[$plan->term_declaration_id]/$totalClassFullSet[$plan->term_declaration_id])*100);
+                        
+                        $avarage= number_format($avarageTotalPercentage[$plan->term_declaration_id], $precision, '.', '');
+                        $avarageTermDetails[$plan->term_declaration_id] = $avarage;
+                    
+                endforeach;
+
             return [ "lastAttendanceDate"=>$lastAttendanceDate,
                      "termData" => $termData,
                      "data" => $data ,
@@ -1027,6 +1157,9 @@ class StudentController extends Controller
                      "avarageTermDetails" => $avarageTermDetails,
                      "totalClassFullSet" => $totalClassFullSet ,
                      "moduleNameList" =>$moduleNameList];
+
+
+
     }
     
 

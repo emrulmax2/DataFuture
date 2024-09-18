@@ -226,7 +226,7 @@
                 <div class="col-span-12 pt-5 relative">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">
-                            Daily Class Information 
+                            E-learning Tracking
                             {{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? '['.$theTerm->attenTerm->name.']' : '') }}
                         </h2>
                         <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
