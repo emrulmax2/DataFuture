@@ -85,7 +85,7 @@
                         @endif
                     </div>
                     @if(!empty($regs->attendances) && $regs->attendances->count() > 0)
-                        <div class="attendanceWrap mt-7">
+                        <div class="attendanceWrap mt-7  bg-success-soft-1 p-3 rounded">
                             <div class="grid grid-cols-12 gap-0 items-center">
                                 <div class="col-span-6">
                                     <h3 class="font-medium text-base">Attendances</h3>
@@ -94,7 +94,7 @@
                                     <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
                                 </div>
                             </div>
-                            <table class="table table-bordered table-sm mt-3">
+                            <table class="table table-bordered table-sm mt-3 bg-white">
                                 <thead>
                                     <tr>
                                         <th class="whitespace-nowrap">ID</th>
@@ -157,7 +157,7 @@
                     @endif
 
                     @if(isset($regs->cocs) && $regs->cocs->count() > 0)
-                    <div class="cocWraps mt-7">
+                    <div class="cocWraps mt-7 bg-danger-soft p-3 rounded">
                         <div class="grid grid-cols-12 gap-0 items-center">
                             <div class="col-span-6">
                                 <h3 class="font-medium text-base">Coc Histories</h3>
@@ -166,7 +166,7 @@
                                 <button  data-regid="{{ $regs->id }}" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
                             </div>
                         </div>
-                        <table class="table table-bordered table-sm mt-3">
+                        <table class="table table-bordered table-sm mt-3 bg-white">
                             <thead>
                                 <tr>
                                     <th class="whitespace-nowrap">ID</th>
