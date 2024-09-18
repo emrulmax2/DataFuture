@@ -191,67 +191,53 @@ class DashboardController extends Controller
     public function getClassInfoHtml($theDate = null, $course_id = 0, ){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         
-            $personalTutorId = auth()->user()->id; //304; 
+        $personalTutorId = auth()->user()->id; //304; 
         
         $html = '';
 
+        $term = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
 
-        $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id, $personalTutorId){
+        $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('status','Completed')->whereHas('plan', function($q) use($term,$course_id, $personalTutorId){
+            
             if($course_id > 0):
                 $q->where('course_id', $course_id);
             endif;
                 $q->where('personal_tutor_id', $personalTutorId);
                 $q->where('class_type', "Theory");
+                $q->where('term_declaration_id',$term->term_declaration_id);
+
 
         })->get()->sortBy(function($planDates, $key) {
+
             return $planDates->plan->start_time;
+
         });
+
+
         if(!empty($plans) && $plans->count() > 0):
-            $currentTime = date('Y-m-d H:i:s');
+            //$currentTime = date('Y-m-d H:i:s');
             foreach($plans as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
                 $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
-                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $theDate)->where('attendance_type', 1)->get();
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $pln->date)->where('attendance_type', 1)->get();
 
                 $proxyEmployeeId = (isset($pln->proxy->employee->id) && $pln->proxy->employee->id > 0 ? $pln->proxy->employee->id : 0);
-                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', $theDate)->where('attendance_type', 1)->get();
+                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', $pln->date)->where('attendance_type', 1)->get();
 
                 $classStatus = 0;
                 $classLabel = '';
-                $orgStart = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->start_time));
-                $orgEnd = date('Y-m-d H:i:s', strtotime($theDate.' '.$pln->plan->end_time));
 
-                if(date('Y-m-d', strtotime($currentTime)) < date('Y-m-d', strtotime($orgStart))):
-                    $classLabel = '<span class="text-info font-medium">Scheduled</span>';
-                elseif($currentTime < $orgStart && !isset($pln->attendanceInformation->id)):
-                    $classLabel = '<span class="text-info font-medium">Scheduled</span>';
-                elseif($currentTime > $orgStart && $currentTime < $orgEnd && !isset($pln->attendanceInformation->id)):
-                    $classLabel = '<span class="text-pending font-medium flashingText">Starting Shortly</span>';
-                elseif(isset($pln->attendanceInformation->id)):
-                    if($pln->feed_given == 1 && $pln->attendances->count() > 0):
-                        $classLabel .= '<span class="btn-rounded btn font-medium btn-success text-white p-0 w-9 h-9 mr-1" style="flex: 0 0 36px;">A</span>';
-                    endif;
-                    if(!empty($pln->attendanceInformation->start_time) && empty($pln->attendanceInformation->end_time)):
-                        $classLabel .= '<span class="text-success font-medium">Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'</span>';
-                    elseif(!empty($pln->attendanceInformation->start_time) && !empty($pln->attendanceInformation->end_time)):
-                        $classLabel .= '<span class="text-success font-medium">';
-                            $classLabel .= 'Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
-                            $classLabel .= 'Finished '.date('h:i A', strtotime($pln->attendanceInformation->end_time)); 
-                        $classLabel .= '</span>';
-                    endif;
-                elseif($currentTime > $orgEnd && !isset($pln->attendanceInformation->id)):
-                    $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
-                endif;
+                $classLabel .= '<span class="text-danger font-medium">Completed</span>';
                     $html .= '<tr class="intro-x">';
                         $html .= '<td>';
-                            $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
+                            $html .= '<span class="font-fedium">'.date('d/m/Y H:i', strtotime($pln->date.' '.$pln->plan->start_time)).'</span>';
                         $html .= '</td>';
                         $html .= '<td>';
                             $html .= '<div class="flex items-center">';
                                 $html .= '<div>';
                                     $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
-                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown'). ' <b>[ '.$pln->plan->group->name .' ]</b></div>';
                                     if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
                                         $html .= '<div class="flex flex-start pt-1">';
                                         foreach($pln->plan->tasks as $tsk):
@@ -268,13 +254,7 @@ class DashboardController extends Controller
                                         $html .= '</div>';
                                     endif;
                                 $html .= '</div>';
-                                if(isset($pln->plan->group->name) && !empty($pln->plan->group->name)):
-                                    if(strlen($pln->plan->group->name) > 2):
-                                        $html .= '<div class="ml-auto mr-4 rounded text-lg bg-success whitespace-nowrap text-white cursor-pointer font-medium w-auto px-2 py-1 h-auto inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
-                                    else:
-                                        $html .= '<div class="ml-auto mr-4 rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.$pln->plan->group->name.'</div>';
-                                    endif;
-                                endif;
+                                
                             $html .= '</div>';
                         $html .= '</td>';
                         $html .= '<td class="text-left">';
@@ -329,50 +309,7 @@ class DashboardController extends Controller
                             $html .= '</span>';
                         $html .= '</td>';
                         $html .= '<td class="text-right">';
-                            if($pln->statu != 'Ongoing'):
-                                $html .= '<div class="dropdown hidden" data-tw-placement="bottom-end">';
-                                    $html .= '<a class="dropdown-toggle w-5 h-5" href="javascript:void(0);" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-5 h-5 text-slate-500"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></a>';
-                                    $html .= '<div class="dropdown-menu w-48">';
-                                        $html .= '<ul class="dropdown-content">';
-                                            if($pln->status == 'Scheduled' && $pln->feed_given != 1 && $orgEnd < $currentTime):
-                                                $html .= '<li>';
-                                                    $html .= '<a href="'.route('attendance.create', $pln->id).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> Feed Attendance</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                            if($pln->status == 'Completed'):
-                                                $html .= '<li>';
-                                                    $html .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->feed_given == 1 && $pln->attendances->count() > 0 ? 'View Feed' : 'Feed Attendance').'</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                            if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime)) && ($pln->proxy_tutor_id == null || $pln->proxy_tutor_id == 0)):
-                                                $html .= '<li>';
-                                                    $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                            if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
-                                                $html .= '<li>';
-                                                    $html .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" href="javascript:void(0);" class="cancelClass text-danger dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Cancel Class</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                            if($pln->status == 'Ongoing' && $pln->feed_given != 1):
-                                                $html .= '<li>';
-                                                    $html .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Feed Attendance</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                            if($pln->status == 'Ongoing' && $pln->feed_given == 1 && $orgEnd < $currentTime):
-                                                $html .= '<li>';
-                                                    $html .= '<a data-attendanceinfo="'.$pln->attendanceInformation->id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" href="javascript:void(0);" class="endClassBtn text-danger dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> End Class</a>';
-                                                $html .= '</li>';
-                                            endif;
-                                        $html .= '</ul>';
-                                $html .= '</div>';
-                            endif;
-                            /*if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime))):
-                                $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" type="button" class="proxyClass btn-rounded btn btn-success text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>';
-                            endif;
-                            if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
-                                $html .= '<button data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#cancelClassModal" type="button" class="cancelClass ml-1 btn-rounded btn btn-danger text-white p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg></button>';
-                            endif;*/
+                            
                         $html .= '</td>';
                     $html .= '</tr>';
               
