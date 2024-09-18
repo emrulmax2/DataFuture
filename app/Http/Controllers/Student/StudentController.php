@@ -684,7 +684,8 @@ class StudentController extends Controller
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
             'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'registrations' => SlcRegistration::where('student_course_relation_id', $courseRelationId)->where('student_id', $student_id)->get()
         ]);
     }
 

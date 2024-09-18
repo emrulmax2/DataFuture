@@ -105,4 +105,26 @@ class SlcMoneyReceiptController extends Controller
 
         return response()->json(['res' => 'Success'], 200);
     }
+
+    public function reAssignPaymentToAgreement(Request $request){
+        $student = $request->student;
+        $ids = (isset($request->recordid) && !empty($request->recordid) ? explode('_', $request->recordid) : []);
+        if(!empty($ids) && count($ids) == 2):
+            $slc_agr_id = (isset($ids[0]) && $ids[0] > 0 ? $ids[0] : 0);
+            $slc_pay_id = (isset($ids[1]) && $ids[1] > 0 ? $ids[1] : 0);
+            if($slc_agr_id > 0 && $slc_pay_id > 0):
+                $slcAGR = SlcAgreement::find($slc_agr_id);
+                $data = [];
+                $data['course_creation_instance_id'] = $slcAGR->course_creation_instance_id;
+                $data['slc_agreement_id'] = $slcAGR->id;
+                SlcMoneyReceipt::where('id', $slc_pay_id)->update($data);
+
+                return response()->json(['res' => 'Success'], 200);
+            else:
+                return response()->json(['res' => 'Error'], 422);
+            endif;
+        else:
+            return response()->json(['res' => 'Error'], 422);
+        endif;
+    }
 }

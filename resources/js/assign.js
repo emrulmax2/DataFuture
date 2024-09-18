@@ -30,11 +30,30 @@ import TomSelect from "tom-select";
     let potentialTermDeclaration = new TomSelect('#potentialTermDeclaration', tomOptions);
     let potentialGroups = new TomSelect('#potentialGroups', tomOptions);
     let potentialModules = new TomSelect('#potentialModules', tomOptions);
+    let newGroupId = new TomSelect('#new_group_id', tomOptions);
 
     const showAllModulesModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#showAllModulesModal"));
+    const studentReAssignModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#studentReAssignModal"));
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+
     const showAllModulesModalEl = document.getElementById('showAllModulesModal')
     showAllModulesModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#showAllModulesModal .modal-body').html('');
+    });
+
+    const studentReAssignModalEl = document.getElementById('studentReAssignModal')
+    studentReAssignModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#studentReAssignModal input[name="student_id"]').val('0');
+        newGroupId.clear(true);
+
+        $('#studentReAssignModal #reAssignStdBtn').attr('disabled', 'disabled');
+        $('#studentReAssignModal .moduleArea').fadeOut(function(){
+            $('#studentReAssignModal #moduleLilstTables .oldGroupName').html('')
+            $('#studentReAssignModal #moduleLilstTables .assignedModulesCol').html('')
+            $('#studentReAssignModal #moduleLilstTables .newGroupName').html('')
+            $('#studentReAssignModal #moduleLilstTables .newModulesCol').html('')
+        });
     });
 
     /* Filter Existing Student List By Module Start*/
@@ -125,8 +144,14 @@ import TomSelect from "tom-select";
         var activeLength = $('.assignStudentsList.existingStudentList').find('li.active').length;
         if(activeLength > 0){
             $('button.removeStudents').removeAttr('disabled');
+            if(activeLength == 1){
+                $('button.reAssignStudent').removeAttr('disabled');
+            }else{
+                $('button.reAssignStudent').attr('disabled', 'disabled');
+            }
         }else{
             $('button.removeStudents').attr('disabled', 'disabled');
+            $('button.reAssignStudent').attr('disabled', 'disabled');
         }
     });
     /* Select Deselect Existing Students End*/
@@ -691,5 +716,140 @@ import TomSelect from "tom-select";
 
     });
     /* DeAssign Students to Class Plan End */
+
+    /* Re-Assign Student Start */
+    $(document).on('click', '.reAssignStudent', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        var activeLength = $('.assignStudentsList.existingStudentList').find('li.active').length;
+        if(activeLength == 1){
+            let student_id = $('.assignStudentsList.existingStudentList').find('li.active').attr('data-studentid');
+            studentReAssignModal.show();
+            document.getElementById("studentReAssignModal").addEventListener("shown.tw.modal", function (event) {
+                $('#studentReAssignModal input[name="student_id"]').val(student_id);
+            });
+        }
+    });
+
+    $('#studentReAssignModal #new_group_id').on('change', function(e){
+        let $theSelect = $(this);
+        let new_group_id = $theSelect.val();
+
+        if(new_group_id > 0){
+            let academic_year_id = $('#studentReAssignModal [name="academic_year_id"]').val();
+            let term_declaration_id = $('#studentReAssignModal [name="term_declaration_id"]').val();
+            let course_id = $('#studentReAssignModal [name="course_id"]').val();
+            let old_group_id = $('#studentReAssignModal [name="group_id"]').val();
+
+            axios({
+                method: "POST",
+                url: route("assigns.get.modules.for.reassign"),
+                data: {academic_year_id : academic_year_id, term_declaration_id : term_declaration_id, course_id : course_id, old_group_id : old_group_id, new_group_id : new_group_id},
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                $('#studentReAssignModal #reAssignStdBtn').removeAttr('disabled');
+                if (response.status == 200) {
+                    $('#studentReAssignModal .moduleArea').fadeIn(function(){
+                        $('#studentReAssignModal #moduleLilstTables .oldGroupName').html(response.data.og_name)
+                        $('#studentReAssignModal #moduleLilstTables .assignedModulesCol').html(response.data.oldModules)
+                        $('#studentReAssignModal #moduleLilstTables .newGroupName').html(response.data.ng_name)
+                        $('#studentReAssignModal #moduleLilstTables .newModulesCol').html(response.data.newModules)
+                    })
+                }
+            }).catch((error) => {
+                $('#studentReAssignModal #reAssignStdBtn').attr('disabled', 'disabled');
+                $('#studentReAssignModal .moduleArea').fadeOut(function(){
+                    $('#studentReAssignModal #moduleLilstTables .oldGroupName').html('')
+                    $('#studentReAssignModal #moduleLilstTables .assignedModulesCol').html('')
+                    $('#studentReAssignModal #moduleLilstTables .newGroupName').html('')
+                    $('#studentReAssignModal #moduleLilstTables .newModulesCol').html('')
+                });
+                console.log(error);
+            });
+        }else{
+            $('#studentReAssignModal #reAssignStdBtn').attr('disabled', 'disabled');
+            $('#studentReAssignModal .moduleArea').fadeOut(function(){
+                $('#studentReAssignModal #moduleLilstTables .oldGroupName').html('')
+                $('#studentReAssignModal #moduleLilstTables .assignedModulesCol').html('')
+                $('#studentReAssignModal #moduleLilstTables .newGroupName').html('')
+                $('#studentReAssignModal #moduleLilstTables .newModulesCol').html('')
+            });
+        }
+    });
+
+    $('#studentReAssignForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('studentReAssignForm');
+    
+        document.querySelector('#reAssignStdBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#reAssignStdBtn svg").style.cssText ="display: inline-block;";
+
+        let group = $('#studentReAssignForm #new_group_id').val();
+        let checkNewModules = $('#studentReAssignForm').find('.newAssigndModuleIds:checked').length;
+        let checkOldModules = $('#studentReAssignForm').find('.oldAssignedModuleIds:checked').length;
+
+        if(group > 0 && checkNewModules > 0 && checkOldModules > 0){
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('assigns.re.assign.students.new.group'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#reAssignStdBtn').removeAttribute('disabled');
+                document.querySelector("#reAssignStdBtn svg").style.cssText = "display: none;";
+                
+                if (response.status == 200) {
+                    //console.log(response.data)
+                    studentReAssignModal.hide();
+
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Success!");
+                        $("#successModal .successModalDesc").html('Student successfully re-assigned to selected groups.');
+                    });                
+                        
+                    setTimeout(() => {
+                        successModal.hide();
+                        window.location.reload();
+                    }, 1000);
+                }
+            }).catch(error => {
+                document.querySelector('#reAssignStdBtn').removeAttribute('disabled');
+                document.querySelector("#reAssignStdBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        console.log(error.response.data.message)
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html("Oops!");
+                            $("#warningModal .warningModalDesc").html(error.response.data.message);
+                        });  
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        }else{
+            document.querySelector('#reAssignStdBtn').removeAttribute('disabled');
+            document.querySelector("#reAssignStdBtn svg").style.cssText = "display: none;";
+
+            $('#studentReAssignModal .modal-content .validationErrors').remove();
+            $('#studentReAssignModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please fill out all required fields and select some modules.</div>');
+            
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+
+            setTimeout(function(){
+                $('#studentReAssignModal .modal-content .validationErrors').remove();
+            }, 2000);
+        }
+    });
+    /* Re-Assign Student End */
 
 })();

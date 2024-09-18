@@ -26,6 +26,7 @@ class Attendance extends Model
         "notofied_by",	
         "attendence_excuse_id",	
         "class_type",	
+        "prev_plan_id",	
         'created_by',
         'updated_by',
     ];

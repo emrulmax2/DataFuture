@@ -9,6 +9,7 @@ use App\Models\CourseCreationInstance;
 use App\Models\SlcAgreement;
 use App\Models\SlcInstallment;
 use App\Models\SlcMoneyReceipt;
+use App\Models\SlcRegistration;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -104,5 +105,27 @@ class SlcAgreementController extends Controller
         SlcAgreement::where('student_id', $student)->where('id', $slc_agreement_id)->delete();
 
         return response()->json(['res' => 'Success'], 200);
+    }
+
+    public function assignAgrToReg(Request $request){
+        $student = $request->student;
+        $ids = (isset($request->recordid) && !empty($request->recordid) ? explode('_', $request->recordid) : []);
+        if(!empty($ids) && count($ids) == 2):
+            $slc_reg_id = (isset($ids[0]) && $ids[0] > 0 ? $ids[0] : 0);
+            $slc_agr_id = (isset($ids[1]) && $ids[1] > 0 ? $ids[1] : 0);
+            if($slc_reg_id > 0 && $slc_agr_id > 0):
+                $slcReg = SlcRegistration::find($slc_reg_id);
+                $data = [];
+                $data['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
+                $data['slc_registration_id'] = $slcReg->id;
+                SlcAgreement::where('id', $slc_agr_id)->update($data);
+
+                return response()->json(['res' => 'Success'], 200);
+            else:
+                return response()->json(['res' => 'Error'], 422);
+            endif;
+        else:
+            return response()->json(['res' => 'Error'], 422);
+        endif;
     }
 }

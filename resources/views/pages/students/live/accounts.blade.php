@@ -38,6 +38,18 @@
                     <div class="col-span-6 text-right relative">
                         <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
                         <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        @if(!empty($registrations) && $registrations->count() > 0 && (empty($agr->slc_registration_id) || $agr->slc_registration_id == 0))
+                            <div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">
+                                <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
+                                <div class="dropdown-menu w-64">
+                                    <ul class="dropdown-content">
+                                        @foreach($registrations as $regs)
+                                            <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-agr="{{ $agr->id }}" class="dropdown-item assignAgreementToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="intro-y mt-5">
@@ -211,6 +223,20 @@
                                                             <td>
                                                                 <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
                                                                 <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                                @if(!empty($agreements) && $agreements->count() > 0)
+                                                                    <div class="dropdown inline-flex" data-tw-placement="bottom-end">
+                                                                        <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-6 h-6" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-3 h-3"></i></button>
+                                                                        <div class="dropdown-menu w-64">
+                                                                            <ul class="dropdown-content">
+                                                                                @foreach($agreements as $sagr)
+                                                                                    @if($sagr->id != $agr->id)
+                                                                                        <li><a href="javascript:void(0);" data-agr="{{ $sagr->id }}" data-pay="{{ $payment->id }}" class="dropdown-item assignPaymentToAgr text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Agreement ID: {{ $sagr->id }} - Year {{ $sagr->year }}</a></li>
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -864,7 +890,7 @@
                         <div class="text-slate-500 mt-2 confModDesc"></div>
                     </div>
                     <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-action="NONE" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
                         <button type="button" data-recordid="0" data-status="none" data-student="{{ $student->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>

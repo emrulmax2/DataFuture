@@ -151,6 +151,10 @@
                             Remove <i data-lucide="chevrons-right" class="w-4 h-4 ml-1"></i>
                             <i data-loading-icon="three-dots" class="w-8 h-8 theLoader hidden"></i>
                         </button>
+                        <button type="button" disabled class="btn btn-pending btn-sm mt-1 text-white w-auto reAssignStudent">
+                            Re-Assign <i data-lucide="chevrons-right" class="w-4 h-4 ml-1"></i>
+                            <i data-loading-icon="three-dots" class="w-8 h-8 theLoader hidden"></i>
+                        </button>
                     </div>
                     <div class="col-span-6 assignPotentialCol">
                         <div class="flex items-center p-5 pl-0 border-b border-slate-200/60 dark:border-darkmode-400">
@@ -234,6 +238,114 @@
             </div>
         </div>
     </div>
+     
+    <!-- Student re-assign Modal Start -->
+    <div id="studentReAssignModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="studentReAssignForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Re - Assign Student to New Group</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body p-5">
+                        <div>
+                            <label for="new_group_id" class="form-label">Assigned To <span class="text-danger">*</span></label>
+                            <select name="new_group_id" class="w-full tom-selects" id="new_group_id">
+                                <option value="">Please Select</option>
+                                @if(!empty($otherGroup) && count($otherGroup) > 0)
+                                    @foreach($otherGroup as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3 moduleArea" style="display: none;">
+                            <table class="table table-bordered table-sm" id="moduleLilstTables">
+                                <thead>
+                                    <tr>
+                                        <th><span class="oldGroupName"></span> Group Modules (Tick to Remove)</th>
+                                        <th><span class="newGroupName"></span> Group Modules (Tick to Add)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="assignedModulesCol"></td>
+                                        <td class="newModulesCol"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button disabled type="submit" id="reAssignStdBtn" class="btn btn-primary w-auto">
+                            Change Group
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="0"/>
+                        <input type="hidden" name="academic_year_id" value="{{ $theAcademicYear->id }}"/>
+                        <input type="hidden" name="term_declaration_id" value="{{ $theTermDeclaration->id }}"/>
+                        <input type="hidden" name="course_id" value="{{ $theCourse->id }}"/>
+                        <input type="hidden" name="group_id" value="{{ $theGroup->id }}"/>
+                        <input type="hidden" name="assigned_module_ids" value="{{ (!empty($selectedModuleIds) ? implode(',', $selectedModuleIds) : '') }}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Student re-assign Modal End -->
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Warning Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Warning Modal Content -->
 @endsection
 
 @section('script')

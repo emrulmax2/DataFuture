@@ -48,6 +48,16 @@ import Tabulator from "tabulator-tables";
         }
     })
 
+    $('#confirmModal .disAgreeWith').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            confirmModal.hide();
+            window.location.reload();
+        }else{
+            confirmModal.hide();
+        }
+    })
+
     $('#warningModal .warningCloser').on('click', function(e){
         e.preventDefault();
         if($(this).attr('data-action') == 'RELOAD'){
@@ -262,6 +272,21 @@ import Tabulator from "tabulator-tables";
         });
     });
 
+    $(document).on('click', '.assignAgreementToReg', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        let reg_id = $theBtn.attr('data-reg');
+        let agr_id = $theBtn.attr('data-agr');
+
+        confirmModal.show();
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .confModTitle").html("Are you sure?" );
+            $("#confirmModal .confModDesc").html('Want to assign #'+agr_id+' this agreement to #'+reg_id+' registration?');
+            $("#confirmModal .agreeWith").attr('data-recordid', reg_id+'_'+agr_id);
+            $("#confirmModal .agreeWith").attr('data-status', 'ASSIGNAGRTOREG');
+        });
+    })
+
     $('#confirmModal .agreeWith').on('click', function(e){
         e.preventDefault();
         let $agreeBTN = $(this);
@@ -286,6 +311,32 @@ import Tabulator from "tabulator-tables";
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Done!');
                         $('#successModal .successModalDesc').html('Student\'s agreement  successfully deleted.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'ASSIGNAGRTOREG'){
+            axios({
+                method: 'POST',
+                url: route('student.assign.slc.agreement.to.registration'),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s agreement  successfully re-assigned to registration.');
                         $('#successModal .successCloser').attr('data-action', 'RELOAD');
                     });
 

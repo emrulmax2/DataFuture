@@ -201,6 +201,21 @@
         });
     });
 
+    $(document).on('click', '.assignPaymentToAgr', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        let agr_id = $theBtn.attr('data-agr');
+        let pay_id = $theBtn.attr('data-pay');
+
+        confirmModal.show();
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .confModTitle").html("Are you sure?" );
+            $("#confirmModal .confModDesc").html('Want to move this #'+pay_id+' payment to #'+agr_id+' agreement?');
+            $("#confirmModal .agreeWith").attr('data-recordid', agr_id+'_'+pay_id);
+            $("#confirmModal .agreeWith").attr('data-status', 'ASSIGNPAYTOAGR');
+        });
+    })
+
     $('#confirmModal .agreeWith').on('click', function(e){
         e.preventDefault();
         let $agreeBTN = $(this);
@@ -214,6 +229,32 @@
             axios({
                 method: 'delete',
                 url: route('student.destory.slc.payment'),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s payment  successfully deleted.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'ASSIGNPAYTOAGR'){
+            axios({
+                method: 'post',
+                url: route('student.sync.slc.payment.to.agreement'),
                 data: {student : student, recordid : recordid},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
