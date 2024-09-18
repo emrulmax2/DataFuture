@@ -101,7 +101,7 @@ class AttendanceReportController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
-                    ->leftJoin('plans as pln', 'atn.class_plan_id', 'pln.id')
+                    ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                     ->leftJoin('groups as grp', 'pln.group_id', 'grp.id')
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
                     ->leftJoin('student_course_relations as scr', function($j){
@@ -118,7 +118,7 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
-                    ->whereIn('atn.class_plan_id', $plan_ids);
+                    ->whereIn('atn.plan_id', $plan_ids);
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;
@@ -252,7 +252,7 @@ class AttendanceReportController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
-                    ->leftJoin('plans as pln', 'atn.class_plan_id', 'pln.id')
+                    ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                     ->leftJoin('groups as grp', 'pln.group_id', 'grp.id')
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
                     ->leftJoin('student_course_relations as scr', function($j){
@@ -269,7 +269,7 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
-                    ->whereIn('atn.class_plan_id', $plan_ids);
+                    ->whereIn('atn.plan_id', $plan_ids);
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;

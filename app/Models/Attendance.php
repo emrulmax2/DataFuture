@@ -17,7 +17,7 @@ class Attendance extends Model
         "plans_date_list_id",
         "attendance_date",
         "attendance_captured_at",
-        "class_plan_id",
+        "plan_id",
         "student_id",	
         "attendance_feed_status_id",	
         "email_notification",	
