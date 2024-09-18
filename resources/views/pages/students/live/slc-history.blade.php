@@ -945,7 +945,7 @@
                         <div class="grid grid-cols-12 gap-4 gap-y-2">
                             <div class="col-span-6 sm:col-span-6">
                                 <label for="coc_confirmation_date" class="form-label">Date of Confirmation <span class="text-danger">*</span></label>
-                                <input type="text" value="" placeholder="DD-MM-YYYY" id="coc_confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <input type="text" value="<?php echo date('d-m-Y') ?>" placeholder="DD-MM-YYYY" id="coc_confirmation_date" class="form-control datepicker" name="confirmation_date" data-format="DD-MM-YYYY" data-single-mode="true">
                                 <div class="acc__input-error error-confirmation_date text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\CourseManagement;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\Assign;
+use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationAvailability;
@@ -19,6 +20,7 @@ use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentCourseRelation;
+use App\Models\StudentGroupChangeHistory;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +36,7 @@ class AssignController extends Controller
                             ->where('name', $theGroup->name)->pluck('id')->unique()->toArray();
         $modules = Plan::where('course_id', $crid)->where('term_declaration_id', $tdid)->where('academic_year_id', $acid)
                    ->whereIn('group_id', $sameNameGroupIds)->get();
-        $planIds = Plan::where('course_id', $crid)->where('term_declaration_id', $tdid)->where('academic_year_id', $acid)
-                   ->whereIn('group_id', $sameNameGroupIds)->pluck('id')->unique()->toArray();
+        $planIds = $modules->pluck('id')->unique()->toArray();
 
         return view('pages.course-management.assign.index', [
             'title' => 'Course Management - London Churchill College',
@@ -53,12 +54,38 @@ class AssignController extends Controller
             'theCourse' => Course::find($crid),
             'theGroup' => Group::find($grid),
             'selectedModules' => $modules,
+            'selectedModuleIds' => $planIds,
             'existingStudents' => $this->getExistingStudentsList($planIds),
             'termDeclarations' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all()->sortBy('name'),
+            'otherGroup' => $this->getOtherAvailableGroups($acid, $tdid, $crid, $theGroup->name)
         ]);
     }
 
+    public function getOtherAvailableGroups($academicYearId, $termDeclaredId, $courseId, $existGroupName){
+        $allGroups = DB::table('plans')->select('groups.name')
+            ->leftJoin('groups', 'plans.group_id', '=', 'groups.id')
+            ->groupBy('groups.name')
+            ->where('plans.academic_year_id', '=', $academicYearId)
+            ->where('plans.term_declaration_id', '=', $termDeclaredId)
+            ->where('plans.course_id', '=', $courseId)
+            ->where('groups.course_id', '=', $courseId)
+            ->where('groups.term_declaration_id', '=', $termDeclaredId)
+            ->where('groups.name', '!=', $existGroupName)
+            ->orderBy('groups.name','ASC')->get();
+
+        $groups = [];
+        if($allGroups->count() > 0):
+            foreach($allGroups as $group):
+                $groupName = $group->name;
+                $theGroup = Group::where('name', $groupName)->where('course_id', $courseId)->where('term_declaration_id', $termDeclaredId)->orderBy('id', 'DESC')->get()->first();
+
+                $groups[$theGroup->id] = $theGroup->name;
+            endforeach;
+        endif;
+
+        return $groups;
+    }
 
     public function unsignnedList(Request $request){
         $unsignedTerm = (isset($request->unsignedTerm) && !empty($request->unsignedTerm) ? $request->unsignedTerm : 0);
@@ -531,6 +558,135 @@ class AssignController extends Controller
         endif;
 
         return response()->json(['res' => $res], 200);
+    }
+
+
+    public function getModulesForReassign(Request $request){
+        $academic_year_id = $request->academic_year_id;
+        $term_declaration_id = $request->term_declaration_id;
+        $course_id = $request->course_id;
+        $old_group_id = $request->old_group_id;
+        $new_group_id = $request->new_group_id;
+
+        $theNewGroup = Group::find($new_group_id);
+        $sameNameNewGroupIds = Group::where('term_declaration_id', $term_declaration_id)->where('course_id', $course_id)
+                            ->where('name', $theNewGroup->name)->pluck('id')->unique()->toArray();
+        $newModules = Plan::where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->where('academic_year_id', $academic_year_id)
+                   ->whereIn('group_id', $sameNameNewGroupIds)->get();
+
+        $NM_HTML = '';
+        if($newModules->count() > 0):
+            $NM_HTML .= '<div class="relative">';
+                if($newModules->count() > 0):
+                    foreach($newModules as $smd):
+                        $NM_HTML .= '<div class="form-check items-start mb-2">';
+                            $NM_HTML .= '<input id="newAssigndModuleIds_'.$smd->id.'" class="form-check-input newAssigndModuleIds" name="newAssigndModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
+                            $NM_HTML .= '<label class="form-check-label" for="newAssigndModuleIds_'.$smd->id.'">';
+                                $NM_HTML .= $smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
+                            $NM_HTML .= '</label>';
+                        $NM_HTML .= '</div>';
+                    endforeach;
+                endif;
+            $NM_HTML .= '</div>';
+        else:
+            $NM_HTML .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Module Not found for '.$theNewGroup->name.'</div>';
+        endif;
+
+        $theOldGroup = Group::find($old_group_id);
+        $sameNameOldGroupIds = Group::where('term_declaration_id', $term_declaration_id)->where('course_id', $course_id)
+                            ->where('name', $theOldGroup->name)->pluck('id')->unique()->toArray();
+        $OldModules = Plan::where('course_id', $course_id)->where('term_declaration_id', $term_declaration_id)->where('academic_year_id', $academic_year_id)
+                   ->whereIn('group_id', $sameNameOldGroupIds)->get();
+
+        $OM_HTML = '';
+        if($OldModules->count() > 0):
+            $OM_HTML .= '<div class="relative">';
+                if($OldModules->count() > 0):
+                    foreach($OldModules as $smd):
+                        $OM_HTML .= '<div class="form-check items-start mb-2">';
+                            $OM_HTML .= '<input checked id="oldAssignedModuleIds_'.$smd->id.'" class="form-check-input oldAssignedModuleIds" name="oldAssignedModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
+                            $OM_HTML .= '<label class="form-check-label" for="oldAssignedModuleIds_'.$smd->id.'">';
+                                $OM_HTML .= $smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
+                            $OM_HTML .= '</label>';
+                        $OM_HTML .= '</div>';
+                    endforeach;
+                endif;
+            $OM_HTML .= '</div>';
+        else:
+            $OM_HTML .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Module Not found for '.$theOldGroup->name.'</div>';
+        endif;
+
+        return response()->json(['og_name' => $theOldGroup->name, 'oldModules' => $OM_HTML, 'ng_name' => $theNewGroup->name, 'newModules' => $NM_HTML], 200);
+    }
+
+    public function reAssignStudentNewGroup(Request $request){
+        $new_group_id = $request->new_group_id;
+
+        $oldAssignedPlans = (isset($request->oldAssignedModuleIds) && !empty($request->oldAssignedModuleIds) ? $request->oldAssignedModuleIds : []);
+        $newAssigndPlans = (isset($request->newAssigndModuleIds) && !empty($request->newAssigndModuleIds) ? $request->newAssigndModuleIds : []);
+        $student_id = $request->student_id;
+        $academic_year_id = $request->academic_year_id;
+        $term_declaration_id = $request->term_declaration_id;
+        $course_id = $request->course_id;
+        $old_group_id = $request->group_id;
+
+        return response()->json(['o' => $oldAssignedPlans, 'n' => $newAssigndPlans], 200);
+        $error = 0;
+        $error_ids = [];
+        if(!empty($oldAssignedPlans) && count($oldAssignedPlans) > 0):
+            foreach($oldAssignedPlans as $module_id => $modules):
+                foreach($modules as $classType => $plan_ids):
+                    $attendanceCount = Attendance::whereIn('class_plan_id', $plan_ids)->where('student_id', $student_id)->get()->count();
+                    if($attendanceCount > 0 && (!isset($newAssigndPlans[$module_id][$classType]) || (isset($newAssigndPlans[$module_id][$classType]) && count($plan_ids) != count($newAssigndPlans[$module_id][$classType])))):
+                        $error += 1;
+                        foreach($plan_ids as $plan_id):
+                            $error_ids[] = $plan_id;
+                        endforeach;
+                    endif;
+                endforeach;
+            endforeach;
+        endif;
+
+        if($error == 0):
+            foreach($oldAssignedPlans as $module_id => $modules):
+                foreach($modules as $classType => $plan_ids):
+                    $i = 0;
+                    foreach($plan_ids as $plan_id):
+                        $newPlanId = (isset($newAssigndPlans[$module_id][$classType][$i]) && $newAssigndPlans[$module_id][$classType][$i] > 0 ? $newAssigndPlans[$module_id][$classType][$i] : 0);
+                        Assign::where('student_id', $student_id)->where('plan_id', $plan_id)->forceDelete();
+                        
+                        $attendances = Attendance::where('class_plan_id', $plan_id)->where('student_id', $student_id)->get();
+                        if($attendances->count() > 0):
+                            foreach($attendances as $atn):
+                                $data = [];
+                                $data['class_plan_id'] = $newPlanId;
+                                $data['prev_plan_id'] = $atn->class_plan_id;
+                                Attendance::where('id', $atn->id)->update($data);
+                            endforeach;
+                        endif;
+                        $i++;
+                    endforeach;
+                endforeach;
+            endforeach;
+
+            foreach($newAssigndPlans as $module_id => $modules):
+                foreach($modules as $classType => $plan_ids):
+                    foreach($plan_ids as $plan_id):
+                        $data = [];
+                        $data['plan_id'] = $plan_id;
+                        $data['student_id'] = $student_id;
+                        $data['attendance'] = null;
+                        $data['created_by'] = auth()->user()->id;
+
+                        Assign::create($data);
+                    endforeach;
+                endforeach;
+            endforeach;
+
+            return response()->json(['message' => 'Student group successfully changed.'], 200);
+        else:
+            return response()->json(['message' => 'Error found. Please check module counts, Match class types, check attendance feeds. Correspondence Plan ids: '.implode(',', $error_ids)], 422);
+        endif;
     }
 
 }

@@ -912,6 +912,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/agreement-has-data', 'hasData')->name('student.slc.agreement.has.data');
         Route::delete('student/destroy-agreement', 'destroy')->name('student.destory.slc.agreement');
+
+        Route::post('student/assign-agreement-to-registration', 'assignAgrToReg')->name('student.assign.slc.agreement.to.registration');
     });
 
     Route::controller(SlcInstallmentController::class)->group(function() {
@@ -942,6 +944,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/edit-slc-payment', 'edit')->name('student.edit.slc.payment');
         Route::post('student/update-slc-payment', 'update')->name('student.update.slc.payment');
         Route::delete('student/destroy-slc-payment', 'destroy')->name('student.destory.slc.payment');
+        Route::post('student/reassign-slc-payment-to-agreement', 'reAssignPaymentToAgreement')->name('student.sync.slc.payment.to.agreement');
     });
 
     Route::controller(AdmissionController::class)->group(function() {
@@ -2450,6 +2453,9 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/assign/remove-students-from-plan', 'deassignStudentsFromPlan')->name('assign.remove.students.from.plan'); 
 
         Route::post('course-management/assign/get-potential-student-list-from-unsigned-list', 'getPotentialStudentListFromUnsignedList')->name('assign.generage.potential.list.from.unsigned.list'); 
+        Route::post('course-management/assign/get-modules-for-reassigns', 'getModulesForReassign')->name('assigns.get.modules.for.reassign'); 
+
+        Route::post('course-management/assign/re-assign-student-new-groups', 'reAssignStudentNewGroup')->name('assigns.re.assign.students.new.group'); 
     });
 
     Route::resource('result', ResultController::class,[

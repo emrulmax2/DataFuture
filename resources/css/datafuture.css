@@ -1478,15 +1478,15 @@
 
 
 .assignExistingCol{
-    padding-right: 60px;
+    padding-right: 70px;
 }
 .assignPotentialCol{
-    padding-left: 60px;
+    padding-left: 70px;
 }
 .addRemoveBtns{
     text-align: center;
-    width: 120px;
-    height: 64px;
+    width: 140px;
+    height: 100px;
     position: absolute;
     left: 0;
     top: 0;
@@ -1497,6 +1497,9 @@
 .addRemoveBtns .btn{
     width: 82px;
     position: relative;
+}
+.addRemoveBtns .btn.reAssignStudent{
+    width: auto;
 }
 .addRemoveBtns .btn:disabled{
     border-color: rgb(var(--color-secondary) / 0.7);
