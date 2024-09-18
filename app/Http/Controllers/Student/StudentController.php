@@ -857,11 +857,6 @@ class StudentController extends Controller
                     $termAttendanceFound[$list->term_id] = false;
                     if(isset($attendance)) {
 
-                        if($attendance->prev_plan_id !=null){
-                            $list->plan_id = $attendance->plan_id;
-                            dd($attendance->prev_plan_id);
-                        }
-
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
                         
                         
