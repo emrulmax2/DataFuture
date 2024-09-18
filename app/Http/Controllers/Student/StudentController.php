@@ -1077,6 +1077,7 @@ class StudentController extends Controller
                                 "term_id"=> $plan->term_declaration_id,
                                 "module_creation_id"=>$list->module_creation_id,
                                 "plan_id" => $plan->id,
+                                "prev_plan_id" => Plan::find($attendance->prev_plan_id),
                         ];
                         
                         $termData[$plan->term_declaration_id] = [

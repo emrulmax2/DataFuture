@@ -126,8 +126,21 @@
                                 @endphp
                                 <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                     
-                                    <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                        {{ $planDateList["attendance"]->id }}
+                                    <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t inline-flex w-full">
+                                        {{ $planDateList["attendance"]->id }} 
+                                        @if(isset($planDateList["prev_plan_id"]))
+                                        <!-- BEGIN: Custom Tooltip Toggle -->
+                                        <a href="javascript:;" data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block ml-2" title="old group"><i data-lucide="info" class="w-4 h-4 ml-1"></i></a>
+                                        <!-- END: Custom Tooltip Toggle -->
+                                        <!-- BEGIN: Custom Tooltip Content -->
+                                        <div class="tooltip-content">
+                                            <div id="custom-content-tooltip" class="relative flex items-center py-1">
+                                                <span class="rounded btn-primary text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDateList["prev_plan_id"]->group->name }}</span>
+                                                <span class="rounded text-slate-500 cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">[ {{ $planDateList["prev_plan_id"]->id }} ]</span>
+                                            </div>
+                                        </div>
+                                        <!-- END: Custom Tooltip Content -->
+                                        @endif
                                     </td>
                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }}
