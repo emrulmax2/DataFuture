@@ -24,6 +24,7 @@
                             <th class="text-center whitespace-nowrap uppercase">No of Modules / Groups</th>
                             <th class="text-left whitespace-nowrap uppercase">Attendance Rate</th>
                             <th class="text-left whitespace-nowrap uppercase">Outstanding Call</th>
+                            <th class="text-left whitespace-nowrap uppercase">Outstanding Uploads</th>
                             <th class="text-left whitespace-nowrap uppercase">Submission Rate</th>
                         </tr>
                     </thead>
@@ -94,6 +95,7 @@
                                         @endphp
                                     </td>
                                     <td class="text-left"></td>
+                                    <td class="text-left">{{ $tut->undecidedUploads }}</td>
                                     <td class="text-left"></td>
                                 </tr>
                             @endforeach

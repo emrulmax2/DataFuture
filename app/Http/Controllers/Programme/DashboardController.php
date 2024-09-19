@@ -511,11 +511,27 @@ class DashboardController extends Controller
 
     public function personalTutors($term_declaration_id){
         $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('personal_tutor_id')->unique()->toArray();
+        
+        $theDate = Date('Y-m-d'); //'2023-11-24';
 
+        
         $res = [];
         $tutors = User::whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
         if(!empty($tutors)):
             foreach($tutors as $tut):
+
+                $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
+                $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',"Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $tut){
+                    
+                    
+                        $q->where('personal_tutor_id', $tut->id);
+                        $q->where('class_type', "Theory");
+                        $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
+
+
+                })->get();
+
+                $undecidedUploads =  $planDates->count();
                 $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
                 $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->where('class_type', 'Tutorial')->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
@@ -527,6 +543,7 @@ class DashboardController extends Controller
                 $tut['no_of_group'] = (!empty($groups) ? count($groups) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
+                $res[$tut->id]['undecidedUploads'] = $undecidedUploads;
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
             endforeach;
         endif;
