@@ -232,20 +232,12 @@
                         <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
                             <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
                                 <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
-                                <select class="form-control w-full border-0" name="plan_status" id="planClassStatus" style="max-width: 230px;">
-                                    <option value="0">All</option>
-                                    <option value="1">Scheduled</option>
-                                    <option value="2">Started</option>
-                                    <option value="3">Finished</option>
+                                <select class="form-control w-full border-0" id="planClassStatus" style="max-width: 230px;">
+                                    <option value="Undecided"> Undecided</option>
+                                    <option value="Yes">Upload Completed</option>
+                                    <option value="No">No Upload found</option>
                                 </select>
                             </div>
-                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
-                                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
-                                <input type="text" name="class_date" class="w-full form-control border-0 classDate" id="theClassDate" value="{{ $theDate }}" style="max-width: 110px;"/>
-                            </div>
-                            <button class="ml-3 btn box flex items-center text-slate-600 dark:text-slate-300">
-                                <i data-lucide="calendar-clock" class="hidden sm:block w-4 h-4 mr-2"></i> <span id="theClock">{{ date('H:i:s') }}</span>
-                            </button>
                         </div>
                     </div>
                     <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0 relative dailyClassInfoTableWrap">
@@ -269,6 +261,7 @@
                                     <th class="text-left whitespace-nowrap uppercase">Tutor</th>
                                     <th class="text-left whitespace-nowrap uppercase">Room</th>
                                     <th class="text-left whitespace-nowrap uppercase">Status</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Upload Found? </th>
                                     <th class="text-right">&nbsp;</th>
                                 </tr>
                             </thead>

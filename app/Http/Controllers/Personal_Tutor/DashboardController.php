@@ -188,23 +188,23 @@ class DashboardController extends Controller
         return response()->json(['htm' => $html], 200);
     }
 
-    public function getClassInfoHtml($theDate = null, $course_id = 0, ){
+    public function getClassInfoHtml($theDate = null, $course_id = 0, $uploadedType="Undecided"){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         
         $personalTutorId = auth()->user()->id; //304; 
         
         $html = '';
 
-        $term = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
+        $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
 
-        $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('status','Completed')->whereHas('plan', function($q) use($term,$course_id, $personalTutorId){
+        $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',$uploadedType)->where('status','Completed')->whereHas('plan', function($q) use($dateTerm,$course_id, $personalTutorId){
             
             if($course_id > 0):
                 $q->where('course_id', $course_id);
             endif;
                 $q->where('personal_tutor_id', $personalTutorId);
                 $q->where('class_type', "Theory");
-                $q->where('term_declaration_id',$term->term_declaration_id);
+                $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
 
 
         })->get()->sortBy(function($planDates, $key) {
@@ -213,31 +213,46 @@ class DashboardController extends Controller
 
         });
 
-
-        if(!empty($plans) && $plans->count() > 0):
-            //$currentTime = date('Y-m-d H:i:s');
-            foreach($plans as $pln):
+        if(!empty($planDates) && $planDates->count() > 0):
+            foreach($planDates as $pln):
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
                 $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
-                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $pln->date)->where('attendance_type', 1)->get();
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', date("Y-m-d",strtotime($pln->date)))->where('attendance_type', 1)->get();
 
                 $proxyEmployeeId = (isset($pln->proxy->employee->id) && $pln->proxy->employee->id > 0 ? $pln->proxy->employee->id : 0);
-                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', $pln->date)->where('attendance_type', 1)->get();
+                
+                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', date("Y-m-d",strtotime($pln->date)))->where('attendance_type', 1)->get();
 
                 $classStatus = 0;
                 $classLabel = '';
+                
+                if(isset($pln->attendanceInformation->id)):
+                    if($pln->feed_given == 1 && $pln->attendances->count() > 0):
+                        $classLabel .= '<span class="btn-rounded btn font-medium btn-success text-white p-0 w-9 h-9 mr-1" style="flex: 0 0 36px;">A</span>';
+                    endif;
+                    if(!empty($pln->attendanceInformation->start_time) && empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'</span>';
+                    elseif(!empty($pln->attendanceInformation->start_time) && !empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">';
+                            $classLabel .= 'Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
+                            $classLabel .= 'Finished '.date('h:i A', strtotime($pln->attendanceInformation->end_time)); 
+                        $classLabel .= '</span>';
+                    endif;
+                else:
+                    $classLabel .= '<span class="text-danger font-medium">Completed But No Attendance Found</span>';
+                endif;
 
-                $classLabel .= '<span class="text-danger font-medium">Completed</span>';
                     $html .= '<tr class="intro-x">';
                         $html .= '<td>';
-                            $html .= '<span class="font-fedium">'.date('d/m/Y H:i', strtotime($pln->date.' '.$pln->plan->start_time)).'</span>';
+                            $html .= '<div class="font-fedium">'.date('jS M, Y', strtotime($pln->date.' '.$pln->plan->start_time)).'</div>';
+                            $html .= '<div class="text-slate-500">'.date('H:i ', strtotime($pln->date.' '.$pln->plan->start_time)).' - '.date('H:i ', strtotime($pln->date.' '.$pln->plan->end_time)).'</div>';
                         $html .= '</td>';
                         $html .= '<td>';
                             $html .= '<div class="flex items-center">';
                                 $html .= '<div>';
                                     $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
-                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown'). ' <b>[ '.$pln->plan->group->name .' ]</b></div>';
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown'). ' <span class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5"> '.$pln->plan->group->name .' </spane></div>';
                                     if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
                                         $html .= '<div class="flex flex-start pt-1">';
                                         foreach($pln->plan->tasks as $tsk):
@@ -271,9 +286,6 @@ class DashboardController extends Controller
                                         $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->tutor->employee->full_name) && !empty($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : (isset($pln->plan->tutor->name) ? $pln->plan->tutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
                                         if($pln->proxy_tutor_id > 0):
                                             $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
-                                            $html .= ($proxyAttendanceLive->count() == 0 && isset($pln->proxy->employee->mobile) && !empty($pln->proxy->employee->mobile) ? '<br/><span class="text-danger">'.$pln->proxy->employee->mobile.'</span>' : '');
-                                        else:
-                                            $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->tutor->employee->mobile) && !empty($pln->plan->tutor->employee->mobile) ? '<br/>'.$pln->plan->tutor->employee->mobile : '');
                                         endif;
                                     $html .= '</div>';
                                 $html .= '</div>';
@@ -290,9 +302,6 @@ class DashboardController extends Controller
                                         $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->personalTutor->employee->full_name) && !empty($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : (isset($pln->plan->personalTutor->name) ? $pln->plan->personalTutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
                                         if($pln->proxy_tutor_id > 0):
                                             $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
-                                            $html .= ($proxyAttendanceLive->count() == 0 && isset($pln->proxy->employee->mobile) && !empty($pln->proxy->employee->mobile) ? '<br/><span class="text-danger">'.$pln->proxy->employee->mobile.'</span>' : '');
-                                        else:
-                                            $html .= ($empAttendanceLive->count() == 0 && isset($pln->plan->personalTutor->employee->mobile) && !empty($pln->plan->personalTutor->employee->mobile) ? '<br/>'.$pln->plan->personalTutor->employee->mobile : '');
                                         endif;
                                         $html .= '</div>';
                                 $html .= '</div>';
@@ -308,11 +317,21 @@ class DashboardController extends Controller
                                 $html .= $classLabel;
                             $html .= '</span>';
                         $html .= '</td>';
+                        $html .= '<td class="text-left">';
+                            $html .= '<span class="flex justify-start items-center">';
+                            $html .= '<div class="mt-2 flex flex-col sm:flex-row">';
+                            $html .=   '<div data-tw-merge class="flex items-center mr-2 "><input id="radio-switch-'.$pln->id.'" data-tw-merge data-id="'.$pln->id.'"  name="class_file_upload_found'.$pln->id.'" value="Yes"  type="radio" '.(isset($pln->class_file_upload_found) && !empty($pln->class_file_upload_found) && $pln->class_file_upload_found=="Yes" ? 'checked' : '').' class="class-fileupload transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type=\'radio\']]:checked:bg-primary [&[type=\'radio\']]:checked:border-primary [&[type=\'radio\']]:checked:border-opacity-10 [&[type=\'checkbox\']]:checked:bg-primary [&[type=\'checkbox\']]:checked:border-primary [&[type=\'checkbox\']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />';
+                            $html .=      '<label data-tw-merge for="radio-switch-'.$pln->id.'" class="cursor-pointer ml-2">Yes</label>';
+                            $html .=   '</div>';
+                            $html .=   '<div data-tw-merge class="flex items-center mr-2 mt-2 sm:mt-0 "><input id="radio-switch2-'.$pln->id.'" data-tw-merge data-id="'.$pln->id.'"   name="class_file_upload_found'.$pln->id.'" value="No" type="radio" '.(isset($pln->class_file_upload_found) && !empty($pln->class_file_upload_found) && $pln->class_file_upload_found=="No" ? 'checked' : '').' class="class-fileupload transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type=\'radio\']]:checked:bg-primary [&[type=\'radio\']]:checked:border-primary [&[type=\'radio\']]:checked:border-opacity-10 [&[type=\'checkbox\']]:checked:bg-primary [&[type=\'checkbox\']]:checked:border-primary [&[type=\'checkbox\']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"   />';
+                            $html .=       '<label data-tw-merge for="radio-switch2-'.$pln->id.'" class="cursor-pointer ml-2">No</label>';
+                            $html .=   '</div>';
+                            $html .= '</div>';
+                            $html .= '</span>';
+                        $html .= '</td>';
                         $html .= '<td class="text-right">';
-                            
                         $html .= '</td>';
                     $html .= '</tr>';
-              
             endforeach;
         else:
             $html .= '<tr class="intro-x">';
@@ -325,100 +344,32 @@ class DashboardController extends Controller
         return $html;
     }
     public function getClassInformations(Request $request){
-        $planClassStatus = $request->planClassStatus;
+        $uploadedType = $request->planClassStatus;
         $planCourseId = (isset($request->planCourseId) && $request->planCourseId > 0 ? $request->planCourseId : 0);
-        $theClassDate = (isset($request->theClassDate) && !empty($request->theClassDate) ? date('Y-m-d', strtotime($request->theClassDate)) : date('Y-m-d'));
-
+        
         $res = [];
-        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId);
-        //$res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
-        //$res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
+        $res['planTable'] = $this->getClassInfoHtml(date("Y-m-d"), $planCourseId, $uploadedType);;
 
         return response()->json(['res' => $res], 200);
     }
-    // public function getClassTutorsHtml($theDate = null, $course_id = 0){
-    //     $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-    //     $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-    //     $termDecs = Plan::whereIn('id', $classPlanIds);
-    //     if($course_id > 0):
-    //         $termDecs->where('course_id', $course_id);
-    //     endif;
-    //     $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-    //     $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
+    public function UpdateClassStatus(Request $request) {
+        $uploadedType = $request->planClassStatus;
+        $plans_date_list_id = $request->plansDateListId;
+        $class_file_upload_found = $request->classFileUploadFound;
+
+        $planCourseId = (isset($request->planCourseId) && $request->planCourseId > 0 ? $request->planCourseId : 0);
+  
+        $pdl = PlansDateList::find($plans_date_list_id);
+        $pdl->class_file_upload_found = $class_file_upload_found;
+        $pdl->save();
         
-    //     $query = Plan::where('term_declaration_id', $termDecId);
-    //     if($course_id > 0):
-    //         $query->where('course_id', $course_id);
-    //     endif;
-    //     $classTutors = $query->pluck('tutor_id')->unique()->toArray();
-        
-    //     $html = '';
-    //     $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
-    //     if(!empty($uttors) && $uttors->count() > 0):
-    //         foreach($uttors as $tut):
-    //             $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->unique()->toArray();
-    //             $html .= '<div class="intro-x">';
-    //                 $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
-    //                     $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
-    //                         $html .= '<img alt="'.(isset($tut->employee->full_name) ? $tut->employee->full_name : '').'" src="'.(isset($tut->employee->photo_url) ? $tut->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
-    //                     $html .= '</div>';
-    //                     $html .= '<div class="ml-4 mr-auto">';
-    //                         $html .= '<a href="'.route('programme.dashboard.personal.tutors.details', [$termDecId, $tut->id]).'" class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</a>';
-    //                     $html .= '</div>';
-    //                     $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
-    //                 $html .= '</div>';
-    //             $html .= '</div>';
-    //         endforeach;
-    //     else:
-    //         $html .= '<div class="intro-x">';
-    //             $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
-    //         $html .= '</div>';
-    //     endif;
-
-    //     return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
-    // }
-
-    // public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0) {
-    //     $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-    //     $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-    //     $termDecs = Plan::whereIn('id', $classPlanIds);
-    //     if($course_id > 0):
-    //         $termDecs->where('course_id', $course_id);
-    //     endif;
-    //     $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-    //     $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
-
-    //     $query = Plan::where('term_declaration_id', $termDecId);
-    //     if($course_id > 0):
-    //         $query->where('course_id', $course_id);
-    //     endif;
-    //     $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
-
-    //     $html = '';
-    //     $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
-    //     if(!empty($uttors) && $uttors->count() > 0):
-    //         foreach($uttors as $tut):
-    //             $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->where('class_type', 'Tutorial')->pluck('module_creation_id')->toArray();
-    //             $html .= '<div class="intro-x">';
-    //                 $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
-    //                     $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
-    //                         $html .= '<img alt="'.(isset($tut->employee->full_name) ? $tut->employee->full_name : '').'" src="'.(isset($tut->employee->photo_url) ? $tut->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
-    //                     $html .= '</div>';
-    //                     $html .= '<div class="ml-4 mr-auto">';
-    //                         $html .= '<a href="'.route('programme.dashboard.personal.tutors.details', [$termDecId, $tut->id]).'" class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</a>';
-    //                     $html .= '</div>';
-    //                     $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
-    //                 $html .= '</div>';
-    //             $html .= '</div>';
-    //         endforeach;
-    //     else:
-    //         $html .= '<div class="intro-x">';
-    //             $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
-    //         $html .= '</div>';
-    //     endif;
-
-    //     return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
-    // }
+        $res['planTable'] = $this->getClassInfoHtml(date("Y-m-d"), $planCourseId, $uploadedType);
+        if($pdl->wasChanged()){
+        return response()->json(['res' => $res], 200);
+        } else
+            return response()->json(['res' => $res], 422);
+    }
+    
     public function getAbsentEmployees($date = ''){
         $theDate = (empty($date) ? date('Y-m-d') : $date);
         $theDay = date('D', strtotime($theDate));
