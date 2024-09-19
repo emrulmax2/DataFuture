@@ -231,6 +231,24 @@ class StudentController extends Controller
                 $course_creation_ids = CourseCreationInstance::where('academic_year_id', $academic_year)->whereIn('id', $course_creation_instance_ids)->pluck('course_creation_id')->unique()->toArray();
             
             }
+            if(isset($academic_year) && !isset($attendance_semester) && !isset($intake_semester)) {
+
+                $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
+                                        ->pluck('student_id')
+                                        ->unique()
+                                        ->toArray();
+                    if(count($studentsIds)>0):
+                        $studentsIdTemp = [];
+                        foreach ($studentslist as $studentT):
+                                if(in_array($studentT, $studentsIds))
+                                $studentsIdTemp[] = $studentT;
+                        endforeach;
+                        $studentsIds = $studentsIdTemp;
+                    else:
+                        $studentsIds = $studentslist;
+                    endif;
+
+            }
 
             if(!empty($student_type) && count($studentsIds)==0):
 
