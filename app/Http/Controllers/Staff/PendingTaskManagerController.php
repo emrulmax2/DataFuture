@@ -190,7 +190,9 @@ class PendingTaskManagerController extends Controller
                         'has_task_upload' => ($task->interview != 'Yes' && isset($theApplicantTask->task->upload) && !empty($theApplicantTask->task->upload) ? $theApplicantTask->task->upload : 'No'),
                         'outcome' => ($task->interview != 'Yes' && isset($theApplicantTask->task_status_id) && isset($theApplicantTask->applicatnTaskStatus->name) && !empty($theApplicantTask->applicatnTaskStatus->name) ? $theApplicantTask->applicatnTaskStatus->name : ''),
                         'is_completable' => ($task->interview != 'Yes' &&  ($theApplicantTask->task->status == 'No' || ($theApplicantTask->task->status == 'Yes' && $theApplicantTask->task_status_id > 0)) && ($theApplicantTask->task->upload == 'No' || ($theApplicantTask->task->upload == 'Yes' && $theApplicantTask->documents->count() > 0)) ? 1 : 0),
-                        'downloads' => $taskDownloads
+                        'downloads' => $taskDownloads,
+                        'task_excuse' => 'No',
+                        'student_task_id' => (isset($theApplicantTask->id) && $theApplicantTask->id > 0 ? $theApplicantTask->id : 0)
                     ];
                     $i++;
                 endforeach;
@@ -278,7 +280,9 @@ class PendingTaskManagerController extends Controller
                         'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
                         'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
                         'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
-                        'downloads' => $taskDownloads
+                        'downloads' => $taskDownloads,
+                        'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
+                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0)
                     ];
                     $i++;
                 endforeach;

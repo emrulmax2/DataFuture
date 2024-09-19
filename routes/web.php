@@ -222,6 +222,7 @@ use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\Student\WorkPlacementController;
@@ -454,6 +455,8 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/plan/{plan}', 'showCourseContent')->name('dashboard.plan.module.show'); 
             Route::get('/dashboard/plan-dates/list', 'planDatelist')->name('dashboard.plan.dates.list');
 
+            Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
+
         });
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
@@ -483,6 +486,10 @@ Route::prefix('/students')->name('students.')->group(function() {
         Route::controller(AddressController::class)->group(function() {
             Route::post('address/get-address', 'getAddress')->name('address.get');
             Route::post('address/store', 'store')->name('address.store');
+        });
+
+        Route::controller(AttendanceExcuseController::class)->group(function() {
+            Route::post('attendance-excuse/store', 'store')->name('excuse.store');
         });
 
     });
@@ -866,6 +873,9 @@ Route::middleware('auth')->group(function() {
         Route::get('student/task-log-list', 'taskLogList')->name('student.process.log.list');
 
         Route::post('student/process-task-user-list', 'processTaskUserList')->name('student.process.task.users');
+        
+        Route::post('student/process-task-view-excuse', 'processTaskViewExcuse')->name('student.process.task.view.excuse');
+        Route::post('student/update-process-task-and-excuse', 'updateProcessTaskAndExcuse')->name('student.process.update.task.and.excuse');
     });
 
     Route::controller(CourseDetailController::class)->group(function() {

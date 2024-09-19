@@ -79,6 +79,11 @@ var taskListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Excuse",
+                    field: "attendance_excuses",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Assigned User",
                     field: "user",
                     headerHozAlign: "left",
@@ -198,7 +203,7 @@ var taskListTable = (function () {
             },
             placeholder: 'Search Here...',
             //persist: false,
-            create: true,
+            create: false,
             maxOptions: null,
             allowEmptyOption: true,
             onDelete: function (values) {
@@ -404,6 +409,11 @@ var taskListTable = (function () {
                             $('#editTaskModal input[name="id_card"][value="Yes"]').prop('checked', true);
                         }else{
                             $('#editTaskModal input[name="id_card"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.attendance_excuses == 'Yes'){
+                            $('#editTaskModal input[name="attendance_excuses"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="attendance_excuses"][value="No"]').prop('checked', true);
                         }
                         
                         if(dataset.external_link == 1){

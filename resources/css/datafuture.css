@@ -2136,3 +2136,18 @@ input[type=number] {
 .border-info{
     border-color: #06b6d4;
 }
+
+.accordion .accordion-item .accordion-header .accordion-button.active-text-white:not(.collapsed){
+    color: #FFF;
+}
+.excuseCheckedList .moduleLabel svg{
+    position: relative;
+    top: 3px;
+} 
+.excuseCheckedList input[type="checkbox"]{
+    margin-top: 3px;
+} 
+.loaderWrap svg{
+    width: 80px;
+    height: 80px;
+}

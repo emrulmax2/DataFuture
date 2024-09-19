@@ -258,6 +258,8 @@ export default defineConfig({
                 'resources/js/student-group-search-form.js',
                 'resources/js/student-attendance-reports.js',
                 
+                'resources/js/student-attendance-excuse.js',
+                
             ],
             refresh: true,
         }),

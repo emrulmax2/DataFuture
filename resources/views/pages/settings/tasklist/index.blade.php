@@ -209,6 +209,19 @@
                                         </div>
                                     </div>
                                     <div class="col-span-12 sm:col-span-6">
+                                        <label for="attendance_excuses" class="form-label">Attendance Excuse</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="attendance_excuses-yes" class="form-check-input" type="radio" name="attendance_excuses" value="Yes">
+                                                <label class="form-check-label" for="attendance_excuses-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="attendance_excuses-no" class="form-check-input" type="radio" name="attendance_excuses" value="No">
+                                                <label class="form-check-label" for="attendance_excuses-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <div>
                                             <div class="form-check form-switch">
                                                 <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
@@ -395,6 +408,19 @@
                                                     <input checked id="edit_id_card-no" class="form-check-input" type="radio" name="id_card" value="No">
                                                     <label class="form-check-label" for="edit_id_card-no">No</label>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_attendance_excuses" class="form-label">Attendance Excuse</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="edit_attendance_excuses-yes" class="form-check-input" type="radio" name="attendance_excuses" value="Yes">
+                                                <label class="form-check-label" for="edit_attendance_excuses-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="edit_attendance_excuses-no" class="form-check-input" type="radio" name="attendance_excuses" value="No">
+                                                <label class="form-check-label" for="edit_attendance_excuses-no">No</label>
                                             </div>
                                         </div>
                                     </div>

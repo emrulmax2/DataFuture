@@ -141,6 +141,7 @@ import Dropzone from "dropzone";
     if($("#changeStudentModal").length > 0) {
         const changeStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#changeStudentModal"));
         const successModalInfo = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalInfo"));
+
         $('#changeStudentForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('changeStudentForm');
@@ -168,8 +169,8 @@ import Dropzone from "dropzone";
                     });  
                     
                     setTimeout(function(){
-                        successModalInfo.hide();
-                        window.location.reload();
+                        //successModalInfo.hide();
+                       // window.location.reload();
                     }, 2000);
                 }
             }).catch(error => {
@@ -191,8 +192,8 @@ import Dropzone from "dropzone";
                         });  
                         
                         setTimeout(function(){
-                            successModalInfo.hide();
-                            window.location.reload();
+                            //successModalInfo.hide();
+                            //window.location.reload();
                         }, 2000);
                     } else {
                         console.log('error');

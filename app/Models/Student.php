@@ -208,5 +208,9 @@ class Student extends Model
             return false;
         endif;
     }
+
+    public function termStatus(){
+        return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->latestOfMany();
+    }
     
 }

@@ -150,7 +150,7 @@
                     @else 
                         <div class="alert alert-pending-soft show flex items-center mt-7" role="alert">
                             <span class="inline-flex items-center">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Attendance recored not found!
+                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Attendance record not found!
                             </span>
                             <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
                         </div>
@@ -229,13 +229,6 @@
                             </tbody>
                         </table>
                     </div>
-                    @else 
-                        <div class="alert alert-pending-soft show flex items-center mt-7" role="alert">
-                            <span class="inline-flex items-center">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> COC recored not found!
-                            </span>
-                            <button  data-regid="{{ $regs->id }}" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
-                        </div>
                     @endif
                 </div>
             </div>

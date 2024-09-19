@@ -158,6 +158,9 @@
                                                                             @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
                                                                                 (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
                                                                             @endif
+                                                                            @if($task->task->attendance_excuses == 'Yes' && isset($task->excuse))
+                                                                                (<u>Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</u>)
+                                                                            @endif
                                                                         </div>
                                                                         {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
                                                                     </div>
@@ -244,17 +247,24 @@
                                                                             </a>
                                                                         </li>
                                                                         @endif
-                                                                        @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
+                                                                        @if($task->task->attendance_excuses == 'No' && ($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
                                                                         <li>
                                                                             <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsCompleted dropdown-item">
                                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete
                                                                             </a>
                                                                         </li>
                                                                         @endif
+                                                                        @if($task->task->attendance_excuses == 'Yes')
+                                                                        <li>
+                                                                            <a data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> Vew Excuse
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
                                                                     </ul>
                                                                 </div>
                                                             </div>
-                                                            @if(($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id == '')) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() == 0)))
+                                                            @if($task->task->attendance_excuses == 'No' && ($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id == '')) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() == 0)))
                                                             <button type="button" data-taskid="{{ $task->id }}" class="deletestudentTask btn btn-danger ml-2">
                                                                 <i data-lucide="Trash2" class="w-5 h-5"></i>
                                                             </button>
@@ -423,6 +433,9 @@
                                                                             @if($task->task_status_id > 0 && isset($task->applicatnTaskStatus->name) && !empty($task->applicatnTaskStatus->name))
                                                                                 (<u>Outcome: {{ $task->applicatnTaskStatus->name }}</u>)
                                                                             @endif
+                                                                            @if($task->task->attendance_excuses == 'Yes' && isset($task->excuse))
+                                                                                (<u>Excuse Status: {{ ($task->excuse->status == 1 ? 'Review & Rejected' : ($task->excuse->status == 2 ? 'Review & Approved' : 'Pending')) }}</u>)
+                                                                            @endif
                                                                         </div>
                                                                         {{--<div class="text-xs text-slate-500 ml-auto">{{ date('h:i a', strtotime($task->created_at)) }}</div>--}}
                                                                     </div>
@@ -526,6 +539,13 @@
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
+                                                                        @if($task->task->attendance_excuses == 'Yes')
+                                                                            <li>
+                                                                                <a data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">
+                                                                                    <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> Vew Excuse
+                                                                                </a>
+                                                                            </li>
+                                                                        @endif
                                                                         <li>
                                                                             <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsPending dropdown-item">
                                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Pending
@@ -563,6 +583,58 @@
         @endif
     </div>
 
+    
+    <!-- BEGIN: View Excuse Modal -->
+    <div id="viewAttendanceExcuseModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="viewAttendanceExcuseForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Attendance Excuse</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="loaderWrap flex justify-center items-center py-5">
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(30, 41, 59)" class="w-8 h-8">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>              
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="updateAttnExcuseBtn" class="btn btn-primary w-auto">
+                            Update
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="student_task_id" value="0"/>
+                        <input type="hidden" name="attendance_excuse_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: View Excuse Modal -->
     
     <!-- BEGIN: View Log Modal -->
     <div id="viewTaskLogModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
