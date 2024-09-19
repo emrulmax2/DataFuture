@@ -524,7 +524,7 @@ class ProcessController extends Controller
             foreach($days as $day):
                 $excuseDay = AttendanceExcuseDay::find($day);
                 if(isset($excuseDay->id) && $excuseDay->id > 0):
-                    Attendance::where('plans_date_list_id', $excuseDay->plans_date_list_id)->where('class_plan_id', $excuseDay->plan_id)
+                    Attendance::where('plans_date_list_id', $excuseDay->plans_date_list_id)->where('plan_id', $excuseDay->plan_id)
                         ->where('student_id', $student_id)->update(['attendance_feed_status_id' => $feedStatusId]);
                 endif;
             endforeach;
