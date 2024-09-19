@@ -19,7 +19,7 @@ var liveStudentsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 50,
-            paginationSizeSelector: [50, 100, 250],
+            paginationSizeSelector: [true, 50, 100, 200, 500, 1000],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",

@@ -381,7 +381,10 @@ class StudentController extends Controller
 
             endif;
             if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
-            if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); endif;
+            if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); 
+            else:
+                $Query->whereIn('id', [0]); 
+            endif;
         endif;
         $total_rows = $Query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
