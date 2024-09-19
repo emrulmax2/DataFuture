@@ -95,7 +95,8 @@
                                         @endphp
                                     </td>
                                     <td class="text-left"></td>
-                                    <td class="text-left">{{ $tut->undecidedUploads }}</td>
+                                    <td class="text-center"><span class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                        {{ $tut->undecidedUploads }}</span></td>
                                     <td class="text-left"></td>
                                 </tr>
                             @endforeach
