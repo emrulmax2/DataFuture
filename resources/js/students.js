@@ -639,7 +639,7 @@ var liveStudentsListTable = (function () {
                 let List4 = group.getValue();
                 let List5 = intake_semester.getValue();
                 //console.log(List5.length);
-                if((List1.length>0 && List2.length>0) || (List5.length>0 && List2.length>0)){
+                if((List2.length>0 )){
                     filterStudentListTable();
                 }else{
                     if(List2.length>0){
