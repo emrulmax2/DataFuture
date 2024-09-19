@@ -60,7 +60,10 @@ class DashboardController extends Controller
         $usedCourses = Plan::pluck('course_id')->unique()->toArray();
         $theTerm = Plan::with('attenTerm')->whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
         $theTermId = (isset($theTerm->attenTerm->id) && $theTerm->attenTerm->id > 0 ? $theTerm->attenTerm->id : 0);
-
+        
+        
+        
+        $undecidedUploads = $this->totalUndecidedCount();
         
         $today = date('Y-m-d');
         return  view('pages.personal-tutor.dashboard.index', [
@@ -70,10 +73,9 @@ class DashboardController extends Controller
             'employee' => $employee,
             'theDate' => date('d-m-Y', strtotime($theDate)),
             'theTerm' => $theTerm,
+            'undecidedUploads' => $undecidedUploads,
             'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
             'classInformation' => $this->getClassInfoHtml($theDate),
-            //'classTutor' => $this->getClassTutorsHtml($theDate),
-            //'classPTutor' => $this->getClassPersonalTutorsHtml($theDate),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
             'termAttendanceRates' => $this->getTermAttendanceRateFull($theTermId),
             'tutors' => User::with('employee')->whereHas('employee', function($q){
@@ -91,6 +93,29 @@ class DashboardController extends Controller
         ]);
 
     }
+
+    public function totalUndecidedCount() {
+
+        $id = auth()->user()->id; //304; 
+        $theDate = Date('Y-m-d'); //'2023-11-24';
+
+        $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
+        $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',"Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $id){
+            
+            
+                $q->where('personal_tutor_id', $id);
+                $q->where('class_type', "Theory");
+                $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
+
+
+        })->get();
+
+        $undecidedUploads =  $planDates->count();
+
+        return $undecidedUploads;
+
+    }
+
     public function getClassess(Request $request){
         $personalTutorId = (isset($request->personalTutorId) && $request->personalTutorId > 0 ? $request->personalTutorId : 0);
         $plan_date = (isset($request->plan_date) && !empty($request->plan_date) ? date('Y-m-d', strtotime($request->plan_date)) : '');
@@ -209,7 +234,7 @@ class DashboardController extends Controller
 
         })->get()->sortBy(function($planDates, $key) {
 
-            return $planDates->plan->start_time;
+            return date("Y-m-d H:i", strtotime($planDates->date." ".$planDates->plan->start_time));
 
         });
 
@@ -349,7 +374,8 @@ class DashboardController extends Controller
         
         $res = [];
         $res['planTable'] = $this->getClassInfoHtml(date("Y-m-d"), $planCourseId, $uploadedType);;
-
+        $res['totalUndecidedCount'] = $this->totalUndecidedCount();
+        
         return response()->json(['res' => $res], 200);
     }
     public function UpdateClassStatus(Request $request) {
@@ -364,6 +390,7 @@ class DashboardController extends Controller
         $pdl->save();
         
         $res['planTable'] = $this->getClassInfoHtml(date("Y-m-d"), $planCourseId, $uploadedType);
+        $res['totalUndecidedCount'] = $this->totalUndecidedCount();
         if($pdl->wasChanged()){
         return response()->json(['res' => $res], 200);
         } else
