@@ -6,6 +6,7 @@ use App\Exports\FeeEligibilityExport;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\Assign;
+use App\Models\AttendanceExcuseDay;
 use App\Models\AwardingBody;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
@@ -165,7 +166,7 @@ class DashboardController extends Controller
 
     public function profileView() {
         
-        $student = $studentData = Student::with('crel','course')->where("student_user_id", auth('student')->user()->id)->get()->first();
+        $student = $studentData = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->get()->first();
         $courseRelationCreation = $student->crel->creation;
         $studentCourseAvailability = $courseRelationCreation->availability;
         $courseCreationQualificationData = $courseRelationCreation->qualification;
@@ -483,5 +484,91 @@ class DashboardController extends Controller
 
 
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function attendanceExcuse(){
+        $student = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->get()->first();
+        $dateWiseClassList = $this->upcommingClass($student->id);
+
+        return view('pages.students.frontend.dashboard.profile.excuse', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Attendance Excuse', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'datewiseClasses' => $dateWiseClassList,
+            'pastDateList' => $this->getAbsentExcuseDateList($student->id),
+            'futureDateList' => $this->getFutureExcuseDateList($student->id),
+        ]);
+    }
+
+    public function getAbsentExcuseDateList($student_id){
+        $planids = Assign::where('student_id', $student_id)->where(function($q){
+            $q->where('attendance', 1)->orWhereNull('attendance');
+        })->pluck('plan_id')->unique()->toArray();
+
+        $today = date('Y-m-d');
+        $list = [];
+        if(!empty($planids) && count($planids) > 0):
+            foreach($planids as $plan_id):
+                $plan = Plan::find($plan_id);
+                $planDateList = PlansDateList::where('plan_id', $plan_id)->where('feed_given', 1)->whereHas('attendances', function($q) use($student_id, $plan_id){
+                    $q->where('attendance_feed_status_id', 4)->where('student_id', $student_id)->where('class_plan_id', $plan_id);
+                })->where('date', '<', $today)->orderBy('date', 'DESC')->get();
+                if($planDateList->count() > 0):
+                    $list[$plan_id]['module'] = $plan->creations->module_name;
+                    $i = 1;
+                    foreach($planDateList as $pdl):
+                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)->orderBy('attendance_excuse_id', 'DESC')->get()->first();
+                        $status = (isset($existExcuse->excuse->status) ? $existExcuse->excuse->status : '');
+                        $statusLabel = (isset($existExcuse->excuse->status_label) ? $existExcuse->excuse->status_label : '');
+                        if($status != 2):
+                            $list[$plan_id]['date_lists'][$i]['id'] = $pdl->id;
+                            $list[$plan_id]['date_lists'][$i]['dates'] = date('jS F, Y', strtotime($pdl->date));
+                            $list[$plan_id]['date_lists'][$i]['status'] = $status;
+                            $list[$plan_id]['date_lists'][$i]['status_label'] = $statusLabel;
+                        endif;
+
+                        $i++;
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
+        
+        return $list;
+    }
+
+    public function getFutureExcuseDateList($student_id){
+        $planids = Assign::where('student_id', $student_id)->where(function($q){
+            $q->where('attendance', 1)->orWhereNull('attendance');
+        })->pluck('plan_id')->unique()->toArray();
+
+        $today = date('Y-m-d');
+        $list = [];
+        if(!empty($planids) && count($planids) > 0):
+            foreach($planids as $plan_id):
+                $plan = Plan::find($plan_id);
+                $planDateList = PlansDateList::where('plan_id', $plan_id)->where('status', 'Scheduled')->where('date', '>', $today)->orderBy('date', 'DESC')->get();
+                if($planDateList->count() > 0):
+                    $list[$plan_id]['module'] = $plan->creations->module_name;
+                    $i = 1;
+                    foreach($planDateList as $pdl):
+                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)->orderBy('attendance_excuse_id', 'DESC')->get()->first();
+                        $status = (isset($existExcuse->excuse->status) ? $existExcuse->excuse->status : '');
+                        $statusLabel = (isset($existExcuse->excuse->status_label) ? $existExcuse->excuse->status_label : '');
+                        if($status != 2):
+                            $list[$plan_id]['date_lists'][$i]['id'] = $pdl->id;
+                            $list[$plan_id]['date_lists'][$i]['dates'] = date('jS F, Y', strtotime($pdl->date));
+                            $list[$plan_id]['date_lists'][$i]['status'] = $status;
+                            $list[$plan_id]['date_lists'][$i]['status_label'] = $statusLabel;
+                        endif;
+
+                        $i++;
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
+
+        return $list;
     }
 }

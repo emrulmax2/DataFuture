@@ -16,6 +16,7 @@ var taskAssignedStudentTable = (function () {
         let org_email = ($("#taskAssignedStudentTable").attr('data-email') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-email') : 'No');
         let id_card = ($("#taskAssignedStudentTable").attr('data-idcard') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-idcard') : 'No');
         let interview = ($("#taskAssignedStudentTable").attr('data-interview') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-interview') : 'No');
+        let excuse = ($("#taskAssignedStudentTable").attr('data-excuse') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-excuse') : 'No');
         
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
@@ -197,7 +198,7 @@ var taskAssignedStudentTable = (function () {
                                                             html += '</a>';
                                                         html += '</li>';
                                                     }
-                                                    if(cell.getData().is_completable == 1){
+                                                    if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No'){
                                                         html += '<li>';
                                                             html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                                 html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
@@ -213,6 +214,13 @@ var taskAssignedStudentTable = (function () {
                                                                         </g>\
                                                                     </g>\
                                                                 </svg>';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
+                                                    if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'Yes'){
+                                                        html += '<li>';
+                                                            html += '<a data-recordid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">';
+                                                                html += '<i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Excuse';
                                                             html += '</a>';
                                                         html += '</li>';
                                                     }
@@ -242,8 +250,10 @@ var taskAssignedStudentTable = (function () {
                         $('#exportTaskStudentsBtn').fadeIn();
                         $('#completeEmailTaskStudentsBtn').fadeIn();
                     }else{
-                        $('#exportTaskStudentListBtn').fadeIn();
-                        $('#commonActionBtns').fadeIn();
+                        if(excuse == 'No'){
+                            $('#exportTaskStudentListBtn').fadeIn();
+                            $('#commonActionBtns').fadeIn();
+                        }
                     }
                 }else{
                     $('#exportTaskStudentsBtn').fadeOut();
@@ -341,6 +351,7 @@ var taskAssignedStudentTable = (function () {
     const canceledReasonModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#canceledReasonModal"));
     const callLockModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#callLockModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
+    const viewAttendanceExcuseModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAttendanceExcuseModal"));
 
     const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
     const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
@@ -369,6 +380,26 @@ var taskAssignedStudentTable = (function () {
         $('#updateTaskOutcomeModal input[name="student_id"]').val('0');
         $('#updateTaskOutcomeModal input[name="task_id"]').val('0');
         $('#updateTaskOutcomeModal input[name="phase"]').val('');
+    });
+
+    const viewAttendanceExcuseModalEl = document.getElementById('viewAttendanceExcuseModal')
+    viewAttendanceExcuseModalEl.addEventListener('hide.tw.modal', function(event) {
+        var loaderHtml = '<div class="loaderWrap flex justify-center items-center py-5">\
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(30, 41, 59)" class="w-8 h-8">\
+                                <g fill="none" fill-rule="evenodd">\
+                                    <g transform="translate(1 1)" stroke-width="4">\
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">\
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
+                                        </path>\
+                                    </g>\
+                                </g>\
+                            </svg>\
+                        </div>';
+        $("#viewAttendanceExcuseModal .modal-body").html(loaderHtml);
+        $('#viewAttendanceExcuseModal input[name="student_id"]').val('0');
+        $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
+        $('#viewAttendanceExcuseModal input[name="attendance_excuse_id"]').val('0');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -1150,4 +1181,84 @@ var taskAssignedStudentTable = (function () {
             }
         });
     })
+
+    /* Attendance Excuse Start */
+    $(document).on('click', '.viewExcuse', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        var student_task_id = $theLink.attr('data-recordid');
+        var student_id = $theLink.attr('data-studentid');
+
+        axios({
+            method: "post",
+            url: route('student.process.task.view.excuse'), 
+            data: {student_task_id : student_task_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                $('#viewAttendanceExcuseModal .modal-body').html(response.data.htm);
+                $('#viewAttendanceExcuseModal [name="student_id"]').val(student_id);
+                $('#viewAttendanceExcuseModal [name="student_task_id"]').val(student_task_id);
+                $('#viewAttendanceExcuseModal [name="attendance_excuse_id"]').val(response.data.excuse);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            } 
+        }).catch(error => {
+            if(error.response){
+                console.log('error');
+            }
+        });
+    });
+
+    $('#viewAttendanceExcuseForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('viewAttendanceExcuseForm');
+    
+        document.querySelector('#updateAttnExcuseBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateAttnExcuseBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.process.update.task.and.excuse'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateAttnExcuseBtn').removeAttribute('disabled');
+            document.querySelector("#updateAttnExcuseBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                viewAttendanceExcuseModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Attendance excuse status successfully updated');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });    
+
+                setTimeout(() => {
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateAttnExcuseBtn').removeAttribute('disabled');
+            document.querySelector("#updateAttnExcuseBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#viewAttendanceExcuseForm .${key}`).addClass('border-danger');
+                        $(`#viewAttendanceExcuseForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+    /* Attendance Excuse End */
 })();

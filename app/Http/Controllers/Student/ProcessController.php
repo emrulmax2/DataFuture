@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProcessAndExcuseUpdateRequest;
+use App\Models\Attendance;
+use App\Models\AttendanceExcuse;
+use App\Models\AttendanceExcuseDay;
+use App\Models\AttendanceFeedStatus;
+use App\Models\Plan;
 use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentArchive;
@@ -405,5 +411,130 @@ class ProcessController extends Controller
         endif;
 
         return response()->json(['res' => $html], 200);
+    }
+
+    public function processTaskViewExcuse(Request $request){
+        $student_task_id = $request->student_task_id;
+        $excuse = AttendanceExcuse::with('student', 'days', 'documents')->where('student_task_id', $student_task_id)->get()->first();
+        $student_id = $excuse->student_id;
+
+        $HTML = '';
+        if(isset($excuse->id) && $excuse->id > 0):
+            $HTML .= '<div class="grid grid-cols-12 gap-4">';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Student ID</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->student->registration_no.'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Name</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->student->full_name.'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Dates</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                    if(isset($excuse->days) && $excuse->days->count() > 0):
+                        $plan_ids = $excuse->days->pluck('plan_id')->unique()->toArray();
+                        foreach($plan_ids as $plan_id):
+                            $plan = Plan::find($plan_id);
+                            $excuseDays = AttendanceExcuseDay::where('plan_id', $plan_id)->where('attendance_excuse_id', $excuse->id)->orderBy('id', 'ASC')->get();
+                            $HTML .= '<div class="futureCheckedList excuseCheckedList mb-4">';
+                                $HTML .= '<label class="font-medium underline inline-flex items-start moduleLabel"><i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i>'.$plan->creations->module_name.'</label>';
+                                foreach($excuseDays as $day):
+                                    $HTML .= '<div class="form-check items-start mt-2 pl-5">';
+                                        $HTML .= '<input '.($day->active == 1 ? 'Checked' : 0).' name="days[]" value="'.$day->id.'" id="excuse_days_'.$plan_id.'_'.$day->id.'" class="form-check-input" type="checkbox">';
+                                        $HTML .= '<label class="form-check-label" for="excuse_days_'.$plan_id.'_'.$day->id.'">';
+                                            $HTML .= (isset($day->plandate->date) && !empty($day->plandate->date) ? date('jS F, Y', strtotime($day->plandate->date)) : 'Undefined Date');
+                                        $HTML .= '</label>';
+                                    $HTML .= '</div>';
+                                endforeach;
+                            $HTML .= '</div>';
+                        endforeach;
+                    endif;
+                $HTML .= '</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Reason</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.$excuse->reason.'</div>';
+                if(isset($excuse->documents) && $excuse->documents->count() > 0):
+                    $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Documents</div>';
+                    $HTML .= '<div class="col-span-12 sm:col-span-8">';
+                        $HTML .= '<ul class="m-0">';
+                        foreach($excuse->documents as $docx):
+                            if ($docx->current_file_name != null && Storage::disk('s3')->exists('public/students/'.$student_id.'/'.$docx->current_file_name)):
+                                $HTML .= '<li class="mb-1 text-primary flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>';
+                                    $HTML .= '<a target="_blank" href="'.Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$docx->current_file_name, now()->addMinutes(60)).'">'.$docx->display_file_name.'</a>';
+                                $HTML .= '</li>';
+                            endif;
+                        endforeach;
+                        $HTML .= '</ul>';
+                    $HTML .= '</div>';
+                endif;
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Requested At</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">'.date('jS F, Y h:i A', strtotime($excuse->created_at)).'</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Attendance Type <span class="text-danger">*</span></div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                    $HTML .= '<select class="form-control w-full" name="attendance_types">';
+                        $HTML .= '<option value="">Please Select</option>';
+                        $HTML .= '<option '.($excuse->attendance_types == 'E' ? 'Selected' : '').' value="E">E (Authorised Absent)</option>';
+                        $HTML .= '<option '.($excuse->attendance_types == 'M' ? 'Selected' : '').' value="M">M (Absent For Medical Reason)</option>';
+                        $HTML .= '<option '.($excuse->attendance_types == 'M' ? 'Selected' : '').' value="H">H (Exceptional Event)</option>';
+                    $HTML .= '</select>';
+                    $HTML .= '<div class="acc__input-error error-attendance_types text-danger mt-2"></div>';
+                $HTML .= '</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Action <span class="text-danger">*</span></div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                    $HTML .= '<select class="form-control w-full" name="status">';
+                        $HTML .= '<option value="">Please Select</option>';
+                        $HTML .= '<option '.($excuse->status == 0 ? 'Selected' : '').' value="0">Pending</option>';
+                        $HTML .= '<option '.($excuse->status == 1 ? 'Selected' : '').' value="1">Reviewed & Rejected</option>';
+                        $HTML .= '<option '.($excuse->status == 2 ? 'Selected' : '').' value="2">Reviewed & Approved</option>';
+                    $HTML .= '</select>';
+                    $HTML .= '<div class="acc__input-error error-status text-danger mt-2"></div>';
+                $HTML .= '</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Remarks</div>';
+                $HTML .= '<div class="col-span-12 sm:col-span-8 text-slate-500 font-medium">';
+                    $HTML .= '<textarea class="form-control w-full" name="remarks" rows="3">'.(isset($excuse->remarks) ? $excuse->remarks : '').'</textarea>';
+                $HTML .= '</div>';
+            $HTML .= '</div>';
+        else:
+            $HTML .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Excuse not found.</div>';
+        endif;
+
+        return response()->json(['htm' => $HTML, 'excuse' => $excuse->id], 200);
+    }
+
+    public function updateProcessTaskAndExcuse(ProcessAndExcuseUpdateRequest $request){
+        $student_id = $request->student_id;
+        $student_task_id = $request->student_task_id;
+        $attendance_excuse_id = $request->attendance_excuse_id;
+
+        $attendance_types = (isset($request->attendance_types) && !empty($request->attendance_types) ? $request->attendance_types : 'E');
+        $status = $request->status;
+        $remarks = $request->remarks;
+        $days = (isset($request->days) && !empty($request->days) ? $request->days : []);
+        $oldDays = AttendanceExcuseDay::where('attendance_excuse_id', $attendance_excuse_id)->pluck('id')->unique()->toArray();
+        $deActiveDays = array_diff($oldDays, $days);
+
+        $excuseData = [];
+        $excuseData['attendance_types'] = $attendance_types;
+        $excuseData['remarks'] = (!empty($remarks) ? $remarks : null);
+        $excuseData['status'] = (!empty($days) && count($days) > 0 ? (!empty($status) ? $status : 0) : 1);
+        $excuseData['actioned_by'] = auth()->user()->id;
+        $excuseData['actioned_at'] = date('Y-m-d H:i:s');
+        AttendanceExcuse::where('id', $attendance_excuse_id)->where('student_task_id', $student_task_id)->update($excuseData);
+
+        if(!empty($days) && count($days) > 0):
+            AttendanceExcuseDay::whereIn('id', $days)->update(['active' => 1]);
+
+            $attendanceStatus = AttendanceFeedStatus::where('code', $attendance_types)->get()->first();
+            $feedStatusId = (isset($attendanceStatus->id) && $attendanceStatus->id > 0 ? $attendanceStatus->id : 6);
+            foreach($days as $day):
+                $excuseDay = AttendanceExcuseDay::find($day);
+                if(isset($excuseDay->id) && $excuseDay->id > 0):
+                    Attendance::where('plans_date_list_id', $excuseDay->plans_date_list_id)->where('class_plan_id', $excuseDay->plan_id)
+                        ->where('student_id', $student_id)->update(['attendance_feed_status_id' => $feedStatusId]);
+                endif;
+            endforeach;
+        endif;
+        if(!empty($deActiveDays) && count($deActiveDays) > 0):
+            AttendanceExcuseDay::whereIn('id', $deActiveDays)->update(['active' => 0]);
+        endif;
+
+        StudentTask::where('id', $student_task_id)->where('student_id', $student_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
+
+        return response()->json(['message' => 'Excuse successfully reviewd and updated.'], 200);
     }
 }
