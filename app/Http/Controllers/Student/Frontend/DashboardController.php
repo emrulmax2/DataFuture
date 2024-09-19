@@ -513,7 +513,7 @@ class DashboardController extends Controller
             foreach($planids as $plan_id):
                 $plan = Plan::find($plan_id);
                 $planDateList = PlansDateList::where('plan_id', $plan_id)->where('feed_given', 1)->whereHas('attendances', function($q) use($student_id, $plan_id){
-                    $q->where('attendance_feed_status_id', 4)->where('student_id', $student_id)->where('class_plan_id', $plan_id);
+                    $q->where('attendance_feed_status_id', 4)->where('student_id', $student_id)->where('plan_id', $plan_id);
                 })->where('date', '<', $today)->orderBy('date', 'DESC')->get();
                 if($planDateList->count() > 0):
                     $list[$plan_id]['module'] = $plan->creations->module_name;
