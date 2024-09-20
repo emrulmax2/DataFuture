@@ -137,6 +137,7 @@ import moment from 'moment';
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
+    const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
     
     //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
     $('.save').on('click', function (e) {
@@ -171,6 +172,7 @@ import moment from 'moment';
                 if(xhr.status == 206){
                     //update Alert
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     successModal.show();
                     confirmModal.hide();
                     errorModal.hide()
@@ -187,6 +189,7 @@ import moment from 'moment';
                 }if(xhr.status == 207){
                     //update Alert
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     successModal.hide();
                     startClassConfirmModal.show();
                     errorModal.hide();
@@ -194,6 +197,7 @@ import moment from 'moment';
                 }  else if(xhr.status == 200){
                     //update Alert
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     successModal.show();
                     confirmModal.hide();
                     errorModal.hide()
@@ -227,6 +231,7 @@ import moment from 'moment';
                     });   
                     confirmModal.show();
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
 
                 }else if(jqXHR.status == 442)
                 {
@@ -235,6 +240,7 @@ import moment from 'moment';
                         $("#confirmModal .confModDesc").html('Please Put a note Below, why are you taking this class?');
                     });  
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     confirmModal.show();
                 }else if(jqXHR.status == 444)
                 {
@@ -243,6 +249,7 @@ import moment from 'moment';
                         $("#errorModal .errorModalDesc").html('It is not your punch number');
                     });  
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     errorModal.show();
                     setTimeout(function(){
                         errorModal.hide();
@@ -255,6 +262,7 @@ import moment from 'moment';
                         $("#errorModal .errorModalDesc").html('Invalid Punch Number');
                     });  
                     editPunchNumberDeteilsModal.hide();
+                    endClassModal.hide();
                     errorModal.show();
                     setTimeout(function(){
                         errorModal.hide();
