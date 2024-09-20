@@ -131,7 +131,7 @@ var classPlanDateListsTutorTable = (function () {
                                     btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
                                 }
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
-                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
+                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
                                 }
                                 if(cell.getData().status == 'Completed'){
                                     btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
@@ -656,6 +656,8 @@ var classPlanAssessmentModuleTable = (function () {
 (function(){
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
 
     
     let confModalDelTitle = 'Are you sure?';
@@ -776,6 +778,77 @@ var classPlanAssessmentModuleTable = (function () {
             $("#status-PD").val("1");
             filterHTMLForm();
         });
+
+        /*End Class Btn*/
+        $('#classPlanDateListsTutorTable').on('click', '.endClassBtns', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var infoId = $theBtn.attr('data-attendanceinfo');
+            var plandDateId = $theBtn.attr('data-id');
+
+            $('#endClassModal [name="plan_date_list_id"]').val(plandDateId);
+        });
+
+        $('#endClassModalForm').on('submit', function(e){
+            e.preventDefault();
+            let $form = $(this);
+            const form = document.getElementById('endClassModalForm');
+
+            $('#endClassModalForm').find('input').removeClass('border-danger')
+            $('#endClassModalForm').find('.acc__input-error').html('')
+
+            document.querySelector('#endClassSave').setAttribute('disabled', 'disabled');
+            document.querySelector('#endClassSave svg').style.cssText = 'display: inline-block;';
+
+            let url = $form.find("input[name=url]").val();
+            let form_data = new FormData(form);
+
+            axios({
+                method: "post",
+                url: url,
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#endClassSave').removeAttribute('disabled');
+                document.querySelector('#endClassSave svg').style.cssText = 'display: none;';
+                
+                if (response.status == 200) {
+                    endClassModal.hide();
+
+                    succModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('WOW!');
+                        $('#successModal .successModalDesc').html('Class successfully ended.');
+                    });
+
+                    setTimeout(() => {
+                        succModal.hide();
+                        window.location.reload();
+                    }, 1000);
+                }
+                
+            }).catch(error => {
+                document.querySelector('#endClassSave').removeAttribute('disabled');
+                document.querySelector('#endClassSave svg').style.cssText = 'display: none;';
+                if(error.response){
+                    endClassModal.hide();
+                    if(error.response.status == 422 || error.response.status == 322){   
+                        warningModal.show();
+                        document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                            $('#warningModal .warningModalTitle').html('Oops!');
+                            $('#warningModal .warningModalDesc').html(error.response.data.data);
+                        });
+
+                        setTimeout(() => {
+                            warningModal.hide();
+                        }, 2000);
+                    }else{
+                        console.log('error');
+                    }
+                }
+            });
+        });
+        /*End Class Btn*/
     }
 
     if ($("#classStudentListTutorModuleTable").length) {

@@ -141,6 +141,11 @@ import moment from 'moment';
     //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
     $('.save').on('click', function (e) {
         e.preventDefault();
+        let $theBtn = $(this);
+
+        $theBtn.attr('disabled', 'disabled');
+        $theBtn.find('svg').fadeIn();
+
         var parentForm = $(this).parents('form');
         var formID = parentForm.attr('id');
         const form = document.getElementById(formID);
@@ -160,6 +165,9 @@ import moment from 'moment';
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             success: function(res, textStatus, xhr) {
                 $('.acc__input-error', parentForm).html('');
+                $theBtn.removeAttr('disabled');
+                $theBtn.find('svg').fadeOut();
+
                 if(xhr.status == 206){
                     //update Alert
                     editPunchNumberDeteilsModal.hide();
@@ -203,6 +211,8 @@ import moment from 'moment';
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $('.acc__input-error').html('');
+                $theBtn.removeAttr('disabled');
+                $theBtn.find('svg').fadeOut();
                 
                 if(jqXHR.status == 422){
                     for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {

@@ -2720,10 +2720,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SystemReportController::class)->group(function(){
         Route::get('reports', 'index')->name('reports'); 
+        Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
-        Route::get('reports/accounts/collection-report', 'index')->name('reports.account.collection'); 
         Route::post('reports/accounts/export-collection-report', 'exportCollectionReport')->name('reports.account.collection.export'); 
     });
 });

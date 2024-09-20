@@ -13,17 +13,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CollectionReportController extends Controller
 {
-    public function index(){
-        return view('pages.reports.accounts.collection', [
-            'title' => 'Collection Reports - London Churchill College',
-            'breadcrumbs' => [
-                ['label' => 'Reports', 'href' => route('reports')],
-                ['label' => 'Accounts', 'href' => route('reports.accounts')],
-                ['label' => 'Collection Reports', 'href' => 'javascript:void(0);']
-            ],
-        ]);
-    }
-
     public function exportCollectionReport(AccountCollectionReportRequest $request){
         $from_date = isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : date('Y-m-d');
         $to_date = isset($request->to_date) && !empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : date('Y-m-d');
