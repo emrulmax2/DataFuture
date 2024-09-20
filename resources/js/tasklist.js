@@ -84,6 +84,11 @@ var taskListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Pearson Reg",
+                    field: "pearson_reg",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Assigned User",
                     field: "user",
                     headerHozAlign: "left",
@@ -414,6 +419,11 @@ var taskListTable = (function () {
                             $('#editTaskModal input[name="attendance_excuses"][value="Yes"]').prop('checked', true);
                         }else{
                             $('#editTaskModal input[name="attendance_excuses"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.pearson_reg == 'Yes'){
+                            $('#editTaskModal input[name="pearson_reg"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="pearson_reg"][value="No"]').prop('checked', true);
                         }
                         
                         if(dataset.external_link == 1){

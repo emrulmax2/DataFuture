@@ -222,6 +222,19 @@
                                         </div>
                                     </div>
                                     <div class="col-span-12 sm:col-span-6">
+                                        <label for="pearson_reg" class="form-label">Pearson Registraton</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="pearson_reg-yes" class="form-check-input" type="radio" name="pearson_reg" value="Yes">
+                                                <label class="form-check-label" for="pearson_reg-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="pearson_reg-no" class="form-check-input" type="radio" name="pearson_reg" value="No">
+                                                <label class="form-check-label" for="pearson_reg-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <div>
                                             <div class="form-check form-switch">
                                                 <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
@@ -421,6 +434,19 @@
                                             <div class="form-check mr-2">
                                                 <input checked id="edit_attendance_excuses-no" class="form-check-input" type="radio" name="attendance_excuses" value="No">
                                                 <label class="form-check-label" for="edit_attendance_excuses-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_pearson_reg" class="form-label">Pearson Registraton</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="edit_pearson_reg-yes" class="form-check-input" type="radio" name="pearson_reg" value="Yes">
+                                                <label class="form-check-label" for="edit_pearson_reg-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="edit_pearson_reg-no" class="form-check-input" type="radio" name="pearson_reg" value="No">
+                                                <label class="form-check-label" for="edit_pearson_reg-no">No</label>
                                             </div>
                                         </div>
                                     </div>
