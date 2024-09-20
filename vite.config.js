@@ -259,6 +259,7 @@ export default defineConfig({
                 'resources/js/student-attendance-reports.js',
                 
                 'resources/js/student-attendance-excuse.js',
+                'resources/js/accounts-reports.js',
                 
             ],
             refresh: true,

@@ -122,6 +122,7 @@
                     <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
                     
                     <input type="hidden" name="url" value="{{ route('tutor-attendance.store') }}" />
+                    <input type="hidden" name="start_class" value="1" />
                     <input type="hidden" name="user_id" value="{{ $employee->user_id }}" />
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
 
@@ -163,6 +164,7 @@
                         <input type="hidden" value="Class Started By {{ $employee->full_name }}" name="note"/>
                         
                         <input type="hidden" name="url" value="{{ route('tutor-attendance.store') }}" />
+                        <input type="hidden" name="start_class" value="1" />
                         <input type="hidden" name="user_id" value="{{ $employee->user_id }}" />
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
 

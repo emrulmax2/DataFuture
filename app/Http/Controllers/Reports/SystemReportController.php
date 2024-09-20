@@ -16,4 +16,14 @@ class SystemReportController extends Controller
             ]
         ]);
     }
+    public function accountsReports(){
+
+        return view('pages.reports.accounts.index', [
+            'title' => 'Site Reports - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Reports', 'href' => route('reports')],
+                ['label' => 'Account Reports', 'href' => 'javascript:void(0);']
+            ]
+        ]);
+    }
 }

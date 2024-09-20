@@ -162,8 +162,14 @@
                     </div>
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['dashboard']['programme_dashboard']) && $priv['dashboard']['programme_dashboard'] == 1 ? 'checked' : '') }} id="permission_dashboard_8" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][programme_dashboard]">
+                            <input {{ (isset($priv['dashboard']['programme_dashboard']) && $priv['dashboard']['programme_dashboard'] == 1 ? 'checked' : '') }} id="permission_dashboard_8" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[dashboard][programme_dashboard]">
                             <label class="form-check-label ml-4" for="permission_dashboard_8">Programme Dashboard</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['reports']) && $priv['programme_dashboard']['reports'] == 1 ? 'checked' : '') }} id="permission_programme_dashboard_1" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][reports]">
+                                <label class="form-check-label ml-4" for="permission_programme_dashboard_1">Reports</label>
+                            </div>
                         </div>
                     </div>
                 </div>

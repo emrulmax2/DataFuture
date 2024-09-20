@@ -50,21 +50,23 @@ class TutorAttendanceController extends Controller
         // 
         $PlansDateList = PlansDateList::find($request->plan_date_list_id);
         $type = (isset($request->type) && $request->type > 0 ? $request->type : 0);
+        $start_class = (isset($request->start_class) && $request->start_class == 1 ? $request->start_class : 0);
 
         $attendanceFind = AttendanceInformation::where("plans_date_list_id",$request->plan_date_list_id)->get()->first();
-            if(!$attendanceFind) {
-                PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Ongoing']);
-                AttendanceInformation::create([
-                    'plans_date_list_id' =>$request->plan_date_list_id,
-                    'tutor_id' => Auth::user()->id,
-                    'start_time' => now(),
-                    'note' => (isset($request->note)) ? $request->note : null,
-                    'created_by' => Auth::user()->id
-                ]);
-                return response()->json(["data"=>["msg"=>"Class started",'tutor' => Auth::user()->id,'plandate'=>$request->plan_date_list_id, 'type' => $type]],206);
-            } else {
+        if(!$attendanceFind) {
+            PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Ongoing']);
+            AttendanceInformation::create([
+                'plans_date_list_id' =>$request->plan_date_list_id,
+                'tutor_id' => Auth::user()->id,
+                'start_time' => now(),
+                'note' => (isset($request->note)) ? $request->note : null,
+                'created_by' => Auth::user()->id
+            ]);
+            return response()->json(["data"=>["msg"=>"Class started",'tutor' => Auth::user()->id,'plandate'=>$request->plan_date_list_id, 'type' => $type]],206);
+        } else {
+            if($start_class == 0){
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
-               
+                
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
                     PlansDateList::where('id', $request->plan_date_list_id)->update(['status' => 'Completed']);
                     $attendanceInformation = AttendanceInformation::find($attendanceFind->id);
@@ -78,9 +80,12 @@ class TutorAttendanceController extends Controller
                 } else {
                     return response()->json(["data"=>"You are out of College. Please return to college to end your class"], 322);
                 }  
+            }else{
+                return response()->json(["data"=>["msg"=>"Class started",'tutor' => Auth::user()->id,'plandate'=>$request->plan_date_list_id, 'type' => $type]], 206);
             }
+        }
         
-        return response()->json(["data"=>"Something Went Wrong"],422);
+        return response()->json(["data"=>"Something Went Wrong"], 422);
     }
     public function check(Request $request)
     {

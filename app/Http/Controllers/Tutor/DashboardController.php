@@ -500,7 +500,6 @@ class DashboardController extends Controller
     }
 
     public function showCourseContent(Plan $plan) {
-        
         $moduleCreation = ModuleCreation::find($plan->module_creation_id);
         
         $assessmentlist = $moduleCreation->module->assesments;
