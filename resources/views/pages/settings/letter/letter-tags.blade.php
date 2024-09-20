@@ -29,9 +29,9 @@
             <li class="dropdown-item">[DATA=courses]name[/DATA]</li>
             <li class="dropdown-item">[DATA=semesters]name[/DATA]</li>
             <li class="dropdown-item">[DATA=student_proposed_courses]awarding_body[/DATA]</li>
-            <li class="dropdown-item">[DATA=student_proposed_courses]evening_and_weekends[/Data]</li>
-            <li class="dropdown-item">[DATA=student_proposed_courses]class_startdate[/Data]</li>
-            <li class="dropdown-item">[DATA=student_proposed_courses]class_enddate[/Data]</li>
+            <li class="dropdown-item">[DATA=student_proposed_courses]evening_and_weekends[/DATA]</li>
+            <li class="dropdown-item">[DATA=student_proposed_courses]class_startdate[/DATA]</li>
+            <li class="dropdown-item">[DATA=student_proposed_courses]class_enddate[/DATA]</li>
             <li class="dropdown-item">[DATA=student_proposed_courses]fees[/DATA]</li>
             <li class="dropdown-item">[DATA=other_details]mode[/DATA]</li>
 

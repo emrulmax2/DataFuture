@@ -27,6 +27,8 @@ class TaskList extends Model
         'image_path',
         'org_email',
         'id_card',
+        'attendance_excuses',
+        'pearson_reg',
         'created_by',
         'updated_by',
     ];

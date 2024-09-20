@@ -293,7 +293,9 @@ var studentCommLetterListTable = (function () {
         }).then(response => {
             document.querySelector('#sendLetterBtn').removeAttribute('disabled');
             document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
-
+            console.log(response.data);
+            return false;
+            
             if (response.status == 200) {
                 addLetterModal.hide();
 

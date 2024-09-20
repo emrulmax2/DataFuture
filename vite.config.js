@@ -260,6 +260,7 @@ export default defineConfig({
                 
                 'resources/js/student-attendance-excuse.js',
                 'resources/js/accounts-reports.js',
+                'resources/js/task-manager-all.js',
                 
             ],
             refresh: true,
