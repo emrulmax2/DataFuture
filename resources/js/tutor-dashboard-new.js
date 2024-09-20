@@ -150,6 +150,7 @@ var attendanceListTable = (function () {
 
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const editPunchNumberDeteilsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPunchNumberDeteilsModal"));
+        const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
         
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
@@ -158,6 +159,10 @@ var attendanceListTable = (function () {
         //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
         $('.save').on('click', function (e) {
             e.preventDefault();
+            let $theBtn = $(this);
+
+            $theBtn.attr('disabled', 'disabled');
+            $theBtn.find('svg').fadeIn();
 
             var parentForm = $(this).parents('form');
             
@@ -180,11 +185,14 @@ var attendanceListTable = (function () {
                 cache: false,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 success: function(res, textStatus, xhr) {
+                    $theBtn.removeAttr('disabled');
+                    $theBtn.find('svg').fadeOut();
 
                     $('.acc__input-error', parentForm).html('');
                     if(xhr.status == 206){
                         //update Alert
                         editPunchNumberDeteilsModal.hide();
+                        startClassConfirmModal.hide();
                         successModal.show();
                         confirmModal.hide();
                         errorModal.hide()
@@ -208,9 +216,11 @@ var attendanceListTable = (function () {
                     }  else if(xhr.status == 200){
                         //update Alert
                         editPunchNumberDeteilsModal.hide();
+                        startClassConfirmModal.hide();
                         successModal.show();
                         confirmModal.hide();
                         errorModal.hide()
+                        endClassModal.hide();
                         document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                             $("#successModal .successModalTitle").html("Congratulations!");
                             $("#successModal .successModalDesc").html('Data updated.');
@@ -225,6 +235,8 @@ var attendanceListTable = (function () {
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     $('.acc__input-error').html('');
+                    $theBtn.removeAttr('disabled');
+                    $theBtn.find('svg').fadeOut();
                     
                     if(jqXHR.status == 422){
                         for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
@@ -247,6 +259,7 @@ var attendanceListTable = (function () {
                             $("#confirmModal .confModDesc").html('Please Put a note Below, why are you taking this class?');
                         });  
                         editPunchNumberDeteilsModal.hide();
+                        startClassConfirmModal.hide();
                         confirmModal.show();
                     }else if(jqXHR.status == 444)
                     {
@@ -255,6 +268,7 @@ var attendanceListTable = (function () {
                             $("#errorModal .errorModalDesc").html('It is not your punch number');
                         });  
                         editPunchNumberDeteilsModal.hide();
+                        startClassConfirmModal.hide();
                         errorModal.show();
                         setTimeout(function(){
                             errorModal.hide();
@@ -267,11 +281,25 @@ var attendanceListTable = (function () {
                             $("#errorModal .errorModalDesc").html('Invalid Punch Number');
                         });  
                         editPunchNumberDeteilsModal.hide();
+                        startClassConfirmModal.hide();
                         errorModal.show();
                         setTimeout(function(){
                             errorModal.hide();
                             editPunchNumberDeteilsModal.show();
                         }, 1000);
+                    }else if(jqXHR.status == 322)
+                    {
+                        endClassModal.hide();
+                        startClassConfirmModal.hide();
+                        errorModal.show();
+                        document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#errorModal .errorModalTitle").html("Oops!");
+                            $("#errorModal .errorModalDesc").html('You are out of College. Please return to college to end your class');
+                        });  
+                        
+                        setTimeout(function(){
+                            errorModal.hide();
+                        }, 2000);
                     }else{
                         console.log(textStatus+' => '+errorThrown);
                     }

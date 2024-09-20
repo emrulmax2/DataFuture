@@ -47,6 +47,10 @@ class SlcMoneyReceipt extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
+    public function crel(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+
     public function received(){
         return $this->belongsTo(User::class, 'received_by');
     }

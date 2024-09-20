@@ -90,6 +90,7 @@ use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use DebugBar\DebugBar as DebugBarDebugBar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -101,7 +102,14 @@ class StudentController extends Controller
 {
     public function index(){
         $semesters = Cache::get('semesters', function () {
-            return Semester::all()->sortByDesc("name");
+            $semesters = Semester::all()->sortByDesc("name");
+            $semesterData = [];
+            foreach ($semesters as $semester):
+                $studentProposedCourse = StudentProposedCourse::where('semester_id',$semester->id)->get()->first();
+                if(isset($studentProposedCourse->id))
+                    $semesterData[] = $semester;
+            endforeach;
+            return $semesterData;
         });
         $courses = Cache::get('courses', function () {
             return Course::all();
@@ -178,210 +186,44 @@ class StudentController extends Controller
             if(!empty($student_status)): $Query->whereIn('status_id', $student_status); endif;
         endif;
         if($groupSearch):
+            
             foreach($groupParams as $field => $value):
                 $$field = (isset($value) && !empty($value) ? $value : '');
             endforeach;
+            //dd($groupParams);
             $studentsIds = [];
-                if(isset($group) && isset($course)) {
-                    
-                $groupsIDList = Group::select('id')
-                                        ->whereIn('term_declaration_id', $attendance_semester)
-                                        ->whereIn('course_id',$course)
-                                        ->whereIn('name',$group)
-                                        ->groupBy('id')
-                                        ->get()
-                                        ->pluck('id')
-                                        ->toArray();
-            
-                $planList = Plan::with("assign")
-                                ->whereIn('term_declaration_id', $attendance_semester)
-                                ->whereIn('course_id',$course)
-                                ->whereIn('group_id',$groupsIDList)
-                                ->orderBy('id', 'ASC')
-                                ->get();
+                $myRequest = new Request();
 
-                }else if((isset($course) && count($course)>0)&& (isset($attendance_semester))) {
-                    $planList = Plan::with("assign")
-                                ->whereIn('term_declaration_id', $attendance_semester)
-                                ->whereIn('course_id',$course)
-                                ->orderBy('id', 'ASC')
-                                ->get();
-                }else if(isset($attendance_semester) && count($attendance_semester)>0) {
-                    $planList = Plan::with("assign")
-                                ->whereIn('term_declaration_id', $attendance_semester)
-                                ->orderBy('id', 'ASC')
-                                ->get();
-                }
+                $myRequest->setMethod('POST');
 
-                if(isset($planList) && $planList->isNotEmpty()):
-                    foreach($planList as $plan):
-                        if(isset($plan->assign)):
-                            foreach($plan->assign as $assingData):
-                                if(!in_array($assingData->student_id, $studentsIds))
-                                $studentsIds[] = $assingData->student_id;
-                            endforeach;
-                        endif;
-                    endforeach;
-                endif;
-    
-
-            if(isset($attendance_semester) && count($attendance_semester)>0) {
-
-                $course_creation_instance_ids = InstanceTerm::where('term_declaration_id', $attendance_semester)->pluck('course_creation_instance_id')->unique()->toArray();
-                $course_creation_ids = CourseCreationInstance::where('academic_year_id', $academic_year)->whereIn('id', $course_creation_instance_ids)->pluck('course_creation_id')->unique()->toArray();
-            
-            }
-            if(isset($academic_year) && !isset($attendance_semester) && !isset($intake_semester)) {
-
-                $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
-                                        ->pluck('student_id')
-                                        ->unique()
-                                        ->toArray();
-                    if(count($studentsIds)>0):
-                        $studentsIdTemp = [];
-                        foreach ($studentslist as $studentT):
-                                if(in_array($studentT, $studentsIds))
-                                $studentsIdTemp[] = $studentT;
-                        endforeach;
-                        $studentsIds = $studentsIdTemp;
-                    else:
-                        $studentsIds = $studentslist;
-                    endif;
-
-            }
-
-            if(!empty($student_type) && count($studentsIds)==0):
-
-                $tmp_cc_ids = CourseCreationAvailability::where('type', $student_type)->pluck('course_creation_id')->unique()->toArray();
-
-                if(!empty($tmp_cc_ids)):
-                    foreach ($tmp_cc_ids as $tmp_cc_id):
-                        if(!in_array($tmp_cc_id, $course_creation_ids))
-                            $course_creation_ids[] = $tmp_cc_id;
-                      endforeach;
-                endif;
-
-                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $course_creation_ids)->pluck('student_id')->unique()->toArray();
-
-                foreach ($studentslist as $studentT):
-                    if(!in_array($studentT, $studentsIds))
-                        $studentsIds[] = $studentT;
-                  endforeach;
-
-            elseif(!empty($student_type) && count($studentsIds)>0):
-
-                $course_creation_ids = StudentCourseRelation::whereIn('student_id', $studentsIds)->pluck('course_creation_id')->unique()->toArray();
-                $course_creation_ids = CourseCreationAvailability::where('type', $student_type)->whereIn('course_creation_id',$course_creation_ids)->pluck('course_creation_id')->unique()->toArray();
-                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $course_creation_ids)->pluck('student_id')->unique()->toArray();
-                $studentsIdTemp = [];
-                foreach ($studentslist as $studentT):
-                        if(in_array($studentT, $studentsIds))
-                        $studentsIdTemp[] = $studentT;
-                endforeach;
-                $studentsIds = $studentsIdTemp;
-
-            endif;
-            
-            if(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && isset($course) && count($course)>0 && isset($attendance_semester) )  {
-
-                $intakeStudentslist = StudentProposedCourse::whereIn('course_creation_id',$course_creation_ids)
-                                        ->whereIn('semester_id', $intake_semester)
-                                        ->whereIn('academic_year_id',$academic_year)
-                                        ->pluck('student_id')
-                                        ->unique()
-                                        ->toArray();
-
-                $courseCreations = CourseCreation::whereIn('id', $course_creation_ids)->whereIn('semester_id', $intake_semester)
-                                    ->whereIn('course_id', $course)
-                                    ->pluck('id')
-                                    ->unique()
-                                    ->toArray();
-                $studentslist = StudentCourseRelation::whereIn('course_creation_id', $courseCreations)
-                                    ->whereIn('student_id',$intakeStudentslist)
-                                    ->pluck('student_id')
-                                    ->unique()
-                                    ->toArray();
-
-                $studentsIdTemp = [];
-                foreach ($studentslist as $studentT):
-                        if(in_array($studentT, $studentsIds))
-                        $studentsIdTemp[] = $studentT;
-                endforeach;
-                $studentsIds = $studentsIdTemp;
-
-            }elseif(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && !isset($attendance_semester) && count($studentsIds)==0)  {
-            
+                if(isset($academic_year))
+                    $myRequest->request->add(['academic_years' => $academic_year]);
+                else
+                    $myRequest->request->add(['academic_years' => '']);
                 
-              if(isset($course) && count($course)>0) {
+                if(isset($attendance_semester))
+                $myRequest->request->add(['term_declaration_ids' => $attendance_semester]);
 
-                    $courseCreations = CourseCreation::whereIn('semester_id', $intake_semester)
-                                    ->whereIn('course_id', $course)
-                                    ->pluck('id')
-                                    ->unique()
-                                    ->toArray();
-                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
-                                    ->whereIn('semester_id', $intake_semester)
-                                    ->whereIn('course_creation_id', $courseCreations)
-                                    ->pluck('student_id')
-                                    ->unique()
-                                    ->toArray();
-                } else {
-                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
-                                    ->whereIn('semester_id', $intake_semester)
-                                    ->pluck('student_id')
-                                    ->unique()
-                                    ->toArray();
-                }
-              foreach ($studentslist as $studentT):
-                if(!in_array($studentT, $studentsIds))
-                    $studentsIds[] = $studentT;
-              endforeach;
-            }elseif(isset($intake_semester) && isset($academic_year) && count($academic_year)>0 && !isset($attendance_semester) && count($studentsIds)>0)  {
-
-                if(isset($course) && count($course)>0) {
-
-                    $courseCreations = CourseCreation::whereIn('semester_id', $intake_semester)
-                                    ->whereIn('course_id', $course)
-                                    ->pluck('id')
-                                    ->unique()
-                                    ->toArray();
-                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
-                                    ->whereIn('semester_id', $intake_semester)
-                                    ->whereIn('course_creation_id', $courseCreations)
-                                    ->pluck('student_id')
-                                    ->unique()
-                                    ->toArray();
-                } else {
-                    $studentslist = StudentProposedCourse::whereIn('academic_year_id', $academic_year)
-                                    ->whereIn('semester_id', $intake_semester)
-                                    ->pluck('student_id')
-                                    ->unique()
-                                    ->toArray();
-                }
-            
-              $studentsIdTemp = [];
-                foreach ($studentslist as $studentT):
-                        if(in_array($studentT, $studentsIds))
-                        $studentsIdTemp[] = $studentT;
-                endforeach;
-                $studentsIds = $studentsIdTemp;
-            }
-
-            if($evening_weekend == 1  && count($studentsIds)>0): 
-                $ew = StudentProposedCourse::where('full_time', $evening_weekend)->whereIn('student_id', $studentsIds);
-               
-                $studentslist= $ew->pluck('student_id')->unique()->toArray();
+                if(isset($course))
+                    $myRequest->request->add(['courses' => $course]);
+                if(isset($group))
+                    $myRequest->request->add(['groups' => $group]);
+                if(isset($intake_semester))
+                    $myRequest->request->add(['intake_semesters' => $intake_semester]);
+                if(isset($group_student_status))
+                    $myRequest->request->add(['group_student_statuses' => $group_student_status]);
+                if(isset($student_type))
+                    $myRequest->request->add(['student_types' => $student_type]);
+                if(isset($groupParams["evening_weekend"]))
+                    $myRequest->request->add(['evening_weekends' => $groupParams["evening_weekend"]]);
                 
-                $studentsIdTemp = [];
-                foreach ($studentslist as $studentT):
-                        if(in_array($studentT, $studentsIds))
-                        $studentsIdTemp[] = $studentT;
-                endforeach;
-                $studentsIds = $studentsIdTemp;
+                
 
-            endif;
-            if(!empty($group_student_status)): $Query->whereIn('status_id', $group_student_status); endif;
-            if(!empty($studentsIds)): $Query->whereIn('id', $studentsIds); 
+                $studentsIds = $this->callTheStudentListForGroup($myRequest);
+                
+
+            if(!empty($studentsIds)): 
+                $Query->whereIn('id', $studentsIds); 
             else:
                 $Query->whereIn('id', [0]); 
             endif;
@@ -1374,20 +1216,21 @@ class StudentController extends Controller
     }
 
     public function getAllIntakes(Request $request) {
+
         $academicYearList = $request->academic_years;
         $term_declaration_ids = $request->term_declaration_ids;
         $courses = $request->course;
 
         $res = [];
 
-        $termDeclarationIds = TermDeclaration::where('academic_year_id', $academicYearList)->pluck('id')->unique()->toArray();
+        $termDeclarationIds = TermDeclaration::whereIn('academic_year_id', $academicYearList)->pluck('id')->unique()->toArray();
         
         if(!empty($termDeclarationIds)):
             
             $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $termDeclarationIds)->pluck('course_creation_instance_id')->unique()->toArray();
            
             if(!empty($courseCreationInstanceIds)):
-                $courseCreationIds = CourseCreationInstance::where('academic_year_id', $academicYearList)->whereIn('id', $courseCreationInstanceIds)->pluck('course_creation_id')->unique()->toArray();
+                $courseCreationIds = CourseCreationInstance::whereIn('academic_year_id', $academicYearList)->whereIn('id', $courseCreationInstanceIds)->pluck('course_creation_id')->unique()->toArray();
                 if(!empty($courseCreationIds)):
                     if(!empty($courses)) {
                        
@@ -1400,9 +1243,15 @@ class StudentController extends Controller
                         if(!empty($semesters)):
                             $i = 1;
                             foreach($semesters as $sem):
-                                $res[$i]['id'] = $sem->id;
-                                $res[$i]['name'] = $sem->name;
-                                $i++;
+
+                                $studentFound = StudentProposedCourse::where('semester_id',$sem->id)->whereIn('academic_year_id', $academicYearList)->get()->first();
+                                
+                                if(isset($studentFound->id)) {
+                                    $res[$i]['id'] = $sem->id;
+                                    $res[$i]['name'] = $sem->name;
+                                    $i++;
+                                }
+                                
                             endforeach;
                         endif;
                     endif;
@@ -1417,15 +1266,11 @@ class StudentController extends Controller
         endif;
     }
 
-    
-
     public function getAllCourses(Request $request) {
             $academicYears = $request->academic_years;
             $term_declaration_ids = $request->term_declaration_ids;
             $data = [];
 
-            //dd($academicYears);
-            //dd($term_declaration_ids);
 
             $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
            
@@ -1460,12 +1305,6 @@ class StudentController extends Controller
         $term_declaration_ids = $request->term_declaration_ids;
 
         $courses = $request->courses;
-
-        // $CourseCreationsList = CourseCreation::with("course")->whereIn('course_id',$courses)->get();
-        // $res = [];
-        // foreach ($CourseCreationsList as $coursesData): 
-        //     $course[$courses->course->id] = $coursesData->id;
-        // endforeach;
             
             $groups = Group::select('name')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->groupBy('name')->orderBy('name', 'ASC')->get();
             $res = [];
@@ -1541,74 +1380,375 @@ class StudentController extends Controller
         
         return response()->json(['res' => $res], 200);
     }
-    public function getAllStudentType(Request $request) {
 
-        $academicYearList = $request->academic_years;
- 
+    public function callTheStudentListForGroup(Request $request) {
+        
 
+        $academic_years = $request->academic_years;
         $term_declaration_ids = $request->term_declaration_ids;
-
         $courses = $request->courses;
         $groups = $request->groups;
+        $intake_semesters = $request->intake_semesters;
+        $group_student_statuses = $request->group_student_statuses;
+        $student_types = $request->student_types;
+        $evening_weekends = $request->evening_weekends;
+        
+        $studentIds = [];
 
-        $res = [];
-        if(isset($term_declaration_ids) && count($term_declaration_ids) >0) {
 
-            if(isset($groups) && count($groups) >0 && isset($courses) && count($courses)>0) {
-                
-                $groupsIDList = Group::select('id')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('name',$groups)->groupBy('id')->get()->pluck('id')->toArray();
-                $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->whereIn('group_id',$groupsIDList)->orderBy('id', 'ASC')->get();
+        $QueryInner = StudentProposedCourse::with('creation');
+
+        if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
+            $QueryInner->where('full_time',$evening_weekends);
+        if(!empty($academic_years) && count($academic_years)>0)
+            $QueryInner->where('academic_year_id',$academic_years);
+        
+
+            $studentIds =  $QueryInner->whereHas('creation', function($q) use($intake_semesters,$courses){
+                    if(!empty($intake_semesters))
+                        $q->whereIn('semester_id', $intake_semesters);
+                    if(!empty($courses))
+                        $q->whereIn('course_id', $courses);
+            })->pluck('student_id')->unique()->toArray();
+
+            $studentsListByEveningSemesterAndCourse = $studentIds;
+
+        if(!empty($term_declaration_ids) && count($term_declaration_ids)>0) {
             
-            }elseif(isset($courses)&& count($courses)>0) {
-                
-                $courseCreationInstanceIds = InstanceTerm::whereIn('term_declaration_id', $term_declaration_ids)->pluck('course_creation_instance_id')->unique()->toArray();
-
-                $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->whereIn('course_id',$courses)->pluck('course_creation_id')->unique()->toArray();
-
-                $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_creation_id',$courseCreationIds)->whereIn('course_id',$courses)->orderBy('id', 'ASC')->get();
-
-            } else {
-
-                $planList = Plan::with("assign")->whereIn('term_declaration_id', $term_declaration_ids)->orderBy('id', 'ASC')->get();
-
+            if(!empty($groups)) {
+                $groups = Group::whereIn('name',$groups)->pluck('id')->unique()->toArray();
             }
-                if($planList->isNotEmpty()):
-                    
-                    $studentsIds = [];
-                    foreach($planList as $plan):
-                        if(isset($plan->assign)):
-                            foreach($plan->assign as $assingData):
+            $innerQuery = Plan::whereIn('term_declaration_id', $term_declaration_ids);
 
-                                if(!in_array($assingData->student_id, $studentsIds)):
-                                    $studentsIds[] = $assingData->student_id;
-                                endif;
-                            endforeach;
-                        endif;
-                    endforeach;
-                    
-                    $i = 1;
-                    //$ListStudentStatus = Student::whereIn('id',$studentsIds)->get()->pluck('status_id')->unique()->toArray();
-                    //$ListStudent = Status::whereIn('id',$ListStudentStatus)->get();
+                if(!empty($groups)) {
+                    $innerQuery->whereIn('group_id', $groups);
+                }
 
+            $planList = $innerQuery->whereHas('course', function($q) use($courses,$academic_years){
+                if(!empty($courses))
+                $q->whereIn('course_id', $courses);
+                if(!empty($academic_years))
+                $q->whereIn('academic_year_id', $academic_years);
+                
 
-                    $course_creation_ids = StudentCourseRelation::whereIn('student_id', $studentsIds)->pluck('course_creation_id')->unique()->toArray();
-                    $typelist = CourseCreationAvailability::whereIn('course_creation_id',$course_creation_ids)->pluck('type')->unique()->toArray();
+            })->pluck('id')->unique()->toArray();
 
+            $studentsListByTerm = Assign::whereIn("plan_id",$planList)->pluck('student_id')->unique()->toArray();
+            $studentIds = [];
+            foreach($studentsListByEveningSemesterAndCourse as $intakeStudent):
 
-
-
-                    foreach ($typelist as $type):
-                        
-                            $res[$i]['id'] = $type;
-                            $res[$i]['name'] = $type;
-                            $i++;
-                        //}
-                    endforeach;
-                endif;
+            if(in_array($intakeStudent,$studentsListByTerm)) {
+                $studentIds[] = $intakeStudent;
+            }
+            endforeach;
             
         }
-        return response()->json(['res' => $res], 200);
+
+        //this part will use both term and intake and open
+        if(!empty($student_types) && count($student_types)>0) {
+
+            $innerQuery = Student::with('courseRelationsList');
+            if(!empty($studentIds)) {
+                $innerQuery->whereIn('id',$studentIds);
+            }
+            $studentsListByStudentType = $innerQuery->whereHas('courseRelationsList', function($q) use($student_types){
+                $q->whereIn('type', $student_types);
+            })->pluck('id')->unique()->toArray();
+
+            $studentIds = $studentsListByStudentType;
+
+        }
+        if(!empty($group_student_statuses) && count($group_student_statuses)>0) {
+
+                $innerQuery = Student::whereIn('status_id',$group_student_statuses);
+                if(!empty($studentIds)) {
+                    $innerQuery->whereIn('id',$studentIds);
+                }
+                $studentsListByStatus = $innerQuery->pluck('id')->unique()->toArray();
+
+                $studentIds = $studentsListByStatus;
+                
+        }
+            //endof the part
+
+        sort($studentIds);
+
+        return $studentIds;
+    }
+    public function getAllStudentType(Request $request) {
+
+
+        $academic_years = $request->academic_years;
+        $term_declaration_ids = $request->term_declaration_ids;
+        $courses = $request->courses;
+        $groups = $request->groups;
+        $intake_semesters = $request->intake_semesters;
+        $group_student_statuses = $request->group_student_statuses;
+        $student_types = $request->student_types;
+        $evening_weekends = $request->evening_weekends;
         
+        $res = [];
+
+        if(!empty($student_types) && count($student_types)>0)
+            $studentsListByStudentType = Student::with('courseRelationsList')->whereHas('courseRelationsList', function($q) use($student_types){
+           
+            $q->whereIn('type', $student_types);
+        })->pluck('id')->unique()->toArray();
+        else
+        $studentsListByStudentType = [];
+
+        
+
+        if(!empty($group_student_statuses) && count($group_student_statuses)>0)
+        $studentsListByStatus = Student::whereIn('status_id',$group_student_statuses)->pluck('id')->unique()->toArray();
+        else 
+        $studentsListByStatus = []; 
+
+        $QueryInner = StudentProposedCourse::with('creation');
+
+        if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
+            $QueryInner->where('full_time',$evening_weekends);
+        if(!empty($academic_years) && count($academic_years)>0)
+            $QueryInner->where('academic_year_id',$academic_years);
+            
+        $studentsListByEveningSemesterAndCourse = $QueryInner->whereHas('creation', function($q) use($intake_semesters,$courses){
+
+                if(!empty($intake_semesters))
+                    $q->whereIn('semester_id', $intake_semesters);
+
+                if(!empty($courses))
+                    $q->whereIn('course_id', $courses);
+
+
+        })->pluck('student_id')->unique()->toArray();
+
+        
+
+        if(count($term_declaration_ids)>0) {
+
+
+            
+            $planList = Plan::whereIn('term_declaration_id', $term_declaration_ids)->whereHas('course', function($q) use($courses,$academic_years,$groups){
+                if(!empty($courses))
+                $q->whereIn('course_id', $courses);
+                if(!empty($academic_years))
+                $q->whereIn('academic_year_id', $academic_years);
+                if(!empty($groups)) {
+                    $groups = Group::whereIn('name',$groups)->pluck('id')->unique()->toArray();
+                    $q->whereIn('group_id', $groups);
+                }
+                
+
+            })->pluck('id')->unique()->toArray();
+
+            $studentsListByTerm = Assign::whereIn("plan_id",$planList)->pluck('student_id')->unique()->toArray();
+
+
+            $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus, $studentsListByEveningSemesterAndCourse,$studentsListByTerm);
+
+            if(!empty($studentsListByStudentType) && !empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus, $studentsListByEveningSemesterAndCourse);
+
+            } else if(empty($studentsListByStudentType) && !empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStatus, $studentsListByEveningSemesterAndCourse);
+
+            }else if(empty($studentsListByStudentType) && empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByEveningSemesterAndCourse;
+
+            }else if(!empty($studentsListByStudentType) && !empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus);
+
+            }else if(!empty($studentsListByStudentType) && empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByStudentType;
+
+            }else if(empty($studentsListByStudentType) && !empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByStatus;
+
+            }
+
+             if(count($commonStudentList)>0) 
+                $commonStudentList = array_intersect($commonStudentList, $studentsListByTerm);
+             else
+                $commonStudentList = $studentsListByTerm;
+
+            
+
+        } else {
+
+            if(!empty($studentsListByStudentType) && !empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus, $studentsListByEveningSemesterAndCourse);
+
+            } else if(empty($studentsListByStudentType) && !empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStatus, $studentsListByEveningSemesterAndCourse);
+
+            }else if(empty($studentsListByStudentType) && empty($studentsListByStatus) && !empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByEveningSemesterAndCourse;
+
+            }else if(!empty($studentsListByStudentType) && !empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus);
+
+            }else if(!empty($studentsListByStudentType) && empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByStudentType;
+
+            }else if(empty($studentsListByStudentType) && !empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
+
+                $commonStudentList = $studentsListByStatus;
+
+            }
+            
+        }
+
+        sort($commonStudentList);
+
+        $res["academic_year"] = $this->getAcademicYearListByStudentList($commonStudentList);
+        
+        
+        $res["intake_semester"] = $this->getIntakeSemesterListByStudentList($commonStudentList);
+        
+        $res["attendance_semester"]= $this->getAttendanceSemesterListByStudentList($commonStudentList);
+        $res["course"]= $this->getCoursesListByStudentList($commonStudentList);
+        $res["group_student_status"]= $this->getStatusListByStudentList($commonStudentList);
+        $res["evening_weekend"]= $this->getEveningWeekendListByStudentList($commonStudentList);
+        $res["group"]= $this->getGroupListByStudentList($commonStudentList);
+        $res["student_type"]= $this->getTypeListByStudentList($commonStudentList);
+ 
+        return response()->json(['res' => $res,], 200);
+        
+    }
+    protected function getAcademicYearListByStudentList($studentList) {
+        $res = [];
+        $i = 1;
+        
+        $academicYears = StudentProposedCourse::whereIn('student_id',$studentList)->pluck('academic_year_id')->unique()->toArray();
+        
+        $list = AcademicYear::whereIn('id',$academicYears)->orderBy('id', 'DESC')->get();
+        foreach ($list as $data):
+                        
+            $res[$i]['id'] = $data->id;
+            $res[$i]['name'] = $data->name;
+            $i++;
+    
+        endforeach;
+        
+        return $res;
+    }
+    protected function getIntakeSemesterListByStudentList($studentList) {
+
+        $res = [];
+        $i = 1;
+        $semesterSet = StudentProposedCourse::whereIn('student_id',$studentList)->pluck('semester_id')->unique()->toArray();
+        $list = Semester::whereIn('id',$semesterSet)->orderBy('name', 'DESC')->get();
+        foreach ($list as $data):
+            $res[$i]['id'] = $data->id;
+            $res[$i]['name'] = $data->name;
+            $i++;
+        endforeach;
+        
+
+        return $res;
+    }
+
+    protected function getCoursesListByStudentList($studentList) {
+
+        $res = [];
+        $i = 1;
+        $course_creation_id = StudentCourseRelation::whereIn('student_id',$studentList)->pluck('course_creation_id')->unique()->toArray();
+        $courseId = CourseCreation::whereIn('id',$course_creation_id)->pluck('course_id')->unique()->toArray();
+        $list = Course::whereIn('id',$courseId)->orderBy('name', 'DESC')->get();
+
+        foreach ($list as $data):
+            $res[$i]['id'] = $data->id;
+            $res[$i]['name'] = $data->name;
+            $i++;
+        endforeach;
+        return $res;
+    }
+
+    protected function getStatusListByStudentList($studentList) {
+
+        $status_id = Student::whereIn('id',$studentList)->pluck('status_id')->unique()->toArray();
+        $list = Status::whereIn('id',$status_id)->orderBy('name', 'DESC')->get();
+        $res = [];
+        $i = 1;
+        foreach ($list as $data):
+            $res[$i]['id'] = $data->id;
+            $res[$i]['name'] = $data->name;
+            $i++;
+        endforeach;
+        return $res;
+    }
+    protected function getEveningWeekendListByStudentList($studentList) {
+
+        $list = StudentProposedCourse::whereIn('student_id',$studentList)->pluck('full_time')->unique()->toArray();
+     
+        $res = [];
+        $i = 1;
+        foreach ($list as $data):
+            
+            $res[$i]['id'] = $data;
+            $res[$i]['name'] = (isset($data) && $data==1)  ? "Yes" : "No";
+            $i++;
+        endforeach;
+        return $res;
+    }
+
+    protected function getGroupListByStudentList($studentList) {
+
+        $studentsListByTerm = Assign::whereIn("student_id",$studentList)->pluck('plan_id')->unique()->toArray();
+        $groups = Plan::whereIn('id', $studentsListByTerm)->pluck('group_id')->unique()->toArray();
+        $list = Group::whereIn('id', $groups)->orderBy('name', 'ASC')->groupBy('name')->get();
+        $res = [];
+        $i = 1;
+
+        foreach ($list as $data):
+            
+            $res[$i]['id'] = $data->name;
+            $res[$i]['name'] = $data->name;
+            $i++;
+        endforeach;
+
+        return $res;
+
+    }
+
+    protected function getAttendanceSemesterListByStudentList($studentList) {
+        
+        $studentsListByTerm = Assign::whereIn("student_id",$studentList)->pluck('plan_id')->unique()->toArray();
+        $attendanceTerms = Plan::whereIn('id', $studentsListByTerm)->pluck('term_declaration_id')->unique()->toArray();
+        $list = TermDeclaration::whereIn('id', $attendanceTerms)->orderBy('name', 'DESC')->get();
+        $res = [];
+        $i = 1;
+        foreach ($list as $data):
+            $res[$i]['id'] = $data->id;
+            $res[$i]['name'] = $data->name;
+            $i++;
+        endforeach;
+        return $res;
+
+    }
+
+    protected function getTypeListByStudentList($studentList) {
+        $res = [];
+        $i = 1;
+        $list = StudentCourseRelation::whereIn('student_id',$studentList)->pluck('type')->unique()->toArray();
+
+        foreach ($list as $data):
+            $res[$i]['id'] = $data;
+            $res[$i]['name'] = $data;
+            $i++;
+        endforeach;
+        return $res;
     }
     
     public function workplacement($student_id) {

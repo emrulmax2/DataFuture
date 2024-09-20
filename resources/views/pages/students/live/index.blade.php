@@ -116,7 +116,7 @@
                                 <div id="studentSearchAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="studentSearchAccordion-1" data-tw-parent="#studentSearchAccordion">
                                     <div class="accordion-body">
                                         <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
-                                            <div class="col-span-12 sm:col-span-3">
+                                            {{-- <div class="col-span-12 sm:col-span-3">
                                                 <label for="academic_year" class="form-label">Academic Year <span class="text-danger">*</span></label>
                                                 <select id="academic_year" class="w-full tom-selects" multiple name="group[academic_year][]">
                                                     <option value="">Please Select</option>
@@ -127,14 +127,14 @@
                                                     @endif
                                                 </select>
                                                 <div class="acc__input-error error-academic_year text-danger mt-2"></div>
-                                            </div>
+                                            </div> --}}
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="intake_semester" class="form-label">Intake Semester </label>
                                                 <select id="intake_semester" class="w-full tom-selects" multiple name="group[intake_semester][]">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($semesters))
                                                         @foreach($semesters as $sem)
-                                                            <option value="{{ $sem->id }}">{{ $sem->name }}</option>
+                                                                <option value="{{ $sem->id }}">{{ $sem->name }}</option>
                                                         @endforeach
                                                     @endif
                                                 </select>
@@ -144,7 +144,11 @@
                                                 <label for="attendance_semester" class="form-label">Attendance Semester </label>
                                                 <select id="attendance_semester" class="w-full tom-selects" multiple name="group[attendance_semester][]">
                                                     <option value="">Please Select</option>
-                                                    
+                                                    @if(!empty($terms))
+                                                        @foreach($terms as $term)
+                                                                <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                                        @endforeach
+                                                    @endif
                                                 </select>
                                                 <div class="acc__input-error error-attendance_semester text-danger mt-2"></div>
                                             </div>
@@ -183,12 +187,12 @@
                                                     <option value="OVERSEAS">OVERSEAS</option></option>
                                                 </select>
                                             </div>
-                                            <div class="col-span-12 sm:col-span-3">
+                                            {{-- <div class="col-span-12 sm:col-span-3">
                                                 <label for="term_status" class="form-label">Student Term Status</label>
                                                 <select id="term_status" class="w-full tom-selects" multiple name="group[term_status][]" multiple>
                                                     <option value="">Please Select</option>
                                                 </select>
-                                            </div>
+                                            </div> --}}
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="group_student_status" class="form-label">Student Status</label>
                                                 <select id="group_student_status" class="w-full tom-selects" name="group[group_student_status][]" multiple>
@@ -200,8 +204,8 @@
                                                     @endif
                                                 </select>
                                             </div>
-                                            <div class="col-span-12 sm:col-span-9 ml-auto mt-auto">
-                                                <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-auto w-96"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                            <div class="col-span-12 sm:col-span-3 ml-auto mt-auto">
+                                                <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-auto w-80"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
                                             </div>
                                             <input type="hidden" id="groupSearchStatus" value="0" class="form-control" name="group[stataus]">
                                         </div>

@@ -19,7 +19,7 @@ var liveStudentsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 50,
-            paginationSizeSelector: [true, 50, 100, 200, 500, 1000],
+            paginationSizeSelector: [50, 100, 250,500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -213,383 +213,883 @@ var liveStudentsListTable = (function () {
             }
         };
         var student_status = new TomSelect('#student_status', tomOptionsMul);
-        var academic_year = new TomSelect('#academic_year', tomOptionsMul);
+        //var academic_year = new TomSelect('#academic_year', tomOptionsMul);
         var intake_semester = new TomSelect('#intake_semester', tomOptionsMul);
         var attendance_semester = new TomSelect('#attendance_semester', tomOptionsMul);
-            attendance_semester.clear()
-            attendance_semester.disable();
+            //attendance_semester.clear()
+            //attendance_semester.disable();
         var course = new TomSelect('#course', tomOptionsMul);
-            course.clear(true)
-            course.disable();
+            //course.clear(true)
+            //course.disable();
         var group = new TomSelect('#group', tomOptionsMul);
             group.clear(true)
             group.disable();
-        var term_status = new TomSelect('#term_status', tomOptionsMul);
+        //var term_status = new TomSelect('#term_status', tomOptionsMul);
         var student_type = new TomSelect('#student_type', tomOptionsMul);
         var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
+        var evening_weekend = new TomSelect('#evening_weekend', tomOptions);
         ///course.list.by.academic.term
-        academic_year.on('change', function(e) {
-            let academicList = academic_year.getValue();
+        // academic_year.on('change', function(e) {
+        //     let academicList = academic_year.getValue();
             
-            attendance_semester.clear(true)
-            attendance_semester.clearOptions();
-            attendance_semester.disable();
+        //     attendance_semester.clear(true)
+        //     attendance_semester.clearOptions();
+        //     attendance_semester.disable();
             
-            if(academicList.length > 0 ){
+        //     if(academicList.length > 0 ){
                 
-                intake_semester.clear(true)
-                intake_semester.clearOptions();
-                intake_semester.disable();
-                axios({
-                    method: "post",
-                    url: route('student.get.intake.by.academics'),
-                    data: { academic_years : academicList },
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        intake_semester.enable();
-                        $.each(res, function(index, row) {
-                            intake_semester.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        intake_semester.refreshOptions();
-                    }
-                }).catch(error => {
-                    if (error.response) {
+        //         intake_semester.clear(true)
+        //         intake_semester.clearOptions();
+        //         intake_semester.disable();
+        //         axios({
+        //             method: "post",
+        //             url: route('student.get.intake.by.academics'),
+        //             data: { academic_years : academicList },
+        //             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        //         }).then(response => {
+        //             if (response.status == 200) {
+        //                 var res = response.data.res;
+        //                 intake_semester.enable();
+        //                 $.each(res, function(index, row) {
+        //                     intake_semester.addOption({
+        //                         value: row.id,
+        //                         text: row.name,
+        //                     });
+        //                 });
+        //                 intake_semester.refreshOptions();
+        //             }
+        //         }).catch(error => {
+        //             if (error.response) {
 
-                        intake_semester.enable();
-                        intake_semester.clear();
-                        intake_semester.clearOptions();
-                        console.log('error');
+        //                 intake_semester.enable();
+        //                 intake_semester.clear();
+        //                 intake_semester.clearOptions();
+        //                 console.log('error');
 
-                    }
-                });
-                axios({
-                    method: "post",
-                    url: route('student.get.term.by.academics'),
-                    data: { academic_years : academicList },
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        attendance_semester.enable();
-                        $.each(res, function(index, row) {
-                            attendance_semester.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        attendance_semester.refreshOptions();
-                    }
-                }).catch(error => {
-                    if (error.response) {
+        //             }
+        //         });
+        //         axios({
+        //             method: "post",
+        //             url: route('student.get.term.by.academics'),
+        //             data: { academic_years : academicList },
+        //             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        //         }).then(response => {
+        //             if (response.status == 200) {
+        //                 var res = response.data.res;
+        //                 attendance_semester.enable();
+        //                 $.each(res, function(index, row) {
+        //                     attendance_semester.addOption({
+        //                         value: row.id,
+        //                         text: row.name,
+        //                     });
+        //                 });
+        //                 attendance_semester.refreshOptions();
+        //             }
+        //         }).catch(error => {
+        //             if (error.response) {
 
-                        attendance_semester.enable();
-                        attendance_semester.clear();
-                        attendance_semester.clearOptions();
-                        console.log('error');
+        //                 attendance_semester.enable();
+        //                 attendance_semester.clear();
+        //                 attendance_semester.clearOptions();
+        //                 console.log('error');
 
-                    }
-                });
+        //             }
+        //         });
 
 
-            }else{
-                attendance_semester.clear(true)
-                attendance_semester.clearOptions();
-                attendance_semester.disable();
-            }
-        })
+        //     }else{
+        //         attendance_semester.clear(true)
+        //         attendance_semester.clearOptions();
+        //         attendance_semester.disable();
+        //     }
+        // })
         intake_semester.on('change', function(){
             let intakeSemester = intake_semester.getValue();
-            attendance_semester.clear(true);
-            course.clear(true);
-            course.clearOptions();
-            course.disable();
 
             if(intakeSemester.length > 0){
-                axios({
-                    method: "post",
-                    url: route('student.get.coureses.by.intake.or.term'),
-                    data: {intakeSemester : intakeSemester},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        course.enable();
-                        $.each(res, function(index, row) {
-                            course.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
+            let intake_semesters = intake_semester.getValue();
+            let attendance_semesters = attendance_semester.getValue();
+            let courses = course.getValue();
+            let groups = group.getValue();
+            let student_types = student_type.getValue();
+            let group_student_statuses = group_student_status.getValue();
+            let evening_weekends = evening_weekend.getValue();
+            //student.get.all.student.type
+
+            axios({
+                method: "post",
+                url: route('student.get.all.student.type'),
+                data: { academic_years : '' , 
+                        term_declaration_ids: attendance_semesters , 
+                        intake_semesters: intake_semesters,
+                        courses: courses, 
+                        groups:groups,
+                        group_student_statuses:group_student_statuses,
+                        student_types:student_types,
+                        evening_weekends:evening_weekends
+                },
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let res = response.data.res;
+
+                   
+                    student_type.clearOptions();
+                    student_type.enable();
+                    
+                    attendance_semester.clearOptions();
+                    attendance_semester.enable();
+
+                    
+                    course.clearOptions();
+                    course.enable();
+
+                    
+                    group.clearOptions();
+                    group.enable();
+
+                    
+                    student_type.clearOptions();
+                    student_type.enable();
+
+                    
+                    group_student_status.clearOptions();
+                    group_student_status.enable();
+
+                    
+                    evening_weekend.clearOptions();
+                    evening_weekend.enable();
+                    
+                    $.each(res.intake_semester, function(index, row) {
+                        intake_semester.addOption({
+                            value: row.id,
+                            text: row.name,
                         });
-                        course.refreshOptions();
-                    }
+                    });
+                    //intake_semester.setValue(intake_semesters);
+                    $.each(res.attendance_semester, function(index, row) {
+                        attendance_semester.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
 
-                }).catch(error => {
-                    if (error.response) {
-                        console.log('error');
-                        course.enable();
-                        course.clear(true);
-                        course.clearOptions();
-                    }
+                    $.each(res.course, function(index, row) {
+                        course.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //course.setValue(courses);
 
-                });
+                    $.each(res.group_student_status, function(index, row) {
+                        group_student_status.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //group_student_status.setValue(group_student_statuses);
+
+                    $.each(res.evening_weekend, function(index, row) {
+                        evening_weekend.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //evening_weekend.setValue(evening_weekends);
+
+                    $.each(res.group, function(index, row) {
+                        group.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //group.setValue(groups);
+                    $.each(res.student_type, function(index, row) {
+                        student_type.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                }
+            });
             }
         });
         
         attendance_semester.on('change', function(e) {
 
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            course.clear(true)
-            course.disable();
-            course.clearOptions();
+            let attendanceSemester = attendance_semester.getValue();
 
-            if(List1.length > 0 ) {
+            if(attendanceSemester.length > 0 ) {
                 
+                let intake_semesters = intake_semester.getValue();
+                let attendance_semesters = attendance_semester.getValue();
+                let courses = course.getValue();
+                let groups = group.getValue();
+                let student_types = student_type.getValue();
+                let group_student_statuses = group_student_status.getValue();
+                let evening_weekends = evening_weekend.getValue();
+            
                 axios({
                     method: "post",
-                    url: route('student.get.coureses.by.terms'),
-                    data: { academic_years : List2, term_declaration_ids :  List1},
+                    url: route('student.get.all.student.type'),
+                    data: { academic_years : '' , 
+                            term_declaration_ids: attendance_semesters , 
+                            intake_semesters: intake_semesters,
+                            courses: courses, 
+                            groups:groups,
+                            group_student_statuses:group_student_statuses,
+                            student_types:student_types,
+                            evening_weekends:evening_weekends
+                    },
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
-
                     if (response.status == 200) {
-                        course.enable();
+                        let res = response.data.res;
+
+                        intake_semester.clearOptions();
+                        intake_semester.enable();
+
+                        student_type.clearOptions();
+                        student_type.enable();
                         
-                        var res = response.data.res;
-                        $.each(res, function(index, row) {
+                        course.clearOptions();
+                        course.enable();
+
+                        
+                        group.clearOptions();
+                        group.enable();
+
+                        
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        group_student_status.clearOptions();
+                        group_student_status.enable();
+
+                        
+                        evening_weekend.clearOptions();
+                        evening_weekend.enable();
+                        
+                        $.each(res.intake_semester, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //intake_semester.setValue(intake_semesters);
+                        $.each(res.attendance_semester, function(index, row) {
+                            attendance_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.course, function(index, row) {
                             course.addOption({
                                 value: row.id,
                                 text: row.name,
                             });
                         });
-                         course.refreshOptions(); 
-                        /* Student Type Start */
-                            student_type.clear(true)
-                            student_type.clearOptions();
-                            student_type.disable();
-                            axios({
-                                method: "post",
-                                url: route('student.get.all.student.type'),
-                                data: { academic_years : List2 , term_declaration_ids: List1},
-                                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                            }).then(response => {
-                                if (response.status == 200) {
-                                    let res = response.data.res;
-                                    student_type.enable();
-                                    $.each(res, function(index, row) {
-                                        student_type.addOption({
-                                            value: row.id,
-                                            text: row.name,
-                                        });
-                                    });
-                                }
-                            }).catch(error => {
-                                if (error.response) {
-            
-                                    student_type.enable();
-                                    student_type.clear();
-                                    student_type.clearOptions();
-                                    console.log('error');
-            
-                                }
-                            });
-                        /* Student Type End */
-                    
-                       
-                }
-                }).catch(error => {
+                        //course.setValue(courses);
 
-                    if (error.response) {
-
-                        course.enable();
-                        course.clear();
-                        course.clearOptions();
-                        console.log('error');
-
-                    }
-
-                });
-
-                /* catch the Status */
-                let List3 = course.getValue();
-                let List4 = group.getValue();
-                group_student_status.clear(true)
-                group_student_status.disable();
-                group_student_status.clearOptions();
-
-                if(List1.length > 0 ) {
-
-                    axios({
-                        method: "post",
-                        url: route('student.get.status.by.groups'),
-                        data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3, groups: List4 },
-                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                    }).then(response => {
-
-                        if (response.status == 200) {
-
-                            var res = response.data.res;
-                            group_student_status.enable();
-                            $.each(res, function(index, row) {
-                                group_student_status.addOption({
-                                    value: row.id,
-                                    text: row.name,
-                                });
-                            });
-                            //group.refreshOptions();
-                        }
-
-                    }).catch(error => {
-                        if (error.response) {
-
-                            group_student_status.enable();
-                            group_student_status.clear();
-                            group_student_status.clearOptions();
-                            group_student_status.log('error');
-
-                        }
-                    });
-
-                } else {
-
-                    group_student_status.clear(true)
-                    group_student_status.clearOptions();
-                    group_student_status.disable();
-
-                }
-                /* End catch the Status */
-            }else{
-                group_student_status.clear(true)
-                group_student_status.clearOptions();
-                group_student_status.disable();
-            }
-        })
-
-        course.on('change', function(e) {
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            let List3 = course.getValue();
-            
-            group.clear(true)
-            group.disable();
-            group.clearOptions();
-
-            if(List1.length > 0 ){
-                axios({
-                    method: "post",
-                    url: route('student.get.groups'),
-                    data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        group.enable();
-                        $.each(res, function(index, row) {
-                            group.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        group.refreshOptions();
-                        /* Student Type Start */
-                            student_type.clear(true)
-                            student_type.clearOptions();
-                            student_type.disable();
-                            axios({
-                                method: "post",
-                                url: route('student.get.all.student.type'),
-                                data: { academic_years : List2 , term_declaration_ids: List1},
-                                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                            }).then(response => {
-                                if (response.status == 200) {
-                                    let res = response.data.res;
-                                    student_type.enable();
-                                    $.each(res, function(index, row) {
-                                        student_type.addOption({
-                                            value: row.id,
-                                            text: row.name,
-                                        });
-                                    });
-                                }
-                            }).catch(error => {
-                                if (error.response) {
-            
-                                    student_type.enable();
-                                    student_type.clear();
-                                    student_type.clearOptions();
-                                    console.log('error');
-            
-                                }
-                            });
-                        /* Student Type End */
-                    }
-                }).catch(error => {
-                    if (error.response) {
-
-                        group.enable();
-                        group.clear();
-                        group.clearOptions();
-                        group.log('error');
-
-                    }
-                });
-            }else{
-                group.clear(true)
-                group.clearOptions();
-                group.disable();
-            }
-        })
-
-        group.on('change', function(e) {
-            let List1 = attendance_semester.getValue();
-            let List2 = academic_year.getValue();
-            let List3 = course.getValue();
-            let List4 = group.getValue();
-            group_student_status.clear(true)
-            group_student_status.disable();
-            group_student_status.clearOptions();
-
-            if(List1.length > 0 ) {
-                axios({
-                    method: "post",
-                    url: route('student.get.status.by.groups'),
-                    data: { academic_years : List2, term_declaration_ids :  List1 ,  courses : List3, groups: List4 },
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        var res = response.data.res;
-                        group_student_status.enable();
-                        $.each(res, function(index, row) {
+                        $.each(res.group_student_status, function(index, row) {
                             group_student_status.addOption({
                                 value: row.id,
                                 text: row.name,
                             });
                         });
-                        group.refreshOptions();
-                    }
-                }).catch(error => {
-                    if (error.response) {
+                        //group_student_status.setValue(group_student_statuses);
 
-                        group_student_status.enable();
-                        group_student_status.clear();
-                        group_student_status.clearOptions();
-                        group_student_status.log('error');
+                        $.each(res.evening_weekend, function(index, row) {
+                            evening_weekend.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //evening_weekend.setValue(evening_weekends);
 
+                        $.each(res.group, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group.setValue(groups);
+                        $.each(res.student_type, function(index, row) {
+                            student_type.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
                     }
                 });
-            }else{
-                group_student_status.clear(true)
-                group_student_status.clearOptions();
-                group_student_status.disable();
             }
         })
+
+        course.on('change', function(e) {
+            let coursee = course.getValue();
+            
+            if(coursee.length > 0 ) {
+                
+                let intake_semesters = intake_semester.getValue();
+                let attendance_semesters = attendance_semester.getValue();
+                let courses = course.getValue();
+                let groups = group.getValue();
+                let student_types = student_type.getValue();
+                let group_student_statuses = group_student_status.getValue();
+                let evening_weekends = evening_weekend.getValue();
+            
+                axios({
+                    method: "post",
+                    url: route('student.get.all.student.type'),
+                    data: { academic_years : '' , 
+                            term_declaration_ids: attendance_semesters , 
+                            intake_semesters: intake_semesters,
+                            courses: courses, 
+                            groups:groups,
+                            group_student_statuses:group_student_statuses,
+                            student_types:student_types,
+                            evening_weekends:evening_weekends
+                    },
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+
+                        intake_semester.clearOptions();
+                        intake_semester.enable();
+
+                        
+                        attendance_semester.clearOptions();
+                        attendance_semester.enable();
+
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        group.clearOptions();
+                        group.enable();
+
+                        
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        group_student_status.clearOptions();
+                        group_student_status.enable();
+
+                        
+                        evening_weekend.clearOptions();
+                        evening_weekend.enable();
+                        
+                        $.each(res.intake_semester, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                        $.each(res.attendance_semester, function(index, row) {
+                            attendance_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.course, function(index, row) {
+                            course.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //course.setValue(courses);
+
+                        $.each(res.group_student_status, function(index, row) {
+                            group_student_status.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group_student_status.setValue(group_student_statuses);
+
+                        $.each(res.evening_weekend, function(index, row) {
+                            evening_weekend.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //evening_weekend.setValue(evening_weekends);
+
+                        $.each(res.group, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group.setValue(groups);
+                        $.each(res.student_type, function(index, row) {
+                            student_type.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                    }
+                });
+            }
+        })
+
+        group.on('change', function(e) {
+            let groups = group.getValue();
+            
+            if(groups.length > 0 ) {
+                
+                let intake_semesters = intake_semester.getValue();
+                let attendance_semesters = attendance_semester.getValue();
+                let courses = course.getValue();
+                let groups = group.getValue();
+                let student_types = student_type.getValue();
+                let group_student_statuses = group_student_status.getValue();
+                let evening_weekends = evening_weekend.getValue();
+            
+                axios({
+                    method: "post",
+                    url: route('student.get.all.student.type'),
+                    data: { academic_years : '' , 
+                            term_declaration_ids: attendance_semesters , 
+                            intake_semesters: intake_semesters,
+                            courses: courses, 
+                            groups:groups,
+                            group_student_statuses:group_student_statuses,
+                            student_types:student_types,
+                            evening_weekends:evening_weekends
+                    },
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+
+                        intake_semester.clearOptions();
+                        intake_semester.enable();
+
+                        
+                        attendance_semester.clearOptions();
+                        attendance_semester.enable();
+
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        group_student_status.clearOptions();
+                        group_student_status.enable();
+
+                        
+                        evening_weekend.clearOptions();
+                        evening_weekend.enable();
+
+                        course.clearOptions();
+                        course.enable();
+                        
+                        $.each(res.intake_semester, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                        $.each(res.attendance_semester, function(index, row) {
+                            attendance_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.course, function(index, row) {
+                            course.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //course.setValue(courses);
+
+                        $.each(res.group_student_status, function(index, row) {
+                            group_student_status.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group_student_status.setValue(group_student_statuses);
+
+                        $.each(res.evening_weekend, function(index, row) {
+                            evening_weekend.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //evening_weekend.setValue(evening_weekends);
+
+                        $.each(res.group, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group.setValue(groups);
+                        $.each(res.student_type, function(index, row) {
+                            student_type.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                    }
+                });
+            }
+        })
+        student_type.on('change', function(e){
+            let group_student_statuses = group_student_status.getValue();
+
+            if(group_student_statuses.length > 0){
+                let intake_semesters = intake_semester.getValue();
+                let attendance_semesters = attendance_semester.getValue();
+                let courses = course.getValue();
+                let groups = group.getValue();
+                let student_types = student_type.getValue();
+                let group_student_statuses = group_student_status.getValue();
+                let evening_weekends = evening_weekend.getValue();
+                //student.get.all.student.type
+
+                axios({
+                    method: "post",
+                    url: route('student.get.all.student.type'),
+                    data: { academic_years : '' , 
+                            term_declaration_ids: attendance_semesters , 
+                            intake_semesters: intake_semesters,
+                            courses: courses, 
+                            groups:groups,
+                            group_student_statuses:group_student_statuses,
+                            student_types:student_types,
+                            evening_weekends:evening_weekends
+                    },
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+
+                        evening_weekend.clearOptions();
+                        evening_weekend.enable();
+
+                        intake_semester.clearOptions();
+                        intake_semester.enable();
                     
+                        student_type.clearOptions();
+                        student_type.enable();
+                        
+                        attendance_semester.clearOptions();
+                        attendance_semester.enable();
+
+                        
+                        course.clearOptions();
+                        course.enable();
+
+                        
+                        group.clearOptions();
+                        group.enable();
+
+                        
+                        group_student_status.clearOptions();
+                        group_student_status.enable();
+
+                        
+                        
+                        $.each(res.intake_semester, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                        $.each(res.attendance_semester, function(index, row) {
+                            attendance_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.course, function(index, row) {
+                            course.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.group_student_status, function(index, row) {
+                            group_student_status.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group_student_status.setValue(group_student_statuses);
+
+                        $.each(res.evening_weekend, function(index, row) {
+                            evening_weekend.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //evening_weekend.setValue(evening_weekends);
+
+                        $.each(res.group, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.student_type, function(index, row) {
+                            student_type.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                    }
+                });
+            
+            }
+        }) 
         
+        group_student_status.on('change', function(e){
+
+            let group_student_statuses = group_student_status.getValue();
+
+            if(group_student_statuses.length > 0){
+                let intake_semesters = intake_semester.getValue();
+                let attendance_semesters = attendance_semester.getValue();
+                let courses = course.getValue();
+                let groups = group.getValue();
+                let student_types = student_type.getValue();
+                let group_student_statuses = group_student_status.getValue();
+                let evening_weekends = evening_weekend.getValue();
+                //student.get.all.student.type
+
+                axios({
+                    method: "post",
+                    url: route('student.get.all.student.type'),
+                    data: { academic_years : '' , 
+                            term_declaration_ids: attendance_semesters , 
+                            intake_semesters: intake_semesters,
+                            courses: courses, 
+                            groups:groups,
+                            group_student_statuses:group_student_statuses,
+                            student_types:student_types,
+                            evening_weekends:evening_weekends
+                    },
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+
+                        evening_weekend.clearOptions();
+                        evening_weekend.enable();
+
+                        intake_semester.clearOptions();
+                        intake_semester.enable();
+                    
+                        student_type.clearOptions();
+                        student_type.enable();
+                        
+                        attendance_semester.clearOptions();
+                        attendance_semester.enable();
+
+                        
+                        course.clearOptions();
+                        course.enable();
+
+                        
+                        group.clearOptions();
+                        group.enable();
+
+                        
+                        student_type.clearOptions();
+                        student_type.enable();
+
+                        
+                        
+                        $.each(res.intake_semester, function(index, row) {
+                            intake_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                        $.each(res.attendance_semester, function(index, row) {
+                            attendance_semester.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.course, function(index, row) {
+                            course.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.group_student_status, function(index, row) {
+                            group_student_status.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //group_student_status.setValue(group_student_statuses);
+
+                        $.each(res.evening_weekend, function(index, row) {
+                            evening_weekend.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        //evening_weekend.setValue(evening_weekends);
+
+                        $.each(res.group, function(index, row) {
+                            group.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+
+                        $.each(res.student_type, function(index, row) {
+                            student_type.addOption({
+                                value: row.id,
+                                text: row.name,
+                            });
+                        });
+                        
+                    }
+                });
+            
+            }
+        })
+        
+        evening_weekend.on('change', function(e){
+            let evening_weekends = evening_weekend.getValue();
+
+            if(evening_weekends.length > 0){
+            let intake_semesters = intake_semester.getValue();
+            let attendance_semesters = attendance_semester.getValue();
+            let courses = course.getValue();
+            let groups = group.getValue();
+            let student_types = student_type.getValue();
+            let group_student_statuses = group_student_status.getValue();
+            let evening_weekends = evening_weekend.getValue();
+            //student.get.all.student.type
+
+            axios({
+                method: "post",
+                url: route('student.get.all.student.type'),
+                data: { academic_years : '' , 
+                        term_declaration_ids: attendance_semesters , 
+                        intake_semesters: intake_semesters,
+                        courses: courses, 
+                        groups:groups,
+                        group_student_statuses:group_student_statuses,
+                        student_types:student_types,
+                        evening_weekends:evening_weekends
+                },
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let res = response.data.res;
+
+                    intake_semester.clearOptions();
+                    intake_semester.enable();
+                   
+                    student_type.clearOptions();
+                    student_type.enable();
+                    
+                    attendance_semester.clearOptions();
+                    attendance_semester.enable();
+
+                    
+                    course.clearOptions();
+                    course.enable();
+
+                    
+                    group.clearOptions();
+                    group.enable();
+
+                    
+                    student_type.clearOptions();
+                    student_type.enable();
+
+                    
+                    group_student_status.clearOptions();
+                    group_student_status.enable();
+                    
+                    $.each(res.intake_semester, function(index, row) {
+                        intake_semester.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //intake_semester.setValue(intake_semesters);
+                    $.each(res.attendance_semester, function(index, row) {
+                        attendance_semester.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+
+                    $.each(res.course, function(index, row) {
+                        course.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //course.setValue(courses);
+
+                    $.each(res.group_student_status, function(index, row) {
+                        group_student_status.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //group_student_status.setValue(group_student_statuses);
+
+                    $.each(res.evening_weekend, function(index, row) {
+                        evening_weekend.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //evening_weekend.setValue(evening_weekends);
+
+                    $.each(res.group, function(index, row) {
+                        group.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    //group.setValue(groups);
+                    $.each(res.student_type, function(index, row) {
+                        student_type.addOption({
+                            value: row.id,
+                            text: row.name,
+                        });
+                    });
+                    student_type.setValue(student_types);
+                }
+            });
+            
+            }
+
+        })
         // Reset Tom Select
         function resetStudentIDSearch(){
             $('#registration_no').val('');
@@ -603,13 +1103,13 @@ var liveStudentsListTable = (function () {
         }
 
         function resetGroupSearch() {
-            academic_year.clear(true);
+            //academic_year.clear(true);
             intake_semester.clear(true);
             attendance_semester.clear(true);
             course.clear(true); 
             group.clear(true); 
             
-            term_status.clear(true);
+            //term_status.clear(true);
             student_type.clear(true);
             group_student_status.clear(true);
             $('#evening_weekend').val('');
@@ -628,32 +1128,32 @@ var liveStudentsListTable = (function () {
                 filterStudentListTable();
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
-                var $academic_year = $('#academic_year');
-                var $intake_semester = $('#intake_semester');
-                var $termDeclaration = $('#attendance_semester');
-                var $course = $('#course');
+                // var $academic_year = $('#academic_year');
+                // var $intake_semester = $('#intake_semester');
+                // var $termDeclaration = $('#attendance_semester');
+                // var $course = $('#course');
 
-                let List1 = attendance_semester.getValue();
-                let List2 = academic_year.getValue();
-                let List3 = course.getValue();
-                let List4 = group.getValue();
-                let List5 = intake_semester.getValue();
+                // let List1 = attendance_semester.getValue();
+                // let List2 = academic_year.getValue();
+                // let List3 = course.getValue();
+                // let List4 = group.getValue();
+                // let List5 = intake_semester.getValue();
                 //console.log(List5.length);
-                if((List2.length>0 )){
+                //if((List1.length>0 && List2.length>0) || (List5.length>0 && List2.length>0)){
                     filterStudentListTable();
-                }else{
-                    if(List2.length>0){
-                        $academic_year.siblings('.acc__input-error').html('This field is required.')
-                    }else{
-                        $academic_year.siblings('.acc__input-error').html('')
-                    }
+                //}else{
+                    // if(List2.length>0){
+                    //     $academic_year.siblings('.acc__input-error').html('This field is required.')
+                    // }else{
+                    //     $academic_year.siblings('.acc__input-error').html('')
+                    // }
                     // if(List1.length>0){
                     //     $termDeclaration.siblings('.acc__input-error').html('This field is required.')
                     // }else{
                     //     $termDeclaration.siblings('.acc__input-error').html('')
                     // }
                     
-                }
+                //}
             });
 
             $("#resetStudentSearch").on("click", function (event) {
