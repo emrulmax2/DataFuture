@@ -209,6 +209,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Reports\SystemReportController;
@@ -2719,5 +2720,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SystemReportController::class)->group(function(){
         Route::get('reports', 'index')->name('reports'); 
+    });
+
+    Route::controller(CollectionReportController::class)->group(function(){
+        Route::get('reports/accounts/collection-report', 'index')->name('reports.account.collection'); 
+        Route::post('reports/accounts/export-collection-report', 'exportCollectionReport')->name('reports.account.collection.export'); 
     });
 });
