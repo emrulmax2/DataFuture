@@ -14,8 +14,9 @@ use Maatwebsite\Excel\Facades\Excel;
 class CollectionReportController extends Controller
 {
     public function exportCollectionReport(AccountCollectionReportRequest $request){
-        $from_date = isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : date('Y-m-d');
-        $to_date = isset($request->to_date) && !empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : date('Y-m-d');
+        $dates = (isset($request->date_range) && !empty($request->date_range) ? explode(' - ', $request->date_range) : []);
+        $from_date = isset($dates[0]) && !empty($dates[0]) ? date('Y-m-d', strtotime($dates[0])) : date('Y-m-d');
+        $to_date = isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : date('Y-m-d');
         $date_type = isset($request->date_type) && empty($request->date_type) ? $request->date_type : 'entry_date';
         $slcPaymentMethods = SlcPaymentMethod::orderBy('id', 'asc')->get();
 

@@ -26,30 +26,30 @@
                         <form action="{{ route('reports.account.collection.export') }}" method="post" id="collectionReportForm">
                             @csrf
                             <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
-                                <div class="col-span-12 sm:col-span-3">
-                                    <label for="from_date" class="form-label">From Date <span class="text-danger">*</span></label>
-                                    <input type="text" name="from_date" class="w-full form-control datepicker" id="from_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                                    <div class="acc__input-error error-from_date text-danger mt-2">{{ ($errors->has('from_date') ? $errors->first('from_date') : '')}}</div>
-                                </div>
-                                <div class="col-span-12 sm:col-span-3">
-                                    <label for="to_date" class="form-label">To Date <span class="text-danger">*</span></label>
-                                    <input type="text" name="to_date" class="w-full form-control datepicker" id="to_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                                    <div class="acc__input-error error-to_date text-danger mt-2">{{ ($errors->has('to_date') ? $errors->first('to_date') : '')}}</div>
+                                <div class="col-span-12 sm:col-span-2">
+                                    <label for="date_range" class="form-label">Date Range <span class="text-danger">*</span></label>
+                                    <div class="relative w-full mx-auto">
+                                        <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-slate-100 border text-slate-500">
+                                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" name="date_range" class="datepicker form-control pl-12" data-single-mode="true"  data-format="DD-MM-YYYY" data-daterange="true">
+                                    </div>
+                                    <div class="acc__input-error error-date_range text-danger mt-2">{{ ($errors->has('date_range') ? $errors->first('date_range') : '')}}</div>
                                 </div>
                                 <div class="col-span-12 sm:col-span-3">
                                     <div class="flex flex-col sm:flex-row pt-10">
                                         <div class="form-check mr-5">
                                             <input id="date_type_1" checked class="form-check-input" type="radio" name="date_type" value="entry_date">
-                                            <label class="form-check-label" for="date_type_1">Entry Date</label>
+                                            <label class="form-check-label" for="date_type_1">Created Date</label>
                                         </div>
                                         <div class="form-check mr-2 mt-2 sm:mt-0">
                                             <input id="date_type_2" class="form-check-input" type="radio" name="date_type" value="payment_date">
-                                            <label class="form-check-label" for="date_type_2">Payment Date</label>
+                                            <label class="form-check-label" for="date_type_2">Invoice Date</label>
                                         </div>
                                     </div>
                                     <div class="acc__input-error error-date_type text-danger mt-2">{{ ($errors->has('date_type') ? $errors->first('date_type') : '')}}</div>
                                 </div>
-                                <div class="col-span-12 sm:col-span-3 ml-auto mt-auto text-right">
+                                <div class="col-span-12 sm:col-span-7 ml-auto mt-auto text-right">
                                     <button type="submit" class="btn btn-success text-white ml-auto w-auto"><i class="w-4 h-4 mr-2" data-lucide="file-text"></i> Export Excel</button>
                                 </div>
                             </div>

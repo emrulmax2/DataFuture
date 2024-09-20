@@ -22,8 +22,7 @@ class AccountCollectionReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from_date' => 'required',
-            'to_date' => 'required',
+            'date_range' => 'required',
             'date_type' => 'required',
         ];
     }
@@ -31,8 +30,7 @@ class AccountCollectionReportRequest extends FormRequest
     public function messages()
     {
         return [
-            'from_date.required' => 'From date is required.',
-            'to_date.required' => 'End date is required.',
+            'date_range.required' => 'Please select a date range.',
             'date_type.required' => 'Please check a date type.',
         ];
     }
