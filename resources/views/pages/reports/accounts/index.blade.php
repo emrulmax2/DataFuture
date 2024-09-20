@@ -32,7 +32,7 @@
                                         <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-slate-100 border text-slate-500">
                                             <i data-lucide="calendar" class="w-4 h-4"></i>
                                         </div>
-                                        <input type="text" name="date_range" class="datepicker form-control pl-12" data-single-mode="true"  data-format="DD-MM-YYYY" data-daterange="true">
+                                        <input type="text" name="date_range" class="datepicker form-control pl-12" data-format="DD-MM-YYYY" data-daterange="true">
                                     </div>
                                     <div class="acc__input-error error-date_range text-danger mt-2">{{ ($errors->has('date_range') ? $errors->first('date_range') : '')}}</div>
                                 </div>
