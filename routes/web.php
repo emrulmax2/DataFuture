@@ -210,6 +210,7 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
+use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Reports\SystemReportController;
@@ -2445,6 +2446,8 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/update-task-outcome', 'updateTaskOutcome')->name('task.manager.update.outcome');
 
         Route::post('task-manager/download-document', 'documentDownload')->name('task.manage.document.download');
+        Route::post('task-manager/create-pearson-registration-task', 'createPearsonRegistrationTask')->name('task.manager.create.pearson.registration');
+        Route::get('task-manager/pearson-registration-student-export', 'pearsonRegStudentListExport')->name('task.manager.pearson.registration.excel');
     });
 
     Route::controller(AssignController::class)->group(function() {
@@ -2725,5 +2728,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(CollectionReportController::class)->group(function(){
         Route::post('reports/accounts/export-collection-report', 'exportCollectionReport')->name('reports.account.collection.export'); 
+    });
+
+    Route::controller(PaymentUploadManagementController::class)->group(function(){
+        Route::get('reports/accounts/slc-payment-history-list', 'slcPaymentHistoryList')->name('reports.account.payment.history.list'); 
+        Route::post('reports/accounts/upload-payment-csv', 'uploadCSV')->name('reports.account.payment.upload.csv'); 
     });
 });

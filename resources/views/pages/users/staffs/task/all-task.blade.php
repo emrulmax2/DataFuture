@@ -89,7 +89,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="save" class="btn btn-primary w-auto">     
+                        <button type="submit" id="PearsonRegBtn" class="btn btn-primary w-auto">     
                             Create Task                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
@@ -122,7 +122,7 @@
                         <div class="text-slate-500 mt-2 successModalDesc"></div>
                     </div>
                     <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                        <button type="button" data-action="None" class="successCloser btn btn-primary w-24">Ok</button>
                     </div>
                 </div>
             </div>

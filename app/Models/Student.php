@@ -215,5 +215,10 @@ class Student extends Model
     public function termStatus(){
         return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->latestOfMany();
     }
+
+    public function award(){
+        $activeCRel = (isset($this->activeCR->id) && $this->activeCR->id > 0 ? $this->activeCR->id : 0);
+        return $this->hasOne(StudentAwardingBodyDetails::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+    }
     
 }

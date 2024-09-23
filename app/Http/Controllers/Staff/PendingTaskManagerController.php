@@ -6,6 +6,7 @@ use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
+use App\Http\Requests\PearsonRegistrationTaskRequest;
 use App\Http\Requests\TaskCanceledReasonRequest;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
@@ -814,5 +815,101 @@ class PendingTaskManagerController extends Controller
         $applicant_id = ($phase == 'Applicant' ? $theDoc->applicant_id : $theDoc->student->applicant_id);
         $tmpURL = Storage::disk('s3')->temporaryUrl('public/applicants/'.$applicant_id.'/'.$theDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
+    }
+
+    public function createPearsonRegistrationTask(PearsonRegistrationTaskRequest $request){
+        $registration_nos = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', str_replace(' ', '', $request->student_ids)) : []);
+        $theTask = TaskList::where('pearson_reg', 'Yes')->get()->first();
+        $assignRegNo = [];
+        $existsRegNo = [];
+        if(isset($theTask->id) && $theTask->id > 0):
+            if(!empty($registration_nos)):
+                foreach($registration_nos as $reg):
+                    $reg = trim($reg);
+                    if(!empty($reg)):
+                        $student = Student::where('registration_no', $reg)->get()->first();
+                        if(!isset($student->award->reference) || (isset($student->award->reference) && empty($student->award->reference))):
+                            $data = [];
+                            $data['student_id'] = $student->id;
+                            $data['task_list_id'] = $theTask->id;
+                            $data['status'] = 'Pending';
+                            $data['created_by'] = auth()->user()->id;
+
+                            StudentTask::create($data);
+                            $assignRegNo[] = $reg;
+                        else:
+                            $existsRegNo[] = $reg;
+                        endif;
+                    endif;
+                endforeach;
+                $messages = '';
+                if(!empty($assignRegNo)):
+                    $messages .= 'Pearson Reg. task created for &nbsp;<strong>'.implode(', ', $assignRegNo).'</strong> students. ';
+                endif;
+                if(!empty($existsRegNo)):
+                    $messages .= '&nbsp; <strong>'.implode(', ', $existsRegNo).'</strong>&nbsp; student\'s profile already has a register number.';
+                endif;
+
+                if(empty($assignRegNo)):
+                    return response()->json(['msg' => 'All student\'s profile already has a register number. &nbsp; <strong>'.implode(', ', $assignRegNo).'</strong>'], 206);
+                else:
+                    return response()->json(['msg' => $messages], 200);
+                endif;
+            else:
+                return response()->json(['msg' => 'Student registration no can not be empty. Please insert at least one registration no.'], 322);
+            endif;
+        else:
+            return response()->json(['msg' => 'Pearson registration task not found under Task List.'], 322);
+        endif;
+    }
+
+    public function pearsonRegStudentListExport(Request $request){
+        $ids = $request->ids;
+
+        if(!empty($ids)):
+            $theCollection = [];
+            $theCollection[1][] = 'Centre Reference';
+            $theCollection[1][] = 'Firstname';
+            $theCollection[1][] = 'Lastname';
+            $theCollection[1][] = 'Gender';
+            $theCollection[1][] = 'DOB';
+            $theCollection[1][] = 'Unique Learner Number';
+            $theCollection[1][] = 'Completion Date';
+            $theCollection[1][] = 'Study Mode';
+            $theCollection[1][] = 'Collaborative Partner No';
+            $theCollection[1][] = 'LSC code';
+            $theCollection[1][] = 'Combination';
+            							
+            $row = 2;
+            foreach($ids as $id):
+                if($id > 0):
+                    $student = Student::find($id);
+                    $completionDate = (isset($student->activeCR->course_end_date) && !empty($student->activeCR->course_end_date) ? date('d/M/Y', strtotime($student->activeCR->course_end_date)) : '');
+                    if(empty($completionDate)):
+                        $completionDate = (isset($student->activeCR->creation->availability[0]->course_end_date) && !empty($student->activeCR->creation->availability[0]->course_end_date) ? date('d/m/Y', strtotime($student->activeCR->creation->availability[0]->course_end_date)) : '');
+                    endif;
+
+                    /* Excel Data Array */
+                    $theCollection[$row][] = $student->registration_no;
+                    $theCollection[$row][] = $student->first_name;
+                    $theCollection[$row][] = $student->last_name;
+                    $theCollection[$row][] = (isset($student->sexid->name) && !empty($student->sexid->name) ? $student->sexid->name : '');
+                    $theCollection[$row][] = (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('d/m/Y', strtotime($student->date_of_birth)) : '');
+                    $theCollection[$row][] = '';
+                    $theCollection[$row][] = $completionDate;
+                    $theCollection[$row][] = 'A';
+                    $theCollection[$row][] = '';
+                    $theCollection[$row][] = '';
+                    $theCollection[$row][] = 'A';
+
+                    $row++;
+                    /*endif;*/
+                endif;
+            endforeach;
+
+            return Excel::download(new StudentEmailIdTaskExport($theCollection), 'Pearson_Registration_Student_List.xlsx');
+        else:
+            return response()->json(['msg' => 'Error Found!'], 422);
+        endif;
     }
 }
