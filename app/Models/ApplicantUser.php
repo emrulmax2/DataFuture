@@ -9,10 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\VerifyEmailForApplicant;
+use Lab404\Impersonate\Models\Impersonate;
 
 class ApplicantUser extends Authenticatable  implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Impersonate;
 
     protected $fillable = [
         'email',
