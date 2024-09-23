@@ -126,6 +126,10 @@
 
 
                         <div class="overflow-x-auto scrollbar-hidden pt-5" id="slcPaymentHistoryListWrap" style="display: none;">
+                            <div class="slcPaymentHistoryListBtnWrap flex justify-end">
+                                <button type="button" class="btn btn-primary text-white btn-sm" id="recheck_errors" style="display: none;"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Re Check Errors</button>
+                                <button type="button" class="btn btn-sm btn-success text-white" id="make_payments" style="display: none;"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Insert Payment</button>
+                            </div>
                             <div id="slcPaymentHistoryListTable" class="mt-5 table-report table-report--tabulator"></div>
                         </div>
 

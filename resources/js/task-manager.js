@@ -10,6 +10,7 @@ var taskAssignedStudentTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let status = $("#status").val() != "" ? $("#status").val() : "";
+        let courses = $("#courses").val() != "" ? $("#courses").val() : "";
         let task_id = $("#taskAssignedStudentTable").attr('data-taskid');
         let phase = $("#taskAssignedStudentTable").attr('data-phase');
         
@@ -22,7 +23,7 @@ var taskAssignedStudentTable = (function () {
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
             ajaxURL: route("task.manager.list"),
-            ajaxParams: { status : status, task_id : task_id, phase : phase},
+            ajaxParams: { status : status, task_id : task_id, phase : phase, courses : courses},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -361,7 +362,8 @@ var taskAssignedStudentTable = (function () {
 
         // On reset filter form
         $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val('');
+            $("#status").val('Pending');
+            $("#courses").val('');
 
             filterHTMLFormADM();
         });
@@ -515,7 +517,7 @@ var taskAssignedStudentTable = (function () {
 
                     var link = document.createElement('a');
                         link.href = window.URL.createObjectURL(data);
-                        link.download = 'Pearson_Registration_Student_List.xlsx';
+                        link.download = 'BTECRTypeSA1.xlsx';
                         link.click();
 
                         link.remove();
