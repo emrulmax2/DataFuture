@@ -31,8 +31,9 @@ import TomSelect from "tom-select";
         var $textArea = $('<textarea></textarea>');
         $textArea.on("blur", function(e) {
             var ids = $textArea.val().replace(/\r?\n/g, ', ');
-            var idsArr = ids.split(', ');
-            var idsLength = idsArr.length - 1;
+                ids = ids.replace(/,\s*$/, "")
+            var idsArr = ids.split(',');
+            var idsLength = idsArr.length;
             $('#addPearsonRegTaskModal .studentCount').html('No of Student: '+idsLength);
             $target.val(ids);
             $textArea.remove();

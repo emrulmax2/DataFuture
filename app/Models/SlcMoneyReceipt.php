@@ -26,6 +26,7 @@ class SlcMoneyReceipt extends Model
         'discount',
         'payment_type',
         'remarks',
+        'force_entry',
         
         'received_by',
         'created_by',
