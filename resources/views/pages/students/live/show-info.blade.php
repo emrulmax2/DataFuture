@@ -19,6 +19,7 @@
             <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
         </div>
     </div>
+    
     <div class="intro-y box px-5 pt-5 mt-5">
         <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
             <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">

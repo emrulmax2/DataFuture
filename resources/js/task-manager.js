@@ -17,6 +17,7 @@ var taskAssignedStudentTable = (function () {
         let id_card = ($("#taskAssignedStudentTable").attr('data-idcard') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-idcard') : 'No');
         let interview = ($("#taskAssignedStudentTable").attr('data-interview') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-interview') : 'No');
         let excuse = ($("#taskAssignedStudentTable").attr('data-excuse') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-excuse') : 'No');
+        let pearsonreg = ($("#taskAssignedStudentTable").attr('data-pearsonreg') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-pearsonreg') : 'No');
         
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
@@ -67,12 +68,28 @@ var taskAssignedStudentTable = (function () {
                     field: "first_name",
                     headerHozAlign: "left",
                     width: "180",
+                    formatter(cell, formatterParams) {
+                        var first_name = cell.getData().first_name;
+                        if(phase != 'Applicant' && first_name.length > 20){
+                            return '<span class="text-danger">'+first_name+'</span>';
+                        }else{
+                            return first_name;
+                        }
+                    }
                 },
                 {
                     title: "Last Name",
                     field: "last_name",
                     headerHozAlign: "left",
                     width: "180",
+                    formatter(cell, formatterParams) {
+                        var last_name = cell.getData().last_name;
+                        if(phase != 'Applicant' && last_name.length > 20){
+                            return '<span class="text-danger">'+last_name+'</span>';
+                        }else{
+                            return last_name;
+                        }
+                    }
                 },
                 {
                     title: "Course",
@@ -250,6 +267,9 @@ var taskAssignedStudentTable = (function () {
                         $('#exportTaskStudentsBtn').fadeIn();
                         $('#completeEmailTaskStudentsBtn').fadeIn();
                     }else{
+                        if(pearsonreg == 'Yes'){
+                            $('#exportPearsonRegStudentList').fadeIn();
+                        }
                         if(excuse == 'No'){
                             $('#exportTaskStudentListBtn').fadeIn();
                             $('#commonActionBtns').fadeIn();
@@ -260,6 +280,7 @@ var taskAssignedStudentTable = (function () {
                     $('#completeEmailTaskStudentsBtn').fadeOut();
                     $('#exportTaskStudentListBtn').fadeOut();
                     $('#commonActionBtns').fadeOut();
+                    $('#exportPearsonRegStudentList').fadeOut();
                 }
             },
             selectableCheck:function(row){
@@ -460,6 +481,56 @@ var taskAssignedStudentTable = (function () {
         }else{
             $btn.removeAttr('disabled').fadeOut();
             $btn.siblings('#completeEmailTaskStudentsBtn').removeAttr('disabled').fadeOut();
+            taskAssignedStudentTable.init();
+        }
+    });
+
+    $('#exportPearsonRegStudentList').on('click', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var ids = [];
+
+        $btn.attr('disabled', 'disabled');
+        $('#taskAssignedStudentTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            ids.push($row.find('.ids').val());
+        });
+
+        if(ids.length > 0){
+            $.ajax({
+                type: 'GET',
+                url: route('task.manager.pearson.registration.excel'),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                    ids: ids
+                },
+                xhrFields:{
+                    responseType: 'blob'
+                },
+                beforeSend: function() {},
+                success: function(data) {
+                    $btn.removeAttr('disabled').fadeOut();
+                    $btn.siblings('#completeEmailTaskStudentsBtn').removeAttr('disabled').fadeOut();
+                    taskAssignedStudentTable.init();
+
+                    var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(data);
+                        link.download = 'Pearson_Registration_Student_List.xlsx';
+                        link.click();
+
+                        link.remove();
+
+                    /*var url = window.URL || window.webkitURL;
+                    var objectUrl = url.createObjectURL(data);
+                    var newWindow = window.open(objectUrl);
+                    newWindow.document.title = 'New_Student_Email_Id_Create_Task';*/
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }else{
+            $btn.removeAttr('disabled').fadeOut();
             taskAssignedStudentTable.init();
         }
     });

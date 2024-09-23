@@ -39,6 +39,12 @@
                             <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Complete & Send Email
                         </button>
                     @else 
+                        @if($task->pearson_reg == 'Yes')
+                        <button type="button" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2" id="exportPearsonRegStudentList" style="display: none;">
+                            <i data-lucide="sheet" class="w-4 h-4 mr-2"></i> Export Pearson Registration
+                        </button>
+                        @endif
+                        
                         <button data-phase="{{ $task->processlist->phase }}" data-taskid="{{ $task->id }}" type="button" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2" id="exportTaskStudentListBtn" style="display: none;">
                             <i data-lucide="sheet" class="w-4 h-4 mr-2"></i> Export Student List 
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +108,7 @@
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
-            <div id="taskAssignedStudentTable" data-excuse="{{ $task->attendance_excuses }}" data-email="{{ $task->org_email }}" data-idcard="{{ $task->id_card }}" data-interview="{{ $task->interview }}" data-taskid="{{ $task->id }}" data-phase={{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }} class="mt-5 table-report table-report--tabulator"></div>
+            <div id="taskAssignedStudentTable" data-pearsonreg="{{ $task->pearson_reg }}" data-excuse="{{ $task->attendance_excuses }}" data-email="{{ $task->org_email }}" data-idcard="{{ $task->id_card }}" data-interview="{{ $task->interview }}" data-taskid="{{ $task->id }}" data-phase={{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }} class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: HTML Table Data -->

@@ -72,10 +72,113 @@
                     </div>
                 </div>
             </div>
+            <div class="accordion-item">
+                <div id="accountsReportsAccordion-3" class="accordion-header">
+                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#accountsReportsAccordion-collapse-3" aria-expanded="false" aria-controls="accountsReportsAccordion-collapse-3">
+                        Payments Upload
+                        <span class="accordionCollaps"></span>
+                    </button>
+                </div>
+                <div id="accountsReportsAccordion-collapse-3" class="accordion-collapse collapse" aria-labelledby="accountsReportsAccordion-3" data-tw-parent="#accountsReportsAccordion">
+                    <div class="accordion-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 sm:col-span-6">
+                                <form action="#" method="post" id="slcPaymentHistorySearchForm">
+                                    @csrf
+                                    <div class="flex justify-start">
+                                        <div class="relative w-72">
+                                            <label for="date_range" class="form-label">Date Range <span class="text-danger">*</span></label>
+                                            <div class="relative w-full mx-auto">
+                                                <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-slate-100 border text-slate-500">
+                                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                                </div>
+                                                <input type="text" id="payment_history_date_range" name="date_range" class="datepicker form-control pl-12" data-format="DD-MM-YYYY" data-daterange="true">
+                                            </div>
+                                            <div class="acc__input-error error-date_range text-danger mt-2">{{ ($errors->has('date_range') ? $errors->first('date_range') : '')}}</div>
+                                        </div>
+                                        <button type="button" id="slcPaymentHistorySearchBtn" class="btn btn-success text-white ml-2 w-auto h-10" style="margin-top: 31px;"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6 text-right">
+                                <form method="POST" action="#" id="slcPaymentDocUploadForm" class="text-right" enctype="multipart/form-data">
+                                    @csrf
+                                    <label class="btn btn-success w-auto relative text-white" style="margin-top: 31px;">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload Payment File (.csv)
+                                        <input type="file" accept=".csv" id="payment_file_csv" name="payment_file_csv" style="width: 0; height: 0; opacity: 0; visibility: hidden; position: absolute;">
+                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                            stroke="white" class="w-4 h-4 ml-2 loaders">
+                                            <g fill="none" fill-rule="evenodd">
+                                                <g transform="translate(1 1)" stroke-width="4">
+                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                    </path>
+                                                </g>
+                                            </g>
+                                        </svg>
+                                    </label>
+                                    <input type="hidden" name="submited" value="1"/>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        <div class="overflow-x-auto scrollbar-hidden pt-5" id="slcPaymentHistoryListWrap" style="display: none;">
+                            <div id="slcPaymentHistoryListTable" class="mt-5 table-report table-report--tabulator"></div>
+                        </div>
+
+                        <div class="overflow-x-auto scrollbar-hidden pt-5" id="slcPaymentUploadListWrap" style="display: none;">
+                            <form method="post" action="#" id="slcPaymentUploadListForm">
+                                
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Success Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
 @endsection
 
 @section('script')
-    @vite('resources/js/accounts-reports.js')
+    @vite('resources/js/slc-accounts-reports.js')
 @endsection
