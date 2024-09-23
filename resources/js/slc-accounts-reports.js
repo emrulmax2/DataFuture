@@ -145,6 +145,8 @@ var slcPaymentHistoryListTable = (function () {
 })();
 
 (function(){
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
     $('#accountsReportsAccordion .accordion-button').on('click', function(e){
         var $thebtn = $(this);
@@ -204,9 +206,14 @@ var slcPaymentHistoryListTable = (function () {
             $('#payment_file_csv').val('');
 
             if (response.status == 200) {
-                console.log(response.data);
                 $('#slcPaymentUploadListWrap').fadeIn('fast', function(){
                     $('#slcPaymentUploadListForm').html(response.data.htm);
+                });
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
                 });
             }
         }).catch(error => {
@@ -216,6 +223,58 @@ var slcPaymentHistoryListTable = (function () {
                 console.log('error');
             }
         });
-    })
+    });
+
+    $('#slcPaymentUploadListForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('slcPaymentUploadListForm');
+    
+        document.querySelector('#saveCSVTransBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveCSVTransBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('reports.account.payment.save.csv.transactions'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveCSVTransBtn').removeAttribute('disabled');
+            document.querySelector("#saveCSVTransBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                $('#slcPaymentUploadListWrap').fadeOut('fast', function(){
+                    $('#slcPaymentUploadListForm').html('');
+                });
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html(response.data.msg);
+                });     
+
+                setTimeout(() => {
+                    successModal.hide();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveCSVTransBtn').removeAttribute('disabled');
+            document.querySelector("#saveCSVTransBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "Error!" );
+                        $("#warningModal .warningModalDesc").html(error.response.data.msg);
+                    });   
+
+                    setTimeout(() => {
+                        warningModal.hide();
+                    }, 2000);
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
 
 })();

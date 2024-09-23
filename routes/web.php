@@ -2733,5 +2733,6 @@ Route::middleware('auth')->group(function() {
     Route::controller(PaymentUploadManagementController::class)->group(function(){
         Route::get('reports/accounts/slc-payment-history-list', 'slcPaymentHistoryList')->name('reports.account.payment.history.list'); 
         Route::post('reports/accounts/upload-payment-csv', 'uploadCSV')->name('reports.account.payment.upload.csv'); 
+        Route::post('reports/accounts/save-csv-transactions', 'storeCsvTransactions')->name('reports.account.payment.save.csv.transactions'); 
     });
 });

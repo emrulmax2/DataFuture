@@ -118,7 +118,7 @@
                         <div class="col-span-12"></div>
                         <div class="col-span-12 sm:col-span-4">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Total</div>
+                                <div class="col-span-4 text-slate-500 font-medium">Note</div>
                                 <div class="col-span-8 font-medium">
                                     {{ (!empty($agr->note) ? $agr->note : '') }}
                                 </div>
