@@ -2734,5 +2734,9 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/accounts/slc-payment-history-list', 'slcPaymentHistoryList')->name('reports.account.payment.history.list'); 
         Route::post('reports/accounts/upload-payment-csv', 'uploadCSV')->name('reports.account.payment.upload.csv'); 
         Route::post('reports/accounts/save-csv-transactions', 'storeCsvTransactions')->name('reports.account.payment.save.csv.transactions'); 
+        Route::post('reports/accounts/history-recheck-errors', 'historyReCheckError')->name('reports.account.payment.recheck.errors'); 
+        Route::post('reports/accounts/history-recheck-insert', 'historyReCheckInsert')->name('reports.account.payment.recheck.insert'); 
+        Route::post('reports/accounts/history-find-agreements', 'historyFindAgreements')->name('reports.account.payment.find.agreements'); 
+        Route::post('reports/accounts/history-payment-force-insert', 'historyPaymentForceInsert')->name('reports.account.payment.force.insert'); 
     });
 });

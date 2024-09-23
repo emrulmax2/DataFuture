@@ -127,8 +127,36 @@
 
                         <div class="overflow-x-auto scrollbar-hidden pt-5" id="slcPaymentHistoryListWrap" style="display: none;">
                             <div class="slcPaymentHistoryListBtnWrap flex justify-end">
-                                <button type="button" class="btn btn-primary text-white btn-sm" id="recheck_errors" style="display: none;"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Re Check Errors</button>
-                                <button type="button" class="btn btn-sm btn-success text-white" id="make_payments" style="display: none;"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Insert Payment</button>
+                                <button type="button" class="btn btn-primary text-white btn-sm" id="recheck_errors" style="display: none;">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Re Check Errors 
+                                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                        stroke="white" class="w-4 h-4 ml-2 loaders">
+                                        <g fill="none" fill-rule="evenodd">
+                                            <g transform="translate(1 1)" stroke-width="4">
+                                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success text-white" id="make_payments" style="display: none;">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Insert Payment
+                                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                        stroke="white" class="w-4 h-4 ml-2 loaders">
+                                        <g fill="none" fill-rule="evenodd">
+                                            <g transform="translate(1 1)" stroke-width="4">
+                                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </button>
                             </div>
                             <div id="slcPaymentHistoryListTable" class="mt-5 table-report table-report--tabulator"></div>
                         </div>
@@ -181,6 +209,52 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Force Insert Modal Start -->
+    <div id="forceInsertFixModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="forceInsertFixForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Force Insert</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="slc_agreement_id" class="form-label">Agreement <span class="text-danger">*</span></label>
+                            <select id="slc_agreement_id" name="slc_agreement_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                            </select>
+                            <div class="acc__input-error error-slc_agreement_id text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="forceSubmitBtn" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="0"/>
+                        <input type="hidden" name="history_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Force Insert Modal End -->
 @endsection
 
 @section('script')
