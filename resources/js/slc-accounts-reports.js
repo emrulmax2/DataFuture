@@ -21,12 +21,25 @@ var slcPaymentHistoryListTable = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            selectable:true,
             columns: [
                 {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
+                /*{
                     title: "#ID",
                     field: "id",
                     width: "180",
-                },
+                },*/
                 {
                     title: "Term",
                     field: "term_name",
@@ -53,7 +66,6 @@ var slcPaymentHistoryListTable = (function () {
                     title: "Course",
                     field: "course_name",
                     headerHozAlign: "left",
-                    headerSort: false,
                     formatter(cell, formatterParams) { 
                         if(cell.getData().errors != ''){
                             return '<span class="break-words whitespace-normal">'+cell.getData().course_name+'</span>';
@@ -64,25 +76,21 @@ var slcPaymentHistoryListTable = (function () {
                     title: "Code",
                     field: "course_code",
                     headerHozAlign: "left",
-                    headerSort: false,
                 },
                 {
                     title: "Year",
                     field: "year",
                     headerHozAlign: "left",
-                    headerSort: false,
                 },
                 {
                     title: "Remittance Date",
                     field: "transaction_date",
                     headerHozAlign: "left",
-                    headerSort: false,
                 },
                 {
                     title: "Amount",
                     field: "amount",
                     headerHozAlign: "left",
-                    headerSort: false,
                 },
                 {
                     title: "Error",
@@ -114,6 +122,10 @@ var slcPaymentHistoryListTable = (function () {
                         if(cell.getData().error_code == 4 && cell.getData().student_id > 0 && cell.getData().status != 1 && cell.getData().student_id > 0){
                             html += '<button type="button" data-regid="'+cell.getData().student_id+'" data-transid="'+cell.getData().id+'" class="btn btn-primary text-white btn-sm forceInsertBtn">Force Insert</button>';
                         }
+                        html += '<input type="hidden" class="history_status" name="status[]" value="'+cell.getData().status+'">';
+                        html += '<input type="hidden" class="history_ids" name="slc_payment_history_id[]" value="'+cell.getData().id+'">';
+
+                        return html;
                     }
                 }
             ],
@@ -124,6 +136,39 @@ var slcPaymentHistoryListTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                var hasErrorLength = 0;
+                var noErrorLength = 0;
+
+                if(rows.length > 0){
+                    $.each(rows, function(index, row){
+                        if(row.getData().status != 1){
+                            hasErrorLength += 1;
+                        }else{
+                            noErrorLength += 1;
+                        }
+                    });
+
+                    if(hasErrorLength > 0 ){
+                        $('.slcPaymentHistoryListBtnWrap #recheck_errors').fadeIn();
+                        $('.slcPaymentHistoryListBtnWrap #make_payments').fadeOut();
+                    }else if(noErrorLength > 0 && hasErrorLength == 0){
+                        $('.slcPaymentHistoryListBtnWrap #recheck_errors').fadeOut();
+                        $('.slcPaymentHistoryListBtnWrap #make_payments').fadeIn();
+                    }else{
+                        $('.slcPaymentHistoryListBtnWrap #recheck_errors').fadeOut();
+                        $('.slcPaymentHistoryListBtnWrap #make_payments').fadeOut();
+                    }
+                    
+                }else{
+                    $('.slcPaymentHistoryListBtnWrap #recheck_errors').fadeOut();
+                    $('.slcPaymentHistoryListBtnWrap #make_payments').fadeOut();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
+            }
         });
 
         // Redraw table onresize

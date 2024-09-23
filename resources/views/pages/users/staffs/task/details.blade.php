@@ -24,6 +24,17 @@
                         <option value="Canceled">Canceled</option>
                     </select>
                 </div>
+                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Courses</label>
+                    <select name="courses" id="courses" class="form-control sm:w-40 2xl:w-60 mt-2 sm:mt-0">
+                        <option value="">All Courses</option>
+                        @if($courses->count() > 0)
+                            @foreach($courses as $crs)
+                                <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
                 <div class="mt-2 xl:mt-0">
                     <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
                     <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>

@@ -19,6 +19,8 @@ use App\Models\ApplicantTaskDocument;
 use App\Models\ApplicantTaskLog;
 use App\Models\ApplicantViewUnlock;
 use App\Models\ComonSmtp;
+use App\Models\Course;
+use App\Models\CourseCreation;
 use App\Models\LetterSet;
 use App\Models\ProcessList;
 use App\Models\Status;
@@ -86,7 +88,8 @@ class PendingTaskManagerController extends Controller
                 ['label' => 'Task Manager', 'href' => route('task.manager')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);'],
             ],
-            'task' => TaskList::find($id)
+            'task' => TaskList::find($id),
+            'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
 
@@ -94,12 +97,21 @@ class PendingTaskManagerController extends Controller
         $status = isset($request->status) && !empty($request->status) ? $request->status : 'Pending';
         $task_id = isset($request->task_id) && $request->task_id > 0 ? $request->task_id : 0;
         $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : 'Live');
+        $courses = (isset($request->courses) && $request->courses > 0 ? $request->courses : 0);
 
         $task = TaskList::find($task_id);
 
         if($phase == 'Applicant'):
             $applicant_ids = ApplicantTask::where('task_list_id', $task_id)->where('status', $status)->pluck('applicant_id')->unique()->toArray();
             $Query = Applicant::whereIn('id', $applicant_ids);
+            if($courses > 0):
+                $courseCreations = CourseCreation::where('course_id', $courses)->pluck('id')->unique()->toArray();
+                if(!empty($courseCreations)):
+                    $Query->whereHas('course', function($q) use($courseCreations){
+                        $q->whereIn('course_creation_id', $courseCreations);
+                    });
+                endif;
+            endif;
 
             $total_rows = $Query->count();
             $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -202,6 +214,14 @@ class PendingTaskManagerController extends Controller
             $student_ids = StudentTask::where('task_list_id', $task_id)->where('status', $status)->pluck('student_id')->unique()->toArray();
 
             $Query = Student::whereIn('id', $student_ids);
+            if($courses > 0):
+                $courseCreations = CourseCreation::where('course_id', $courses)->pluck('id')->unique()->toArray();
+                if(!empty($courseCreations)):
+                    $Query->whereHas('activeCR', function($q) use($courseCreations){
+                        $q->whereIn('course_creation_id', $courseCreations)->where('active', 1);
+                    });
+                endif;
+            endif;
 
             $total_rows = $Query->count();
             $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -907,7 +927,7 @@ class PendingTaskManagerController extends Controller
                 endif;
             endforeach;
 
-            return Excel::download(new StudentEmailIdTaskExport($theCollection), 'Pearson_Registration_Student_List.xlsx');
+            return Excel::download(new ArrayCollectionExport($theCollection, 'BTEC'), 'BTECRTypeSA1.xlsx');
         else:
             return response()->json(['msg' => 'Error Found!'], 422);
         endif;

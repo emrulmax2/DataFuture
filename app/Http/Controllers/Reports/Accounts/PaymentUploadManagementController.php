@@ -216,7 +216,7 @@ class PaymentUploadManagementController extends Controller
                                         $HTML .= '<input type="hidden" name="trans['.$r.'][last_name]" value="'.$last_name.'"/>';
                                     $HTML .= '</td>';
                                     $HTML .= '<td class="'.$dob_class.'">';
-                                        $HTML .= $dob;
+                                        $HTML .= date('d-m-Y', strtotime($dob));
                                         $HTML .= '<input type="hidden" name="trans['.$r.'][dob]" value="'.date('Y-m-d', strtotime($dob)).'"/>';
                                     $HTML .= '</td>';
                                     $HTML .= '<td>';
