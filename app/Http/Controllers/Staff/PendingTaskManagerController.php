@@ -884,7 +884,7 @@ class PendingTaskManagerController extends Controller
             foreach($ids as $id):
                 if($id > 0):
                     $student = Student::find($id);
-                    $completionDate = (isset($student->activeCR->course_end_date) && !empty($student->activeCR->course_end_date) ? date('d/M/Y', strtotime($student->activeCR->course_end_date)) : '');
+                    $completionDate = (isset($student->activeCR->course_end_date) && !empty($student->activeCR->course_end_date) ? date('d/m/Y', strtotime($student->activeCR->course_end_date)) : '');
                     if(empty($completionDate)):
                         $completionDate = (isset($student->activeCR->creation->availability[0]->course_end_date) && !empty($student->activeCR->creation->availability[0]->course_end_date) ? date('d/m/Y', strtotime($student->activeCR->creation->availability[0]->course_end_date)) : '');
                     endif;
@@ -893,7 +893,7 @@ class PendingTaskManagerController extends Controller
                     $theCollection[$row][] = $student->registration_no;
                     $theCollection[$row][] = $student->first_name;
                     $theCollection[$row][] = $student->last_name;
-                    $theCollection[$row][] = (isset($student->sexid->name) && !empty($student->sexid->name) ? $student->sexid->name : '');
+                    $theCollection[$row][] = (isset($student->sexid->name) && !empty($student->sexid->name) ? strtoupper(substr($student->sexid->name, 0, 1)) : '');
                     $theCollection[$row][] = (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('d/m/Y', strtotime($student->date_of_birth)) : '');
                     $theCollection[$row][] = '';
                     $theCollection[$row][] = $completionDate;
