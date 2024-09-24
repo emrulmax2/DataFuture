@@ -120,11 +120,11 @@ class DashboardController extends Controller
                         $classLabel .= '<span class="btn-rounded btn font-medium btn-success text-white p-0 w-9 h-9 mr-1" style="flex: 0 0 36px;">A</span>';
                     endif;
                     if(!empty($pln->attendanceInformation->start_time) && empty($pln->attendanceInformation->end_time)):
-                        $classLabel .= '<span class="text-success font-medium">Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'</span>';
+                        $classLabel .= '<span class="text-success font-medium">Started '.date('H:i', strtotime($pln->attendanceInformation->start_time)).'</span>';
                     elseif(!empty($pln->attendanceInformation->start_time) && !empty($pln->attendanceInformation->end_time)):
                         $classLabel .= '<span class="text-success font-medium">';
-                            $classLabel .= 'Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
-                            $classLabel .= 'Finished '.date('h:i A', strtotime($pln->attendanceInformation->end_time)); 
+                            $classLabel .= 'Started '.date('H:i', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
+                            $classLabel .= 'Finished '.date('H:i', strtotime($pln->attendanceInformation->end_time)); 
                         $classLabel .= '</span>';
                     endif;
                 elseif($currentTime > $orgEnd && !isset($pln->attendanceInformation->id)):

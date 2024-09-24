@@ -2742,6 +2742,7 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(DueReportController::class)->group(function(){
+        Route::post('reports/accounts/due/export', 'exportExcel')->name('reports.account.due.export'); 
         Route::post('reports/accounts/due/get-course-status-by-semester', 'getCourseStatusBySemester')->name('reports.account.due.get.course.status'); 
         Route::post('reports/accounts/due/get-status-by-semester-course', 'getStatusBySemesterCourse')->name('reports.account.due.get.statuses'); 
     });

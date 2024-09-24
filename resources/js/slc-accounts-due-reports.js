@@ -3,8 +3,6 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
-
-
 (function(){
 
     let dueTomOptions = {
