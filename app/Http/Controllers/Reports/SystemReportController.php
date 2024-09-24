@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\Semester;
+use App\Models\Status;
 use Illuminate\Http\Request;
 
 class SystemReportController extends Controller
@@ -23,7 +26,10 @@ class SystemReportController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => route('reports')],
                 ['label' => 'Account Reports', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'semester' => Semester::orderBy('id', 'DESC')->get(),
+            'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'status' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get()
         ]);
     }
 }

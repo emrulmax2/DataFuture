@@ -210,6 +210,7 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
+use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
@@ -315,7 +316,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
             Route::post('application/store-course-details', 'storeCourseDetails')->name('application.store.course');
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
-            Route::post('application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
+            Route::get('application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
 
@@ -2738,5 +2739,10 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/accounts/history-recheck-insert', 'historyReCheckInsert')->name('reports.account.payment.recheck.insert'); 
         Route::post('reports/accounts/history-find-agreements', 'historyFindAgreements')->name('reports.account.payment.find.agreements'); 
         Route::post('reports/accounts/history-payment-force-insert', 'historyPaymentForceInsert')->name('reports.account.payment.force.insert'); 
+    });
+
+    Route::controller(DueReportController::class)->group(function(){
+        Route::post('reports/accounts/due/get-course-status-by-semester', 'getCourseStatusBySemester')->name('reports.account.due.get.course.status'); 
+        Route::post('reports/accounts/due/get-status-by-semester-course', 'getStatusBySemesterCourse')->name('reports.account.due.get.statuses'); 
     });
 });

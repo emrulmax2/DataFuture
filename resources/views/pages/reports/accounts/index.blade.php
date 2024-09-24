@@ -66,8 +66,54 @@
                 </div>
                 <div id="accountsReportsAccordion-collapse-2" class="accordion-collapse collapse" aria-labelledby="accountsReportsAccordion-2" data-tw-parent="#accountsReportsAccordion">
                     <div class="accordion-body">
-                        <div class="alert alert-success-soft show flex items-center mb-2 font-medium" role="alert">
-                            <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Comming Soon...
+                        <form method="post" action="#" id="accountDueReportForm">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-3">
+                                    <label for="due_semester_id" class="form-label semesterLabel inline-flex items-center">Intake Semester <span class="text-danger">*</span></label>
+                                    <select name="due_semester_id[]" multiple class="tom-selects w-full" id="due_semester_id">
+                                        <option value="">Please Select</option>
+                                        @if($semester->count() > 0)
+                                            @foreach($semester as $sem)
+                                                <option value="{{ $sem->id }}">{{ $sem->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-span-3">
+                                    <label for="due_course_id" class="form-label courseLabel inline-flex items-center">Course</label>
+                                    <select name="due_course_id[]" multiple class="tom-selects w-full" id="due_course_id">
+                                        <option value="">Please Select</option>
+                                        @if($courses->count() > 0)
+                                            @foreach($courses as $crs)
+                                                <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label for="due_status_id" class="form-label">Status</label>
+                                    <select name="due_status_id[]" multiple class="tom-selects w-full" id="due_status_id">
+                                        <option value="">Please Select</option>
+                                        @if($courses->count() > 0)
+                                            @foreach($status as $sts)
+                                                <option value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label for="due_date" class="form-label">Due Until</label>
+                                    <input type="text" name="due_date" class="form-control w-full datepicker" id="due_date" value="" data-date-format="DD-MM-YYYY" data-single-mode="true"/>
+                                </div>
+                                <div class="col-span-2 text-right" style="padding-top: 31px;">
+                                    <button type="button" id="accDueSearchBtn" class="btn btn-primary text-white ml-auto w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                                    <button type="submit" id="accDueSubmitBtn" class="btn btn-success text-white ml-auto w-auto ml-2"><i class="w-4 h-4 mr-2" data-lucide="file-text"></i> Export Excel</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="overflow-x-auto scrollbar-hidden pt-5 accountsDueReportTableWrap" style="display: none;">
+                            <div id="accountsDueReportTable" class="table-report table-report--tabulator"></div>
                         </div>
                     </div>
                 </div>
@@ -259,4 +305,5 @@
 
 @section('script')
     @vite('resources/js/slc-accounts-reports.js')
+    @vite('resources/js/slc-accounts-due-reports.js')
 @endsection

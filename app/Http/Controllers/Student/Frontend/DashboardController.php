@@ -519,7 +519,10 @@ class DashboardController extends Controller
                     $list[$plan_id]['module'] = $plan->creations->module_name;
                     $i = 1;
                     foreach($planDateList as $pdl):
-                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)->orderBy('attendance_excuse_id', 'DESC')->get()->first();
+                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)
+                                       ->whereHas('excuse', function($q) use($student_id){
+                                            $q->where('student_id', $student_id);
+                                       })->orderBy('attendance_excuse_id', 'DESC')->get()->first();
                         $status = (isset($existExcuse->excuse->status) ? $existExcuse->excuse->status : '');
                         $statusLabel = (isset($existExcuse->excuse->status_label) ? $existExcuse->excuse->status_label : '');
                         if($status != 2):
@@ -553,7 +556,10 @@ class DashboardController extends Controller
                     $list[$plan_id]['module'] = $plan->creations->module_name;
                     $i = 1;
                     foreach($planDateList as $pdl):
-                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)->orderBy('attendance_excuse_id', 'DESC')->get()->first();
+                        $existExcuse = AttendanceExcuseDay::with('excuse')->where('plan_id', $plan_id)->where('plans_date_list_id', $pdl->id)->where('active', 1)
+                                        ->whereHas('excuse', function($q) use($student_id){
+                                            $q->where('student_id', $student_id);
+                                        })->orderBy('attendance_excuse_id', 'DESC')->get()->first();
                         $status = (isset($existExcuse->excuse->status) ? $existExcuse->excuse->status : '');
                         $statusLabel = (isset($existExcuse->excuse->status_label) ? $existExcuse->excuse->status_label : '');
                         if($status != 2):
