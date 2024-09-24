@@ -67,9 +67,7 @@ var slcPaymentHistoryListTable = (function () {
                     field: "course_name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        if(cell.getData().errors != ''){
-                            return '<span class="break-words whitespace-normal">'+cell.getData().course_name+'</span>';
-                        }
+                        return '<span class="break-words whitespace-normal">'+cell.getData().course_name+'</span>';
                     }
                 },
                 {
@@ -120,7 +118,7 @@ var slcPaymentHistoryListTable = (function () {
                             html += '<span class="btn btn-facebook btn-sm text-white">New</span>';
                         }
                         if(cell.getData().error_code == 4 && cell.getData().student_id > 0 && cell.getData().status != 1 && cell.getData().student_id > 0){
-                            html += '<button type="button" data-regid="'+cell.getData().student_id+'" data-transid="'+cell.getData().id+'" class="btn btn-primary text-white btn-sm forceInsertBtn">Force Insert</button>';
+                            html += '<button type="button" data-studentid="'+cell.getData().student_id+'" data-historyid="'+cell.getData().id+'" class="btn ml-1 btn-primary text-white btn-sm forceInsertBtn">Force Insert</button>';
                         }
                         html += '<input type="hidden" class="history_status" name="status[]" value="'+cell.getData().status+'">';
                         html += '<input type="hidden" class="history_ids" name="slc_payment_history_id[]" value="'+cell.getData().id+'">';
@@ -192,6 +190,12 @@ var slcPaymentHistoryListTable = (function () {
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const forceInsertFixModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#forceInsertFixModal"));
+
+    document.getElementById('forceInsertFixModal').addEventListener('hidden.tw.modal', function(event){
+        $('#forceInsertFixModal .acc__input-error').html('');
+        $('#forceInsertFixModal #slc_agreement_id').html('<option value="">Select Agreement</option>').val('');
+    });
 
     $('#accountsReportsAccordion .accordion-button').on('click', function(e){
         var $thebtn = $(this);
@@ -220,6 +224,7 @@ var slcPaymentHistoryListTable = (function () {
         }else{
             $('#slcPaymentHistoryListWrap').fadeOut('fast', function(){
                 $('#slcPaymentHistoryListTable').removeAttr('tabulator-layout').removeAttr('role').removeClass('tabulator').html('');
+                $('.slcPaymentHistoryListBtnWrap button').fadeOut();
             })
         }
     });
@@ -227,6 +232,7 @@ var slcPaymentHistoryListTable = (function () {
     $('#payment_file_csv').on('change', function() {
         $('#slcPaymentHistoryListWrap').fadeOut('fast', function(){
             $('#slcPaymentHistoryListTable').removeAttr('tabulator-layout').removeAttr('role').removeClass('tabulator').html('');
+            $('.slcPaymentHistoryListBtnWrap button').fadeOut();
         })
 
         $('#slcPaymentDocUploadForm').trigger('submit');
@@ -315,6 +321,178 @@ var slcPaymentHistoryListTable = (function () {
                     setTimeout(() => {
                         warningModal.hide();
                     }, 2000);
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#recheck_errors').on('click', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+
+        $theBtn.find('svg.loaders').fadeIn();
+        var history_ids = [];
+        $('#slcPaymentHistoryListTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            history_ids.push($row.find('.history_ids').val());
+        });
+
+        if(history_ids.length > 0){
+            axios({
+                method: "post",
+                url: route('reports.account.payment.recheck.errors'),
+                data: {history_ids : history_ids},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $theBtn.find('svg.loaders').fadeOut();
+                if (response.status == 200) {
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "Congratulations!" );
+                        $("#successModal .successModalDesc").html('Error re-checked successfully done.');
+                    });     
+    
+                    setTimeout(() => {
+                        successModal.hide();
+                    }, 2000);
+                }
+                slcPaymentHistoryListTable.init();
+            }).catch(error => {
+                $theBtn.find('svg.loaders').fadeOut();
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $theBtn.find('svg.loaders').fadeOut();
+            warningModal.show();
+            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModal .warningModalTitle").html( "Error!" );
+                $("#warningModal .warningModalDesc").html('Please select some rows first.');
+            });   
+
+            setTimeout(() => {
+                warningModal.hide();
+            }, 2000);
+        }
+    });
+
+    $('#make_payments').on('click', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+
+        $theBtn.find('svg.loaders').fadeIn();
+        var history_ids = [];
+        $('#slcPaymentHistoryListTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            history_ids.push($row.find('.history_ids').val());
+        });
+
+        if(history_ids.length > 0){
+            axios({
+                method: "post",
+                url: route('reports.account.payment.recheck.insert'),
+                data: {history_ids : history_ids},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $theBtn.find('svg.loaders').fadeOut();
+                if (response.status == 200) {
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "Congratulations!" );
+                        $("#successModal .successModalDesc").html(response.data.msg);
+                    });     
+    
+                    setTimeout(() => {
+                        successModal.hide();
+                    }, 2000);
+                }
+                slcPaymentHistoryListTable.init();
+            }).catch(error => {
+                $theBtn.find('svg.loaders').fadeOut();
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $theBtn.find('svg.loaders').fadeOut();
+            warningModal.show();
+            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModal .warningModalTitle").html( "Error!" );
+                $("#warningModal .warningModalDesc").html('Please select some rows first.');
+            });   
+
+            setTimeout(() => {
+                warningModal.hide();
+            }, 2000);
+        }
+    });
+
+    $('#slcPaymentHistoryListTable').on('click', '.forceInsertBtn', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        var studentid = $theBtn.attr('data-studentid');
+        var historyid = $theBtn.attr('data-historyid');
+
+        axios({
+            method: 'POST',
+            url: route('reports.account.payment.find.agreements'),
+            data: {studentid : studentid, historyid : historyid},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                forceInsertFixModal.show();
+
+                $('#forceInsertFixModal #slc_agreement_id').html(response.data.htm);
+                $('#forceInsertFixModal [name="student_id"]').val(studentid);
+                $('#forceInsertFixModal [name="history_id"]').val(historyid);
+            }
+        }).catch(error =>{
+            console.log(error)
+        });
+    });
+
+    $('#forceInsertFixForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('forceInsertFixForm');
+    
+        document.querySelector('#forceSubmitBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#forceSubmitBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('reports.account.payment.force.insert'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#forceSubmitBtn').removeAttribute('disabled');
+            document.querySelector("#forceSubmitBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                forceInsertFixModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Transaction successfully inserted.');
+                });     
+
+                setTimeout(() => {
+                    successModal.hide();
+                }, 2000);
+            }
+            slcPaymentHistoryListTable.init();
+        }).catch(error => {
+            document.querySelector('#forceSubmitBtn').removeAttribute('disabled');
+            document.querySelector("#forceSubmitBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#forceInsertFixForm .${key}`).addClass('border-danger')
+                        $(`#forceInsertFixForm  .error-${key}`).html(val)
+                    }
                 } else {
                     console.log('error');
                 }

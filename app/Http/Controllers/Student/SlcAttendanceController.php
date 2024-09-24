@@ -194,7 +194,8 @@ class SlcAttendanceController extends Controller
                        ->where('slc_agreement_id', $slcAgreement->id)->where('session_term', $session_term)
                        ->get()->first();
 
-            if(isset($installment->id) && $installment->id > 0):
+            //if(isset($installment->id) && $installment->id > 0):
+            if(isset($installment->id) && $installment->id > 0 && $slcAgreement->is_self_funded != 1):
                 return response()->json(['res' => 1], 200);
             else:
                 return response()->json(['res' => 0], 200);

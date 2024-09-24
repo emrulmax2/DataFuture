@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reports\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SlcPaymentForceInsertRequest;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationVenue;
@@ -370,7 +371,7 @@ class PaymentUploadManagementController extends Controller
                     $data['slc_payment_method_id'] = 2;
                     $data['entry_date'] = date('Y-m-d');
                     $data['payment_date'] = $transaction_date;
-                    $data['amount'] = $trans['amount'];
+                    $data['amount'] = str_replace('-', '', $trans['amount']);
                     $data['discount'] = 0;
                     $data['payment_type'] = $payment_type;
                     $data['remarks'] = date('Y-m-d H:i:s').' Bulk Upload';
@@ -393,5 +394,228 @@ class PaymentUploadManagementController extends Controller
         else:
             return response()->json(['msg' => 'Transactions not found. Please insert some valid transactions.'], 422);
         endif;
+    }
+
+    public function historyReCheckError(Request $request){
+        $history_ids = $request->history_ids;
+        if(!empty($history_ids)):
+            foreach($history_ids as $history_id):
+                $history = SlcPaymentHistory::find($history_id);
+                if($history->status != 1):
+                    $hasError = false; 
+
+                    $ssn = $history->ssn;
+                    $dob = (!empty($history->dob) ? date('Y-m-d', strtotime($history->dob)) : '');
+                    $course_code = $history->course_code;
+                    $academic_year = (isset($history->year) && $history->year > 0 ? $history->year : 0);
+                    $term_name = (isset($history->term_name) && !empty($history->term_name) ? $history->term_name : '');
+
+                    $student = Student::where('ssn_no', $ssn)->where('date_of_birth', $dob)->get()->first();
+                    $student_course_id = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : false);
+                    $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
+                    $courseCreationIds = CourseCreationVenue::where('slc_code', $course_code)->pluck('course_creation_id')->unique()->toArray();
+                    $courseIds = (!empty($courseCreationIds) ? CourseCreation::whereIn('id', $courseCreationIds)->pluck('course_id')->unique()->toArray() : []);
+                    $course_id = (isset($courseIds[0]) && $courseIds[0] > 0 ? $courseIds[0] : '');
+
+                    if(empty($student)):
+                        $hasError = true;
+                    elseif(!empty($student) && ($course_id == '' || $student_course_id != $course_id)):
+                        $hasError = true;
+                    elseif(!empty($student) && ($student_course_id && $student_course_id == $course_id)):
+                        $exist_installment = $this->get_exist_installment($student->id, $academic_year, $term_name, $course_id, $student_course_relation_id);
+                        if($exist_installment):
+                            $hasError = false;
+                        else:
+                            $hasError = true;
+                        endif;
+                    endif;
+
+                    if(!$hasError):
+                        $data = [];
+                        $data['errors'] = '';
+                        $data['status'] = 1;
+                        if($history->student_id == 0 || $history->student_id == '' && !empty($student)):
+                            $data['student_id'] = $student->id;
+                        endif;
+                        SlcPaymentHistory::where('id', $history_id)->update($data);
+                    endif;
+                endif;
+            endforeach;
+        endif;
+
+        return response()->json(['msg' => 'Error re-checked successfully.'], 200);
+    }
+
+    public function historyReCheckInsert(Request $request){
+        $history_ids = $request->history_ids;
+
+        $receipts = SlcMoneyReceipt::max('invoice_no');
+        $invoice = preg_replace('~\D~', '', $receipts);
+
+        foreach($history_ids as $history_id):
+            $history = SlcPaymentHistory::find($history_id);
+            $slcAgreement = SlcAgreement::where('year', $history->year)->where('slc_coursecode', $history->course_code)->where('student_id', $history->student_id)->get()->first();
+            $student = Student::find($history->student_id);
+            $student_course_id = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : false);
+            $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
+
+            $invoice += 1;
+            $invoice_no = '';
+            $refund_invoice_no = '';
+            if ($history->amount > 0):
+                $amount = $history->amount;
+                $invoice_no = $invoice;
+                $payment_type = 'Course Fee';
+            else:
+                $amount = str_replace('-', '', $history->amount);
+                $refund_invoice_no = 'R-' . $invoice;
+                $payment_type = 'Refund';
+            endif;
+
+            if(isset($slcAgreement->id) && $slcAgreement->id > 0):
+                $term_name = (isset($history->term_name) && !empty($history->term_name) ? $history->term_name : '');
+                $session_term = null;
+                $term_declaration_id = null;
+                $installment_id = null;
+                if(!empty($term_name)):
+                    $termTypeId = TermType::where('code', $term_name)->get()->first();
+                    $termTypeId = (isset($termType->id) && $termType->id > 0 ? $termType->id : 0);
+                    $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+                    $installment_id = (isset($inst->id) && $inst->id > 0 ? $inst->id : null);
+                    $session_term = (isset($inst->session_term) && $inst->session_term != '' ? $inst->session_term : null);
+                    $term_declaration_id = (isset($inst->term_declaration_id) && $inst->term_declaration_id != '' ? $inst->term_declaration_id : null);
+                endif;
+
+                $data = [];
+                $data['student_id'] = $history->student_id;
+                $data['student_course_relation_id'] = $student_course_relation_id;
+                $data['course_creation_instance_id'] = (isset($slcAgreement->course_creation_instance_id) && $slcAgreement->course_creation_instance_id > 0 ? $slcAgreement->course_creation_instance_id : null);
+                $data['slc_agreement_id'] = $slcAgreement->id;
+                $data['term_declaration_id'] = $term_declaration_id;
+                $data['session_term'] = $session_term;
+                $data['invoice_no'] = ($history->amount > 0 ? $invoice_no : $refund_invoice_no);
+                $data['refund_invoice_no'] = ($history->amount > 0 ? null : $refund_invoice_no);
+                $data['slc_coursecode'] = $history->course_code;
+                $data['slc_payment_method_id'] = 2;
+                $data['entry_date'] = date('Y-m-d');
+                $data['payment_date'] = $history->transaction_date;
+                $data['amount'] = $amount;
+                $data['discount'] = 0;
+                $data['payment_type'] = $payment_type;
+                $data['remarks'] = date('Y-m-d H:i:s').' Bulk Upload';
+                $data['force_entry'] = 0;
+                $data['received_by'] = auth()->user()->id;
+                $data['created_by'] = auth()->user()->id;
+
+                $moneyReceipt = SlcMoneyReceipt::create($data);
+                if(!empty($installment_id) && $installment_id > 0 && $moneyReceipt):
+                    SlcInstallment::where('id', $installment_id)->update(['slc_money_receipt_id' => $moneyReceipt->id]);
+                endif;
+
+                if($moneyReceipt->id):
+                    SlcPaymentHistory::where('id', $history->id)->forceDelete();
+                else:
+                    SlcPaymentHistory::where('id', $history->id)->update(['status' => 2, 'errors' => 'Unknown issue occour. Please insert this manually.']);
+                endif;
+            else:
+                SlcPaymentHistory::where('id', $history->id)->update(['status' => 2, 'errors' => 'No match found for agreement id.']);
+            endif;
+        endforeach;
+
+        return response()->json(['msg' => 'Requested action successfully taken. Please reload the search result and re-check.'], 200);
+    }
+
+    public function historyFindAgreements(Request $request){
+        $studentid = $request->studentid;
+        $historyid = $request->historyid;
+
+        $student = Student::find($studentid);
+        $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
+
+        $history = SlcPaymentHistory::find($historyid);
+        $slcAgreement = SlcAgreement::where('year', $history->year)->where('slc_coursecode', $history->course_code)->where('student_id', $history->student_id)->get()->first();
+        $agreement_id = (isset($slcAgreement->id) && $slcAgreement->id > 0 ? $slcAgreement->id : 0);
+
+        $agreements = SlcAgreement::where('student_id', $studentid)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
+        $html = '<option value="">Please Select</option>';
+        if($agreements->count() > 0):
+            foreach($agreements as $agr):
+                $html .= '<option '.($agr->id == $agreement_id ? 'Selected' : '').' value="'.$agr->id.'">Agreement Year: '.$agr->year.' ID# '.$agr->id.'</option>';
+            endforeach;
+        endif;
+
+        return response()->json(['htm' => $html], 200);
+
+    }
+
+    public function historyPaymentForceInsert(SlcPaymentForceInsertRequest $request){
+        $slc_agreement_id = $request->slc_agreement_id;
+        $student_id = $request->student_id;
+        $history_id = $request->history_id;
+
+        $slcAgreement = SlcAgreement::find($slc_agreement_id);
+        $student = Student::find($student_id);
+        $history = SlcPaymentHistory::find($history_id);
+
+        $receipts = SlcMoneyReceipt::max('invoice_no');
+        $invoice = preg_replace('~\D~', '', $receipts);
+
+        $invoice += 1;
+        $invoice_no = '';
+        $refund_invoice_no = '';
+        if ($history->amount > 0):
+            $amount = $history->amount;
+            $invoice_no = $invoice;
+            $payment_type = 'Course Fee';
+        else:
+            $amount = str_replace('-', '', $history->amount);
+            $refund_invoice_no = 'R-' . $invoice;
+            $payment_type = 'Refund';
+        endif;
+
+        $term_name = (isset($history->term_name) && !empty($history->term_name) ? $history->term_name : '');
+        $session_term = null;
+        $term_declaration_id = null;
+        $installment_id = null;
+        if(!empty($term_name)):
+            $termTypeId = TermType::where('code', $term_name)->get()->first();
+            $termTypeId = (isset($termType->id) && $termType->id > 0 ? $termType->id : 0);
+            $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+            $installment_id = (isset($inst->id) && $inst->id > 0 ? $inst->id : null);
+            $session_term = (isset($inst->session_term) && $inst->session_term != '' ? $inst->session_term : null);
+            $term_declaration_id = (isset($inst->term_declaration_id) && $inst->term_declaration_id != '' ? $inst->term_declaration_id : null);
+        endif;
+
+        $data = [];
+        $data['student_id'] = $history->student_id;
+        $data['student_course_relation_id'] = (isset($slcAgreement->student_course_relation_id) && $slcAgreement->student_course_relation_id > 0 ? $slcAgreement->student_course_relation_id : null);
+        $data['course_creation_instance_id'] = (isset($slcAgreement->course_creation_instance_id) && $slcAgreement->course_creation_instance_id > 0 ? $slcAgreement->course_creation_instance_id : null);
+        $data['slc_agreement_id'] = $slcAgreement->id;
+        $data['term_declaration_id'] = $term_declaration_id;
+        $data['session_term'] = $session_term;
+        $data['invoice_no'] = ($history->amount > 0 ? $invoice_no : $refund_invoice_no);
+        $data['refund_invoice_no'] = ($history->amount > 0 ? null : $refund_invoice_no);
+        $data['slc_coursecode'] = $history->course_code;
+        $data['slc_payment_method_id'] = 2;
+        $data['entry_date'] = date('Y-m-d');
+        $data['payment_date'] = $history->transaction_date;
+        $data['amount'] = $amount;
+        $data['discount'] = 0;
+        $data['payment_type'] = $payment_type;
+        $data['remarks'] = date('Y-m-d H:i:s').' Bulk Upload';
+        $data['force_entry'] = 1;
+        $data['received_by'] = auth()->user()->id;
+        $data['created_by'] = auth()->user()->id;
+
+        $moneyReceipt = SlcMoneyReceipt::create($data);
+        if(!empty($installment_id) && $installment_id > 0 && $moneyReceipt):
+            SlcInstallment::where('id', $installment_id)->update(['slc_money_receipt_id' => $moneyReceipt->id]);
+        endif;
+
+        if($moneyReceipt->id):
+            SlcPaymentHistory::where('id', $history->id)->forceDelete();
+        endif;
+
+        return response()->json(['msg' => 'Payment successfully inserted.'], 200);
     }
 }
