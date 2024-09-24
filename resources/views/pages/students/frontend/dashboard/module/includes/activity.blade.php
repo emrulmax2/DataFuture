@@ -6,12 +6,12 @@
         <div id="faq-accordion-5-collapse" aria-labelledby="faq-accordion-5" class="accordion-collapse collapse mt-3 text-slate-700 leading-relaxed dark:text-slate-400 [&.collapse:not(.show)]:hidden [&.collapse.show]:visible show">
             <div data-tw-merge class="accordion-body leading-relaxed text-slate-600 dark:text-slate-500 leading-relaxed text-slate-600 dark:text-slate-500">
                 <!-- BEGIN: Module Documents -->
-                <div class="col-span-12 mt-6">
+                {{-- <div class="col-span-12 mt-6">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Module Documents</h2>
                         <div class="ml-auto w-full sm:w-auto flex mt-4 sm:mt-0"></div>
                     </div>
-                    <!-- END: Activity Product List -->
+                    
                     <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
                         <table class="table table-report sm:mt-2">
                             <thead>
@@ -21,25 +21,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($planTasks as $task) 
                                 
-                                @php
-                                if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
-                                    $logoUrl = Storage::disk('s3')->url('public/activity/'.$task->task->logo);
-                                } else {
-                                    $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
-                                }
-
-                                //dd($task->task);
-
-                                $FullName = (isset($task->task->user)) ? $task->task->user->employee->full_name : "";
-                                $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
-                                $rand = rand(0,1);
-                                if($task->taskUploads->isNotEmpty())
-                                    $upload = $task->taskUploads[0];
-                                else
-                                    $upload = null;
-                                @endphp
                                     @if($upload)
                                     <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >              
                                     @endif
@@ -56,53 +38,11 @@
                                             <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $task->task->category }}</div>
                                         </td>
                                         <td class="w-40">
-                                            {{-- <div class="flex">
-                                                @if(($task->taskUploads))
-                                                    @foreach($task->taskUploads as $upload)
-                                                        <a target="_blank" href="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" class="w-10 h-10 image-fit zoom-in -ml-5" >
-                                                            
-                                                            @if($upload->doc_type!="pdf" && $upload->doc_type!="xls" && $upload->doc_type!="doc" && $upload->doc_type!="docx")
-                                                                <img alt="{{ display_file_name }}" class="tooltip rounded-full" src="{{ Storage::disk('s3')->url('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name) }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">           
-                                                            @else
-                                                                <img alt="{{ $upload->display_file_name }}" class="tooltip rounded-full" src="{{ asset('build/assets/images/placeholders/files2.jpeg') }}" title="Uploaded at {{ date("F jS, Y",strtotime($upload->created_at)) }}">             
-                                                            @endif   
-                                                        </a>
-                                                        @php
-                                                            $FullName = $upload->createdBy->employee->full_name;
-                                                            $lastUpdate = $upload->created_at;
-                                                        @endphp
-                                                    @endForeach
-                                                @else
-                                                    <div class="font-medium text-slate-400">
-                                                            No Upload File Found
-                                                    </div>
-                                                @endif
-                                            </div> --}}
+                                            
                                         </td>
                                         
                                         <td>
-                                            {{-- <div class="flex items-center px-5 py-5">
-                                                <div class="image-fit h-10 w-10 flex-none overflow-hidden rounded-full">
-                                                    <img src="" alt="">
-                                                </div>
-                                                <div class="ml-4 mr-auto">
-                                                    <div class="font-medium">{{ $FullName }}</div>
-                                                    <div class="mt-0.5 text-xs text-slate-500">
-                                                        {{ date("F jS, Y",strtotime($lastUpdate)) }}
-                                                    </div>
-                                                </div>
-                                                <div class="text-success">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                                </div>
-                                            </div> --}}
                                         </td>
-                                        {{-- <td class="table-report__action w-56">
-                                            <div class="flex justify-center items-center">
-                                                <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" data-plantaskid="{{ $task->task->id }}" class="flex items-center mr-3 task-upload__Button" href="">
-                                                    <i data-lucide="upload-cloud" class="w-4 h-4 mr-1"></i> upload
-                                                </button>
-                                            </div>
-                                        </td> --}}
 
                                     </tr>
                                     @if($upload)
@@ -112,8 +52,96 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> --}}
                 <!-- END: Module Documents  -->
+                <div class="p-5 pt-0">
+                    <div class="grid grid-cols-12 gap-4">
+                        @foreach ($planTasks as $task) 
+                            @php
+                                if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
+                                    $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$task->task->logo, now()->addMinutes(120));
+                                } else {
+                                    $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
+                                }
+            
+                                $FullName = isset($task->task->user) ? $task->task->user->employee->full_name : '';
+                                $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
+                                $userProfileImage =$task->task->createdBy->employee->photo_url;
+                                $onlyTaskCreatorFound =1;
+                                $rand = rand(0,1);
+            
+                                $required_date = '';
+                                $days_reminder = (isset($task->task->days_reminder) && $task->task->days_reminder > 0 ? $task->task->days_reminder : 0);
+                                $class_start = (isset($plan->attenTerm->start_date) && !empty($plan->attenTerm->start_date) ? date('Y-m-d', strtotime($plan->attenTerm->start_date)) : '');
+                                if(!empty($class_start)):
+                                    $required_date = date('jS F, Y', strtotime('+'.$days_reminder.' days', strtotime($class_start)));
+                                endif;
+            
+                                $document = [];
+                            @endphp
+                            <div class="intro-y col-span-12 sm:col-span-3">
+                                <div class="box">
+                                    <div class="p-5">
+                                        <div class="relative h-40 overflow-hidden rounded-md before:absolute before:left-0 before:top-0 before:z-10 before:block before:h-full before:w-full before:bg-gradient-to-t before:from-black before:to-black/10 2xl:h-56">
+                                            <img class="rounded-md absolute h-30 w-auto m-auto l-0 r-0 t-0 b-0" src="{{ $logoUrl }}" alt="{{ $task->task->name }}">
+                                            {{--<span class="absolute top-0 z-10 m-5 rounded bg-pending/80 px-2 py-1 text-xs text-white">
+                                                {{ $task->task->category }}
+                                            </span>--}}
+                                            <div class="absolute bottom-0 z-10 px-5 pb-6 text-white">
+                                                <a class="block text-base font-medium mt-3 " href="">
+                                                    <span class="text-lg text-white/90">{{ $task->task->name }}</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="mt-5 text-slate-600 dark:text-slate-500">
+                                            <div class="flex items-center">
+                                                <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i>
+                                                Upload Required By: {{ (!empty($required_date) ? $required_date : '')}}
+                                            </div>
+            
+                                            @if($task->taskUploads->isNotEmpty())
+                                                @foreach($task->taskUploads as $upload)
+                                                    @php
+                                                        $document['type'] = $upload->doc_type;
+                                                        $document['url'] = Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name, now()->addMinutes(120))
+                                                    @endphp
+                                                    <div class="mt-2 flex items-center">
+                                                        <i class="w-4 h-4 mr-2" data-lucide="user"></i>
+                                                        Uploaded By: {{ $upload->createdBy->employee->full_name }}
+                                                    </div>
+                                                    <div class="mt-2 flex items-center">
+                                                        <i class="w-4 h-4 mr-2" data-lucide="clock"></i>
+                                                        Uploaded At: {{ (isset($upload->created_at) && !empty($upload->created_at) ? date('jS F, Y', strtotime($upload->created_at)) : '') }}
+                                                    </div>
+                                                    @php
+                                                        $userProfileImage = $upload->createdBy->employee->photo_url;
+                                                    @endphp
+                                                @endForeach
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-center border-t border-slate-200/60 p-5 dark:border-darkmode-400 lg:justify-end">
+                                        @if(!empty($document) && count($document) > 0 && isset($document['url']) && !empty($document['url']))
+                                            <a target="_blank" href="{{ $document['url'] }}" class="mr-auto flex items-center text-success">
+                                                @if($document['type'] !="pdf" && $document['type']!="xls" && $document['type']!="doc" && $document['type']!="docx")
+                                                    <i data-lucide="file-down" class="w-4 h-4 mr-2"></i>
+                                                @else
+                                                    <i data-lucide="image-down" class="w-4 h-4 mr-2"></i>
+                                                @endif   
+                                                Download File
+                                            </a>
+                                        @else
+                                            <a class="mr-auto flex items-center text-slate-400" href="javascript:void(0);">
+                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> File Not Available
+                                            </a>
+                                        @endif
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>
