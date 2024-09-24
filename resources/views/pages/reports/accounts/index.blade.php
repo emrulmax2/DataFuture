@@ -66,7 +66,8 @@
                 </div>
                 <div id="accountsReportsAccordion-collapse-2" class="accordion-collapse collapse" aria-labelledby="accountsReportsAccordion-2" data-tw-parent="#accountsReportsAccordion">
                     <div class="accordion-body">
-                        <form method="post" action="#" id="accountDueReportForm">
+                        <form method="post" action="{{ route('reports.account.due.export') }}" id="accountDueReportForm">
+                            @csrf
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-3">
                                     <label for="due_semester_id" class="form-label semesterLabel inline-flex items-center">Intake Semester <span class="text-danger">*</span></label>
@@ -106,15 +107,10 @@
                                     <input type="text" name="due_date" class="form-control w-full datepicker" id="due_date" value="" data-date-format="DD-MM-YYYY" data-single-mode="true"/>
                                 </div>
                                 <div class="col-span-2 text-right" style="padding-top: 31px;">
-                                    <button type="button" id="accDueSearchBtn" class="btn btn-primary text-white ml-auto w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
-                                    <button type="submit" id="accDueSubmitBtn" class="btn btn-success text-white ml-auto w-auto ml-2"><i class="w-4 h-4 mr-2" data-lucide="file-text"></i> Export Excel</button>
+                                    <button type="submit" id="accDueSubmitBtn" class="btn btn-success text-white w-auto ml-2"><i class="w-4 h-4 mr-2" data-lucide="file-text"></i> Export Excel</button>
                                 </div>
                             </div>
                         </form>
-
-                        <div class="overflow-x-auto scrollbar-hidden pt-5 accountsDueReportTableWrap" style="display: none;">
-                            <div id="accountsDueReportTable" class="table-report table-report--tabulator"></div>
-                        </div>
                     </div>
                 </div>
             </div>

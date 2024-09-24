@@ -20,7 +20,6 @@ class SystemReportController extends Controller
         ]);
     }
     public function accountsReports(){
-
         return view('pages.reports.accounts.index', [
             'title' => 'Site Reports - London Churchill College',
             'breadcrumbs' => [
