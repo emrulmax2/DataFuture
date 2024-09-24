@@ -613,7 +613,7 @@ var employmentHistoryTable = (function () {
         }else
             axios({
                 method: "get",
-                url: route("application.course.creation.edit", $('#course_creation_id').val()),
+                url: route("applicant.application.course.creation.edit", $('#course_creation_id').val()),
                 headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
             }).then((response) => {
                 if (response.status == 200) {

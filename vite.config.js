@@ -261,6 +261,7 @@ export default defineConfig({
                 'resources/js/student-attendance-excuse.js',
                 'resources/js/slc-accounts-reports.js',
                 'resources/js/task-manager-all.js',
+                'resources/js/slc-accounts-due-reports.js',
                 
             ],
             refresh: true,
