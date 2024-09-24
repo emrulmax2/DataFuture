@@ -10,11 +10,11 @@
         <h2 class="text-lg font-medium mr-auto">Profile of <u><strong>{{ $employee->first_name.' '.$employee->last_name }}</strong></u></h2>
        
             <div class="ml-auto flex justify-end">
-                
+                @if(isset(auth()->user()->priv()['login_as_user']) && auth()->user()->priv()['login_as_user'] == 1)
                     <a target="__blank" href="{{ route('impersonate', ['id' =>$employee->agent_user_id,'guardName' =>'agent']) }}" class="btn btn-success text-white w-auto mr-1 mb-0">
                             Login As Agent <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
                     </a>
-                
+                @endif
               
             </div>
     </div>
