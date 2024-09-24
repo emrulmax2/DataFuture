@@ -3,76 +3,7 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
-("use strict");
-var accountsDueReportTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let semester_ids = $("#due_semester_id").val() != "" ? $("#due_semester_id").val() : "";
-        let course_ids = $("#due_course_id").val() != "" ? $("#due_course_id").val() : "";
-        let status_ids = $("#due_status_id").val() != "" ? $("#due_status_id").val() : "";
-        let due_date = $("#due_date").val() != "" ? $("#due_date").val() : "";
 
-        let tableContent = new Tabulator("#accountsDueReportTable", {
-            ajaxURL: route("statuses.list"),
-            ajaxParams: { semester_ids: semester_ids, course_ids: course_ids, status_ids : status_ids, due_date : due_date },
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
-            columns: [
-                {
-                    title: "#ID",
-                    field: "id",
-                    width: "180",
-                },
-                {
-                    title: "Name",
-                    field: "name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Type",
-                    field: "type",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Process",
-                    field: "process",
-                    headerHozAlign: "left",
-                    headerSort: false,
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-            },
-        });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-    };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
 
 (function(){
 
