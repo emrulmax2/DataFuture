@@ -980,7 +980,7 @@ class PlanController extends Controller
         $academicYear = $request->academicYear;
         $term_declaration_id = $request->term_declaration_id;
         $data = [];
-
+        //check
         $courseCreationInstanceIds = InstanceTerm::where('term_declaration_id', $term_declaration_id)->pluck('course_creation_instance_id')->unique()->toArray();
         if(!empty($courseCreationInstanceIds)):
             $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->where('academic_year_id', $academicYear)->pluck('course_creation_id')->unique()->toArray();
