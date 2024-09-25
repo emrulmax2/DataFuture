@@ -379,6 +379,8 @@ var taskAssignedStudentTable = (function () {
     const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
     const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
 
+    const uploadPearsonRegConfModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadPearsonRegConfModal"));
+
     const downloadIDCardEl = document.getElementById('downloadIDCard')
     downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
         $('#downloadIDCard .idContent').html('').fadeOut('fast');
@@ -423,6 +425,12 @@ var taskAssignedStudentTable = (function () {
         $('#viewAttendanceExcuseModal input[name="student_id"]').val('0');
         $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
         $('#viewAttendanceExcuseModal input[name="attendance_excuse_id"]').val('0');
+    });
+    
+    const uploadPearsonRegConfModalEl = document.getElementById('uploadPearsonRegConfModal')
+    uploadPearsonRegConfModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#uploadPearsonRegConfModal [name="document"]').val('');
+        $('#uploadPearsonRegConfModal .documentPearRegName').html('');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -1334,4 +1342,77 @@ var taskAssignedStudentTable = (function () {
         });
     })
     /* Attendance Excuse End */
+
+    /* Pearson Reg. Conf Start */
+    $('#uploadPearsonRegConfForm').on('change', '#editPearRegDocument', function(){
+        showFileName('editPearRegDocument', 'editPearRegDocumentName');
+    });
+
+    function showFileName(inputId, targetPreviewId) {
+        let fileInput = document.getElementById(inputId);
+        let namePreview = document.getElementById(targetPreviewId);
+        let fileName = fileInput.files[0].name;
+        namePreview.innerText = fileName;
+        return false;
+    };
+
+    $('#uploadPearsonRegConfForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('uploadPearsonRegConfForm');
+    
+        document.querySelector('#upPRegConfBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#upPRegConfBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#uploadPearsonRegConfForm input[name="document"]')[0].files[0]); 
+        axios({
+            method: "POST",
+            url: route('student.process.upload.registration.confirmations'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#upPRegConfBtn').removeAttribute('disabled');
+            document.querySelector("#upPRegConfBtn svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                uploadPearsonRegConfModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html(response.data.msg);
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                }, 2000);
+            }
+            taskAssignedStudentTable.init();
+        }).catch(error => {
+            document.querySelector('#upPRegConfBtn').removeAttribute('disabled');
+            document.querySelector("#upPRegConfBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#uploadPearsonRegConfForm .${key}`).addClass('border-danger');
+                        $(`#uploadPearsonRegConfForm  .error-${key}`).html(val);
+                    }
+                } else if(error.response.status == 405){
+                    errorModal.show();
+                    document.getElementById("errorModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#errorModal .errorModalTitle").html("Error!" );
+                        $("#errorModal .errorModalDesc").html(error.response.data.msg);
+                    }); 
+
+                    setTimeout(() => {
+                        errorModal.hide();
+                    }, 2000);
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+
+    /* Pearson Reg. Conf End */
 })();

@@ -19,6 +19,7 @@ class SystemReportController extends Controller
             ]
         ]);
     }
+    
     public function accountsReports(){
         return view('pages.reports.accounts.index', [
             'title' => 'Site Reports - London Churchill College',
@@ -29,6 +30,17 @@ class SystemReportController extends Controller
             'semester' => Semester::orderBy('id', 'DESC')->get(),
             'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
             'status' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get()
+        ]);
+    }
+
+    public function intakePerformance(){
+        return view('pages.reports.intake-performance.index', [
+            'title' => 'Site Reports - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Reports', 'href' => route('reports')],
+                ['label' => 'Intake Performance Reports', 'href' => 'javascript:void(0);']
+            ],
+            'semester' => Semester::orderBy('id', 'DESC')->get(),
         ]);
     }
 }
