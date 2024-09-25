@@ -29,23 +29,28 @@
                         <i class="w-4 h-4 text-white" data-lucide="camera"></i>
                     </button>
                 </div>
-                @php
                 
-                if($student->course->full_time==1) 
-                            $day = 'text-slate-900' ;
-                        else  
-                            $day = 'text-amber-600';
-                        $html = '<div class="inline-flex ml-auto">';
-                            $html .= '<div class="w-8 h-8 '.$day.' intro-x inline-flex">';
-                                if($student->course->full_time==1) 
+                @php
+                    if($student->course->full_time==1):
+                        $day = 'text-slate-900' ;
+                    else:
+                        $day = 'text-amber-600';
+                    endif;
+                    $html = '<div class="inline-flex ml-auto">';
+                        if($student->due > 1):
+                            $html .= '<div class="mr-2 '.($student->due == 2 ? 'text-success' : ($student->due == 3 ? 'text-warning' : 'text-danger')).'"><i data-lucide="badge-pound-sterling" class="w-6 h-6"></i></div>';
+                        endif;
+                        $html .= '<div class="w-8 h-8 '.$day.' intro-x inline-flex">';
+                            if($student->course->full_time==1):
                                 $html .= '<i data-lucide="sunset" class="w-6 h-6"></i>';
-                                else
+                            else:
                                 $html .= '<i data-lucide="sun" class="w-6 h-6"></i>';
-                                $html .= '</div>';
-                if($student->other->disability_status==1)
-                    $html .= '<div class="inline-flex  intro-x  ml-auto" style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
-                            
-                $html .= '</div>';
+                            endif;
+                        $html .= '</div>';
+                        if($student->other->disability_status==1):
+                            $html .= '<div class="inline-flex  intro-x  ml-auto" style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                        endif;
+                    $html .= '</div>';
                 @endphp
                 <div class="ml-5">
                     <div class="w-full flex truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }} {!! $html !!} </div>

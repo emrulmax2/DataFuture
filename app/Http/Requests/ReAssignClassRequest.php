@@ -22,14 +22,16 @@ class ReAssignClassRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'proxy_tutor_id' => 'required'
+            'proxy_tutor_id' => 'required',
+            'proxy_reason' => 'required'
         ];
     }
 
     public function messages()
     {
         return [
-            'proxy_tutor_id.required' => 'This field is required'
+            'proxy_tutor_id.required' => 'This field is required',
+            'proxy_reason.required' => 'This field is required'
         ];
     }
 }

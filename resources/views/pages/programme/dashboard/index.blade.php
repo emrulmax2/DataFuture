@@ -291,6 +291,11 @@
                             </select>
                             <div class="acc__input-error error-proxy_tutor_id text-danger mt-2"></div>
                         </div>
+                        <div class="mt-3">
+                            <label for="proxy_reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea id="proxy_reason" name="proxy_reason" class="form-control w-full"></textarea>
+                            <div class="acc__input-error error-proxy_reason text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

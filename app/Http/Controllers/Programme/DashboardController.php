@@ -166,8 +166,8 @@ class DashboardController extends Controller
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td class="text-left">';
-                        if($pln->plan->tutor_id > 0):
-                            $html .= '<div class="flex justify-start items-center">';
+                        if($pln->plan->tutor_id > 0): 
+                            $html .= '<div class="flex justify-start items-center '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? 'tooltip' : '').'" '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? ' title="'.$pln->proxy_reason.'" ' : '').'>';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
                                     if($pln->proxy_tutor_id > 0):
                                         $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
@@ -186,7 +186,7 @@ class DashboardController extends Controller
                                 $html .= '</div>';
                             $html .= '</div>';
                         elseif($pln->plan->personal_tutor_id > 0):
-                            $html .= '<div class="flex justify-start items-center">';
+                            $html .= '<div class="flex justify-start items-center '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? 'tooltip' : '').'" '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? ' title="'.$pln->proxy_reason.'" ' : '').'>';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
                                     if($pln->proxy_tutor_id > 0):
                                         $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
@@ -838,6 +838,7 @@ class DashboardController extends Controller
 
         $data = [];
         $data['proxy_tutor_id'] = $proxy_tutor_id;
+        $data['proxy_reason'] = (isset($request->proxy_reason) && !empty($request->proxy_reason) ? $request->proxy_reason : null);
         $data['proxy_assigned_by'] = auth()->user()->id;
         $data['proxy_assigned_at'] = date('Y-m-d H:i:s');
 
