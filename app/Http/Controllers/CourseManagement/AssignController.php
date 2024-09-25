@@ -582,7 +582,7 @@ class AssignController extends Controller
                         $NM_HTML .= '<div class="form-check items-start mb-2">';
                             $NM_HTML .= '<input id="newAssigndModuleIds_'.$smd->id.'" class="form-check-input newAssigndModuleIds" name="newAssigndModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
                             $NM_HTML .= '<label class="form-check-label" for="newAssigndModuleIds_'.$smd->id.'">';
-                                $NM_HTML .= $smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
+                                $NM_HTML .= $smd->id.' - '.$smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
                             $NM_HTML .= '</label>';
                         $NM_HTML .= '</div>';
                     endforeach;
@@ -606,7 +606,7 @@ class AssignController extends Controller
                         $OM_HTML .= '<div class="form-check items-start mb-2">';
                             $OM_HTML .= '<input checked id="oldAssignedModuleIds_'.$smd->id.'" class="form-check-input oldAssignedModuleIds" name="oldAssignedModuleIds['.$smd->creations->course_module_id.']['.$smd->class_type.'][]" type="checkbox" value="'.$smd->id.'">';
                             $OM_HTML .= '<label class="form-check-label" for="oldAssignedModuleIds_'.$smd->id.'">';
-                                $OM_HTML .= $smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
+                                $OM_HTML .= $smd->id.' - '.$smd->creations->module_name.(isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>');
                             $OM_HTML .= '</label>';
                         $OM_HTML .= '</div>';
                     endforeach;

@@ -20,6 +20,7 @@ class PlansDateList extends Model
         'proxy_tutor_id',
         'proxy_assigned_by',
         'proxy_assigned_at',
+        'proxy_reason',
         'proxy_class_tutor_note',
         'canceled_by',
         'canceled_at',

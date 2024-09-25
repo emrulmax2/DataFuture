@@ -282,7 +282,7 @@
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button disabled type="submit" id="reAssignStdBtn" class="btn btn-primary w-auto">
-                            Change Group
+                            Save
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
