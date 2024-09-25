@@ -214,6 +214,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -2449,6 +2450,8 @@ Route::middleware('auth')->group(function() {
         Route::post('task-manager/download-document', 'documentDownload')->name('task.manage.document.download');
         Route::post('task-manager/create-pearson-registration-task', 'createPearsonRegistrationTask')->name('task.manager.create.pearson.registration');
         Route::get('task-manager/pearson-registration-student-export', 'pearsonRegStudentListExport')->name('task.manager.pearson.registration.excel');
+        
+        Route::post('task-manager/upload-pearson-registration-confirmation', 'uploadPearsonRegistrationConfirmation')->name('student.process.upload.registration.confirmations');
     });
 
     Route::controller(AssignController::class)->group(function() {
@@ -2725,6 +2728,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(SystemReportController::class)->group(function(){
         Route::get('reports', 'index')->name('reports'); 
         Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
+        Route::get('reports/intake-performance', 'intakePerformance')->name('reports.intake.performance'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
@@ -2745,5 +2749,9 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/accounts/due/export', 'exportExcel')->name('reports.account.due.export'); 
         Route::post('reports/accounts/due/get-course-status-by-semester', 'getCourseStatusBySemester')->name('reports.account.due.get.course.status'); 
         Route::post('reports/accounts/due/get-status-by-semester-course', 'getStatusBySemesterCourse')->name('reports.account.due.get.statuses'); 
+    });
+
+    Route::controller(ContinuationReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-continuation-report', 'getContinuationReport')->name('reports.intake.performance.get.continuation.report'); 
     });
 });

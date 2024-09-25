@@ -262,6 +262,7 @@ export default defineConfig({
                 'resources/js/slc-accounts-reports.js',
                 'resources/js/task-manager-all.js',
                 'resources/js/slc-accounts-due-reports.js',
+                'resources/js/intake-performance-reports.js',
                 
             ],
             refresh: true,

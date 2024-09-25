@@ -42,6 +42,11 @@
             </form>
             <div class="flex mt-5 sm:mt-0">
                 <div class="taskActionBtnGroup">
+                    @if($task->pearson_reg == 'Yes')
+                        <button type="button" data-tw-toggle="modal" data-tw-target="#uploadPearsonRegConfModal" class="btn btn-facebook w-1/2 sm:w-auto ml-2" id="uploadPearsonRegConfBtn">
+                            <i data-lucide="sheet" class="w-4 h-4 mr-2"></i> Upload Pearson Reg. Confirmation
+                        </button>
+                    @endif
                     @if($task->org_email == 'Yes')
                         <button type="button" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2" id="exportTaskStudentsBtn" style="display: none;">
                             <i data-lucide="sheet" class="w-4 h-4 mr-2"></i> Export Students Email
@@ -123,6 +128,54 @@
         </div>
     </div>
     <!-- END: HTML Table Data -->
+
+    <!-- BEGIN: Upload Prearson Reg Modal -->
+    <div id="uploadPearsonRegConfModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="uploadPearsonRegConfForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Upload Pearson Registration Confirmations</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="upload_pearson_doc" class="form-label">Upload Pearson Registration Excel</label>
+                            <div class="flex justify-start items-center relative w-full">
+                                <label for="editPearRegDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                                    <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Excel
+                                </label>
+                                <input type="file" accept=".xlsx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editPearRegDocument"/>
+                                <span id="editPearRegDocumentName" class="documentPearRegName ml-5"></span>
+                            </div>
+                            <div class="acc__input-error error-document text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer flex justify-between">
+                        <a href="{{ url('storage/BTECRT_Sample.xlsx') }}" class="btn btn-success text-white w-auto mr-auto">Download Sample</a>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="upPRegConfBtn" class="btn btn-primary w-auto">
+                            Save
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="task_list_id" value="{{ $task->id }}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Upload Prearson Reg Modal -->
 
     <!-- BEGIN: View Excuse Modal -->
     <div id="viewAttendanceExcuseModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

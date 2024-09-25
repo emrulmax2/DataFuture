@@ -6,8 +6,10 @@ use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
+use App\Http\Requests\PearsonRegistrationConfirmationRequest;
 use App\Http\Requests\PearsonRegistrationTaskRequest;
 use App\Http\Requests\TaskCanceledReasonRequest;
+use App\Imports\CollectionsImport;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\Applicant;
@@ -26,6 +28,7 @@ use App\Models\ProcessList;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
+use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
 use App\Models\StudentTask;
@@ -35,6 +38,7 @@ use App\Models\StudentUser;
 use App\Models\TaskList;
 use App\Models\TaskListUser;
 use App\Models\TaskStatus;
+use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -930,6 +934,74 @@ class PendingTaskManagerController extends Controller
             return Excel::download(new ArrayCollectionExport($theCollection, 'BTEC'), 'BTECRTypeSA1.xlsx');
         else:
             return response()->json(['msg' => 'Error Found!'], 422);
+        endif;
+    }
+
+    public function uploadPearsonRegistrationConfirmation(PearsonRegistrationConfirmationRequest $request){
+        $task_list_id = $request->task_list_id;
+
+        if($request->hasFile('document') && $task_list_id > 0):
+            $rows = Excel::toCollection(new CollectionsImport, $request->file('document'));
+            $rowCount = 1;
+            $successCount = 0;
+            $errorCount = 0;
+            if(isset($rows[0]) && !empty($rows[0]) && count($rows[0]) > 1):
+                foreach($rows[0] as $row):
+                    if($rowCount != 1):
+                        $registration_no = (isset($row[0]) && !empty($row[0]) ? 'LCC'.$row[0] : '');
+                        $reference = (isset($row[11]) && !empty($row[11]) ? $row[11] : '');
+                        $reg_exp_date = (isset($row[12]) && !empty($row[12]) ? date('Y-m-d', strtotime($row[12])) : '');
+                        $reg_date = (isset($row[13]) && !empty($row[13]) ? date('Y-m-d', strtotime($row[13])) : '');
+                        $course_code = (isset($row[14]) && !empty($row[14]) ? $row[14] : '');
+
+                        if(!empty($registration_no) && !empty($reference) && !empty($reg_exp_date) && !empty($reg_date) && !empty($course_code)):
+                            $student = Student::where('registration_no', $registration_no)->get()->first();
+                            if(isset($student->id) && $student->id > 0):
+                                $courseRelationId = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : null);
+                                $existRegistration = StudentAwardingBodyDetails::where('student_id', $student->id)->where('student_course_relation_id', $courseRelationId)->where('reference', $reference)->where('course_code', $course_code)->get()->count();
+                                if($existRegistration > 0):
+                                    $errorCount += 1;
+                                else:
+                                    $data = [];
+                                    $data['student_course_relation_id'] = $courseRelationId;
+                                    $data['student_id'] = $student->id;
+                                    $data['reference'] = $reference;
+                                    $data['course_code'] = $course_code;
+                                    $data['registration_date'] = $reg_date;
+                                    $data['registration_expire_date'] = $reg_exp_date;
+                                    $data['registration_document_verified'] = null;
+                                    $data['created_by'] = auth()->user()->id;
+                                    
+                                    $awardBody = true; StudentAwardingBodyDetails::create($data);
+                                    if($awardBody):
+                                        $studentTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
+                                        $successCount += 1;
+                                    else:
+                                        $errorCount += 1;
+                                    endif;
+                                endif;
+                            endif;
+                        else:
+                            $errorCount += 1;
+                        endif;
+                    endif;
+
+                    $rowCount++;
+                endforeach;
+                $messages = 'Total <span class="font-bold underline">'.($rowCount - 2).'</span> rows submitted. ';
+                if($successCount > 0):
+                    $messages .= ' <span class="font-bold underline">'.$successCount.'</span> rows are successfully inserted.';
+                    $messages .= ($errorCount > 0 ? '<span class="font-bold underline">'.$errorCount.' rows can not inserted due to fail the validation.</span>' : '');
+                    return response()->json(['msg' => $messages], 200);
+                else:
+                    $messages .= ' None of them are inserted. Please check your xl file and submit again with valid data.';
+                    return response()->json(['msg' => $messages], 405);
+                endif;
+            else:
+                return response()->json(['msg' => 'Please upload a valid .xlsx file with valid data.'], 405);
+            endif;
+        else:
+            return response()->json(['msg' => 'Form validation error found!'], 405);
         endif;
     }
 }
