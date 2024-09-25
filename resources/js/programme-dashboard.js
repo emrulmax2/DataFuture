@@ -7,6 +7,7 @@ import TomSelect from "tom-select";
 import helper from "./helper";
 import colors from "./colors";
 import Chart from "chart.js/auto";
+import tippy, { roundArrow } from "tippy.js";
 
 (function(){
     let pgdTomOptions = {
@@ -98,6 +99,19 @@ import Chart from "chart.js/auto";
                 
                 $('.personalTutorCount').html('('+res.ptutors.count+')');
                 $('.personalTutorWrap .theHolder').html(res.ptutors.html);
+
+                $('#dailyClassInfoTable .tooltip').each(function () {
+                    let options = {
+                        content: $(this).attr("title"),
+                    };
+                    $(this).removeAttr("title");
+            
+                    tippy(this, {
+                        arrow: roundArrow,
+                        animation: "shift-away",
+                        ...options,
+                    });
+                });
 
             }
         }).catch(error =>{

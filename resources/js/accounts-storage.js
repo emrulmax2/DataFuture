@@ -53,16 +53,32 @@ var storageTransList = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
                         var html = '<div class="relative">';
+                                var txts = '';
                                 if(cell.getData().detail != ''){
-                                    html += '<div class="whitespace-normal">'+cell.getData().detail+'</div>';
+                                    txts += cell.getData().detail;
+                                    //html += '<div class="whitespace-normal">'+cell.getData().detail+'</div>';
                                 }
                                 if(cell.getData().description != '' || cell.getData().invoice_no != ''){
-                                    html += '<div class="whitespace-normal">';
-                                        html += (cell.getData().invoice_no != '' ? cell.getData().invoice_no : '');
-                                        html += (cell.getData().invoice_no != '' && cell.getData().description != '' ? ' - ' : '');
-                                        html += (cell.getData().description != '' ? cell.getData().description : '');
-                                    html += '</div>';
+                                    //html += '<div class="whitespace-normal">';
+                                        //html += (cell.getData().invoice_no != '' ? cell.getData().invoice_no : '');
+                                        txts += (cell.getData().invoice_no != '' ? cell.getData().invoice_no : '');
+
+                                        //html += (cell.getData().invoice_no != '' && cell.getData().description != '' ? ' - ' : '');
+                                        txts += (cell.getData().invoice_no != '' && cell.getData().description != '' ? ' - ' : '');
+                                        //html += (cell.getData().description != '' ? cell.getData().description : '');
+                                        txts += (cell.getData().description != '' ? cell.getData().description : '');
+                                    //html += '</div>';
                                 }
+                                /*if(txts.length > 150){
+                                    html += '<div class="whitespace-normal">';
+                                        html += txts.substr(0, 150);
+                                        html += '<span class="showHidTexts hidden">'+txts.substr(151)+'</span>';
+                                        html += '&nbsp;&nbsp;<a href="javascript:void(0);" class="text-primary showMoreLess font-medium">Show More</a>';
+                                    html +='</div>';
+                                }else{
+                                    html += '<div class="whitespace-normal">'+txts+'</div>';
+                                }*/
+                                html += '<div class="whitespace-normal">'+txts+'</div>';
                             html += '</div>';
                         return html;
                     }
@@ -218,6 +234,18 @@ var storageTransList = (function () {
             }
             storageTransList.init();
         });
+
+        $('#storageTransList').on('click', '.showMoreLess', function(e){
+            e.preventDefault();
+            var $theLink = $(this);
+            if($theLink.hasClass('active')){
+                $theLink.siblings('.showHidTexts').addClass('hidden');
+                $theLink.removeClass('active').text('Show More');
+            }else{
+                $theLink.siblings('.showHidTexts').removeClass('hidden');
+                $theLink.addClass('active').text('Show Less');
+            }
+        })
     }
 
 

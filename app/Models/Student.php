@@ -182,6 +182,7 @@ class Student extends Model
             return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
         endif;
     }
+    
     public function courseRelationsList() {
         return $this->hasMany(StudentCourseRelation::class, 'student_id');
     }
@@ -219,6 +220,36 @@ class Student extends Model
     public function award(){
         $activeCRel = (isset($this->activeCR->id) && $this->activeCR->id > 0 ? $this->activeCR->id : 0);
         return $this->hasOne(StudentAwardingBodyDetails::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+    }
+
+    public function getDueAttribute(){
+        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+        $agreements = SlcAgreement::where('student_id', $this->id)->where('student_course_relation_id', $activeCRel)->orderBy('id', 'ASC')->get();
+        $dueStatus = 2; /* Due Not Found */
+        if($agreements->count() > 0):
+            foreach($agreements as $agr):
+                $ClaimAmount = (isset($agr->claim_amount) && $agr->claim_amount > 0 ? $agr->claim_amount : 0);
+                $ReceivedAmount = (isset($agr->received_amount) && $agr->received_amount > 0 ? $agr->received_amount : 0);
+                if($ClaimAmount > $ReceivedAmount):
+                    $inst = SlcInstallment::where('slc_agreement_id', $agr->id)->orderBy('id', 'DESC')->get()->first();
+                    $inst_date = (isset($inst->installment_date) && !empty($inst->installment_date) ? date('Y-m-d', strtotime($inst->installment_date)) : '');
+                    if(!empty($inst_date)):
+                        $inst_date = date('Y-m-d', strtotime('+30 Days', strtotime($inst_date)));
+                        if($inst_date < date('Y-m-d')):
+                            $dueStatus = 4; /* Due Found. And its over 30 days. Its a danger */
+                        else:
+                            $dueStatus = 3; /* Due Found. And its within 30 days. Its a warning */
+                        endif;
+                    else:
+                        $dueStatus = 3; /* Due Found But Date Not Found. Its a warning.*/
+                    endif;
+                endif;
+            endforeach;
+        else:
+            $dueStatus = 1; /* Agreement does not exist */
+        endif;
+
+        return $dueStatus;
     }
     
 }
