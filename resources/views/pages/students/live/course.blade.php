@@ -107,6 +107,7 @@
             </div>
         </div>
     </div>
+   
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">

@@ -182,7 +182,11 @@ class Student extends Model
             return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
         endif;
     }
-    
+
+    public function getSessionkeyAttribute(){
+        return 'student_temp_course_relation_'.$this->id;
+    }
+
     public function courseRelationsList() {
         return $this->hasMany(StudentCourseRelation::class, 'student_id');
     }
