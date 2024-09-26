@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentUpdateStatusRequest extends FormRequest
+class BulkStatusUpdateReqest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,18 +22,20 @@ class StudentUpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'student_ids' => 'required',
             'status_id' => 'required',
-            'status_change_date' => 'required',
             'term_declaration_id' => 'required',
+            'status_change_date' => 'required',
         ];
     }
 
     public function messages()
     {
         return [
+            'student_ids.required' => 'Student ids can not be empty.',
             'status_id.required' => 'This field is required.',
-            'status_change_date.required' => 'This field is required.',
             'term_declaration_id.required' => 'This field is required.',
+            'status_change_date.required' => 'This field is required.',
         ];
     }
 }

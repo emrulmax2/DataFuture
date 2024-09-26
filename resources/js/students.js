@@ -231,81 +231,7 @@ var liveStudentsListTable = (function () {
         var student_type = new TomSelect('#student_type', tomOptionsMul);
         var group_student_status = new TomSelect('#group_student_status', tomOptionsMul);
         var evening_weekend = new TomSelect('#evening_weekend', tomOptions);
-        ///course.list.by.academic.term
-        // academic_year.on('change', function(e) {
-        //     let academicList = academic_year.getValue();
-            
-        //     attendance_semester.clear(true)
-        //     attendance_semester.clearOptions();
-        //     attendance_semester.disable();
-            
-        //     if(academicList.length > 0 ){
-                
-        //         intake_semester.clear(true)
-        //         intake_semester.clearOptions();
-        //         intake_semester.disable();
-        //         axios({
-        //             method: "post",
-        //             url: route('student.get.intake.by.academics'),
-        //             data: { academic_years : academicList },
-        //             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        //         }).then(response => {
-        //             if (response.status == 200) {
-        //                 var res = response.data.res;
-        //                 intake_semester.enable();
-        //                 $.each(res, function(index, row) {
-        //                     intake_semester.addOption({
-        //                         value: row.id,
-        //                         text: row.name,
-        //                     });
-        //                 });
-        //                 intake_semester.refreshOptions();
-        //             }
-        //         }).catch(error => {
-        //             if (error.response) {
-
-        //                 intake_semester.enable();
-        //                 intake_semester.clear();
-        //                 intake_semester.clearOptions();
-        //                 console.log('error');
-
-        //             }
-        //         });
-        //         axios({
-        //             method: "post",
-        //             url: route('student.get.term.by.academics'),
-        //             data: { academic_years : academicList },
-        //             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        //         }).then(response => {
-        //             if (response.status == 200) {
-        //                 var res = response.data.res;
-        //                 attendance_semester.enable();
-        //                 $.each(res, function(index, row) {
-        //                     attendance_semester.addOption({
-        //                         value: row.id,
-        //                         text: row.name,
-        //                     });
-        //                 });
-        //                 attendance_semester.refreshOptions();
-        //             }
-        //         }).catch(error => {
-        //             if (error.response) {
-
-        //                 attendance_semester.enable();
-        //                 attendance_semester.clear();
-        //                 attendance_semester.clearOptions();
-        //                 console.log('error');
-
-        //             }
-        //         });
-
-
-        //     }else{
-        //         attendance_semester.clear(true)
-        //         attendance_semester.clearOptions();
-        //         attendance_semester.disable();
-        //     }
-        // })
+        
         intake_semester.on('change', function(){
             let intakeSemester = intake_semester.getValue();
 
@@ -1131,32 +1057,7 @@ var liveStudentsListTable = (function () {
                 filterStudentListTable();
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
-                // var $academic_year = $('#academic_year');
-                // var $intake_semester = $('#intake_semester');
-                // var $termDeclaration = $('#attendance_semester');
-                // var $course = $('#course');
-
-                // let List1 = attendance_semester.getValue();
-                // let List2 = academic_year.getValue();
-                // let List3 = course.getValue();
-                // let List4 = group.getValue();
-                // let List5 = intake_semester.getValue();
-                //console.log(List5.length);
-                //if((List1.length>0 && List2.length>0) || (List5.length>0 && List2.length>0)){
-                    filterStudentListTable();
-                //}else{
-                    // if(List2.length>0){
-                    //     $academic_year.siblings('.acc__input-error').html('This field is required.')
-                    // }else{
-                    //     $academic_year.siblings('.acc__input-error').html('')
-                    // }
-                    // if(List1.length>0){
-                    //     $termDeclaration.siblings('.acc__input-error').html('This field is required.')
-                    // }else{
-                    //     $termDeclaration.siblings('.acc__input-error').html('')
-                    // }
-                    
-                //}
+                filterStudentListTable();
             });
 
             $("#resetStudentSearch").on("click", function (event) {
@@ -1176,6 +1077,7 @@ var liveStudentsListTable = (function () {
             e.preventDefault();
             $('#studentSearchAccordionWrap').slideToggle();
             $('#studentIDSearchBtn').fadeToggle();
+            $('.studentIdSearchWrap').fadeToggle();
             studentSearchAccordion.toggle();
             resetStudentSearch();
             resetGroupSearch();
@@ -1183,6 +1085,7 @@ var liveStudentsListTable = (function () {
 
             //filterStudentListTable();
             $('#liveStudentsListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+            
         });
 
         $('#studentSearchBtn').on('click', function(){

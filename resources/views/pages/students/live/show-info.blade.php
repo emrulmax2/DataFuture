@@ -190,7 +190,7 @@
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="term_declaration_id" class="form-label">Term</label>
+                            <label for="term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
                             <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
                                 <option value="">Please Select</option>
                                 @if($student->assigned_terms && !empty($student->assigned_terms) && $student->assigned_terms->count() > 0)

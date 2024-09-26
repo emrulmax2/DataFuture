@@ -16,7 +16,7 @@
         <form id="studentSearchForm" method="post" action="#">
             <div class="grid grid-cols-12 gap-0 gap-x-4">
                 <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0 gap-x-4">
+                    <div class="grid grid-cols-12 gap-0 gap-x-4 studentIdSearchWrap">
                         <label class="col-span-12 sm:col-span-4 form-label pt-2">Student Search</label>
                         <div class="col-span-12 sm:col-span-8">
                             <div class="autoCompleteField" data-table="students">

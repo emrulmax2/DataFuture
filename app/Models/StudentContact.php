@@ -38,6 +38,10 @@ class StudentContact extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     public function termaddress(){
         return $this->belongsTo(Address::class, 'term_time_address_id');
     }
