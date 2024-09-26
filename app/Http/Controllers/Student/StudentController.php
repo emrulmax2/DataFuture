@@ -2207,9 +2207,10 @@ class StudentController extends Controller
             $assignData = Assign::where('student_id',$student_id)->whereHas('plan', function($q)use($term_declaration_id) {
                 $q->where('term_declaration_id',$term_declaration_id);
             })->get();
+
             if(!empty($assignData))
             foreach($assignData as $assign) {
-                $newAssign = Assign::find($assign);
+                $newAssign = Assign::find($assign->id);
                 $newAssign->attendance = 0;
                 $newAssign->save();
             }
@@ -2222,7 +2223,7 @@ class StudentController extends Controller
 
             if(!empty($assignData))
             foreach($assignData as $assign) {
-                $newAssign = Assign::find($assign);
+                $newAssign = Assign::find($assign->id);
                 $newAssign->attendance = 1;
                 $newAssign->save();
             }
