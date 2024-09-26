@@ -168,9 +168,10 @@ class AssignController extends Controller
             $res['count'] = $students->count();
             foreach($students as $std):
                 $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $planIds)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
+                $checkAttendances = Assign::whereIn('plan_id', $planIds)->where('student_id', $std->id)->where('attendance', 0)->get()->count();
                 $res['htm'] .= '<li data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
                     $res['htm'] .= '<input type="checkbox" name="assignedStudents[]" value="'.$std->id.'" id="assignedStudents_'.$std->id.'"/>';
-                    $res['htm'] .= '<label for="assignedStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>';
+                    $res['htm'] .= '<label class="'.($checkAttendances > 0 ? 'text-danger' : '').'" for="assignedStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>';
                         $res['htm'] .= $std->registration_no.' - '.$std->full_name;
                     $res['htm'] .= '</label>';
                     if(!empty($assignedTo)):
