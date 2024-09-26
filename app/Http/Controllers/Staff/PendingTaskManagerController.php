@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Exports\ArrayCollectionExport;
 use App\Exports\StudentEmailIdTaskExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BulkStatusUpdateReqest;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
 use App\Http\Requests\PearsonRegistrationConfirmationRequest;
 use App\Http\Requests\PearsonRegistrationTaskRequest;
@@ -20,14 +21,17 @@ use App\Models\ApplicantTask;
 use App\Models\ApplicantTaskDocument;
 use App\Models\ApplicantTaskLog;
 use App\Models\ApplicantViewUnlock;
+use App\Models\Assign;
 use App\Models\ComonSmtp;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\LetterSet;
+use App\Models\Plan;
 use App\Models\ProcessList;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
@@ -93,7 +97,9 @@ class PendingTaskManagerController extends Controller
                 ['label' => 'Details', 'href' => 'javascript:void(0);'],
             ],
             'task' => TaskList::find($id),
-            'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get()
+            'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get()
         ]);
     }
 
@@ -325,7 +331,9 @@ class PendingTaskManagerController extends Controller
                 ['label' => 'Task Manager', 'href' => route('task.manager')],
                 ['label' => 'All Task', 'href' => 'javascript:void(0);'],
             ],
-            'processTasks' => $this->getAllPendingProcessTasks()
+            'processTasks' => $this->getAllPendingProcessTasks(),
+            'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get()
         ]);
     }
 
@@ -939,6 +947,10 @@ class PendingTaskManagerController extends Controller
 
     public function uploadPearsonRegistrationConfirmation(PearsonRegistrationConfirmationRequest $request){
         $task_list_id = $request->task_list_id;
+        $status_id = (isset($request->status_id) && $request->status_id > 0 ? $request->status_id : 0);
+        $term_declaration_id = $request->term_declaration_id;
+        $status_change_reason = $request->status_change_reason;
+        $status_change_date = date('Y-m-d H:i:s');
 
         if($request->hasFile('document') && $task_list_id > 0):
             $rows = Excel::toCollection(new CollectionsImport, $request->file('document'));
@@ -974,6 +986,19 @@ class PendingTaskManagerController extends Controller
                                     
                                     $awardBody = true; StudentAwardingBodyDetails::create($data);
                                     if($awardBody):
+                                        if($status_id > 0):
+                                            Student::where('id', $student->id)->update(['status_id' => $status_id]);
+                                            $data = [];
+                                            $data['student_id'] = $student->id;
+                                            $data['term_declaration_id'] = $term_declaration_id;
+                                            $data['status_id'] = $status_id;
+                                            $data['status_change_reason'] = (!empty($status_change_reason) ? $status_change_reason : null);
+                                            $data['status_change_date'] = $status_change_date;
+                                            $data['created_by'] = auth()->user()->id;
+
+                                            StudentAttendanceTermStatus::create($data);
+                                        endif;
+
                                         $studentTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
                                         $successCount += 1;
                                     else:
@@ -1002,6 +1027,66 @@ class PendingTaskManagerController extends Controller
             endif;
         else:
             return response()->json(['msg' => 'Form validation error found!'], 405);
+        endif;
+    }
+
+    public function updateBulkStatus(BulkStatusUpdateReqest $request){
+        $registration_nos = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', str_replace(' ', '', $request->student_ids)): []);
+        $status_id = $request->status_id;
+        $status = Status::find($status_id);
+
+        $term_declaration_id = $request->term_declaration_id;
+        $status_change_reason = (isset($request->status_change_reason) && !empty($request->status_change_reason) ? $request->status_change_reason : null);
+        $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
+
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
+
+        if(!empty($registration_nos)):
+            $notExistRegNo = [];
+            $existsRegNo = [];
+            foreach($registration_nos as $reg):
+                $reg = trim($reg);
+                if(!empty($reg)):
+                    $student = Student::where('registration_no', $reg)->get()->first();
+                    if(isset($student->id) && $student->id > 0):
+                        Student::where('id', $student->id)->update(['status_id' => $status_id]);
+                        $data = [];
+                        $data['student_id'] = $student->id;
+                        $data['term_declaration_id'] = $term_declaration_id;
+                        $data['status_id'] = $status_id;
+                        $data['status_change_reason'] = $status_change_reason;
+                        $data['status_change_date'] = $status_change_date;
+                        $data['created_by'] = auth()->user()->id;
+
+                        StudentAttendanceTermStatus::create($data);
+
+                        /* Update Assigns Here */
+                        if(isset($status->active) && !empty($plan_ids)):
+                            Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student->id)->update(['attendance' => ($status->active == 0 ? 0 : 1)]);
+                        endif;
+                        /* Update Assigns Here */
+
+                        $existsRegNo[] = $reg;
+                    else:
+                        $notExistRegNo[] = $reg;
+                    endif;
+                endif;
+            endforeach;
+            $messages = '';
+            if(!empty($existsRegNo)):
+                $messages .= 'Successfully status changed for &nbsp;<span class="font-medium underline">'.implode(', ', $existsRegNo).'</span> students. ';
+            endif;
+            if(!empty($notExistRegNo)):
+                $messages .= '&nbsp; <span class="font-medium underline">'.implode(', ', $existsRegNo).'</span>&nbsp; student\'s status can not change due to miss match of Registration No.';
+            endif;
+
+            if(empty($existsRegNo)):
+                return response()->json(['msg' => 'Registration No match not found for all: &nbsp; <span class="font-medium underline">'.implode(', ', $existsRegNo).'</span>'], 206);
+            else:
+                return response()->json(['msg' => $messages], 200);
+            endif;
+        else:
+            return response()->json(['msg' => 'Student registration no can not be empty. Please insert at least one registration no.'], 322);
         endif;
     }
 }

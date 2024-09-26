@@ -158,6 +158,27 @@
     </div>
     
 
+    <!-- BEGIN: Description Show Modal -->
+    <div id="descriptionShowHideModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Details</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Description Show Modal -->
+     
     <!-- BEGIN: Edit Modal -->
     <div id="uploadCSVModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

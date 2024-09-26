@@ -4,6 +4,7 @@ import Tabulator from "tabulator-tables";
 import html2canvas from "html2canvas";
 import { saveAs } from 'file-saver';
 import Dropzone from "dropzone";
+import TomSelect from "tom-select";
 
 ("use strict");
 var taskAssignedStudentTable = (function () {
@@ -369,6 +370,23 @@ var taskAssignedStudentTable = (function () {
         });
     }
 
+    let tomOptionsTasManager = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        maxOptions: null,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let change_status_id = new TomSelect('#change_status_id', tomOptionsTasManager);
+    let term_declaration_id = new TomSelect('#term_declaration_id', tomOptionsTasManager);
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const downloadIDCard = tailwind.Modal.getOrCreateInstance(document.querySelector("#downloadIDCard"));
     const canceledReasonModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#canceledReasonModal"));
@@ -431,6 +449,8 @@ var taskAssignedStudentTable = (function () {
     uploadPearsonRegConfModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadPearsonRegConfModal [name="document"]').val('');
         $('#uploadPearsonRegConfModal .documentPearRegName').html('');
+        change_status_id.clear(true);
+        term_declaration_id.clear(true);
     });
 
     $('#successModal .successCloser').on('click', function(e){

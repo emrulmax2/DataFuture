@@ -10,8 +10,25 @@
             <div class="intro-y flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">All Pending Tasks</h2>
                 <div class="ml-auto text-right inline-flex items-center">
-                    <button type="button" data-tw-toggle="modal" data-tw-target="#addPearsonRegTaskModal" class="btn btn-facebook text-white mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Create Pearson Reg. Task</button>
-                    <a href="{{ route('task.manager') }}" class="btn btn-primary text-white">
+                    <div class="dropdown inline-flex" data-tw-placement="bottom-end">
+                        <button class="dropdown-toggle btn btn-success text-white" aria-expanded="false" data-tw-toggle="dropdown"><i class="w-5 h-5" data-lucide="list-checks"></i></button>
+                        <div class="dropdown-menu w-60">
+                            <ul class="dropdown-content">
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item" data-tw-toggle="modal" data-tw-target="#addPearsonRegTaskModal">
+                                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2 text-success"></i> Create Pearson Reg. Task
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item" data-tw-toggle="modal" data-tw-target="#updateBulkStatusModal">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Change Bulk Status
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>  
+                    {{--<button type="button" data-tw-toggle="modal" data-tw-target="#addPearsonRegTaskModal" class="btn btn-facebook text-white mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Create Pearson Reg. Task</button>--}}
+                    <a href="{{ route('task.manager') }}" class="btn btn-primary text-white ml-2">
                         Back to Task Manager
                     </a>
                 </div>
@@ -67,6 +84,80 @@
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Update Bulk Status Modal -->
+    <div id="updateBulkStatusModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="updateBulkStatusForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Update Bulk Status</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <div class="flex justify-start items-center">
+                                <label for="name" class="form-label">Registration No <span class="text-danger">*</span></label>
+                                <span class="studentCount ml-auto font-medium text-primary">No of Student: 0</span>
+                            </div>
+                            <textarea id="bulk_student_ids" name="student_ids" class="form-control w-full" rows="4"></textarea>
+                            <div class="acc__input-error error-student_ids text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="change_status_id" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="change_status_id" name="status_id" class="tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(isset($statuses))
+                                    @foreach($statuses as $stst)
+                                        <option value="{{ $stst->id }}">{{ $stst->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
+                            <select id="term_declaration_id" name="term_declaration_id" class="tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @foreach($terms as $term)
+                                    <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="status_change_reason" class="form-label">Change Reason</label>
+                            <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3"></textarea>
+                        </div>
+                        <div class="mt-3">
+                            <label for="status_change_date" class="form-label">Change Date <span class="text-danger">*</span></label>
+                            <input type="text" name="status_change_date" id="status_change_date" value="<?php echo date('d-m-Y') ?>" class="form-control w-full datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="upBulkStsBtn" class="btn btn-primary w-auto">     
+                            Update                    
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Update Bulk Status Modal -->
 
     <!-- BEGIN: Add Modal -->
     <div id="addPearsonRegTaskModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

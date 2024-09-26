@@ -2452,6 +2452,7 @@ Route::middleware('auth')->group(function() {
         Route::get('task-manager/pearson-registration-student-export', 'pearsonRegStudentListExport')->name('task.manager.pearson.registration.excel');
         
         Route::post('task-manager/upload-pearson-registration-confirmation', 'uploadPearsonRegistrationConfirmation')->name('student.process.upload.registration.confirmations');
+        Route::post('task-manager/update-bulk-status', 'updateBulkStatus')->name('task.manager.update.bulk.status');
     });
 
     Route::controller(AssignController::class)->group(function() {

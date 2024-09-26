@@ -69,16 +69,16 @@ var storageTransList = (function () {
                                         txts += (cell.getData().description != '' ? cell.getData().description : '');
                                     //html += '</div>';
                                 }
-                                /*if(txts.length > 150){
+                                if(txts.length > 150){
                                     html += '<div class="whitespace-normal">';
                                         html += txts.substr(0, 150);
-                                        html += '<span class="showHidTexts hidden">'+txts.substr(151)+'</span>';
+                                        html += '<span class="showHidTexts hidden">'+txts+'</span>';
                                         html += '&nbsp;&nbsp;<a href="javascript:void(0);" class="text-primary showMoreLess font-medium">Show More</a>';
                                     html +='</div>';
                                 }else{
                                     html += '<div class="whitespace-normal">'+txts+'</div>';
-                                }*/
-                                html += '<div class="whitespace-normal">'+txts+'</div>';
+                                }
+                                //html += '<div class="whitespace-normal">'+txts+'</div>';
                             html += '</div>';
                         return html;
                     }
@@ -235,20 +235,27 @@ var storageTransList = (function () {
             storageTransList.init();
         });
 
+        const descriptionShowHideModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#descriptionShowHideModal"));
+        document.getElementById('descriptionShowHideModal').addEventListener('hidden.tw.modal', function(event){
+            $('#descriptionShowHideModal .modal-body').html('');
+        });
+
         $('#storageTransList').on('click', '.showMoreLess', function(e){
             e.preventDefault();
             var $theLink = $(this);
-            if($theLink.hasClass('active')){
-                $theLink.siblings('.showHidTexts').addClass('hidden');
-                $theLink.removeClass('active').text('Show More');
-            }else{
-                $theLink.siblings('.showHidTexts').removeClass('hidden');
-                $theLink.addClass('active').text('Show Less');
-            }
-        })
+            var fullText = $theLink.siblings('.showHidTexts').html();
+
+            descriptionShowHideModal.show();
+            document.getElementById("descriptionShowHideModal").addEventListener("shown.tw.modal", function (event) {
+                $("#descriptionShowHideModal .modal-body").html(fullText);
+            }); 
+        });
+
+
     }
 
 
+    
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
 

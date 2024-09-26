@@ -140,6 +140,32 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <label for="change_status_id" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="change_status_id" name="status_id" class="tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(isset($statuses))
+                                    @foreach($statuses as $stst)
+                                        <option value="{{ $stst->id }}">{{ $stst->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-status_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
+                            <select id="term_declaration_id" name="term_declaration_id" class="tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @foreach($terms as $term)
+                                    <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="status_change_reason" class="form-label">Change Reason</label>
+                            <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3"></textarea>
+                        </div>
+                        <div class="mt-3">
                             <label for="upload_pearson_doc" class="form-label">Upload Pearson Registration Excel</label>
                             <div class="flex justify-start items-center relative w-full">
                                 <label for="editPearRegDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">

@@ -22,14 +22,18 @@ class PearsonRegistrationConfirmationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document' => 'required'
+            'document' => 'required',
+            'status_id' => 'required',
+            'term_declaration_id' => 'required'
         ];
     }
 
     public function messages()
     {
         return [
-            'document.required' => 'Please select pearson registration confirmation .xlsx file.'
+            'document.required' => 'Please select pearson registration confirmation .xlsx file.',
+            'status_id.required' => 'This field is required.',
+            'term_declaration_id.required' => 'This field is required.'
         ];
     }
 }

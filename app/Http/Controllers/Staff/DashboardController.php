@@ -11,6 +11,7 @@ use App\Models\TaskList;
 use App\Models\ApplicantTask;
 use App\Models\AttendanceInformation;
 use App\Models\ComonSmtp;
+use App\Models\CourseCreationAvailability;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
@@ -26,6 +27,7 @@ use App\Models\TaskListUser;
 use App\Models\User;
 use App\Models\UserPrivilege;
 use App\Models\VenueIpAddress;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -66,12 +68,20 @@ class DashboardController extends Controller
             $workHistory['loc_no'] = 0;
             Session::put('work_history_lock_first_time', 1);
         }
+
+        $availableCreations = CourseCreationAvailability::all()->filter(function($item) {
+                                if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
+                                return $item;
+                                }
+                            })->pluck('course_creation_id')->unique()->toArray();
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
             'user' => $userData,
             "interview" => $unfinishedInterviewCount."/".$TotalInterviews,
-            'applicant' => Applicant::where('status_id', '>', 1)->get()->count(),
+            'applicant' => Applicant::where('status_id', '>', 1)->whereHas('course', function($q) use($availableCreations){
+                                $q->whereIn('course_creation_id', $availableCreations);
+                            })->get()->count(),
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
