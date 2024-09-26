@@ -790,7 +790,8 @@ import TomSelect from "tom-select";
         let checkNewModules = $('#studentReAssignForm').find('.newAssigndModuleIds:checked').length;
         let checkOldModules = $('#studentReAssignForm').find('.oldAssignedModuleIds:checked').length;
 
-        if(group > 0 && checkNewModules > 0 && checkOldModules > 0){
+        //if(group > 0 && checkNewModules > 0 && checkOldModules > 0){
+        if(group > 0 && checkNewModules > 0){
             let form_data = new FormData(form);
             axios({
                 method: "post",

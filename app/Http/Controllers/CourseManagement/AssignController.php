@@ -647,26 +647,28 @@ class AssignController extends Controller
         endif;
 
         if($error == 0):
-            foreach($oldAssignedPlans as $module_id => $modules):
-                foreach($modules as $classType => $plan_ids):
-                    $i = 0;
-                    foreach($plan_ids as $plan_id):
-                        $newPlanId = (isset($newAssigndPlans[$module_id][$classType][$i]) && $newAssigndPlans[$module_id][$classType][$i] > 0 ? $newAssigndPlans[$module_id][$classType][$i] : 0);
-                        Assign::where('student_id', $student_id)->where('plan_id', $plan_id)->forceDelete();
-                        
-                        $attendances = Attendance::where('plan_id', $plan_id)->where('student_id', $student_id)->get();
-                        if($attendances->count() > 0):
-                            foreach($attendances as $atn):
-                                $data = [];
-                                $data['plan_id'] = $newPlanId;
-                                $data['prev_plan_id'] = $atn->plan_id;
-                                Attendance::where('id', $atn->id)->update($data);
-                            endforeach;
-                        endif;
-                        $i++;
+            if(!empty($oldAssignedPlans) && count($oldAssignedPlans) > 0):
+                foreach($oldAssignedPlans as $module_id => $modules):
+                    foreach($modules as $classType => $plan_ids):
+                        $i = 0;
+                        foreach($plan_ids as $plan_id):
+                            $newPlanId = (isset($newAssigndPlans[$module_id][$classType][$i]) && $newAssigndPlans[$module_id][$classType][$i] > 0 ? $newAssigndPlans[$module_id][$classType][$i] : 0);
+                            Assign::where('student_id', $student_id)->where('plan_id', $plan_id)->forceDelete();
+                            
+                            $attendances = Attendance::where('plan_id', $plan_id)->where('student_id', $student_id)->get();
+                            if($attendances->count() > 0):
+                                foreach($attendances as $atn):
+                                    $data = [];
+                                    $data['plan_id'] = $newPlanId;
+                                    $data['prev_plan_id'] = $atn->plan_id;
+                                    Attendance::where('id', $atn->id)->update($data);
+                                endforeach;
+                            endif;
+                            $i++;
+                        endforeach;
                     endforeach;
                 endforeach;
-            endforeach;
+            endif;
 
             foreach($newAssigndPlans as $module_id => $modules):
                 foreach($modules as $classType => $plan_ids):

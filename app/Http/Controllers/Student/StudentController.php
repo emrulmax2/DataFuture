@@ -311,7 +311,7 @@ class StudentController extends Controller
 
     public function courseDetails($studentId){
 
-        $student = Student::with('crel','course')->where('id',$studentId)->get()->first();
+        $student = Student::with('course')->where('id', $studentId)->get()->first();
         $courseRelationCreation = $student->crel->creation;
         $studentCourseAvailability = $courseRelationCreation->availability;
         $courseCreationQualificationData = $courseRelationCreation->qualification;
