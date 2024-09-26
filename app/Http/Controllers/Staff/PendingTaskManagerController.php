@@ -48,9 +48,12 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Str;
+
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class PendingTaskManagerController extends Controller
 {
@@ -962,10 +965,10 @@ class PendingTaskManagerController extends Controller
                     if($rowCount != 1):
                         $registration_no = (isset($row[0]) && !empty($row[0]) ? 'LCC'.$row[0] : '');
                         $reference = (isset($row[11]) && !empty($row[11]) ? $row[11] : '');
-                        $reg_exp_date = (isset($row[12]) && !empty($row[12]) ? date('Y-m-d', strtotime(str_replace('/', '-', $row[12]))) : null);
-                        $reg_date = (isset($row[13]) && !empty($row[13]) ? date('Y-m-d', strtotime('/', '-', $row[13])) : null);
+                        $reg_exp_date = (isset($row[12]) && !empty($row[12]) ? Date::excelToDateTimeObject($row[12])->format('Y-m-d') : null);
+                        $reg_date = (isset($row[13]) && !empty($row[13]) ? Date::excelToDateTimeObject($row[13])->format('Y-m-d') : null);
                         $course_code = (isset($row[14]) && !empty($row[14]) ? $row[14] : '');
-
+                        
                         if(!empty($registration_no) && !empty($reference) && !empty($reg_exp_date) && !empty($reg_date) && !empty($course_code)):
                             $student = Student::where('registration_no', $registration_no)->get()->first();
                             if(isset($student->id) && $student->id > 0):
@@ -985,7 +988,7 @@ class PendingTaskManagerController extends Controller
                                         $data['registration_expire_date'] = $reg_exp_date;
                                         $data['registration_document_verified'] = null;
                                         $data['created_by'] = auth()->user()->id;
-                                        
+
                                         $awardBody = true; StudentAwardingBodyDetails::create($data);
                                         if($awardBody):
                                             if($status_id > 0):

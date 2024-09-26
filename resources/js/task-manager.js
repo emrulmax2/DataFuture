@@ -449,6 +449,7 @@ var taskAssignedStudentTable = (function () {
     uploadPearsonRegConfModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#uploadPearsonRegConfModal [name="document"]').val('');
         $('#uploadPearsonRegConfModal .documentPearRegName').html('');
+        $('#uploadPearsonRegConfModal textarea').html('');
         change_status_id.clear(true);
         term_declaration_id.clear(true);
     });
@@ -1393,7 +1394,7 @@ var taskAssignedStudentTable = (function () {
         }).then(response => {
             document.querySelector('#upPRegConfBtn').removeAttribute('disabled');
             document.querySelector("#upPRegConfBtn svg").style.cssText = "display: none;";
-
+            
             if (response.status == 200) {
                 uploadPearsonRegConfModal.hide();
 
