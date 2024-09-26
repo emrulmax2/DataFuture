@@ -2203,8 +2203,10 @@ class StudentController extends Controller
         $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
         
         if($statusDetails->active==0) {
-
-            $assignData = Assign::where('student_id',$student_id)->get();
+            
+            $assignData = Assign::where('student_id',$student_id)->whereHas('plan', function($q)use($term_declaration_id) {
+                $q->where('term_declaration_id',$term_declaration_id);
+            })->get();
             if(!empty($assignData))
             foreach($assignData as $assign) {
                 $newAssign = Assign::find($assign);
@@ -2213,8 +2215,11 @@ class StudentController extends Controller
             }
 
         }else {
-            
-            $assignData = Assign::where('student_id',$student_id)->get();
+
+            $assignData = Assign::where('student_id',$student_id)->whereHas('plan', function($q)use($term_declaration_id) {
+                $q->where('term_declaration_id',$term_declaration_id);
+            })->get();
+
             if(!empty($assignData))
             foreach($assignData as $assign) {
                 $newAssign = Assign::find($assign);
