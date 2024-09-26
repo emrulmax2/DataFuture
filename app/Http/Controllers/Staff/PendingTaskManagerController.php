@@ -922,7 +922,7 @@ class PendingTaskManagerController extends Controller
                     endif;
 
                     /* Excel Data Array */
-                    $theCollection[$row][] = $student->registration_no;
+                    $theCollection[$row][] = str_replace('LCC', '', $student->registration_no);
                     $theCollection[$row][] = $student->first_name;
                     $theCollection[$row][] = $student->last_name;
                     $theCollection[$row][] = (isset($student->sexid->name) && !empty($student->sexid->name) ? strtoupper(substr($student->sexid->name, 0, 1)) : '');
@@ -969,40 +969,43 @@ class PendingTaskManagerController extends Controller
                         if(!empty($registration_no) && !empty($reference) && !empty($reg_exp_date) && !empty($reg_date) && !empty($course_code)):
                             $student = Student::where('registration_no', $registration_no)->get()->first();
                             if(isset($student->id) && $student->id > 0):
-                                $courseRelationId = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : null);
-                                $existRegistration = StudentAwardingBodyDetails::where('student_id', $student->id)->where('student_course_relation_id', $courseRelationId)->where('reference', $reference)->where('course_code', $course_code)->get()->count();
-                                if($existRegistration > 0):
-                                    $errorCount += 1;
-                                else:
-                                    $data = [];
-                                    $data['student_course_relation_id'] = $courseRelationId;
-                                    $data['student_id'] = $student->id;
-                                    $data['reference'] = $reference;
-                                    $data['course_code'] = $course_code;
-                                    $data['registration_date'] = $reg_date;
-                                    $data['registration_expire_date'] = $reg_exp_date;
-                                    $data['registration_document_verified'] = null;
-                                    $data['created_by'] = auth()->user()->id;
-                                    
-                                    $awardBody = true; StudentAwardingBodyDetails::create($data);
-                                    if($awardBody):
-                                        if($status_id > 0):
-                                            Student::where('id', $student->id)->update(['status_id' => $status_id]);
-                                            $data = [];
-                                            $data['student_id'] = $student->id;
-                                            $data['term_declaration_id'] = $term_declaration_id;
-                                            $data['status_id'] = $status_id;
-                                            $data['status_change_reason'] = (!empty($status_change_reason) ? $status_change_reason : null);
-                                            $data['status_change_date'] = $status_change_date;
-                                            $data['created_by'] = auth()->user()->id;
-
-                                            StudentAttendanceTermStatus::create($data);
-                                        endif;
-
-                                        $studentTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
-                                        $successCount += 1;
-                                    else:
+                                $theTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->where('status', 'Pending')->get()->first();
+                                if(isset($theTask->id) && $theTask->id > 0):
+                                    $courseRelationId = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : null);
+                                    $existRegistration = StudentAwardingBodyDetails::where('student_id', $student->id)->where('student_course_relation_id', $courseRelationId)->where('reference', $reference)->where('course_code', $course_code)->get()->count();
+                                    if($existRegistration > 0):
                                         $errorCount += 1;
+                                    else:
+                                        $data = [];
+                                        $data['student_course_relation_id'] = $courseRelationId;
+                                        $data['student_id'] = $student->id;
+                                        $data['reference'] = $reference;
+                                        $data['course_code'] = $course_code;
+                                        $data['registration_date'] = $reg_date;
+                                        $data['registration_expire_date'] = $reg_exp_date;
+                                        $data['registration_document_verified'] = null;
+                                        $data['created_by'] = auth()->user()->id;
+                                        
+                                        $awardBody = true; StudentAwardingBodyDetails::create($data);
+                                        if($awardBody):
+                                            if($status_id > 0):
+                                                Student::where('id', $student->id)->update(['status_id' => $status_id]);
+                                                $data = [];
+                                                $data['student_id'] = $student->id;
+                                                $data['term_declaration_id'] = $term_declaration_id;
+                                                $data['status_id'] = $status_id;
+                                                $data['status_change_reason'] = (!empty($status_change_reason) ? $status_change_reason : null);
+                                                $data['status_change_date'] = $status_change_date;
+                                                $data['created_by'] = auth()->user()->id;
+
+                                                StudentAttendanceTermStatus::create($data);
+                                            endif;
+
+                                            $studentTask = StudentTask::where('student_id', $student->id)->where('task_list_id', $task_list_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
+                                            $successCount += 1;
+                                        else:
+                                            $errorCount += 1;
+                                        endif;
                                     endif;
                                 endif;
                             endif;
