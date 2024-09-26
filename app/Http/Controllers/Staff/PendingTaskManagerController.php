@@ -962,8 +962,8 @@ class PendingTaskManagerController extends Controller
                     if($rowCount != 1):
                         $registration_no = (isset($row[0]) && !empty($row[0]) ? 'LCC'.$row[0] : '');
                         $reference = (isset($row[11]) && !empty($row[11]) ? $row[11] : '');
-                        $reg_exp_date = (isset($row[12]) && !empty($row[12]) ? date('Y-m-d', strtotime($row[12])) : '');
-                        $reg_date = (isset($row[13]) && !empty($row[13]) ? date('Y-m-d', strtotime($row[13])) : '');
+                        $reg_exp_date = (isset($row[12]) && !empty($row[12]) ? date('Y-m-d', strtotime(str_replace('/', '-', $row[12]))) : null);
+                        $reg_date = (isset($row[13]) && !empty($row[13]) ? date('Y-m-d', strtotime('/', '-', $row[13])) : null);
                         $course_code = (isset($row[14]) && !empty($row[14]) ? $row[14] : '');
 
                         if(!empty($registration_no) && !empty($reference) && !empty($reg_exp_date) && !empty($reg_date) && !empty($course_code)):
