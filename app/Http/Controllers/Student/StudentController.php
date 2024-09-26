@@ -2197,10 +2197,31 @@ class StudentController extends Controller
         $lastTermId = (isset($lastTermStatus->term_declaration_id) && $lastTermStatus->term_declaration_id > 0 ? $lastTermStatus->term_declaration_id : 0);
 
         $status_id = $request->status_id;
+        $statusDetails = Status::find($status_id);
         $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
         $status_change_reason = (isset($request->status_change_reason) && !empty($request->status_change_reason) ? $request->status_change_reason : null);
         $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
         
+        if($statusDetails->active==0) {
+
+            $assignData = Assign::where('student_id',$student_id)->get();
+            if(!empty($assignData))
+            foreach($assignData as $assign) {
+                $newAssign = Assign::find($assign);
+                $newAssign->attendance = 0;
+                $newAssign->save();
+            }
+
+        }else {
+            
+            $assignData = Assign::where('student_id',$student_id)->get();
+            if(!empty($assignData))
+            foreach($assignData as $assign) {
+                $newAssign = Assign::find($assign);
+                $newAssign->attendance = 1;
+                $newAssign->save();
+            }
+        }
         /* Save Term Status */
         $termChange = false;
         if($lastTermId != $term_declaration_id):

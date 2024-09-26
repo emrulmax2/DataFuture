@@ -16,6 +16,7 @@ class Status extends Model
         'process_list_id',
         'letter_set_id',
         'signatory_id',
+        'active',
         'email_template_id',
         'created_by',
         'updated_by',
