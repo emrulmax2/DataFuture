@@ -948,8 +948,12 @@ import TomSelect from "tom-select";
 
     })
     $("#studentDataReportExcelBtn").on("click", function (e) {
+
         e.preventDefault();
+        
+        document.querySelector("#studentDataReportExcelBtn svg.loadingCall").style.cssText ="display: inline-block;";
         $("#studentExcelForm").submit();
+
     })
 
     $("#studentExcelForm").on("submit", function (event) {
@@ -957,10 +961,7 @@ import TomSelect from "tom-select";
         event.preventDefault();
         let studentIds = localStorage.getItem('studentIdsList2024');
         if(studentIds.length>0) {
-            document.querySelector('#studentDataReportExcelBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#studentDataReportExcelBtn .loadingCallingForLife").style.cssText ="display: inline-block;";
 
-            $('#studentDataReportExcelBtn .loading').show();
             const form = document.getElementById('studentExcelForm');
             let form_data = new FormData(form);
             form_data.append("studentIds", studentIds);
@@ -974,8 +975,9 @@ import TomSelect from "tom-select";
                 responseType: 'blob',
             })
             .then((response) => {
-                    document.querySelector('#studentDataReportExcelBtn').removeAttribute('disabled');
-                    $('#studentDataReportExcelBtn svg.loading').hide();
+
+                    document.querySelector("#studentDataReportExcelBtn svg.loadingCall").style.cssText ="display: none;";
+                    document.querySelector('#studentDataReportExcelBtn').setAttribute('disabled', 'disabled');
                     localStorage.removeItem('studentIdsList2024');
                     $('#totalCount').html('');
                     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -984,13 +986,13 @@ import TomSelect from "tom-select";
                     link.setAttribute('download', 'student_data_report_download.xlsx'); 
                     document.body.appendChild(link);
                     link.click();
-                    
+
             })
             .catch((error) => {
                     console.log(error);
+                    $(".loadingCallFromApart").remove();
             });
-            document.querySelector('#studentDataReportExcelBtn').removeAttribute('disabled');
-            document.querySelector("#studentDataReportExcelBtn .loadingCallingForLife").style.cssText ="display: none;";
+
         }
     });
     
