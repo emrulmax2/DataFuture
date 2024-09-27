@@ -392,9 +392,10 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = (isset($student->title->name)) ? $student->title->name : "";  
                                     $theCollection[$row][$j++] = $student->first_name;  
                                     $theCollection[$row][$j++] = $student->last_name;  
-                                  break;
+                                    break;
                                 case 'DF_SID_Number':
                                     $theCollection[$row][$j++] = $student->registration_no;  
+                                    break;
                                 default:
                                     $theCollection[$row][$j++] = $student->$key;  
                               }

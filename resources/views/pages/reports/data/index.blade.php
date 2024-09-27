@@ -101,7 +101,7 @@
                 <button type="button" id="studentDataReportExcelBtn" class="btn btn-primary w-auto" disabled>
                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>Export Excel 
                     <svg  style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white" class="w-4 h-4 ml-2 loadingCall">
+                        stroke="white" class="w-4 h-4 ml-2 loadingCallingForLife">
                         <g fill="none" fill-rule="evenodd">
                             <g transform="translate(1 1)" stroke-width="4">
                                 <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
