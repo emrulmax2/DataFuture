@@ -39,9 +39,9 @@ class DashboardController extends Controller
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $usedCourses = Plan::pluck('course_id')->unique()->toArray();
         $theTerm = Plan::with('attenTerm')->whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
         $theTermId = (isset($theTerm->attenTerm->id) && $theTerm->attenTerm->id > 0 ? $theTerm->attenTerm->id : 0);
+        $usedCourses = Plan::where('term_declaration_id', $theTermId)->pluck('course_id')->unique()->toArray();
 
         return view('pages.programme.dashboard.index', [
             'title' => 'Programme Dashboard - London Churchill College',
@@ -67,14 +67,14 @@ class DashboardController extends Controller
         $theClassDate = (isset($request->theClassDate) && !empty($request->theClassDate) ? date('Y-m-d', strtotime($request->theClassDate)) : date('Y-m-d'));
 
         $res = [];
-        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId);
+        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId, $planClassStatus);
         $res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
         $res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
 
         return response()->json(['res' => $res], 200);
     }
 
-    public function getClassInfoHtml($theDate = null, $course_id = 0){
+    public function getClassInfoHtml($theDate = null, $course_id = 0, $planClassStatus = 'All'){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
 
         $html = '';
@@ -85,13 +85,17 @@ class DashboardController extends Controller
         endif;
         $query = $query->orderBy('start_time', 'ASC')->get();*/
 
-        $plans = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
-            if($course_id > 0):
-                $q->where('course_id', $course_id);
-            endif;
-        })->get()->sortBy(function($planDates, $key) {
-            return $planDates->plan->start_time;
-        });
+        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
+                    if($course_id > 0):
+                        $q->where('course_id', $course_id);
+                    endif;
+                });
+        if($planClassStatus != 'All'):
+            $query->where('status', $planClassStatus);
+        endif;
+        $plans = $query->get()->sortBy(function($planDates, $key) {
+                    return $planDates->plan->start_time;
+                });
 
         if(!empty($plans) && $plans->count() > 0):
             $currentTime = date('Y-m-d H:i:s');
@@ -454,8 +458,14 @@ class DashboardController extends Controller
         return $minutes;
     }
 
-    public function tutors($term_declaration_id){
-        $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('tutor_id')->unique()->toArray();
+    public function tutors($term_declaration_id, $course_id = 0){
+        $usedCourses = Plan::where('term_declaration_id', $term_declaration_id)->pluck('course_id')->unique()->toArray();
+        //$tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('tutor_id')->unique()->toArray();
+        $query = Plan::where('term_declaration_id', $term_declaration_id);
+        if($course_id > 0):
+            $query->where('course_id', $course_id);
+        endif;
+        $tutorIds = $query->pluck('tutor_id')->unique()->toArray();
 
         $res = [];
         $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
@@ -484,7 +494,9 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
-            'tutors' => $res
+            'tutors' => $res,
+            'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
+            'selected_course' => $course_id
         ]);
     }
 
@@ -511,8 +523,13 @@ class DashboardController extends Controller
     }
 
 
-    public function personalTutors($term_declaration_id){
-        $tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('personal_tutor_id')->unique()->toArray();
+    public function personalTutors($term_declaration_id, $course_id = 0){
+        $usedCourses = Plan::where('term_declaration_id', $term_declaration_id)->pluck('course_id')->unique()->toArray();
+        $query = Plan::where('term_declaration_id', $term_declaration_id);
+        if($course_id > 0):
+            $query->where('course_id', $course_id);
+        endif;
+        $tutorIds = $query->pluck('personal_tutor_id')->unique()->toArray();
         
         $theDate = Date('Y-m-d'); //'2023-11-24';
 
@@ -555,7 +572,9 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
-            'tutors' => $res
+            'tutors' => $res,
+            'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
+            'selected_course' => $course_id
         ]);
     }
 
