@@ -264,7 +264,8 @@ export default defineConfig({
                 'resources/js/slc-accounts-due-reports.js',
                 'resources/js/intake-performance-reports.js',
                 'resources/js/slc-connection-reports.js',
-                
+
+                'resources/js/student-data-search-form.js',
             ],
             refresh: true,
         }),
