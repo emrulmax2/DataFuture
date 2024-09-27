@@ -48,10 +48,10 @@ class StudentDataReportController extends Controller
         });
         
         return view('pages.reports.data.index', [
-            'title' => 'Attendance Reports - London Churchill College',
+            'title' => 'Student Data Reports - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => 'javascript:void(0);'],
-                ['label' => 'Attendance Reports', 'href' => 'javascript:void(0);']
+                ['label' => 'Student Data Reports', 'href' => 'javascript:void(0);']
             ],
             'semesters' => $semesters,
             'courses' => $courses,
@@ -567,7 +567,7 @@ class StudentDataReportController extends Controller
                         switch ($key) {
                             
                             case "referral_name":
-                                
+
                                 $theCollection[$row][$j++] = isset($student->referral_info) ? $student->referral_info->full_name : "";
 
                             default:
