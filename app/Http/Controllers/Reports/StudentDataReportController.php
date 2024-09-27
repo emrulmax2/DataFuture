@@ -241,7 +241,7 @@ class StudentDataReportController extends Controller
         $StudentQualificationData  = $request->StudentQualification;
         $AgentReferralCodeData  = $request->AgentReferralCode;
         
-        //dd($studentIds);
+        
 
         $StudentData = Student::with('other','crel','termStatus','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest')->whereIn('id',$studentIds)->get();
 
@@ -537,50 +537,45 @@ class StudentDataReportController extends Controller
                             default:
                                 $theCollection[$row][$j++] = (isset($student->kin)) ? $student->kin->$key : "";
                         }
+                    endforeach;
+                            
+                    if(!empty($StudentQualificationData))
+                    foreach($StudentQualificationData as $key =>$value):
+                        
+                        switch ($key) {
+                            case "highest_qualification_on_Entry":
+                                $rel = key($value);
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->highest_qualification_on_entries)) ? $student->qualHigest->highest_qualification_on_entries->name : "";
+                                break;
 
+                            case "qualification_details":
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->awarding_body)) ? $student->qualHigest->awarding_body : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->highest_academic)) ? $student->qualHigest->highest_academic : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->subjects)) ? $student->qualHigest->subjects : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->result)) ? $student->qualHigest->result : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->degree_award_date)) ? $student->qualHigest->degree_award_date : "";
+                                break;
+
+                            default:
+                                $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
+                        }
+                    endforeach; 
+
+                    if(!empty($AgentReferralCodeData))
+                    foreach($AgentReferralCodeData as $key =>$value):
+                        
+                        switch ($key) {
                             
-                        if(!empty($StudentQualificationData))
-                        foreach($StudentQualificationData as $key =>$value):
-                            
-                            switch ($key) {
-                                case "highest_qualification_on_Entry":
-                                    $rel = key($value);
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->highest_qualification_on_entries)) ? $student->qualHigest->highest_qualification_on_entries->name : "";
-                                    break;
-    
-                                case "qualification_details":
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->awarding_body)) ? $student->qualHigest->awarding_body : "";
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->highest_academic)) ? $student->qualHigest->highest_academic : "";
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->subjects)) ? $student->qualHigest->subjects : "";
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->result)) ? $student->qualHigest->result : "";
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest->degree_award_date)) ? $student->qualHigest->degree_award_date : "";
-                                    break;
-    
-                                default:
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
-                            }
-                        endforeach; 
-                        if(!empty($AgentReferralCodeData))
-                        foreach($AgentReferralCodeData as $key =>$value):
-                            $refferalCode = AgentReferralCode::where('code', $student->referral_code)->get()->first();
-                            switch ($key) {
+                            case "referral_name":
                                 
-                                case "referral_name":
-                                    if(isset($refferalCode->AgentUser))
-                                        $theCollection[$row][$j++] = Agent::where('agent_user_id',$refferalCode->AgentUser->id)->get()->first()->full_name;
-                                    elseif(isset($refferalCode->User))
-                                        $theCollection[$row][$j++] =  Employee::where('user_id',$refferalCode->User->id)->get()->first()->full_name ;
-                                    else
-                                        $theCollection[$row][$j++] =  isset($refferalCode->Student) ? $refferalCode->Student->full_name : "";
-                                    break;
-    
-                                default:
-                                    $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
-                            }
-                            
-                        endforeach; 
+                                $theCollection[$row][$j++] = isset($student->referral_info) ? $student->referral_info->full_name : "";
+
+                            default:
+                                $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
+                        }
                         
                     endforeach; 
+                        
                 $row++;
             endforeach;
         endif;

@@ -12,7 +12,7 @@ class Student extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $appends = ['full_name', 'photo', 'photo_url'];
+    protected $appends = ['full_name', 'photo', 'photo_url','referral_info'];
 
     protected $fillable = [
         'applicant_user_id',
@@ -49,6 +49,17 @@ class Student extends Model
         } else {
             return asset('build/assets/images/user_avatar.png');
         }
+    }
+    public function getReferralInfoAttribute() {
+        $refferalCode = ReferralCode::where('code', $this->referral_code)->get()->first();
+        if(isset($refferalCode->agent_user_id)) {
+            return Agent::where('agent_user_id',$refferalCode->agent_user_id)->get()->first();
+        }elseif(isset($refferalCode->user_id)) {
+            return Employee::where('user_id',$refferalCode->user_id)->get()->first();
+        }elseif(isset($refferalCode->student_id)) {
+            return Student::find($refferalCode->student_id);
+        }
+        return NULL;
     }
 
     public function getPhotoAttribute($value){
@@ -173,9 +184,9 @@ class Student extends Model
         return $this->hasMany(StudentConsent::class, 'student_id', 'id');
     }
 
-    public function referral(){
-        return $this->belongsTo(ReferralCode::class, 'status_id');
-    }
+    // public function referral(){
+    //     return $this->belongsTo(ReferralCode::class, 'status_id');
+    // }
 
     public function crel(){
         if(Session::has('student_temp_course_relation_'.$this->id) && Session::get('student_temp_course_relation_'.$this->id) > 0):
