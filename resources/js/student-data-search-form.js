@@ -949,6 +949,7 @@ import TomSelect from "tom-select";
     })
     $("#studentDataReportExcelBtn").on("click", function (e) {
         e.preventDefault();
+        
         $("#studentExcelForm").submit();
     })
 
@@ -958,7 +959,7 @@ import TomSelect from "tom-select";
         let studentIds = localStorage.getItem('studentIdsList2024');
         if(studentIds.length>0) {
             document.querySelector('#studentDataReportExcelBtn').setAttribute('disabled', 'disabled');
-            document.querySelector('#studentDataReportExcelBtn svg.loading').style.cssText = 'display: inline-block;';
+            document.querySelector('#studentDataReportExcelBtn .loading').style.cssText = 'display: inline-block;';
 
             
             const form = document.getElementById('studentExcelForm');
@@ -990,7 +991,7 @@ import TomSelect from "tom-select";
                     console.log(error);
             });
             document.querySelector('#studentDataReportExcelBtn').removeAttribute('disabled');
-            document.querySelector('#studentDataReportExcelBtn svg.loading').style.cssText = 'display: none;';
+            document.querySelector('#studentDataReportExcelBtn .loading').style.cssText = 'display: none;';
         }
     });
     
