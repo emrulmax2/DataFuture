@@ -85,4 +85,30 @@ class SlcAgreement extends Model
 
         return $receivedAmount;
     }
+
+    public function getOnlyReceivedAmountAttribute(){
+        $receivedAmount = 0;
+        if(isset($this->payments) && $this->payments->count() > 0):
+            foreach($this->payments as $pay):
+                if($pay->payment_type != 'Refund'):
+                    $receivedAmount += $pay->amount;
+                endif;
+            endforeach;
+        endif;
+
+        return $receivedAmount;
+    }
+
+    public function getRefundAmountAttribute(){
+        $refundAmount = 0;
+        if(isset($this->payments) && $this->payments->count() > 0):
+            foreach($this->payments as $pay):
+                if($pay->payment_type == 'Refund'):
+                    $refundAmount += $pay->amount;
+                endif;
+            endforeach;
+        endif;
+
+        return $refundAmount;
+    }
 }

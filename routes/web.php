@@ -210,6 +210,7 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
+use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
 use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
@@ -2754,5 +2755,11 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(ContinuationReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-continuation-report', 'getContinuationReport')->name('reports.intake.performance.get.continuation.report'); 
+    });
+
+    Route::controller(ConnectTransactionController::class)->group(function(){
+        Route::post('reports/accounts/search-transactions', 'searchTransactions')->name('reports.accounts.search.transaction'); 
+        Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
+        Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
     });
 });

@@ -8,6 +8,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Accounts Reports</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <button type="button" data-tw-target="#transConnectionModal" data-tw-toggle="modal" class="add_btn btn btn-success text-white shadow-md mr-2"><i data-lucide="arrow-right-left" class="w-4 h-4 mr-2"></i> Connect TC</button>
             <a href="{{ route('reports') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Reports</a>
         </div>
     </div>
@@ -296,7 +297,37 @@
             </form>
         </div>
     </div>
-    <!-- END: Force Insert Modal End -->
+
+    <!-- BEGIN: Transaction Connection Modal Modal Start -->
+    <div id="transConnectionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="transConnectionForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Connect Transaction</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label class="col-span-12 sm:col-span-4 form-label pt-2">Search Transaction</label>
+                            <div class="col-span-12 sm:col-span-8">
+                                <div class="autoCompleteField" data-table="acc_transactions">
+                                    <input type="text" autocomplete="off" id="transaction_code" name="transaction_code" class="form-control transaction_code" value="" placeholder="TC00000"/>
+                                    <ul class="autoFillDropdown"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Transaction Connection Modal Modal End -->
 @endsection
 
 @section('script')

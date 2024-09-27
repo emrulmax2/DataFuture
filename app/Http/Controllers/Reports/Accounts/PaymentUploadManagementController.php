@@ -50,6 +50,8 @@ class PaymentUploadManagementController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'first_name' => $list->first_name,
+                    'last_name' => $list->last_name,
                     'student_id' => $list->student_id,
                     'term_name' => $list->term_name,
                     'ssn' => $list->ssn,
