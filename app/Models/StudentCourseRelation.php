@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StudentCourseRelation extends Model
@@ -34,6 +35,11 @@ class StudentCourseRelation extends Model
 
     public function creation(){
         return $this->belongsTo(CourseCreation::class, 'course_creation_id');
+    }
+
+    public function course(): HasOneThrough
+    {
+        return $this->hasOneThrough(Course::class, CourseCreation::class,'id','id','course_creation_id','course_id');
     }
 
     public function propose(){
