@@ -36,6 +36,7 @@
                         </svg>
                     </button>
                     <input type="hidden" name="acc_transaction_id" value="{{ $transaction->id }}"/>
+                    <a href="{{ route('reports.accounts.transaction.connection.export', $transaction->id) }}" class="btn btn-facebook text-white w-auto ml-1"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel</a>
                 </div>
             </div>
             <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
@@ -75,6 +76,7 @@
                                     <th>Date</th>
                                     <th>Invoice No</th>
                                     <th>Student ID</th>
+                                    <th>SSN</th>
                                     <th>Name</th>
                                     <th>Payment Type</th>
                                     <th>Amount</th>
@@ -97,6 +99,9 @@
                                         </td>
                                         <td>
                                             {!! (isset($rec->student->registration_no) && !empty($rec->student->registration_no) ? '<a href="'.route('student.accounts', $rec->student_id).'" class="font-medium text-primary">'.$rec->student->registration_no.'</a>' : '') !!}
+                                        </td>
+                                        <td>
+                                            {{ (isset($rec->student->ssn_no) && !empty($rec->student->ssn_no) ? $rec->student->ssn_no : '') }}
                                         </td>
                                         <td>
                                             {{ (isset($rec->student->full_name) && !empty($rec->student->full_name) ? $rec->student->full_name : '')}}

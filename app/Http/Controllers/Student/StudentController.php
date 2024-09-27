@@ -135,7 +135,7 @@ class StudentController extends Controller
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request) {
 
         parse_str($request->form_data, $form);
         $student_id = isset($form['student_id']) && !empty($form['student_id']) ? $form['student_id'] : '';
@@ -1301,28 +1301,6 @@ class StudentController extends Controller
             endif;
 
     }
-    public function getAllGroups(Request $request) {
-
-        $term_declaration_ids = $request->term_declaration_ids;
-
-        $courses = $request->courses;
-            
-            $groups = Group::select('name')->whereIn('term_declaration_id', $term_declaration_ids)->whereIn('course_id',$courses)->groupBy('name')->orderBy('name', 'ASC')->get();
-            $res = [];
-            if(!empty($groups)):
-                $i = 1;
-                foreach($groups as $gr):
-                    
-                    $res[$i]['id'] = $gr->name;
-                    $res[$i]['name'] = $gr->name;
-
-                    $i++;
-                endforeach;
-            endif;
-
-        
-        return response()->json(['res' => $res], 200);
-    }
 
     public function getAllStatuses(Request $request) {
 
@@ -1415,7 +1393,7 @@ class StudentController extends Controller
             $studentsListByEveningSemesterAndCourse = $studentIds;
 
         if(!empty($term_declaration_ids) && count($term_declaration_ids)>0) {
-            
+
             if(!empty($groups)) {
                 $groups = Group::whereIn('name',$groups)->pluck('id')->unique()->toArray();
             }
@@ -1476,7 +1454,7 @@ class StudentController extends Controller
 
         return $studentIds;
     }
-    public function getAllStudentType(Request $request) {
+    public function getAllStudentByGroupType(Request $request) {
 
 
         $academic_years = $request->academic_years;

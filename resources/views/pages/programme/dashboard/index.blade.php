@@ -16,10 +16,12 @@
                     <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
                         <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
                         <select class="form-control w-full border-0" name="plan_status" id="planClassStatus" style="max-width: 230px;">
-                            <option value="0">All</option>
-                            <option value="1">Scheduled</option>
-                            <option value="2">Started</option>
-                            <option value="3">Finished</option>
+                            <option value="All">All</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Canceled">Canceled</option>
+                            <option value="Unknown">Unknown</option>
                         </select>
                     </div>
                     <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">

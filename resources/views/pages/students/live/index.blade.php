@@ -217,9 +217,30 @@
                 </div>
             </div>
         </form>
-        <div id="studentListFound" class="flex items-center  ">
-            <div id="unsignedResultCount" class="font-bold text-base text-right ml-auto p-5 border-b border-slate-200/60 dark:border-darkmode-400 hidden" data-total="0"></div>
+        <div id="studentListFound" class="flex flex-col sm:flex-row sm:items-end xl:items-start  ">
+            <div class="flex mt-5 sm:mt-0 mr-auto">
+                <div class="dropdown w-1/2 sm:w-auto hidden">
+                    <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto px-5" aria-expanded="false" data-tw-toggle="dropdown">
+                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                    </button>
+                    <div class="dropdown-menu w-40">
+                        <ul class="dropdown-content">
+                            <li>
+                                <a id="tabulator-export-xlsx-LSD" href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="flex  mt-5 sm:mt-0 ml-auto">
+                <div id="unsignedResultCount" class="font-bold text-base text-right ml-auto p-5 border-b border-slate-200/60 dark:border-darkmode-400 hidden" data-total="0"></div>
+            </div>
         </div>
+        
+            
+        
         <div class="overflow-x-auto scrollbar-hidden">
             <div id="liveStudentsListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>

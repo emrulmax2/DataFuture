@@ -215,6 +215,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
@@ -738,13 +739,15 @@ Route::middleware('auth')->group(function() {
         Route::get('student/set-temp-course/{student}/{crel}', 'setTempCourse')->name('student.set.temp.course');
         Route::get('student/set-default-course/{student}', 'setDefaultCourse')->name('student.set.default.course');
 
-        Route::post('student/all-groups', 'getAllGroups')->name('student.get.groups');
         
         Route::post('student/temm-by-academic', 'getAllTerms')->name('student.get.term.by.academics');
         Route::post('student/intake-by-academic-or-term', 'getAllIntakes')->name('student.get.intake.by.academics');
-        Route::post('student/get-student-type', 'getAllStudentType')->name('student.get.all.student.type');
+
+        Route::post('student/get-student-type', 'getAllStudentByGroupType')->name('student.get.all.student.type');
+
         Route::post('student/course-by-terms', 'getAllCourses')->name('student.get.coureses.by.terms');
         Route::post('student/status-by-groups', 'getAllStatuses')->name('student.get.status.by.groups');
+
         Route::post('student/courses-by-intake', 'getCoursesByIntakeOrTerm')->name('student.get.coureses.by.intake.or.term');
         
         Route::post('student/group-by-courses', 'getGroupByCourseAndTerms')->name('student.get.groups.by.course');
@@ -2326,17 +2329,20 @@ Route::middleware('auth')->group(function() {
         Route::get('personal-tutor-dashboard', 'index')->name('pt.dashboard'); 
         Route::post('personal-tutor-dashboard/get-classes', 'getClassess')->name('pt.get.classes'); 
         Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
-        Route::post('personal-tutor-dashboard/get-class-info', 'getClassInformations')->name('pt.dashboard.class.info'); 
+        Route::post('personal-tutor-dashboard/get-class-info', 'getClassInformations')->name('pt.dashboard.class.info');
+        Route::post('personal-tutor-dashboard/update-class-status', 'UpdateClassStatus')->name('pt.dashboard.class.status.update'); 
+        Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count'); 
+        
     });
 
     Route::controller(ProgrammeDashboardController::class)->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
         Route::post('programme-dashboard/get-class-info', 'getClassInformations')->name('programme.dashboard.class.info'); 
 
-        Route::get('programme-dashboard/tutors/{id}', 'tutors')->name('programme.dashboard.tutors'); 
+        Route::get('programme-dashboard/tutors/{id}/{course?}', 'tutors')->name('programme.dashboard.tutors'); 
         Route::get('programme-dashboard/tutors/details/{id}/{tutorid}', 'tutorsDetails')->name('programme.dashboard.tutors.details'); 
 
-        Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
+        Route::get('programme-dashboard/personal-tutors/{id}/{course?}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
 
         Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
@@ -2720,6 +2726,12 @@ Route::middleware('auth')->group(function() {
         Route::post('bulk-communication/get-letter-template', 'getLetterTemplate')->name('bulk.communication.get.letter.set'); 
         Route::post('bulk-communication/send-letter', 'sendLetter')->name('bulk.communication.send.letter'); 
     });
+    
+    Route::controller(StudentDataReportController::class)->prefix('reports')->group(function(){
+        Route::get('student-data-reports', 'index')->name('report.student.data.view'); 
+        Route::post('student-reports-list', 'totalCount')->name('report.student.data.total'); 
+        Route::post('student-excel-download', 'excelDownload')->name('report.student.data.excel'); 
+    });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
@@ -2761,5 +2773,6 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/accounts/search-transactions', 'searchTransactions')->name('reports.accounts.search.transaction'); 
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
+        Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
     });
 });

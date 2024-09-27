@@ -82,7 +82,9 @@ class Student extends Model
     public function quals(){
         return $this->hasMany(StudentQualification::class, 'student_id', 'id');
     }
-
+    public function qualHigest(){
+        return $this->hasOne(StudentQualification::class, 'student_id', 'id')->latestOfMany();
+    }
     public function employment(){
         return $this->hasMany(StudentEmployment::class, 'student_id', 'id');
     }
@@ -192,7 +194,12 @@ class Student extends Model
     }
     
     public function activeCR(){
+
         return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1)->latestOfMany();
+        
+    }
+    public function ProofOfIdLatest() {
+        return $this->hasOne(StudentProofOfId::class, 'student_id')->latestOfMany();
     }
 
     public function otherCrels(){
