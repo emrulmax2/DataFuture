@@ -16,6 +16,7 @@ use App\Models\Plan;
 use App\Models\Semester;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\StudentCourseRelation;
 use App\Models\StudentProposedCourse;
 use App\Models\TermDeclaration;
 use Barryvdh\Debugbar\Facades\Debugbar;
@@ -143,8 +144,8 @@ class StudentDataReportController extends Controller
         $studentIds = [];
 
 
-        $QueryInner = StudentProposedCourse::with('creation');
-
+        $QueryInner = StudentCourseRelation::with('creation');
+        $QueryInner->where('active','=',1);
         if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
             $QueryInner->where('full_time',$evening_weekends);
         if(!empty($academic_years) && count($academic_years)>0)
@@ -249,13 +250,24 @@ class StudentDataReportController extends Controller
         $theCollection = [];
         $i=1;
         $j=0;
+
+        $theCollection[$i][$j++] = "Regestration No";
+        $theCollection[$i][$j++] = "Student Data ID";
+        $theCollection[$i][$j++] = "Status";
+        
         if(!empty($studentDataSet))
         foreach($studentDataSet as $key =>$value):
             if($key=="full_name"){
                 $theCollection[$i][$j++] = "Title";
                 $theCollection[$i][$j++] = "First Name";
                 $theCollection[$i][$j++] = "Last Name";
-            }else
+            }elseif($key=="ssn_no"){
+                $theCollection[$i][$j++] = "SSN";
+
+            }elseif($key=="uhn_no"){
+
+                $theCollection[$i][$j++] = "UHN No ";
+            }else  
                 $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
             if($key=="id") {
                 $theCollection[$i][$j-1] = "ID";
@@ -271,14 +283,13 @@ class StudentDataReportController extends Controller
 
         if(!empty($StudentCourseRelationData))
         foreach($StudentCourseRelationData as $key =>$value):
-           
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
 
         if(!empty($StudentProposedCourseData))
         foreach($StudentProposedCourseData as $key =>$value):
             if($key=="full_time"){
-                $theCollection[$i][$j++] = "EveningWeekend";
+                $theCollection[$i][$j++] = "Evening/Weekend";
             }else
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
@@ -360,8 +371,14 @@ class StudentDataReportController extends Controller
         $row = 2;
 
         if(!empty($StudentData)):
+            
             foreach($StudentData as $student):
                 $j=0;
+
+                $theCollection[$row][$j++] = $student->registration_no;
+                $theCollection[$row][$j++] = $student->id;
+                $theCollection[$row][$j++] = $student->status->name;
+                
                 if(!empty($studentDataSet))
                     foreach($studentDataSet as $key =>$value):
                         if(strpos( $key, '_id') !== false) {
@@ -372,11 +389,12 @@ class StudentDataReportController extends Controller
                             switch ($key) {
                                 case "full_name":
 
-                                    $theCollection[$row][$j++] = $student->title->name;  
+                                    $theCollection[$row][$j++] = (isset($student->title->name)) ? $student->title->name : "";  
                                     $theCollection[$row][$j++] = $student->first_name;  
                                     $theCollection[$row][$j++] = $student->last_name;  
                                   break;
-
+                                case 'DF_SID_Number':
+                                    $theCollection[$row][$j++] = $student->registration_no;  
                                 default:
                                     $theCollection[$row][$j++] = $student->$key;  
                               }

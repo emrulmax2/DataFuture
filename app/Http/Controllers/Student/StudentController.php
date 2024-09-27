@@ -1375,8 +1375,8 @@ class StudentController extends Controller
         $studentIds = [];
 
 
-        $QueryInner = StudentProposedCourse::with('creation');
-
+        $QueryInner = StudentCourseRelation::with('creation');
+        $QueryInner->where('active','=',1);
         if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
             $QueryInner->where('full_time',$evening_weekends);
         if(!empty($academic_years) && count($academic_years)>0)
@@ -1501,12 +1501,9 @@ class StudentController extends Controller
 
         })->pluck('student_id')->unique()->toArray();
 
-        
 
         if(count($term_declaration_ids)>0) {
 
-
-            
             $planList = Plan::whereIn('term_declaration_id', $term_declaration_ids)->whereHas('course', function($q) use($courses,$academic_years,$groups){
                 if(!empty($courses))
                 $q->whereIn('course_id', $courses);
@@ -1516,12 +1513,10 @@ class StudentController extends Controller
                     $groups = Group::whereIn('name',$groups)->pluck('id')->unique()->toArray();
                     $q->whereIn('group_id', $groups);
                 }
-                
 
             })->pluck('id')->unique()->toArray();
 
             $studentsListByTerm = Assign::whereIn("plan_id",$planList)->pluck('student_id')->unique()->toArray();
-
 
             $commonStudentList = array_intersect($studentsListByStudentType, $studentsListByStatus, $studentsListByEveningSemesterAndCourse,$studentsListByTerm);
 
@@ -1548,7 +1543,6 @@ class StudentController extends Controller
             }else if(empty($studentsListByStudentType) && !empty($studentsListByStatus) && empty($studentsListByEveningSemesterAndCourse)) {
 
                 $commonStudentList = $studentsListByStatus;
-
             }
 
              if(count($commonStudentList)>0) 
@@ -1587,8 +1581,8 @@ class StudentController extends Controller
             }
             
         }
-
-        sort($commonStudentList);
+        
+        
 
         $res["academic_year"] = $this->getAcademicYearListByStudentList($commonStudentList);
         
