@@ -2761,5 +2761,6 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/accounts/search-transactions', 'searchTransactions')->name('reports.accounts.search.transaction'); 
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
+        Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
     });
 });
