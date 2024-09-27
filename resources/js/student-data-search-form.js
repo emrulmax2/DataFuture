@@ -994,8 +994,50 @@ import TomSelect from "tom-select";
         }
     });
     
+    $("#checkbox-all-personal").on('click',function(e){
+        for(let i=1;i<15;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+    $("#checkbox-all-course").on('click',function(e){
+        for(let i=15;i<24;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+    
+    $("#checkbox-all-proof").on('click',function(e){
+        for(let i=24;i<27;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+    
+    $("#checkbox-all-address").on('click',function(e){
+        for(let i=27;i<36;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+    
+    $("#checkbox-all-kin").on('click',function(e){
+        for(let i=36;i<41;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+
     
     
+    $("#checkbox-all-qual").on('click',function(e){
+        for(let i=41;i<43;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
+
+    
+    
+    $("#checkbox-all-ref").on('click',function(e){
+        for(let i=43;i<49;i++) {
+            $('#checkbox-switch-'+i).trigger('click');
+        }
+    })
     /* End List Table Inits */
 
     function resetList() {
