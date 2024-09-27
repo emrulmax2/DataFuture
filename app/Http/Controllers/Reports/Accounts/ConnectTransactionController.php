@@ -7,6 +7,9 @@ use App\Models\AccTransaction;
 use App\Models\SlcMoneyReceipt;
 use Illuminate\Http\Request;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ArrayCollectionExport;
+
 class ConnectTransactionController extends Controller
 {
     
@@ -64,5 +67,43 @@ class ConnectTransactionController extends Controller
         else:
             return response()->json(['msg' => 'Transaction ID or Money receipts not foud. Please validate and submit again.'], 422);
         endif;
+    }
+
+    public function exportList($transaction_id){
+        $transaction = AccTransaction::find($transaction_id);
+        $code = $transaction->transaction_code;
+
+        $transDate = (!empty($transaction->transaction_date_2) ? date('Y-m-d', strtotime($transaction->transaction_date_2)) : '');
+        $moneyReceipts = SlcMoneyReceipt::where('payment_date', $transDate)->where(function($q) use($transaction_id){
+                            $q->where('acc_transaction_id', $transaction_id)->orWhereNull('acc_transaction_id');
+                        })->orderBy('id', 'ASC')->get();
+
+        $theCollection[1][] = 'Date';
+        $theCollection[1][] = 'Invoice No';
+        $theCollection[1][] = 'Student ID';
+        $theCollection[1][] = 'SSN';
+        $theCollection[1][] = 'Name';
+        $theCollection[1][] = 'Payment Type';
+        $theCollection[1][] = 'Amount';
+        $theCollection[1][] = 'Indicator';
+
+        $row = 2;
+        if($moneyReceipts->count() > 0):
+            foreach($moneyReceipts as $rec):
+                $theCollection[$row][] = (isset($rec->payment_date) && !empty($rec->payment_date) ? date('d-m-Y', strtotime($rec->payment_date)) : '');
+                $theCollection[$row][] = (isset($rec->invoice_no) && !empty($rec->invoice_no) ? $rec->invoice_no : '');
+                $theCollection[$row][] = (isset($rec->student->registration_no) && !empty($rec->student->registration_no) ? $rec->student->registration_no : '');
+                $theCollection[$row][] = (isset($rec->student->ssn_no) && !empty($rec->student->ssn_no) ? $rec->student->ssn_no : '');
+                $theCollection[$row][] = (isset($rec->student->full_name) && !empty($rec->student->full_name) ? $rec->student->full_name : '');
+                $theCollection[$row][] = $rec->payment_type;
+                $theCollection[$row][] = number_format($rec->amount, 2);
+                $theCollection[$row][] = (isset($rec->agreement->is_self_funded) && $rec->agreement->is_self_funded == 1 ? 'Yes' : '');
+
+                $row++;
+            endforeach;
+        endif;
+
+        $fileName = $code.'_Money_Receipts.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
 }

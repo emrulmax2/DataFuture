@@ -2339,10 +2339,10 @@ Route::middleware('auth')->group(function() {
         Route::get('programme-dashboard', 'index')->name('programme.dashboard'); 
         Route::post('programme-dashboard/get-class-info', 'getClassInformations')->name('programme.dashboard.class.info'); 
 
-        Route::get('programme-dashboard/tutors/{id}', 'tutors')->name('programme.dashboard.tutors'); 
+        Route::get('programme-dashboard/tutors/{id}/{course?}', 'tutors')->name('programme.dashboard.tutors'); 
         Route::get('programme-dashboard/tutors/details/{id}/{tutorid}', 'tutorsDetails')->name('programme.dashboard.tutors.details'); 
 
-        Route::get('programme-dashboard/personal-tutors/{id}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
+        Route::get('programme-dashboard/personal-tutors/{id}/{course?}', 'personalTutors')->name('programme.dashboard.personal.tutors'); 
         Route::get('programme-dashboard/personal-tutors/details/{id}/{tutorid}', 'personalTutorDetails')->name('programme.dashboard.personal.tutors.details'); 
 
         Route::post('programme-dashboard/cancel-class', 'cancelClass')->name('programme.dashboard.cancel.class'); 
@@ -2773,5 +2773,6 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/accounts/search-transactions', 'searchTransactions')->name('reports.accounts.search.transaction'); 
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
+        Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
     });
 });

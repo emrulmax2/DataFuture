@@ -11,6 +11,20 @@
                 <h2 class="text-lg font-medium truncate mr-5">
                     Personal Tutors: {{ $termDeclaration->name }}
                 </h2>
+
+                <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                        <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
+                        <select class="form-control w-full border-0" name="course_id" id="personalTutorCourseFilter" style="max-width: 230px;">
+                            <option value="{{ route('programme.dashboard.personal.tutors', $termDeclaration->id) }}">All Course</option>
+                            @if(!empty($courses))
+                                @foreach($courses as $cr)
+                                    <option {{ $selected_course == $cr->id ? 'Selected' : '' }} value="{{ route('programme.dashboard.personal.tutors', [$termDeclaration->id, $cr->id]) }}">{{ $cr->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0 relative">
@@ -112,4 +126,14 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script type="module">
+        (function () {
+            $('#personalTutorCourseFilter').on('change', function(e){
+                window.location.href = $(this).val();
+            })
+        })()
+    </script>
 @endsection
