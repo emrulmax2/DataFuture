@@ -21,5 +21,19 @@
                 @endif
             </div>
         </li>
+        <li class="mb-2 pt-1">
+            <a href="{{ route('reports.accounts') }}" class="text-lg font-medium truncate flex justify-start items-center"><i data-lucide="badge-pound-sterling" class="w-5 h-5 mr-4"></i> Student Accounts</a>
+        </li>
     </ul>
+
+
+    {{--<a href="{{ route('reports.accounts') }}" class="box px-2 py-2 mb-2 flex items-center zoom-in">
+        <div class="w-10 h-10 flex-none bg-slate-500 rounded-full inline-flex justify-center items-center overflow-hidden">
+            <i class="w-6 h-6 text-success" data-lucide="badge-pound-sterling"></i>
+        </div>
+        <div class="ml-4 mr-auto">
+            <div class="font-medium">Student Accounts</div>
+        </div>
+        <div class="py-1 px-2 rounded-full text-xs bg-success text-white cursor-pointer font-medium">0</div>
+    </a>--}}
 </div>

@@ -59,4 +59,8 @@ class AccTransaction extends Model
     public function tbank(){
         return $this->belongsTo(AccBank::class, 'transfer_bank_id');
     }
+
+    public function receipts(){
+        return $this->hasMany(SlcMoneyReceipt::class, 'acc_transaction_id', 'id');
+    }
 }

@@ -1405,7 +1405,7 @@ var taskAssignedStudentTable = (function () {
                 });  
                 
                 setTimeout(function(){
-                    successModal.hide();
+                    //successModal.hide();
                 }, 2000);
             }
             taskAssignedStudentTable.init();
@@ -1426,7 +1426,7 @@ var taskAssignedStudentTable = (function () {
                     }); 
 
                     setTimeout(() => {
-                        errorModal.hide();
+                        //errorModal.hide();
                     }, 2000);
                 } else {
                     console.log('error');

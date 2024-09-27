@@ -24,8 +24,9 @@
         @foreach($agreements as $agr)
             @php 
                 $claimAmount = (isset($agr->claim_amount) && $agr->claim_amount > 0 ? $agr->claim_amount : 0);
-                $receivedAmount = (isset($agr->received_amount) && $agr->received_amount > 0 ? $agr->received_amount : 0);
-                $balance = $claimAmount - $receivedAmount;
+                $onlyReceivedAmount = (isset($agr->only_received_amount) && $agr->only_received_amount > 0 ? $agr->only_received_amount : 0);
+                $refundAmount = (isset($agr->refund_amount) && $agr->refund_amount > 0 ? $agr->refund_amount : 0);
+                $balance = $onlyReceivedAmount - ($claimAmount + $refundAmount);
             @endphp
             <div class="intro-y box p-5 mt-5 {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'bg-danger-soft') }}">
                 <div class="grid grid-cols-12 gap-0 items-center">
@@ -109,7 +110,7 @@
                                 <div class="col-span-4 text-slate-500 font-medium">Balance</div>
                                 <div class="col-span-8 font-medium">
                                     <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($balance > 0 ? '<span class="text-danger">£'.number_format($balance, 2).'</span>' : '<span class="text-success">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
+                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
                                 </div>
                             </div>
                         </div>

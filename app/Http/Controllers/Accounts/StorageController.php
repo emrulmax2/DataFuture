@@ -181,6 +181,7 @@ class StorageController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'transaction_code' => $list->transaction_code,
+                    'connected' => (isset($list->receipts) && $list->receipts->count() > 0 ? 1 : 0),
                     'transaction_date_2' => (!empty($list->transaction_date_2) ? date('jS F, Y', strtotime($list->transaction_date_2)) : ''),
                     'invoice_no' => (!empty($list->invoice_no) ? $list->invoice_no : ''),
                     'detail' => (!empty($list->detail) ? $list->detail : ''),

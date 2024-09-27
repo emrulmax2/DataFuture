@@ -42,6 +42,9 @@ var storageTransList = (function () {
                                         html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                     }
                                     html += cell.getData().transaction_code;
+                                    if(cell.getData().connected == 1){
+                                        html += '<a href="'+route('reports.accounts.transaction.connection', cell.getData().id)+'" class="text-success ml-2" style="position: relative; top: -1px;"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></a>';
+                                    }
                                 html += '</div>';
                             html += '</div>';
                         return html;

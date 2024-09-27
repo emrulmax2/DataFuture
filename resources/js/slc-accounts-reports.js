@@ -51,6 +51,14 @@ var slcPaymentHistoryListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Name",
+                    field: "first_name",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        return '<span>'+cell.getData().first_name+' '+cell.getData().last_name+'</span>';
+                    }
+                },
+                {
                     title: "REG. NO",
                     field: "registration_no",
                     headerHozAlign: "left",
@@ -499,5 +507,39 @@ var slcPaymentHistoryListTable = (function () {
             }
         });
     });
+
+    $('#transaction_code').on('keyup', function(){
+        var $theInput = $(this);
+        var SearchVal = $theInput.val();
+
+        if(SearchVal.length >= 3){
+            axios({
+                method: "post",
+                url: route('reports.accounts.search.transaction'),
+                data: {SearchVal : SearchVal},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $theInput.siblings('.autoFillDropdown').html(response.data.htm).fadeIn();
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                    $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+                }
+            });
+        }else{
+            $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+        }
+    });
+
+    /*$('.autoFillDropdown').on('click', 'li a:not(".disable")', function(e){
+        e.preventDefault();
+        var transaction_code = $(this).attr('href');
+        var acc_transaction_id = $(this).attr('data-id');
+        $(this).parent('li').parent('ul.autoFillDropdown').siblings('.transaction_code').val(transaction_code);
+        $(this).parent('li').parent('ul.autoFillDropdown').siblings('#acc_transaction_id').val(acc_transaction_id);
+        $(this).parent('li').parent('.autoFillDropdown').html('').fadeOut();
+    });*/
 
 })();
