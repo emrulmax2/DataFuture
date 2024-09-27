@@ -1469,7 +1469,7 @@ class StudentController extends Controller
         $res = [];
 
         if(!empty($student_types) && count($student_types)>0)
-            $studentsListByStudentType = Student::with('courseRelationsList')->whereHas('courseRelationsList', function($q) use($student_types){
+            $studentsListByStudentType = Student::with('activeCR')->whereHas('activeCR', function($q) use($student_types){
            
             $q->whereIn('type', $student_types);
         })->pluck('id')->unique()->toArray();
@@ -1483,8 +1483,8 @@ class StudentController extends Controller
         else 
         $studentsListByStatus = []; 
 
-        $QueryInner = StudentProposedCourse::with('creation');
-
+        $QueryInner = StudentCourseRelation::with('creation');
+        $QueryInner->where('active', '=', 1);
         if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
             $QueryInner->where('full_time',$evening_weekends);
         if(!empty($academic_years) && count($academic_years)>0)
