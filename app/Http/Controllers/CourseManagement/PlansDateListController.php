@@ -139,29 +139,31 @@ class PlansDateListController extends Controller
                 $plan = Plan::find($cp_id);
 
                 /* Plan Task Start */
-                foreach($eLearningActivitySettings as $activitySetting) {
-                    $planTask = PlanTask::where('e_learning_activity_setting_id',$activitySetting->id)
-                                ->where('plan_id', $cp_id)
-                                ->get()
-                                ->first();
-                    if(!$planTask) {
-                        $planTask = new PlanTask();    
+                if($plan->class_type != 'Tutorial' && $plan->class_type != 'Seminar'):
+                    foreach($eLearningActivitySettings as $activitySetting):
+                        $planTask = PlanTask::where('e_learning_activity_setting_id',$activitySetting->id)
+                                    ->where('plan_id', $cp_id)
+                                    ->get()
+                                    ->first();
+                        if(!$planTask) {
+                            $planTask = new PlanTask();    
 
-                    }
-                    if($activitySetting->has_week==0 ) {
-                        $planTask->name = $activitySetting->name;
-                        $planTask->category = $activitySetting->category;
-                        $planTask->logo = $activitySetting->logo;
-                        $planTask->plan_id = $cp_id;
-                        $planTask->module_creation_id = $plan->module_creation_id;
-                        $planTask->e_learning_activity_setting_id = $activitySetting->id;
-                        $planTask->has_week = ($activitySetting->has_week) ?? 0;
-                        $planTask->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
-                        $planTask->days_reminder = ($activitySetting->days_reminder) ?? 0;
-                        $planTask->created_by = Auth::user()->id;
-                        $planTask->save();
-                    }
-                }
+                        }
+                        if($activitySetting->has_week==0 ) {
+                            $planTask->name = $activitySetting->name;
+                            $planTask->category = $activitySetting->category;
+                            $planTask->logo = $activitySetting->logo;
+                            $planTask->plan_id = $cp_id;
+                            $planTask->module_creation_id = $plan->module_creation_id;
+                            $planTask->e_learning_activity_setting_id = $activitySetting->id;
+                            $planTask->has_week = ($activitySetting->has_week) ?? 0;
+                            $planTask->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
+                            $planTask->days_reminder = ($activitySetting->days_reminder) ?? 0;
+                            $planTask->created_by = Auth::user()->id;
+                            $planTask->save();
+                        }
+                    endforeach;
+                endif;
                 /* Plan Task Start */
 
                 $creation = $plan->creations;
@@ -207,28 +209,30 @@ class PlansDateListController extends Controller
                                 $plandateList = PlansDateList::create($data);
                                 $plandateListId = $plandateList->id;
                                 
-                                foreach($eLearningActivitySettings as $activitySetting) {
-                                    $planContent = PlanContent::where('e_learning_activity_setting_id',$activitySetting->id)
-                                                ->where('plans_date_list_id',$plandateListId)
-                                                ->get()
-                                                ->first();
-                                    if(!$planContent) {
-                                        $planContent = new PlanContent();    
-                
+                                if($plan->class_type != 'Tutorial' && $plan->class_type != 'Seminar'):
+                                    foreach($eLearningActivitySettings as $activitySetting) {
+                                        $planContent = PlanContent::where('e_learning_activity_setting_id',$activitySetting->id)
+                                                    ->where('plans_date_list_id',$plandateListId)
+                                                    ->get()
+                                                    ->first();
+                                        if(!$planContent) {
+                                            $planContent = new PlanContent();    
+                    
+                                        }
+                                        if($activitySetting->has_week==1 && $name=="Teaching") {
+                                            $planContent->plans_date_list_id  = $plandateListId;
+                                            $planContent->e_learning_activity_setting_id = $activitySetting->id;
+                                            $planContent->logo = $activitySetting->logo;
+                                            $planContent->availibility_at = now();
+                                            $planContent->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
+                                            $planContent->days_reminder = ($activitySetting->days_reminder) ?? 0;
+                                            $planContent->name = $activitySetting->name;
+                                            $planContent->category = $activitySetting->category;
+                                            $planContent->created_by = Auth::user()->id;
+                                            $planContent->save();
+                                        }
                                     }
-                                    if($activitySetting->has_week==1 && $name=="Teaching") {
-                                        $planContent->plans_date_list_id  = $plandateListId;
-                                        $planContent->e_learning_activity_setting_id = $activitySetting->id;
-                                        $planContent->logo = $activitySetting->logo;
-                                        $planContent->availibility_at = now();
-                                        $planContent->is_mandatory = ($activitySetting->is_mandatory) ?? 0;
-                                        $planContent->days_reminder = ($activitySetting->days_reminder) ?? 0;
-                                        $planContent->name = $activitySetting->name;
-                                        $planContent->category = $activitySetting->category;
-                                        $planContent->created_by = Auth::user()->id;
-                                        $planContent->save();
-                                    }
-                                }
+                                endif;
 
                             endif;
                             $start = date("Y-m-d", strtotime("+1 day", strtotime($start)));
