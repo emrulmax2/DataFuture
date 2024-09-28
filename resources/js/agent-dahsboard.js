@@ -7,8 +7,6 @@ import TomSelect from "tom-select";
 var applicantApplicantionList = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-
-        
         let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
         let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
         let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
@@ -91,6 +89,10 @@ var applicantApplicantionList = (function () {
                         if (cell.getData().submission_date == '') {
 
                             btns += '<a href="'+route('agent.application',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                        
+                        }else if (cell.getData().status == 'Rejected') {
+
+                            btns += '<a href="'+route('agent.application.show',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="plus" class="w-4 h-4"></i></a>';
                         
                         }else{
 
