@@ -269,9 +269,7 @@ class StudentDataReportController extends Controller
                 $theCollection[$i][$j++] = "UHN No ";
             }else  
                 $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
-            if($key=="id") {
-                $theCollection[$i][$j-1] = "ID";
-            }
+            
         endforeach; 
 
 
