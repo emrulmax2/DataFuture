@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  
 env:
   APP_NAME: "London Churchill College (SMS) App"
   APP_ENV: production
@@ -57,7 +58,8 @@ env:
 
   DOCUSEAL_API_KEY: ${{ secrets.DOCUSEAL_API_KEY }}
   OFFER_ACCEPTANCE_FORM_TEMPLATE_ID: 172859
-  
+
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -75,7 +77,7 @@ jobs:
       run: npm install
 
     - name: Build project
-      run: npm run build
+      run: 'cd /home/${{ secrets.CPUSER }}/${{secrets.LIVEAPP}}/ && npm run build'
       
     - name: Setup SSH
       run: |
