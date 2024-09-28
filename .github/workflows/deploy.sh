@@ -8,6 +8,11 @@ git pull origin main
 # Install/update composer dependencies
 composer install --no-interaction
 
+
+# Install NPM dependencies and build assets
+npm install
+npm run build
+
 # Run database migrations
 php artisan migrate --force
 
