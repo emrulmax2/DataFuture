@@ -12,6 +12,7 @@ composer install --no-interaction
 # Install NPM dependencies and build assets
 npm install
 npm run build
+rm -rf node_modules
 
 # Run database migrations
 php artisan migrate --force
