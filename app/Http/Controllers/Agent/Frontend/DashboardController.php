@@ -121,7 +121,12 @@ class DashboardController extends Controller
 
         if(!empty($Query)):
             $i = 1;
+
             foreach($Query as $list):
+                $newApply =false;
+                if($list->status->name=="Rejected") {
+                    $newApply = true;
+                }
                 $studentFound = Student::where('applicant_id',$list->id)->get()->first();
                 $agentCheck = AgentApplicationCheck::whereIn('agent_user_id',$agents)->where("email",$list->users->email)->where("mobile",$list->users->phone)->get()->first();
                 $data[] = [
@@ -137,7 +142,8 @@ class DashboardController extends Controller
                     'referral_code' => $list->referral_code,
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),
                     'is_student' => (!empty($studentFound) ? 1 : 0),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'new_apply' => $newApply
                 ];
                 $i++;
             endforeach;
