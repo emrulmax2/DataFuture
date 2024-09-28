@@ -76,7 +76,7 @@ jobs:
 
     - name: Build project
       run: npm run build
-
+      
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh/
@@ -89,3 +89,5 @@ jobs:
     - name: Deploy
       run: |
         ssh smslccuk@${{ secrets.SERVER_IP }} 'bash -s' < ${{ github.workspace }}/.github/workflows/deploy.sh
+        export DEPLOYPATH=/home/${{ secrets.CPUSER }}/datafuture/public/build
+        - /bin/cp -R public/build $DEPLOYPATH
