@@ -50,7 +50,7 @@ class CourseCreation extends Model
     }
 
     public function available(){
-        return $this->hasOne(CourseCreationAvailability::class, 'course_creation_id', 'id');
+        return $this->hasOne(CourseCreationAvailability::class, 'course_creation_id', 'id')->latestOfMany();
     }
 
     public function instance(){

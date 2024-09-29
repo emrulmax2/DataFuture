@@ -215,6 +215,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\SystemReportController;
@@ -2774,5 +2775,10 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
         Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
+    });
+
+    Route::controller(AttendanceRateReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-attendance-rate', 'getAttendanceRateReport')->name('reports.intake.performance.get.attendance.rate'); 
+        Route::get('reports/intake-performance/print-attendance-rate/{semesters?}', 'printAttendanceRateReport')->name('reports.intake.performance.print.attendance.rate'); 
     });
 });

@@ -6,6 +6,6 @@
             e.preventDefault();
             $(this).toggleClass('active text-primary');
             $(this).siblings('.accDropDown').slideToggle();
-        })
+        });
     }
 })();

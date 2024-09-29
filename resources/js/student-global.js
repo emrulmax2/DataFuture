@@ -169,8 +169,8 @@ import Dropzone from "dropzone";
                     });  
                     
                     setTimeout(function(){
-                        //successModalInfo.hide();
-                       // window.location.reload();
+                        successModalInfo.hide();
+                       window.location.reload();
                     }, 2000);
                 }
             }).catch(error => {
@@ -192,8 +192,8 @@ import Dropzone from "dropzone";
                         });  
                         
                         setTimeout(function(){
-                            //successModalInfo.hide();
-                            //window.location.reload();
+                            successModalInfo.hide();
+                            window.location.reload();
                         }, 2000);
                     } else {
                         console.log('error');

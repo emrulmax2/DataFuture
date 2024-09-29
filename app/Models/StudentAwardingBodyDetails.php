@@ -48,4 +48,8 @@ class StudentAwardingBodyDetails extends Model
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function studentcrel(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
 }

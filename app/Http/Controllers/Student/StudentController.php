@@ -2174,47 +2174,10 @@ class StudentController extends Controller
         $status_change_reason = (isset($request->status_change_reason) && !empty($request->status_change_reason) ? $request->status_change_reason : null);
         $status_change_date = (isset($request->status_change_date) && !empty($request->status_change_date) ? date('Y-m-d', strtotime($request->status_change_date)).' '.date('H:i:s') : date('Y-m-d H:i:s'));
         
-        if($statusDetails->active==0) {
-            
-            $assignData = Assign::where('student_id',$student_id)->whereHas('plan', function($q)use($term_declaration_id) {
-                $q->where('term_declaration_id',$term_declaration_id);
-            })->get();
 
-            if(!empty($assignData))
-            foreach($assignData as $assign) {
-                $newAssign = Assign::find($assign->id);
-                $newAssign->attendance = 0;
-                $newAssign->save();
-            }
-
-        }else {
-
-            $assignData = Assign::where('student_id',$student_id)->whereHas('plan', function($q)use($term_declaration_id) {
-                $q->where('term_declaration_id',$term_declaration_id);
-            })->get();
-
-            if(!empty($assignData))
-            foreach($assignData as $assign) {
-                $newAssign = Assign::find($assign->id);
-                $newAssign->attendance = 1;
-                $newAssign->save();
-            }
-        }
-        /* Save Term Status */
-        $termChange = false;
-        if($lastTermId != $term_declaration_id):
-            $data = [];
-            $data['student_id'] = $student_id;
-            $data['term_declaration_id'] = $term_declaration_id;
-            $data['status_id'] = $status_id;
-            $data['status_change_reason'] = $status_change_reason;
-            $data['status_change_date'] = $status_change_date;
-            $data['created_by'] = auth()->user()->id;
-            StudentAttendanceTermStatus::create($data);
-
-            $termChange = true;
-        endif;
-        /* Save Term Status */
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
+        $statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
+        
 
         $student = Student::find($student_id);
         $student->fill([
@@ -2235,9 +2198,8 @@ class StudentController extends Controller
                 StudentArchive::create($data);
             endforeach;
 
-            $status = Status::find($status_id);
-            if(isset($status->process_list_id) && $status->process_list_id > 0):
-                $processTask = TaskList::where('process_list_id', $status->process_list_id)->orderBy('id', 'ASC')->get();
+            if(isset($statusDetails->process_list_id) && $statusDetails->process_list_id > 0):
+                $processTask = TaskList::where('process_list_id', $statusDetails->process_list_id)->orderBy('id', 'ASC')->get();
                 if(!empty($processTask) && $processTask->count() > 0 ):
                     foreach($processTask as $task):
                         $data = [];
@@ -2251,13 +2213,21 @@ class StudentController extends Controller
                     endforeach;
                 endif;
             endif;
+
+            $data = [];
+            $data['student_id'] = $student_id;
+            $data['term_declaration_id'] = $term_declaration_id;
+            $data['status_id'] = $status_id;
+            $data['status_change_reason'] = $status_change_reason;
+            $data['status_change_date'] = $status_change_date;
+            $data['created_by'] = auth()->user()->id;
+            StudentAttendanceTermStatus::create($data);
+
+            $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
+
             return response()->json(['message' => 'Student status successfully changed.'], 200);
         else:
-            if($termChange):
-                return response()->json(['message' => 'Student status successfully changed.'], 200);
-            else:
-                return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
-            endif;
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
         endif;
     }
 
