@@ -760,8 +760,6 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
 
-        //Route::get('student/student-copy-profile-photo/{page}/{limit}','studentCopyProfilePhoto')->name('student.copy.profile.photo');
-
         Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
     });
     
