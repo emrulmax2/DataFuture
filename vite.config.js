@@ -267,8 +267,10 @@ export default defineConfig({
 
                 'resources/js/student-data-search-form.js',
                 
+                'resources/js/intake-continuation-reports.js',
                 'resources/js/intake-attendance-rate-reports.js',
                 'resources/js/agent-application.js',
+                'resources/js/intake-retention-reports.js',
             ],
             refresh: true,
         }),

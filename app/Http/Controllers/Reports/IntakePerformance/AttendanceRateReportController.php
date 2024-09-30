@@ -9,6 +9,7 @@ use App\Models\CourseCreation;
 use App\Models\Option;
 use App\Models\Semester;
 use App\Models\Student;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentCourseRelation;
 use App\Models\User;
@@ -109,7 +110,7 @@ class AttendanceRateReportController extends Controller
 
     public function getHtml($atn_semester_id = []){
         $res = $this->refineResult($atn_semester_id);
-
+        
         $html = '';
         $html .= '<table class="table table-bordered table-sm attenRateReportTable">';
             $html .= '<thead>';
@@ -227,7 +228,7 @@ class AttendanceRateReportController extends Controller
                                                 $html .= '<td style="padding-left: 35px">'.$termResult->term_name.'</td>';
                                                 $html .= '<td>';
                                                     if($i != 1):
-                                                        $termDroppedOut = 0; //get_last_term_dropped_out_students($semesterId, $theCourseId, $sd, $ed);
+                                                        $termDroppedOut = $this->get_last_term_dropped_out_students($semesterId, $theCourseId, $sd, $ed);
                                                         $allTermDrropedOut += $termDroppedOut;
                                                         $html .= ($courseRegisteredStudents - $allTermDrropedOut);
                                                     else:
@@ -346,7 +347,7 @@ class AttendanceRateReportController extends Controller
                                 if(!empty($class_plan_ids) && count($class_plan_ids) > 0):
                                     $query = DB::table('attendances as atn')
                                             ->select(
-                                                'std.id', 'trm.id as term_id', 'trm.name as term_name', 'trm.teaching_start_date as start_date', 'trm.teaching_end_date as end_date',
+                                                'std.id', 'trm.id as term_id', 'trm.name as term_name', 'trm.start_date', 'trm.end_date',
                                                 DB::raw('group_concat(atn.student_id) as student_ids'),
 
                                                 DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
@@ -391,5 +392,30 @@ class AttendanceRateReportController extends Controller
         endif;
 
         return $res;
+    }
+
+    public function get_last_term_dropped_out_students($semesterId, $theCourseId, $sd, $ed){
+        $droppedOut = 0;
+       
+        $coursCreation = CourseCreation::where('course_id', $theCourseId)->where('semester_id', $semesterId)->orderBy('id', 'DESC')->get()->first();
+        if(isset($coursCreation->id) && $coursCreation->id > 0):
+            $courseCreationId = $coursCreation->id;
+            $student_ids = StudentCourseRelation::where('course_creation_id', $coursCreation->id)->where('active', 1)->pluck('student_id')->unique()->toArray();
+            if(isset($student_ids) && count($student_ids) > 0):
+                $admissionCount = count($student_ids);
+                $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
+                                    $q->where('course_creation_id', $courseCreationId);
+                                })->pluck('student_id')->unique()->toArray();
+                $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
+                $statusChanged = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
+                                ->whereNotNull('status_change_date')->where(function($q) use($sd, $ed){
+                                    $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($sd)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($ed)));
+                                })->groupBy('student_id')->pluck('student_id')->unique()->toArray();
+                                
+                $droppedOut = (!empty($statusChanged) ? count($statusChanged) : 0);
+            endif;
+        endif;
+
+        return $droppedOut;
     }
 }

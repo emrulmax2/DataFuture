@@ -7,7 +7,6 @@ use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\Option;
 use App\Models\Semester;
-use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentCourseRelation;
@@ -15,16 +14,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class ContinuationReportController extends Controller
+class RetentionRateReportController extends Controller
 {
-    public function getContinuationReport(Request $request){
-        $cr_semester_ids = (isset($request->cr_semester_id) && !empty($request->cr_semester_id) ? $request->cr_semester_id : []);
-        $html = $this->getHtml($cr_semester_ids);
+    public function getRetentionReport(Request $request){
+        $rtn_semester_id = (isset($request->rtn_semester_id) && !empty($request->rtn_semester_id) ? $request->rtn_semester_id : []);
+        $html = $this->getHtml($rtn_semester_id);
         
         return response()->json(['htm' => $html], 200);
     }
 
-    public function printContinuationRateReport($semester_ids = null){
+    public function printRetentionRateReport($semester_ids = null){
         $semester_ids = (!empty($semester_ids) ? explode('_', $semester_ids) : []);
         $semesterNames = (!empty($semester_ids) ? Semester::whereIn('id', $semester_ids)->pluck('name')->unique()->toArray() : []);
         $user = User::find(auth()->user()->id);
@@ -35,7 +34,7 @@ class ContinuationReportController extends Controller
         $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
         $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
 
-        $report_title = 'Intake Continuation Rate Reports';
+        $report_title = 'Intake Retention Rate Reports';
         $PDFHTML = '';
         $PDFHTML .= '<html>';
             $PDFHTML .= '<head>';
@@ -116,7 +115,7 @@ class ContinuationReportController extends Controller
                     $html .= '<th class="w-2/6">&nbsp;</th>';
                     $html .= '<th>Total Student</th>';
                     $html .= '<th>Registered</th>';
-                    $html .= '<th>Dropped Out within 380days</th>';
+                    $html .= '<th>Dropped Out</th>';
                     $html .= '<th class="text-right">Rate</th>';
                 $html .= '</tr>';
             $html .= '</thead>';
@@ -154,7 +153,7 @@ class ContinuationReportController extends Controller
                                 $rateCrs = (($actualAdmissionCrs - $droppedoutCrs) / $actualAdmissionCrs) * 100;
                                 
                                 $html .= '<tr class="courseRow courseRow_'.$theSemesterId.'" style="display: none;">';
-                                    $html .= '<th class="w-2/6">'.$theCrsResult['name'].'</th>';
+                                    $html .= '<th class="w-2/6">'.$theCrsResult['name'].' '.($theCrsResult['status'] == 0 ? ' <span class="text-danger">(Incomplete)</span>' : '').'</th>';
                                     $html .= '<td>'.$admissionCrs.'</td>';
                                     $html .= '<td>'.$actualAdmissionCrs.'</td>';
                                     $html .= '<td>'.$droppedoutCrs.'</td>';
@@ -206,33 +205,33 @@ class ContinuationReportController extends Controller
                         $creation = CourseCreation::where('semester_id', $semester_id)->where('course_id', $course_id)->orderBy('id', 'DESC')->get()->first();
                         $courseCreationId = $creation->id;
                         $courseStartDate = (isset($creation->available->course_start_date) && !empty($creation->available->course_start_date) ? date('Y-m-d', strtotime($creation->available->course_start_date)) : '');
+                        $courseEndDate = (isset($creation->available->course_end_date) && !empty($creation->available->course_end_date) ? date('Y-m-d', strtotime($creation->available->course_end_date)) : '');
                         $refund_date = (!empty($courseStartDate) ? date('Y-m-d', strtotime($courseStartDate.' + 28 days')) : '');
                         $completion_date = (!empty($courseStartDate) ? date('Y-m-d', strtotime($courseStartDate.' + 380 days')) : '');
 
-                        if($completion_date < date('Y-m-d')):
-                            $student_ids = StudentCourseRelation::where('course_creation_id', $creation->id)->where('active', 1)->pluck('student_id')->unique()->toArray();
-                            if(!empty($student_ids) && count($student_ids) > 0):
-                                $courseCount += 1;
+                        $student_ids = StudentCourseRelation::where('course_creation_id', $creation->id)->where('active', 1)->pluck('student_id')->unique()->toArray();
+                        if(!empty($student_ids) && count($student_ids) > 0):
+                            $courseCount += 1;
 
-                                $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
-                                                        $q->where('course_creation_id', $courseCreationId);
-                                                    })->pluck('student_id')->unique()->toArray();
-                                $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
+                            $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
+                                                    $q->where('course_creation_id', $courseCreationId);
+                                                })->pluck('student_id')->unique()->toArray();
+                            $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
 
-                                $droppedOutStdents = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
-                                                        ->whereNotNull('status_change_date')->where(function($q) use($refund_date, $completion_date){
-                                                            $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($completion_date)));
-                                                        })->groupBy('student_id')->pluck('student_id')->unique()->toArray();
+                            $droppedOutStdents = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
+                                                    ->whereNotNull('status_change_date')->where(function($q) use($refund_date, $courseEndDate){
+                                                        $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
+                                                    })->groupBy('student_id')->pluck('student_id')->unique()->toArray();
 
-                                $res['result'][$semester_id]['course'][$course_id]['name'] = $course->name;
-                                $res['result'][$semester_id]['course'][$course_id]['admissions'] = (!empty($student_ids) ? count($student_ids) : 0);
-                                $res['result'][$semester_id]['course'][$course_id]['registered'] = (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
-                                $res['result'][$semester_id]['course'][$course_id]['droppedout'] = (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
+                            $res['result'][$semester_id]['course'][$course_id]['name'] = $course->name;
+                            $res['result'][$semester_id]['course'][$course_id]['admissions'] = (!empty($student_ids) ? count($student_ids) : 0);
+                            $res['result'][$semester_id]['course'][$course_id]['registered'] = (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
+                            $res['result'][$semester_id]['course'][$course_id]['droppedout'] = (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
+                            $res['result'][$semester_id]['course'][$course_id]['status'] = ($courseEndDate < date('Y-m-d') ? 1 : 0);
 
-                                $semesterAdmission += (!empty($student_ids) ? count($student_ids) : 0);
-                                $semesterRegistered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
-                                $semesterDroppedOut += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
-                            endif;
+                            $semesterAdmission += (!empty($student_ids) ? count($student_ids) : 0);
+                            $semesterRegistered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
+                            $semesterDroppedOut += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
                         endif;
                     endforeach;
                     $res['result'][$semester_id]['admissions'] = $semesterAdmission;
