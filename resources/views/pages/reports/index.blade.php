@@ -22,7 +22,13 @@
 
             <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
                 <a href="{{ route('reports.intake.performance'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
-                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Accounts Report" src="{{ asset('build/assets/images/report_icons/Intak_Performance_Report.png') }}">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Intake Performance Report" src="{{ asset('build/assets/images/report_icons/Intak_Performance_Report.png') }}">
+                </a>
+            </div>
+
+            <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
+                <a href="{{ route('reports.term.performance'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/report_icons/term_performance _report.png') }}">
                 </a>
             </div>
 
