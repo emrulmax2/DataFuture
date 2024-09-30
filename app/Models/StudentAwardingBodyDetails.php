@@ -18,6 +18,7 @@ class StudentAwardingBodyDetails extends Model
         'registration_date',
         'registration_expire_date',
         'registration_document_verified',
+        'remarks',
         'created_by',
         'updated_by',
     ];

@@ -476,8 +476,10 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/plan-dates/list', 'planDatelist')->name('dashboard.plan.dates.list');
 
             Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
+            Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 
         });
+
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
             Route::post('/update-other-personal-details', 'update')->name('update.other.personal.details');
