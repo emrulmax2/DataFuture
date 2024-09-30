@@ -1218,7 +1218,12 @@
     </div>
     <!-- END: Delete Confirm Modal Content -->
 @endsection
-
-@section('script')
-    @vite('resources/js/application.js')
-@endsection
+@if(isset(\Auth::guard('agent')->user()->id))
+    @section('script')
+        @vite('resources/js/agent-application.js')
+    @endsection
+@else
+    @section('script')
+        @vite('resources/js/application.js')
+    @endsection
+@endif

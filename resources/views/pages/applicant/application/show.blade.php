@@ -428,7 +428,7 @@
                                                         <td>{{ $emps->company_phone }}</td>
                                                         <td>{{ $emps->position }}</td>
                                                         <td>{{ $emps->start_date }}</td>
-                                                        <td>{{ ($continuing == 1 ? 'Continue' : $qual->end_date) }}</td>
+                                                        <td>{{ ($continuing == 1 ? 'Continue' : (isset($qual->end_date) ? $qual->end_date : "No End Date Found")) }}</td>
                                                         <td>{!! $address !!}</td>
                                                         <td>{{ $emps->reference[0]->name }}</td>
                                                         <td>{{ $emps->reference[0]->position }}</td>

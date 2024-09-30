@@ -23,7 +23,7 @@
                     Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} 
                     <div class="col-span-12">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-12 text-slate-500 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId]) ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
+                            <div class="col-span-12 text-slate-500 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId] && $lastAttendanceDate[$termId]!="N/A") ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
                         </div>
                     </div>
                 </div>

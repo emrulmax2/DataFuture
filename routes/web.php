@@ -215,6 +215,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\SystemReportController;
@@ -404,9 +405,22 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         });
 
         Route::controller(FrontendApplicationController::class)->group(function() {
+            Route::get('new-application/create/{applicant_user}', 'create')->name('application.create');
             Route::get('application/{checkedApplication}', 'index')->name('application');
             Route::get('application/show/{id}', 'show')->name('application.show');
         });
+
+        Route::controller(ApplicationController::class)->group(function() {
+            
+            Route::post('agent-application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
+            Route::post('agent-application/store-course-details', 'storeCourseDetails')->name('application.store.course');
+            Route::post('agent-application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
+            Route::post('agent-application/review', 'review')->name('application.review');
+            Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+        });
+
+        
 
         Route::controller(AgentMyAccountController::class)->group(function() {
             Route::get('my-account', 'index')->name('account'); 
@@ -758,8 +772,6 @@ Route::middleware('auth')->group(function() {
         Route::post('student/send-email-verify-code','verifyEmailVerificationCode')->name('student.email.verify.code');
 
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
-
-        //Route::get('student/student-copy-profile-photo/{page}/{limit}','studentCopyProfilePhoto')->name('student.copy.profile.photo');
 
         Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
     });
@@ -2774,5 +2786,10 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
         Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
+    });
+
+    Route::controller(AttendanceRateReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-attendance-rate', 'getAttendanceRateReport')->name('reports.intake.performance.get.attendance.rate'); 
+        Route::get('reports/intake-performance/print-attendance-rate/{semesters?}', 'printAttendanceRateReport')->name('reports.intake.performance.print.attendance.rate'); 
     });
 });

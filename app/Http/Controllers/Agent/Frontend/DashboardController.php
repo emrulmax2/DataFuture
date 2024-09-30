@@ -125,7 +125,10 @@ class DashboardController extends Controller
             foreach($Query as $list):
                 $newApply =false;
                 if($list->status->name=="Rejected") {
-                    $newApply = true;
+                    $applicationList = Applicant::where('applicant_user_id',$list->applicant_user_id)->orderBy('id', 'DESC')->get()->first();
+                    if($applicationList->status_id==8)
+                        $newApply = true;
+                    
                 }
                 $studentFound = Student::where('applicant_id',$list->id)->get()->first();
                 $agentCheck = AgentApplicationCheck::whereIn('agent_user_id',$agents)->where("email",$list->users->email)->where("mobile",$list->users->phone)->get()->first();
@@ -143,6 +146,7 @@ class DashboardController extends Controller
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),
                     'is_student' => (!empty($studentFound) ? 1 : 0),
                     'deleted_at' => $list->deleted_at,
+                    'applicant_user_id' => $list->applicant_user_id,
                     'new_apply' => $newApply
                 ];
                 $i++;

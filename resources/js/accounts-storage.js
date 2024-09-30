@@ -43,7 +43,7 @@ var storageTransList = (function () {
                                     }
                                     html += cell.getData().transaction_code;
                                     if(cell.getData().connected == 1){
-                                        html += '<a href="'+route('reports.accounts.transaction.connection', cell.getData().id)+'" class="text-success ml-2" style="position: relative; top: -1px;"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></a>';
+                                        html += '<a href="'+route('reports.accounts.transaction.connection', cell.getData().id)+'" class="text-success ml-2" style="position: relative; top: -1px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></a>';
                                     }
                                 html += '</div>';
                             html += '</div>';
@@ -227,7 +227,7 @@ var storageTransList = (function () {
             filterHTMLForm();
         });
 
-        $('#searchTransaction').on('keyup paste change', function(){
+        $('#searchTransaction').on('keyup paste', function(){
             let $theInput = $(this);
             let theQuery = $theInput.val();
             if(theQuery.length > 0){

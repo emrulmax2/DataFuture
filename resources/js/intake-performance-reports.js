@@ -78,7 +78,7 @@ import TomSelect from "tom-select";
             $form.find('.error-cr_semester_id').html('Semesters can not be empty.');
         }
     })
-
     /* Continuation Report End */
+
 
 })()
