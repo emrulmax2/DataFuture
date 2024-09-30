@@ -23,9 +23,117 @@ if($('.liveStudentMainMenu').length > 0){
 }
 
 if($('.doitOnlineSecondBoxToggle').length > 0) {
+
     $(".doitOnlineSecondBoxToggle").on('click', function(e){
         e.preventDefault();
         $("#doitOnlineSecondBox").toggle("slow");
-      });
+    });
+}
+
+
+if($('#awardingBodyEditModal').length > 0 ) {
+    
+    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const awardingBodyEditModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#awardingBodyEditModal"));
+    const confirmAwardMissModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmAwardingBodyMissingInformationModal"));
+    awardingBodyEditModal.show();
+    $("#awardingBodyDetailsVerificationEditModalForm").on('submit', function(e){
+        e.preventDefault();
+            const form = document.getElementById('awardingBodyDetailsVerificationEditModalForm');
+        
+            
+            $('#agreeWithAwarding').attr('disabled', 'disabled');
+            $("#agreeWithAwarding .loadingClass").removeClass('hidden')
+
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('students.awarding.body.status.update'),
+                
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('#agreeWithAwarding').removeAttr('disabled');
+                $("#agreeWithAwarding .loadingClass").addClass('hidden');
+                
+                if (response.status == 200) {
+
+                    $('#agreeWithAwarding').removeAttr('disabled');
+                    $("#agreeWithAwarding .loadingClass").addClass('hidden');
+                    awardingBodyEditModal.hide();
+
+                    succModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Success!");
+                        $("#successModal .successModalDesc").html('Pearson Verification Successfully Saved.');
+                    });    
+                    window.location.reload();     
+                }
+                
+            }).catch(error => {
+                $('#agreeWithAwarding').removeAttr('disabled');
+                    $("#agreeWithAwarding .loadingClass").addClass('hidden');
+                
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#addForm .${key}`).addClass('border-danger')
+                            $(`#addForm  .error-${key}`).html(val)
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        
+    });
+    
+    $("#confirmModalconfirmAwardingBodyMissingInformationModalForm").on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('confirmModalconfirmAwardingBodyMissingInformationModalForm');
+            $('#formSubmitAward').attr('disabled', 'disabled');
+            $("#formSubmitAward .loadingClass").removeClass('hidden');
+
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('students.awarding.body.status.update'),
+                
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                    $('#formSubmitAward').removeAttr('disabled');
+                    $("#formSubmitAward .loadingClass").addClass('hidden');
+                
+                if (response.status == 200) {
+
+                    $('#formSubmitAward').removeAttr('disabled');
+                    $("#formSubmitAward .loadingClass").addClass('hidden');
+                    awardingBodyEditModal.hide();
+                    confirmAwardMissModal.hide();
+                    succModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Success!");
+                        $("#successModal .successModalDesc").html('Pearson Verification Missing Information Saved.');
+                    });    
+                    window.location.reload();     
+                }
+                
+            }).catch(error => {
+                $('#formSubmitAward').removeAttr('disabled');
+                    $("#formSubmitAward .loadingClass").addClass('hidden');
+                
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#addForm .${key}`).addClass('border-danger')
+                            $(`#addForm  .error-${key}`).html(val)
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+    });
 }
 /* Profile Menu End */

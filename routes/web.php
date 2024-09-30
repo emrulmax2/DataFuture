@@ -218,6 +218,7 @@ use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendance
 use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
+use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -476,8 +477,10 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/plan-dates/list', 'planDatelist')->name('dashboard.plan.dates.list');
 
             Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
+            Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 
         });
+
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
             Route::post('/update-other-personal-details', 'update')->name('update.other.personal.details');
@@ -2755,6 +2758,7 @@ Route::middleware('auth')->group(function() {
         Route::get('reports', 'index')->name('reports'); 
         Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
         Route::get('reports/intake-performance', 'intakePerformance')->name('reports.intake.performance'); 
+        Route::get('reports/term-performance', 'termPerformance')->name('reports.term.performance'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
@@ -2779,6 +2783,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(ContinuationReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-continuation-report', 'getContinuationReport')->name('reports.intake.performance.get.continuation.report'); 
+        Route::get('reports/intake-performance/print-continuation-rate/{semesters?}', 'printContinuationRateReport')->name('reports.intake.performance.print.continuation.rate'); 
     });
 
     Route::controller(ConnectTransactionController::class)->group(function(){
@@ -2791,5 +2796,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(AttendanceRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-attendance-rate', 'getAttendanceRateReport')->name('reports.intake.performance.get.attendance.rate'); 
         Route::get('reports/intake-performance/print-attendance-rate/{semesters?}', 'printAttendanceRateReport')->name('reports.intake.performance.print.attendance.rate'); 
+    });
+
+    Route::controller(RetentionRateReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-retention-report', 'getRetentionReport')->name('reports.intake.performance.get.retention.report'); 
+        Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
     });
 });

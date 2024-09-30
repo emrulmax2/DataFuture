@@ -7,6 +7,7 @@ use App\Models\AccTransaction;
 use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Status;
+use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 
 class SystemReportController extends Controller
@@ -36,12 +37,23 @@ class SystemReportController extends Controller
 
     public function intakePerformance(){
         return view('pages.reports.intake-performance.index', [
-            'title' => 'Site Reports - London Churchill College',
+            'title' => 'Intake Performance Reports - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => route('reports')],
                 ['label' => 'Intake Performance Reports', 'href' => 'javascript:void(0);']
             ],
             'semester' => Semester::orderBy('id', 'DESC')->get(),
+        ]);
+    }
+
+    public function termPerformance(){
+        return view('pages.reports.term-performance.index', [
+            'title' => 'Term Performance Reports - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Reports', 'href' => route('reports')],
+                ['label' => 'Term Performance Reports', 'href' => 'javascript:void(0);']
+            ],
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
         ]);
     }
 }

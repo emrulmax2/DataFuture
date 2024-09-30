@@ -35,6 +35,8 @@ use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\StudentArchive;
+use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentConsent;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentUser;
@@ -107,8 +109,8 @@ class DashboardController extends Controller
 
             $allData = $dataBox["data"];
             $currenTerm = $dataBox["currenTerm"];
-            //dd($allData[$currenTerm]);
-            
+           
+            if(isset($allData) && !empty($allData))
             foreach($allData[$currenTerm] as $key => $data):
                foreach($data->plan_dates as $dateData):
                 $upcommingDate = strtotime(date("Y-m-d",strtotime($dateData->date)));
@@ -306,7 +308,7 @@ class DashboardController extends Controller
        $allData = $dataBox["data"];
        $currenTerm = $dataBox["currenTerm"];
        //dd($allData[$currenTerm]);
-       
+       if(isset($allData) && !empty($allData))
        foreach($allData[$currenTerm] as $key => $data):
           foreach($data->plan_dates as $dateData):
            $upcommingDate = strtotime(date("Y-m-d",strtotime($dateData->date)));
@@ -576,5 +578,52 @@ class DashboardController extends Controller
         endif;
 
         return $list;
+    }
+
+    public function awardingBodyUpdateStatus(Request $request){
+        $student_id = $request->student_id;
+        $student_crel_id = $request->student_crel_id;
+        $row_id = (isset($request->id) && $request->id > 0 ? (int) $request->id : 0);
+        $status = (isset($request->status) && !empty($request->status) ? $request->status : '');
+        $remarks = (isset($request->remarks) && !empty($request->remarks) ? $request->remarks : '');
+        $status = ($status == 'Reset' ? null : $status);
+
+        $existRow = StudentAwardingBodyDetails::find($row_id);
+        
+        $data = [];
+        $data['registration_document_verified'] = $status;
+        $data['student_id'] = $student_id;
+        if($remarks!="")
+            $data['remarks'] = $remarks;
+
+        if($row_id > 0 && !empty($existRow)):
+            $data['updated_by'] = auth('student')->user()->id;
+
+            $awardingBody = StudentAwardingBodyDetails::find($row_id);
+            $awardingBody->fill($data);
+            $changes = $awardingBody->getDirty();
+            $awardingBody->save();
+
+            if($awardingBody->wasChanged() && !empty($changes)):
+                foreach($changes as $field => $value):
+                    $data = [];
+                    $data['student_id'] = $student_id;
+                    $data['table'] = 'student_awarding_body_details';
+                    $data['field_name'] = $field;
+                    $data['field_value'] = $existRow->$field;
+                    $data['field_new_value'] = $value;
+                    $data['created_by'] = auth('student')->user()->id;
+
+                    StudentArchive::create($data);
+                endforeach;
+            endif;
+        else:
+            $data['student_course_relation_id'] = $student_crel_id;
+            $data['created_by'] = auth('student')->user()->id;
+
+            StudentAwardingBodyDetails::create($data);
+        endif;
+
+        return response()->json(['msg' => 'Student awarding body Successfully Updated.'], 200);
     }
 }

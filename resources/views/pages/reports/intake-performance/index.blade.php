@@ -39,24 +39,29 @@
                                     <div class="acc__input-error error-cr_semester_id text-danger mt-2"></div>
                                 </div>
                                 <div class="col-span-9 text-right" style="padding-top: 31px;">
-                                    <button type="submit" id="continuationRateBtn" class="btn btn-success text-white w-auto ml-2">
-                                        <i class="w-4 h-4 mr-2" data-lucide="file-text"></i> Export Excel
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                            stroke="white" class="w-4 h-4 ml-2 loaders">
-                                            <g fill="none" fill-rule="evenodd">
-                                                <g transform="translate(1 1)" stroke-width="4">
-                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                    </path>
+                                    <div class="flex justify-end items-center">
+                                        <button type="submit" id="continuationRateBtn" class="btn btn-success text-white w-auto ml-2">
+                                            Generate Report
+                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                stroke="white" class="w-4 h-4 ml-2 loaders">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
                                                 </g>
-                                            </g>
-                                        </svg>
-                                    </button>
+                                            </svg>
+                                        </button>
+                                        <a href="javascript:void(0);" style="display: none;" id="printPdfContinuationRateBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                    </div>
                                 </div>
                             </div>
                         </form>
+
+                        <div class="overflow-x-auto scrollbar-hidden mt-5" id="continuationRateWrap" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -69,9 +74,45 @@
                 </div>
                 <div id="intakePerformanceReportAccordion-collapse-2" class="accordion-collapse collapse" aria-labelledby="intakePerformanceReportAccordion-2" data-tw-parent="#intakePerformanceReportAccordion">
                     <div class="accordion-body">
-                        <div class="alert alert-secondary-soft show flex items-center mb-2" role="alert">
-                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Details comming soon...
-                        </div>
+                    <form method="post" action="#" id="retentionRateSearchForm">
+                            @csrf
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-3">
+                                    <label for="rtn_semester_id" class="form-label semesterLabel inline-flex items-center">Intake Semester <span class="text-danger">*</span></label>
+                                    <select name="rtn_semester_id[]" multiple class="tom-selects w-full" id="rtn_semester_id">
+                                        <option value="">Please Select</option>
+                                        @if($semester->count() > 0)
+                                            @foreach($semester as $sem)
+                                                <option value="{{ $sem->id }}">{{ $sem->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-rtn_semester_id text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-9 text-right" style="padding-top: 31px;">
+                                    <div class="flex justify-end items-center">
+                                        <button type="submit" id="retentionRateBtn" class="btn btn-success text-white w-auto ml-2">
+                                            Generate Report
+                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                stroke="white" class="w-4 h-4 ml-2 loaders">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                        <a href="javascript:void(0);" style="display: none;" id="printPdfRetentionRateBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="overflow-x-auto scrollbar-hidden mt-5" id="retentionRateWrap" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -116,15 +157,13 @@
                                                 </g>
                                             </svg>
                                         </button>
-                                        <a href="javascript:void(0);" style="display: none;" id="printPdfAtnRateBtn" class="btn btn-success text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                        <a href="javascript:void(0);" style="display: none;" id="printPdfAtnRateBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
                                     </div>
                                 </div>
                             </div>
                         </form>
 
-                        <div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap" style="display: none;">
-                            
-                        </div>
+                        <div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -202,5 +241,7 @@
 
 @section('script')
     @vite('resources/js/intake-performance-reports.js')
+    @vite('resources/js/intake-continuation-reports.js')
+    @vite('resources/js/intake-retention-reports.js')
     @vite('resources/js/intake-attendance-rate-reports.js')
 @endsection
