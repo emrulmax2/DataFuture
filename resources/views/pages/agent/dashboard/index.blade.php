@@ -101,6 +101,12 @@
                 <!-- END: Important Notes -->
             </div>
         </div> --}}
+        @if (\Session::has('errors'))
+        <div role="alert" class="alert relative border rounded-md px-5 py-4 bg-pending border-pending text-white dark:border-pending mb-2 flex items-center"><i data-tw-merge data-lucide="alert-triangle" class="stroke-1.5 w-5 h-5 mr-2 h-6 w-6 mr-2 h-6 w-6"></i>
+            {!! \Session::get('errors') !!}
+            <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 h-4 w-4 h-4 w-4"></i></button>
+        </div>
+        @endif
         <div class="col-span-12 xl:col-span-9 2xl:col-span-9 box p-10 my-10">
             <div class="col-span-12 w-full flex">
                 <h2 class="text-lg font-medium mr-auto">My Applicants</h2>

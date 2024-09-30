@@ -90,9 +90,9 @@ var applicantApplicantionList = (function () {
 
                             btns += '<a href="'+route('agent.application',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                         
-                        }else if (cell.getData().status == 'Rejected') {
+                        }else if (cell.getData().new_apply == true) {
 
-                            btns += '<a href="'+route('agent.application.show',cell.getData().applicationCheck)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="plus" class="w-4 h-4"></i></a>';
+                            btns += '<a href="'+route('agent.application.create',cell.getData().applicant_user_id)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="plus" class="w-4 h-4"></i></a>';
                         
                         }else{
 
@@ -280,7 +280,6 @@ var applicantionCustonList = (function () {
 
 (function () {
     
-
     if($('#applicantApplicantionList').length > 0){
         
         let tomOptions = {

@@ -56,9 +56,9 @@ class ApplicationController extends Controller
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
         }
-        if($applicantUser) {
-            Auth::guard('applicant')->loginUsingId($applicantUser->id);
-        }
+        // if($applicantUser) {
+        //     Auth::guard('applicant')->loginUsingId($applicantUser->id);
+        // }
         return view('pages.applicant.application.index', [
             'title' => 'Application Form - London Churchill College',
             'breadcrumbs' => [
@@ -92,5 +92,47 @@ class ApplicationController extends Controller
             'applicant' => Applicant::where('id', $id)->first(),
         ]);
     }
+
+    public function create(ApplicantUser $applicant_user) {
+        $applicantUser = $applicant_user;
+        $prevApplicantInformation = Applicant::where('applicant_user_id',$applicantUser->id)->orderBy('id', 'DESC')->first();
+        
+        if(isset($prevApplicantInformation->id)) {
+
+            $applicant = Applicant::Create([
+                'applicant_user_id' => $applicantUser->id,
+                'title_id' => $prevApplicantInformation->title_id,
+                'first_name' => $prevApplicantInformation->first_name,
+                'last_name' => $prevApplicantInformation->last_name,
+                'date_of_birth' => $prevApplicantInformation->date_of_birth,
+                'sex_identifier_id' => $prevApplicantInformation->sex_identifier_id,
+                'agent_user_id' =>  Auth::guard('agent')->user()->id,
+                'status_id' => 1,
+                'nationality_id' => $prevApplicantInformation->nationality_id,
+                'country_id' => $prevApplicantInformation->country_id,
+                'created_by' => Auth::guard('agent')->user()->id,
+                'updated_by' => Auth::guard('agent')->user()->id,
+            ]);
+
+            $agentApplicationCheck = AgentApplicationCheck::create([
+                'agent_user_id' => Auth::guard('agent')->user()->id,
+                'first_name'=>$prevApplicantInformation->first_name,
+                'last_name'=>$prevApplicantInformation->last_name,
+                'email' => $applicantUser->email,
+                'mobile' => $applicantUser->phone,
+                'verify_code' => '4454',
+                'email_verify_code' => '4454',
+                'email_verified_at' => date("Y-m-d H:i:s"),
+                'mobile_verified_at' => date("Y-m-d H:i:s"),
+                'active' => 1,
+                'created_by' => Auth::guard('agent')->user()->id,
+            ]);
+            
+            return redirect()->route('agent.application',$agentApplicationCheck->id);
+        }
+        return redirect()->back()->with('errors',"No application can be created. started with a new email and mobile number");
+
+    }
+
     
 }

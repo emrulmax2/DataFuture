@@ -405,9 +405,22 @@ Route::prefix('/agent')->name('agent.')->group(function() {
         });
 
         Route::controller(FrontendApplicationController::class)->group(function() {
+            Route::get('new-application/create/{applicant_user}', 'create')->name('application.create');
             Route::get('application/{checkedApplication}', 'index')->name('application');
             Route::get('application/show/{id}', 'show')->name('application.show');
         });
+
+        Route::controller(ApplicationController::class)->group(function() {
+            
+            Route::post('agent-application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
+            Route::post('agent-application/store-course-details', 'storeCourseDetails')->name('application.store.course');
+            Route::post('agent-application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
+            Route::post('agent-application/review', 'review')->name('application.review');
+            Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+        });
+
+        
 
         Route::controller(AgentMyAccountController::class)->group(function() {
             Route::get('my-account', 'index')->name('account'); 

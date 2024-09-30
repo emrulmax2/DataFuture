@@ -36,6 +36,8 @@ use App\Models\Option;
 use App\Models\ReferralCode;
 use App\Models\SexIdentifier;
 use App\Models\Venue;
+use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
+use DebugBar\DebugBar;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -84,7 +86,7 @@ class ApplicationController extends Controller
         $applicantUserId = $request->applicant_user_id;
         $applicant_id = $request->applicant_id;
         $applicant = Applicant::updateOrCreate([ 'applicant_user_id' => $applicantUserId, 'id' => $applicant_id ], [
-            'applicant_id' => $applicantUserId,
+            'applicant_user_id' => $applicantUserId,
             'title_id' => $request->title_id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -94,8 +96,9 @@ class ApplicationController extends Controller
             'status_id' => 1,
             'nationality_id' => $request->nationality_id,
             'country_id' => $request->country_id,
-            'created_by' => \Auth::guard('applicant')->user()->id,
-            'updated_by' => \Auth::guard('applicant')->user()->id,
+
+            'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+            'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
         ]);
         if($applicant){
             if(!isset($applicant->application_no) || is_null($applicant->application_no)):
@@ -108,8 +111,8 @@ class ApplicationController extends Controller
                     'ethnicity_id' => $request->ethnicity_id,
                     'disability_status' => $disabilityStatus,
                     'disabilty_allowance' => ($disabilityStatus == 1 && (isset($request->disabilty_allowance) && $request->disabilty_allowance > 0) ? $request->disabilty_allowance : 0),
-                    'created_by' => \Auth::guard('applicant')->user()->id,
-                    'updated_by' => \Auth::guard('applicant')->user()->id,
+                    'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+                    'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
                 ]
             );
             if($disabilityStatus == 1 && isset($request->disability_id) && !empty($request->disability_id)):
@@ -118,7 +121,7 @@ class ApplicationController extends Controller
                     $applicantDisabilities = ApplicantDisability::create([
                         'applicant_id' => $applicant->id,
                         'disabilitiy_id' => $disabilityID,
-                        'created_by' => \Auth::guard('applicant')->user()->id,
+                        'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
                     ]);
                 endforeach;
             else:
@@ -134,8 +137,8 @@ class ApplicationController extends Controller
                 'post_code' => (isset($request->applicant_address_postal_zip_code) && !empty($request->applicant_address_postal_zip_code) ? $request->applicant_address_postal_zip_code : null),
                 'city' => (isset($request->applicant_address_city) && !empty($request->applicant_address_city) ? $request->applicant_address_city : null),
                 'country' => (isset($request->applicant_address_country) && !empty($request->applicant_address_country) ? $request->applicant_address_country : null),
-                'created_by' => \Auth::guard('applicant')->user()->id,
-                'updated_by' => \Auth::guard('applicant')->user()->id,
+                'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+                'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
             ]);
 
             $kin = ApplicantKin::updateOrCreate(['applicant_id' => $applicant->id], [
@@ -149,8 +152,8 @@ class ApplicationController extends Controller
                 'post_code' => (isset($request->kin_address_postal_zip_code) && !empty($request->kin_address_postal_zip_code) ? $request->kin_address_postal_zip_code : null),
                 'city' => (isset($request->kin_address_city) && !empty($request->kin_address_city) ? $request->kin_address_city : null),
                 'country' => (isset($request->kin_address_country) && !empty($request->kin_address_country) ? $request->kin_address_country : null),
-                'created_by' => \Auth::guard('applicant')->user()->id,
-                'updated_by' => \Auth::guard('applicant')->user()->id,
+                'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+                'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
             ]);
             return response()->json(['message' => 'WOW! Data successfully inserted.', 'applicant_id' => $applicant->id], 200);
         }else{
@@ -179,8 +182,8 @@ class ApplicationController extends Controller
             'fund_receipt' => $fundReceipt,
             'other_funding' => ($studentLoan == 'Others' && isset($request->other_funding) && !empty($request->other_funding) ? $request->other_funding : null),
             'full_time' => ((isset($courseCreation->has_evening_and_weekend) && $courseCreation->has_evening_and_weekend == 1) && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),
-            'created_by' => \Auth::guard('applicant')->user()->id,
-            'updated_by' => \Auth::guard('applicant')->user()->id,
+            'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+            'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
         ]);
         if($course):
             $isEducationQualification = (isset($request->is_edication_qualification) && $request->is_edication_qualification > 0 ? $request->is_edication_qualification : 0);
@@ -188,7 +191,7 @@ class ApplicationController extends Controller
             $otherDetails = ApplicantOtherDetail::updateOrCreate(['applicant_id' => $applicant_id], [
                 'is_edication_qualification' => $isEducationQualification,
                 'employment_status' => $employmentStatus,
-                'updated_by' => \Auth::guard('applicant')->user()->id,
+                'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
             ]);
             if($isEducationQualification == 0):
                 $educationQualifications = ApplicantQualification::where('applicant_id', $applicant_id)->forceDelete();
@@ -207,7 +210,7 @@ class ApplicationController extends Controller
                 $ref = Applicant::where('id', $applicant_id)->update([
                     'referral_code' => $request->referral_code,
                     'is_referral_varified' => 0,
-                    'updated_by' => \Auth::guard('applicant')->user()->id,
+                    'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
                 ]);
             endif;*/
             
@@ -239,7 +242,7 @@ class ApplicationController extends Controller
             'status_id' => 2,
             'is_agree' => 1,
             'submission_date' => date('Y-m-d'),
-            'updated_by' => \Auth::guard('applicant')->user()->id,
+            'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
         ]);
 
         if(auth('agent')->user()) {
@@ -266,7 +269,9 @@ class ApplicationController extends Controller
             $application->applicant_id = $applicant_id;
             $application->updated_by = auth('agent')->user()->id;
             $application->save();
-            Auth::guard('applicant')->logout();
+            //Auth::guard('applicant')->logout();
+
+            FacadesDebugbar::info("Application updated with agent: ".$referral->agent_user_id );
         }
         session(['applicantSubmission' => 'Application successfully submitted.']);
 

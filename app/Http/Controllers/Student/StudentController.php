@@ -771,7 +771,7 @@ class StudentController extends Controller
                         if(!isset($lastAttendanceDate[$list->term_id])) {
 
                             
-                            $lastAttendanceDate[$list->term_id] = "1970-01-01";
+                            $lastAttendanceDate[$list->term_id] = "N/A";
                             
                             
                         }
@@ -953,7 +953,7 @@ class StudentController extends Controller
                         if(!isset($lastAttendanceDate[$plan->term_declaration_id])) {
 
                             
-                            $lastAttendanceDate[$plan->term_declaration_id] = "1970-01-01";
+                            $lastAttendanceDate[$plan->term_declaration_id] = "N/A";
                             
                             
                         }
