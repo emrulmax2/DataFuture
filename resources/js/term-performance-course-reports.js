@@ -8,30 +8,6 @@ import Chart from "chart.js/auto";
 import { bottom } from "@popperjs/core";
 
 (function(){
-    let dueTomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        //persist: false,
-        create: false,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
-
-    let dueTomOptionsMul = {
-        ...dueTomOptions,
-        plugins: {
-            ...dueTomOptions.plugins,
-            remove_button: {
-                title: "Remove this item",
-            },
-        }
-    };
-
-    var term_declaration_id = new TomSelect('#term_declaration_id', dueTomOptions);
     let attendanceRateBarChart = null;
     $(window).on('load', function(){
         let $theTable = $('#attendanceRateOvTable');
@@ -70,7 +46,7 @@ import { bottom } from "@popperjs/core";
                         axis: 'y',
                         label: false,
                         data: rates,
-                        barThickness: 25,
+                        barThickness: 20,
                         fill: false,
                         backgroundColor: bgs,
                         borderColor: bds,

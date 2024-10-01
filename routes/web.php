@@ -2833,5 +2833,11 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(TermPerformanceReportController::class)->group(function(){
         Route::any('reports/term-performance', 'index')->name('reports.term.performance'); 
+        Route::any('reports/term-performance/trend/{terms}', 'viewTermTrend')->name('reports.term.performance.term.trend'); 
+
+        Route::any('reports/term-performance/course/{terms}/{course}', 'courseView')->name('reports.term.performance.course.view'); 
+
+
+        Route::any('reports/term-performance/group/{terms}/{course}/{group}', 'groupView')->name('reports.term.performance.group.view'); 
     });
 });
