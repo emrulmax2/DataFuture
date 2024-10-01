@@ -120,6 +120,7 @@ class StudentController extends Controller
         
         
         return view('pages.students.live.index', [
+
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
 
@@ -132,7 +133,9 @@ class StudentController extends Controller
             'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
             'terms' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all(),
+            
         ]);
+
     }
 
     public function list(Request $request) {
@@ -320,6 +323,7 @@ class StudentController extends Controller
                         ->where('student_course_relation_id',$student->crel->id)
                         ->get()
                         ->first();
+
         $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
         
         return view('pages.students.live.course', [
