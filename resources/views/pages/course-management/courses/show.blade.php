@@ -56,6 +56,12 @@
                             <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Datafuture
                         </a>
                     </li>
+                    
+                    <li id="monitors-tab" class="nav-item mr-5" role="presentation">
+                        <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0" data-tw-target="#monitors" aria-controls="monitors" aria-selected="true" role="tab" >
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Monitor Emails
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="intro-y tab-content mt-5">
@@ -65,12 +71,16 @@
                 <div id="baseDataFuture" class="tab-pane" role="tabpanel" aria-labelledby="baseDataFuture-tab">
                     @include('pages.course-management.courses.details.datafuture')
                 </div>
+                <div id="monitors" class="tab-pane" role="tabpanel" aria-labelledby="monitors-tab">
+                    @include('pages.course-management.courses.details.monitors')
+                </div>
             </div>
         </div>
     </div>
 
     @include('pages.course-management.courses.details.module-modal')
     @include('pages.course-management.courses.details.datafuture-modal')
+    @include('pages.course-management.courses.details.monitor-modal')
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -97,4 +107,5 @@
     @vite('resources/js/courses.js')
     @vite('resources/js/course-module.js')
     @vite('resources/js/course-datafuture.js')
+    @vite('resources/js/course-monitor.js')
 @endsection
