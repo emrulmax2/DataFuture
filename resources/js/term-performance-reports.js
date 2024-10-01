@@ -5,6 +5,7 @@ import TomSelect from "tom-select";
 
 import helper from "./helper";
 import Chart from "chart.js/auto";
+import { bottom } from "@popperjs/core";
 
 (function(){
     let dueTomOptions = {
@@ -52,15 +53,62 @@ import Chart from "chart.js/auto";
                     labels: labels,
                     datasets: [{
                         axis: 'y',
-                        label: theTitle,
+                        label: false,
                         data: rates,
-                        barThickness: 30,
-                        backgroundColor: 'rgba(74, 179, 244, .8)'
+                        barThickness: 25,
+                        fill: false,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                        ],
+                        borderColor: [
+                            'rgb(75, 192, 192)',
+                            'rgb(54, 162, 235)',
+                            'rgb(153, 102, 255)'
+                        ],
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     //maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: theTitle,
+                            color: '#164e63e6',
+                            padding: {
+                                bottom: 20
+                            },
+                            font: {
+                                size: 18,
+                                weight: 'bold',
+                                lineHeight: 1
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#164e63e6',
+                                display: true,
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    lineHeight: 1
+                                }
+                            },
+                            stacked: false,
+                            /*afterFit: function(scaleInstance) {
+                                scaleInstance.width = 150; // sets the width to 100px
+                            }*/
+                        }
+                    }
                 }
             });
         }

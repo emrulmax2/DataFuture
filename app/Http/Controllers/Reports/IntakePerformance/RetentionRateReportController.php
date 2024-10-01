@@ -7,12 +7,17 @@ use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\Option;
 use App\Models\Semester;
+use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentCourseRelation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+
+use App\Exports\ArrayCollectionExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RetentionRateReportController extends Controller
 {
@@ -218,10 +223,15 @@ class RetentionRateReportController extends Controller
                                                 })->pluck('student_id')->unique()->toArray();
                             $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
 
-                            $droppedOutStdents = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
-                                                    ->whereNotNull('status_change_date')->where(function($q) use($refund_date, $courseEndDate){
-                                                        $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
-                                                    })->groupBy('student_id')->pluck('student_id')->unique()->toArray();
+                            $droppedOutStdents = DB::table('students as std')
+                                                 ->leftJoin('student_attendance_term_statuses as sats', function($j){
+                                                    $j->on('std.id', 'sats.student_id');
+                                                    $j->on('std.status_id', 'sats.status_id');
+                                                 })->whereIn('std.id', $registered_std_ids)
+                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45])
+                                                 ->where(function($q) use($refund_date, $courseEndDate){
+                                                    $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
+                                                 })->pluck('std.id')->unique()->toArray();
 
                             $res['result'][$semester_id]['course'][$course_id]['name'] = $course->name;
                             $res['result'][$semester_id]['course'][$course_id]['admissions'] = (!empty($student_ids) ? count($student_ids) : 0);
@@ -243,5 +253,111 @@ class RetentionRateReportController extends Controller
         endif;
 
         return $res;
+    }
+
+    public function exportRetentionRateReport($semester_ids = null){
+        $semester_ids = (!empty($semester_ids) ? explode('_', $semester_ids) : []);
+        $semesterAdmission = 0;
+        $semesterRegistered = 0;
+        $semesterDroppedOut = 0;
+        $courseCount = 0;
+
+        $theCollection = [];
+        $theCollection[1][] = 'Total Student';
+        $theCollection[1][] = 'Semester';
+        $theCollection[1][] = 'Course';
+        $theCollection[1][] = 'Status';
+        $theCollection[1][] = 'Status Changed Date';
+        $theCollection[1][] = 'Registered';
+        $theCollection[1][] = 'Dropped Out';
+        $theCollection[1][] = 'Rate';
+
+        $row = 3;
+        if(!empty($semester_ids)):
+            foreach($semester_ids as $semester_id):
+                $semester = Semester::find($semester_id);
+
+                $course_ids = CourseCreation::where('semester_id', $semester_id)->orderBy('course_id', 'DESC')->pluck('course_id')->unique()->toArray();
+                if(!empty($course_ids)):
+                    foreach($course_ids as $course_id):
+                        $course = Course::find($course_id);
+                        $creation = CourseCreation::where('semester_id', $semester_id)->where('course_id', $course_id)->orderBy('id', 'DESC')->get()->first();
+                        $courseCreationId = $creation->id;
+                        $courseStartDate = (isset($creation->available->course_start_date) && !empty($creation->available->course_start_date) ? date('Y-m-d', strtotime($creation->available->course_start_date)) : '');
+                        $courseEndDate = (isset($creation->available->course_end_date) && !empty($creation->available->course_end_date) ? date('Y-m-d', strtotime($creation->available->course_end_date)) : '');
+                        $refund_date = (!empty($courseStartDate) ? date('Y-m-d', strtotime($courseStartDate.' + 28 days')) : '');
+                        $completion_date = (!empty($courseStartDate) ? date('Y-m-d', strtotime($courseStartDate.' + 380 days')) : '');
+
+                        $student_ids = StudentCourseRelation::where('course_creation_id', $creation->id)->where('active', 1)->pluck('student_id')->unique()->toArray();
+                        if(!empty($student_ids) && count($student_ids) > 0):
+                            $courseCount += 1;
+
+                            $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
+                                                    $q->where('course_creation_id', $courseCreationId);
+                                                })->pluck('student_id')->unique()->toArray();
+
+                            $droppedOutStdents = DB::table('students as std')
+                                                 ->select('sats.student_id', 'sats.status_change_date')
+                                                 ->leftJoin('student_attendance_term_statuses as sats', function($j){
+                                                    $j->on('std.id', 'sats.student_id');
+                                                    $j->on('std.status_id', 'sats.status_id');
+                                                 })->whereIn('std.id', $registered_std_ids)
+                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45])
+                                                 ->where(function($q) use($refund_date, $courseEndDate){
+                                                    $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
+                                                 })->get();
+                            $droppedoutStudentIds = $droppedOutStdents->pluck('student_id')->unique()->toArray();
+                            $droppedoutCount = !empty($droppedoutStudentIds) ? count($droppedoutStudentIds) : 0;
+                            $droppedStatusChanged = [];
+                            if($droppedOutStdents->count() > 0):
+                                foreach($droppedOutStdents as $dps):
+                                    $droppedStatusChanged[$dps->student_id] = (isset($dps->status_change_date) && !empty($dps->status_change_date) ? date('d-m-Y', strtotime($dps->status_change_date)) : '');
+                                endforeach;
+                            endif;
+
+                            $semesterAdmission += count($student_ids);
+                            $semesterRegistered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
+                            $semesterDroppedOut += $droppedoutCount;
+
+                            foreach($student_ids as $student_id):
+                                $std = Student::with('status')->find($student_id);
+                                $theCollection[$row][] = (isset($std->registration_no) && !empty($std->registration_no) ? $std->registration_no : '');
+                                $theCollection[$row][] = $semester->name;
+                                $theCollection[$row][] = $course->name.' '.($courseEndDate < date('Y-m-d') ? '' : ' (Incomplete)');
+                                $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+                                $theCollection[$row][] = (in_array($student_id, $droppedoutStudentIds) && isset($droppedStatusChanged[$student_id]) && !empty($droppedStatusChanged[$student_id]) ? $droppedStatusChanged[$student_id] : '');;
+                                $theCollection[$row][] = (in_array($student_id, $registered_std_ids) && (isset($std->award->reference) && !empty($std->award->reference)) ? $std->award->reference : '');
+                                $theCollection[$row][] = (in_array($student_id, $droppedoutStudentIds) ? 'Yes' : '');
+                                $theCollection[$row][] = '';
+
+                                $row += 1;
+                            endforeach;
+                        endif;
+                    endforeach;
+                endif;
+            endforeach;
+            $res['course_count'] = $courseCount;
+        endif;
+
+        if($courseCount > 0):
+            $actualAdmission = $semesterRegistered;
+            $rate = (($actualAdmission - $semesterDroppedOut) / $actualAdmission) * 100;
+
+            $theCollection[2][] = $semesterAdmission;
+            $theCollection[2][] = (!empty($semester_ids) ? count($semester_ids) : '0');
+            $theCollection[2][] = $courseCount;
+            $theCollection[2][] = '';
+            $theCollection[2][] = '';
+            $theCollection[2][] = $actualAdmission;
+            $theCollection[2][] = $semesterDroppedOut;
+            $theCollection[2][] = number_format($rate, 2).'%';
+        else:
+            $excelArray[2][] = 'Too early to do the calculation.';
+        endif;
+
+        ksort($theCollection);
+
+        $fileName = 'Retention_Rate_Reports.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
 }

@@ -2801,6 +2801,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(RetentionRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-retention-report', 'getRetentionReport')->name('reports.intake.performance.get.retention.report'); 
         Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
+        Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
     });
 
     Route::controller(TermPerformanceReportController::class)->group(function(){

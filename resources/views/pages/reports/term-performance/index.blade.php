@@ -50,8 +50,12 @@
                 endif;
             @endphp
             <div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap">
-                <div class="chartWrap mb-7">
-                    <canvas height="40" id="attendanceRateBarChart"></canvas>
+                <div class="grid grid-cols-12 gap-0">
+                    <div class="col-span-7">
+                        <div class="chartWrap mb-7">
+                            <canvas width="70%" height="15" id="attendanceRateBarChart"></canvas><!-- height="35" -->
+                        </div>
+                    </div>
                 </div>
                 <table class="table table-bordered table-sm" id="attendanceRateOvTable" data-title="{{ (isset($theTerm->name) && !empty($theTerm->name) ? $theTerm->name : 'Undefined') }}">
                     <tbody>
