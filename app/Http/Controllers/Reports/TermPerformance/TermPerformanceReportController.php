@@ -124,7 +124,7 @@ class TermPerformanceReportController extends Controller
                 $week++;
             endwhile;
         endif;
-//dd($res);
+
         return $res;
     }
 

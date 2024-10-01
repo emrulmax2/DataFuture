@@ -101,7 +101,7 @@ class Plan extends Model
 
     public function activeAssign(){
         return $this->hasMany(Assign::class, 'plan_id', 'id')->where(function($q){
-            $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+            $q->whereNull('attendance')->orWhere('attendance', 1);
         });
     }
 
