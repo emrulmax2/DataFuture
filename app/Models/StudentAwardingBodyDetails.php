@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\StudentAwardingBodyDetailsUpdate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -53,4 +54,8 @@ class StudentAwardingBodyDetails extends Model
     public function studentcrel(){
         return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
     }
+
+    // public function  SendPreasonVerificationNotification() {
+    //     $this->notify(new StudentAwardingBodyDetailsUpdate($this));
+    // }
 }

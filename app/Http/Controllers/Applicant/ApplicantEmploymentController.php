@@ -79,6 +79,12 @@ class ApplicantEmploymentController extends Controller
 
 
     public function store(ApplicantEmploymentRequest $request){
+
+        if(!isset(\Auth::guard('applicant')->user()->id))
+            $updatedBy = (isset(auth('agent')->user()->id)) ? auth('agent')->user()->id : auth()->user()->id;  
+        else
+            $updatedBy = \Auth::guard('applicant')->user()->id;
+
         $continuing = (isset($request->continuing) && $request->continuing > 0 ? $request->continuing : 0);
         $employment = ApplicantEmployment::create([
             'applicant_id'=> $request->applicant_id,
@@ -94,7 +100,7 @@ class ApplicantEmploymentController extends Controller
             'post_code' => (isset($request->employment_address_postal_zip_code) ? $request->employment_address_postal_zip_code : ''),
             'city' => (isset($request->employment_address_city) ? $request->employment_address_city : ''),
             'country' => (isset($request->employment_address_country) ? $request->employment_address_country : ''),
-            'created_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+            'created_by' => $updatedBy
         ]);
         if($employment):
             $reference = EmploymentReference::create([
@@ -103,7 +109,7 @@ class ApplicantEmploymentController extends Controller
                 'position' => $request->contact_position,
                 'phone' => $request->contact_phone,
                 'email' => (isset($request->contact_email) ? $request->contact_email : null),
-                'created_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+                'created_by' => $updatedBy
             ]);
         endif;
 
@@ -124,6 +130,10 @@ class ApplicantEmploymentController extends Controller
         $employmentID = $request->id;
         $referenceID = $request->ref_id;   
         $employment = ApplicantEmployment::with(['reference'])->where('id', $employmentID)->first();
+        if(!isset(\Auth::guard('applicant')->user()->id))
+            $updatedBy = (isset(auth('agent')->user()->id)) ? auth('agent')->user()->id : auth()->user()->id;  
+        else
+            $updatedBy = \Auth::guard('applicant')->user()->id;
 
         $continuing = (isset($request->continuing) && $request->continuing > 0 ? $request->continuing : 0);
         $employment = ApplicantEmployment::where('id', $employmentID)->update([
@@ -139,14 +149,14 @@ class ApplicantEmploymentController extends Controller
             'post_code' => (isset($request->employment_address_postal_zip_code) ? $request->employment_address_postal_zip_code : ''),
             'city' => (isset($request->employment_address_city) ? $request->employment_address_city : ''),
             'country' => (isset($request->employment_address_country) ? $request->employment_address_country : ''),
-            'updated_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+            'updated_by' => $updatedBy
         ]);
         $reference = EmploymentReference::where('id', $referenceID)->update([
             'name' => $request->contact_name,
             'position' => $request->contact_position,
             'phone' => $request->contact_phone,
             'email' => (isset($request->contact_email) ? $request->contact_email : null),
-            'updated_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+            'updated_by' => $updatedBy
         ]);
 
 

@@ -460,7 +460,7 @@ class StudentDataReportController extends Controller
                                 case "SLC_course_code":
 
                                     $currentCourse = StudentProposedCourse::where('student_id',$student->id)
-                                    ->where('student_course_relation_id',$student->crel->creation->id)
+                                    ->where('student_course_relation_id',$student->crel->id)
                                     ->get()
                                     ->first();
                                     

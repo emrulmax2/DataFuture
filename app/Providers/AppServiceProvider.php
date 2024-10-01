@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\StudentAwardingBodyDetails;
+use App\Observers\StudentAwardingBodyDetailsObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Mail;
@@ -56,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        StudentAwardingBodyDetails::observe(StudentAwardingBodyDetailsObserver::class);
         Schema::defaultStringLength(191);
+        
     }
 }

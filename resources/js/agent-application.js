@@ -19,7 +19,7 @@ var educationQualTable = (function () {
         let status = $("#status-EQ").val() != "" ? $("#status-EQ").val() : "";
 
         let tableContent = new Tabulator("#educationQualTable", {
-            ajaxURL: route("applicant.qualification.list"),
+            ajaxURL: route("agent.qualification.list"),
             ajaxParams: { applicantId: applicantId, querystr: querystr, status: status},
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -142,7 +142,7 @@ var employmentHistoryTable = (function () {
         let status = $("#status-EH").val() != "" ? $("#status-EH").val() : "";
 
         let tableContent = new Tabulator("#employmentHistoryTable", {
-            ajaxURL: route("applicant.employment.list"),
+            ajaxURL: route("agent.employment.list"),
             ajaxParams: { applicantId: applicantId, querystr: querystr, status: status},
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -708,7 +708,7 @@ var employmentHistoryTable = (function () {
         let applicantId = $('[name="applicant_id"]', $form).val();
         axios({
             method: "post",
-            url: route('applicant.qualification.store'),
+            url: route('agent.qualification.store'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
@@ -748,7 +748,7 @@ var employmentHistoryTable = (function () {
 
         axios({
             method: "get",
-            url: route("applicant.qualification.edit", editId),
+            url: route("agent.qualification.edit", editId),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -783,7 +783,7 @@ var employmentHistoryTable = (function () {
 
         axios({
             method: "post",
-            url: route("applicant.qualification.update"),
+            url: route("agent.qualification.update"),
             data: form_data,
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -826,7 +826,8 @@ var employmentHistoryTable = (function () {
     });
 
     // Delete Course
-    $('#educationQualTable').on('click', '.delete_btn', function(){
+    $('#educationQualTable').on('click', '.delete_btn', function(e){
+        e.preventDefault();
         let $statusBTN = $(this);
         let rowID = $statusBTN.attr('data-id');
 
@@ -863,7 +864,7 @@ var employmentHistoryTable = (function () {
         if(action == 'DELETE'){
             axios({
                 method: 'delete',
-                url: route('applicant.qualification.destory', recordID),
+                url: route('agent.qualification.destory', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -883,7 +884,7 @@ var employmentHistoryTable = (function () {
         } else if(action == 'RESTORE'){
             axios({
                 method: 'post',
-                url: route('applicant.qualification.restore', recordID),
+                url: route('agent.qualification.restore', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -1016,7 +1017,7 @@ var employmentHistoryTable = (function () {
         let applicantId = $('[name="applicant_id"]', $form).val();
         axios({
             method: "post",
-            url: route('applicant.employment.store'),
+            url: route('agent.employment.store'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => { 
@@ -1056,7 +1057,7 @@ var employmentHistoryTable = (function () {
 
         axios({
             method: "get",
-            url: route("applicant.employment.edit", editId),
+            url: route("agent.employment.edit", editId),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -1131,7 +1132,7 @@ var employmentHistoryTable = (function () {
 
         axios({
             method: "post",
-            url: route("applicant.employment.update"),
+            url: route("agent.employment.update"),
             data: form_data,
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -1174,7 +1175,8 @@ var employmentHistoryTable = (function () {
     });
 
     // Delete Course
-    $('#employmentHistoryTable').on('click', '.delete_btn', function(){
+    $('#employmentHistoryTable').on('click', '.delete_btn', function(e){
+        e.preventDefault();
         let $statusBTN = $(this);
         let rowID = $statusBTN.attr('data-id');
 
@@ -1211,7 +1213,7 @@ var employmentHistoryTable = (function () {
         if(action == 'DELETEEH'){
             axios({
                 method: 'delete',
-                url: route('applicant.employment.destory', recordID),
+                url: route('agent.employment.destory', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -1231,7 +1233,7 @@ var employmentHistoryTable = (function () {
         } else if(action == 'RESTOREEH'){
             axios({
                 method: 'post',
-                url: route('applicant.employment.restore', recordID),
+                url: route('agent.employment.restore', recordID),
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
