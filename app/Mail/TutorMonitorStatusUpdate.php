@@ -15,15 +15,17 @@ use Illuminate\Queue\SerializesModels;
 class TutorMonitorStatusUpdate extends Mailable
 {
     use Queueable, SerializesModels;
-    protected $plansDateList,$plan;
+    protected $plansDateList,$plan,$ReplyToEmail;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($plansDateList,$plan)
+    public function __construct($plansDateList,$plan,$ReplyToEmail)
     {
         $this->plansDateList = $plansDateList;
         $this->plan = $plan;
+        $this->ReplyToEmail = $ReplyToEmail;
+
     }
 
     /**
@@ -36,7 +38,7 @@ class TutorMonitorStatusUpdate extends Mailable
         return new Envelope(
             subject: 'Lecture Material Not Uploaded',
             replyTo: [
-                new Address('no-reply@lcc.ac.uk', 'Email Monitor'),
+                new Address($this->ReplyToEmail, 'LCC Tutor Monitor Team'),
             ],
         );
     }
