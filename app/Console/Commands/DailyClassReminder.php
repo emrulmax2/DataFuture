@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Assign;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\Status;
 use App\Models\StudentSms;
 use App\Models\StudentSmsContent;
 use Illuminate\Console\Command;
@@ -78,7 +79,7 @@ class DailyClassReminder extends Command
                     $mobileNumbers = [];
                     $i = 1;
                     foreach($assigns as $asign):
-                        if(isset($asign->student->contact->mobile) && !empty($asign->student->contact->mobile)):
+                        if(isset($asign->student->contact->mobile) && !empty($asign->student->contact->mobile) && isset($asign->student->status->active) && $asign->student->status->active == 1):
                             $mobileNumbers[$i] = $asign->student->contact->mobile;
 
                             $studentSms = StudentSms::create([
