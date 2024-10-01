@@ -30,8 +30,8 @@ class PlansDateListObserver  implements ShouldHandleEventsAfterCommit
             $tutorMonitor = TutorMonitorTeam::where('course_id')->get()->first();
             
             $ccPT = auth()->user()->email;
-            $ReplyToEmail = $tutorMonitor->email;
-            
+            $ReplyToEmail = isset($tutorMonitor->email) ? $tutorMonitor->email : 'no-reply@lcc.ac.uk';
+
             Mail::to($plan->tutor->email)->cc([$ccPT,$ReplyToEmail])->send(new TutorMonitorStatusUpdate($plansDateList,$plan,$ReplyToEmail));
 
         }
