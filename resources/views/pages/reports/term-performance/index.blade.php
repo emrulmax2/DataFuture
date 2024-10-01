@@ -33,7 +33,9 @@
                         <button type="submit" id="IntakeAttnRateBtn" class="btn btn-primary text-white w-auto ml-2">
                             Generate Report
                         </button>
-                        {{--<a href="javascript:void(0);" style="display: none;" id="printPdfAtnRateBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>--}}
+                        @if($searched_terms)
+                            <a href="{{ route('reports.term.performance.term.trend', $searched_terms) }}" class="btn btn-linkedin text-white ml-2"><i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Trend</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -48,19 +50,22 @@
                     $attendances = $result->sum('P') + $result->sum('O') + $result->sum('E') + $result->sum('M') + $result->sum('H') + $result->sum('L');
                     $overAll = round($attendances * 100 / $perticipents, 2);
                 endif;
+
+                $bgs = ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)'];
+                $bds = ['rgb(75, 192, 192)', 'rgb(54, 162, 235)', 'rgb(153, 102, 255)', 'rgb(255, 99, 132)', 'rgb(255, 159, 64)'];
             @endphp
             <div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-7">
-                        <div class="chartWrap mb-7">
-                            <canvas width="70%" height="15" id="attendanceRateBarChart"></canvas><!-- height="35" -->
+                    <div class="col-span-12">
+                        <div class="chartWrap mb-7" style="max-width: 70%;">
+                            <canvas height="300" id="attendanceRateBarChart"></canvas>
                         </div>
                     </div>
                 </div>
                 <table class="table table-bordered table-sm" id="attendanceRateOvTable" data-title="{{ (isset($theTerm->name) && !empty($theTerm->name) ? $theTerm->name : 'Undefined') }}">
                     <tbody>
                         @if($result && !empty($result))
-                            <tr class="rateRow" data-label="Overall" data-rate="{{ ($overAll > 0 ? $overAll : 0) }}">
+                            <tr class="rateRow" data-label="Overall" data-rate="{{ ($overAll > 0 ? $overAll : 0) }}" data-bg="{{ $bgs[0] }}" data-bd="{{ $bds[0] }}">
                                 <td class="w-20">
                                     <div class="form-check m-0 justify-center">
                                         <input checked id="rateRowCheck_0" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">
@@ -72,14 +77,14 @@
                                 </th>
                             </tr>
                             @foreach($result as $res)
-                                <tr class="rateRow" data-label="{{ $res->course_name }}" data-rate="{{ ($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2) : 0) }}">
+                                <tr class="rateRow" data-label="{{ $res->course_name }}" data-rate="{{ ($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2) : 0) }}" data-bg="{{ $bgs[$row] }}" data-bd="{{ $bds[$row] }}">
                                     <td class="w-20">
                                         <div class="form-check m-0 justify-center">
                                             <input checked id="rateRowCheck_{{ $row }}" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">
                                         </div>
                                     </td>    
-                                    <th>{{ $res->course_name }}</th>
-                                    <th>{{ ($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2).'%' : '0.00%') }}</th>
+                                    <th><a href="{{ route('reports.term.performance.course.view', [$searched_terms, $res->course_id]) }}">{{ $res->course_name }}</a></th>
+                                    <th>{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
                                 </tr>
                                 @php $row++; @endphp
                             @endforeach
