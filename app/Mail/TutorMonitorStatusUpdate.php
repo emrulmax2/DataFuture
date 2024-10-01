@@ -51,7 +51,7 @@ class TutorMonitorStatusUpdate extends Mailable
     {
         
          return new Content(
-            view: 'tutor-monitoring.index',
+            view: 'emails.tutor-monitoring.index',
             with: ['plansDateList' => $this->plansDateList,'plan'=>$this->plan]
         );
     }

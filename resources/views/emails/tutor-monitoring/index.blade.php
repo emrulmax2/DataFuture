@@ -340,7 +340,7 @@
 				<tr>
 					<td style="padding: 30px 30px; text-align: justify;">
 						<h6>Dear {{ $plan->tutor->full_name }},</h6>
-						<p>Our records indicate that no lecture material has been uploaded to MS Teams (E-learning portal) for the class held on [{{ date('js F, Y', strtotime($plansDateList->date)) }} - {{ date("h:i a",strtotime(date("Y-m-d ".$plan->start_time))) }}].</p>
+						<p>Our records indicate that no lecture material has been uploaded to MS Teams (E-learning portal) for the class held on [{{ date('jS F, Y', strtotime($plansDateList->date)) }} - {{ date("h:i a",strtotime(date("Y-m-d ".$plan->start_time))) }}].</p>
 						<p>If you are experiencing any issues with uploading the material, please do not hesitate to contact your designated personal tutor or programme coordinator for assistance.</p>
 						<p>Best regards,<br />LCC E-learning Team</p>
 						<p>Please note that this is a monitoring email, and the programme monitoring team has been CC'd.</p>
