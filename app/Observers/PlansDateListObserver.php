@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Mail\TutorMonitorStatusUpdate;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\TutorMonitorTeam;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Mail;
 
@@ -25,7 +26,13 @@ class PlansDateListObserver  implements ShouldHandleEventsAfterCommit
     {
         if($plansDateList->class_file_upload_found=="No") {
             $plan = Plan::with('tutor','personalTutor')->where('id',$plansDateList->plan_id)->get()->first();
-            Mail::to('registry@lcc.ac.uk')->send(new TutorMonitorStatusUpdate($plansDateList,$plan));
+            $plan->cCreation->course->id;
+            $tutorMonitor = TutorMonitorTeam::where('course_id')->get()->first();
+            
+            $ccPT = auth()->user()->email;
+            $ReplyToEmail = $tutorMonitor->email;
+            
+            Mail::to($plan->tutor->email)->cc([$ccPT,$ReplyToEmail])->send(new TutorMonitorStatusUpdate($plansDateList,$plan,$ReplyToEmail));
 
         }
     }
