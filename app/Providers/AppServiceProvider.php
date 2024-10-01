@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\PlansDateList;
 use App\Models\StudentAwardingBodyDetails;
+use App\Observers\PlansDateListObserver;
 use App\Observers\StudentAwardingBodyDetailsObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -58,7 +60,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
+        
+        PlansDateList::observe(PlansDateListObserver::class);
         StudentAwardingBodyDetails::observe(StudentAwardingBodyDetailsObserver::class);
         Schema::defaultStringLength(191);
         

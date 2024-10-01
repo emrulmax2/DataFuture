@@ -200,6 +200,7 @@ use App\Http\Controllers\Student\SlcInstallmentController;
 use App\Http\Controllers\Student\SlcRegistrationController;
 use App\Http\Controllers\Student\StudentAssignController;
 use App\Http\Controllers\CourseManagement\TermDeclarationController;
+use App\Http\Controllers\CourseManagement\TutorMonitorController;
 use App\Http\Controllers\Filemanager\DocumentTagController;
 use App\Http\Controllers\Filemanager\FilemanagerController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
@@ -636,6 +637,16 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/course-datafuture/update', 'update')->name('course.datafuture.update');
         Route::delete('course-management/course-datafuture/delete/{id}', 'destroy')->name('course.datafuture.destory');
         Route::post('course-management/course-datafuture/restore/{id}', 'restore')->name('course.datafuture.restore');
+        
+    });
+
+    Route::controller(TutorMonitorController::class)->group(function() {
+        Route::post('course-management/course-monitor/store', 'store')->name('course.monitor.store');
+        Route::get('course-management/course-monitor/list', 'list')->name('course.monitor.list'); 
+        Route::get('course-management/course-monitor/edit/{id}', 'edit')->name('course.monitor.edit');
+        Route::post('course-management/course-monitor/update', 'update')->name('course.monitor.update');
+        Route::delete('course-management/course-monitor/delete/{id}', 'destroy')->name('course.monitor.destory');
+        Route::post('course-management/course-monitor/restore/{id}', 'restore')->name('course.monitor.restore');
         
     });
 

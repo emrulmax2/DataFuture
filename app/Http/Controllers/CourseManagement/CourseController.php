@@ -12,6 +12,7 @@ use App\Models\AwardingBody;
 use App\Models\DatafutureField;
 use App\Models\ModuleLevel;
 use App\Models\SourceTuitionFee;
+use App\Models\TutorMonitorTeam;
 use Illuminate\Support\Facades\Cache;
 
 class CourseController extends Controller
@@ -143,7 +144,8 @@ class CourseController extends Controller
             ],
             'course' => Course::find($id),
             'levels' => ModuleLevel::all(),
-            'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [1,2])->orderBy('name', 'ASC')->get()
+            'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [1,2])->orderBy('name', 'ASC')->get(),
+            'monitors' => TutorMonitorTeam::all()
         ]);
     }
 

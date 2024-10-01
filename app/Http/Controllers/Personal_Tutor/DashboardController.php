@@ -116,7 +116,7 @@ class DashboardController extends Controller
 
     }
 
-    public function getClassess(Request $request){
+    public function getClassess(Request $request) {
         $personalTutorId = (isset($request->personalTutorId) && $request->personalTutorId > 0 ? $request->personalTutorId : 0);
         $plan_date = (isset($request->plan_date) && !empty($request->plan_date) ? date('Y-m-d', strtotime($request->plan_date)) : '');
         $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
