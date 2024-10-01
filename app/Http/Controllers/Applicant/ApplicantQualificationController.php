@@ -66,6 +66,12 @@ class ApplicantQualificationController extends Controller
 
 
     public function store(ApplicantQualificationRequest $request){
+
+        if(!isset(\Auth::guard('applicant')->user()->id))
+            $updatedBy = (isset(auth('agent')->user()->id)) ? auth('agent')->user()->id : auth()->user()->id;  
+        else
+            $updatedBy = \Auth::guard('applicant')->user()->id;
+
         $data = ApplicantQualification::create([
             'applicant_id'=> $request->applicant_id,
             'highest_academic'=> $request->highest_academic,
@@ -73,7 +79,7 @@ class ApplicantQualificationController extends Controller
             'subjects'=> $request->subjects,
             'result'=> $request->result,
             'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
-            'created_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+            'created_by' => $updatedBy
         ]);
 
         return response()->json($data);
@@ -89,7 +95,13 @@ class ApplicantQualificationController extends Controller
         }
     }
 
-    public function update(ApplicantQualificationRequest $request){      
+    public function update(ApplicantQualificationRequest $request){    
+
+        if(!isset(\Auth::guard('applicant')->user()->id))
+            $updatedBy = (isset(auth('agent')->user()->id)) ? auth('agent')->user()->id : auth()->user()->id;  
+        else
+            $updatedBy = \Auth::guard('applicant')->user()->id;
+
         $data = ApplicantQualification::where('id', $request->id)->update([
             'applicant_id'=> $request->applicant_id,
             'highest_academic'=> $request->highest_academic,
@@ -97,7 +109,7 @@ class ApplicantQualificationController extends Controller
             'subjects'=> $request->subjects,
             'result'=> $request->result,
             'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
-            'updated_by' => (!is_null(\Auth::guard('applicant')->user()) ? \Auth::guard('applicant')->user()->id : auth()->user()->id)
+            'updated_by' => $updatedBy
         ]);
 
 

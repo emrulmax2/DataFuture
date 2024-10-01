@@ -422,7 +422,23 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
         });
 
+        Route::controller(ApplicantQualificationController::class)->group(function() {
+            Route::get('qualification/list', 'list')->name('qualification.list');
+            Route::post('qualification/store', 'store')->name('qualification.store');
+            Route::get('qualification/edit/{id}', 'edit')->name('qualification.edit');
+            Route::post('qualification/update', 'update')->name('qualification.update');
+            Route::delete('qualification/delete/{id}', 'destroy')->name('qualification.destory');
+            Route::post('qualification/restore/{id}', 'restore')->name('qualification.restore');
+        });
         
+        Route::controller(ApplicantEmploymentController::class)->group(function() {
+            Route::get('employment/list', 'list')->name('employment.list');
+            Route::post('employment/store', 'store')->name('employment.store');
+            Route::get('employment/edit/{id}', 'edit')->name('employment.edit');
+            Route::post('employment/update', 'update')->name('employment.update');
+            Route::delete('employment/delete/{id}', 'destroy')->name('employment.destory');
+            Route::post('employment/restore/{id}', 'restore')->name('employment.restore');
+        });
 
         Route::controller(AgentMyAccountController::class)->group(function() {
             Route::get('my-account', 'index')->name('account'); 
