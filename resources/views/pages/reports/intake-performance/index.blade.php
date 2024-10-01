@@ -107,6 +107,7 @@
                                             </svg>
                                         </button>
                                         <a href="javascript:void(0);" style="display: none;" id="printPdfRetentionRateBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                        <a href="javascript:void(0);" style="display: none;" id="exportRetentionRateBtn" class="btn btn-twitter text-white ml-2"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel</a>
                                     </div>
                                 </div>
                             </div>

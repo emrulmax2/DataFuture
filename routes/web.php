@@ -220,6 +220,7 @@ use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
 use App\Http\Controllers\Reports\SystemReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermPerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -2758,7 +2759,6 @@ Route::middleware('auth')->group(function() {
         Route::get('reports', 'index')->name('reports'); 
         Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
         Route::get('reports/intake-performance', 'intakePerformance')->name('reports.intake.performance'); 
-        Route::get('reports/term-performance', 'termPerformance')->name('reports.term.performance'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
@@ -2801,5 +2801,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(RetentionRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-retention-report', 'getRetentionReport')->name('reports.intake.performance.get.retention.report'); 
         Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
+        Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
+    });
+
+    Route::controller(TermPerformanceReportController::class)->group(function(){
+        Route::any('reports/term-performance', 'index')->name('reports.term.performance'); 
     });
 });

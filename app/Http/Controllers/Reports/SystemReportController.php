@@ -45,15 +45,4 @@ class SystemReportController extends Controller
             'semester' => Semester::orderBy('id', 'DESC')->get(),
         ]);
     }
-
-    public function termPerformance(){
-        return view('pages.reports.term-performance.index', [
-            'title' => 'Term Performance Reports - London Churchill College',
-            'breadcrumbs' => [
-                ['label' => 'Reports', 'href' => route('reports')],
-                ['label' => 'Term Performance Reports', 'href' => 'javascript:void(0);']
-            ],
-            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
-        ]);
-    }
 }

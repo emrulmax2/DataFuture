@@ -144,11 +144,11 @@ class SlcRegistrationController extends Controller
     public function update(SlcRegistrationUpdateRequest $request){
         $slc_registration_id = $request->slc_registration_id;
         $theRegistration = SlcRegistration::find($slc_registration_id);
-        $existRegistration = SlcRegistration::where('student_id', $theRegistration->student_id)->where('student_course_relation_id', $theRegistration->student_course_relation_id)
+        /*$existRegistration = SlcRegistration::where('student_id', $theRegistration->student_id)->where('student_course_relation_id', $theRegistration->student_course_relation_id)
                             ->where('registration_year', $request->registration_year)->where('id', '!=', $slc_registration_id)->get()->first();
         if(isset($existRegistration->id) && $existRegistration->id > 0):
             return response()->json(['msg' => 'Registration exist under selected registration year.'], 304);
-        endif;
+        endif;*/
 
         $regData = [];
         $regData['course_creation_instance_id'] = $request->course_creation_instance_id;

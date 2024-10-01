@@ -29,7 +29,7 @@ import TomSelect from "tom-select";
 
     var rtn_semester_id = new TomSelect('#rtn_semester_id', dueTomOptionsMul);
     $('#rtn_semester_id').on('change', function(){
-        $('#printPdfRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
+        $('#printPdfRetentionRateBtn, #exportRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
         $('#retentionRateWrap').fadeOut().html('');
     });
 
@@ -43,7 +43,7 @@ import TomSelect from "tom-select";
             $form.find('.error-rtn_semester_id').html('')
             document.querySelector('#retentionRateBtn').setAttribute('disabled', 'disabled');
             document.querySelector("#retentionRateBtn svg").style.cssText ="display: inline-block;";
-            $('#printPdfRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $('#printPdfRetentionRateBtn, #exportRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
             $('#retentionRateWrap').fadeOut().html('');
 
             let form_data = new FormData(form);
@@ -58,8 +58,10 @@ import TomSelect from "tom-select";
                 
                 if (response.status == 200) {
                     let pdf_url = route('reports.intake.performance.print.retention.rate', rtn_semester_id.join('_'));
+                    let excel_url = route('reports.intake.performance.export.retention.rate', rtn_semester_id.join('_'));
                     $('#retentionRateWrap').fadeIn().html(response.data.htm);
                     $('#printPdfRetentionRateBtn').attr('href', pdf_url).fadeIn();
+                    $('#exportRetentionRateBtn').attr('href', excel_url).fadeIn();
 
                     setTimeout(() => {
                         createIcons({
@@ -72,7 +74,7 @@ import TomSelect from "tom-select";
             }).catch(error => {
                 document.querySelector('#retentionRateBtn').removeAttribute('disabled');
                 document.querySelector("#retentionRateBtn svg").style.cssText = "display: none;";
-                $('#printPdfRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
+                $('#printPdfRetentionRateBtn, #exportRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
                 if (error.response) {
                     console.log('error');
                 }
@@ -80,7 +82,7 @@ import TomSelect from "tom-select";
         }else{
             $form.find('.error-rtn_semester_id').html('Semesters can not be empty.');
             $('#retentionRateWrap').fadeOut().html('');
-            $('#printPdfRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $('#printPdfRetentionRateBtn, #exportRetentionRateBtn').attr('href', 'javascript:void(0);').fadeOut();
         }
     });
 
