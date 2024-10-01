@@ -1054,6 +1054,7 @@ var liveStudentsListTable = (function () {
             }
             
             $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
+                resetStudentSearch();
                 filterStudentListTable();
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {

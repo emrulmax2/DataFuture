@@ -10,6 +10,7 @@ use App\Models\Agent;
 use App\Models\AgentReferralCode;
 use App\Models\Assign;
 use App\Models\Course;
+use App\Models\CourseCreationVenue;
 use App\Models\Employee;
 use App\Models\Group;
 use App\Models\Plan;
@@ -246,6 +247,7 @@ class StudentDataReportController extends Controller
 
         $StudentData = Student::with('other','crel','termStatus','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest')->whereIn('id',$studentIds)->get();
 
+        
 
         $theCollection = [];
         $i=1;
@@ -395,6 +397,7 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = $student->df_sid_number;  
                                     break;
                                 default:
+                                    $key = strtolower($key);
                                     $theCollection[$row][$j++] = $student->$key;  
                               }
                         }
@@ -454,8 +457,21 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = (($student->course->$key)==1) ? 'Yes' : 'No'; 
                                     
                                   break;
+                                case "SLC_course_code":
+
+                                    $currentCourse = StudentProposedCourse::where('student_id',$student->id)
+                                    ->where('student_course_relation_id',$student->crel->creation->id)
+                                    ->get()
+                                    ->first();
+                                    
+                                    $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$currentCourse->course_creation_id)->where('venue_id', $currentCourse->venue_id)->get()->first();
+                                    
+                                    $theCollection[$row][$j++] = $CourseCreationVenue->slc_code; 
+
+                                  break;
                                 
                                 default:
+                                    $key = strtolower($key);
                                     $theCollection[$row][$j++] = (isset($student->course)) ? $student->course->$key : "";
                             }
                         }
@@ -488,6 +504,7 @@ class StudentDataReportController extends Controller
                                   break;
                                 
                                 default:
+                                    $key = strtolower($key);
                                     $theCollection[$row][$j++] = (isset($student->crel->abody)) ? $student->crel->abody->$key : "";
                             }
 
@@ -528,6 +545,7 @@ class StudentDataReportController extends Controller
                                   break;
                                 
                                 default:
+                                    $key = strtolower($key);
                                     $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->$key : "";
                             }
 
@@ -552,6 +570,7 @@ class StudentDataReportController extends Controller
                                 break;
 
                             default:
+                                $key = strtolower($key);
                                 $theCollection[$row][$j++] = (isset($student->kin)) ? $student->kin->$key : "";
                         }
                     endforeach;
@@ -574,6 +593,7 @@ class StudentDataReportController extends Controller
                                 break;
 
                             default:
+                                $key = strtolower($key);
                                 $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
                         }
                     endforeach; 
@@ -588,6 +608,7 @@ class StudentDataReportController extends Controller
                                 $theCollection[$row][$j++] = isset($student->referral_info) ? $student->referral_info->full_name : "";
 
                             default:
+                                $key = strtolower($key);
                                 $theCollection[$row][$j++] = (isset($student->qualHigest)) ? $student->qualHigest->$key : "";
                         }
                         
