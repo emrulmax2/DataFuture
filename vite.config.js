@@ -276,6 +276,8 @@ export default defineConfig({
                 'resources/js/term-performance-group-reports.js',
                 'resources/js/term-performance-trend-reports.js',
                 'resources/js/term-performance-reports.js',
+                'resources/js/term-performance-course-trend-reports.js',
+                'resources/js/term-performance-group-trend-reports.js',
                 
             ],
             refresh: true,

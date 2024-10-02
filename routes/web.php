@@ -2836,8 +2836,10 @@ Route::middleware('auth')->group(function() {
         Route::any('reports/term-performance/trend/{terms}', 'viewTermTrend')->name('reports.term.performance.term.trend'); 
 
         Route::any('reports/term-performance/course/{terms}/{course}', 'courseView')->name('reports.term.performance.course.view'); 
+        Route::any('reports/term-performance/course/trend/{terms}/{course}', 'courseTrendView')->name('reports.term.performance.course.trend.view'); 
 
 
         Route::any('reports/term-performance/group/{terms}/{course}/{group}', 'groupView')->name('reports.term.performance.group.view'); 
+        Route::any('reports/term-performance/group/trend/{terms}/{course}/{group}', 'groupTrendView')->name('reports.term.performance.group.trend.view'); 
     });
 });

@@ -290,7 +290,8 @@ class PaymentUploadManagementController extends Controller
             $termTypeId = (isset($termType->id) && $termType->id > 0 ? $termType->id : 0);
             $agreement = SlcAgreement::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('year', $year)->orderBy('id', 'DESC')->get()->first();
             if(isset($agreement->id) && $agreement->id > 0):
-                $inst = SlcInstallment::where('slc_agreement_id', $agreement->id)->where('term_type_id', $termTypeId)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+                //$inst = SlcInstallment::where('slc_agreement_id', $agreement->id)->where('term_type_id', $termTypeId)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+                $inst = SlcInstallment::where('slc_agreement_id', $agreement->id)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
                 return (isset($inst->id) && $inst->id > 0 ? $inst : false);
             else:
                 return false;
@@ -482,7 +483,8 @@ class PaymentUploadManagementController extends Controller
                 if(!empty($term_name)):
                     $termTypeId = TermType::where('code', $term_name)->get()->first();
                     $termTypeId = (isset($termType->id) && $termType->id > 0 ? $termType->id : 0);
-                    $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+                    //$inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+                    $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
                     $installment_id = (isset($inst->id) && $inst->id > 0 ? $inst->id : null);
                     $session_term = (isset($inst->session_term) && $inst->session_term != '' ? $inst->session_term : null);
                     $term_declaration_id = (isset($inst->term_declaration_id) && $inst->term_declaration_id != '' ? $inst->term_declaration_id : null);
@@ -582,7 +584,8 @@ class PaymentUploadManagementController extends Controller
         if(!empty($term_name)):
             $termTypeId = TermType::where('code', $term_name)->get()->first();
             $termTypeId = (isset($termType->id) && $termType->id > 0 ? $termType->id : 0);
-            $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+            //$inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('term_type_id', $termTypeId)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
+            $inst = SlcInstallment::where('slc_agreement_id', $slcAgreement->id)->where('student_id', $history->student_id)->orderBy('id', 'DESC')->get()->first();
             $installment_id = (isset($inst->id) && $inst->id > 0 ? $inst->id : null);
             $session_term = (isset($inst->session_term) && $inst->session_term != '' ? $inst->session_term : null);
             $term_declaration_id = (isset($inst->term_declaration_id) && $inst->term_declaration_id != '' ? $inst->term_declaration_id : null);
