@@ -269,7 +269,10 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
-
+Route::controller(StudentController::class)->group(function() {
+    Route::get('old-student/email/verified/{code}','verifiedEmail')->name('student.update.email.verified');
+    
+});
 // Route::controller(CoursCreationController::class)->group(function() {
 //     Route::get('global/course-creation/edit/{id}', 'edit')->name('global.course.creation.edit');
 // });
@@ -498,7 +501,11 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 
         });
-
+        Route::controller(StudentController::class)->group(function() {
+            
+            Route::post('student/email/verifyupdate','verifyEmail')->name('update.email');
+            Route::post('student/mobile/verifed','verifiedMobile')->name('update.mobile');
+        });
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
             Route::post('/update-other-personal-details', 'update')->name('update.other.personal.details');
@@ -805,6 +812,11 @@ Route::middleware('auth')->group(function() {
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
 
         Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
+
+        Route::post('student/email/verifyupdate','verifyEmail')->name('student.update.email');
+        Route::post('student/mobile/verifed','verifiedMobile')->name('student.update.mobile');
+        
+
     });
     
     Route::controller(PersonalDetailController::class)->group(function() {

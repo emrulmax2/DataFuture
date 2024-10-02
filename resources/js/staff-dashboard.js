@@ -465,5 +465,8 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
         });
     });
     /* End Class End */
-
+    if($('#success-notification-toggle').length>0) {
+        $("#success-notification-toggle").trigger('click');
+    }
+    
 })();

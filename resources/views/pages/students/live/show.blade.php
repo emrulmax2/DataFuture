@@ -248,14 +248,33 @@
         </div>
         
         <div class="intro-y box p-5 mt-5">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
+            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                <div class="xl:flex sm:mr-auto">
                     <div class="font-medium text-base">Contact Details</div>
                 </div>
-                <div class="col-span-6 text-right">
-                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                <div class="flex mt-5 sm:mt-0">
+                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary w-1/2 sm:w-auto mr-2">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Contact Details
                     </button>
+                    <div class="dropdown w-1/2 sm:w-auto">
+                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                            <i data-lucide="grip" class="w-4 h-4"></i>
+                        </button>
+                        <div class="dropdown-menu w-40">
+                            <ul class="dropdown-content">
+                                <li>
+                                    <a id="tabulator-export-csv" data-tw-toggle="modal" data-tw-target="#confirmPersonalEmailUpdateModal" href="javascript:;" class="dropdown-item">
+                                        <i data-lucide="mail-question" class="w-4 h-4 mr-2"></i> Change Email
+                                    </a>
+                                </li>
+                                <li>
+                                    <a id="tabulator-export-xlsx" href="javascript:;"  data-tw-toggle="modal" data-tw-target="#confirmPersonalMobileUpdateModal" class="dropdown-item">
+                                        <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> Change Mobile
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
@@ -392,6 +411,7 @@
                     <button data-tw-toggle="modal" data-tw-target="#editAdmissionKinDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Next of Kin
                     </button>
+
                 </div>
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
