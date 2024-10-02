@@ -271,10 +271,13 @@ export default defineConfig({
                 'resources/js/intake-attendance-rate-reports.js',
                 'resources/js/agent-application.js',
                 'resources/js/intake-retention-reports.js',
+                'resources/js/term-performance-reports.js',
                 'resources/js/term-performance-course-reports.js',
                 'resources/js/term-performance-group-reports.js',
                 'resources/js/term-performance-trend-reports.js',
                 'resources/js/term-performance-reports.js',
+                'resources/js/term-performance-course-trend-reports.js',
+                'resources/js/term-performance-group-trend-reports.js',
                 
             ],
             refresh: true,

@@ -174,78 +174,81 @@
                         @foreach($data["assignStudentList"] as $list) 
                             @php 
 								$existAttendance = (isset($data['existAttendances'][$list->student->id]) && $data['existAttendances'][$list->student->id] > 0 ? $data['existAttendances'][$list->student->id] : 0);
-							@endphp      
-                            <tr class="theAttendanceRow">
-                                <td width="100px">{{ $serial }}</td>
-                                <td width="w-2/6">
-                                    <div class="block">
-                                        <div class="w-10 h-10 intro-x image-fit mr-3 inline-block">
-                                            <img alt="{{ $list->student->full_name }}" class="rounded-full shadow" src="{{ $list->student->photo_url }}">
+                                $statusActive = (isset($list->student->status->active) && $list->student->status->active == 1 ? 1 : 0);
+                            @endphp    
+                            @if($existAttendance > 0 || $statusActive == 1)  
+                                <tr class="theAttendanceRow">
+                                    <td width="100px">{{ $serial }}</td>
+                                    <td width="w-2/6">
+                                        <div class="block">
+                                            <div class="w-10 h-10 intro-x image-fit mr-3 inline-block">
+                                                <img alt="{{ $list->student->full_name }}" class="rounded-full shadow" src="{{ $list->student->photo_url }}">
+                                            </div>
+                                            <div class="inline-block relative" style="top: -5px;" >
+                                                <div class="font-medium whitespace-nowrap">{{ $list->student->registration_no }}</div>
+                                                <div class="text-slate-500 text-xs whitespace-nowrap">{{ $list->student->full_name }}</div>
+                                            </div>
+                                        </div>   
+                                        <input type="hidden" name="attendances[{{$data['id']}}][{{$serial}}][student_id]" value="{{ $list->student->id }}">
+                                    </td>
+                                    <td style="width: 150px;" class="text-center feedTypeCol font-medium capitalize"></td>
+                                    <td class="attendance-column">
+                                        <div class="flex flex-col sm:flex-row justify-end">
+                                            @foreach($data["AttendanceFeedStatus"] as $feedType)
+                                                @php 
+                                                    $buttonDefault = "btn btn-success text-white btn-sm w-auto";
+                                                    $color = '#0f9488';
+                                                @endphp
+                                                @switch($feedType->id)
+                                                    @case(2)
+                                                        @php $button = 'btn btn-facebook text-white btn-sm w-auto'; $color = '#3b5998e6'; @endphp
+                                                        @break;
+                                                    @case(3)
+                                                        @php $button = 'btn btn-pending text-white btn-sm w-auto'; $color = '#d97706e6'; @endphp
+                                                        @break;
+                                                    @case(4)
+                                                        @php $button = 'btn btn-danger text-white btn-sm w-auto'; $color = '#b91c1ce6'; @endphp
+                                                        @break;
+                                                    @case(5)
+                                                        @php $button = 'btn btn-warning text-white btn-sm w-auto'; $color = '#f59e0b'; @endphp
+                                                        @break;
+                                                    @case(6)
+                                                        @php $button = 'btn btn-dark text-white btn-sm w-auto'; $color = '#1e293be6'; @endphp
+                                                        @break;
+                                                    @case(7)
+                                                        @php $button = 'btn btn-instagram text-white btn-sm w-auto'; $color = '#517fa4'; @endphp
+                                                        @break;
+                                                    @case(8)
+                                                        @php $button = 'btn btn-twitter text-white btn-sm w-auto'; $color = '#4ab3f4e6'; @endphp
+                                                        @break;
+                                                    @default
+                                                        @php $button = $buttonDefault; $color = '#0f9488'; @endphp
+                                                        @break
+                                                @endswitch
+                                                <span class="attendanceCheckbox mb-2 sm:mb-0 ml-1">
+                                                    <input class="attendanceRadio attendanceRadio_{{ $feedType->id }}" data-type="{{ $feedType->name }}" data-color="{{ $color }}" id="radio-switch-{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" {{ ($existAttendance > 0 && $existAttendance == $feedType->id) ? ' Checked ' : ($existAttendance == 0 && $feedType->id == 4 ? 'Checked' : '') }} name="attendances[{{$data['id']}}][{{$serial}}][attendance_feed_status_id]" value="{{ $feedType->id }}" type="radio"  />
+                                                    <label class="{{ $button }}" for="radio-switch-{{$data['id']}}-{{$serial}}-{{ $feedType->id }}"><span class="mr-2"><i data-lucide="check-circle" class="w-4 h-4 checkedIcon"></i><i data-lucide="x-circle" class="w-4 h-4 unCheckedIcon"></i></span>{{ $feedType->name }}</label>
+                                                </span>
+                                            @endforeach
                                         </div>
-                                        <div class="inline-block relative" style="top: -5px;" >
-                                            <div class="font-medium whitespace-nowrap">{{ $list->student->registration_no }}</div>
-                                            <div class="text-slate-500 text-xs whitespace-nowrap">{{ $list->student->full_name }}</div>
+                                    </td>
+                                    <td style="width: 150px;">
+                                        <div class="flex items-center justify-center m-0">
+                                            <input type="checkbox"  class="form-check-input checkEmailNotify" id="email_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="{{ $list->student->id }}" />
                                         </div>
-                                    </div>   
-                                    <input type="hidden" name="attendances[{{$data['id']}}][{{$serial}}][student_id]" value="{{ $list->student->id }}">
-                                </td>
-                                <td style="width: 150px;" class="text-center feedTypeCol font-medium capitalize"></td>
-                                <td class="attendance-column">
-                                    <div class="flex flex-col sm:flex-row justify-end">
-										@foreach($data["AttendanceFeedStatus"] as $feedType)
-											@php 
-												$buttonDefault = "btn btn-success text-white btn-sm w-auto";
-												$color = '#0f9488';
-											@endphp
-											@switch($feedType->id)
-												@case(2)
-													@php $button = 'btn btn-facebook text-white btn-sm w-auto'; $color = '#3b5998e6'; @endphp
-													@break;
-												@case(3)
-													@php $button = 'btn btn-pending text-white btn-sm w-auto'; $color = '#d97706e6'; @endphp
-													@break;
-												@case(4)
-													@php $button = 'btn btn-danger text-white btn-sm w-auto'; $color = '#b91c1ce6'; @endphp
-													@break;
-												@case(5)
-													@php $button = 'btn btn-warning text-white btn-sm w-auto'; $color = '#f59e0b'; @endphp
-													@break;
-												@case(6)
-													@php $button = 'btn btn-dark text-white btn-sm w-auto'; $color = '#1e293be6'; @endphp
-													@break;
-												@case(7)
-													@php $button = 'btn btn-instagram text-white btn-sm w-auto'; $color = '#517fa4'; @endphp
-													@break;
-												@case(8)
-													@php $button = 'btn btn-twitter text-white btn-sm w-auto'; $color = '#4ab3f4e6'; @endphp
-													@break;
-												@default
-													@php $button = $buttonDefault; $color = '#0f9488'; @endphp
-													@break
-											@endswitch
-                                            <span class="attendanceCheckbox mb-2 sm:mb-0 ml-1">
-                                                <input class="attendanceRadio attendanceRadio_{{ $feedType->id }}" data-type="{{ $feedType->name }}" data-color="{{ $color }}" id="radio-switch-{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" {{ ($existAttendance > 0 && $existAttendance == $feedType->id) ? ' Checked ' : ($existAttendance == 0 && $feedType->id == 4 ? 'Checked' : '') }} name="attendances[{{$data['id']}}][{{$serial}}][attendance_feed_status_id]" value="{{ $feedType->id }}" type="radio"  />
-                                                <label class="{{ $button }}" for="radio-switch-{{$data['id']}}-{{$serial}}-{{ $feedType->id }}"><span class="mr-2"><i data-lucide="check-circle" class="w-4 h-4 checkedIcon"></i><i data-lucide="x-circle" class="w-4 h-4 unCheckedIcon"></i></span>{{ $feedType->name }}</label>
-                                            </span>
-										@endforeach
-									</div>
-                                </td>
-                                <td style="width: 150px;">
-                                    <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox"  class="form-check-input checkEmailNotify" id="email_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][email_notify]" value="{{ $list->student->id }}" />
-                                    </div>
-                                </td>
-                                <td style="width: 150px;">
-                                    <div class="flex items-center justify-center m-0">
-                                        <input type="checkbox" class="form-check-input checkSmsNotify" id="sms_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="{{ $list->student->id }}" />
-                                    </div>
-                                </td>
-                            </tr>   
-                        
-                            <input type="hidden" name="attendances[{{$data['id']}}][{{$serial}}][plans_date_list_id]" value="{{ $list->id }}">
-                            @php
-                                $serial++;
-                            @endphp
+                                    </td>
+                                    <td style="width: 150px;">
+                                        <div class="flex items-center justify-center m-0">
+                                            <input type="checkbox" class="form-check-input checkSmsNotify" id="sms_notify_{{$data['id']}}-{{$serial}}-{{ $feedType->id }}" name="attendances[{{$data['id']}}][{{$serial}}][sms_notify]" value="{{ $list->student->id }}" />
+                                        </div>
+                                    </td>
+                                </tr>   
+                            
+                                <input type="hidden" name="attendances[{{$data['id']}}][{{$serial}}][plans_date_list_id]" value="{{ $list->id }}">
+                                @php
+                                    $serial++;
+                                @endphp
+                            @endif
                         @endforeach                                     
                     </tbody>
                 </table>

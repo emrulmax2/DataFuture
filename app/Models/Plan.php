@@ -108,5 +108,9 @@ class Plan extends Model
     public function tasks(){
         return $this->hasMany(PlanTask::class, 'plan_id', 'id');
     }
+
+    public function attendance(){
+        return $this->hasMany(Attendance::class, 'plan_id', 'id');
+    }
     
 }

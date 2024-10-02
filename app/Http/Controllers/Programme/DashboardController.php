@@ -795,9 +795,12 @@ class DashboardController extends Controller
         $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
         $query = DB::table('attendances as atn')
                     ->select(
+
                         DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
                         DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
                         DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
                         DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
                         DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
                         DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
@@ -812,17 +815,9 @@ class DashboardController extends Controller
         $attendances = $query->get()->first();
 
         if(isset($attendances) && !empty($attendances)):
-            $attendance = 0;
-            $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
-            $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
-            $attendance += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
-            $attendance += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
-            $attendance += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
-            $attendance += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
-
-            $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
-            if($attendance > 0 && $attendanceTotal > 0):
-                return number_format($attendance / $attendanceTotal * 100, 2);
+            $attendance = (isset($attendances->percentage_withexcuse) && $attendances->percentage_withexcuse > 0 ? $attendances->percentage_withexcuse : 0);
+            if($attendance):
+                return number_format($attendance, 2);
             else:
                 return 0;
             endif;
