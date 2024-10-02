@@ -82,6 +82,8 @@ class TermPerformanceReportController extends Controller
 
         $plan_ids = Plan::where('term_declaration_id', $term_id)->pluck('id')->unique()->toArray();
         $student_ids = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
+        $course_ids = Plan::where('term_declaration_id', $term_id)->pluck('course_id')->unique()->toArray();
+        sort($course_ids);
 
         $res = [];
         if(!empty($start_date) && !empty($end_date)):
@@ -91,35 +93,48 @@ class TermPerformanceReportController extends Controller
                 $batchEnd = date("Y-m-d", strtotime("+6 day", strtotime($theStart)));
                 $batchEnd = ($batchEnd > $end_date ? $end_date : $batchEnd);
                 
-                $result = DB::table('attendances as atn')
-                        ->select(
-                            'cr.name as course_name', 'cr.id as course_id',
-                            DB::raw('GROUP_CONCAT(DISTINCT atn.student_id) as student_ids'),
-
-                            DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
-                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
-                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
-                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
-                        )
-                        ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
-                        ->leftJoin('courses as cr', 'pln.course_id', 'cr.id')
-                        ->leftJoin('students as std', 'atn.student_id', 'std.id')
-                        ->whereIn('atn.plan_id', $plan_ids)
-                        ->whereIn('atn.student_id', $student_ids)
-                        ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
-                        ->where(function($q) use($batchStart, $batchEnd){
-                            $q->whereDate('atn.attendance_date', '>=', $batchStart)->whereDate('atn.attendance_date', '<=', $batchEnd);
-                        })->groupBy('pln.course_id')->orderBy('pln.course_id', 'ASC')->get();
                 $res[$week]['start'] = $batchStart;
                 $res[$week]['end'] = $batchEnd;
-                $res[$week]['result'] = $result;
+
+                $TOTAL = $ATTENDANCE = 0;
+                foreach($course_ids as $course_id):
+                    $row = DB::table('attendances as atn')
+                            ->select(
+                                DB::raw('GROUP_CONCAT(DISTINCT atn.student_id) as student_ids'),
+
+                                DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
+                                DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
+                                DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
+                                DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                            )
+                            ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
+                            ->leftJoin('courses as cr', 'pln.course_id', 'cr.id')
+                            ->leftJoin('students as std', 'atn.student_id', 'std.id')
+                            ->whereIn('atn.plan_id', $plan_ids)
+                            ->whereIn('atn.student_id', $student_ids)
+                            ->where('pln.course_id', $course_id)
+                            ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
+                            ->where(function($q) use($batchStart, $batchEnd){
+                                $q->whereDate('atn.attendance_date', '>=', $batchStart)->whereDate('atn.attendance_date', '<=', $batchEnd);
+                            })->get()->first();
+
+                    $TOTAL += (isset($row->TOTAL) && $row->TOTAL > 0 ? $row->TOTAL : 0);
+                    $ATTENDANCE += (isset($row->P) && $row->P > 0 ? $row->P : 0);
+                    $ATTENDANCE += (isset($row->O) && $row->O > 0 ? $row->O : 0);
+                    $ATTENDANCE += (isset($row->E) && $row->E > 0 ? $row->E : 0);
+                    $ATTENDANCE += (isset($row->M) && $row->M > 0 ? $row->M : 0);
+                    $ATTENDANCE += (isset($row->H) && $row->H > 0 ? $row->H : 0);
+                    $ATTENDANCE += (isset($row->L) && $row->L > 0 ? $row->L : 0);
+                    $res[$week]['rows'][$course_id] = (!empty($row) ? $row : []);
+                endforeach;
+                $res[$week]['overall'] = ($TOTAL > 0 && $ATTENDANCE > 0 ? round($ATTENDANCE * 100 / $TOTAL, 2) : 0);
                 
                 $theStart = date("Y-m-d", strtotime("+7 day", strtotime($theStart)));
                 $week++;
