@@ -14,6 +14,9 @@
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         @if(!empty($result))
+            @php 
+                $bgs = ['rgba(54, 162, 235, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 99, 132, 0.8)', 'rgba(255, 159, 64, 0.8)', 'rgba(59, 89, 152, 0.8)', 'rgba(74, 179, 244, 0.8)', 'rgba(81, 127, 164, 0.8)', 'rgba(0, 119, 181, 0.8)', 'rgba(13, 148, 136, 0.8)', 'rgba(6, 182, 212, 0.8)', 'rgba(22, 78, 99, 0.8)'];
+            @endphp
             <div class="grid grid-cols-12 gap-0">
                 <div class="col-span-12">
                     <div class="chartWrap mb-7" style="max-width: 70%;">
@@ -26,10 +29,20 @@
                     <thead>
                         <tr>
                             <th>&nbsp;</th>
-                            <th>Overall</th>
+                            <th class="countable" data-label="Overall" data-sl="0" data-color="rgba(75, 192, 192, 0.8)">
+                                <div class="form-check m-0">
+                                    <input id="col_selection_0" class="form-check-input col_selection" name="col_selection[]" type="checkbox" value="0">
+                                    <label class="form-check-label" for="col_selection_0">Overall</label>
+                                </div>
+                            </th>
                             @if(!empty($courses))
                                 @foreach($courses as $crs)
-                                    <th>{{ $crs->name }}</th>
+                                    <th class="countable" data-label="{{ $crs->name }}" data-sl="{{ $crs->id }}" data-color="{{ $bgs[array_rand($bgs)] }}">
+                                        <div class="form-check m-0">
+                                            <input id="col_selection_{{ $crs->id }}" class="form-check-input col_selection" name="col_selection[]" type="checkbox" value="{{ $crs->id }}">
+                                            <label class="form-check-label" for="col_selection_{{ $crs->id }}">{{ $crs->name }}</label>
+                                        </div>
+                                    </th>
                                 @endforeach
                             @endif
                         </tr>
@@ -43,19 +56,19 @@
                                 $overAll = round($attendances * 100 / $perticipents, 2);
                             @endphp
                             <tr>
-                                <th>{{ date('jS', strtotime($week.'-11-1986')) }} Week</th>
-                                <th>
+                                <th class="labels" data-labels="W/S {{ date('d-m-Y', strtotime($res['start'])) }}">W/S {{ date('d-m-Y', strtotime($res['start'])) }}</th>
+                                <th class="rowRates serial_0" data-rate="{{ $overAll > 0 ? number_format($overAll, 2) : '0.00'}}">
                                     {{ $overAll > 0 ? number_format($overAll, 2).'%' : '0.00%'}}
                                 </th>
                                 @foreach($result as $res)
-                                    <th>{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
+                                    <th class="rowRates serial_{{ $res->course_id }}" data-rate="{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2) : '0.00') }}">{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
                                 @endforeach
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-        @endif;
+        @endif
     </div>
 
     <!-- BEGIN: Success Modal Content -->

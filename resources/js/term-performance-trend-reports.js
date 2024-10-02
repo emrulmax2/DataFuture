@@ -8,43 +8,88 @@ import colors from "./colors";
 
     let attendanceTrendLineChart = null;
     $(window).on('load', function(){
-        let labels = ['1st Week', '2nd Week', '3rd Week', '4th Week', '5th Week', '6th Week', '7th Week', '8th Week', '9th Week', '10th Week', '11th Week'];
+        let $theTable = $('#attendanceTrendOvTable');
+        let theTitle = $theTable.attr('data-title');
+        let labels = [];
+        let datasets = [];
+
+        $theTable.find('tbody tr').each(function(){
+            var $theRow = $(this);
+            labels.push($theRow.find('.labels').attr('data-labels'));
+        });
+
+        $theTable.find('thead tr th.countable').each(function(){
+            var $theHead = $(this);
+            var sl = $theHead.attr('data-sl');
+            var label = $theHead.attr('data-label');
+            var color = $theHead.attr('data-color');
+
+            var theSet = {};
+            theSet.label = label;
+            theSet.borderWidth = 4;
+            theSet.borderColor = color;
+            theSet.backgroundColor = color;
+            theSet.pointBorderColor = color;
+            theSet.tension = 0.1;
+
+            var singleData = [];
+            var total = 0;
+            var count = 0;
+            $theTable.find('tbody .serial_'+sl).each(function(){
+                var $theDataCol = $(this);
+                singleData.push($theDataCol.attr('data-rate'));
+
+                total += ($theDataCol.attr('data-rate') * 1);
+                count += 1;
+            })
+            theSet.data = singleData;
+            datasets.push(theSet);
+
+            var avgSet = {};
+            var average = total / count;
+            var averageData = [];
+            for(var i = 0; i <= labels.length; i++){
+                averageData.push(average.toFixed(2));
+            }
+            avgSet.label = label+' Average';
+            avgSet.borderWidth = 4;
+            avgSet.borderColor = color;
+            avgSet.backgroundColor = color;
+            avgSet.pointBorderColor = color;
+            avgSet.tension = 0.1;
+            avgSet.data = averageData;
+            datasets.push(avgSet);
+
+        });
+        
+        /*$theTable.find('tbody tr').each(function(){
+            var $theRow = $(this);
+        })*/
 
         let ctx = document.getElementById('attendanceTrendLineChart').getContext("2d");
         attendanceTrendLineChart = new Chart(ctx, {
             type: "line",
             data: {
                 labels : labels,
-                datasets : [
-                    {
-                        label: "Overall",
-                        data: [
-                            20, 200, 250, 200, 700, 550, 650, 1050, 950, 1100,
-                            900
-                        ],
-                        borderWidth: 3,
-                        borderColor: colors.primary(0.8),
-                        backgroundColor: "transparent",
-                        pointBorderColor: "transparent",
-                        tension: 0.4,
-                    },
-                    {
-                        label: "HND IN HOSPITALITY MANAGEMENT",
-                        data: [
-                            0, 300, 400, 560, 320, 600, 720, 850, 690, 805,
-                            1200
-                        ],
-                        borderWidth: 3,
-                        borderColor: colors.success(0.8),
-                        backgroundColor: "transparent",
-                        pointBorderColor: "transparent",
-                        tension: 0.4,
-                    },
-                ]
+                datasets : datasets
             },
             options: {
                 maintainAspectRatio: false,
+                responsive: true,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: theTitle,
+                        color: '#164e63e6',
+                        padding: {
+                            bottom: 20
+                        },
+                        font: {
+                            size: 18,
+                            weight: 'bold',
+                            lineHeight: 1
+                        }
+                    },
                     legend: {
                         display: false,
                     },
