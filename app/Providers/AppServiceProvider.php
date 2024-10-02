@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Models\PlansDateList;
+use App\Models\Student;
 use App\Models\StudentAwardingBodyDetails;
+use App\Models\StudentUser;
 use App\Observers\PlansDateListObserver;
 use App\Observers\StudentAwardingBodyDetailsObserver;
+use App\Observers\StudentUserObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Mail;
@@ -63,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
         
         PlansDateList::observe(PlansDateListObserver::class);
         StudentAwardingBodyDetails::observe(StudentAwardingBodyDetailsObserver::class);
+        StudentUser::observe(StudentUserObserver::class);
+        
         Schema::defaultStringLength(191);
         
     }

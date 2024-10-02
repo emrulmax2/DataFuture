@@ -136,4 +136,83 @@ if($('#awardingBodyEditModal').length > 0 ) {
             });
     });
 }
+
+if($('.save').length>0) {
+    const confirmPersonalEmailUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalEmailUpdateModal"));
+    const confirmPersonalMobileUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalMobileUpdateModal"));
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        $('.save').on('click', function(e){
+            e.preventDefault();
+
+            let tthis = $(this);
+            let parentForm = tthis.parents('form');
+            let formID = parentForm.attr('id');
+            const form = document.getElementById(formID);
+            let rurl = $("#"+formID+" input[name=url]").val();
+            let mobile = $("#"+formID+" input[name=mobile]").val();
+            let code = $("#"+formID+" input[name=code]").val();
+            
+            tthis.attr('disabled', 'disabled');
+            $(".loadingClass",tthis).removeClass('hidden');
+
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: rurl,
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+
+                tthis.removeAttr('disabled');
+                $(".loadingClass",tthis).addClass('hidden');
+
+                if (response.status == 200) {
+
+                    tthis.removeAttr('disabled');
+                    
+                    $(".loadingClass",tthis).addClass('hidden');
+
+                    successModal.show();
+                    
+                    if(code=="") {
+                        confirmPersonalEmailUpdateModal.hide();
+                        
+                    } else {
+                        confirmPersonalEmailUpdateModal.hide();
+                        confirmPersonalMobileUpdateModal.hide();
+                        
+                    }
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Success!");
+                        $("#successModal .successModalDesc").html('Data Send');
+                    });
+                    
+                    
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                    }, 1200); 
+                    location.reload();
+                }
+            }).catch(error => {
+                
+                tthis.removeAttr('disabled');
+                $("svg",tthis).css("display", "none");
+
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#${formID} .${key}`).addClass('border-danger')
+                            $(`#${formID}  .error-${key}`).html(val)
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        });
+        if($('#success-notification-toggle').length>0) {
+            $("#success-notification-toggle").trigger('click');
+        }
+}
 /* Profile Menu End */

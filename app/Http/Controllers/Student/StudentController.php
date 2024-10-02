@@ -84,6 +84,7 @@ use App\Models\Title;
 use App\Models\User;
 use App\Models\StudentSms;
 use App\Models\StudentTask;
+use App\Models\StudentUser;
 use App\Models\StudentWorkPlacement;
 use App\Models\StudyMode;
 use App\Models\TaskList;
@@ -2131,7 +2132,110 @@ class StudentController extends Controller
             return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
         endif;
     }
+    public function verifyEmail(Request $request){
+        $student_user_id = $request->student_user_id;
+        $temp_email = $request->email;
+        $temp_mobile = $request->mobile;
 
+
+        $student = StudentUser::find($student_user_id);
+        if(isset($temp_email) && $temp_email!="") {
+            $student->temp_email = $temp_email;
+            $student->temp_email_verify_code = $student_user_id.Rand('1000','9999');
+        }
+        if(isset($temp_mobile) && $temp_mobile!="") {
+            
+            $student->temp_mobile = $temp_mobile;
+            $student->temp_mobile_verify_code = Rand('1000','9999');
+
+            $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
+            $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
+            $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+
+            if($active_api == 1 && !empty($textlocal_api)):
+                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                    'apikey' => $textlocal_api, 
+                    'message' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
+                                    ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                    'sender' => 'London Churchill College', 
+                    'numbers' => $student->temp_mobile
+                ]);
+            elseif($active_api == 2 && !empty($smseagle_api)):
+                $response = Http::withHeaders([
+                    'access-token' => $smseagle_api,
+                    'Content-Type' => 'application/json',
+                ])->withoutVerifying()->withOptions([
+                    "verify" => false
+                ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                    'to' => [$student->temp_mobile],
+                    'text' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
+                                ".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                ]);
+            endif;
+
+        }
+        $changes = $student->getDirty();
+        $student->save();
+        if($student->wasChanged() && !empty($changes)):
+            if(isset($temp_mobile) && $temp_mobile!="") {
+                return response()->json(['message' => 'A message is sent to your new phone'], 200);
+            }else 
+                return response()->json(['message' => 'A email send to your new mail. please checkk to verify'], 200);
+        else:
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+        endif;
+    }
+    public function verifiedEmail(Request $request) {
+
+        
+        $studentUserFound = StudentUser::where('temp_email_verify_code',$request->code)->get()->first();
+        if(isset($studentUserFound->id)) {
+
+            $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
+            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentContact->personal_email = $studentUserFound->temp_email;
+            $studentContact->personal_email_verification = 1;
+
+            $changes = $studentContact->getDirty();
+            $studentContact->save();
+
+            if($studentContact->wasChanged() && !empty($changes)):
+                $studentUserFound->temp_email_verify_code = NULL;
+                $studentUserFound->temp_email = NULL;
+                $studentUserFound->save();
+                if(isset(auth()->user()->id))
+                    return redirect()->route('staff.dashboard')->with('verifySuccessMessage', 'Personal Email Information Updated');
+                else
+                    return redirect()->route('students.login')->with('verifySuccessMessage', 'Personal Email Information Updated');
+                
+            else:
+                return route('/');
+            endif;
+        }
+    }
+    public function verifiedMobile(Request $request) {
+
+        $studentUserFound = StudentUser::where('temp_mobile_verify_code',$request->code)->get()->first();
+        if(isset($studentUserFound->id)) {
+
+            $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
+            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentContact->mobile = $studentUserFound->temp_mobile;
+            $studentContact->mobile_verification = 1;
+
+            $changes = $studentContact->getDirty();
+            $studentContact->save();
+            
+            if($studentContact->wasChanged() && !empty($changes)):
+                $studentUserFound->temp_mobile_verify_code = NULL;
+                $studentUserFound->temp_mobile = NULL;
+                $studentUserFound->save();
+                return response()->json(['message' => 'Mobile Update Succefully'], 200);
+            else:
+                return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+            endif;
+        }
+    }
     public function getCoursesByIntakeOrTerm(Request $request){
         $intakeSemester = (isset($request->intakeSemester) && !empty($request->intakeSemester) ? $request->intakeSemester : []);
         $attenSemesters = (isset($request->attenSemesters) && !empty($request->attenSemesters) ? $request->attenSemesters : []);

@@ -29,7 +29,33 @@
                 <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0 phoneEmail" id="phoneEmail">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
-                            <div class="font-normal text-center lg:text-left mb-4 inline-flex">Contact Details
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-6">
+                                    <div class="font-normal text-center lg:text-left mb-4">
+                                        Contact Details 
+                                    </div>
+                                </div>
+                                <div class="col-span-6 text-right">
+                                    <div class="dropdown w-1/2 sm:w-auto ml-auto">
+                                        <button class="dropdown-toggle btn btn-primary w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                            <i data-lucide="grip" class="w-4 h-4"></i>
+                                        </button>
+                                        <div class="dropdown-menu w-40">
+                                            <ul class="dropdown-content">
+                                                <li>
+                                                    <a id="tabulator-export-csv" data-tw-toggle="modal" data-tw-target="#confirmPersonalEmailUpdateModal" href="javascript:;" class="dropdown-item">
+                                                        <i data-lucide="mail-question" class="w-4 h-4 mr-2"></i> Change Email
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a id="tabulator-export-xlsx" href="javascript:;"  data-tw-toggle="modal" data-tw-target="#confirmPersonalMobileUpdateModal" class="dropdown-item">
+                                                        <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> Change Mobile
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                            </div>
                             </div>
                             <div class="ml-0 mt-0  mb-2">
                                 @if($student->users->email)
