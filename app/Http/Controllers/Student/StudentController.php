@@ -2159,7 +2159,6 @@ class StudentController extends Controller
         $student_user_id = $request->student_user_id;
         $temp_mobile = $request->mobile;
         $student = StudentUser::find($student_user_id);
-        
         if(isset($temp_mobile) && $temp_mobile!="") {
             
             $student->temp_mobile = $temp_mobile;
@@ -2195,6 +2194,7 @@ class StudentController extends Controller
         $student->save();
         if($student->wasChanged() && !empty($changes)):
             if(isset($temp_mobile) && $temp_mobile!="") {
+
                 return response()->json(['message' => 'A message is sent to your new phone'], 200);
             }else 
                 return response()->json(['message' => 'A email send to your new mail. please checkk to verify'], 200);
@@ -2235,7 +2235,8 @@ class StudentController extends Controller
 
         $studentUserFound = StudentUser::where('temp_mobile_verify_code',$request->code)->get()->first();
         if(isset($studentUserFound->id)) {
-
+            
+            $studentOld = Student::where('student_user_id', $studentUserFound->id)->get()->first();
             $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
             $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
             $studentContact->mobile = $studentUserFound->temp_mobile;
@@ -2248,6 +2249,18 @@ class StudentController extends Controller
                 $studentUserFound->temp_mobile_verify_code = NULL;
                 $studentUserFound->temp_mobile = NULL;
                 $studentUserFound->save();
+
+                foreach($changes as $field => $value):
+                    $data = [];
+                    $data['student_id'] = $student->id;
+                    $data['table'] = 'student_contacts';
+                    $data['field_name'] = $field;
+                    $data['field_value'] = $studentOld->$field;
+                    $data['field_new_value'] = $value;
+                    $data['created_by'] = (isset(auth()->user()->id)) ? auth()->user()->id : auth('student')->user()->id;
+
+                    StudentArchive::create($data);
+                endforeach;
                 return response()->json(['message' => 'Mobile Update Succefully'], 200);
             else:
                 return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
