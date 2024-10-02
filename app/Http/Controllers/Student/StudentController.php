@@ -2209,7 +2209,8 @@ class StudentController extends Controller
         if(isset($studentUserFound->id)) {
 
             $student = Student::where('student_user_id',$studentUserFound->id)->get()->first();
-            $studentContact = $studentOld = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentOld  = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
             $studentContact->personal_email = $studentUserFound->temp_email;
             $studentContact->personal_email_verification = 1;
 
@@ -2252,7 +2253,8 @@ class StudentController extends Controller
             
            
             $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
-            $studentContact = $studentOld = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentOld  = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
             $studentContact->mobile = $studentUserFound->temp_mobile;
             $studentContact->mobile_verification = 1;
 
