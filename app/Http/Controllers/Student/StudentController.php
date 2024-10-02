@@ -2208,8 +2208,8 @@ class StudentController extends Controller
         $studentUserFound = StudentUser::where('temp_email_verify_code',$request->code)->get()->first();
         if(isset($studentUserFound->id)) {
 
-            $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
-            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
+            $student = Student::where('student_user_id',$studentUserFound->id)->get()->first();
+            $studentContact = $studentOld = StudentContact::where('student_id',$student->id)->get()->first();
             $studentContact->personal_email = $studentUserFound->temp_email;
             $studentContact->personal_email_verification = 1;
 
@@ -2220,6 +2220,20 @@ class StudentController extends Controller
                 $studentUserFound->temp_email_verify_code = NULL;
                 $studentUserFound->temp_email = NULL;
                 $studentUserFound->save();
+
+                
+                foreach($changes as $field => $value):
+                    $data = [];
+                    $data['student_id'] = $student->id;
+                    $data['table'] = 'student_contacts';
+                    $data['field_name'] = $field;
+                    $data['field_value'] = $studentOld->$field;
+                    $data['field_new_value'] = $value;
+                    $data['created_by'] = (isset(auth()->user()->id)) ? auth()->user()->id : auth('student')->user()->id;
+
+                    StudentArchive::create($data);
+                endforeach;
+
                 if(isset(auth()->user()->id))
                     return redirect()->route('staff.dashboard')->with('verifySuccessMessage', 'Student Personal Email Information Updated');
                 elseif(isset(auth('student')->user()->id))
@@ -2236,9 +2250,9 @@ class StudentController extends Controller
         $studentUserFound = StudentUser::where('temp_mobile_verify_code',$request->code)->get()->first();
         if(isset($studentUserFound->id)) {
             
-            $studentOld = Student::where('student_user_id', $studentUserFound->id)->get()->first();
+           
             $student= Student::where('student_user_id',$studentUserFound->id)->get()->first();
-            $studentContact = StudentContact::where('student_id',$student->id)->get()->first();
+            $studentContact = $studentOld = StudentContact::where('student_id',$student->id)->get()->first();
             $studentContact->mobile = $studentUserFound->temp_mobile;
             $studentContact->mobile_verification = 1;
 
