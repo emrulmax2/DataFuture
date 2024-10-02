@@ -51,19 +51,13 @@
                     </thead>
                     <tbody>
                         @foreach($result as $week => $res)
-                            @php 
-                                $result = $res['result'];
-                                $perticipents = $result->sum('TOTAL');
-                                $attendances = $result->sum('P') + $result->sum('O') + $result->sum('E') + $result->sum('M') + $result->sum('H') + $result->sum('L');
-                                $overAll = round($attendances * 100 / $perticipents, 2);
-                            @endphp
                             <tr>
                                 <th class="labels" data-labels="W/S {{ date('d-m-Y', strtotime($res['start'])) }}">W/S {{ date('d-m-Y', strtotime($res['start'])) }}</th>
-                                <th class="rowRates serial_0" data-rate="{{ $overAll > 0 ? number_format($overAll, 2) : '0.00'}}">
-                                    {{ $overAll > 0 ? number_format($overAll, 2).'%' : '0.00%'}}
+                                <th class="rowRates serial_0" data-rate="{{ $res['overall'] > 0 ? number_format($res['overall'], 2) : '0.00'}}">
+                                    {{ $res['overall'] > 0 ? number_format($res['overall'], 2).'%' : '0.00%'}}
                                 </th>
-                                @foreach($result as $res)
-                                    <th class="rowRates serial_{{ $res->course_id }}" data-rate="{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2) : '0.00') }}">{{ ($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
+                                @foreach($res['rows'] as $course_id => $row)
+                                    <th class="rowRates serial_{{ $course_id }}" data-rate="{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2) : '0.00') }}">{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
                                 @endforeach
                             </tr>
                         @endforeach
