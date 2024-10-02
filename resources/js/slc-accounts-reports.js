@@ -65,7 +65,7 @@ var slcPaymentHistoryListTable = (function () {
                     headerSort: false,
                     formatter(cell, formatterParams) { 
                         if(cell.getData().registration_no != '' && cell.getData().student_id > 0){
-                            return '<a href="'+route('student.accounts', cell.getData().student_id)+'" class="text-primary font-medium">'+cell.getData().registration_no+'</a>';
+                            return '<a target="_blank" href="'+route('student.accounts', cell.getData().student_id)+'" class="text-primary font-medium">'+cell.getData().registration_no+'</a>';
                         }else{
                             return cell.getData().registration_no;
                         }
