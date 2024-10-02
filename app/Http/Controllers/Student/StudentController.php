@@ -2135,7 +2135,6 @@ class StudentController extends Controller
     public function verifyEmail(Request $request){
         $student_user_id = $request->student_user_id;
         $temp_email = $request->email;
-        $temp_mobile = $request->mobile;
 
 
         $student = StudentUser::find($student_user_id);
@@ -2143,6 +2142,24 @@ class StudentController extends Controller
             $student->temp_email = $temp_email;
             $student->temp_email_verify_code = $student_user_id.Rand('1000','9999');
         }
+
+        $changes = $student->getDirty();
+        $student->save();
+        if($student->wasChanged() && !empty($changes)):
+            if(isset($temp_mobile) && $temp_mobile!="") {
+                return response()->json(['message' => 'A message is sent to your new phone'], 200);
+            }else 
+                return response()->json(['message' => 'A email send to your new mail. please checkk to verify'], 200);
+        else:
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+        endif;
+    }
+
+    public function verifyMobile(Request $request){
+        $student_user_id = $request->student_user_id;
+        $temp_mobile = $request->mobile;
+        $student = StudentUser::find($student_user_id);
+        
         if(isset($temp_mobile) && $temp_mobile!="") {
             
             $student->temp_mobile = $temp_mobile;
@@ -2204,10 +2221,11 @@ class StudentController extends Controller
                 $studentUserFound->temp_email = NULL;
                 $studentUserFound->save();
                 if(isset(auth()->user()->id))
-                    return redirect()->route('staff.dashboard')->with('verifySuccessMessage', 'Personal Email Information Updated');
+                    return redirect()->route('staff.dashboard')->with('verifySuccessMessage', 'Student Personal Email Information Updated');
+                elseif(isset(auth('student')->user()->id))
+                    return redirect()->route('students.dashboard')->with('verifySuccessMessage', 'Your Personal Email Information Updated');
                 else
-                    return redirect()->route('students.login')->with('verifySuccessMessage', 'Personal Email Information Updated');
-                
+                    return redirect()->route('students.login')->with('verifySuccessMessage', 'Your Personal Email Information Updated');
             else:
                 return route('/');
             endif;

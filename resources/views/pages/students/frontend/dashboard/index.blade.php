@@ -132,19 +132,19 @@
         
     </div>
     @if (session('verifySuccessMessage'))
-    <!-- BEGIN: Notification Content -->
-    <div id="success-notification-content" class="toastify-content hidden flex">
-        <i class="text-success" data-lucide="check-circle"></i>
-        <div class="ml-4 mr-4">
-            <div class="font-medium">Success !</div>
-            <div class="text-slate-500 mt-1">{{ session('verifySuccessMessage') }}</div>
+        <!-- BEGIN: Notification Content -->
+        <div id="success-notification-content" class="toastify-content hidden flex">
+            <i class="text-success" data-lucide="check-circle"></i>
+            <div class="ml-4 mr-4">
+                <div class="font-medium">Success !</div>
+                <div class="text-slate-500 mt-1">{{ session('verifySuccessMessage') }}</div>
+            </div>
         </div>
-    </div>
-    <!-- END: Notification Content -->
-    <!-- BEGIN: Notification Toggle -->
-    <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
-    <!-- END: Notification Toggle -->
-@endif
+        <!-- END: Notification Content -->
+        <!-- BEGIN: Notification Toggle -->
+        <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+        <!-- END: Notification Toggle -->
+    @endif
 
 @endsection
 

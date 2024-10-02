@@ -23,7 +23,7 @@ class StudentUserObserver  implements ShouldHandleEventsAfterCommit
      */
     public function updated(StudentUser $studentUser): void
     {
-        if($studentUser->temp_email!="" && !is_null($studentUser->temp_email)) {
+        if($studentUser->wasChanged('temp_email') && !is_null($studentUser->temp_email)) {
 
            
             $student = Student::where('student_user_id',$studentUser->id)->get()->first();
