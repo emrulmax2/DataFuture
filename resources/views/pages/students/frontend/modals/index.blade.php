@@ -205,39 +205,53 @@
     <!-- END: Success Modal Content -->
 
 
+    <!-- BEGIN: Success Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="alert-octagon" class="w-16 h-16 text-orange-400 mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 successModalTitle"></div>
+                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
 
 <!-- BEGIN: Delete Confirm Modal Content -->
-<div id="confirmPersonalMobileUpdateModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="confirmPersonalMobileUpdateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content w-full">
             <div class="modal-body p-0">
+                <a class="absolute right-0 top-0 mr-3 mt-3" data-tw-dismiss="modal" href="javascript::void()">
+                    <i data-tw-merge data-lucide="x" class="stroke-1.5 w-8 h-8  text-slate-400 "></i>
+                </a>
                 <div class="p-5 text-center">
                     <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">UPDATE PHONE</div>
-                    @if(!is_null($student->users->temp_mobile))
-                        <div class="text-slate-500 mt-2 mb-2 confModDesc">A code sent to {{ $student->users->temp_mobile }}. Please put the code here</div>
-                    @else
-                        <div class="text-slate-500 mt-2 mb-2 confModDesc">A code will send to you update mobile</div>
-                    @endif
+                    
+                    <div class="text-slate-500 mt-2 mb-2 confModDesc">To update your mobile number, please enter the new number below. We will send an OTP to that number. Once you enter the OTP code, your mobile number will be updated.</div>
+                   
                     <div  id="modal-mobileverified" class="mt-5">
-                        @if(is_null($student->users->temp_mobile))
                             <form method="POST" action="#" id="confirmModalForm2" class="flex-none" enctype="multipart/form-data">
                                 <input class="id" type="hidden" name="id" value="">
-                                <input type="hidden" name="url" value="{{ route('students.update.email') }}" />
+                                <input type="hidden" name="url" value="{{ route('students.verify.mobile') }}" />
                                 <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
                                 <div class="flex py-2 items-center">
                                     <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
-                                    <input id="horizontal-form-2" name="mobile" type="text" class=" form-control w-60 mr-1 flex-auto" placeholder="712324555">
+                                    <input id="horizontal-form-2" name="mobile" type="text" class=" form-control w-60 mr-1 flex-auto" placeholder="079XXXXXXXX">
                                     <button id="resend-mobile" type="submit" data-id="0" data-action="none" class="save btn btn-primary  w-auto ml-auto flex-auto">
-                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND CODE
+                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND OTP
                                         <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
                                     </button>
                                 </div>
                             </form>
-                        @else
-                            <form method="POST" action="#" id="confirmModalForm3" enctype="multipart/form-data">
+                            <form method="POST" action="#" id="confirmModalForm3" enctype="multipart/form-data" class="hidden">
                                 <div class="flex py-2 items-center">
-                                    <label for="horizontal-form-3" class="form-label w-20 text-left flex-none"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning inline-flex"></i> Code </label>
+                                    <label for="horizontal-form-3" class="form-label w-20 text-left flex-none"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning inline-flex"></i> OTP </label>
                                     <input type="hidden" name="url" value="{{ route('students.update.mobile') }}" />
                                     <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
                                     <input id="horizontal-form-3" name="code" type="text" class="form-control w-60 mr-1 flex-auto" placeholder="XXXX">
@@ -249,11 +263,7 @@
                                     <div class="acc__input-error error-verify_code text-danger mt-2 w-full text-right"></div>
                                 </div>
                             </form>
-                        @endif
                     </div>
-                </div>
-                <div class="px-5 pb-8 text-center">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
                 </div>
             </div>
         </div>
@@ -266,14 +276,17 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content w-full">
             <div class="modal-body p-0">
+                <a class="absolute right-0 top-0 mr-3 mt-3" data-tw-dismiss="modal" href="javascript::void()">
+                    <i data-tw-merge data-lucide="x" class="stroke-1.5 w-8 h-8  text-slate-400 "></i>
+                </a>
                 <div class="p-5 text-center">
                     <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Update Email</div>
-                    <div class="text-slate-500 mt-2 mb-2 confModDesc">Please update your personal email this will need a verification</div>
+                    <div class="text-slate-500 mt-2 mb-2 confModDesc">If you’d like to change your personal email, please enter the new email address below. Keep in mind that we will send you a verification link, which you need to click to complete the update.</div>
                     <div id="modal-emailverified" class="form-inline">
                         <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data">
                         <input class="id" type="hidden" name="id" value="">
-                        <input type="hidden" name="url" value="{{ route('students.update.email') }}" />
+                        <input type="hidden" name="url" value="{{ route('students.verify.email') }}" />
                         <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
                         <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
                         
@@ -288,9 +301,6 @@
                         <div class="acc__input-error error-email text-danger mt-2 w-full text-right"></div>
                         </form>
                     </div>
-                </div>
-                <div class="px-5 pb-8 text-center">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
                 </div>
             </div>
         </div>

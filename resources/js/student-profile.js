@@ -776,20 +776,23 @@ import TomSelect from "tom-select";
     if($('.save').length>0) {
         const confirmPersonalEmailUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalEmailUpdateModal"));
         const confirmPersonalMobileUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalMobileUpdateModal"));
-            $('.save').on('click', function(e){
+        const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+            $('.save').on('click', function(e) {
                 e.preventDefault();
-
+    
                 let tthis = $(this);
                 let parentForm = tthis.parents('form');
                 let formID = parentForm.attr('id');
                 const form = document.getElementById(formID);
                 let rurl = $("#"+formID+" input[name=url]").val();
                 let mobile = $("#"+formID+" input[name=mobile]").val();
+                let email = $("#"+formID+" input[name=email]").val();
                 let code = $("#"+formID+" input[name=code]").val();
                 
                 tthis.attr('disabled', 'disabled');
                 $(".loadingClass",tthis).removeClass('hidden');
-
+    
                 let form_data = new FormData(form);
                 axios({
                     method: "post",
@@ -797,54 +800,93 @@ import TomSelect from "tom-select";
                     data: form_data,
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
-
+    
                     tthis.removeAttr('disabled');
                     $(".loadingClass",tthis).addClass('hidden');
-
+    
                     if (response.status == 200) {
-
+    
                         tthis.removeAttr('disabled');
                         
                         $(".loadingClass",tthis).addClass('hidden');
-
-                        successModal.show();
+    
                         
-                        if(code=="") {
-                            confirmPersonalEmailUpdateModal.hide();
-                            
-                        } else {
+                        if(rurl== route('student.verify.email')) {
+
                             confirmPersonalEmailUpdateModal.hide();
                             confirmPersonalMobileUpdateModal.hide();
+                            warningModal.show();
+                            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                                $("#warningModal .successModalTitle").html("Attention!");
+                                $("#warningModal .successModalDesc").html('We’ve sent a verification link to the student’s new email. Please ask them to check their inbox and click the verify button. Without this verification, we can’t update their email.');
+                            });
+                            setTimeout(function(){
+                                warningModal.hide();
+                            }, 30000); 
+    
+                        }
+                        if(rurl==route('student.verify.mobile')) {
+
+                                confirmPersonalEmailUpdateModal.hide();
+                                successModal.show();
+                                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                                    $("#successModal .successModalTitle").html("Success!");
+                                    $("#successModal .successModalDesc").html('OTP SEND');
+                                });
+                                setTimeout(function(){
+                                    successModal.hide();
+                                }, 1200); 
+                                $('#confirmModalForm2').addClass('hidden');
+                                $('#confirmModalForm3').removeClass('hidden');
                             
                         }
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html("Success!");
-                            $("#successModal .successModalDesc").html('Data Send');
-                        });
+    
+                        if(rurl==route('student.update.mobile')) {
+    
+                            successModal.show();
+                            document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                                $("#successModal .successModalTitle").html("Success!");
+                                $("#successModal .successModalDesc").html('Mobile number updated successfully');
+                            });
+                            setTimeout(function(){
+                                successModal.hide();
+                                location.reload();
+                            }, 4500); 
+
+                        }
                         
                         
-                        
-                        setTimeout(function(){
-                            successModal.hide();
-                        }, 1200); 
-                        location.reload();
                     }
                 }).catch(error => {
                     
                     tthis.removeAttr('disabled');
                     $("svg",tthis).css("display", "none");
-
+    
                     if (error.response) {
                         if (error.response.status == 422) {
                             for (const [key, val] of Object.entries(error.response.data.errors)) {
                                 $(`#${formID} .${key}`).addClass('border-danger')
                                 $(`#${formID}  .error-${key}`).html(val)
                             }
+                        }if(error.response.status == 304){
+                            warningModal.show();
+                            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                                $("#warningModal .successModalTitle").html("Alert!");
+                                $("#warningModal .successModalDesc").html('No mobile changes found to be updated.');
+                            });
+                            setTimeout(function(){
+                                warningModal.hide();
+                                location.reload();
+                            }, 6000); 
+    
                         } else {
                             console.log('error');
                         }
                     }
                 });
             });
+            if($('#success-notification-toggle').length>0) {
+                $("#success-notification-toggle").trigger('click');
+            }
     }
 })();

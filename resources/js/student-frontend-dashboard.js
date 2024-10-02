@@ -141,6 +141,7 @@ if($('.save').length>0) {
     const confirmPersonalEmailUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalEmailUpdateModal"));
     const confirmPersonalMobileUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmPersonalMobileUpdateModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
         $('.save').on('click', function(e){
             e.preventDefault();
 
@@ -150,6 +151,7 @@ if($('.save').length>0) {
             const form = document.getElementById(formID);
             let rurl = $("#"+formID+" input[name=url]").val();
             let mobile = $("#"+formID+" input[name=mobile]").val();
+            let email = $("#"+formID+" input[name=email]").val();
             let code = $("#"+formID+" input[name=code]").val();
             
             tthis.attr('disabled', 'disabled');
@@ -172,27 +174,49 @@ if($('.save').length>0) {
                     
                     $(".loadingClass",tthis).addClass('hidden');
 
-                    successModal.show();
                     
-                    if(code=="") {
-                        confirmPersonalEmailUpdateModal.hide();
-                        
-                    } else {
+                    if(rurl== route('students.verify.email')) {
                         confirmPersonalEmailUpdateModal.hide();
                         confirmPersonalMobileUpdateModal.hide();
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .successModalTitle").html("Attention!");
+                            $("#warningModal .successModalDesc").html('We’ve sent a verification link to your email. Please check your inbox and click the verify button. Without this verification, we can’t update your email.');
+                        });
+                        setTimeout(function(){
+                            warningModal.hide();
+                        }, 30000); 
+
+                    }
+                    if(rurl==route('students.verify.mobile')) {
+                            confirmPersonalEmailUpdateModal.hide();
+                            successModal.show();
+                            document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                                $("#successModal .successModalTitle").html("Success!");
+                                $("#successModal .successModalDesc").html('OTP SEND');
+                            });
+                            setTimeout(function(){
+                                successModal.hide();
+                            }, 1200); 
+                            $('#confirmModalForm2').addClass('hidden');
+                            $('#confirmModalForm3').removeClass('hidden');
                         
                     }
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Data Send');
-                    });
+
+                    if(rurl==route('students.update.mobile')) {
+
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html("Success!");
+                            $("#successModal .successModalDesc").html('Mobile number updated successfully');
+                        });
+                        setTimeout(function(){
+                            successModal.hide();
+                            location.reload();
+                        }, 4500); 
+                    }
                     
                     
-                    
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 1200); 
-                    location.reload();
                 }
             }).catch(error => {
                 
@@ -205,6 +229,17 @@ if($('.save').length>0) {
                             $(`#${formID} .${key}`).addClass('border-danger')
                             $(`#${formID}  .error-${key}`).html(val)
                         }
+                    }if(error.response.status == 304){
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .successModalTitle").html("Alert!");
+                            $("#warningModal .successModalDesc").html('No mobile changes found to be updated.');
+                        });
+                        setTimeout(function(){
+                            warningModal.hide();
+                            location.reload();
+                        }, 6000); 
+
                     } else {
                         console.log('error');
                     }

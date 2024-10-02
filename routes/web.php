@@ -502,9 +502,11 @@ Route::prefix('/students')->name('students.')->group(function() {
 
         });
         Route::controller(StudentController::class)->group(function() {
+
+            Route::post('email/verifyupdate','verifyEmail')->name('verify.email');
+            Route::post('mobile/verify','verifyMobile')->name('verify.mobile');
+            Route::post('mobile/verifed','verifiedMobile')->name('update.mobile');
             
-            Route::post('student/email/verifyupdate','verifyEmail')->name('update.email');
-            Route::post('student/mobile/verifed','verifiedMobile')->name('update.mobile');
         });
 
         Route::controller(StudentOtherPersonalInformationController::class)->group(function() {
@@ -813,7 +815,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
 
-        Route::post('student/email/verifyupdate','verifyEmail')->name('student.update.email');
+        Route::post('student/email/verifyupdate','verifyEmail')->name('student.verify.email');
+        Route::post('student/mobile/verify','verifyMobile')->name('student.verify.mobile');
         Route::post('student/mobile/verifed','verifiedMobile')->name('student.update.mobile');
         
 

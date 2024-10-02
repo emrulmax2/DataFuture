@@ -470,7 +470,7 @@ class ProcessController extends Controller
                         $HTML .= '<option value="">Please Select</option>';
                         $HTML .= '<option '.($excuse->attendance_types == 'E' ? 'Selected' : '').' value="E">E (Authorised Absent)</option>';
                         $HTML .= '<option '.($excuse->attendance_types == 'M' ? 'Selected' : '').' value="M">M (Absent For Medical Reason)</option>';
-                        $HTML .= '<option '.($excuse->attendance_types == 'M' ? 'Selected' : '').' value="H">H (Exceptional Event)</option>';
+                        $HTML .= '<option '.($excuse->attendance_types == 'H' ? 'Selected' : '').' value="H">H (Exceptional Event)</option>';
                     $HTML .= '</select>';
                     $HTML .= '<div class="acc__input-error error-attendance_types text-danger mt-2"></div>';
                 $HTML .= '</div>';
@@ -516,7 +516,7 @@ class ProcessController extends Controller
         $excuseData['actioned_at'] = date('Y-m-d H:i:s');
         AttendanceExcuse::where('id', $attendance_excuse_id)->where('student_task_id', $student_task_id)->update($excuseData);
 
-        if(!empty($days) && count($days) > 0):
+        if(!empty($days) && count($days) > 0 && $status == 2):
             AttendanceExcuseDay::whereIn('id', $days)->update(['active' => 1]);
 
             $attendanceStatus = AttendanceFeedStatus::where('code', $attendance_types)->get()->first();
@@ -529,8 +529,23 @@ class ProcessController extends Controller
                 endif;
             endforeach;
         endif;
-        if(!empty($deActiveDays) && count($deActiveDays) > 0):
+        if(!empty($deActiveDays) && count($deActiveDays) > 0 && $status == 2):
+            foreach($deActiveDays as $exc_day):
+                $excDay = AttendanceExcuseDay::find($exc_day);
+                Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
+                        ->where('student_id', $student_id)->update(['attendance_feed_status_id' => 4]);
+            endforeach;
             AttendanceExcuseDay::whereIn('id', $deActiveDays)->update(['active' => 0]);
+        endif;
+        if($status == 1):
+            if(!empty($oldDays) && count($oldDays) > 0):
+                foreach($oldDays as $exc_day):
+                    $excDay = AttendanceExcuseDay::find($exc_day);
+                    Attendance::where('plans_date_list_id', $excDay->plans_date_list_id)->where('plan_id', $excDay->plan_id)
+                            ->where('student_id', $student_id)->update(['attendance_feed_status_id' => 4]);
+                endforeach;
+            endif;
+            AttendanceExcuseDay::whereIn('id', $oldDays)->update(['active' => 0]);
         endif;
 
         StudentTask::where('id', $student_task_id)->where('student_id', $student_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);

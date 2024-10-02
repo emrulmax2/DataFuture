@@ -202,7 +202,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="status_change_reason" class="form-label">Change Reason</label>
-                            <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3">{{ (isset($student->termStatus->status_change_reason) && !empty($student->termStatus->status_change_reason) ? $student->termStatus->status_change_reason : '') }}</textarea>
+                            <textarea name="status_change_reason" id="status_change_reason" class="form-control w-full" rows="3"></textarea>
                         </div>
                         <div class="mt-3">
                             <label for="status_change_date" class="form-label">Change Date <span class="text-danger">*</span></label>

@@ -342,8 +342,7 @@
 						
                             <h6>Dear {{ $name }}</h6>
             				<p>
-                                We got a request to change your personal email address <strong>{{ $oldEmail }}</strong> to <strong>{{ $newEmail }}</strong>.
-            				    To change and activate your new personal email address please click on the verify button.
+								We received a request to update your personal email address from <strong>{{ $oldEmail }}</strong> to <strong>{{ $newEmail }}</strong>. To confirm and activate your new email address, please click the verify button.
 							</p>
             				<p style="text-align: center;"><a href="{{ $url }}" class="btn btn-primary">Click Here to Verify</a></p>
             			
