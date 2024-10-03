@@ -90,16 +90,20 @@
             </a>
         </li>
         @if($plan->class_type != 'Tutorial' && $plan->class_type != 'Seminar')
-        <li id="assessment-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
-                <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
-            </a>
-        </li>
-        <li id="analytics-tab" class="nav-item mr-5" role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#analytics" aria-controls="analytics" aria-selected="true" role="tab" >
-                <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
-            </a>
-        </li>
+            @if(isset(auth()->user()->priv()['assessment']) && auth()->user()->priv()['assessment'] == 1)
+                <li id="assessment-tab" class="nav-item mr-5" role="presentation">
+                    <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#assessment" aria-controls="assessment" aria-selected="true" role="tab" >
+                        <i data-lucide="utility-pole" class="w-4 h-4 mr-2"></i> Assessment
+                    </a>
+                </li>
+            @endif
+            @if(isset(auth()->user()->priv()['analytics']) && auth()->user()->priv()['analytics'] == 1)
+                <li id="analytics-tab" class="nav-item mr-5" role="presentation">
+                    <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#analytics" aria-controls="analytics" aria-selected="true" role="tab" >
+                        <i data-lucide="scatter-chart" class="w-4 h-4 mr-2"></i> Analytics
+                    </a>
+                </li>
+            @endif
         @endif
     </ul>
 </div>
@@ -143,9 +147,7 @@
     </div>
     <div id="analytics" class="tab-pane " role="tabpanel"  aria-labelledby="analytics-tab">
         <!-- BEGIN: HTML Table Data -->
-        <div class="intro-y box p-5 mt-5">
-            <h2>Upcoming....</h2>
-        </div>
+        @include('pages.tutor.module.includes.analytics')
         <!-- END: HTML Table Data -->
     </div>
     @endif
@@ -155,4 +157,5 @@
 
 @section('script')
     @vite('resources/js/plan-tasks.js')
+    @vite('resources/js/plan-tasks-analytics.js')
 @endsection

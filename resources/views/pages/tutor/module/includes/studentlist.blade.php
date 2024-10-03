@@ -17,6 +17,7 @@
     <div class="flex justify-end mt-5 sm:mt-0" id="actionButtonWrap" style="display: none;">
         <button type="button" class="sendBulkSmsBtn btn btn-pending shadow-md text-white"><i data-lucide="smartphone" class="w-4 h-4 mr-2"></i>Send SMS</button>
         <button type="button" class="sendBulkMailBtn btn btn-success shadow-md text-white ml-1"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>
+        @if(isset(auth()->user()->priv()['participant_export']) && auth()->user()->priv()['participant_export'] == 1)
         <button data-filename="{{ (isset($data->module) && !empty($data->module) ? str_replace(' ', '_', $data->module).'_student_lists.xlsx' : 'student_lists.xlsx') }}" data-planid="{{ $plan->id }}" id="exportStudentList" type="button" class="btn btn-primary shadow-md w-auto ml-1"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export
             <svg class="loaders" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                 stroke="white" class="w-4 h-4 ml-2">
@@ -31,6 +32,7 @@
                 </g>
             </svg>
         </button>
+        @endif
     </div>
 </div>
             

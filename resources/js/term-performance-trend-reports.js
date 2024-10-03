@@ -36,20 +36,20 @@ import colors from "./colors";
                     theSet.tension = 0.1;
 
                     var singleData = [];
-                    var total = 0;
-                    var count = 0;
+                    var attendances = 0;
+                    var attendance_count = 0;
                     $theTable.find('tbody .serial_'+sl).each(function(){
                         var $theDataCol = $(this);
                         singleData.push($theDataCol.attr('data-rate'));
 
-                        total += ($theDataCol.attr('data-rate') * 1);
-                        count += 1;
+                        attendances += ($theDataCol.attr('data-attendance') * 1);
+                        attendance_count += ($theDataCol.attr('data-count') * 1);
                     })
                     theSet.data = singleData;
                     datasets.push(theSet);
 
                     var avgSet = {};
-                    var average = total / count;
+                    var average = (attendances > 0 && attendance_count > 0 ? attendances * 100 / attendance_count : 0);
                     var averageData = [];
                     for(var i = 0; i <= labels.length; i++){
                         averageData.push(average.toFixed(2));
@@ -97,6 +97,11 @@ import colors from "./colors";
                             display: false,
                         },
                     },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        }
+                    }
                 }
             });
         });
@@ -128,20 +133,20 @@ import colors from "./colors";
                     theSet.tension = 0.1;
 
                     var singleData = [];
-                    var total = 0;
-                    var count = 0;
+                    var attendances = 0;
+                    var attendance_count = 0;
                     $theTable.find('tbody .serial_'+sl).each(function(){
                         var $theDataCol = $(this);
                         singleData.push($theDataCol.attr('data-rate'));
 
-                        total += ($theDataCol.attr('data-rate') * 1);
-                        count += 1;
+                        attendances += ($theDataCol.attr('data-attendance') * 1);
+                        attendance_count += ($theDataCol.attr('data-count') * 1);
                     })
                     theSet.data = singleData;
                     datasets.push(theSet);
 
                     var avgSet = {};
-                    var average = total / count;
+                    var average = (attendances > 0 && attendance_count > 0 ? attendances * 100 / attendance_count : 0);
                     var averageData = [];
                     for(var i = 0; i <= labels.length; i++){
                         averageData.push(average.toFixed(2));

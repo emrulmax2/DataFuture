@@ -278,6 +278,44 @@
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
+                    <div class="font-medium text-base">Module Content Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-start">
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (!isset($priv['module_contents']['participants']) || (isset($priv['module_contents']['participants']) && $priv['module_contents']['participants'] == 1) ? 'checked' : '') }} id="permission_module_contents_1" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[module_contents][participants]">
+                            <label class="form-check-label ml-4" for="permission_module_contents_1">Participants</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['module_contents']['participant_export']) && $priv['module_contents']['participant_export'] == 1 ? 'checked' : '') }} id="permission_participant_export_1" class="form-check-input" type="checkbox" value="1" name="permission[module_contents][participant_export]">
+                                <label class="form-check-label ml-4" for="permission_participant_export_1">Application Analysis</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['module_contents']['assessment']) && $priv['module_contents']['assessment'] == 1 ? 'checked' : '') }} id="permission_module_contents_2" class="form-check-input" type="checkbox" value="1" name="permission[module_contents][assessment]">
+                            <label class="form-check-label ml-4" for="permission_module_contents_2">Assessment</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['module_contents']['analytics']) && $priv['module_contents']['analytics'] == 1 ? 'checked' : '') }} id="permission_module_contents_3" class="form-check-input" type="checkbox" value="1" name="permission[module_contents][analytics]">
+                            <label class="form-check-label ml-4" for="permission_module_contents_3">Analytics</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
                     <div class="font-medium text-base">Internal Links Privileges</div>
                 </div>
                 <div class="col-span-6 text-right relative">
