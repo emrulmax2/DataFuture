@@ -54,11 +54,11 @@
                         @foreach($result as $week => $res)
                             <tr>
                                 <th class="labels whitespace-nowrap" data-labels="W/S {{ date('d-m-Y', strtotime($res['start'])) }}">W/S {{ date('d-m-Y', strtotime($res['start'])) }}</th>
-                                <th class="rowRates serial_0" data-rate="{{ $res['overall'] > 0 ? number_format($res['overall'], 2) : '0.00'}}">
+                                <th class="rowRates serial_0" data-count="{{ $res['overall_count'] > 0 ? $res['overall_count'] : 0 }}" data-attendance="{{ $res['overall_attendance'] > 0 ? $res['overall_attendance'] : 0 }}" data-rate="{{ $res['overall'] > 0 ? number_format($res['overall'], 2) : '0.00'}}">
                                     {{ $res['overall'] > 0 ? number_format($res['overall'], 2).'%' : '0.00%'}}
                                 </th>
                                 @foreach($res['rows'] as $mod => $row)
-                                    <th class="rowRates serial_{{ $mod }}" data-rate="{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2) : '0.00') }}">{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
+                                    <th class="rowRates serial_{{ $mod }}" data-count="{{ $row->TOTAL > 0 ? $row->TOTAL : 0 }}" data-attendance="{{ $row->TOTALATTENDANCE > 0 ? $row->TOTALATTENDANCE : 0 }}" data-rate="{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2) : '0.00') }}">{{ ($row->percentage_withexcuse > 0 ? number_format(round($row->percentage_withexcuse, 2), 2).'%' : '0.00%') }}</th>
                                 @endforeach
                             </tr>
                         @endforeach
