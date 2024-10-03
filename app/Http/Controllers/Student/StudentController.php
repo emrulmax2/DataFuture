@@ -2283,6 +2283,7 @@ class StudentController extends Controller
             endif;
         }
     }
+    
     public function getCoursesByIntakeOrTerm(Request $request){
         $intakeSemester = (isset($request->intakeSemester) && !empty($request->intakeSemester) ? $request->intakeSemester : []);
         $attenSemesters = (isset($request->attenSemesters) && !empty($request->attenSemesters) ? $request->attenSemesters : []);

@@ -220,6 +220,7 @@ use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportControlle
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
+use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermPerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
@@ -2857,4 +2858,14 @@ Route::middleware('auth')->group(function() {
         Route::any('reports/term-performance/group/{terms}/{course}/{group}', 'groupView')->name('reports.term.performance.group.view'); 
         Route::any('reports/term-performance/group/trend/{terms}/{course}/{group}', 'groupTrendView')->name('reports.term.performance.group.trend.view'); 
     });
+
+    Route::controller(SlcDataReportController::class)->group(function(){
+
+        Route::get('reports/slc-report', 'index')->name('reports.slc.index'); 
+        Route::any('reports/slc-attendance/excel-export', 'SLCAttendanceExcelDownload')->name('reports.slc.attendance.excel.export'); 
+        Route::any('reports/slc-register/excel-export', 'SlcRegistrationHistoryExcelDownload')->name('reports.slc.register.excel.export'); 
+        Route::any('reports/slc-coc/excel-export', 'SlcCocHistoryExcelDownload')->name('reports.slc.coc.excel.export'); 
+        
+    });
+    
 });
