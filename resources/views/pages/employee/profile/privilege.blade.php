@@ -294,7 +294,7 @@
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
                                 <input {{ (isset($priv['module_contents']['participant_export']) && $priv['module_contents']['participant_export'] == 1 ? 'checked' : '') }} id="permission_participant_export_1" class="form-check-input" type="checkbox" value="1" name="permission[module_contents][participant_export]">
-                                <label class="form-check-label ml-4" for="permission_participant_export_1">Application Analysis</label>
+                                <label class="form-check-label ml-4" for="permission_participant_export_1">Export</label>
                             </div>
                         </div>
                     </div>

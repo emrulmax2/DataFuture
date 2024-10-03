@@ -581,7 +581,7 @@ class DashboardController extends Controller
             
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
-            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+            'smtps' => ComonSmtp::where('is_default', 1)->get()->first(),
 
             'attendanceStatus' => AttendanceFeedStatus::orderBy('id', 'ASC')->get(),
             'attendance_rate' => $this->getModuleAttendanceRate($plan->id),

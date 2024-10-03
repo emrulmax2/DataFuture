@@ -17,16 +17,18 @@ class UserMailerJob implements ShouldQueue
     public $configuration;
     public $to;
     public $mailable;
+    public $bcc;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $configuration, array $to, Mailable $mailable)
+    public function __construct(array $configuration, array $to, Mailable $mailable, array $bcc = [])
     {
         $this->configuration = $configuration;
         $this->to = $to;
         $this->mailable = $mailable;
+        $this->bcc = (!empty($bcc) ? $bcc : []);
     }
 
     /**
@@ -37,6 +39,6 @@ class UserMailerJob implements ShouldQueue
     public function handle()
     {
         $mailer = app()->makeWith('user.mailer', $this->configuration);
-        $mailer->to($this->to)->send($this->mailable);
+        $mailer->to($this->to)->bcc($this->bcc)->send($this->mailable);
     }
 }

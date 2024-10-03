@@ -11,6 +11,7 @@ use App\Mail\CommunicationSendMail;
 use App\Models\Assign;
 use App\Models\ComonSmtp;
 use App\Models\EmailTemplate;
+use App\Models\Employee;
 use App\Models\LetterSet;
 use App\Models\Option;
 use App\Models\Signatory;
@@ -365,6 +366,152 @@ class BulkCommunicationController extends Controller
             'mail_pdf_file' => $fileName
         ]);
         return $studentEmail;
+    }
+
+    public function sendGroupEmail(SendBulkEmailRequest $request){
+        $user = User::with('employee')->find(auth()->user()->id);
+        $userEmail = $user->email;;
+        $userName = (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name);
+        $student_ids = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', $request->student_ids) : []);
+
+        $comon_smtp_id = (isset($request->comon_smtp_id) && $request->comon_smtp_id > 0 ? $request->comon_smtp_id : 4);
+        $subject = $request->subject;
+        $body = $request->body;
+
+        $commonSmtp = ComonSmtp::find($comon_smtp_id);
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $userEmail,
+            'from_name'    =>  $userName,
+        ];
+        
+        if(!empty($student_ids)):
+            $fileName = $this->generateGroupEmailPdf($subject, $request->body);
+
+            $docCounter = 1;
+            $attachmentInfo = [];
+            $attachments = [];
+            if($request->hasFile('documents')):
+                $documents = $request->file('documents');
+                foreach($documents as $document):
+                    $documentName = time().'_'.$document->getClientOriginalName();
+                    $path = $document->storeAs('public/bulk_communications/emails/attachments', $documentName, 's3');
+
+                    $attachments[$docCounter]['name'] = $documentName;
+                    $attachments[$docCounter]['doc_type'] = $document->getClientOriginalExtension();
+                    $attachmentInfo[$docCounter++] = [
+                        "pathinfo" => $path,
+                        "nameinfo" => $document->getClientOriginalName(),
+                        "mimeinfo" => $document->getMimeType(),
+                        'disk'     => 's3'      
+                    ];
+                    $docCounter++;
+                endforeach;
+            endif;
+            
+
+            $sendMailCount = 0;
+            $bcc = [];
+            foreach($student_ids as $student_id):
+                $student = Student::find($student_id);
+                if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+                    $bcc[] = $student->contact->institutional_email;
+                endif;
+                if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+                    $bcc[] = $student->contact->personal_email;
+                endif;
+
+                $studentEmail = StudentEmail::create([
+                    'student_id' => $student_id,
+                    'common_smtp_id' => $comon_smtp_id,
+                    'email_template_id' => null,
+                    'is_bulk' => 1,
+                    'mail_pdf_file' => $fileName,
+                    'subject' => $subject,
+                    'created_by' => auth()->user()->id,
+                ]);
+                if($studentEmail && !empty($attachments) && count($attachments) > 0):
+                    foreach($attachments as $attachment):
+                        $data = [];
+                        $data['student_id'] = $student_id;
+                        $data['student_email_id'] = $studentEmail->id;
+                        $data['is_bulk'] = 1;
+                        $data['hard_copy_check'] = 0;
+                        $data['doc_type'] = $attachment['doc_type'];
+                        $data['path'] = null;
+                        $data['display_file_name'] = $attachment['name'];
+                        $data['current_file_name'] = $attachment['name'];
+                        $data['created_by'] = auth()->user()->id;
+                        $studentEmailDocument = StudentEmailsDocument::create($data);
+                    endforeach;
+                endif;
+            endforeach;
+
+            UserMailerJob::dispatch($configuration, [$userEmail], new CommunicationSendMail($subject, $body, $attachmentInfo), $bcc);
+
+            /*$testTo = 'themewar@gmail.com';
+            $testbcc = ['limon@churchill.ac', 'limon@lcc.ac.uk'];
+            UserMailerJob::dispatch($configuration, [$testTo], new CommunicationSendMail($subject, $body, $attachmentInfo), $testbcc);*/
+
+            return response()->json(['message' => 'Email successfully sent to selected students.'], 200);
+        else:
+            return response()->json(['message' => 'Student ids can not be empty. Please select some student first.'], 412);
+        endif;
+    }
+
+    public function generateGroupEmailPdf($subject, $body){
+        $user = User::where('id', auth()->user()->id)->get()->first();
+
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>'.$subject.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
+                                table{margin-left: 0px; width: 100%;}
+                                figure{margin: 0;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
+                                .vtop{vertical-align: top;}
+                                .mailContentTable tr th, .mailContentTable tr td{ padding: 0 0 10px 0; vertical-align: top;}
+                            </style>';
+            $PDFHTML .= '</head>';
+            $PDFHTML .= '<body>';
+                $PDFHTML .= '<table class="mailContentTable">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued Date</th>';
+                            $PDFHTML .= '<td>'.date('d-m-Y').'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued BY</th>';
+                            $PDFHTML .= '<td>'.(isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name).'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Email Body</th>';
+                            $PDFHTML .= '<td>'.$body.'</td>';
+                        $PDFHTML .= '</tr>';
+                $PDFHTML .= '</table>';
+                
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = time().'_'.$user->id.'_bulk_communication.pdf';
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'portrait')
+            ->setWarnings(false);
+        $content = $pdf->output();
+        Storage::disk('s3')->put('public/bulk_communications/emails/'.$fileName, $content );
+
+        return $fileName;
     }
     /* Bulk Email Start */
 

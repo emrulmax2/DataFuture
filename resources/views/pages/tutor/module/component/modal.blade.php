@@ -174,7 +174,7 @@
                     </a>
                 </div>
                 <div class="modal-body">
-                    <div>
+                    {{--<div>
                         <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
                         <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
                             <option value="">Please Select</option>
@@ -185,13 +185,13 @@
                             @endif
                         </select>
                         <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                    </div>
-                    <div class="mt-3">
+                    </div>--}}
+                    <div class="mb-4">
                         <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
                         <input id="subject" type="text" name="subject" class="form-control w-full">
                         <div class="acc__input-error error-subject text-danger mt-2"></div>
                     </div>
-                    <div class="mt-3 mb-4">
+                    <!--<div class="mt-3 mb-4">
                         <label for="email_template_id" class="form-label">Template</label>
                         <select id="email_template_id" name="email_template_id" class="w-full tom-selects">
                             <option value="">Please Select</option>
@@ -201,7 +201,7 @@
                                 @endforeach
                             @endif
                         </select>
-                    </div>
+                    </div> -->
                     <div>
                         <div class="editor document-editor">
                             <div class="document-editor__toolbar"></div>
@@ -237,6 +237,7 @@
                         </svg>
                     </button>
                     <input type="hidden" name="student_ids" value=""/>
+                    <input type="hidden" name="comon_smtp_id" value="{{ $smtps->id }}"/>
                 </div>
             </div>
         </form>
