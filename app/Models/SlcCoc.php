@@ -22,7 +22,6 @@ class SlcCoc extends Model
         'coc_type',
         'reason',
         'actioned',
-        
         'created_by',
         'updated_by',
     ];
@@ -34,6 +33,15 @@ class SlcCoc extends Model
      */
     protected $dates = ['deleted_at'];
 
+
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function crel(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+    
     public function setConfirmationDateAttribute($value) {  
         $this->attributes['confirmation_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }

@@ -17,6 +17,7 @@ class StudentEmail extends Model
         'student_id',
         'common_smtp_id',
         'email_template_id',
+        'is_bulk',
         'subject',
         'mail_pdf_file',
         'created_by',

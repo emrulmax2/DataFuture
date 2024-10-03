@@ -243,7 +243,11 @@ class EmailController extends Controller
         $row_id = $request->row_id;
 
         $studentEmail = StudentEmail::find($row_id);
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmail->student_id.'/'.$studentEmail->mail_pdf_file, now()->addMinutes(5));
+        if(isset($studentEmail->is_bulk) && $studentEmail->is_bulk == 1):
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/bulk_communications/emails/'.$studentEmail->mail_pdf_file, now()->addMinutes(5));
+        else:
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmail->student_id.'/'.$studentEmail->mail_pdf_file, now()->addMinutes(5));
+        endif;
         return response()->json(['res' => $tmpURL], 200);
     }
 
@@ -251,7 +255,11 @@ class EmailController extends Controller
         $row_id = $request->row_id;
 
         $studentEmailDoc = StudentEmailsDocument::find($row_id);
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmailDoc->student_id.'/'.$studentEmailDoc->current_file_name, now()->addMinutes(5));
+        if(isset($studentEmailDoc->is_bulk) && $studentEmailDoc->is_bulk == 1):
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/bulk_communications/emails/attachments/'.$studentEmailDoc->current_file_name, now()->addMinutes(5));
+        else:
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$studentEmailDoc->student_id.'/'.$studentEmailDoc->current_file_name, now()->addMinutes(5));
+        endif;
         return response()->json(['res' => $tmpURL], 200);
     }
 }

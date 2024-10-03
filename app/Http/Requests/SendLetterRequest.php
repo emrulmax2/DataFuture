@@ -26,8 +26,9 @@ class SendLetterRequest extends FormRequest
         return [
             'issued_date' => 'required',
             'letter_set_id' => 'required',
-            'comon_smtp_id' => 'required',
             'letter_body' => 'required',
+            'send_in_email' => 'sometimes',
+            'comon_smtp_id' => 'required_if:send_in_email,1',
         ];
     }
 
@@ -37,7 +38,7 @@ class SendLetterRequest extends FormRequest
             'issued_date.required' => 'Letter issued date is a required field',
             'letter_set_id.required' => 'Letter set can nto be empty',
             'letter_body.required' => 'Letter body can not be empty.',
-            'comon_smtp_id.required' => 'Please select a SMTP.'
+            'comon_smtp_id.required_if' => 'Please select a SMTP.'
         ];
     }
 }
