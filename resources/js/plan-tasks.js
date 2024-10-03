@@ -892,7 +892,7 @@ var classPlanAssessmentModuleTable = (function () {
             },
         };
         let sms_template_id = new TomSelect('#sms_template_id', tomOptions);
-        let email_template_id = new TomSelect('#email_template_id', tomOptions);
+        //let email_template_id = new TomSelect('#email_template_id', tomOptions);
     
         let mailEditor;
         if($("#mailEditor").length > 0){
@@ -918,12 +918,12 @@ var classPlanAssessmentModuleTable = (function () {
         sendBulkMailModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#sendBulkMailModal .acc__input-error').html('');
             $('#sendBulkMailModal .modal-body input#sendMailsDocument').val('');
-            $('#sendBulkMailModal .modal-body input, #sendBulkMailModal .modal-body select').val('');
+            $('#sendBulkMailModal .modal-body input').val('');
             $('#sendBulkMailModal .sendMailsDocumentNames').html('').fadeOut();
             $('#sendBulkMailModal input[name="student_ids"]').val('');
 
             mailEditor.setData('');
-            email_template_id.clear(true);
+            //email_template_id.clear(true);
         });
 
 
@@ -1145,7 +1145,7 @@ var classPlanAssessmentModuleTable = (function () {
             });
         });
 
-        $('#sendBulkMailForm [name="email_template_id"]').on('change', function(){
+        /*$('#sendBulkMailForm [name="email_template_id"]').on('change', function(){
             var emailTemplateID = $(this).val();
             if(emailTemplateID != ''){
                 axios({
@@ -1169,7 +1169,7 @@ var classPlanAssessmentModuleTable = (function () {
             }else{
                 mailEditor.setData('');
             }
-        });
+        });*/
 
         $('#sendBulkMailForm').on('submit', function(e){
             e.preventDefault();
@@ -1183,7 +1183,7 @@ var classPlanAssessmentModuleTable = (function () {
             form_data.append("body", mailEditor.getData());
             axios({
                 method: "post",
-                url: route('bulk.communication.send.email'),
+                url: route('bulk.communication.send.group.email'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {

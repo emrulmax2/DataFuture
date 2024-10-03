@@ -2781,6 +2781,7 @@ Route::middleware('auth')->group(function() {
 
         Route::post('bulk-communication/get-email-template', 'getEmailTemplate')->name('bulk.communication.get.mail.template'); 
         Route::post('bulk-communication/send-email', 'sendEmail')->name('bulk.communication.send.email'); 
+        Route::post('bulk-communication/send-group-email', 'sendGroupEmail')->name('bulk.communication.send.group.email'); 
 
         Route::post('bulk-communication/get-letter-template', 'getLetterTemplate')->name('bulk.communication.get.letter.set'); 
         Route::post('bulk-communication/send-letter', 'sendLetter')->name('bulk.communication.send.letter'); 

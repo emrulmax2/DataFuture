@@ -13,6 +13,7 @@ class StudentEmailsDocument extends Model
     protected $fillable = [
         'student_id',
         'student_email_id',
+        'is_bulk',
         'hard_copy_check',
         'doc_type',
         'disk_type',

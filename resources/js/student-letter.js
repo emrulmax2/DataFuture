@@ -207,12 +207,15 @@ var studentCommLetterListTable = (function () {
     const addLetterModalEl = document.getElementById('addLetterModal')
     addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal .modal-body input').val('');
+        $('#addLetterModal .modal-body input:not([type="checkbox"]').val('');
         $('#addLetterModal .modal-body select').val('');
         $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#addLetterModal .letterEditorArea').fadeOut();
         letterEditor.setData('');
         letter_set_id.clear(true);
+
+        $('#addLetterModal .modal-body input[name="send_in_email"]').prop('checked', false);
+        $('#addLetterModal .commonSmtpWrap').fadeOut();
     });
 
     const confirmModalEl = document.getElementById('confirmModal')
@@ -251,6 +254,19 @@ var studentCommLetterListTable = (function () {
 
 
     /* Letter Area */
+    $('#send_in_email').on('change', function() {
+        if($(this).prop('checked')){
+            $('.commonSmtpWrap').fadeIn('fast', function(){
+                $('select', this).val('')
+            });
+        }else{
+            $('.commonSmtpWrap').fadeOut('fast', function(){
+                $('select', this).val('')
+            });
+        }
+    });
+
+
     $('#addLetterModal #letter_set_id').on('change', function(){
         var letterSetId = $(this).val();
         if(letterSetId > 0){
@@ -293,8 +309,6 @@ var studentCommLetterListTable = (function () {
         }).then(response => {
             document.querySelector('#sendLetterBtn').removeAttribute('disabled');
             document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
-            console.log(response.data);
-            return false;
             
             if (response.status == 200) {
                 addLetterModal.hide();
