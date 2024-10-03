@@ -280,6 +280,7 @@ export default defineConfig({
                 'resources/js/term-performance-course-trend-reports.js',
                 'resources/js/term-performance-group-trend-reports.js',
                 'resources/js/plan-tasks-analytics.js',
+                'resources/js/student-slc-reports.js',
                 
             ],
             refresh: true,
