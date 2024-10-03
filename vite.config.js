@@ -204,6 +204,7 @@ export default defineConfig({
                 'resources/js/venue-datafuture.js',
                 'resources/js/employee-time-keeping.js',
                 'resources/js/course-management.js',
+                'resources/js/course-monitor.js',
                 'resources/js/semester.js',
                 'resources/js/term-declaration.js',
                 'resources/js/courses.js',
