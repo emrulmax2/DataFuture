@@ -44,7 +44,7 @@
                                         <option value="">Please Select</option>
                                         @if($attendanceCodes->count() > 0)
                                             @foreach($attendanceCodes as $attendanceCode)
-                                                <option value="{{ $attendanceCode->id }}">{{ $attendanceCode->name }}</option>
+                                                <option value="{{ $attendanceCode->id }}">{{ $attendanceCode->code }}</option>
                                             @endforeach
                                         @endif
                                     </select>
@@ -145,9 +145,9 @@
                                     <label for="academic_year_id" class="form-label  inline-flex items-center">Academic Year</label>
                                     <select name="academic_year_id" multiple class="tom-selects w-full" id="academic_year_id">
                                         <option value="">Please Select</option>
-                                        @if($termDeclarations->count() > 0)
-                                            @foreach($termDeclarations as $termDeclaration)
-                                                <option value="{{ $termDeclaration->id }}">{{ $termDeclaration->name }}</option>
+                                        @if($academicYears->count() > 0)
+                                            @foreach($academicYears as $academicYear)
+                                                <option value="{{ $academicYear->id }}">{{ $academicYear->name }}</option>
                                             @endforeach
                                         @endif
                                     </select>
