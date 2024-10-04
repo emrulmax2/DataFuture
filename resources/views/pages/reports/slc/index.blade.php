@@ -107,7 +107,7 @@
                             @csrf
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-3">
-                                    <div class="relative w-72">
+                                    <div class="w-auto">
                                         <label for="date_range" class="form-label">Date Range <span class="text-danger">*</span></label>
                                         <div class="relative w-full mx-auto">
                                             <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-slate-100 border text-slate-500">
