@@ -282,6 +282,8 @@ export default defineConfig({
                 'resources/js/plan-tasks-analytics.js',
                 'resources/js/student-slc-reports.js',
                 
+                'resources/js/student-flag.js',
+                
             ],
             refresh: true,
         }),

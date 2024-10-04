@@ -108,6 +108,11 @@
                     <i data-lucide="sliders" class="w-4 h-4 mr-2"></i> Student Option Values
                 </a>
             </li>
+            <li>
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'flags' ? 'active text-primary font-medium' : '' }}" href="{{ route('flags') }}">
+                    <i data-lucide="flag" class="w-4 h-4 mr-2"></i> Student Flags
+                </a>
+            </li>
             <li class="hasChild">
                 <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="mail" class="w-4 h-4 mr-2 "></i> Communication Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>

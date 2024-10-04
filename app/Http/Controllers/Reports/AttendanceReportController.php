@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use App\Exports\ArrayCollectionExport;
+use App\Models\ComonSmtp;
+use App\Models\EmailTemplate;
+use App\Models\LetterSet;
+use App\Models\Signatory;
+use App\Models\SmsTemplate;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceReportController extends Controller
@@ -34,6 +39,12 @@ class AttendanceReportController extends Controller
             'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
             'terms' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all(),
+
+            'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'letterSet' => LetterSet::where('live', 1)->where('status', 1)->orderBy('letter_title', 'ASC')->get(),
+            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+            'signatory' => Signatory::orderBy('signatory_name', 'ASC')->get()
         ]);
     }
 
@@ -123,9 +134,11 @@ class AttendanceReportController extends Controller
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;
         $query->groupBy('atn.student_id');
-        if(!empty($attendance_percentage)):
+        if($attendance_percentage == 0 || $attendance_percentage > 0):
             $query->havingRaw('percentage_withexcuse < '.$attendance_percentage.' OR round(percentage_withexcuse) = 0');
         endif;
+        $sql = $query->toSql();
+
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -184,7 +197,7 @@ class AttendanceReportController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows, 'a' => $sql]);
     }
 
 
@@ -274,7 +287,7 @@ class AttendanceReportController extends Controller
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;
         $query->groupBy('atn.student_id');
-        if(!empty($attendance_percentage)):
+        if($attendance_percentage == 0 || $attendance_percentage > 0):
             $query->havingRaw('percentage_withexcuse < '.$attendance_percentage.' OR round(percentage_withexcuse) = 0');
         endif;
         $Query = $query->get();
