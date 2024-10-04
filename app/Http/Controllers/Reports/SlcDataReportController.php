@@ -54,6 +54,9 @@ class SlcDataReportController extends Controller
         $queryInner = SlcAttendance::with('student',
             'student.termStatus',
             'student.status',
+            'registration',
+            'registration.slcAgreement',
+            'registration.slcAgreement.installments',
             'code',
             'term',
             'crel',
@@ -96,6 +99,7 @@ class SlcDataReportController extends Controller
         $theCollection[$i][$j++] = "Attendance Year";
         $theCollection[$i][$j++] = "Code";
         $theCollection[$i][$j++] = "Term";
+        $theCollection[$i][$j++] = "Claim Amount";
         $theCollection[$i][$j++] = "Confirmation Date";
         
 
@@ -126,8 +130,17 @@ class SlcDataReportController extends Controller
 
                 $theCollection[$row][$j++] = (isset($slc->attendance_year)&& !empty($slc->attendance_year)) ? $slc->attendance_year. " Year" : ''; 
                 $theCollection[$row][$j++] = (isset($slc->code->code)&& !empty($slc->code->code)) ? $slc->code->code : ''; 
-                $theCollection[$row][$j++] = (isset($slc->term->name)&& !empty($slc->term->name)) ? $slc->term->name : ''; 
+                $theCollection[$row][$j++] = (isset($slc->session_term)&& !empty($slc->session_term)) ? 'Term '.$slc->session_term : ''; 
                 $theCollection[$row][$j++] = (isset($slc->confirmation_date)&& !empty($slc->confirmation_date)) ? $slc->confirmation_date :''; 
+                $claimAmount = 0;
+                foreach($slc->registration->slcAgreement as $agreement):
+                    if(isset($agreement->installments) && $agreement->installments->count() > 0):
+                        foreach($agreement->installments as $inst):
+                            $claimAmount += $inst->amount;
+                        endforeach;
+                    endif;
+                endforeach;
+                $theCollection[$row][$j++] = (isset($claimAmount)&& !empty($claimAmount)) ? $claimAmount :'';  
                 $row++;
             endforeach;
         endif;
@@ -154,8 +167,6 @@ class SlcDataReportController extends Controller
         $queryInner = SlcRegistration::with('student','student.termStatus',
             'student.status',
             'regStatus',
-            'slcAgreement',
-            'slcAgreement.installments',
             'year',
             'cocs',
             'crel',
@@ -196,7 +207,6 @@ class SlcDataReportController extends Controller
         $theCollection[$i][$j++] = "Academic Year";
         $theCollection[$i][$j++] = "Registration Year";
         $theCollection[$i][$j++] = "Confirmation Date";
-        $theCollection[$i][$j++] = "Claim Amount";
         
         $row = 2;
         if(!empty($StudentSLCData)):
@@ -226,15 +236,7 @@ class SlcDataReportController extends Controller
                 $theCollection[$row][$j++] = (isset($slc->year->name)&& !empty($slc->year->name)) ? $slc->year->name : ''; 
                 $theCollection[$row][$j++] = (isset($slc->registration_year)&& !empty($slc->registration_year)) ? "Year ".$slc->registration_year : ''; 
                 $theCollection[$row][$j++] = (isset($slc->confirmation_date)&& !empty($slc->confirmation_date)) ? $slc->confirmation_date :''; 
-                $claimAmount = 0;
-                foreach($slc->slcAgreement as $agreement):
-                    if(isset($agreement->installments) && $agreement->installments->count() > 0):
-                        foreach($agreement->installments as $inst):
-                            $claimAmount += $inst->amount;
-                        endforeach;
-                    endif;
-                endforeach;
-                $theCollection[$row][$j++] = (isset($claimAmount)&& !empty($claimAmount)) ? $claimAmount :''; 
+                
                 
                 $row++;
             endforeach;
