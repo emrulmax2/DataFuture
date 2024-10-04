@@ -281,6 +281,8 @@ export default defineConfig({
                 'resources/js/term-performance-group-trend-reports.js',
                 'resources/js/plan-tasks-analytics.js',
                 
+                'resources/js/student-flag.js',
+                
             ],
             refresh: true,
         }),

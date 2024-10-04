@@ -230,6 +230,7 @@ use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
+use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
@@ -2857,5 +2858,15 @@ Route::middleware('auth')->group(function() {
 
         Route::any('reports/term-performance/group/{terms}/{course}/{group}', 'groupView')->name('reports.term.performance.group.view'); 
         Route::any('reports/term-performance/group/trend/{terms}/{course}/{group}', 'groupTrendView')->name('reports.term.performance.group.trend.view'); 
+    });
+
+    Route::controller(StudentFlagController::class)->group(function() {
+        Route::get('site-settings/flags', 'index')->name('flags'); 
+        Route::get('site-settings/flags/list', 'list')->name('flags.list'); 
+        Route::post('site-settings/flags/store', 'store')->name('flags.store'); 
+        Route::get('site-settings/flags/edit/{id}', 'edit')->name('flags.edit');
+        Route::post('site-settings/flags/update', 'update')->name('flags.update');
+        Route::delete('site-settings/flags/delete/{id}', 'destroy')->name('flags.destory');
+        Route::post('site-settings/flags/restore/{id}', 'restore')->name('flags.restore');
     });
 });

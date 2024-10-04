@@ -68,6 +68,22 @@
                 </div>
             </div>
             <!-- END: Important Notes -->
+             
+            <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 2xl:mt-8">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12">
+                        <a href="https://www.jstor.org/" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" alt="J Stor Library" src="{{ asset('build/assets/images/jstor_vertical.png') }}">
+                        </a>
+                    </div>
+                    <div class="col-span-12">
+                        <a href="https://sites.google.com/lcc.ac.uk/training-guidance/home" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/training_and_guidance_vertical.png') }}">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- BEGIN: Transactions -->
             <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 2xl:mt-8">
                 <div class="intro-x flex items-center h-10">
