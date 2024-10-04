@@ -130,8 +130,7 @@ class SlcDataReportController extends Controller
 
                 $theCollection[$row][$j++] = (isset($slc->attendance_year)&& !empty($slc->attendance_year)) ? $slc->attendance_year. " Year" : ''; 
                 $theCollection[$row][$j++] = (isset($slc->code->code)&& !empty($slc->code->code)) ? $slc->code->code : ''; 
-                $theCollection[$row][$j++] = (isset($slc->session_term)&& !empty($slc->session_term)) ? 'Term '.$slc->session_term : ''; 
-                $theCollection[$row][$j++] = (isset($slc->confirmation_date)&& !empty($slc->confirmation_date)) ? $slc->confirmation_date :''; 
+                $theCollection[$row][$j++] = (isset($slc->session_term)&& !empty($slc->session_term)) ? 'Term '.$slc->session_term : '';  
                 $claimAmount = 0;
                 foreach($slc->registration->slcAgreement as $agreement):
                     if(isset($agreement->installments) && $agreement->installments->count() > 0):
@@ -141,8 +140,11 @@ class SlcDataReportController extends Controller
                     endif;
                 endforeach;
                 $theCollection[$row][$j++] = (isset($claimAmount)&& !empty($claimAmount)) ? $claimAmount :'';  
+                
+                $theCollection[$row][$j++] = (isset($slc->confirmation_date)&& !empty($slc->confirmation_date)) ? $slc->confirmation_date :'';
                 $row++;
             endforeach;
+
         endif;
 
         
