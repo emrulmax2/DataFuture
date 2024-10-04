@@ -60,7 +60,7 @@
                                 </div>
                                 <div class="col-span-3">
                                     <label for="term_declaration_id" class="form-label  inline-flex items-center">Attendance Term</label>
-                                    <select name="session_term" class="tom-selects w-full" id="term_declaration_id">
+                                    <select name="session_term[]" multiple class="tom-selects w-full" id="term_declaration_id">
                                         <option value="">Please Select</option>
                                         <option value="1">Term 1</option>
                                         <option value="2">Term 2</option>

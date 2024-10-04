@@ -45,7 +45,7 @@ class SlcDataReportController extends Controller
         $dates = (isset($request->date_range) && !empty($request->date_range) ? explode(' - ', $request->date_range) : []);
         $attendance_code_id = (isset($request->attendance_code_id) && !empty($request->attendance_code_id) ? $request->attendance_code_id : '');
         $attendance_year = (isset($request->attendance_year) && !empty($request->attendance_year) ? $request->attendance_year : '');
-        $session_term = (isset($request->session_term) && !empty($request->session_term) ? $request->session_term : '');
+        $session_term = (isset($request->session_term) && !empty($request->session_term) ? $request->session_term : []);
         $from_date = isset($dates[0]) && !empty($dates[0]) ? date('Y-m-d', strtotime($dates[0])) : date('Y-m-d');
         $to_date = isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : date('Y-m-d');
 
@@ -70,7 +70,7 @@ class SlcDataReportController extends Controller
         if($attendance_year)
             $queryInner->where('attendance_year',$attendance_year);
         if($session_term)
-            $queryInner->where('session_term',$session_term);
+            $queryInner->whereIn('session_term',$session_term);
 
 
         $StudentSLCData = $queryInner->orderBy('id', 'DESC')->get();
