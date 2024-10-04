@@ -62,11 +62,9 @@
                                     <label for="term_declaration_id" class="form-label  inline-flex items-center">Attendance Term</label>
                                     <select name="term_declaration_id" multiple class="tom-selects w-full" id="term_declaration_id">
                                         <option value="">Please Select</option>
-                                        @if($termDeclarations->count() > 0)
-                                            @foreach($termDeclarations as $termDeclaration)
-                                                <option value="{{ $termDeclaration->id }}">{{ $termDeclaration->name }}</option>
-                                            @endforeach
-                                        @endif
+                                        <option value="1">Term 1</option>
+                                        <option value="2">Term 2</option>
+                                        <option value="3">Term 3</option>
                                     </select>
                                 </div>
                                 <div class="col-span-12 ml-auto text-right py-2" >

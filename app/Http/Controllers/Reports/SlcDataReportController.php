@@ -45,21 +45,32 @@ class SlcDataReportController extends Controller
         $dates = (isset($request->date_range) && !empty($request->date_range) ? explode(' - ', $request->date_range) : []);
         $attendance_code_id = (isset($request->attendance_code_id) && !empty($request->attendance_code_id) ? $request->attendance_code_id : '');
         $attendance_year = (isset($request->attendance_year) && !empty($request->attendance_year) ? $request->attendance_year : '');
-        $term_declaration_id = (isset($request->term_declaration_id) && !empty($request->term_declaration_id) ? $request->term_declaration_id : '');
+        $session_term = (isset($request->session_term) && !empty($request->session_term) ? $request->session_term : '');
         $from_date = isset($dates[0]) && !empty($dates[0]) ? date('Y-m-d', strtotime($dates[0])) : date('Y-m-d');
         $to_date = isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : date('Y-m-d');
 
         
 
-        $queryInner = SlcAttendance::with('student','student.termStatus','student.award','student.status','code','term','crel','crel.creation','crel.creation.course','crel.creation.semester','crel.propose')->whereBetween('confirmation_date',[$from_date, $to_date]);
+        $queryInner = SlcAttendance::with('student',
+            'student.termStatus',
+            'student.status',
+            'code',
+            'term',
+            'crel',
+            'crel.abody',
+            'crel.creation',
+            'crel.creation.course',
+            'crel.creation.semester',
+            'crel.propose'
+        )->whereBetween('confirmation_date',[$from_date, $to_date]);
 
 
         if($attendance_code_id)
             $queryInner->where('attendance_code_id',$attendance_code_id);
         if($attendance_year)
             $queryInner->where('attendance_year',$attendance_year);
-        if($term_declaration_id)
-            $queryInner->where('term_declaration_id',$term_declaration_id);
+        if($session_term)
+            $queryInner->where('session_term',$session_term);
 
 
         $StudentSLCData = $queryInner->orderBy('id', 'DESC')->get();
@@ -108,8 +119,9 @@ class SlcDataReportController extends Controller
                 
                 $theCollection[$row][$j++] = isset($student->status) ? $student->status->name : ""; 
                 $theCollection[$row][$j++] = (isset($student->termStatus->status_change_date)&& !empty($slc_crel->course_end_date)) ? $student->termStatus->status_change_date : ''; 
-                $theCollection[$row][$j++] = ((isset($student->award->reference)&& !empty($student->award->reference)) ? $student->award->reference : '');
+                $theCollection[$row][$j++] = ((isset($slc_crel->abody->reference)&& !empty($slc_crel->abody->reference)) ? $slc_crel->abody->reference : '');
 
+                
                 $theCollection[$row][$j++] = (isset($slc_crel->propose)&& !empty($slc_crel->propose)) ?  $slc_crel->propose->slc_code : ''; 
 
                 $theCollection[$row][$j++] = (isset($slc->attendance_year)&& !empty($slc->attendance_year)) ? $slc->attendance_year. " Year" : ''; 
@@ -140,12 +152,14 @@ class SlcDataReportController extends Controller
         $to_date = isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : date('Y-m-d');
 
         $queryInner = SlcRegistration::with('student','student.termStatus',
-            'student.award',
             'student.status',
             'regStatus',
+            'slcAgreement',
+            'slcAgreement.installments',
             'year',
             'cocs',
             'crel',
+            'crel.abody',
             'crel.creation',
             'crel.creation.course',
             'crel.creation.semester',
@@ -182,6 +196,7 @@ class SlcDataReportController extends Controller
         $theCollection[$i][$j++] = "Academic Year";
         $theCollection[$i][$j++] = "Registration Year";
         $theCollection[$i][$j++] = "Confirmation Date";
+        $theCollection[$i][$j++] = "Claim Amount";
         
         $row = 2;
         if(!empty($StudentSLCData)):
@@ -190,7 +205,6 @@ class SlcDataReportController extends Controller
                 $slc_crel = $slc->crel;
                 $j=0;
                 $student = $slc->student; 
-
                 $theCollection[$row][$j++] = $student->registration_no;
                 $theCollection[$row][$j++] = $student->ssn_no ?? '';
                 $theCollection[$row][$j++] = $student->full_name;  
@@ -203,14 +217,25 @@ class SlcDataReportController extends Controller
                 
                 $theCollection[$row][$j++] = isset($student->status) ? $student->status->name : ""; 
                 $theCollection[$row][$j++] = (isset($student->termStatus->status_change_date)&& !empty($slc_crel->course_end_date)) ? $student->termStatus->status_change_date : ''; 
-                $theCollection[$row][$j++] = ((isset($student->award->reference)&& !empty($student->award->reference)) ? $student->award->reference : '');
+                $theCollection[$row][$j++] = ((isset($slc_crel->abody->reference)&& !empty($slc_crel->abody->reference)) ? $slc_crel->abody->reference : '');
 
+                
                 $theCollection[$row][$j++] = (isset($slc_crel->propose)&& !empty($slc_crel->propose)) ?  $slc_crel->propose->slc_code : ''; 
 
                 $theCollection[$row][$j++] = (isset($slc->regStatus)&& !empty($slc->regStatus)) ? $slc->regStatus->name : ''; 
                 $theCollection[$row][$j++] = (isset($slc->year->name)&& !empty($slc->year->name)) ? $slc->year->name : ''; 
                 $theCollection[$row][$j++] = (isset($slc->registration_year)&& !empty($slc->registration_year)) ? "Year ".$slc->registration_year : ''; 
                 $theCollection[$row][$j++] = (isset($slc->confirmation_date)&& !empty($slc->confirmation_date)) ? $slc->confirmation_date :''; 
+                $claimAmount = 0;
+                foreach($slc->slcAgreement as $agreement):
+                    if(isset($agreement->installments) && $agreement->installments->count() > 0):
+                        foreach($agreement->installments as $inst):
+                            $claimAmount += $inst->amount;
+                        endforeach;
+                    endif;
+                endforeach;
+                $theCollection[$row][$j++] = (isset($claimAmount)&& !empty($claimAmount)) ? $claimAmount :''; 
+                
                 $row++;
             endforeach;
         endif;
@@ -233,9 +258,9 @@ class SlcDataReportController extends Controller
         
 
         $queryInner = SlcCoc::with('student','student.termStatus',
-                        'student.award',
                         'student.status',
                         'crel',
+                        'crel.abody',
                         'crel.creation',
                         'crel.creation.course',
                         'crel.creation.semester',
@@ -293,7 +318,7 @@ class SlcDataReportController extends Controller
                 
                 $theCollection[$row][$j++] = isset($student->status) ? $student->status->name : ""; 
                 $theCollection[$row][$j++] = (isset($student->termStatus->status_change_date)&& !empty($slc_crel->course_end_date)) ? $student->termStatus->status_change_date : ''; 
-                $theCollection[$row][$j++] = ((isset($student->award->reference)&& !empty($student->award->reference)) ? $student->award->reference : '');
+                $theCollection[$row][$j++] = ((isset($slc_crel->abody->reference)&& !empty($slc_crel->abody->reference)) ? $slc_crel->abody->reference : '');
 
                 $theCollection[$row][$j++] = (isset($slc_crel->propose)&& !empty($slc_crel->propose)) ?  $slc_crel->propose->slc_code : ''; 
 
