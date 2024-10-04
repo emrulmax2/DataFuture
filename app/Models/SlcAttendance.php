@@ -35,6 +35,10 @@ class SlcAttendance extends Model
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
     }
+
+    public function currentClaimAmount(){
+        return $this->hasOne(SlcInstallment::class, 'slc_attendance_id', 'id');
+    }
     public function registration(){
         return $this->belongsTo(SlcRegistration::class, 'slc_registration_id');
     }
