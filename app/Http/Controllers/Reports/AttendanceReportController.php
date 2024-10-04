@@ -79,16 +79,9 @@ class AttendanceReportController extends Controller
         if(!empty($groupsIDList)): $plans->whereIn('group_id', $groupsIDList); endif;
         $plan_ids = $plans->pluck('id')->unique()->toArray();
 
-        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status, $evening_weekend){
+        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status){
             if(!empty($group_student_status)):
                 $q->whereIn('status_id', $group_student_status);
-            endif;
-            if(!empty($evening_weekend)):
-                $q->whereHas('activeCR', function($qs) use($evening_weekend){
-                    $qs->whereHas('propose', function($qp) use($evening_weekend){
-                        $qp->whereIn('full_time', $evening_weekend);
-                    });
-                });
             endif;
         })->pluck('student_id')->unique()->toArray();
 
@@ -129,7 +122,8 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
-                    ->whereIn('atn.plan_id', $plan_ids);
+                    ->whereIn('atn.plan_id', $plan_ids)
+                    ->where('pln.course_id', DB::raw('cc.course_id'));
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;
@@ -232,16 +226,9 @@ class AttendanceReportController extends Controller
         if(!empty($groupsIDList)): $plans->whereIn('group_id', $groupsIDList); endif;
         $plan_ids = $plans->pluck('id')->unique()->toArray();
 
-        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status, $evening_weekend){
+        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status){
             if(!empty($group_student_status)):
                 $q->whereIn('status_id', $group_student_status);
-            endif;
-            if(!empty($evening_weekend)):
-                $q->whereHas('activeCR', function($qs) use($evening_weekend){
-                    $qs->whereHas('propose', function($qp) use($evening_weekend){
-                        $qp->whereIn('full_time', $evening_weekend);
-                    });
-                });
             endif;
         })->pluck('student_id')->unique()->toArray();
 
@@ -282,7 +269,8 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
-                    ->whereIn('atn.plan_id', $plan_ids);
+                    ->whereIn('atn.plan_id', $plan_ids)
+                    ->where('pln.course_id', DB::raw('cc.course_id'));
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
         endif;
