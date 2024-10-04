@@ -132,6 +132,7 @@ class SlcDataReportController extends Controller
                 $theCollection[$row][$j++] = (isset($slc->code->code)&& !empty($slc->code->code)) ? $slc->code->code : ''; 
                 $theCollection[$row][$j++] = (isset($slc->session_term)&& !empty($slc->session_term)) ? 'Term '.$slc->session_term : '';  
                 $claimAmount = 0;
+                if(isset($slc->registration->slcAgreement))
                 foreach($slc->registration->slcAgreement as $agreement):
                     if(isset($agreement->installments) && $agreement->installments->count() > 0):
                         foreach($agreement->installments as $inst):
