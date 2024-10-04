@@ -31,10 +31,17 @@ class SlcAttendance extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
+    
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
     public function registration(){
         return $this->belongsTo(SlcRegistration::class, 'slc_registration_id');
     }
+    public function crel(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+    
     public function code(){
         return $this->belongsTo(AttendanceCode::class, 'attendance_code_id');
     }

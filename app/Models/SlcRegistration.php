@@ -31,10 +31,19 @@ class SlcRegistration extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+
     public function attendances(){
         return $this->hasMany(SlcAttendance::class, 'slc_registration_id', 'id');
     }
 
+    public function slcAgreement(){
+        return $this->hasMany(SlcAgreement::class, 'slc_registration_id', 'id');
+    }
+    
     public function cocs(){
         return $this->hasMany(SlcCoc::class, 'slc_registration_id', 'id');
     }
@@ -50,7 +59,10 @@ class SlcRegistration extends Model
     public function year(){
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
-
+    public function crel(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+    
     public function setConfirmationDateAttribute($value) {  
         $this->attributes['confirmation_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
