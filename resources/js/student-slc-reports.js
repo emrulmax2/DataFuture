@@ -29,7 +29,7 @@ import TomSelect from "tom-select";
 
     var attendance_code_id = new TomSelect('#attendance_code_id', dueTomOptions);
     var attendance_year = new TomSelect('#attendance_year', dueTomOptions);
-    var term_declaration_id = new TomSelect('#term_declaration_id', dueTomOptions);
+    var term_declaration_id = new TomSelect('#term_declaration_id', dueTomOptionsMul);
     
     $('#attendanceSLCReportForm').on('submit', function(e){
 
