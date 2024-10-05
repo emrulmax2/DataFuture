@@ -235,6 +235,7 @@ use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
+use App\Http\Controllers\Student\Result\StudentResultController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\Student\WorkPlacementController;
@@ -824,6 +825,13 @@ Route::middleware('auth')->group(function() {
 
     });
     
+    
+    Route::controller(StudentResultController::class)->group(function() {
+
+        Route::get('student-results/{student}', 'index')->name('student-results.index'); 
+        
+    }); 
+
     Route::controller(PersonalDetailController::class)->group(function() {
         Route::post('student/update-personal-details', 'update')->name('student.update.personal.details'); 
         Route::post('student/update-personal-identification-details', 'updateOtherIdentificationDetails')->name('student.update.other.identification'); 
