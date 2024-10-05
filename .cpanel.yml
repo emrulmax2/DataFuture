@@ -1,0 +1,29 @@
+# .cpanel.yml
+# Custom deployment script for Laravel + Vite
+deployment:
+  tasks:
+    - pre_deploy:
+        # Ensure the right PHP version is set
+        - echo "Setting PHP version to 8.1..."
+        - /usr/local/bin/ea-php81 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+
+        # Install Node.js dependencies for Vite
+        - echo "Installing Node.js dependencies..."
+        - /opt/cpanel/ea-nodejs16/bin/npm ci --legacy-peer-deps
+
+    - deploy:
+        # Build the Vite assets
+        - echo "Building Vite assets..."
+        - /opt/cpanel/ea-nodejs16/bin/npm run build
+
+        # Run Laravel migrations (optional, only if needed)
+        - echo "Running Laravel migrations..."
+        - /usr/local/bin/ea-php81 artisan migrate --force
+
+    - post_deploy:
+        # Clear Laravel caches
+        - echo "Clearing application cache..."
+        - /usr/local/bin/ea-php81 artisan config:cache
+        - /usr/local/bin/ea-php81 artisan route:cache
+        - /usr/local/bin/ea-php81 artisan view:cache
+        - /usr/local/bin/ea-php81 artisan optimize
